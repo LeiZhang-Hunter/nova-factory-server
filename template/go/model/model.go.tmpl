@@ -1,0 +1,25 @@
+package {{.Table.ModuleName}}Models
+
+import (
+    "nova-factory-server/app/baize"
+{{- if .ContainsTimeType}}    "nova-factory-server/app/common/nova-factory-server/baizeUnix"{{end}}
+)
+
+// ==========================================================================
+// date：{{.GenerateTime.Format "2006-01-02 15:04:05" }}
+// author：{{.Table.FunctionAuthor}}
+// version: v1.0
+// ==========================================================================
+
+type {{.Table.StructName}}Vo struct {
+{{range $index, $column := .Columns -}}{{if eq $column.IsRequired "1"}}   {{$column.GoField}}     {{if eq $column.GoType "Time"}}*baize.Time{{else}}{{$column.GoType}}{{end}}     `json:"{{$column.HtmlField}}{{if and (eq $column.GoType "int64") (eq $column.IsPk "1")}},string{{end}}" db:"{{$column.ColumnName}}"`      // {{$column.ColumnComment}}
+{{end}}
+{{- end}}   baize.BaseEntity
+}
+
+type {{.Table.StructName}}DQL struct {
+{{range $index, $column := .Columns -}}{{if eq $column.IsQuery "1"}}     {{$column.GoField}}    {{if eq $column.GoType "Time"}}*baize.Time{{else}}{{$column.GoType}}{{end}}    `form:"{{$column.HtmlField}}" db:"{{$column.ColumnName}}"`    // {{$column.ColumnComment}}
+{{end}}{{- end}}    baize.BaseEntityDQL
+}
+
+

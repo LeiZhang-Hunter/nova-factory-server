@@ -1,0 +1,5401 @@
+definitions:
+  aiDataSetModels.AddChunkReq:
+    properties:
+      content:
+        type: string
+      dataset_uuid:
+        type: string
+      document_uuid:
+        type: string
+      important_keywords:
+        items:
+          type: string
+        type: array
+      questions:
+        items:
+          type: string
+        type: array
+    type: object
+  aiDataSetModels.AgentsCompletionsRequest:
+    properties:
+      agent_id:
+        type: string
+      question:
+        type: string
+      session_id:
+        type: string
+      stream:
+        type: boolean
+      sync_dsl:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  aiDataSetModels.ChatsCompletionsRequest:
+    properties:
+      chat_id:
+        type: string
+      question:
+        type: string
+      session_id:
+        type: string
+      stream:
+        type: boolean
+      user_id:
+        type: string
+    required:
+    - chat_id
+    type: object
+  aiDataSetModels.ConversationRelatedQuestionsRequest:
+    properties:
+      question:
+        type: string
+    type: object
+  aiDataSetModels.CreateAssistantRequest:
+    properties:
+      avatar:
+        type: string
+      dataset_ids:
+        items:
+          type: string
+        type: array
+      llm:
+        $ref: '#/definitions/aiDataSetModels.Llm'
+      name:
+        type: string
+      prompt:
+        $ref: '#/definitions/aiDataSetModels.Prompt'
+    type: object
+  aiDataSetModels.CreateSessionsRequest:
+    properties:
+      chat_id:
+        type: string
+      name:
+        type: string
+      user_id:
+        type: string
+    required:
+    - chat_id
+    - name
+    type: object
+  aiDataSetModels.DataSetRequest:
+    properties:
+      avatar:
+        type: string
+      chunk_method:
+        type: string
+      description:
+        type: string
+      embedding_model:
+        type: string
+      name:
+        type: string
+      pagerank:
+        type: string
+      parser_config: {}
+      permission:
+        type: string
+    required:
+    - name
+    type: object
+  aiDataSetModels.DeleteDocumentRequest:
+    properties:
+      dataset_id:
+        example: "0"
+        type: string
+      document_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  aiDataSetModels.DeleteSessionRequest:
+    properties:
+      chat_id:
+        type: string
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - chat_id
+    type: object
+  aiDataSetModels.Llm:
+    properties:
+      frequency_penalty:
+        type: number
+      model_name:
+        type: string
+      presence_penalty:
+        type: number
+      temperature:
+        type: number
+      top_p:
+        type: number
+    type: object
+  aiDataSetModels.ParseDocumentApiRequest:
+    properties:
+      dataset_id:
+        example: "0"
+        type: string
+      document_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  aiDataSetModels.ParserConfig:
+    properties:
+      chunk_token_num:
+        type: integer
+      delimiter:
+        type: string
+      html4excel:
+        type: boolean
+      layout_recognize:
+        type: string
+      raptor:
+        properties:
+          use_raptor:
+            type: boolean
+        type: object
+    type: object
+  aiDataSetModels.Prompt:
+    properties:
+      empty_response:
+        type: string
+      keywords_similarity_weight:
+        type: number
+      opener:
+        type: string
+      prompt:
+        type: string
+      rerank_model:
+        type: string
+      similarity_threshold:
+        type: number
+      top_n:
+        type: integer
+      variables:
+        items:
+          $ref: '#/definitions/aiDataSetModels.Variables'
+        type: array
+    type: object
+  aiDataSetModels.PutDocumentRequest:
+    properties:
+      chunk_method:
+        type: string
+      meta_fields:
+        additionalProperties: true
+        type: object
+      name:
+        type: string
+      parser_config:
+        $ref: '#/definitions/aiDataSetModels.ParserConfig'
+    type: object
+  aiDataSetModels.RemoveAgentSessionsRequest:
+    properties:
+      agent_id:
+        type: string
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - agent_id
+    type: object
+  aiDataSetModels.RemoveChunkReq:
+    properties:
+      chunk_ids:
+        items:
+          type: string
+        type: array
+      dataset_uuid:
+        type: string
+      document_uuid:
+        type: string
+    type: object
+  aiDataSetModels.RetrievalListReq:
+    properties:
+      dataset_uuids:
+        items:
+          type: string
+        type: array
+      document_uuids:
+        items:
+          type: string
+        type: array
+      highlight:
+        type: boolean
+      keyword:
+        type: boolean
+      page:
+        type: integer
+      page_size:
+        type: integer
+      question:
+        type: string
+      rerank_id:
+        type: string
+      similarity_threshold:
+        type: number
+      top_k:
+        type: integer
+      vector_similarity_weight:
+        type: number
+    type: object
+  aiDataSetModels.SessionAgentCreate:
+    properties:
+      agent_id:
+        type: string
+      data:
+        additionalProperties: true
+        type: object
+    type: object
+  aiDataSetModels.UpdateAssistantRequest:
+    properties:
+      avatar:
+        type: string
+      chat_id:
+        type: string
+      dataset_ids:
+        items:
+          type: string
+        type: array
+      llm:
+        $ref: '#/definitions/aiDataSetModels.Llm'
+      name:
+        type: string
+      prompt:
+        $ref: '#/definitions/aiDataSetModels.Prompt'
+    type: object
+  aiDataSetModels.UpdateChunkReq:
+    properties:
+      chunk_id:
+        type: string
+      content:
+        type: string
+      dataset_uuid:
+        type: string
+      document_uuid:
+        type: string
+      important_keywords:
+        items:
+          type: string
+        type: array
+      questions:
+        items:
+          type: string
+        type: array
+    type: object
+  aiDataSetModels.UpdateDataSetRequest:
+    properties:
+      chunk_method:
+        type: string
+      embedding_model:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  aiDataSetModels.UpdateSessionsRequest:
+    properties:
+      chat_id:
+        type: string
+      name:
+        type: string
+      session_id:
+        type: string
+      user_id:
+        type: string
+    required:
+    - chat_id
+    - session_id
+    type: object
+  aiDataSetModels.Variables:
+    properties:
+      key:
+        type: string
+      optional:
+        type: boolean
+    type: object
+  baize.List:
+    properties:
+      data:
+        items:
+          type: string
+        type: array
+    type: object
+  craftRouteModels.SysCraftRouteRequest:
+    properties:
+      datasetId:
+        description: 出库id
+        example: "0"
+        type: string
+      remark:
+        description: 备注
+        type: string
+      route_code:
+        description: 工艺路线编号
+        type: string
+      route_desc:
+        description: 工艺路线说明
+        type: string
+      route_name:
+        description: 工艺路线名称
+        type: string
+      status:
+        description: 操作状态（0正常 1异常）
+        type: boolean
+    required:
+    - route_code
+    - route_name
+    type: object
+  deviceModels.DeviceGroup:
+    properties:
+      groupId:
+        example: "0"
+        type: string
+      name:
+        type: string
+      remark:
+        type: string
+    type: object
+  deviceModels.DeviceInfo:
+    properties:
+      Action:
+        items:
+          type: string
+        type: array
+      ControlType:
+        type: integer
+      Extension:
+        additionalProperties:
+          type: string
+        type: object
+      Name:
+        type: string
+      Number:
+        type: string
+      Type:
+        type: string
+      deviceBuildingId:
+        example: "0"
+        type: string
+      deviceClassId:
+        example: "0"
+        type: string
+      deviceGroupId:
+        example: "0"
+        type: string
+      deviceId:
+        example: "0"
+        type: string
+      deviceProtocolId:
+        example: "0"
+        type: string
+    type: object
+  materialModels.InboundInfo:
+    properties:
+      materialId:
+        example: "0"
+        type: string
+      number:
+        type: integer
+    type: object
+  materialModels.MaterialInfo:
+    properties:
+      address:
+        type: string
+      code:
+        type: string
+      factory:
+        type: string
+      materialId:
+        example: "0"
+        type: string
+      model:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      unit:
+        type: string
+    required:
+    - address
+    - code
+    - factory
+    - model
+    - name
+    - unit
+    type: object
+  materialModels.OutboundInfo:
+    properties:
+      materialId:
+        example: "0"
+        type: string
+      number:
+        type: integer
+      reason:
+        type: string
+    type: object
+  monitorModels.JobDML:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      cronExpression:
+        type: string
+      invokeTarget:
+        type: string
+      jobId:
+        example: "0"
+        type: string
+      jobName:
+        type: string
+      jobParams:
+        $ref: '#/definitions/baize.List'
+      status:
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  monitorModels.JobIdAndName:
+    properties:
+      jobId:
+        example: "0"
+        type: string
+      jobName:
+        type: string
+    type: object
+  monitorModels.JobLog:
+    properties:
+      costTime:
+        type: integer
+      createTime:
+        type: string
+      exceptionInfo:
+        type: string
+      invokeTarget:
+        type: string
+      jobId:
+        example: "0"
+        type: string
+      jobLogId:
+        example: "0"
+        type: string
+      jobName:
+        type: string
+      jobParams:
+        $ref: '#/definitions/baize.List'
+      status:
+        type: string
+    type: object
+  monitorModels.JobVo:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      cronExpression:
+        type: string
+      invokeTarget:
+        type: string
+      jobId:
+        example: "0"
+        type: string
+      jobName:
+        type: string
+      jobParams:
+        $ref: '#/definitions/baize.List'
+      nextValidTime:
+        type: string
+      status:
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  monitorModels.SysUserOnline:
+    properties:
+      browser:
+        type: string
+      deptName:
+        type: string
+      ipaddr:
+        type: string
+      loginTime:
+        type: integer
+      os:
+        type: string
+      tokenId:
+        type: string
+      userName:
+        type: string
+    type: object
+  response.ListData:
+    properties:
+      rows: {}
+      total:
+        type: integer
+    type: object
+  response.ResCode:
+    enum:
+    - 200
+    - 401
+    - 403
+    - 412
+    - 500
+    - 600
+    type: integer
+    x-enum-comments:
+      Error: 系统异常
+      Forbidden: 没有权限
+      Parameter: 参数错误
+      Success: 成功
+      Unauthorized: token失效
+      Waring: 详情看msg
+    x-enum-varnames:
+    - Success
+    - Unauthorized
+    - Forbidden
+    - Parameter
+    - Error
+    - Waring
+  response.ResponseData:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/response.ResCode'
+        description: 相应状态码
+      data:
+        description: 数据
+      msg:
+        description: 提示信息
+        type: string
+    type: object
+  systemModels.Accredit:
+    properties:
+      posts:
+        description: 岗位
+        items:
+          $ref: '#/definitions/systemModels.SysPostVo'
+        type: array
+      roles:
+        description: 角色
+        items:
+          $ref: '#/definitions/systemModels.SysRoleIdAndName'
+        type: array
+    type: object
+  systemModels.ConsumptionNoticeVo:
+    properties:
+      createName:
+        type: string
+      createTime:
+        description: 创建时间
+        type: string
+      id:
+        description: 通知ID
+        example: "0"
+        type: string
+      status:
+        description: 通知状态 1未读 2 已读
+        type: string
+      title:
+        description: 通知标题
+        type: string
+      txt:
+        description: 通知文本
+        type: string
+      type:
+        type: string
+    required:
+    - type
+    type: object
+  systemModels.EditUserStatus:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      status:
+        description: 状态
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+      userId:
+        description: 用户id
+        example: "0"
+        type: string
+    required:
+    - status
+    - userId
+    type: object
+  systemModels.GetInfo:
+    properties:
+      permissions:
+        items:
+          type: string
+        type: array
+      roles:
+        items:
+          type: string
+        type: array
+      user:
+        $ref: '#/definitions/systemModels.User'
+    type: object
+  systemModels.LoginBody:
+    properties:
+      code:
+        description: 验证码
+        type: string
+      password:
+        description: 密码
+        type: string
+      username:
+        description: 用户名
+        type: string
+      uuid:
+        description: uuid
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  systemModels.ResetPwd:
+    properties:
+      password:
+        description: 新密码
+        type: string
+      userId:
+        description: 用户ID
+        example: "0"
+        type: string
+    required:
+    - password
+    - userId
+    type: object
+  systemModels.RoleDeptTree:
+    properties:
+      checkedKeys:
+        description: keys
+        items:
+          type: string
+        type: array
+      depts:
+        description: 部门
+        items:
+          $ref: '#/definitions/systemModels.SysDeptVo'
+        type: array
+    type: object
+  systemModels.SelectPermission:
+    properties:
+      parentId:
+        example: "0"
+        type: string
+      permissionId:
+        example: "0"
+        type: string
+      permissionName:
+        type: string
+    type: object
+  systemModels.SysConfigVo:
+    properties:
+      configId:
+        description: 参数主键
+        example: "0"
+        type: string
+      configKey:
+        description: 参数键名
+        type: string
+      configName:
+        description: 参数名称
+        type: string
+      configType:
+        description: 系统内置（Y是 N否）
+        type: string
+      configValue:
+        description: 参数键值
+        type: string
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      remark:
+        description: 备注
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  systemModels.SysDeptVo:
+    properties:
+      ancestors:
+        description: 祖级列表
+        type: string
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      delFag:
+        description: 删除标志
+        type: string
+      deptId:
+        description: id
+        example: "0"
+        type: string
+      deptName:
+        description: 部门名称
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      leader:
+        description: 负责人
+        type: string
+      orderNum:
+        description: 排序
+        type: integer
+      parentId:
+        description: 上级id
+        example: "0"
+        type: string
+      phone:
+        description: 电话
+        type: string
+      status:
+        description: 状态
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  systemModels.SysDictDataVo:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      cssClass:
+        type: string
+      dictCode:
+        example: "0"
+        type: string
+      dictLabel:
+        type: string
+      dictSort:
+        type: integer
+      dictType:
+        type: string
+      dictValue:
+        type: string
+      isDefault:
+        type: string
+      listClass:
+        type: string
+      remark:
+        type: string
+      status:
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  systemModels.SysNoticeVo:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createName:
+        description: 创建人
+        type: string
+      createTime:
+        description: 创建时间
+        type: string
+      deptIds:
+        allOf:
+        - $ref: '#/definitions/baize.List'
+        description: 接收部门列表
+      id:
+        description: 通知ID
+        example: "0"
+        type: string
+      title:
+        description: 通知标题
+        type: string
+      txt:
+        description: 通知文本
+        type: string
+      type:
+        description: 通知文本
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    required:
+    - title
+    - txt
+    - type
+    type: object
+  systemModels.SysPermissionAdd:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      parentId:
+        description: 父权限ID
+        example: "0"
+        type: string
+      permission:
+        description: 权限标识符
+        type: string
+      permissionName:
+        description: 权限名称
+        type: string
+      sort:
+        description: 排序
+        type: integer
+      status:
+        description: 状态
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    required:
+    - permission
+    type: object
+  systemModels.SysPermissionEdit:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      parentId:
+        description: 父权限ID
+        example: "0"
+        type: string
+      permission:
+        description: 权限标识符
+        type: string
+      permissionId:
+        description: 权限ID
+        example: "0"
+        type: string
+      permissionName:
+        description: 权限名称
+        type: string
+      sort:
+        description: 排序
+        type: integer
+      status:
+        description: 状态
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    required:
+    - permissionId
+    type: object
+  systemModels.SysPermissionVo:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      parentId:
+        description: 父权限ID
+        example: "0"
+        type: string
+      permission:
+        description: 权限标识符
+        type: string
+      permissionId:
+        description: 权限ID
+        example: "0"
+        type: string
+      permissionName:
+        description: 权限名称
+        type: string
+      sort:
+        description: 排序
+        type: integer
+      status:
+        description: 状态
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  systemModels.SysPostVo:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      postCode:
+        type: string
+      postId:
+        example: "0"
+        type: string
+      postName:
+        type: string
+      postSort:
+        type: integer
+      remark:
+        type: string
+      status:
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  systemModels.SysRoleDML:
+    properties:
+      RoleId:
+        example: "0"
+        type: string
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      delFlag:
+        type: string
+      permissionIds:
+        items:
+          type: string
+        type: array
+      remark:
+        type: string
+      roleName:
+        type: string
+      roleSort:
+        type: integer
+      status:
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  systemModels.SysRoleIdAndName:
+    properties:
+      roleId:
+        example: "0"
+        type: string
+      roleName:
+        type: string
+    type: object
+  systemModels.SysRoleVo:
+    properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      permissionIds:
+        items:
+          type: string
+        type: array
+      remark:
+        type: string
+      roleId:
+        example: "0"
+        type: string
+      roleName:
+        type: string
+      roleSort:
+        type: integer
+      status:
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  systemModels.SysUserDML:
+    properties:
+      avatar:
+        description: 头像
+        type: string
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      dataScope:
+        description: 权限范围
+        type: string
+      deptId:
+        description: 部门ID
+        example: "0"
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      nickName:
+        description: 用户昵称
+        type: string
+      password:
+        description: 密码
+        type: string
+      phonenumber:
+        description: 手机号
+        type: string
+      postIds:
+        description: 岗位IDS
+        items:
+          type: string
+        type: array
+      remark:
+        description: 备注
+        type: string
+      roleIds:
+        description: 角色IDS
+        items:
+          type: string
+        type: array
+      sex:
+        description: 性别
+        type: string
+      status:
+        description: 状态
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+      userName:
+        description: 用户名
+        type: string
+    required:
+    - deptId
+    - nickName
+    - password
+    - sex
+    - userName
+    type: object
+  systemModels.SysUserDataScope:
+    properties:
+      dataScope:
+        description: 数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限,无任何）权限
+        type: string
+      deptIds:
+        description: 如果是自定义就是部门ID 其他不填
+        items:
+          type: string
+        type: array
+      userId:
+        description: 用户ID
+        example: "0"
+        type: string
+    required:
+    - dataScope
+    - userId
+    type: object
+  systemModels.SysUserRole:
+    properties:
+      roleId:
+        example: "0"
+        type: string
+      userId:
+        example: "0"
+        type: string
+    type: object
+  systemModels.SysUserVo:
+    properties:
+      avatar:
+        type: string
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      dataScope:
+        type: string
+      delFlag:
+        type: string
+      deptId:
+        example: "0"
+        type: string
+      deptName:
+        type: string
+      email:
+        type: string
+      leader:
+        type: string
+      nickName:
+        type: string
+      phonenumber:
+        type: string
+      remark:
+        type: string
+      sex:
+        type: string
+      status:
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+      userId:
+        example: "0"
+        type: string
+      userName:
+        type: string
+    type: object
+  systemModels.User:
+    properties:
+      avatar:
+        type: string
+      dataScope:
+        type: string
+      userId:
+        example: "0"
+        type: string
+      userName:
+        type: string
+    type: object
+  systemModels.UserAndAccredit:
+    properties:
+      postIds:
+        description: 选择的岗位Id
+        items:
+          type: string
+        type: array
+      posts:
+        description: 岗位
+        items:
+          $ref: '#/definitions/systemModels.SysPostVo'
+        type: array
+      roleIds:
+        description: 选择的角色Id
+        items:
+          type: string
+        type: array
+      roles:
+        description: 角色
+        items:
+          $ref: '#/definitions/systemModels.SysRoleIdAndName'
+        type: array
+      user:
+        allOf:
+        - $ref: '#/definitions/systemModels.SysUserVo'
+        description: user
+    type: object
+  systemModels.UserProfile:
+    properties:
+      postGroup:
+        description: 选择的角色Id
+        type: string
+      roleGroup:
+        description: 角色
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/systemModels.SysUserVo'
+        description: user
+    type: object
+info:
+  contact:
+    email: zhao_402295440@126.com
+    name: danny
+  description: baize接口文档
+  title: baize
+  version: 2.0.x
+paths:
+  /ai/dataset/agents/list:
+    get:
+      description: Agen话列表
+      parameters:
+      - in: query
+        name: agent_id
+        required: true
+        type: string
+      - in: query
+        name: dsl
+        type: boolean
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: user_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: Agen话列表
+      tags:
+      - 工业智能体
+  /ai/dataset/assistant/create:
+    post:
+      description: 创建助理
+      parameters:
+      - description: 创建助理表请求参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.CreateAssistantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 创建助理
+      tags:
+      - 工业智能体
+  /ai/dataset/assistant/list:
+    get:
+      description: 读取助理列表
+      parameters:
+      - in: query
+        name: id
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 读取助理列表
+      tags:
+      - 工业智能体
+  /ai/dataset/assistant/remove/{assistantIds}:
+    put:
+      description: 删除助理
+      parameters:
+      - collectionFormat: csv
+        description: assistantIds
+        in: path
+        items:
+          type: string
+        name: assistantIds
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除助理
+      tags:
+      - 工业智能体
+  /ai/dataset/assistant/update:
+    put:
+      description: 更新助理
+      parameters:
+      - description: 更新助理表请求参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.UpdateAssistantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 更新助理
+      tags:
+      - 工业智能体
+  /ai/dataset/chunk/add:
+    post:
+      description: 添加chunk
+      parameters:
+      - description: 添加chunk参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.AddChunkReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 添加chunk
+      tags:
+      - 工业智能体
+  /ai/dataset/chunk/list:
+    get:
+      description: chunk列表
+      parameters:
+      - in: query
+        name: dataset_uuid
+        type: string
+      - in: query
+        name: document_uuid
+        type: string
+      - example: ""
+        in: query
+        name: id
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - example: ""
+        in: query
+        name: keywords
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: chunk列表
+      tags:
+      - 工业智能体
+  /ai/dataset/chunk/remove:
+    delete:
+      description: 移除chunk
+      parameters:
+      - description: 移除chunk
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.RemoveChunkReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 移除chunk成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 移除chunk
+      tags:
+      - 工业智能体
+  /ai/dataset/chunk/retrieval:
+    post:
+      description: 检索chunk
+      parameters:
+      - description: 检索chunk请求参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.RetrievalListReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 检索chunk
+      tags:
+      - 工业智能体
+  /ai/dataset/chunk/update:
+    put:
+      description: 更新chunk
+      parameters:
+      - description: 请求参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.UpdateChunkReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 更新chunk
+      tags:
+      - 工业智能体
+  /ai/dataset/create:
+    post:
+      description: 添加数据集
+      parameters:
+      - description: 设备分组参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.DataSetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 添加数据集
+      tags:
+      - 工业智能体
+  /ai/dataset/download/document/{document_id}:
+    get:
+      description: 下载文档
+      parameters:
+      - description: document_id
+        in: path
+        name: document_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 下载文档
+      tags:
+      - 工业智能体
+  /ai/dataset/list:
+    get:
+      description: 读取数据集列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - example: ""
+        in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 读取数据集列表
+      tags:
+      - 工业智能体
+  /ai/dataset/list/document:
+    get:
+      description: 文档列表
+      parameters:
+      - in: query
+        name: dataset_id
+        type: integer
+      - in: query
+        name: document_id
+        type: string
+      - in: query
+        name: document_name
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: keywords
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 文档列表
+      tags:
+      - 工业智能体
+  /ai/dataset/remove:
+    delete:
+      description: 移除数据集
+      parameters:
+      - description: dataset_id
+        in: path
+        name: dataset_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 移除数据集
+      tags:
+      - 工业智能体
+  /ai/dataset/remove/document:
+    delete:
+      description: 删除文档
+      parameters:
+      - description: 删除文档请求参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.DeleteDocumentRequest'
+      responses:
+        "200":
+          description: 删除文档成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除文档
+      tags:
+      - 工业智能体
+  /ai/dataset/session/agents/completions:
+    post:
+      description: Agent聊天
+      parameters:
+      - description: Agent聊天
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.AgentsCompletionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: Agent聊天
+      tags:
+      - 工业智能体
+  /ai/dataset/session/agents/create:
+    post:
+      description: 创建agent会话
+      parameters:
+      - description: 创建agent会话
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.SessionAgentCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 创建agent会话
+      tags:
+      - 工业智能体
+  /ai/dataset/session/agents/delete:
+    delete:
+      description: 删除Agent会话
+      parameters:
+      - description: 删除Agent会话
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.RemoveAgentSessionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除Agent会话
+      tags:
+      - 工业智能体
+  /ai/dataset/session/agents/list:
+    get:
+      description: Agent会话列表
+      parameters:
+      - in: query
+        name: agent_id
+        required: true
+        type: string
+      - in: query
+        name: dsl
+        type: boolean
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: user_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: Agent会话列表
+      tags:
+      - 工业智能体
+  /ai/dataset/session/charts/completions:
+    post:
+      description: 与聊天助手交谈
+      parameters:
+      - description: 与聊天助手交谈
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.ChatsCompletionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 与聊天助手交谈
+      tags:
+      - 工业智能体
+  /ai/dataset/session/conversation/related_questions:
+    post:
+      description: 相关提问
+      parameters:
+      - description: 相关提问
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.ConversationRelatedQuestionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 相关提问
+      tags:
+      - 工业智能体
+  /ai/dataset/session/create:
+    post:
+      description: 创建助理会话
+      parameters:
+      - description: 使用 chat 助手创建会话
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.CreateSessionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 创建助理会话
+      tags:
+      - 工业智能体
+  /ai/dataset/session/list:
+    get:
+      description: 助理会话列表
+      parameters:
+      - in: query
+        name: chat_id
+        required: true
+        type: string
+      - in: query
+        name: id
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: user_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 助理会话列表
+      tags:
+      - 工业智能体
+  /ai/dataset/session/remove:
+    delete:
+      description: 删除会话
+      parameters:
+      - description: 删除会话
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.DeleteSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除会话
+      tags:
+      - 工业智能体
+  /ai/dataset/session/update:
+    post:
+      description: 更新助理会话
+      parameters:
+      - description: 更新助理会话
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.UpdateSessionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 更新助理会话
+      tags:
+      - 工业智能体
+  /ai/dataset/start/document:
+    post:
+      description: 解析文档
+      parameters:
+      - description: 解析文档请求参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.ParseDocumentApiRequest'
+      responses:
+        "200":
+          description: 解析文档成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 解析文档
+      tags:
+      - 工业智能体
+  /ai/dataset/stop/document:
+    post:
+      description: 停止解析文档
+      parameters:
+      - description: 停止解析文档参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.DeleteDocumentRequest'
+      responses:
+        "200":
+          description: 停止解析文档成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 停止解析文档
+      tags:
+      - 工业智能体
+  /ai/dataset/update:
+    put:
+      description: 更新数据集
+      parameters:
+      - description: dataset_id
+        in: path
+        name: dataset_id
+        required: true
+        type: string
+      - description: 设备分组参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.UpdateDataSetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 更新数据集
+      tags:
+      - 工业智能体
+  /ai/dataset/update/document/{document_id}:
+    put:
+      description: 更新文档
+      parameters:
+      - description: document_id
+        in: path
+        name: document_id
+        required: true
+        type: integer
+      - description: 更新文档请求
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.PutDocumentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 更新文档
+      tags:
+      - 工业智能体
+  /ai/dataset/upload/document/{datasetId}:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传文档
+      parameters:
+      - description: datasetId
+        in: path
+        name: datasetId
+        required: true
+        type: integer
+      - description: files
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 上传文档
+      tags:
+      - 工业智能体
+  /asset/device/{deviceIds}:
+    delete:
+      description: 删除设备
+      parameters:
+      - description: deviceIds
+        in: path
+        name: deviceIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除设备
+      tags:
+      - 资产管理
+  /asset/device/list:
+    get:
+      description: 获取设备列表
+      parameters:
+      - in: query
+        name: controlType
+        type: integer
+      - example: "0"
+        in: query
+        name: deviceBuildingId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceClassId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceGroupId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceProtocolId
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: number
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 获取设备列表
+      tags:
+      - 资产管理
+  /asset/device/set:
+    post:
+      description: 设置设备信息
+      parameters:
+      - description: 设备参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceModels.DeviceInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置设备信息
+      tags:
+      - 资产管理
+  /asset/deviceGroup/{groupIds}:
+    delete:
+      description: 删除设备组
+      parameters:
+      - description: groupIds
+        in: path
+        name: groupIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除设备组
+      tags:
+      - 资产管理
+  /asset/deviceGroup/list:
+    get:
+      description: 获取设备分组列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 获取设备分组列表
+      tags:
+      - 资产管理
+  /asset/deviceGroup/set:
+    post:
+      description: 设置设备分组信息
+      parameters:
+      - description: 设备分组参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceModels.DeviceGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置设备分组信息
+      tags:
+      - 资产管理
+  /asset/material/{materialIds}:
+    delete:
+      description: 删除物料
+      parameters:
+      - description: materialIds
+        in: path
+        name: materialIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除物料
+      tags:
+      - 物料管理
+  /asset/material/inbound/add:
+    post:
+      description: 登记物料入库
+      parameters:
+      - description: 登记物料入库参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/materialModels.InboundInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 登记物料入库
+      tags:
+      - 物料管理
+  /asset/material/inbound/list:
+    get:
+      description: 物料入库列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - example: ""
+        in: query
+        name: keyword
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 物料入库列表
+      tags:
+      - 物料管理
+  /asset/material/list:
+    get:
+      description: 物料管理列表
+      parameters:
+      - example: ""
+        in: query
+        name: address
+        type: string
+      - example: ""
+        in: query
+        name: code
+        type: string
+      - example: ""
+        in: query
+        name: factory
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - example: ""
+        in: query
+        name: model
+        type: string
+      - example: ""
+        in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - example: ""
+        in: query
+        name: unit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 物料管理列表
+      tags:
+      - 物料管理
+  /asset/material/outbound/add:
+    post:
+      description: 登记物料出库
+      parameters:
+      - description: 登记物料出库参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/materialModels.OutboundInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 登记物料出库
+      tags:
+      - 物料管理
+  /asset/material/outbound/list:
+    get:
+      description: 物料出库列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - example: ""
+        in: query
+        name: keyword
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 物料出库列表
+      tags:
+      - 物料管理
+  /asset/material/set:
+    post:
+      description: 登记物料
+      parameters:
+      - description: 物料参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/materialModels.MaterialInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 登记物料
+      tags:
+      - 物料管理
+  /captchaImage:
+    get:
+      description: 获取验证码
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 获取验证码
+      tags:
+      - 登录
+  /craft/route/list:
+    get:
+      description: 读取工艺列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 工艺路线编号
+        in: query
+        name: route_code
+        type: string
+      - description: 工艺路线名称
+        in: query
+        name: route_name
+        type: string
+      - description: 操作状态（0正常 1异常）
+        in: query
+        name: status
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 读取工艺列表
+      tags:
+      - 工艺管理
+  /craft/route/remove:
+    delete:
+      description: 移除工艺
+      parameters:
+      - description: craft_route_id
+        in: path
+        name: craft_route_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 移除工艺
+      tags:
+      - 工艺管理
+  /craft/route/set:
+    post:
+      description: 设置工艺路线
+      parameters:
+      - description: 设备分组参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/craftRouteModels.SysCraftRouteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置工艺路线
+      tags:
+      - 工艺管理
+  /file/downloadPrivateFile:
+    get:
+      description: 租户下载私有文件
+      parameters:
+      - description: key
+        in: query
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: 租户下载私有文件
+      tags:
+      - 租户上传文件
+  /file/uploadFileOriginalName:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传文件原始文件名
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 上传文件原始文件名
+      tags:
+      - 租户上传文件
+  /file/uploadFileRandomName:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传文件随即文件名
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 上传文件随即文件名
+      tags:
+      - 租户上传文件
+  /file/uploadFiles:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传多个文件随即文件名
+      parameters:
+      - description: files
+        in: formData
+        name: files
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 上传多个文件随即文件名
+      tags:
+      - 租户上传文件
+  /file/uploadPrivateFileOriginalName:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传私有文件原始文件名
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 上传私有文件原始文件名
+      tags:
+      - 租户上传文件
+  /getInfo:
+    get:
+      description: 获取用户个人信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.GetInfo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取用户个人信息
+      tags:
+      - 登录
+  /login:
+    post:
+      description: 用户登录
+      parameters:
+      - description: 登录信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.LoginBody'
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+        "412":
+          description: 参数错误
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+        "600":
+          description: 用户名密码错误
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 用户登录
+      tags:
+      - 登录
+  /logout:
+    post:
+      description: 退出
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 退出成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 退出
+      tags:
+      - 登录
+  /monitor/job:
+    post:
+      description: 新增定时任务
+      parameters:
+      - description: 新增信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/monitorModels.JobDML'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增定时任务
+      tags:
+      - 定时任务
+    put:
+      description: 编辑定时任务
+      parameters:
+      - description: 编辑信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/monitorModels.JobDML'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 编辑定时任务
+      tags:
+      - 定时任务
+  /monitor/job/{jobId}:
+    get:
+      description: 查询定时任务信息
+      parameters:
+      - description: jobId
+        in: path
+        name: jobId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/monitorModels.JobVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询定时任务信息
+      tags:
+      - 定时任务
+  /monitor/job/{jobIds}:
+    delete:
+      description: 删除定时任务
+      parameters:
+      - description: jobIds
+        in: path
+        name: jobIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除定时任务
+      tags:
+      - 定时任务
+  /monitor/job/changeStatus:
+    put:
+      description: 修改定时任务状态
+      parameters:
+      - description: 修改信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/monitorModels.JobDML'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改定时任务状态
+      tags:
+      - 定时任务
+  /monitor/job/funList:
+    get:
+      description: 获取方法列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取方法列表
+      tags:
+      - 定时任务
+  /monitor/job/idAndNameAll:
+    get:
+      description: 查询定时任务id和名称
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/monitorModels.JobIdAndName'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询定时任务id和名称
+      tags:
+      - 定时任务
+  /monitor/job/list:
+    get:
+      description: 查询定时任务列表
+      parameters:
+      - in: query
+        name: invokeTarget
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: jobName
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/monitorModels.JobVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询定时任务列表
+      tags:
+      - 定时任务
+  /monitor/job/log/{jobLogId}:
+    get:
+      description: 查询定时任务日志信息
+      parameters:
+      - description: jobLogId
+        in: path
+        name: jobLogId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/monitorModels.JobLog'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询定时任务日志信息
+      tags:
+      - 定时任务
+  /monitor/job/log/list:
+    get:
+      description: 查询定时任务日志列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: jobId
+        type: integer
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/monitorModels.JobLog'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询定时任务日志列表
+      tags:
+      - 定时任务
+  /monitor/job/run:
+    put:
+      description: 执行定时任务
+      parameters:
+      - description: 执行信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/monitorModels.JobVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 执行定时任务
+      tags:
+      - 定时任务
+  /monitor/online/{tokenId}:
+    delete:
+      description: 强退在线用户列表
+      parameters:
+      - description: tokenId
+        in: path
+        name: tokenId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 强退在线用户列表
+      tags:
+      - 在线用户
+  /monitor/online/list:
+    get:
+      description: 查询在线用户列表查询
+      parameters:
+      - in: query
+        name: ipaddr
+        type: string
+      - in: query
+        name: userName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/monitorModels.SysUserOnline'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询在线用户列表查询
+      tags:
+      - 在线用户
+  /register:
+    post:
+      description: 用户登录
+      parameters:
+      - description: 登录信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.LoginBody'
+      responses:
+        "200":
+          description: 注册成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 用户登录
+      tags:
+      - 登录
+  /system/Config:
+    post:
+      description: 添加配置
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysConfigVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 添加配置
+      tags:
+      - 配置相关
+    put:
+      description: 修改配置
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysConfigVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改配置
+      tags:
+      - 配置相关
+  /system/Config/{configId}:
+    delete:
+      description: 删除配置
+      parameters:
+      - description: configId
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除配置
+      tags:
+      - 配置相关
+  /system/config/{configId}:
+    get:
+      description: 根据配置ID获取配置信息
+      parameters:
+      - description: ConfigId
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysConfigVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据配置ID获取配置信息
+      tags:
+      - 配置相关
+  /system/config/export:
+    post:
+      description: 导出字典类型
+      parameters:
+      - in: query
+        name: dictLabel
+        type: string
+      - in: query
+        name: dictType
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: status
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: integer
+            type: array
+      security:
+      - BearerAuth: []
+      summary: 导出字典类型
+      tags:
+      - 字典相关
+  /system/config/list:
+    get:
+      description: 查询配置列表查询
+      parameters:
+      - description: 参数键名
+        in: query
+        name: configKey
+        type: string
+      - description: 参数名称
+        in: query
+        name: configName
+        type: string
+      - description: 系统内置（Y是 N否）
+        in: query
+        name: configType
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysConfigVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询配置列表查询
+      tags:
+      - 配置相关
+  /system/consumption/{id}:
+    get:
+      description: 消费方获取消息根据ID
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.ConsumptionNoticeVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 消费方获取消息根据ID
+      tags:
+      - 消息通知
+  /system/consumption/newMessage:
+    get:
+      description: 未读消息通知数量
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 未读消息通知数量
+      tags:
+      - 消息通知
+  /system/consumption/noticeDelete/{ids}:
+    delete:
+      description: 消费方消息删除消息
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 消费方消息删除消息
+      tags:
+      - 消息通知
+  /system/consumption/noticeRead/{id}:
+    put:
+      description: 消费方消息修改为已读
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 消费方消息修改为已读
+      tags:
+      - 消息通知
+  /system/consumption/noticeReadAll:
+    put:
+      description: 消费方所有消息修改为已读
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 消费方所有消息修改为已读
+      tags:
+      - 消息通知
+  /system/consumption/userNoticeList:
+    get:
+      description: 消费方获取消息列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 未读消息1 已读2 全部不填
+        in: query
+        name: status
+        type: string
+      - in: query
+        name: title
+        type: string
+      - description: 消息类型
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/systemModels.ConsumptionNoticeVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 消费方获取消息列表
+      tags:
+      - 消息通知
+  /system/dept:
+    get:
+      description: 查询部门列表查询
+      parameters:
+      - description: 部门名称
+        in: query
+        name: deptName
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 上级id
+        in: query
+        name: parentId
+        type: integer
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysDeptVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询部门列表查询
+      tags:
+      - 部门相关
+    post:
+      description: 添加部门
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysDeptVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 添加部门
+      tags:
+      - 部门相关
+    put:
+      description: 修改部门
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysDeptVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改部门
+      tags:
+      - 部门相关
+  /system/dept/{deptId}:
+    delete:
+      description: 删除部门
+      parameters:
+      - description: deptId
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除部门
+      tags:
+      - 部门相关
+    get:
+      description: 根据部门ID获取部门信息
+      parameters:
+      - description: deptId
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysDeptVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据部门ID获取部门信息
+      tags:
+      - 部门相关
+  /system/dept/roleDeptTreeSelect/{roleId}:
+    get:
+      description: 获取角色部门
+      parameters:
+      - description: roleId
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.RoleDeptTree'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取角色部门
+      tags:
+      - 部门相关
+  /system/dict/data:
+    post:
+      description: 添加字典数据
+      parameters:
+      - description: 字典
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysDictDataVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 添加字典数据
+      tags:
+      - 字典相关
+    put:
+      description: 修改字典数据
+      parameters:
+      - description: 字典
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysDictDataVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改字典数据
+      tags:
+      - 字典相关
+  /system/dict/data/{dictCode}:
+    get:
+      description: 根据dictCode获取字典信息
+      parameters:
+      - description: dictCode
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysDictDataVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据dictCode获取字典信息
+      tags:
+      - 字典相关
+  /system/dict/data/{dictCodes}:
+    delete:
+      description: 根据dictCode获取字典信息
+      parameters:
+      - collectionFormat: csv
+        description: dictCodes
+        in: path
+        items:
+          type: integer
+        name: dictCodes
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysDictDataVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据dictCode获取字典信息
+      tags:
+      - 字典相关
+  /system/dict/data/list:
+    get:
+      description: 查询字典列表
+      parameters:
+      - in: query
+        name: dictLabel
+        type: string
+      - in: query
+        name: dictType
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysDictDataVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询字典列表
+      tags:
+      - 字典相关
+  /system/dict/data/type/{dictType}:
+    get:
+      description: 查询字典列表
+      parameters:
+      - description: dictType
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysDictDataVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询字典列表
+      tags:
+      - 字典相关
+  /system/dict/type:
+    delete:
+      description: 根据dictCode获取字典类型信息
+      parameters:
+      - description: 字典
+        in: body
+        name: object
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 根据dictCode获取字典类型信息
+      tags:
+      - 字典相关
+    post:
+      description: 添加字典类型数据
+      parameters:
+      - description: 字典
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysDictDataVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 添加字典类型数据
+      tags:
+      - 字典相关
+    put:
+      description: 修改字典类型数据
+      parameters:
+      - description: 字典
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysDictDataVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改字典类型数据
+      tags:
+      - 字典相关
+  /system/dict/type/{dictCode}:
+    get:
+      description: 根据dictCode获取字典类型信息
+      parameters:
+      - description: dictCode
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysDictDataVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据dictCode获取字典类型信息
+      tags:
+      - 字典相关
+  /system/dict/type/list:
+    get:
+      description: 查询字典类型列表
+      parameters:
+      - in: query
+        name: dictLabel
+        type: string
+      - in: query
+        name: dictType
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysDictDataVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询字典类型列表
+      tags:
+      - 字典相关
+  /system/dict/type/optionSelect:
+    put:
+      description: 查询字典列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysDictDataVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询字典列表
+      tags:
+      - 字典相关
+  /system/dict/type/refreshCache:
+    put:
+      description: 更新字典缓存
+      parameters:
+      - description: 字典
+        in: body
+        name: object
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 更新字典缓存
+      tags:
+      - 字典相关
+  /system/notice:
+    post:
+      description: 新增消息通知
+      parameters:
+      - description: 系统角色
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysNoticeVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增消息通知
+      tags:
+      - 消息通知
+  /system/notice/{id}:
+    get:
+      description: 根据id消息通知
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysNoticeVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据id消息通知
+      tags:
+      - 消息通知
+  /system/notice/list:
+    get:
+      description: 消息通知列表
+      parameters:
+      - in: query
+        name: createBy
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: noticeTitle
+        type: string
+      - in: query
+        name: noticeType
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysNoticeVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 消息通知列表
+      tags:
+      - 消息通知
+  /system/permission:
+    post:
+      description: 新增系统权限
+      parameters:
+      - description: 系统权限
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysPermissionAdd'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增系统权限
+      tags:
+      - 系统权限
+    put:
+      description: 修改系统权限
+      parameters:
+      - description: 系统权限
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysPermissionEdit'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改系统权限
+      tags:
+      - 系统权限
+  /system/permission/{permissionId}:
+    delete:
+      description: 删除系统权限
+      parameters:
+      - description: permissionId
+        in: path
+        name: permissionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除系统权限
+      tags:
+      - 系统权限
+    get:
+      description: 根据id查询系统权限
+      parameters:
+      - description: permissionId
+        in: path
+        name: permissionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysPermissionVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据id查询系统权限
+      tags:
+      - 系统权限
+  /system/permission/byRoleIds/{roleIds}:
+    get:
+      description: 根据id查询系统权限
+      parameters:
+      - description: roleIds
+        in: path
+        name: roleIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/systemModels.SysPermissionVo'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据id查询系统权限
+      tags:
+      - 系统权限
+  /system/permission/list:
+    get:
+      description: 系统权限列表
+      parameters:
+      - description: 创建人
+        in: query
+        name: createBy
+        type: integer
+      - description: 创建时间
+        in: query
+        name: createTime
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: 修改人
+        in: query
+        name: updateBy
+        type: integer
+      - description: 修改时间
+        in: query
+        name: updateTime
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/systemModels.SysPermissionVo'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 系统权限列表
+      tags:
+      - 系统权限
+  /system/post:
+    post:
+      description: 添加岗位
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysPostVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 添加岗位
+      tags:
+      - 岗位相关
+    put:
+      description: 修改岗位
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysPostVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改岗位
+      tags:
+      - 岗位相关
+  /system/post/{postId}:
+    get:
+      description: 根据岗位ID获取岗位信息
+      parameters:
+      - description: PostId
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysPostVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据岗位ID获取岗位信息
+      tags:
+      - 岗位相关
+  /system/post/{postIds}:
+    delete:
+      description: 删除岗位
+      parameters:
+      - collectionFormat: csv
+        description: postId
+        in: path
+        items:
+          type: string
+        name: ids
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除岗位
+      tags:
+      - 岗位相关
+  /system/post/export:
+    post:
+      description: 导出岗位
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: postCode
+        type: string
+      - in: query
+        name: postName
+        type: string
+      - in: query
+        name: status
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: integer
+            type: array
+      security:
+      - BearerAuth: []
+      summary: 导出岗位
+      tags:
+      - 岗位相关
+  /system/post/list:
+    get:
+      description: 查询岗位列表查询
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: postCode
+        type: string
+      - in: query
+        name: postName
+        type: string
+      - in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysPostVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询岗位列表查询
+      tags:
+      - 岗位相关
+  /system/role:
+    post:
+      description: 添加角色
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysRoleDML'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 添加角色
+      tags:
+      - 角色相关
+    put:
+      description: 修改角色
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysRoleDML'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改角色
+      tags:
+      - 角色相关
+  /system/role/{roleId}:
+    get:
+      description: 根据角色ID获取角色信息
+      parameters:
+      - description: roleId
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SysRoleVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据角色ID获取角色信息
+      tags:
+      - 角色相关
+  /system/role/{rolesIds}:
+    delete:
+      description: 删除角色
+      parameters:
+      - collectionFormat: csv
+        description: rolesIds
+        in: path
+        items:
+          type: string
+        name: rolesIds
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除角色
+      tags:
+      - 角色相关
+  /system/role/authUser/cancel:
+    put:
+      description: 取消用户角色
+      parameters:
+      - description: 用户id角色id
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysUserRole'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 取消用户角色
+      tags:
+      - 角色相关
+  /system/role/authUser/cancelAll:
+    put:
+      description: 取消角色授权用户
+      parameters:
+      - description: 角色Id
+        in: query
+        name: roleId
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: 用户Ids
+        in: query
+        items:
+          type: string
+        name: userIds
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 取消角色授权用户
+      tags:
+      - 角色相关
+  /system/role/authUser/selectAll:
+    put:
+      description: 角色授权用户
+      parameters:
+      - description: 角色Id
+        in: query
+        name: roleId
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: 用户Ids
+        in: query
+        items:
+          type: string
+        name: userIds
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 角色授权用户
+      tags:
+      - 角色相关
+  /system/role/authUser/unallocatedList:
+    put:
+      description: 查询角色未授权用户列表查询
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: phonenumber
+        type: string
+      - in: query
+        name: roleId
+        required: true
+        type: string
+      - in: query
+        name: userName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysUserVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询角色未授权用户列表查询
+      tags:
+      - 角色相关
+  /system/role/changeStatus:
+    get:
+      description: 查询角色授权用户列表查询
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: phonenumber
+        type: string
+      - in: query
+        name: roleId
+        required: true
+        type: string
+      - in: query
+        name: userName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysUserVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询角色授权用户列表查询
+      tags:
+      - 角色相关
+    put:
+      description: 修改角色状态
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysRoleDML'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改角色状态
+      tags:
+      - 角色相关
+  /system/role/list:
+    get:
+      description: 查询角色列表查询
+      parameters:
+      - in: query
+        name: beginTime
+        type: string
+      - in: query
+        name: endTime
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: roleName
+        type: string
+      - in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysRoleVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询角色列表查询
+      tags:
+      - 角色相关
+  /system/selectBox/dept:
+    get:
+      description: 部门选择框
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SelectPermission'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 部门选择框
+      tags:
+      - 下拉框选项
+  /system/selectBox/permission:
+    get:
+      description: 权限选择框
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.SelectPermission'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 权限选择框
+      tags:
+      - 下拉框选项
+  /system/sse/{token}:
+    get:
+      description: 建立SSE链接
+      parameters:
+      - description: token
+        in: path
+        name: token
+        required: true
+        type: string
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: 建立SSE链接
+      tags:
+      - 建立SSE链接
+  /system/user:
+    get:
+      description: 查询用户列表
+      parameters:
+      - description: 注册开始时间
+        in: query
+        name: beginTime
+        type: string
+      - description: 部门ID
+        in: query
+        name: deptId
+        type: integer
+      - description: 注册结束时间
+        in: query
+        name: endTime
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 电话
+        in: query
+        name: phonenumber
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: 用户名
+        in: query
+        name: userName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysUserVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查询用户列表
+      tags:
+      - 用户相关
+    post:
+      description: 添加用户
+      parameters:
+      - description: 用户信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysUserDML'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 添加用户
+      tags:
+      - 用户相关
+    put:
+      description: 修改用户
+      parameters:
+      - description: 用户信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysUserDML'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改用户
+      tags:
+      - 用户相关
+  /system/user/:
+    get:
+      description: 获取当前用户信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.Accredit'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取当前用户信息
+      tags:
+      - 用户相关
+  /system/user/:userIds:
+    delete:
+      description: 删除用户
+      parameters:
+      - collectionFormat: csv
+        description: userIds
+        in: path
+        items:
+          type: integer
+        name: userIds
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除用户
+      tags:
+      - 系统用户
+  /system/user/{userId}:
+    get:
+      description: 根据用户ID获取用户信息
+      parameters:
+      - description: userId
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.UserAndAccredit'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 根据用户ID获取用户信息
+      tags:
+      - 用户相关
+  /system/user/authRole:
+    put:
+      description: 授权角色
+      parameters:
+      - description: 角色id
+        in: query
+        name: string
+        required: true
+        type: string
+      - description: 用户id
+        in: query
+        name: string
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      Rows:
+                        items:
+                          $ref: '#/definitions/systemModels.SysUserVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 授权角色
+      tags:
+      - 用户相关
+  /system/user/authRole/{userId}:
+    get:
+      description: 根据用户编号获取授权角色
+      parameters:
+      - description: userId
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: 根据用户编号获取授权角色
+      tags:
+      - 用户相关
+  /system/user/changeStatus:
+    put:
+      description: 修改用户状态
+      parameters:
+      - description: 用户信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.EditUserStatus'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改用户状态
+      tags:
+      - 用户相关
+  /system/user/dataScope:
+    put:
+      description: 修改数据权限
+      parameters:
+      - description: 用户权限信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysUserDataScope'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改数据权限
+      tags:
+      - 用户相关
+  /system/user/dataScope/{userId}:
+    get:
+      description: 查询用户数据权限
+      parameters:
+      - description: userId
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询用户数据权限
+      tags:
+      - 用户相关
+  /system/user/export:
+    post:
+      description: 导出用户
+      parameters:
+      - description: 注册开始时间
+        in: query
+        name: beginTime
+        type: string
+      - description: 部门ID
+        in: query
+        name: deptId
+        type: integer
+      - description: 注册结束时间
+        in: query
+        name: endTime
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 电话
+        in: query
+        name: phonenumber
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: 用户名
+        in: query
+        name: userName
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: integer
+            type: array
+      security:
+      - BearerAuth: []
+      summary: 导出用户
+      tags:
+      - 系统用户
+  /system/user/importData:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 导入用户
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 导入用户
+      tags:
+      - 系统用户
+  /system/user/input:
+    post:
+      description: 导出用户
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: integer
+            type: array
+      security:
+      - BearerAuth: []
+      summary: 导出用户
+      tags:
+      - 系统用户
+  /system/user/profile:
+    get:
+      description: 查看个人资料
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/systemModels.UserProfile'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 查看个人资料
+      tags:
+      - 个人资料
+    put:
+      description: 修改个人资料
+      parameters:
+      - description: 公司信息
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysUserDML'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改个人资料
+      tags:
+      - 个人资料
+  /system/user/profile/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 修改头像
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改头像
+      tags:
+      - 个人资料
+  /system/user/profile/updatePwd:
+    put:
+      description: 修改密码
+      parameters:
+      - description: 旧密码
+        in: query
+        name: oldPassword
+        required: true
+        type: string
+      - description: 新密码
+        in: query
+        name: newPassword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改密码
+      tags:
+      - 个人资料
+  /system/user/resetPwd:
+    put:
+      description: 重置密码
+      parameters:
+      - description: 密码
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.ResetPwd'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 重置密码
+      tags:
+      - 用户相关
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

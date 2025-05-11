@@ -1,0 +1,49 @@
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "code": 0,
+    "data": {
+      "avatar": "https://avatars.githubusercontent.com/u/57009900",
+      "create_date": "Thu, 08 May 2025 22:47:48 GMT",
+      "create_time": 1746715668073,
+      "dataset_ids": [
+        "14cc5b8627ba11f0b6370242ac120006"
+      ],
+      "description": "A helpful Assistant",
+      "do_refer": "1",
+      "id": "68afa28e2c1b11f0be8e0242ac1b0006",
+      "language": "English",
+      "llm": {
+        "frequency_penalty": 0.7,
+        "model_name": "deepseek-r1:1.5b@Ollama",
+        "presence_penalty": 0.4,
+        "temperature": 0.1,
+        "top_p": 0.3
+      },
+      "name": "测试助理",
+      "prompt": {
+        "empty_response": "Sorry! No relevant content was found in the knowledge base!",
+        "keywords_similarity_weight": 0.7,
+        "opener": "Hi! I'm your assistant, what can I do for you?",
+        "prompt": "You are an intelligent assistant. Please summarize the content of the knowledge base to answer the question. Please list the data in the knowledge base and answer in detail. When all knowledge base content is irrelevant to the question, your answer must include the sentence \"The answer you are looking for is not found in the knowledge base!\" Answers need to consider chat history.\n      Here is the knowledge base:\n      {knowledge}\n      The above is the knowledge base.",
+        "rerank_model": "",
+        "similarity_threshold": 0.2,
+        "top_n": 6,
+        "variables": [
+          {
+            "key": "knowledge",
+            "optional": false
+          }
+        ]
+      },
+      "prompt_type": "simple",
+      "status": "1",
+      "tenant_id": "ec8fdb321cfd11f0b8520242ac120006",
+      "top_k": 0,
+      "update_date": "Thu, 08 May 2025 22:47:48 GMT",
+      "update_time": 1746715668073
+    },
+    "message": ""
+  }
+}
