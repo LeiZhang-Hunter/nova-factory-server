@@ -9,7 +9,7 @@ import (
 // SessionCreate 创建助理会话
 // @Summary 创建助理会话
 // @Description 创建助理会话
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object body aiDataSetModels.CreateSessionsRequest true "使用 chat 助手创建会话"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -32,7 +32,7 @@ func (d *Dataset) SessionCreate(c *gin.Context) {
 // SessionUpdate 更新助理会话
 // @Summary 更新助理会话
 // @Description 更新助理会话
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object body aiDataSetModels.UpdateSessionsRequest true "更新助理会话"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -55,7 +55,7 @@ func (d *Dataset) SessionUpdate(c *gin.Context) {
 // SessionList 助理会话列表
 // @Summary 助理会话列表
 // @Description 助理会话列表
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object query aiDataSetModels.ListSessionRequest true "助理会话列表"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -78,7 +78,7 @@ func (d *Dataset) SessionList(c *gin.Context) {
 // SessionRemove 删除会话
 // @Summary 删除会话
 // @Description 删除会话
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object body aiDataSetModels.DeleteSessionRequest true "删除会话"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -101,7 +101,7 @@ func (d *Dataset) SessionRemove(c *gin.Context) {
 // ChartsCompletions 与聊天助手交谈
 // @Summary 与聊天助手交谈
 // @Description 与聊天助手交谈
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object body aiDataSetModels.ChatsCompletionsRequest true "与聊天助手交谈"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -135,7 +135,7 @@ func (d *Dataset) ChartsCompletions(c *gin.Context) {
 // AgentSessionCreate 创建agent会话
 // @Summary 创建agent会话
 // @Description 创建agent会话
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object body aiDataSetModels.SessionAgentCreate true "创建agent会话"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -159,7 +159,7 @@ func (d *Dataset) AgentSessionCreate(c *gin.Context) {
 // AgentCompletions Agent聊天
 // @Summary Agent聊天
 // @Description Agent聊天
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object body aiDataSetModels.AgentsCompletionsRequest true "Agent聊天"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -184,7 +184,7 @@ func (d *Dataset) AgentCompletions(c *gin.Context) {
 // AgentsSessionList Agent会话列表
 // @Summary Agent会话列表
 // @Description Agent会话列表
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object query aiDataSetModels.ListAgentSessionsRequest true "Agent会话列表请求参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -207,7 +207,7 @@ func (d *Dataset) AgentsSessionList(c *gin.Context) {
 // AgentsSessionRemove 删除Agent会话
 // @Summary 删除Agent会话
 // @Description 删除Agent会话
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object body aiDataSetModels.RemoveAgentSessionsRequest true "删除Agent会话"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -230,7 +230,7 @@ func (d *Dataset) AgentsSessionRemove(c *gin.Context) {
 // ConversationRelatedQuestions 相关提问
 // @Summary 相关提问
 // @Description 相关提问
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object body aiDataSetModels.ConversationRelatedQuestionsRequest true "相关提问"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -253,7 +253,7 @@ func (d *Dataset) ConversationRelatedQuestions(c *gin.Context) {
 // AgentList Agen话列表
 // @Summary Agen话列表
 // @Description Agen话列表
-// @Tags 工业智能体
+// @Tags 工业智能体/会话管理
 // @Param  object query aiDataSetModels.ListAgentSessionsRequest true "Agen话列表请求参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"

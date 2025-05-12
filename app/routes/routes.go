@@ -98,6 +98,7 @@ func NewGinEngine(
 		ai.Dataset.PrivateRoutes(group) // 工业智能体
 
 		craft.CraftRoute.PrivateRoutes(group)
+		craft.Process.PrivateRoutes(group)
 	}
 
 	r.NoRoute(func(c *gin.Context) {

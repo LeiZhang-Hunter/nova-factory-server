@@ -25,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "Agen话列表",
                 "parameters": [
@@ -89,7 +89,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/助理管理"
                 ],
                 "summary": "创建助理",
                 "parameters": [
@@ -117,7 +117,7 @@ const docTemplate = `{
             "get": {
                 "description": "读取助理列表",
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/助理管理"
                 ],
                 "summary": "读取助理列表",
                 "parameters": [
@@ -175,7 +175,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/助理管理"
                 ],
                 "summary": "删除助理",
                 "parameters": [
@@ -208,7 +208,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/助理管理"
                 ],
                 "summary": "更新助理",
                 "parameters": [
@@ -239,7 +239,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/分块管理"
                 ],
                 "summary": "添加chunk",
                 "parameters": [
@@ -270,7 +270,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/分块管理"
                 ],
                 "summary": "chunk列表",
                 "parameters": [
@@ -340,7 +340,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/分块管理"
                 ],
                 "summary": "移除chunk",
                 "parameters": [
@@ -371,7 +371,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/分块管理"
                 ],
                 "summary": "检索chunk",
                 "parameters": [
@@ -402,7 +402,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/分块管理"
                 ],
                 "summary": "更新chunk",
                 "parameters": [
@@ -433,7 +433,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/知识库管理"
                 ],
                 "summary": "添加数据集",
                 "parameters": [
@@ -469,7 +469,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/文档管理"
                 ],
                 "summary": "下载文档",
                 "parameters": [
@@ -498,7 +498,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/知识库管理"
                 ],
                 "summary": "读取数据集列表",
                 "parameters": [
@@ -554,7 +554,7 @@ const docTemplate = `{
                 ],
                 "description": "文档列表",
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/文档管理"
                 ],
                 "summary": "文档列表",
                 "parameters": [
@@ -622,7 +622,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/知识库管理"
                 ],
                 "summary": "移除数据集",
                 "parameters": [
@@ -653,7 +653,7 @@ const docTemplate = `{
                 ],
                 "description": "删除文档",
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/文档管理"
                 ],
                 "summary": "删除文档",
                 "parameters": [
@@ -684,7 +684,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "Agent聊天",
                 "parameters": [
@@ -715,7 +715,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "创建agent会话",
                 "parameters": [
@@ -746,7 +746,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "删除Agent会话",
                 "parameters": [
@@ -777,7 +777,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "Agent会话列表",
                 "parameters": [
@@ -841,7 +841,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "与聊天助手交谈",
                 "parameters": [
@@ -872,7 +872,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "相关提问",
                 "parameters": [
@@ -903,7 +903,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "创建助理会话",
                 "parameters": [
@@ -934,7 +934,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "助理会话列表",
                 "parameters": [
@@ -1003,7 +1003,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "删除会话",
                 "parameters": [
@@ -1034,7 +1034,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/会话管理"
                 ],
                 "summary": "更新助理会话",
                 "parameters": [
@@ -1067,7 +1067,7 @@ const docTemplate = `{
                 ],
                 "description": "解析文档",
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/文档管理"
                 ],
                 "summary": "解析文档",
                 "parameters": [
@@ -1100,7 +1100,7 @@ const docTemplate = `{
                 ],
                 "description": "停止解析文档",
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/文档管理"
                 ],
                 "summary": "停止解析文档",
                 "parameters": [
@@ -1131,7 +1131,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/知识库管理"
                 ],
                 "summary": "更新数据集",
                 "parameters": [
@@ -1174,7 +1174,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/文档管理"
                 ],
                 "summary": "更新文档",
                 "parameters": [
@@ -1220,7 +1220,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "工业智能体"
+                    "工业智能体/文档管理"
                 ],
                 "summary": "上传文档",
                 "parameters": [
@@ -1872,6 +1872,37 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/process/set": {
+            "post": {
+                "description": "设置工序2",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/工序管理"
+                ],
+                "summary": "设置工序",
+                "parameters": [
+                    {
+                        "description": "设备分组参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.SysProProcess"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -7296,6 +7327,71 @@ const docTemplate = `{
                 "status": {
                     "description": "操作状态（0正常 1异常）",
                     "type": "boolean"
+                }
+            }
+        },
+        "craftRouteModels.SysProProcess": {
+            "type": "object",
+            "properties": {
+                "attention": {
+                    "description": "工艺要求",
+                    "type": "string"
+                },
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "createBy": {
+                    "description": "创建人",
+                    "type": "integer"
+                },
+                "createTime": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "process_code": {
+                    "description": "工序编码",
+                    "type": "string"
+                },
+                "process_id": {
+                    "description": "工序ID",
+                    "type": "integer"
+                },
+                "process_name": {
+                    "description": "工序名称",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "操作状态（0正常 -1删除）",
+                    "type": "boolean"
+                },
+                "status": {
+                    "description": "是否启用（0禁用 1启用）",
+                    "type": "boolean"
+                },
+                "updateBy": {
+                    "description": "修改人",
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "description": "修改时间",
+                    "type": "string"
                 }
             }
         },

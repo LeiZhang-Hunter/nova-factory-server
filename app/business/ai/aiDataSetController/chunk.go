@@ -10,7 +10,7 @@ import (
 // ChunkList chunk列表
 // @Summary chunk列表
 // @Description chunk列表
-// @Tags 工业智能体
+// @Tags 工业智能体/分块管理
 // @Param  object query aiDataSetModels.ChunkListReq true "设备分组列表请求参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -35,7 +35,7 @@ func (d *Dataset) ChunkList(c *gin.Context) {
 // AddChunk 添加chunk
 // @Summary 添加chunk
 // @Description 添加chunk
-// @Tags 工业智能体
+// @Tags 工业智能体/分块管理
 // @Param  object body aiDataSetModels.AddChunkReq true "添加chunk参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -60,7 +60,7 @@ func (d *Dataset) AddChunk(c *gin.Context) {
 // RemoveChunk 移除chunk
 // @Summary 移除chunk
 // @Description 移除chunk
-// @Tags 工业智能体
+// @Tags 工业智能体/分块管理
 // @Param  object body aiDataSetModels.RemoveChunkReq true "移除chunk"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "移除chunk成功"
@@ -85,7 +85,7 @@ func (d *Dataset) RemoveChunk(c *gin.Context) {
 // UpdateChunk 更新chunk
 // @Summary 更新chunk
 // @Description 更新chunk
-// @Tags 工业智能体
+// @Tags 工业智能体/分块管理
 // @Param  object body aiDataSetModels.UpdateChunkReq true "请求参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -110,7 +110,7 @@ func (d *Dataset) UpdateChunk(c *gin.Context) {
 // RetrievalChunk 检索chunk
 // @Summary 检索chunk
 // @Description 检索chunk
-// @Tags 工业智能体
+// @Tags 工业智能体/分块管理
 // @Param  object body aiDataSetModels.RetrievalListReq true "检索chunk请求参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"

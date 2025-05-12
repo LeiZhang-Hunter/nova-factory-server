@@ -10,7 +10,7 @@ import (
 // CreateAssistant 创建助理
 // @Summary 创建助理
 // @Description 创建助理
-// @Tags 工业智能体
+// @Tags 工业智能体/助理管理
 // @Param  object body aiDataSetModels.CreateAssistantRequest true "创建助理表请求参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -36,7 +36,7 @@ func (d *Dataset) CreateAssistant(c *gin.Context) {
 // UpdateAssistant 更新助理
 // @Summary 更新助理
 // @Description 更新助理
-// @Tags 工业智能体
+// @Tags 工业智能体/助理管理
 // @Param  object body aiDataSetModels.UpdateAssistantRequest true "更新助理表请求参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -66,7 +66,7 @@ func (d *Dataset) UpdateAssistant(c *gin.Context) {
 // RemoveAssistant 删除助理
 // @Summary 删除助理
 // @Description 删除助理
-// @Tags 工业智能体
+// @Tags 工业智能体/助理管理
 // @Param  assistantIds path []string true "assistantIds"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -84,7 +84,7 @@ func (d *Dataset) RemoveAssistant(c *gin.Context) {
 // ListAssistant 读取助理列表
 // @Summary 读取助理列表
 // @Description 读取助理列表
-// @Tags 工业智能体
+// @Tags 工业智能体/助理管理
 // @Param  object query aiDataSetModels.GetAssistantRequest true "助理列表参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
 // @Router /ai/dataset/assistant/list [get]

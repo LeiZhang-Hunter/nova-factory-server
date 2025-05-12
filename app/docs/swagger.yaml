@@ -350,6 +350,54 @@ definitions:
     - route_code
     - route_name
     type: object
+  craftRouteModels.SysProProcess:
+    properties:
+      attention:
+        description: 工艺要求
+        type: string
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      attr4:
+        description: 预留字段4
+        type: integer
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      process_code:
+        description: 工序编码
+        type: string
+      process_id:
+        description: 工序ID
+        type: integer
+      process_name:
+        description: 工序名称
+        type: string
+      remark:
+        description: 备注
+        type: string
+      state:
+        description: 操作状态（0正常 -1删除）
+        type: boolean
+      status:
+        description: 是否启用（0禁用 1启用）
+        type: boolean
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
   deviceModels.DeviceGroup:
     properties:
       groupId:
@@ -1314,7 +1362,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: Agen话列表
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/assistant/create:
     post:
       description: 创建助理
@@ -1334,7 +1382,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 创建助理
       tags:
-      - 工业智能体
+      - 工业智能体/助理管理
   /ai/dataset/assistant/list:
     get:
       description: 读取助理列表
@@ -1370,7 +1418,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 读取助理列表
       tags:
-      - 工业智能体
+      - 工业智能体/助理管理
   /ai/dataset/assistant/remove/{assistantIds}:
     put:
       description: 删除助理
@@ -1392,7 +1440,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 删除助理
       tags:
-      - 工业智能体
+      - 工业智能体/助理管理
   /ai/dataset/assistant/update:
     put:
       description: 更新助理
@@ -1412,7 +1460,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 更新助理
       tags:
-      - 工业智能体
+      - 工业智能体/助理管理
   /ai/dataset/chunk/add:
     post:
       description: 添加chunk
@@ -1432,7 +1480,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 添加chunk
       tags:
-      - 工业智能体
+      - 工业智能体/分块管理
   /ai/dataset/chunk/list:
     get:
       description: chunk列表
@@ -1478,7 +1526,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: chunk列表
       tags:
-      - 工业智能体
+      - 工业智能体/分块管理
   /ai/dataset/chunk/remove:
     delete:
       description: 移除chunk
@@ -1498,7 +1546,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 移除chunk
       tags:
-      - 工业智能体
+      - 工业智能体/分块管理
   /ai/dataset/chunk/retrieval:
     post:
       description: 检索chunk
@@ -1518,7 +1566,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 检索chunk
       tags:
-      - 工业智能体
+      - 工业智能体/分块管理
   /ai/dataset/chunk/update:
     put:
       description: 更新chunk
@@ -1538,7 +1586,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 更新chunk
       tags:
-      - 工业智能体
+      - 工业智能体/分块管理
   /ai/dataset/create:
     post:
       description: 添加数据集
@@ -1558,7 +1606,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 添加数据集
       tags:
-      - 工业智能体
+      - 工业智能体/知识库管理
   /ai/dataset/download/document/{document_id}:
     get:
       description: 下载文档
@@ -1579,7 +1627,7 @@ paths:
       - BearerAuth: []
       summary: 下载文档
       tags:
-      - 工业智能体
+      - 工业智能体/文档管理
   /ai/dataset/list:
     get:
       description: 读取数据集列表
@@ -1615,7 +1663,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 读取数据集列表
       tags:
-      - 工业智能体
+      - 工业智能体/知识库管理
   /ai/dataset/list/document:
     get:
       description: 文档列表
@@ -1659,7 +1707,7 @@ paths:
       - BearerAuth: []
       summary: 文档列表
       tags:
-      - 工业智能体
+      - 工业智能体/文档管理
   /ai/dataset/remove:
     delete:
       description: 移除数据集
@@ -1678,7 +1726,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 移除数据集
       tags:
-      - 工业智能体
+      - 工业智能体/知识库管理
   /ai/dataset/remove/document:
     delete:
       description: 删除文档
@@ -1698,7 +1746,7 @@ paths:
       - BearerAuth: []
       summary: 删除文档
       tags:
-      - 工业智能体
+      - 工业智能体/文档管理
   /ai/dataset/session/agents/completions:
     post:
       description: Agent聊天
@@ -1718,7 +1766,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: Agent聊天
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/session/agents/create:
     post:
       description: 创建agent会话
@@ -1738,7 +1786,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 创建agent会话
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/session/agents/delete:
     delete:
       description: 删除Agent会话
@@ -1758,7 +1806,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 删除Agent会话
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/session/agents/list:
     get:
       description: Agent会话列表
@@ -1800,7 +1848,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: Agent会话列表
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/session/charts/completions:
     post:
       description: 与聊天助手交谈
@@ -1820,7 +1868,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 与聊天助手交谈
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/session/conversation/related_questions:
     post:
       description: 相关提问
@@ -1840,7 +1888,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 相关提问
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/session/create:
     post:
       description: 创建助理会话
@@ -1860,7 +1908,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 创建助理会话
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/session/list:
     get:
       description: 助理会话列表
@@ -1905,7 +1953,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 助理会话列表
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/session/remove:
     delete:
       description: 删除会话
@@ -1925,7 +1973,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 删除会话
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/session/update:
     post:
       description: 更新助理会话
@@ -1945,7 +1993,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 更新助理会话
       tags:
-      - 工业智能体
+      - 工业智能体/会话管理
   /ai/dataset/start/document:
     post:
       description: 解析文档
@@ -1965,7 +2013,7 @@ paths:
       - BearerAuth: []
       summary: 解析文档
       tags:
-      - 工业智能体
+      - 工业智能体/文档管理
   /ai/dataset/stop/document:
     post:
       description: 停止解析文档
@@ -1985,7 +2033,7 @@ paths:
       - BearerAuth: []
       summary: 停止解析文档
       tags:
-      - 工业智能体
+      - 工业智能体/文档管理
   /ai/dataset/update:
     put:
       description: 更新数据集
@@ -2010,7 +2058,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 更新数据集
       tags:
-      - 工业智能体
+      - 工业智能体/知识库管理
   /ai/dataset/update/document/{document_id}:
     put:
       description: 更新文档
@@ -2037,7 +2085,7 @@ paths:
       - BearerAuth: []
       summary: 更新文档
       tags:
-      - 工业智能体
+      - 工业智能体/文档管理
   /ai/dataset/upload/document/{datasetId}:
     post:
       consumes:
@@ -2065,7 +2113,7 @@ paths:
       - BearerAuth: []
       summary: 上传文档
       tags:
-      - 工业智能体
+      - 工业智能体/文档管理
   /asset/device/{deviceIds}:
     delete:
       description: 删除设备
@@ -2473,6 +2521,26 @@ paths:
       summary: 获取验证码
       tags:
       - 登录
+  /craft/process/set:
+    post:
+      description: 设置工序2
+      parameters:
+      - description: 设备分组参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/craftRouteModels.SysProProcess'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置工序
+      tags:
+      - 工艺管理/工序管理
   /craft/route/list:
     get:
       description: 读取工艺列表

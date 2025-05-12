@@ -91,7 +91,7 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 // GetAiDataSet 读取数据集列表
 // @Summary 读取数据集列表
 // @Description 读取数据集列表
-// @Tags 工业智能体
+// @Tags 工业智能体/知识库管理
 // @Param  object query aiDataSetModels.DatasetListReq true "设备分组列表请求参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
@@ -115,7 +115,7 @@ func (d *Dataset) GetAiDataSet(c *gin.Context) {
 // CreateAiDataSet 添加数据集
 // @Summary 添加数据集
 // @Description 添加数据集
-// @Tags 工业智能体
+// @Tags 工业智能体/知识库管理
 // @Param  object body aiDataSetModels.DataSetRequest true "设备分组参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "设置分组成功"
@@ -138,7 +138,7 @@ func (d *Dataset) CreateAiDataSet(c *gin.Context) {
 // RemoveDataSet 移除数据集
 // @Summary 移除数据集
 // @Description 移除数据集
-// @Tags 工业智能体
+// @Tags 工业智能体/知识库管理
 // @Param  dataset_id path int64 true "dataset_id"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "设置分组成功"
@@ -161,7 +161,7 @@ func (d *Dataset) RemoveDataSet(c *gin.Context) {
 // UpdateAiDataSet 更新数据集
 // @Summary 更新数据集
 // @Description 更新数据集
-// @Tags 工业智能体
+// @Tags 工业智能体/知识库管理
 // @Param  dataset_id path string true "dataset_id"
 // @Param  object body aiDataSetModels.UpdateDataSetRequest true "设备分组参数"
 // @Produce application/json
