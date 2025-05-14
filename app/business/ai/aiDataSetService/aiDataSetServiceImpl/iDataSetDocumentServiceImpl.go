@@ -289,7 +289,7 @@ func (i *IDataSetDocumentServiceImpl) ListDocument(c *gin.Context, datasetId int
 	if response.Code != 0 {
 		return nil, errors.New(response.Message)
 	}
-
+	// /v1/document/image/708cbadc2f3611f0a6fb0242ac120002-thumbnail_8f8465f82f3f11f0a02a0242ac120002.png
 	var uuids []string = make([]string, 0)
 	for _, v := range response.Data.Docs {
 		uuids = append(uuids, v.Id)
@@ -336,7 +336,11 @@ func (i *IDataSetDocumentServiceImpl) ListDocument(c *gin.Context, datasetId int
 		document.DatasetParserConfig = v.ParserConfig
 		document.DatasetRun = v.Run
 		document.DatasetSize = int64(v.Size)
-		document.DatasetThumbnail = v.Thumbnail
+		if v.Thumbnail != "" {
+			document.DatasetThumbnail = fmt.Sprintf("%s/v1/document/image/%s-%s", i.config.ImageUrl, v.DatasetId, v.Thumbnail)
+		} else {
+			document.DatasetThumbnail = v.Thumbnail
+		}
 		document.DatasetType = v.Type
 		document.DeptID = deptId
 		document.ChunkCount = v.ChunkCount

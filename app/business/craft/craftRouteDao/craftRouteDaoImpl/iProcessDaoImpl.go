@@ -22,17 +22,19 @@ func NewIProcessDaoImpl(db *gorm.DB) craftRouteDao.IProcessDao {
 	}
 }
 
-func (i *IProcessDaoImpl) Add(c *gin.Context, process *craftRouteModels.SysProProcess) (*craftRouteModels.SysProProcess, error) {
-	process.ProcessID = snowflake.GenID()
-	process.SetCreateBy(baizeContext.GetUserId(c))
-	ret := i.db.Table(i.tableName).Create(process)
-	return process, ret.Error
+func (i *IProcessDaoImpl) Add(c *gin.Context, req *craftRouteModels.SysProSetProcessReq) (*craftRouteModels.SysProProcess, error) {
+	data := craftRouteModels.NewSysProProcess(req)
+	data.ProcessID = snowflake.GenID()
+	data.SetCreateBy(baizeContext.GetUserId(c))
+	ret := i.db.Table(i.tableName).Create(data)
+	return data, ret.Error
 }
 
-func (i *IProcessDaoImpl) Update(c *gin.Context, process *craftRouteModels.SysProProcess) (*craftRouteModels.SysProProcess, error) {
-	process.SetUpdateBy(baizeContext.GetUserId(c))
-	ret := i.db.Table(i.tableName).Where("process_id = ?", process.ProcessID).Updates(process)
-	return process, ret.Error
+func (i *IProcessDaoImpl) Update(c *gin.Context, req *craftRouteModels.SysProSetProcessReq) (*craftRouteModels.SysProProcess, error) {
+	data := craftRouteModels.NewSysProProcess(req)
+	data.SetUpdateBy(baizeContext.GetUserId(c))
+	ret := i.db.Table(i.tableName).Where("process_id = ?", data.ProcessID).Updates(data)
+	return data, ret.Error
 }
 
 func (i *IProcessDaoImpl) Remove(c *gin.Context, processIds []int64) error {

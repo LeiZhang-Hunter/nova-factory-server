@@ -2,7 +2,6 @@ package craftRouteServiceImpl
 
 import (
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/craft/craftRouteDao"
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	"nova-factory-server/app/business/craft/craftRouteService"
@@ -10,44 +9,35 @@ import (
 	"nova-factory-server/app/business/system/systemModels"
 )
 
-type ICraftProcessServiceImpl struct {
-	dao      craftRouteDao.IProcessDao
+type ICraftProcessContextServiceImpl struct {
+	dao      craftRouteDao.IProcessContextDao
 	iUserDao systemDao.IUserDao
 }
 
-func NewICraftProcessServiceImpl(dao craftRouteDao.IProcessDao, iUserDao systemDao.IUserDao) craftRouteService.ICraftProcessService {
-	return &ICraftProcessServiceImpl{
+func NewICraftProcessContextServiceImpl(dao craftRouteDao.IProcessContextDao, iUserDao systemDao.IUserDao) craftRouteService.ICraftProcessContextService {
+	return &ICraftProcessContextServiceImpl{
 		dao:      dao,
 		iUserDao: iUserDao,
 	}
 }
 
-func (i *ICraftProcessServiceImpl) Add(c *gin.Context, process *craftRouteModels.SysProSetProcessReq) (*craftRouteModels.SysProProcess, error) {
-	data, err := i.dao.Add(c, process)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+func (i *ICraftProcessContextServiceImpl) Add(c *gin.Context, processContext *craftRouteModels.SysProSetProcessContent) (*craftRouteModels.SysProProcessContent, error) {
+	return i.dao.Add(c, processContext)
 }
 
-func (i *ICraftProcessServiceImpl) Update(c *gin.Context, process *craftRouteModels.SysProSetProcessReq) (*craftRouteModels.SysProProcess, error) {
-	data, err := i.dao.Update(c, process)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-func (i *ICraftProcessServiceImpl) Remove(c *gin.Context, processIds []int64) error {
-	return i.dao.Remove(c, processIds)
+func (i *ICraftProcessContextServiceImpl) Update(c *gin.Context, processContext *craftRouteModels.SysProSetProcessContent) (*craftRouteModels.SysProProcessContent, error) {
+	return i.dao.Update(c, processContext)
 }
 
-func (i *ICraftProcessServiceImpl) List(c *gin.Context, req *craftRouteModels.SysProProcessListReq) (*craftRouteModels.SysProProcessListData, error) {
+func (i *ICraftProcessContextServiceImpl) Remove(c *gin.Context, ids []string) error {
+	return i.dao.Remove(c, ids)
+}
+
+func (i *ICraftProcessContextServiceImpl) List(c *gin.Context, req *craftRouteModels.SysProProcessContextListReq) (*craftRouteModels.SysProProcessContextListData, error) {
 	list, err := i.dao.List(c, req)
 	if err != nil {
-		zap.L().Error("读取工序列表失败", zap.Error(err))
 		return list, err
 	}
-
 	if len(list.Rows) == 0 {
 		return list, nil
 	}
@@ -94,5 +84,5 @@ func (i *ICraftProcessServiceImpl) List(c *gin.Context, req *craftRouteModels.Sy
 		list.Rows[k].CreateUserName = createUserName
 		list.Rows[k].UpdateUserName = updateUserName
 	}
-	return list, nil
+	return nil, nil
 }

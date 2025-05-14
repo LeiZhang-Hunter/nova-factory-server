@@ -57,7 +57,7 @@ func (p *Process) GetProcessList(c *gin.Context) {
 // @Success 200 {object}  response.ResponseData "设置分组成功"
 // @Router /craft/process/set [post]
 func (p *Process) SetProcess(c *gin.Context) {
-	req := new(craftRouteModels.SysProProcess)
+	req := new(craftRouteModels.SysProSetProcessReq)
 	err := c.ShouldBindJSON(req)
 	if err != nil {
 		baizeContext.ParameterError(c)
@@ -84,7 +84,7 @@ func (p *Process) SetProcess(c *gin.Context) {
 // @Summary 删除工序
 // @Description 删除工序
 // @Tags 工艺管理/工序管理
-// @Param  deviceIds path string true "deviceIds"
+// @Param  process_ids path string true "process_ids"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "设置分组成功"
 // @Router /craft/process/remove/{process_ids} [delete]

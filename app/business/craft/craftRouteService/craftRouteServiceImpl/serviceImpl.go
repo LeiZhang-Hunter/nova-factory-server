@@ -2,4 +2,4 @@ package craftRouteServiceImpl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewCraftRouteServiceImpl, NewICraftProcessServiceImpl)
+var ProviderSet = wire.NewSet(NewCraftRouteServiceImpl, NewICraftProcessServiceImpl, NewICraftProcessContextServiceImpl)

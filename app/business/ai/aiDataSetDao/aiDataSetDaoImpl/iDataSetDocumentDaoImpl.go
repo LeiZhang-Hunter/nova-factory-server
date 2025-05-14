@@ -140,7 +140,7 @@ func (d *IDataSetDocumentDaoImpl) SelectByList(c *gin.Context, request *aiDataSe
 
 func (d *IDataSetDocumentDaoImpl) GetByIds(c *gin.Context, documentId []string) ([]*aiDataSetModels.SysDatasetDocument, error) {
 	var info []*aiDataSetModels.SysDatasetDocument
-	ret := d.db.Table(d.tableName).Where("document_id in (?)", documentId).Where("state = ?", commonStatus.NORMAL).First(&info)
+	ret := d.db.Table(d.tableName).Where("document_id in (?)", documentId).Where("state = ?", commonStatus.NORMAL).Find(&info)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -157,7 +157,7 @@ func (d *IDataSetDocumentDaoImpl) RemoveByIds(c *gin.Context, documentId []strin
 
 func (d *IDataSetDocumentDaoImpl) GetByDocumentUuids(c *gin.Context, documentUuids []string) ([]*aiDataSetModels.SysDatasetDocument, error) {
 	var info []*aiDataSetModels.SysDatasetDocument
-	ret := d.db.Table(d.tableName).Debug().Where("dataset_document_uuid in (?)", documentUuids).Where("state = ?", commonStatus.NORMAL).Find(&info)
+	ret := d.db.Table(d.tableName).Where("dataset_document_uuid in (?)", documentUuids).Where("state = ?", commonStatus.NORMAL).Find(&info)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}

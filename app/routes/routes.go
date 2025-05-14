@@ -99,6 +99,7 @@ func NewGinEngine(
 
 		craft.CraftRoute.PrivateRoutes(group)
 		craft.Process.PrivateRoutes(group)
+		craft.ProcessContext.PrivateRoutes(group)
 	}
 
 	r.NoRoute(func(c *gin.Context) {

@@ -20,7 +20,7 @@ create table sys_craft_route (
    update_time                    datetime                                   comment '更新时间',
    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
    primary key (route_id)
-) engine=innodb auto_increment=200 comment = '工艺路线表';
+) engine=innodb auto_increment=0 comment = '工艺路线表';
 
 
 -- ----------------------------
@@ -41,9 +41,10 @@ create table sys_pro_process (
      create_time 	                 datetime                                   comment '创建时间',
      update_by                      varchar(64)     default ''                 comment '更新者',
      update_time                    datetime                                   comment '更新时间',
+     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
      `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
      primary key (process_id)
-) engine=innodb auto_increment=200 comment = '生产工序表';
+) engine=innodb auto_increment=0 comment = '生产工序表';
 
 
 -- ----------------------------
@@ -62,12 +63,14 @@ create table sys_pro_process_content (
     attr2                          varchar(255)    default null               comment '预留字段2',
     attr3                          int(11)         default 0                  comment '预留字段3',
     attr4                          int(11)         default 0                  comment '预留字段4',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     create_by                      varchar(64)     default ''                 comment '创建者',
     create_time 	                 datetime                                   comment '创建时间',
     update_by                      varchar(64)     default ''                 comment '更新者',
     update_time                    datetime                                   comment '更新时间',
     primary key (content_id)
-) engine=innodb auto_increment=200 comment = '生产工序内容表';
+) engine=innodb auto_increment=0 comment = '生产工序内容表';
 
 -- ----------------------------
 -- 4、工艺组成表
@@ -93,12 +96,13 @@ create table sys_pro_route_process (
    attr2                          varchar(255)    default null               comment '预留字段2',
    attr3                          int(11)         default 0                  comment '预留字段3',
    attr4                          int(11)         default 0                  comment '预留字段4',
+   `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
    create_by                      varchar(64)     default ''                 comment '创建者',
    create_time 	                 datetime                                   comment '创建时间',
    update_by                      varchar(64)     default ''                 comment '更新者',
    update_time                    datetime                                   comment '更新时间',
    primary key (record_id)
-) engine=innodb auto_increment=200 comment = '工艺组成表';
+) engine=innodb auto_increment=0 comment = '工艺组成表';
 
 -- ----------------------------
 -- 5、产品制程
@@ -120,12 +124,13 @@ create table sys_pro_route_product (
     attr2                          varchar(255)    default null               comment '预留字段2',
     attr3                          int(11)         default 0                  comment '预留字段3',
     attr4                          int(11)         default 0                  comment '预留字段4',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     create_by                      varchar(64)     default ''                 comment '创建者',
     create_time 	                 datetime                                   comment '创建时间',
     update_by                      varchar(64)     default ''                 comment '更新者',
     update_time                    datetime                                   comment '更新时间',
     primary key (record_id)
-) engine=innodb auto_increment=200 comment = '产品制程';
+) engine=innodb auto_increment=0 comment = '产品制程';
 
 -- ----------------------------
 -- 6、产品制程物料BOM表
@@ -147,9 +152,10 @@ create table pro_route_product_bom (
    attr2                          varchar(255)    default null               comment '预留字段2',
    attr3                          int(11)         default 0                  comment '预留字段3',
    attr4                          int(11)         default 0                  comment '预留字段4',
+   `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
    create_by                      varchar(64)     default ''                 comment '创建者',
    create_time 	                 datetime                                   comment '创建时间',
    update_by                      varchar(64)     default ''                 comment '更新者',
    update_time                    datetime                                   comment '更新时间',
    primary key (record_id)
-) engine=innodb auto_increment=200 comment = '产品制程物料BOM表';
+) engine=innodb auto_increment=0 comment = '产品制程物料BOM表';

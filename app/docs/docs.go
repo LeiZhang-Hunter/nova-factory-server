@@ -1110,7 +1110,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.DeleteDocumentRequest"
+                            "$ref": "#/definitions/aiDataSetModels.ParseDocumentApiRequest"
                         }
                     }
                 ],
@@ -1879,9 +1879,218 @@ const docTemplate = `{
                 }
             }
         },
+        "/craft/process/context/list": {
+            "get": {
+                "description": "工序内容列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/工序内容管理"
+                ],
+                "summary": "工序内容列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "工序ID",
+                        "name": "process_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/process/context/remove/{context_ids}": {
+            "delete": {
+                "description": "移除工序内容",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/工序内容管理"
+                ],
+                "summary": "移除工序内容",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "context_ids",
+                        "name": "context_ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/process/context/set": {
+            "post": {
+                "description": "设置工序内容",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/工序内容管理"
+                ],
+                "summary": "设置工序内容",
+                "parameters": [
+                    {
+                        "description": "设备分组参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.SysProSetProcessContent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/process/list": {
+            "get": {
+                "description": "工序列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/工序管理"
+                ],
+                "summary": "工序列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "工序编码",
+                        "name": "process_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "工序名称",
+                        "name": "process_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否启用（0禁用 1启用）",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/process/remove/{process_ids}": {
+            "delete": {
+                "description": "删除工序",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/工序管理"
+                ],
+                "summary": "删除工序",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "process_ids",
+                        "name": "process_ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/craft/process/set": {
             "post": {
-                "description": "设置工序2",
+                "description": "设置工序",
                 "produces": [
                     "application/json"
                 ],
@@ -7332,6 +7541,10 @@ const docTemplate = `{
         },
         "craftRouteModels.SysProProcess": {
             "type": "object",
+            "required": [
+                "process_code",
+                "process_name"
+            ],
             "properties": {
                 "attention": {
                     "description": "工艺要求",
@@ -7359,6 +7572,9 @@ const docTemplate = `{
                 },
                 "createTime": {
                     "description": "创建时间",
+                    "type": "string"
+                },
+                "createUserName": {
                     "type": "string"
                 },
                 "process_code": {
@@ -7391,6 +7607,67 @@ const docTemplate = `{
                 },
                 "updateTime": {
                     "description": "修改时间",
+                    "type": "string"
+                },
+                "updateUserName": {
+                    "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.SysProSetProcessContent": {
+            "type": "object",
+            "required": [
+                "content_text",
+                "process_id"
+            ],
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "content_id": {
+                    "description": "内容ID",
+                    "type": "integer"
+                },
+                "content_text": {
+                    "description": "内容说明",
+                    "type": "string"
+                },
+                "device": {
+                    "description": "辅助设备",
+                    "type": "string"
+                },
+                "doc_url": {
+                    "description": "材料URL",
+                    "type": "string"
+                },
+                "material": {
+                    "description": "辅助材料",
+                    "type": "string"
+                },
+                "order_num": {
+                    "description": "顺序编号",
+                    "type": "integer"
+                },
+                "process_id": {
+                    "description": "工序ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "remark": {
+                    "description": "备注",
                     "type": "string"
                 }
             }

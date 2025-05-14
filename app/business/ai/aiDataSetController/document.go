@@ -191,12 +191,12 @@ func (d *Dataset) StartParseDocument(c *gin.Context) {
 // @Description 停止解析文档
 // @Tags 工业智能体/文档管理
 // @Security BearerAuth
-// @Param  object body aiDataSetModels.DeleteDocumentRequest true "停止解析文档参数"
+// @Param  object body aiDataSetModels.ParseDocumentApiRequest true "停止解析文档参数"
 // @Success 200 {object}  response.ResponseData "停止解析文档成功"
 // @Router /ai/dataset/stop/document [post]
 func (d *Dataset) StopParseDocument(c *gin.Context) {
 
-	req := new(aiDataSetModels.DeleteDocumentRequest)
+	req := new(aiDataSetModels.ParseDocumentApiRequest)
 	err := c.ShouldBindJSON(req)
 	if err != nil {
 		baizeContext.ParameterError(c)
@@ -213,7 +213,7 @@ func (d *Dataset) StopParseDocument(c *gin.Context) {
 		return
 	}
 
-	err = d.iDataSetDocumentService.RemoveDocument(c, req)
+	err = d.iDataSetDocumentService.StopParse(c, req)
 	if err != nil {
 		zap.L().Error("文档列表错误", zap.Error(err))
 		baizeContext.Waring(c, "停止解析失败")

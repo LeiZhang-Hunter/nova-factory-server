@@ -39,3 +39,4 @@ upload_file:
 dataset:
   api_key: ragflow-JmNmIyYjk0MjY1NzExZjBiNmVlMDI0Mm
   host: http://192.168.2.100
+  image_url: http://81.71.98.26:11105

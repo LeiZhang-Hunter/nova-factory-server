@@ -87,6 +87,10 @@ type ParseDocumentApiRequest struct {
 	DocumentIds []string `json:"document_ids"`
 }
 
+type StopDocumentApiRequest struct {
+	DocumentIds []string `json:"document_ids"`
+}
+
 // ParseDocumentApiResponse 解析文档详情
 type ParseDocumentApiResponse struct {
 	Code    int    `json:"code"`
@@ -100,6 +104,7 @@ type DocumentData struct {
 	CreatedBy       string       `json:"created_by"`
 	Id              string       `json:"id"`
 	KnowledgebaseId string       `json:"knowledgebase_id"`
+	DatasetId       string       `json:"dataset_id"`
 	Location        string       `json:"location"`
 	Name            string       `json:"name"`
 	ParserConfig    ParserConfig `json:"parser_config"`
