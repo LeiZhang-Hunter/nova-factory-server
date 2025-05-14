@@ -24,16 +24,31 @@ type Prompt struct {
 // CreateAssistantRequest 创建聊天代理
 
 type CreateAssistantRequest struct {
-	DatasetIds []string `json:"dataset_ids"`
-	Name       string   `json:"name"`
-	Avatar     string   `json:"avatar,omitempty"`
-	Llm        *Llm     `json:"llm,omitempty"`
-	Prompt     *Prompt  `json:"prompt,omitempty"`
+	DatasetIds   []string      `json:"dataset_ids"`
+	Name         string        `json:"name"`
+	Avatar       string        `json:"avatar,omitempty"`
+	Llm          *Llm          `json:"llm,omitempty"`
+	Prompt       *Prompt       `json:"prompt,omitempty"`
+	Description  string        `json:"description,omitempty"`
+	Icon         string        `json:"icon,omitempty"`
+	TopN         int           `json:"top_n,omitempty"`
+	TopK         int           `json:"top_k,omitempty"`
+	PromptConfig *PromptConfig `json:"prompt_config,omitempty"`
 }
 
 type Variables struct {
 	Key      string `json:"key"`
 	Optional bool   `json:"optional"`
+}
+
+type PromptConfig struct {
+	System          string `json:"system"`
+	Prologue        string `json:"prologue"`
+	Parameters      string `json:"parameters"`
+	EmptyResponse   string `json:"empty_response"`
+	Quote           string `json:"quote"`
+	Tts             string `json:"tts"`
+	RefineMultiturn string `json:"refine_multiturn"`
 }
 
 type CreateAssistantData struct {
@@ -45,9 +60,9 @@ type CreateAssistantData struct {
 	DoRefer     string   `json:"do_refer"`
 	Id          string   `json:"id"`
 	Language    string   `json:"language"`
-	Llm         Llm      `json:"llm"`
+	Llm         *Llm     `json:"llm,omitempty"`
 	Name        string   `json:"name"`
-	Prompt      Prompt   `json:"prompt"`
+	Prompt      *Prompt  `json:"prompt,omitempty"`
 	PromptType  string   `json:"prompt_type"`
 	Status      string   `json:"status"`
 	TenantId    string   `json:"tenant_id"`

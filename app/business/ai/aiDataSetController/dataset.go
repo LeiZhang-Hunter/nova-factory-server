@@ -61,7 +61,7 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 	ai.GET("/assistant/list", middlewares.HasPermission("ai:dataset:assistant"), d.ListAssistant)
 	ai.PUT("/assistant/update", middlewares.HasPermission("ai:dataset:assistant:update"), d.UpdateAssistant)
 	ai.POST("/assistant/create", middlewares.HasPermission("ai:dataset:chats:assistant:create"), d.CreateAssistant)
-	ai.DELETE("/assistant/remove:assistantIds", middlewares.HasPermission("ai:dataset:chats:assistant:remove"), d.RemoveAssistant)
+	ai.DELETE("/assistant/remove/:assistantIds", middlewares.HasPermission("ai:dataset:chats:assistant:remove"), d.RemoveAssistant)
 
 	// chats 聊天
 	// 使用chat助手创建会话

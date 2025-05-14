@@ -169,7 +169,7 @@ const docTemplate = `{
             }
         },
         "/ai/dataset/assistant/remove/{assistantIds}": {
-            "put": {
+            "delete": {
                 "description": "删除助理",
                 "produces": [
                     "application/json"
@@ -7099,6 +7099,12 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
                 "llm": {
                     "$ref": "#/definitions/aiDataSetModels.Llm"
                 },
@@ -7107,6 +7113,15 @@ const docTemplate = `{
                 },
                 "prompt": {
                     "$ref": "#/definitions/aiDataSetModels.Prompt"
+                },
+                "prompt_config": {
+                    "$ref": "#/definitions/aiDataSetModels.PromptConfig"
+                },
+                "top_k": {
+                    "type": "integer"
+                },
+                "top_n": {
+                    "type": "integer"
                 }
             }
         },
@@ -7282,11 +7297,40 @@ const docTemplate = `{
                 }
             }
         },
+        "aiDataSetModels.PromptConfig": {
+            "type": "object",
+            "properties": {
+                "empty_response": {
+                    "type": "string"
+                },
+                "parameters": {
+                    "type": "string"
+                },
+                "prologue": {
+                    "type": "string"
+                },
+                "quote": {
+                    "type": "string"
+                },
+                "refine_multiturn": {
+                    "type": "string"
+                },
+                "system": {
+                    "type": "string"
+                },
+                "tts": {
+                    "type": "string"
+                }
+            }
+        },
         "aiDataSetModels.PutDocumentRequest": {
             "type": "object",
             "properties": {
                 "chunk_method": {
                     "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
                 },
                 "meta_fields": {
                     "type": "object",
@@ -7373,6 +7417,9 @@ const docTemplate = `{
                 "top_k": {
                     "type": "integer"
                 },
+                "use_kg": {
+                    "type": "boolean"
+                },
                 "vector_similarity_weight": {
                     "type": "number"
                 }
@@ -7419,6 +7466,9 @@ const docTemplate = `{
         "aiDataSetModels.UpdateChunkReq": {
             "type": "object",
             "properties": {
+                "available": {
+                    "type": "boolean"
+                },
                 "chunk_id": {
                     "type": "string"
                 },

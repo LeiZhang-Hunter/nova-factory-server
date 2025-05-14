@@ -117,6 +117,9 @@ func (i *IDataSetDocumentServiceImpl) PutFile(c *gin.Context, documentId int64, 
 	apiRequest.ParserConfig = request.ParserConfig
 	apiRequest.ChunkMethod = request.ChunkMethod
 	apiRequest.MetaFields = request.MetaFields
+	if request.Enabled != nil {
+		apiRequest.Enabled = request.Enabled
+	}
 	content, err := json.Marshal(apiRequest)
 	if err != nil {
 		zap.L().Error("读取文档失败", zap.Error(err))

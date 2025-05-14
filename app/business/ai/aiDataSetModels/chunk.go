@@ -19,7 +19,7 @@ type ChunkData struct {
 	Id                string   `json:"id"`
 	ImageId           string   `json:"image_id"`
 	ImportantKeywords []string `json:"important_keywords"`
-	Positions         []string `json:"positions"`
+	Positions         [][]int  `json:"positions"`
 }
 
 type ChunkDoc struct {
@@ -47,6 +47,7 @@ type ChunkDoc struct {
 	UpdateDate     string       `json:"update_date"`
 	UpdateTime     int64        `json:"update_time"`
 }
+
 type ChunkListResponse struct {
 	Code int `json:"code"`
 	Data struct {
@@ -100,6 +101,7 @@ type UpdateChunkReq struct {
 	Content           string   `json:"content"  form:"content"`
 	ImportantKeywords []string `json:"important_keywords"  form:"important_keywords"`
 	Questions         []string `json:"questions,string" form:"questions"`
+	Available         bool     `json:"available" form:"available"`
 }
 
 type UpdateChunkResponse struct {
@@ -120,6 +122,7 @@ type RetrievalListReq struct {
 	RerankId               string   `json:"rerank_id"  form:"rerank_id"`
 	Keyword                bool     `json:"keyword"  form:"keyword"`
 	Highlight              bool     `json:"highlight"  form:"highlight"`
+	UseKg                  bool     `json:"use_kg"  form:"use_kg"`
 }
 
 type RetrievalApiListReq struct {
@@ -134,6 +137,7 @@ type RetrievalApiListReq struct {
 	RerankId               string   `json:"rerank_id,omitempty"  form:"rerank_id"`
 	Keyword                bool     `json:"keyword,omitempty"  form:"keyword"`
 	Highlight              bool     `json:"highlight,omitempty"  form:"highlight"`
+	UseKg                  bool     `json:"use_kg"  form:"use_kg"`
 }
 
 func (api *RetrievalApiListReq) Of(req *RetrievalListReq) {
@@ -148,6 +152,7 @@ func (api *RetrievalApiListReq) Of(req *RetrievalListReq) {
 	api.RerankId = req.RerankId
 	api.Keyword = req.Keyword
 	api.Highlight = req.Highlight
+	api.UseKg = req.UseKg
 }
 
 type RetrievalApiData struct {

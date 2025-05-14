@@ -29,7 +29,7 @@ func (d *Dataset) ChunkList(c *gin.Context) {
 		baizeContext.SuccessData(c, &aiDataSetModels.ChunkListResponse{})
 		return
 	}
-	baizeContext.SuccessData(c, documents)
+	baizeContext.SuccessData(c, documents.Data)
 }
 
 // AddChunk 添加chunk

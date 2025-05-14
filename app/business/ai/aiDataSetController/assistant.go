@@ -70,7 +70,7 @@ func (d *Dataset) UpdateAssistant(c *gin.Context) {
 // @Param  assistantIds path []string true "assistantIds"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "获取成功"
-// @Router /ai/dataset/assistant/remove/{assistantIds} [put]
+// @Router /ai/dataset/assistant/remove/{assistantIds} [delete]
 func (d *Dataset) RemoveAssistant(c *gin.Context) {
 	assistantIds := baizeContext.ParamStringArray(c, "assistantIds")
 	err := d.assistantService.DeleteAssistant(c, assistantIds)
@@ -101,5 +101,5 @@ func (d *Dataset) ListAssistant(c *gin.Context) {
 		baizeContext.Waring(c, "读取助理列表失败")
 		return
 	}
-	baizeContext.SuccessData(c, assistants)
+	baizeContext.SuccessData(c, assistants.Data)
 }

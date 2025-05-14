@@ -97,6 +97,7 @@ create table sys_pro_route_process (
    attr3                          int(11)         default 0                  comment '预留字段3',
    attr4                          int(11)         default 0                  comment '预留字段4',
    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+   `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
    create_by                      varchar(64)     default ''                 comment '创建者',
    create_time 	                 datetime                                   comment '创建时间',
    update_by                      varchar(64)     default ''                 comment '更新者',

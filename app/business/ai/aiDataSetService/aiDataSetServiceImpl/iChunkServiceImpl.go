@@ -72,6 +72,7 @@ func (i *IChunkServiceImpl) ChunkList(c *gin.Context, req *aiDataSetModels.Chunk
 	var response aiDataSetModels.ChunkListResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
+		zap.L().Error("读取chunk列表失败", zap.Error(err))
 		return &aiDataSetModels.ChunkListResponse{}, errors.New("读取chunk列表失败")
 	}
 	if response.Code != 0 {

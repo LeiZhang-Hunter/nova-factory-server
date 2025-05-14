@@ -59,12 +59,22 @@ definitions:
         items:
           type: string
         type: array
+      description:
+        type: string
+      icon:
+        type: string
       llm:
         $ref: '#/definitions/aiDataSetModels.Llm'
       name:
         type: string
       prompt:
         $ref: '#/definitions/aiDataSetModels.Prompt'
+      prompt_config:
+        $ref: '#/definitions/aiDataSetModels.PromptConfig'
+      top_k:
+        type: integer
+      top_n:
+        type: integer
     type: object
   aiDataSetModels.CreateSessionsRequest:
     properties:
@@ -179,10 +189,29 @@ definitions:
           $ref: '#/definitions/aiDataSetModels.Variables'
         type: array
     type: object
+  aiDataSetModels.PromptConfig:
+    properties:
+      empty_response:
+        type: string
+      parameters:
+        type: string
+      prologue:
+        type: string
+      quote:
+        type: string
+      refine_multiturn:
+        type: string
+      system:
+        type: string
+      tts:
+        type: string
+    type: object
   aiDataSetModels.PutDocumentRequest:
     properties:
       chunk_method:
         type: string
+      enabled:
+        type: boolean
       meta_fields:
         additionalProperties: true
         type: object
@@ -239,6 +268,8 @@ definitions:
         type: number
       top_k:
         type: integer
+      use_kg:
+        type: boolean
       vector_similarity_weight:
         type: number
     type: object
@@ -269,6 +300,8 @@ definitions:
     type: object
   aiDataSetModels.UpdateChunkReq:
     properties:
+      available:
+        type: boolean
       chunk_id:
         type: string
       content:
@@ -1470,7 +1503,7 @@ paths:
       tags:
       - 工业智能体/助理管理
   /ai/dataset/assistant/remove/{assistantIds}:
-    put:
+    delete:
       description: 删除助理
       parameters:
       - collectionFormat: csv
