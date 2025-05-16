@@ -97,9 +97,10 @@ func NewGinEngine(
 
 		ai.Dataset.PrivateRoutes(group) // 工业智能体
 
-		craft.CraftRoute.PrivateRoutes(group)
-		craft.Process.PrivateRoutes(group)
-		craft.ProcessContext.PrivateRoutes(group)
+		craft.CraftRoute.PrivateRoutes(group)     //工艺路线
+		craft.Process.PrivateRoutes(group)        //工序设置
+		craft.ProcessContext.PrivateRoutes(group) //工序内容
+		craft.RouteProcess.PrivateRoutes(group)   //工艺组成
 	}
 
 	r.NoRoute(func(c *gin.Context) {

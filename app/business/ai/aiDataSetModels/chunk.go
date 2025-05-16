@@ -46,6 +46,7 @@ type ChunkDoc struct {
 	Type           string       `json:"type"`
 	UpdateDate     string       `json:"update_date"`
 	UpdateTime     int64        `json:"update_time"`
+	URL            string       `json:"url"`
 }
 
 type ChunkListResponse struct {
@@ -111,26 +112,26 @@ type UpdateChunkResponse struct {
 
 // RetrievalListReq 检索req
 type RetrievalListReq struct {
-	Question               string   `json:"question"  form:"question"`
-	DatasetIds             []string `json:"dataset_uuids"  form:"dataset_uuids"`
-	DocumentIds            []string `json:"document_uuids"  form:"document_uuids"`
-	Page                   int      `json:"page"  form:"page"`
-	PageSize               int      `json:"page_size"  form:"page_size"`
-	SimilarityThreshold    float64  `json:"similarity_threshold"  form:"similarity_threshold"`
-	VectorSimilarityWeight float64  `json:"vector_similarity_weight"  form:"vector_similarity_weight"`
-	TopK                   int      `json:"top_k"  form:"top_k"`
-	RerankId               string   `json:"rerank_id"  form:"rerank_id"`
-	Keyword                bool     `json:"keyword"  form:"keyword"`
-	Highlight              bool     `json:"highlight"  form:"highlight"`
-	UseKg                  bool     `json:"use_kg"  form:"use_kg"`
+	Question               string   `json:"question,omitempty"  form:"question"`
+	DatasetIds             []string `json:"dataset_uuids,omitempty"  form:"dataset_uuids"`
+	DocumentIds            []string `json:"document_uuids,omitempty"  form:"document_uuids"`
+	Page                   int      `json:"page,omitempty"  form:"page"`
+	PageSize               int      `json:"page_size,omitempty"  form:"page_size"`
+	SimilarityThreshold    float64  `json:"similarity_threshold,omitempty"  form:"similarity_threshold"`
+	VectorSimilarityWeight float64  `json:"vector_similarity_weight,omitempty"  form:"vector_similarity_weight"`
+	TopK                   int      `json:"top_k,omitempty"  form:"top_k"`
+	RerankId               string   `json:"rerank_id,omitempty"  form:"rerank_id"`
+	Keyword                bool     `json:"keyword,omitempty"  form:"keyword"`
+	Highlight              bool     `json:"highlight,omitempty"  form:"highlight"`
+	UseKg                  bool     `json:"use_kg,omitempty"  form:"use_kg"`
 }
 
 type RetrievalApiListReq struct {
 	Question               string   `json:"question,omitempty"  form:"question"`
-	DatasetIds             []string `json:"dataset_ids"  form:"dataset_uuids"`
-	DocumentIds            []string `json:"document_ids"  form:"document_uuids"`
-	Page                   int      `json:"page"  form:"page"`
-	PageSize               int      `json:"page_size"  form:"page_size"`
+	DatasetIds             []string `json:"dataset_ids,omitempty"  form:"dataset_uuids"`
+	DocumentIds            []string `json:"document_ids,omitempty"  form:"document_uuids"`
+	Page                   int      `json:"page,omitempty"  form:"page"`
+	PageSize               int      `json:"page_size,omitempty"  form:"page_size"`
 	SimilarityThreshold    float64  `json:"similarity_threshold,omitempty"  form:"similarity_threshold"`
 	VectorSimilarityWeight float64  `json:"vector_similarity_weight,omitempty"  form:"vector_similarity_weight"`
 	TopK                   int      `json:"top_k,omitempty"  form:"top_k"`

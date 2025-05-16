@@ -491,6 +491,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/dataset/info": {
+            "get": {
+                "description": "读取数据集",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/知识库管理"
+                ],
+                "summary": "读取数据集",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "dataset_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/dataset/list": {
             "get": {
                 "description": "读取数据集列表",
@@ -2178,6 +2206,97 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/process/list": {
+            "get": {
+                "description": "组成工序列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/工序组成管理"
+                ],
+                "summary": "组成工序列表",
+                "parameters": [
+                    {
+                        "description": "组成工序列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.SysProRouteProcessListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/process/remove": {
+            "delete": {
+                "description": "删除组成工序",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/工序组成管理"
+                ],
+                "summary": "删除组成工序",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "route_process_ids",
+                        "name": "route_process_ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/process/set": {
+            "post": {
+                "description": "设置组成工序",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/工序组成管理"
+                ],
+                "summary": "设置组成工序",
+                "parameters": [
+                    {
+                        "description": "设置组成工序参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.SysProRouteProcessSetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -7167,7 +7286,9 @@ const docTemplate = `{
                 "pagerank": {
                     "type": "string"
                 },
-                "parser_config": {},
+                "parser_config": {
+                    "$ref": "#/definitions/aiDataSetModels.ParserConfig"
+                },
                 "permission": {
                     "type": "string"
                 }
@@ -7310,16 +7431,16 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "quote": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "refine_multiturn": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "system": {
                     "type": "string"
                 },
                 "tts": {
-                    "type": "string"
+                    "type": "boolean"
                 }
             }
         },
@@ -7509,6 +7630,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "parser_config": {
+                    "$ref": "#/definitions/aiDataSetModels.ParserConfig"
                 }
             }
         },
@@ -7661,6 +7785,118 @@ const docTemplate = `{
                 },
                 "updateUserName": {
                     "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.SysProRouteProcessListReq": {
+            "type": "object",
+            "properties": {
+                "isAsc": {
+                    "description": "排序规则  降序desc   asc升序",
+                    "type": "string"
+                },
+                "orderBy": {
+                    "description": "排序字段",
+                    "type": "string"
+                },
+                "pageNum": {
+                    "description": "第几页",
+                    "type": "integer",
+                    "default": 1
+                },
+                "pageSize": {
+                    "description": "数量",
+                    "type": "integer",
+                    "default": 10000
+                }
+            }
+        },
+        "craftRouteModels.SysProRouteProcessSetRequest": {
+            "type": "object",
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "color_code": {
+                    "description": "甘特图显示颜色",
+                    "type": "string"
+                },
+                "default_pre_time": {
+                    "description": "准备时间",
+                    "type": "integer"
+                },
+                "default_suf_time": {
+                    "description": "等待时间",
+                    "type": "integer"
+                },
+                "dept_id": {
+                    "description": "部门ID",
+                    "type": "integer"
+                },
+                "is_check": {
+                    "description": "是否检验",
+                    "type": "string"
+                },
+                "key_flag": {
+                    "description": "关键工序",
+                    "type": "string"
+                },
+                "link_type": {
+                    "description": "与下一道工序关系",
+                    "type": "string"
+                },
+                "next_process_code": {
+                    "description": "工序编码",
+                    "type": "string"
+                },
+                "next_process_id": {
+                    "description": "工序ID",
+                    "type": "integer"
+                },
+                "next_process_name": {
+                    "description": "工序名称",
+                    "type": "string"
+                },
+                "order_num": {
+                    "description": "序号",
+                    "type": "integer"
+                },
+                "process_code": {
+                    "description": "工序编码",
+                    "type": "string"
+                },
+                "process_id": {
+                    "description": "工序ID",
+                    "type": "integer"
+                },
+                "process_name": {
+                    "description": "工序名称",
+                    "type": "string"
+                },
+                "record_id": {
+                    "description": "记录ID",
+                    "type": "integer"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "route_id": {
+                    "description": "工艺路线ID",
+                    "type": "integer"
                 }
             }
         },

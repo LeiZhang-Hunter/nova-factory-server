@@ -4,7 +4,7 @@ import "nova-factory-server/app/baize"
 
 type Llm struct {
 	FrequencyPenalty float64 `json:"frequency_penalty"`
-	ModelName        string  `json:"model_name"`
+	ModelName        string  `json:"model_name,omitempty"`
 	PresencePenalty  float64 `json:"presence_penalty"`
 	Temperature      float64 `json:"temperature"`
 	TopP             float64 `json:"top_p"`
@@ -46,9 +46,9 @@ type PromptConfig struct {
 	Prologue        string `json:"prologue"`
 	Parameters      string `json:"parameters"`
 	EmptyResponse   string `json:"empty_response"`
-	Quote           string `json:"quote"`
-	Tts             string `json:"tts"`
-	RefineMultiturn string `json:"refine_multiturn"`
+	Quote           bool   `json:"quote"`
+	Tts             bool   `json:"tts"`
+	RefineMultiturn bool   `json:"refine_multiturn"`
 }
 
 type CreateAssistantData struct {

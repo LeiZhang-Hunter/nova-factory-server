@@ -164,10 +164,14 @@ func wireApp() (*gin.Engine, func(), error) {
 	iProcessContextDao := craftRouteDaoImpl.NewProcessContextDaoImpl(db)
 	iCraftProcessContextService := craftRouteServiceImpl.NewICraftProcessContextServiceImpl(iProcessContextDao, iUserDao)
 	processContext := craftRouteController.NewProcessContext(iCraftProcessContextService)
+	iRouteProcessDao := craftRouteDaoImpl.NewIProcessRouteDaoImpl(db)
+	iProcessRouteService := craftRouteServiceImpl.NewIProcessRouteServiceImpl(iRouteProcessDao)
+	routeProcess := craftRouteController.NewSysProRouteProcess(iProcessRouteService)
 	craftRoute := &craftRouteController.CraftRoute{
 		CraftRoute:     craft,
 		Process:        process,
 		ProcessContext: processContext,
+		RouteProcess:   routeProcess,
 	}
 	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute)
 	return engine, func() {

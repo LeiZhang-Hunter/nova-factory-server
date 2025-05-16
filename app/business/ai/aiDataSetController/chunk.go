@@ -120,7 +120,7 @@ func (d *Dataset) RetrievalChunk(c *gin.Context) {
 	err := c.ShouldBindJSON(req)
 	if err != nil {
 		zap.L().Error("解析错误", zap.Error(err))
-		baizeContext.SuccessData(c, &aiDataSetModels.ChunkListResponse{})
+		baizeContext.Waring(c, "解析错误")
 		return
 	}
 	response, err := d.iChunkService.RetrievalChunk(c, req)
@@ -129,5 +129,5 @@ func (d *Dataset) RetrievalChunk(c *gin.Context) {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
-	baizeContext.SuccessData(c, response)
+	baizeContext.SuccessData(c, response.Data)
 }

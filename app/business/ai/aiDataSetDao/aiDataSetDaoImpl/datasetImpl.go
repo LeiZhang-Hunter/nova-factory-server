@@ -1,6 +1,7 @@
 package aiDataSetDaoImpl
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -59,6 +60,14 @@ func (d *DataSetDaoImpl) Create(c *gin.Context, dataset *aiDataSetModels.DataSet
 		updateDate = time.Now()
 	}
 
+	var parseConfig []byte
+	if dataset.Data.ParserConfig != nil {
+		parseConfig, err = json.Marshal(dataset.Data.ParserConfig)
+		if err != nil {
+			return &aiDataSetModels.SysDataset{}, errors.New(err.Error())
+		}
+	}
+
 	var data aiDataSetModels.SysDataset = aiDataSetModels.SysDataset{
 		DatasetID:                     snowflake.GenID(),
 		DatasetAvatar:                 dataset.Data.Avatar,
@@ -73,7 +82,7 @@ func (d *DataSetDaoImpl) Create(c *gin.Context, dataset *aiDataSetModels.DataSet
 		DatasetLanguage:               dataset.Data.Language,
 		DatasetName:                   dataset.Data.Name,
 		DatasetPagerank:               dataset.Data.Pagerank,
-		DatasetParserConfig:           "",
+		DatasetParserConfig:           string(parseConfig),
 		DatasetPermission:             dataset.Data.Permission,
 		DatasetSimilarityThreshold:    dataset.Data.SimilarityThreshold,
 		DatasetTokenNum:               int64(dataset.Data.TokenNum),
@@ -103,9 +112,18 @@ func (d *DataSetDaoImpl) Update(c *gin.Context, datasetId int64, request *aiData
 	if info == nil {
 		return nil, nil
 	}
+	var parseConfig []byte
+	var err error
+	if request.ParserConfig != nil {
+		parseConfig, err = json.Marshal(request.ParserConfig)
+		if err != nil {
+			return &aiDataSetModels.SysDataset{}, errors.New(err.Error())
+		}
+	}
 	info.DatasetName = request.Name
 	info.DatasetEmbeddingModel = request.EmbeddingModel
 	info.DatasetChunkMethod = request.ChunkMethod
+	info.DatasetParserConfig = string(parseConfig)
 	info.SetUpdateBy(baizeContext.GetUserId(c))
 	ret = d.db.Table(d.tableName).Where("dataset_id = ?", datasetId).Updates(info)
 	if ret.Error != nil {

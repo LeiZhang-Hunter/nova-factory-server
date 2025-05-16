@@ -127,7 +127,7 @@ func (d *Dataset) ChartsCompletions(c *gin.Context) {
 		return
 	}
 	if req.Stream == false {
-		baizeContext.SuccessData(c, completions)
+		baizeContext.SuccessData(c, completions.Data)
 	}
 	return
 }

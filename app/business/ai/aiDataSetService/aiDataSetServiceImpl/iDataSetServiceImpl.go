@@ -99,6 +99,7 @@ func (i *IDataSetServiceImpl) CreateDataSet(c *gin.Context, request *aiDataSetMo
 	response.Data.Name = originName
 	create, err := i.iDataSetDao.Create(c, &response)
 	if err != nil {
+		zap.L().Error("创建知识库失败", zap.Error(err))
 		return nil, err
 	}
 	return create, nil
@@ -321,4 +322,21 @@ func (i *IDataSetServiceImpl) SyncDataSet(c *gin.Context, id int64) error {
 	}
 	i.iDataSetDao.UpdateData(c, id, &list.Data[0])
 	return nil
+}
+
+func (i *IDataSetServiceImpl) GetInfoById(c *gin.Context, id int64) (*aiDataSetModels.SysDataset, error) {
+	info, err := i.iDataSetDao.GetById(c, id)
+	if err != nil {
+		return nil, err
+	}
+	if len(info.DatasetParserConfig) != 0 {
+		var parseConfig aiDataSetModels.ParserConfig
+		err := json.Unmarshal([]byte(info.DatasetParserConfig), &parseConfig)
+		if err != nil {
+			return nil, err
+		}
+		info.ParserConfig = &parseConfig
+	}
+
+	return info, nil
 }
