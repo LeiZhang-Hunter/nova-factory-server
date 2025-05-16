@@ -111,3 +111,9 @@ func (dao *CraftRouteDaoImpl) SelectCraftRoute(c *gin.Context, req *craftRouteMo
 		Total: total,
 	}, nil
 }
+
+func (dao *CraftRouteDaoImpl) GetById(c *gin.Context, id int64) (*craftRouteModels.SysCraftRoute, error) {
+	var data *craftRouteModels.SysCraftRoute
+	ret := dao.db.Table(dao.tableName).Where("route_id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&data)
+	return data, ret.Error
+}

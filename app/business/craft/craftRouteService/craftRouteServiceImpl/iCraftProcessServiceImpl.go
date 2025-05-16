@@ -96,3 +96,7 @@ func (i *ICraftProcessServiceImpl) List(c *gin.Context, req *craftRouteModels.Sy
 	}
 	return list, nil
 }
+
+func (i *ICraftProcessServiceImpl) GetById(c *gin.Context, id int64) (*craftRouteModels.SysProProcess, error) {
+	return i.dao.GetById(c, id)
+}

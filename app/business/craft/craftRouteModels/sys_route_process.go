@@ -16,8 +16,8 @@ type SysProRouteProcessSetRequest struct {
 	NextProcessCode string `gorm:"column:next_process_code;comment:工序编码" json:"next_process_code"`               // 工序编码
 	NextProcessName string `gorm:"column:next_process_name;comment:工序名称" json:"next_process_name"`               // 工序名称
 	LinkType        string `gorm:"column:link_type;default:SS;comment:与下一道工序关系" json:"link_type"`                // 与下一道工序关系
-	DefaultPreTime  int32  `gorm:"column:default_pre_time;comment:准备时间" json:"default_pre_time"`                 // 准备时间
-	DefaultSufTime  int32  `gorm:"column:default_suf_time;comment:等待时间" json:"default_suf_time"`                 // 等待时间
+	DefaultPreTime  int64  `gorm:"column:default_pre_time;comment:准备时间" json:"default_pre_time"`                 // 准备时间
+	DefaultSufTime  int64  `gorm:"column:default_suf_time;comment:等待时间" json:"default_suf_time"`                 // 等待时间
 	ColorCode       string `gorm:"column:color_code;default:#00AEF3;comment:甘特图显示颜色" json:"color_code"`          // 甘特图显示颜色
 	KeyFlag         string `gorm:"column:key_flag;default:N;comment:关键工序" json:"key_flag"`                       // 关键工序
 	IsCheck         string `gorm:"column:is_check;default:N;comment:是否检验" json:"is_check"`                       // 是否检验
@@ -41,8 +41,8 @@ type SysProRouteProcess struct {
 	NextProcessCode string `gorm:"column:next_process_code;comment:工序编码" json:"next_process_code"`               // 工序编码
 	NextProcessName string `gorm:"column:next_process_name;comment:工序名称" json:"next_process_name"`               // 工序名称
 	LinkType        string `gorm:"column:link_type;default:SS;comment:与下一道工序关系" json:"link_type"`                // 与下一道工序关系
-	DefaultPreTime  int32  `gorm:"column:default_pre_time;comment:准备时间" json:"default_pre_time"`                 // 准备时间
-	DefaultSufTime  int32  `gorm:"column:default_suf_time;comment:等待时间" json:"default_suf_time"`                 // 等待时间
+	DefaultPreTime  int64  `gorm:"column:default_pre_time;comment:准备时间" json:"default_pre_time"`                 // 准备时间
+	DefaultSufTime  int64  `gorm:"column:default_suf_time;comment:等待时间" json:"default_suf_time"`                 // 等待时间
 	ColorCode       string `gorm:"column:color_code;default:#00AEF3;comment:甘特图显示颜色" json:"color_code"`          // 甘特图显示颜色
 	KeyFlag         string `gorm:"column:key_flag;default:N;comment:关键工序" json:"key_flag"`                       // 关键工序
 	IsCheck         string `gorm:"column:is_check;default:N;comment:是否检验" json:"is_check"`                       // 是否检验

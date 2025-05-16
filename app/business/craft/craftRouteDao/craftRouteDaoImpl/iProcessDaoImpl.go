@@ -92,3 +92,9 @@ func (i *IProcessDaoImpl) List(c *gin.Context, req *craftRouteModels.SysProProce
 		Total: total,
 	}, nil
 }
+
+func (i *IProcessDaoImpl) GetById(c *gin.Context, id int64) (*craftRouteModels.SysProProcess, error) {
+	var data *craftRouteModels.SysProProcess
+	ret := i.db.Table(i.tableName).Where("process_id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&data)
+	return data, ret.Error
+}

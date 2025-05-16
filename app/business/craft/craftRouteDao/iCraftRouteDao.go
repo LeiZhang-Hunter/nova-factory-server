@@ -14,4 +14,5 @@ type ICraftRouteDao interface {
 	RemoveCraftRoute(c *gin.Context, ids []int64) error
 	// SelectCraftRoute 读取工艺列表
 	SelectCraftRoute(c *gin.Context, req *craftRouteModels.SysCraftRouteListReq) (*craftRouteModels.SysCraftRouteListData, error)
+	GetById(c *gin.Context, id int64) (*craftRouteModels.SysCraftRoute, error)
 }

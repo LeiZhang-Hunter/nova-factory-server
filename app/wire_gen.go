@@ -165,7 +165,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	iCraftProcessContextService := craftRouteServiceImpl.NewICraftProcessContextServiceImpl(iProcessContextDao, iUserDao)
 	processContext := craftRouteController.NewProcessContext(iCraftProcessContextService)
 	iRouteProcessDao := craftRouteDaoImpl.NewIProcessRouteDaoImpl(db)
-	iProcessRouteService := craftRouteServiceImpl.NewIProcessRouteServiceImpl(iRouteProcessDao)
+	iProcessRouteService := craftRouteServiceImpl.NewIProcessRouteServiceImpl(iRouteProcessDao, iProcessDao, iCraftRouteDao)
 	routeProcess := craftRouteController.NewSysProRouteProcess(iProcessRouteService)
 	craftRoute := &craftRouteController.CraftRoute{
 		CraftRoute:     craft,

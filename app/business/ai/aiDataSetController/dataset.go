@@ -34,6 +34,7 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 	ai := router.Group("/ai/dataset")
 	ai.GET("/list", middlewares.HasPermission("ai:dataset"), d.GetAiDataSet)                          // 知识库列表
 	ai.GET("/info", middlewares.HasPermission("ai:dataset:info"), d.GetAiDataGetInfo)                 // 知识库列表
+	ai.GET("/config", middlewares.HasPermission("ai:dataset:info"), d.GetAiDataGetConfig)             // 知识库列表
 	ai.POST("/create", middlewares.HasPermission("ai:dataset:create"), d.CreateAiDataSet)             // 创建知识库
 	ai.PUT("/update/:dataset_id", middlewares.HasPermission("ai:dataset:update"), d.UpdateAiDataSet)  // 更新知识库
 	ai.DELETE("/remove/:dataset_id", middlewares.HasPermission("ai:dataset:remove"), d.RemoveDataSet) // 删除知识库集合
@@ -167,7 +168,7 @@ func (d *Dataset) RemoveDataSet(c *gin.Context) {
 // @Param  object body aiDataSetModels.UpdateDataSetRequest true "设备分组参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "设置分组成功"
-// @Router /ai/dataset/update [put]
+// @Router /ai/dataset/update/{dataset_id} [put]
 func (d *Dataset) UpdateAiDataSet(c *gin.Context) {
 	req := new(aiDataSetModels.UpdateDataSetRequest)
 	err := c.ShouldBindJSON(req)
@@ -211,4 +212,15 @@ func (d *Dataset) GetAiDataGetInfo(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, list)
+}
+
+// GetAiDataGetConfig 读取知识库配置
+// @Summary 读取知识库配置
+// @Description 读取知识库配置
+// @Tags 工业智能体/知识库管理
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /ai/dataset/config [get]
+func (d *Dataset) GetAiDataGetConfig(c *gin.Context) {
+	baizeContext.SuccessData(c, aiDataSetModels.NewDataSetConfig())
 }

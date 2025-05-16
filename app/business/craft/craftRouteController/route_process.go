@@ -20,9 +20,9 @@ func NewSysProRouteProcess(service craftRouteService.IProcessRouteService) *Rout
 
 func (p *RouteProcess) PrivateRoutes(router *gin.RouterGroup) {
 	routers := router.Group("/craft/route/process")
-	routers.GET("/list", middlewares.HasPermission("craft:route:process"), p.GetRouteProcessList)                               // 工序内容列表
-	routers.POST("/set", middlewares.HasPermission("craft:route:process:set"), p.SetRouteProcess)                               // 设置工序内容
-	routers.DELETE("/remove/:route_process_ids", middlewares.HasPermission("craft:route:process:remove"), p.RemoveRouteProcess) //移除工序内容
+	routers.GET("/list", middlewares.HasPermission("craft:route:process"), p.GetRouteProcessList)                               // 组成工序列表
+	routers.POST("/set", middlewares.HasPermission("craft:route:process:set"), p.SetRouteProcess)                               // 设置组成工序内容
+	routers.DELETE("/remove/:route_process_ids", middlewares.HasPermission("craft:route:process:remove"), p.RemoveRouteProcess) //移除组成工序内容
 }
 
 // GetRouteProcessList 组成工序列表
@@ -58,7 +58,7 @@ func (p *RouteProcess) GetRouteProcessList(c *gin.Context) {
 // @Router /craft/route/process/set [post]
 func (p *RouteProcess) SetRouteProcess(c *gin.Context) {
 	req := new(craftRouteModels.SysProRouteProcessSetRequest)
-	err := c.ShouldBindQuery(req)
+	err := c.ShouldBindJSON(req)
 	if err != nil {
 		baizeContext.ParameterError(c)
 		return

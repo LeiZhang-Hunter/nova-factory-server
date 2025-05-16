@@ -426,6 +426,26 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/dataset/config": {
+            "get": {
+                "description": "读取知识库配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/知识库管理"
+                ],
+                "summary": "读取知识库配置",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/dataset/create": {
             "post": {
                 "description": "添加数据集",
@@ -1152,44 +1172,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/ai/dataset/update": {
-            "put": {
-                "description": "更新数据集",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "工业智能体/知识库管理"
-                ],
-                "summary": "更新数据集",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "dataset_id",
-                        "name": "dataset_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "设备分组参数",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.UpdateDataSetRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
         "/ai/dataset/update/document/{document_id}": {
             "put": {
                 "security": [
@@ -1220,6 +1202,44 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/aiDataSetModels.PutDocumentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/dataset/update/{dataset_id}": {
+            "put": {
+                "description": "更新数据集",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/知识库管理"
+                ],
+                "summary": "更新数据集",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "dataset_id",
+                        "name": "dataset_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "设备分组参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aiDataSetModels.UpdateDataSetRequest"
                         }
                     }
                 ],
@@ -7364,6 +7384,9 @@ const docTemplate = `{
         "aiDataSetModels.ParserConfig": {
             "type": "object",
             "properties": {
+                "auto_keywords": {
+                    "type": "integer"
+                },
                 "chunk_token_num": {
                     "type": "integer"
                 },
@@ -7383,6 +7406,12 @@ const docTemplate = `{
                             "type": "boolean"
                         }
                     }
+                },
+                "tag_kb_ids": {
+                    "type": "integer"
+                },
+                "task_page_size": {
+                    "type": "integer"
                 }
             }
         },

@@ -166,7 +166,7 @@ type RetrievalApiData struct {
 	ImageId           string   `json:"image_id"`
 	ImportantKeywords []string `json:"important_keywords"`
 	KbId              string   `json:"kb_id"`
-	Positions         []string `json:"positions"`
+	Positions         [][]int  `json:"positions"`
 	Similarity        float64  `json:"similarity"`
 	TermSimilarity    float64  `json:"term_similarity"`
 	VectorSimilarity  float64  `json:"vector_similarity"`

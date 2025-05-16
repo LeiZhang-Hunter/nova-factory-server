@@ -155,6 +155,8 @@ definitions:
     type: object
   aiDataSetModels.ParserConfig:
     properties:
+      auto_keywords:
+        type: integer
       chunk_token_num:
         type: integer
       delimiter:
@@ -168,6 +170,10 @@ definitions:
           use_raptor:
             type: boolean
         type: object
+      tag_kb_ids:
+        type: integer
+      task_page_size:
+        type: integer
     type: object
   aiDataSetModels.Prompt:
     properties:
@@ -1756,6 +1762,19 @@ paths:
       summary: 更新chunk
       tags:
       - 工业智能体/分块管理
+  /ai/dataset/config:
+    get:
+      description: 读取知识库配置
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 读取知识库配置
+      tags:
+      - 工业智能体/知识库管理
   /ai/dataset/create:
     post:
       description: 添加数据集
@@ -2221,7 +2240,7 @@ paths:
       summary: 停止解析文档
       tags:
       - 工业智能体/文档管理
-  /ai/dataset/update:
+  /ai/dataset/update/{dataset_id}:
     put:
       description: 更新数据集
       parameters:

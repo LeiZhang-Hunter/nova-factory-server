@@ -17,14 +17,22 @@ type DataSetRequest struct {
 	ParserConfig   *ParserConfig `json:"parser_config,omitempty"`
 }
 
+type Graphrag struct {
+	UseGraphrag bool `json:"use_graphrag"`
+}
+
 type ParserConfig struct {
 	ChunkTokenNum   int    `json:"chunk_token_num"`
+	AutoKeywords    int    `json:"auto_keywords"`
+	TagKbIds        int    `json:"tag_kb_ids"`
 	Delimiter       string `json:"delimiter"`
 	Html4Excel      bool   `json:"html4excel"`
 	LayoutRecognize string `json:"layout_recognize"`
 	Raptor          struct {
 		UseRaptor bool `json:"use_raptor"`
 	} `json:"raptor"`
+	TaskPageSize int       `json:"task_page_size"`
+	graphrag     *Graphrag `json:"graphrag,omitempty"`
 }
 
 type DataSetData struct {
@@ -122,4 +130,33 @@ type DatasetListResponse struct {
 // GetDatasetInfoReq 知识库列表集
 type GetDatasetInfoReq struct {
 	Id int64 `json:"dataset_id,string" db:"dataset_id" form:"dataset_id"`
+}
+
+type DataSetConfig struct {
+	LayoutRecognize []string `json:"layout_recognize"`
+	Delimiter       string   `json:"delimiter"`
+	ChunkMethod     []string `json:"chunk_method"`
+}
+
+func NewDataSetConfig() *DataSetConfig {
+	return &DataSetConfig{
+		LayoutRecognize: []string{
+			"DeepDOC",
+			"Naive",
+		},
+		Delimiter: "\\n!?;。；！？",
+		ChunkMethod: []string{
+			"naive",
+			"manual",
+			"qa",
+			"table",
+			"paper",
+			"book",
+			"laws",
+			"presentation",
+			"picture",
+			"one",
+			"email",
+		},
+	}
 }
