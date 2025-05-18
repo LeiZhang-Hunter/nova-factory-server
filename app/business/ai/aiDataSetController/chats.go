@@ -26,7 +26,7 @@ func (d *Dataset) SessionCreate(c *gin.Context) {
 		baizeContext.Waring(c, "助手创建会话失败")
 		return
 	}
-	baizeContext.SuccessData(c, response)
+	baizeContext.SuccessData(c, response.Data)
 }
 
 // SessionUpdate 更新助理会话

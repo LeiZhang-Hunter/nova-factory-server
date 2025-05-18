@@ -29,7 +29,7 @@ func (d *Dataset) CreateAssistant(c *gin.Context) {
 		baizeContext.SuccessData(c, "添加助理失败")
 		return
 	}
-	baizeContext.SuccessData(c, assistant)
+	baizeContext.SuccessData(c, assistant.Data)
 	return
 }
 
