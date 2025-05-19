@@ -24,7 +24,8 @@ type Graphrag struct {
 type ParserConfig struct {
 	ChunkTokenNum   int    `json:"chunk_token_num"`
 	AutoKeywords    int    `json:"auto_keywords"`
-	TagKbIds        int    `json:"tag_kb_ids"`
+	AutoQuestions   int    `json:"auto_questions"`
+	TagKbIds        int    `json:"tag_kb_ids,omitempty"`
 	Delimiter       string `json:"delimiter"`
 	Html4Excel      bool   `json:"html4excel"`
 	LayoutRecognize string `json:"layout_recognize"`
@@ -102,6 +103,8 @@ type UpdateDataSetRequest struct {
 	EmbeddingModel string        `json:"embedding_model,omitempty"`
 	ChunkMethod    string        `json:"chunk_method"`
 	ParserConfig   *ParserConfig `json:"parser_config,omitempty"`
+	Description    string        `json:"description,omitempty"`
+	Pagerank       int           `json:"pagerank"`
 }
 
 // DatasetListReq 知识库列表集

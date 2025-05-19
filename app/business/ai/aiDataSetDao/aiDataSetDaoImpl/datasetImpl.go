@@ -105,7 +105,7 @@ func (d *DataSetDaoImpl) Update(c *gin.Context, datasetId int64, request *aiData
 	}
 
 	var info *aiDataSetModels.SysDataset
-	ret := d.db.Table(d.tableName).First(&info)
+	ret := d.db.Table(d.tableName).Where("dataset_id = ?", datasetId).First(&info)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}
@@ -120,12 +120,15 @@ func (d *DataSetDaoImpl) Update(c *gin.Context, datasetId int64, request *aiData
 			return &aiDataSetModels.SysDataset{}, errors.New(err.Error())
 		}
 	}
+	info.DatasetID = datasetId
 	info.DatasetName = request.Name
 	info.DatasetEmbeddingModel = request.EmbeddingModel
 	info.DatasetChunkMethod = request.ChunkMethod
-	info.DatasetParserConfig = string(parseConfig)
+	info.DatasetDescription = request.Description
+	info.DatasetPagerank = request.Pagerank
+	info.DatasetParserConfig = string(parseConfig) //362544783287128064
 	info.SetUpdateBy(baizeContext.GetUserId(c))
-	ret = d.db.Table(d.tableName).Where("dataset_id = ?", datasetId).Updates(info)
+	ret = d.db.Table(d.tableName).Where("dataset_id = ?", datasetId).Save(info)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}

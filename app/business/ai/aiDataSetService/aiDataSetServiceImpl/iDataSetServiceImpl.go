@@ -60,7 +60,6 @@ func (i *IDataSetServiceImpl) CreateDataSet(c *gin.Context, request *aiDataSetMo
 	if info != nil {
 		return nil, errors.New("知识库已经存在")
 	}
-
 	content, err := json.Marshal(request)
 	if err != nil {
 		zap.L().Error("创建知识库失败", zap.Error(err))

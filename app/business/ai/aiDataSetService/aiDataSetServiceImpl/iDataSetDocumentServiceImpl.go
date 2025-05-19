@@ -336,6 +336,8 @@ func (i *IDataSetDocumentServiceImpl) ListDocument(c *gin.Context, datasetId int
 		document.DatasetLanguage = datasetLanguage
 		document.DatasetLocation = v.Location
 		document.DatasetName = v.Name
+		document.ProcessBeginAt = v.ProcessBeginAt
+		document.Progress = v.ProcessDuation
 		document.DatasetParserConfig = v.ParserConfig
 		document.DatasetRun = v.Run
 		document.DatasetSize = int64(v.Size)

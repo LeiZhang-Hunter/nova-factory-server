@@ -110,7 +110,7 @@ type DocumentData struct {
 	Name            string       `json:"name"`
 	ParserConfig    ParserConfig `json:"parser_config"`
 	ChunkMethod     string       `json:"chunk_method"`
-	ProcessBeginAt  interface{}  `json:"process_begin_at"`
+	ProcessBeginAt  string       `json:"process_begin_at"`
 	ProcessDuation  float64      `json:"process_duation"`
 	Progress        float64      `json:"progress"`
 	ProgressMsg     string       `json:"progress_msg"`
@@ -161,6 +161,8 @@ type SysDatasetDocumentData struct {
 	ProgressMsg         string       `gorm:"-" json:"progress_msg"`
 	DeptID              int64        `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`       // 部门ID
 	State               bool         `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"` // 操作状态（0正常 -1删除）
+	ProcessBeginAt      string       `gorm:"-" json:"process_begin_at"`
+	ProcessDuation      float64      `gorm:"-" json:"process_duation"`
 	Run                 string       `json:"run"`
 	baize.BaseEntity
 }
