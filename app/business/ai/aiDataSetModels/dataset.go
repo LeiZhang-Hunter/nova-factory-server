@@ -99,7 +99,7 @@ type SysDataset struct {
 // UpdateDataSetRequest 更新知识库请求
 type UpdateDataSetRequest struct {
 	Name           string        `json:"name" binding:"required"`
-	EmbeddingModel string        `json:"embedding_model"`
+	EmbeddingModel string        `json:"embedding_model,omitempty"`
 	ChunkMethod    string        `json:"chunk_method"`
 	ParserConfig   *ParserConfig `json:"parser_config,omitempty"`
 }

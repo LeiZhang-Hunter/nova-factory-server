@@ -158,6 +158,7 @@ type SysDatasetDocumentData struct {
 	DatasetType         string       `gorm:"column:dataset_type;comment:知识库类型" json:"dataset_type"`                          // 知识库类型
 	ChunkCount          int64        `gorm:"-" json:"chunk_count"`                                                           // 知识库类型
 	Progress            float64      `gorm:"-" json:"progress"`
+	ProgressMsg         string       `gorm:"-" json:"progress_msg"`
 	DeptID              int64        `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`       // 部门ID
 	State               bool         `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"` // 操作状态（0正常 -1删除）
 	Run                 string       `json:"run"`

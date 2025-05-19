@@ -349,6 +349,7 @@ func (i *IDataSetDocumentServiceImpl) ListDocument(c *gin.Context, datasetId int
 		document.ChunkCount = v.ChunkCount
 		document.Run = v.Run
 		document.Progress = v.Progress
+		document.ProgressMsg = v.ProgressMsg
 
 		layout := "Mon, 02 Jan 2006 15:04:05 MST" // 注意这里的布局要和输入字符串的格式相匹配
 		// 使用 Parse 函数解析时间字符串
