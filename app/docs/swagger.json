@@ -2411,100 +2411,13 @@
                 "summary": "设置产品制程",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "预留字段1",
-                        "name": "attr1",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "预留字段2",
-                        "name": "attr2",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "预留字段3",
-                        "name": "attr3",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "预留字段4",
-                        "name": "attr4",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "产品物料编码",
-                        "name": "item_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "产品物料ID",
-                        "name": "item_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "产品物料名称",
-                        "name": "item_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
-                        "description": "生产用时",
-                        "name": "production_time",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "生产数量",
-                        "name": "quantity",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "记录ID",
-                        "name": "record_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "备注",
-                        "name": "remark",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "工艺路线ID",
-                        "name": "route_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "规格型号",
-                        "name": "specification",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "时间单位",
-                        "name": "time_unit_type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "单位名称",
-                        "name": "unit_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "单位",
-                        "name": "unit_of_measure",
-                        "in": "query"
+                        "description": "设置产品制程参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.SysProRouteSetProduct"
+                        }
                     }
                 ],
                 "responses": {
@@ -8119,6 +8032,75 @@
                 "route_id": {
                     "description": "工艺路线ID",
                     "type": "integer"
+                }
+            }
+        },
+        "craftRouteModels.SysProRouteSetProduct": {
+            "type": "object",
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "item_code": {
+                    "description": "产品物料编码",
+                    "type": "string"
+                },
+                "item_id": {
+                    "description": "产品物料ID",
+                    "type": "integer"
+                },
+                "item_name": {
+                    "description": "产品物料名称",
+                    "type": "string"
+                },
+                "production_time": {
+                    "description": "生产用时",
+                    "type": "number"
+                },
+                "quantity": {
+                    "description": "生产数量",
+                    "type": "integer"
+                },
+                "record_id": {
+                    "description": "记录ID",
+                    "type": "integer"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "route_id": {
+                    "description": "工艺路线ID",
+                    "type": "integer"
+                },
+                "specification": {
+                    "description": "规格型号",
+                    "type": "string"
+                },
+                "time_unit_type": {
+                    "description": "时间单位",
+                    "type": "string"
+                },
+                "unit_name": {
+                    "description": "单位名称",
+                    "type": "string"
+                },
+                "unit_of_measure": {
+                    "description": "单位",
+                    "type": "string"
                 }
             }
         },

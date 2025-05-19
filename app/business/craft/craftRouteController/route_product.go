@@ -20,9 +20,9 @@ func NewRouteProduct(service craftRouteService.ISysProRouteProductService) *Rout
 
 func (p *RouteProduct) PrivateRoutes(router *gin.RouterGroup) {
 	routers := router.Group("/craft/route/product")
-	routers.GET("/list", middlewares.HasPermission("craft:process"), p.GetRouteProductList)                        // 工序列表
-	routers.POST("/set", middlewares.HasPermission("craft:process:set"), p.SetRouteProduct)                        // 设置工序
-	routers.DELETE("/remove/:record_ids", middlewares.HasPermission("craft:process:remove"), p.RemoveRouteProduct) //移除工序
+	routers.GET("/list", middlewares.HasPermission("craft:route:product"), p.GetRouteProductList)                        // 工序列表
+	routers.POST("/set", middlewares.HasPermission("craft:route:product:set"), p.SetRouteProduct)                        // 设置工序
+	routers.DELETE("/remove/:record_ids", middlewares.HasPermission("craft:route:product:remove"), p.RemoveRouteProduct) //移除工序
 }
 
 // GetRouteProductList 产品制程列表
@@ -51,7 +51,7 @@ func (p *RouteProduct) GetRouteProductList(c *gin.Context) {
 // @Summary 设置产品制程
 // @Description 设置产品制程
 // @Tags 工艺管理/产品制程管理
-// @Param  object query craftRouteModels.SysProRouteSetProduct true "设置产品制程参数"
+// @Param  object body craftRouteModels.SysProRouteSetProduct true "设置产品制程参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "设置分组成功"
 // @Router /craft/route/product/set [post]

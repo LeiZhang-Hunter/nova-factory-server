@@ -530,6 +530,57 @@ definitions:
         description: 工艺路线ID
         type: integer
     type: object
+  craftRouteModels.SysProRouteSetProduct:
+    properties:
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      attr4:
+        description: 预留字段4
+        type: integer
+      item_code:
+        description: 产品物料编码
+        type: string
+      item_id:
+        description: 产品物料ID
+        type: integer
+      item_name:
+        description: 产品物料名称
+        type: string
+      production_time:
+        description: 生产用时
+        type: number
+      quantity:
+        description: 生产数量
+        type: integer
+      record_id:
+        description: 记录ID
+        type: integer
+      remark:
+        description: 备注
+        type: string
+      route_id:
+        description: 工艺路线ID
+        type: integer
+      specification:
+        description: 规格型号
+        type: string
+      time_unit_type:
+        description: 时间单位
+        type: string
+      unit_name:
+        description: 单位名称
+        type: string
+      unit_of_measure:
+        description: 单位
+        type: string
+    type: object
   craftRouteModels.SysProSetProcessContent:
     properties:
       attr1:
@@ -3047,70 +3098,12 @@ paths:
     post:
       description: 设置产品制程
       parameters:
-      - description: 预留字段1
-        in: query
-        name: attr1
-        type: string
-      - description: 预留字段2
-        in: query
-        name: attr2
-        type: string
-      - description: 预留字段3
-        in: query
-        name: attr3
-        type: integer
-      - description: 预留字段4
-        in: query
-        name: attr4
-        type: integer
-      - description: 产品物料编码
-        in: query
-        name: item_code
-        type: string
-      - description: 产品物料ID
-        in: query
-        name: item_id
-        type: integer
-      - description: 产品物料名称
-        in: query
-        name: item_name
-        type: string
-      - description: 生产用时
-        in: query
-        name: production_time
-        type: number
-      - description: 生产数量
-        in: query
-        name: quantity
-        type: integer
-      - description: 记录ID
-        in: query
-        name: record_id
-        type: integer
-      - description: 备注
-        in: query
-        name: remark
-        type: string
-      - description: 工艺路线ID
-        in: query
-        name: route_id
-        type: integer
-      - description: 规格型号
-        in: query
-        name: specification
-        type: string
-      - description: 时间单位
-        in: query
-        name: time_unit_type
-        type: string
-      - description: 单位名称
-        in: query
-        name: unit_name
-        type: string
-      - description: 单位
-        in: query
-        name: unit_of_measure
-        type: string
+      - description: 设置产品制程参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/craftRouteModels.SysProRouteSetProduct'
       produces:
       - application/json
       responses:
