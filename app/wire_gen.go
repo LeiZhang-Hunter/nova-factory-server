@@ -170,12 +170,16 @@ func wireApp() (*gin.Engine, func(), error) {
 	iSysProRouteProductDao := craftRouteDaoImpl.NewISysProRouteProductDaoImpl(db)
 	iSysProRouteProductService := craftRouteServiceImpl.NewSysProRouteProductServiceImpl(iSysProRouteProductDao)
 	routeProduct := craftRouteController.NewRouteProduct(iSysProRouteProductService)
+	iSysProRouteProductBomDao := craftRouteDaoImpl.NewSysProRouteProductBomDaoImpl(db)
+	iSysProRouteProductBomService := craftRouteServiceImpl.NewISysProRouteProductBomServiceImpl(iSysProRouteProductBomDao)
+	routeProductBom := craftRouteController.NewRouteProductBom(iSysProRouteProductBomService)
 	craftRoute := &craftRouteController.CraftRoute{
-		CraftRoute:     craft,
-		Process:        process,
-		ProcessContext: processContext,
-		RouteProcess:   routeProcess,
-		RouteProduct:   routeProduct,
+		CraftRoute:      craft,
+		Process:         process,
+		ProcessContext:  processContext,
+		RouteProcess:    routeProcess,
+		RouteProduct:    routeProduct,
+		RouteProductBom: routeProductBom,
 	}
 	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute)
 	return engine, func() {

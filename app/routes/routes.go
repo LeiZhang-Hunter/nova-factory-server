@@ -102,6 +102,7 @@ func NewGinEngine(
 		craft.ProcessContext.PrivateRoutes(group) //工序内容
 		craft.RouteProcess.PrivateRoutes(group)   //工艺组成
 		craft.RouteProduct.PrivateRoutes(group)
+		craft.RouteProductBom.PrivateRoutes(group)
 	}
 
 	r.NoRoute(func(c *gin.Context) {

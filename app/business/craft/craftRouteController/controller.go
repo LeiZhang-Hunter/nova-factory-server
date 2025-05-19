@@ -3,12 +3,13 @@ package craftRouteController
 import "github.com/google/wire"
 
 var ProviderSet = wire.NewSet(NewCraft, NewProcess, NewProcessContext, NewSysProRouteProcess,
-	NewRouteProduct, wire.Struct(new(CraftRoute), "*"))
+	NewRouteProduct, NewRouteProductBom, wire.Struct(new(CraftRoute), "*"))
 
 type CraftRoute struct {
-	CraftRoute     *Craft
-	Process        *Process
-	ProcessContext *ProcessContext
-	RouteProcess   *RouteProcess
-	RouteProduct   *RouteProduct
+	CraftRoute      *Craft
+	Process         *Process
+	ProcessContext  *ProcessContext
+	RouteProcess    *RouteProcess
+	RouteProduct    *RouteProduct
+	RouteProductBom *RouteProductBom
 }

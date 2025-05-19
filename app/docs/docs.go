@@ -2136,32 +2136,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/craft/process/remove/{record_ids}": {
-            "delete": {
-                "description": "删除产品制程",
-                "tags": [
-                    "工艺管理/产品制程管理"
-                ],
-                "summary": "删除产品制程",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "record_ids",
-                        "name": "record_ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
         "/craft/process/set": {
             "post": {
                 "description": "设置工序",
@@ -2350,6 +2324,108 @@ const docTemplate = `{
                 }
             }
         },
+        "/craft/route/product/bom/list": {
+            "get": {
+                "description": "产品制程物料BOM物料BOM列表",
+                "tags": [
+                    "工艺管理/产品制程物料BOM物料BOM管理"
+                ],
+                "summary": "产品制程物料BOM物料BOM列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/product/bom/remove/{record_ids}": {
+            "delete": {
+                "description": "删除产品制程物料BOM",
+                "tags": [
+                    "工艺管理/产品制程物料BOM管理"
+                ],
+                "summary": "删除产品制程物料BOM",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "record_ids",
+                        "name": "record_ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/product/bom/set": {
+            "post": {
+                "description": "设置产品制程物料BOM",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/产品制程物料BOM管理"
+                ],
+                "summary": "设置产品制程物料BOM",
+                "parameters": [
+                    {
+                        "description": "设置产品制程物料BOM参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.SysSetProRouteProductBom"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/craft/route/product/list": {
             "get": {
                 "description": "产品制程列表",
@@ -2395,6 +2471,32 @@ const docTemplate = `{
                         "description": "数量",
                         "name": "pageSize",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/product/remove/{record_ids}": {
+            "delete": {
+                "description": "删除产品制程",
+                "tags": [
+                    "工艺管理/产品制程管理"
+                ],
+                "summary": "删除产品制程",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "record_ids",
+                        "name": "record_ids",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -7501,6 +7603,9 @@ const docTemplate = `{
                 "auto_keywords": {
                     "type": "integer"
                 },
+                "auto_questions": {
+                    "type": "integer"
+                },
                 "chunk_token_num": {
                     "type": "integer"
                 },
@@ -7768,11 +7873,17 @@ const docTemplate = `{
                 "chunk_method": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "embedding_model": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "pagerank": {
+                    "type": "integer"
                 },
                 "parser_config": {
                     "$ref": "#/definitions/aiDataSetModels.ParserConfig"
@@ -8166,6 +8277,75 @@ const docTemplate = `{
                 },
                 "remark": {
                     "description": "备注",
+                    "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.SysSetProRouteProductBom": {
+            "type": "object",
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "item_code": {
+                    "description": "产品物料编码",
+                    "type": "string"
+                },
+                "item_id": {
+                    "description": "产品物料ID",
+                    "type": "integer"
+                },
+                "item_name": {
+                    "description": "产品物料名称",
+                    "type": "string"
+                },
+                "process_id": {
+                    "description": "工序ID",
+                    "type": "integer"
+                },
+                "product_id": {
+                    "description": "产品BOM中的唯一ID",
+                    "type": "integer"
+                },
+                "quantity": {
+                    "description": "用料比例",
+                    "type": "number"
+                },
+                "record_id": {
+                    "description": "记录ID",
+                    "type": "integer"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "route_id": {
+                    "description": "工艺路线ID",
+                    "type": "integer"
+                },
+                "specification": {
+                    "description": "规格型号",
+                    "type": "string"
+                },
+                "unit_name": {
+                    "description": "单位名称",
+                    "type": "string"
+                },
+                "unit_of_measure": {
+                    "description": "单位",
                     "type": "string"
                 }
             }

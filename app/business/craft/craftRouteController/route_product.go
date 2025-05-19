@@ -85,7 +85,7 @@ func (p *RouteProduct) SetRouteProduct(c *gin.Context) {
 // @Tags 工艺管理/产品制程管理
 // @Param  record_ids path string true "record_ids"
 // @Success 200 {object}  response.ResponseData "设置分组成功"
-// @Router /craft/process/remove/{record_ids} [delete]
+// @Router /craft/route/product/remove/{record_ids} [delete]
 func (p *RouteProduct) RemoveRouteProduct(c *gin.Context) {
 	recordIds := baizeContext.ParamStringArray(c, "record_ids")
 	if len(recordIds) == 0 {

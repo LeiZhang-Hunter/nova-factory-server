@@ -157,6 +157,8 @@ definitions:
     properties:
       auto_keywords:
         type: integer
+      auto_questions:
+        type: integer
       chunk_token_num:
         type: integer
       delimiter:
@@ -330,10 +332,14 @@ definitions:
     properties:
       chunk_method:
         type: string
+      description:
+        type: string
       embedding_model:
         type: string
       name:
         type: string
+      pagerank:
+        type: integer
       parser_config:
         $ref: '#/definitions/aiDataSetModels.ParserConfig'
     required:
@@ -623,6 +629,57 @@ definitions:
     required:
     - content_text
     - process_id
+    type: object
+  craftRouteModels.SysSetProRouteProductBom:
+    properties:
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      attr4:
+        description: 预留字段4
+        type: integer
+      item_code:
+        description: 产品物料编码
+        type: string
+      item_id:
+        description: 产品物料ID
+        type: integer
+      item_name:
+        description: 产品物料名称
+        type: string
+      process_id:
+        description: 工序ID
+        type: integer
+      product_id:
+        description: 产品BOM中的唯一ID
+        type: integer
+      quantity:
+        description: 用料比例
+        type: number
+      record_id:
+        description: 记录ID
+        type: integer
+      remark:
+        description: 备注
+        type: string
+      route_id:
+        description: 工艺路线ID
+        type: integer
+      specification:
+        description: 规格型号
+        type: string
+      unit_name:
+        description: 单位名称
+        type: string
+      unit_of_measure:
+        description: 单位
+        type: string
     type: object
   deviceModels.DeviceGroup:
     properties:
@@ -2916,23 +2973,6 @@ paths:
       summary: 删除工序
       tags:
       - 工艺管理/工序管理
-  /craft/process/remove/{record_ids}:
-    delete:
-      description: 删除产品制程
-      parameters:
-      - description: record_ids
-        in: path
-        name: record_ids
-        required: true
-        type: string
-      responses:
-        "200":
-          description: 设置分组成功
-          schema:
-            $ref: '#/definitions/response.ResponseData'
-      summary: 删除产品制程
-      tags:
-      - 工艺管理/产品制程管理
   /craft/process/set:
     post:
       description: 设置工序
@@ -3056,6 +3096,73 @@ paths:
       summary: 设置组成工序
       tags:
       - 工艺管理/工序组成管理
+  /craft/route/product/bom/list:
+    get:
+      description: 产品制程物料BOM物料BOM列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 产品制程物料BOM物料BOM列表
+      tags:
+      - 工艺管理/产品制程物料BOM物料BOM管理
+  /craft/route/product/bom/remove/{record_ids}:
+    delete:
+      description: 删除产品制程物料BOM
+      parameters:
+      - description: record_ids
+        in: path
+        name: record_ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除产品制程物料BOM
+      tags:
+      - 工艺管理/产品制程物料BOM管理
+  /craft/route/product/bom/set:
+    post:
+      description: 设置产品制程物料BOM
+      parameters:
+      - description: 设置产品制程物料BOM参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/craftRouteModels.SysSetProRouteProductBom'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置产品制程物料BOM
+      tags:
+      - 工艺管理/产品制程物料BOM管理
   /craft/route/product/list:
     get:
       description: 产品制程列表
@@ -3092,6 +3199,23 @@ paths:
           schema:
             $ref: '#/definitions/response.ResponseData'
       summary: 产品制程列表
+      tags:
+      - 工艺管理/产品制程管理
+  /craft/route/product/remove/{record_ids}:
+    delete:
+      description: 删除产品制程
+      parameters:
+      - description: record_ids
+        in: path
+        name: record_ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除产品制程
       tags:
       - 工艺管理/产品制程管理
   /craft/route/product/set:
