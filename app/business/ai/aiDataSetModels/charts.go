@@ -173,8 +173,8 @@ type ListAgentResponse struct {
 					Height   int    `json:"height"`
 					Id       string `json:"id"`
 					Position struct {
-						X int `json:"x"`
-						Y int `json:"y"`
+						X float64 `json:"x"`
+						Y float64 `json:"y"`
 					} `json:"position"`
 					SourcePosition string `json:"sourcePosition"`
 					TargetPosition string `json:"targetPosition"`

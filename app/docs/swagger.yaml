@@ -1498,7 +1498,7 @@ info:
 paths:
   /ai/dataset/agents/list:
     get:
-      description: Agen话列表
+      description: Agen列表
       parameters:
       - in: query
         name: agent_id
@@ -1535,7 +1535,7 @@ paths:
           description: 获取成功
           schema:
             $ref: '#/definitions/response.ResponseData'
-      summary: Agen话列表
+      summary: Agen列表
       tags:
       - 工业智能体/会话管理
   /ai/dataset/assistant/create:
@@ -2865,6 +2865,23 @@ paths:
       summary: 删除工序
       tags:
       - 工艺管理/工序管理
+  /craft/process/remove/{record_ids}:
+    delete:
+      description: 删除产品制程
+      parameters:
+      - description: record_ids
+        in: path
+        name: record_ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除产品制程
+      tags:
+      - 工艺管理/产品制程管理
   /craft/process/set:
     post:
       description: 设置工序
@@ -2988,6 +3005,122 @@ paths:
       summary: 设置组成工序
       tags:
       - 工艺管理/工序组成管理
+  /craft/route/product/list:
+    get:
+      description: 产品制程列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 产品物料编码
+        in: query
+        name: item_code
+        type: string
+      - description: 产品物料名称
+        in: query
+        name: item_name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 产品制程列表
+      tags:
+      - 工艺管理/产品制程管理
+  /craft/route/product/set:
+    post:
+      description: 设置产品制程
+      parameters:
+      - description: 预留字段1
+        in: query
+        name: attr1
+        type: string
+      - description: 预留字段2
+        in: query
+        name: attr2
+        type: string
+      - description: 预留字段3
+        in: query
+        name: attr3
+        type: integer
+      - description: 预留字段4
+        in: query
+        name: attr4
+        type: integer
+      - description: 产品物料编码
+        in: query
+        name: item_code
+        type: string
+      - description: 产品物料ID
+        in: query
+        name: item_id
+        type: integer
+      - description: 产品物料名称
+        in: query
+        name: item_name
+        type: string
+      - description: 生产用时
+        in: query
+        name: production_time
+        type: number
+      - description: 生产数量
+        in: query
+        name: quantity
+        type: integer
+      - description: 记录ID
+        in: query
+        name: record_id
+        type: integer
+      - description: 备注
+        in: query
+        name: remark
+        type: string
+      - description: 工艺路线ID
+        in: query
+        name: route_id
+        type: integer
+      - description: 规格型号
+        in: query
+        name: specification
+        type: string
+      - description: 时间单位
+        in: query
+        name: time_unit_type
+        type: string
+      - description: 单位名称
+        in: query
+        name: unit_name
+        type: string
+      - description: 单位
+        in: query
+        name: unit_of_measure
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置产品制程
+      tags:
+      - 工艺管理/产品制程管理
   /craft/route/remove:
     delete:
       description: 移除工艺

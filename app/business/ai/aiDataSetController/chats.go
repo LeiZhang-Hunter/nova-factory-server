@@ -250,9 +250,9 @@ func (d *Dataset) ConversationRelatedQuestions(c *gin.Context) {
 	baizeContext.SuccessData(c, questions.Data)
 }
 
-// AgentList Agen话列表
-// @Summary Agen话列表
-// @Description Agen话列表
+// AgentList Agen列表
+// @Summary Agen列表
+// @Description Agen列表
 // @Tags 工业智能体/会话管理
 // @Param  object query aiDataSetModels.ListAgentSessionsRequest true "Agen话列表请求参数"
 // @Produce application/json
