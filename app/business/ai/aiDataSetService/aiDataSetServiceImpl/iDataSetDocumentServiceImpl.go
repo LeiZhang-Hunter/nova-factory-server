@@ -124,7 +124,7 @@ func (i *IDataSetDocumentServiceImpl) PutFile(c *gin.Context, documentId int64, 
 	if err != nil {
 		zap.L().Error("读取文档失败", zap.Error(err))
 		return nil, errors.New("读取文档失败")
-	}
+	} //96fe9c7434ba11f0a53a0242ac120005
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v1/datasets/%s/documents/%s",
 		i.config.Host, info.DatasetDatasetUUID, info.DatasetDocumentUUID), bytes.NewBuffer(content))
 	if err != nil {
@@ -340,6 +340,7 @@ func (i *IDataSetDocumentServiceImpl) ListDocument(c *gin.Context, datasetId int
 		document.Progress = v.ProcessDuation
 		document.DatasetParserConfig = v.ParserConfig
 		document.DatasetRun = v.Run
+		document.Status = v.Status
 		document.DatasetSize = int64(v.Size)
 		if v.Thumbnail != "" {
 			document.DatasetThumbnail = fmt.Sprintf("%s/v1/document/image/%s-%s", i.config.ImageUrl, v.DatasetId, v.Thumbnail)

@@ -18,7 +18,11 @@ type DataSetRequest struct {
 }
 
 type Graphrag struct {
-	UseGraphrag bool `json:"use_graphrag"`
+	UseGraphrag bool     `json:"use_graphrag"`
+	EntityTypes []string `json:"entity_types"`
+	Method      string   `json:"method"`
+	Resolution  bool     `json:"resolution"`
+	Community   bool     `json:"community"`
 }
 
 type ParserConfig struct {
@@ -33,7 +37,7 @@ type ParserConfig struct {
 		UseRaptor bool `json:"use_raptor"`
 	} `json:"raptor"`
 	TaskPageSize int       `json:"task_page_size"`
-	graphrag     *Graphrag `json:"graphrag,omitempty"`
+	Graphrag     *Graphrag `json:"graphrag,omitempty"`
 }
 
 type DataSetData struct {
@@ -139,6 +143,7 @@ type DataSetConfig struct {
 	LayoutRecognize []string `json:"layout_recognize"`
 	Delimiter       string   `json:"delimiter"`
 	ChunkMethod     []string `json:"chunk_method"`
+	GraphragMethod  []string `json:"graphrag_method"`
 }
 
 func NewDataSetConfig() *DataSetConfig {
@@ -160,6 +165,10 @@ func NewDataSetConfig() *DataSetConfig {
 			"picture",
 			"one",
 			"email",
+		},
+		GraphragMethod: []string{
+			"Light",
+			"General",
 		},
 	}
 }

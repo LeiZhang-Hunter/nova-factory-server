@@ -47,7 +47,7 @@ type SysDatasetDocument struct {
 type PutDocumentRequest struct {
 	Name         string                 `json:"name"`
 	Enabled      *bool                  `json:"enabled,omitempty"`
-	ChunkMethod  string                 `json:"chunk_method"`
+	ChunkMethod  string                 `json:"chunk_method,omitempty"`
 	ParserConfig *ParserConfig          `json:"parser_config,omitempty"`
 	MetaFields   map[string]interface{} `json:"meta_fields,omitempty"`
 }
@@ -161,6 +161,7 @@ type SysDatasetDocumentData struct {
 	ProgressMsg         string       `gorm:"-" json:"progress_msg"`
 	DeptID              int64        `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`       // 部门ID
 	State               bool         `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"` // 操作状态（0正常 -1删除）
+	Status              string       `gorm:"-" json:"status"`
 	ProcessBeginAt      string       `gorm:"-" json:"process_begin_at"`
 	ProcessDuation      float64      `gorm:"-" json:"process_duation"`
 	Run                 string       `json:"run"`
