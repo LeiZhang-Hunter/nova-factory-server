@@ -34,7 +34,12 @@ type ParserConfig struct {
 	Html4Excel      bool   `json:"html4excel"`
 	LayoutRecognize string `json:"layout_recognize"`
 	Raptor          struct {
-		UseRaptor bool `json:"use_raptor"`
+		UseRaptor  bool    `json:"use_raptor"`
+		Prompt     string  `json:"prompt"`
+		MaxToken   int     `json:"max_token"`
+		Threshold  float64 `json:"threshold"`
+		MaxCluster int     `json:"max_cluster"`
+		RandomSeed int     `json:"random_seed"`
 	} `json:"raptor"`
 	TaskPageSize int       `json:"task_page_size"`
 	Graphrag     *Graphrag `json:"graphrag,omitempty"`

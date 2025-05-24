@@ -1,6 +1,8 @@
 package craftRouteDaoImpl
 
-import "github.com/google/wire"
+import (
+	"github.com/google/wire"
+	"nova-factory-server/app/business/gateway/gatewayDao/gatewayDaoImpl"
+)
 
-var ProviderSet = wire.NewSet(NewCraftRouteDaoImpl, NewIProcessDaoImpl, NewProcessContextDaoImpl,
-	NewIProcessRouteDaoImpl, NewISysProRouteProductDaoImpl, NewSysProRouteProductBomDaoImpl)
+var ProviderSet = wire.NewSet(gatewayDaoImpl.NewISysGatewayInboundConfigDaoImpl)
