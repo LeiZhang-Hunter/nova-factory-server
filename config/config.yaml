@@ -23,8 +23,8 @@ mysql:
 cache:
   type: redis
   redis:
-    host: localhost
-    port: 6379
+    host: 192.168.2.100
+    port: 6380
     password:
     db: 1
     pool_size: 100

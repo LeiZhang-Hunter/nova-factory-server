@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"github.com/tmaxmax/go-sse"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"nova-factory-server/app/business/ai/aiDataSetModels"
 	"nova-factory-server/app/business/ai/aiDataSetService"
 	"strconv"
+	"time"
 )
 
 type IChartServiceImpl struct {
@@ -422,7 +424,24 @@ func (i *IChartServiceImpl) ChatsCompletions(c *gin.Context, req *aiDataSetModel
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+i.config.ApiKey)
-	resp, err := i.client.Do(request)
+	var client *http.Client = i.client
+	if req.Stream {
+		transport := &http.Transport{
+			MaxIdleConns:        100,              // 整个客户端的最大空闲连接数
+			MaxIdleConnsPerHost: 60,               // 每个主机的最大空闲连接数
+			MaxConnsPerHost:     50,               // 每个主机的最大连接数
+			IdleConnTimeout:     60 * time.Second, // 空闲连接的超时时间
+
+			DisableKeepAlives: false, // 不禁用连接保持活动
+			ForceAttemptHTTP2: true,  // 尝试使用HTTP/2
+		}
+		// 创建HTTP客户端并设置自定义的Transport
+		client = &http.Client{
+			Transport: transport,
+			Timeout:   120 * time.Second, // 请求的总超时时间
+		}
+	}
+	resp, err := client.Do(request)
 	if err != nil {
 		zap.L().Error("与聊天助手交谈失败", zap.Error(err))
 		return nil, errors.New("与聊天助手交谈失败")
@@ -457,36 +476,17 @@ func (i *IChartServiceImpl) ChatsCompletions(c *gin.Context, req *aiDataSetModel
 		w := c.Writer
 		flusher, _ := w.(http.Flusher)
 		flusher.Flush()
-		// 数据chan
-		msgChan := make(chan string)
-		// 错误chan
-		errChan := make(chan error, 1)
-
-		// 开启另一个协程处理业务，通过msgChan和errChan传递信息和错误
-		go handle(msgChan, errChan, resp.Body)
-
-		// 读取消息
-		for {
-			msg, ok := <-msgChan
-			if !ok {
-				break
+		for ev, err := range sse.Read(resp.Body, nil) {
+			if err != nil {
+				fmt.Fprintf(w, "event: error\n")
+				fmt.Fprintf(w, "data: %s\n\n", err.Error())
+				// handle read error
+				break // can end the loop as Read stops on first error anyway
 			}
-			fmt.Fprintf(w, "%s\n\n", msg)
+			fmt.Fprintf(w, "data: "+ev.Data+"\n\n")
+			// Do something with the events, parse the JSON or whatever.
 			flusher.Flush()
 		}
-
-		// 检查错误
-		for {
-			err, ok := <-errChan
-			if !ok {
-				return nil, err
-			}
-			fmt.Println(err)
-			fmt.Fprintf(w, "event: error\n")
-			fmt.Fprintf(w, "data: %s\n\n", err.Error())
-			flusher.Flush()
-		}
-
 	}
 
 	return &response, nil
@@ -505,6 +505,7 @@ func handle(msgChan chan string, errChan chan error, reader io.Reader) {
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		line := scanner.Text()
+		fmt.Println(line)
 		msgChan <- line
 	}
 }
@@ -573,7 +574,25 @@ func (i *IChartServiceImpl) AgentsCompletions(c *gin.Context, req *aiDataSetMode
 
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+i.config.ApiKey)
-	resp, err := i.client.Do(request)
+
+	var client *http.Client = i.client
+	if req.Stream {
+		transport := &http.Transport{
+			MaxIdleConns:        100,              // 整个客户端的最大空闲连接数
+			MaxIdleConnsPerHost: 60,               // 每个主机的最大空闲连接数
+			MaxConnsPerHost:     50,               // 每个主机的最大连接数
+			IdleConnTimeout:     60 * time.Second, // 空闲连接的超时时间
+
+			DisableKeepAlives: false, // 不禁用连接保持活动
+			ForceAttemptHTTP2: true,  // 尝试使用HTTP/2
+		}
+		// 创建HTTP客户端并设置自定义的Transport
+		client = &http.Client{
+			Transport: transport,
+			Timeout:   120 * time.Second, // 请求的总超时时间
+		}
+	}
+	resp, err := client.Do(request)
 	if err != nil {
 		zap.L().Error("与聊天助手交谈失败", zap.Error(err))
 		return nil, errors.New("与聊天助手交谈失败")
@@ -608,33 +627,15 @@ func (i *IChartServiceImpl) AgentsCompletions(c *gin.Context, req *aiDataSetMode
 		w := c.Writer
 		flusher, _ := w.(http.Flusher)
 		flusher.Flush()
-		// 数据chan
-		msgChan := make(chan string)
-		// 错误chan
-		errChan := make(chan error, 1)
-
-		// 开启另一个协程处理业务，通过msgChan和errChan传递信息和错误
-		go handle(msgChan, errChan, resp.Body)
-
-		// 读取消息
-		for {
-			msg, ok := <-msgChan
-			if !ok {
-				break
+		for ev, err := range sse.Read(resp.Body, nil) {
+			if err != nil {
+				fmt.Fprintf(w, "event: error\n")
+				fmt.Fprintf(w, "data: %s\n\n", err.Error())
+				// handle read error
+				break // can end the loop as Read stops on first error anyway
 			}
-			fmt.Fprintf(w, "%s\n\n", msg)
-			flusher.Flush()
-		}
-
-		// 检查错误
-		for {
-			err, ok := <-errChan
-			if !ok {
-				return nil, err
-			}
-			fmt.Println(err)
-			fmt.Fprintf(w, "event: error\n")
-			fmt.Fprintf(w, "data: %s\n\n", err.Error())
+			fmt.Fprintf(w, "data: "+ev.Data+"\n\n")
+			// Do something with the events, parse the JSON or whatever.
 			flusher.Flush()
 		}
 
