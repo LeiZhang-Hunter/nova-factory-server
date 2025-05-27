@@ -13,6 +13,7 @@ type IChartService interface {
 	AgentSessionList(c *gin.Context, req *aiDataSetModels.ListAgentSessionsRequest) (*aiDataSetModels.AgentSessionListResponse, error)
 	AgentSessionRemove(c *gin.Context, req *aiDataSetModels.RemoveAgentSessionsRequest) (*aiDataSetModels.RemoveAgentSessionsResponse, error)
 	ConversationRelatedQuestions(c *gin.Context, req *aiDataSetModels.ConversationRelatedQuestionsRequest) (*aiDataSetModels.ConversationRelatedQuestionsResponse, error)
+	Ask(c *gin.Context, req *aiDataSetModels.AskRequest) error
 	AgentList(c *gin.Context, req *aiDataSetModels.ListAgentRequest) (*aiDataSetModels.ListAgentResponse, error)
 	ChatsCompletions(c *gin.Context, req *aiDataSetModels.ChatsCompletionsRequest) (*aiDataSetModels.ChatsCompletionsResponse, error)
 	AgentSessionCreate(c *gin.Context, req *aiDataSetModels.SessionAgentCreate) (*aiDataSetModels.SessionAgentResponse, error)

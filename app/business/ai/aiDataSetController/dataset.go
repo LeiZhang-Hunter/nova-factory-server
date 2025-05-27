@@ -86,6 +86,8 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 	ai.DELETE("/session/agents/delete", middlewares.HasPermission("ai:dataset:session:agents:delete"), d.AgentsSessionRemove)
 	// 相关提问
 	ai.POST("/session/conversation/related_questions", middlewares.HasPermission("ai:dataset:session:conversation:related_questions"), d.ConversationRelatedQuestions)
+	// 智能问答
+	ai.POST("/session/ask", middlewares.HasPermission("ai:dataset:session:ask"), d.Ask)
 	// 清单代理
 	ai.GET("/agents/list", middlewares.HasPermission("ai:dataset:agents:list"), d.AgentList)
 }

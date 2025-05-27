@@ -1,7 +1,6 @@
 package aiDataSetServiceImpl
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -314,7 +313,7 @@ func (i *IChartServiceImpl) ConversationRelatedQuestions(c *gin.Context, req *ai
 	if err != nil {
 		return nil, err
 	}
-	request, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/conversation/related_questions",
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/sessions/related_questions",
 		i.config.Host), bytes.NewBuffer(content))
 	if err != nil {
 		zap.L().Error("提问失败", zap.Error(err))
@@ -492,24 +491,6 @@ func (i *IChartServiceImpl) ChatsCompletions(c *gin.Context, req *aiDataSetModel
 	return &response, nil
 }
 
-// 逻辑处理,读取文件中每一行的内容返回给eventstream
-func handle(msgChan chan string, errChan chan error, reader io.Reader) {
-	defer func() {
-		if r := recover(); r != nil {
-			errChan <- errors.New("system panic")
-		}
-		close(msgChan)
-		close(errChan)
-	}()
-
-	scanner := bufio.NewScanner(reader)
-	for scanner.Scan() {
-		line := scanner.Text()
-		fmt.Println(line)
-		msgChan <- line
-	}
-}
-
 func (i *IChartServiceImpl) AgentSessionCreate(c *gin.Context, req *aiDataSetModels.SessionAgentCreate) (*aiDataSetModels.SessionAgentResponse, error) {
 	content, err := json.Marshal(req.Data)
 	if err != nil {
@@ -642,4 +623,52 @@ func (i *IChartServiceImpl) AgentsCompletions(c *gin.Context, req *aiDataSetMode
 	}
 
 	return &response, nil
+}
+
+func (i *IChartServiceImpl) Ask(c *gin.Context, req *aiDataSetModels.AskRequest) error {
+	content, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/sessions/ask",
+		i.config.Host), bytes.NewBuffer(content))
+	if err != nil {
+		zap.L().Error("回答失败", zap.Error(err))
+		return err
+	}
+
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+i.config.ApiKey)
+	resp, err := i.client.Do(request)
+	if err != nil {
+		zap.L().Error("回答失败", zap.Error(err))
+		return errors.New("回答失败")
+	}
+	if resp == nil {
+		return errors.New("回答失败")
+	}
+	defer resp.Body.Close()
+
+	// 声明数据格式为event stream
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	// 禁用nginx缓存,防止nginx会缓存数据导致数据流是一段一段的
+	c.Writer.Header().Set("X-Accel-Buffering", "no")
+	w := c.Writer
+	flusher, _ := w.(http.Flusher)
+	flusher.Flush()
+	for ev, err := range sse.Read(resp.Body, nil) {
+		if err != nil {
+			fmt.Fprintf(w, "event: error\n")
+			fmt.Fprintf(w, "data: %s\n\n", err.Error())
+			// handle read error
+			break // can end the loop as Read stops on first error anyway
+		}
+		fmt.Fprintf(w, "data: "+ev.Data+"\n\n")
+		// Do something with the events, parse the JSON or whatever.
+		flusher.Flush()
+	}
+
+	return nil
 }

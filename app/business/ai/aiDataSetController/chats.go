@@ -250,6 +250,28 @@ func (d *Dataset) ConversationRelatedQuestions(c *gin.Context) {
 	baizeContext.SuccessData(c, questions.Data)
 }
 
+// Ask 智能问答
+// @Summary 智能问答
+// @Description 智能问答
+// @Tags 工业智能体/会话管理
+// @Param  object body aiDataSetModels.AskRequest true "相关提问"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /ai/dataset/session/ask [post]
+func (d *Dataset) Ask(c *gin.Context) {
+	req := new(aiDataSetModels.AskRequest)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	err = d.chartsService.Ask(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+}
+
 // AgentList Agen列表
 // @Summary Agen列表
 // @Description Agen列表

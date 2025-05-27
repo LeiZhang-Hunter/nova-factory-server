@@ -882,6 +882,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/dataset/session/ask": {
+            "post": {
+                "description": "智能问答",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "智能问答",
+                "parameters": [
+                    {
+                        "description": "相关提问",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aiDataSetModels.AskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/dataset/session/charts/completions": {
             "post": {
                 "description": "与聊天助手交谈",
@@ -2772,6 +2803,150 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/gateway/protocol/list": {
+            "get": {
+                "description": "网关协议列表",
+                "tags": [
+                    "网关管理/协议管理"
+                ],
+                "summary": "网关协议列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "设备名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "协议类型",
+                        "name": "protocol_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "操作状态（0正常 1异常）",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/gateway/protocol/remove": {
+            "delete": {
+                "description": "删除网关协议",
+                "tags": [
+                    "网关管理/协议管理"
+                ],
+                "summary": "删除网关协议",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/gateway/protocol/set": {
+            "post": {
+                "description": "设置网关协议",
+                "tags": [
+                    "网关管理/协议管理"
+                ],
+                "summary": "设置网关协议",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "配置",
+                        "name": "config",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "设备主键",
+                        "name": "gateway_config_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "设备名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "协议类型",
+                        "name": "protocol_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "操作状态（0正常 -1删除）",
+                        "name": "state",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "操作状态（0正常 1异常）",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -7411,6 +7586,20 @@ const docTemplate = `{
                 }
             }
         },
+        "aiDataSetModels.AskRequest": {
+            "type": "object",
+            "properties": {
+                "dataset_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "question": {
+                    "type": "string"
+                }
+            }
+        },
         "aiDataSetModels.ChatsCompletionsRequest": {
             "type": "object",
             "required": [
@@ -7562,6 +7751,29 @@ const docTemplate = `{
                 }
             }
         },
+        "aiDataSetModels.Graphrag": {
+            "type": "object",
+            "properties": {
+                "community": {
+                    "type": "boolean"
+                },
+                "entity_types": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "method": {
+                    "type": "string"
+                },
+                "resolution": {
+                    "type": "boolean"
+                },
+                "use_graphrag": {
+                    "type": "boolean"
+                }
+            }
+        },
         "aiDataSetModels.Llm": {
             "type": "object",
             "properties": {
@@ -7612,6 +7824,9 @@ const docTemplate = `{
                 "delimiter": {
                     "type": "string"
                 },
+                "graphrag": {
+                    "$ref": "#/definitions/aiDataSetModels.Graphrag"
+                },
                 "html4excel": {
                     "type": "boolean"
                 },
@@ -7621,6 +7836,21 @@ const docTemplate = `{
                 "raptor": {
                     "type": "object",
                     "properties": {
+                        "max_cluster": {
+                            "type": "integer"
+                        },
+                        "max_token": {
+                            "type": "integer"
+                        },
+                        "prompt": {
+                            "type": "string"
+                        },
+                        "random_seed": {
+                            "type": "integer"
+                        },
+                        "threshold": {
+                            "type": "number"
+                        },
                         "use_raptor": {
                             "type": "boolean"
                         }

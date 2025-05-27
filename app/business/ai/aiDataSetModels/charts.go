@@ -316,3 +316,9 @@ type AgentsCompletionsApiResponse struct {
 		} `json:"param"`
 	} `json:"data"`
 }
+
+// AskRequest 智能提问
+type AskRequest struct {
+	Question   string   `json:"question"`
+	DatasetIds []string `json:"dataset_ids"`
+}

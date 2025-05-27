@@ -31,6 +31,15 @@ definitions:
       user_id:
         type: string
     type: object
+  aiDataSetModels.AskRequest:
+    properties:
+      dataset_ids:
+        items:
+          type: string
+        type: array
+      question:
+        type: string
+    type: object
   aiDataSetModels.ChatsCompletionsRequest:
     properties:
       chat_id:
@@ -130,6 +139,21 @@ definitions:
     required:
     - chat_id
     type: object
+  aiDataSetModels.Graphrag:
+    properties:
+      community:
+        type: boolean
+      entity_types:
+        items:
+          type: string
+        type: array
+      method:
+        type: string
+      resolution:
+        type: boolean
+      use_graphrag:
+        type: boolean
+    type: object
   aiDataSetModels.Llm:
     properties:
       frequency_penalty:
@@ -163,12 +187,24 @@ definitions:
         type: integer
       delimiter:
         type: string
+      graphrag:
+        $ref: '#/definitions/aiDataSetModels.Graphrag'
       html4excel:
         type: boolean
       layout_recognize:
         type: string
       raptor:
         properties:
+          max_cluster:
+            type: integer
+          max_token:
+            type: integer
+          prompt:
+            type: string
+          random_seed:
+            type: integer
+          threshold:
+            type: number
           use_raptor:
             type: boolean
         type: object
@@ -2163,6 +2199,26 @@ paths:
       summary: Agent会话列表
       tags:
       - 工业智能体/会话管理
+  /ai/dataset/session/ask:
+    post:
+      description: 智能问答
+      parameters:
+      - description: 相关提问
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.AskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 智能问答
+      tags:
+      - 工业智能体/会话管理
   /ai/dataset/session/charts/completions:
     post:
       description: 与聊天助手交谈
@@ -3388,6 +3444,101 @@ paths:
       summary: 上传私有文件原始文件名
       tags:
       - 租户上传文件
+  /gateway/protocol/list:
+    get:
+      description: 网关协议列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 设备名称
+        in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 协议类型
+        in: query
+        name: protocol_type
+        type: string
+      - description: 操作状态（0正常 1异常）
+        in: query
+        name: status
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 网关协议列表
+      tags:
+      - 网关管理/协议管理
+  /gateway/protocol/remove:
+    delete:
+      description: 删除网关协议
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除网关协议
+      tags:
+      - 网关管理/协议管理
+  /gateway/protocol/set:
+    post:
+      description: 设置网关协议
+      parameters:
+      - description: 配置
+        in: query
+        name: config
+        type: string
+      - description: 设备主键
+        in: query
+        name: gateway_config_id
+        type: integer
+      - description: 设备名称
+        in: query
+        name: name
+        type: string
+      - description: 协议类型
+        in: query
+        name: protocol_type
+        type: string
+      - description: 操作状态（0正常 -1删除）
+        in: query
+        name: state
+        type: boolean
+      - description: 操作状态（0正常 1异常）
+        in: query
+        name: status
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置网关协议
+      tags:
+      - 网关管理/协议管理
   /getInfo:
     get:
       description: 获取用户个人信息
