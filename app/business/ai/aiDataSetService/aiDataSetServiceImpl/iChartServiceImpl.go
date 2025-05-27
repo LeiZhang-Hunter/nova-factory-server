@@ -314,7 +314,7 @@ func (i *IChartServiceImpl) ConversationRelatedQuestions(c *gin.Context, req *ai
 	if err != nil {
 		return nil, err
 	}
-	request, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v1/conversation/related_questions",
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/conversation/related_questions",
 		i.config.Host), bytes.NewBuffer(content))
 	if err != nil {
 		zap.L().Error("提问失败", zap.Error(err))

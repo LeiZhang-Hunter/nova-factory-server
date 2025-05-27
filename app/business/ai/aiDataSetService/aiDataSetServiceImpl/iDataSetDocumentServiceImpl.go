@@ -326,6 +326,9 @@ func (i *IDataSetDocumentServiceImpl) ListDocument(c *gin.Context, datasetId int
 			datasetLanguage = documentData.DatasetLanguage
 			deptId = documentData.DeptID
 		}
+		if datasetDatasetUUID == "" {
+			datasetDatasetUUID = v.DatasetId
+		}
 		var document aiDataSetModels.SysDatasetDocumentData
 		document.DocumentID = documentId
 		document.DatasetID = databaseId
