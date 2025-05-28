@@ -2571,7 +2571,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/craft/route/remove": {
+        "/craft/route/remove/{craft_route_id}": {
             "delete": {
                 "description": "移除工艺",
                 "produces": [

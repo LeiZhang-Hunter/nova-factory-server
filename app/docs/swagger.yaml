@@ -3294,7 +3294,7 @@ paths:
       summary: 设置产品制程
       tags:
       - 工艺管理/产品制程管理
-  /craft/route/remove:
+  /craft/route/remove/{craft_route_id}:
     delete:
       description: 移除工艺
       parameters:

@@ -22,9 +22,9 @@ func NewCraft(craft craftRouteService.ICraftRouteService) *Craft {
 
 func (craft *Craft) PrivateRoutes(router *gin.RouterGroup) {
 	routers := router.Group("/craft/route")
-	routers.GET("/list", middlewares.HasPermission("craft:route"), craft.GetRouteList)                        // 知识库列表
-	routers.POST("/set", middlewares.HasPermission("craft:route:set"), craft.SetRoute)                        // 设置工艺路线
-	routers.DELETE("/remove/:dataset_id", middlewares.HasPermission("craft:route:remove"), craft.RemoveRoute) //移除工艺路线
+	routers.GET("/list", middlewares.HasPermission("craft:route"), craft.GetRouteList)                            // 知识库列表
+	routers.POST("/set", middlewares.HasPermission("craft:route:set"), craft.SetRoute)                            // 设置工艺路线
+	routers.DELETE("/remove/:craft_route_id", middlewares.HasPermission("craft:route:remove"), craft.RemoveRoute) //移除工艺路线
 }
 
 // GetRouteList 读取工艺列表
@@ -92,7 +92,7 @@ func (craft *Craft) SetRoute(c *gin.Context) {
 // @Param  craft_route_id path int64 true "craft_route_id"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "设置分组成功"
-// @Router /craft/route/remove [delete]
+// @Router /craft/route/remove/{craft_route_id} [delete]
 func (craft *Craft) RemoveRoute(c *gin.Context) {
 	craftRouteId := baizeContext.ParamInt64Array(c, "craft_route_id")
 	if len(craftRouteId) == 0 {

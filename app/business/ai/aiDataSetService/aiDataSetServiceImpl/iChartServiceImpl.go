@@ -649,16 +649,23 @@ func (i *IChartServiceImpl) Ask(c *gin.Context, req *aiDataSetModels.AskRequest)
 	}
 	defer resp.Body.Close()
 
-	// 声明数据格式为event stream
-	c.Writer.Header().Set("Content-Type", "text/event-stream")
-	c.Writer.Header().Set("Cache-Control", "no-cache")
-	c.Writer.Header().Set("Connection", "keep-alive")
-	// 禁用nginx缓存,防止nginx会缓存数据导致数据流是一段一段的
-	c.Writer.Header().Set("X-Accel-Buffering", "no")
 	w := c.Writer
 	flusher, _ := w.(http.Flusher)
-	flusher.Flush()
+
+	ret, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(ret))
+	var isSse bool = false
 	for ev, err := range sse.Read(resp.Body, nil) {
+		if !isSse {
+			// 声明数据格式为event stream
+			c.Writer.Header().Set("Content-Type", "text/event-stream")
+			c.Writer.Header().Set("Cache-Control", "no-cache")
+			c.Writer.Header().Set("Connection", "keep-alive")
+			// 禁用nginx缓存,防止nginx会缓存数据导致数据流是一段一段的
+			c.Writer.Header().Set("X-Accel-Buffering", "no")
+			flusher.Flush()
+		}
+		isSse = true
 		if err != nil {
 			fmt.Fprintf(w, "event: error\n")
 			fmt.Fprintf(w, "data: %s\n\n", err.Error())
@@ -670,5 +677,8 @@ func (i *IChartServiceImpl) Ask(c *gin.Context, req *aiDataSetModels.AskRequest)
 		flusher.Flush()
 	}
 
+	if !isSse {
+		return errors.New("智能回答失败")
+	}
 	return nil
 }
