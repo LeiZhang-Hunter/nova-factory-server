@@ -96,7 +96,7 @@ func (craft *Craft) SetRoute(c *gin.Context) {
 func (craft *Craft) RemoveRoute(c *gin.Context) {
 	craftRouteId := baizeContext.ParamInt64Array(c, "craft_route_id")
 	if len(craftRouteId) == 0 {
-		baizeContext.Waring(c, "请输入知识库id")
+		baizeContext.Waring(c, "请输入工艺id")
 		return
 	}
 

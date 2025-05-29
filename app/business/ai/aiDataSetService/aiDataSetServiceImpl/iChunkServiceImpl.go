@@ -272,5 +272,12 @@ func (i *IChunkServiceImpl) RetrievalChunk(c *gin.Context, req *aiDataSetModels.
 		zap.L().Error(fmt.Sprintf("检索chunk失败: %s", response.Message))
 		return nil, errors.New("检索chunk失败")
 	}
+	if len(response.Data.Chunks) != 0 {
+		for k, chunk := range response.Data.Chunks {
+			if chunk.DocumentId != "" {
+				response.Data.Chunks[k].ImageUrl = fmt.Sprintf("%s/v1/document/get/%s", i.config.ImageUrl, chunk.DocumentId)
+			}
+		}
+	}
 	return &response, nil
 }

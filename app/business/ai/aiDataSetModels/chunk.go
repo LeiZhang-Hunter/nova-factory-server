@@ -170,6 +170,7 @@ type RetrievalApiData struct {
 	Similarity        float64  `json:"similarity"`
 	TermSimilarity    float64  `json:"term_similarity"`
 	VectorSimilarity  float64  `json:"vector_similarity"`
+	ImageUrl          string   `json:"image_url"`
 }
 
 type DocAggs struct {

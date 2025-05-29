@@ -27,3 +27,4 @@ yarn.lock
 config/config1.yaml
 vendor
 public/*
+nova-factory-server
