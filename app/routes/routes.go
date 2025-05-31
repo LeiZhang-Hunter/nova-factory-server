@@ -13,6 +13,7 @@ import (
 	"nova-factory-server/app/business/tool/toolController"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/objectFile/localhostObject"
+	"nova-factory-server/app/utils/logger"
 	"time"
 
 	"nova-factory-server/app/middlewares"
@@ -22,7 +23,6 @@ import (
 	"net/http"
 	"nova-factory-server/app/docs"
 	"nova-factory-server/app/setting"
-	"nova-factory-server/app/utils/logger"
 	"strings"
 
 	"github.com/gin-gonic/gin"

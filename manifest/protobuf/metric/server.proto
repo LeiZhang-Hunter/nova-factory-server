@@ -1,0 +1,16 @@
+syntax = "proto3";
+package app.pkg.metric.grpc.v1;
+option go_package = "app/pkg/metric/grpc/v1";
+
+message DeviceData {
+    int32 deviceId = 1;
+}
+
+message NodeRes {
+  int32 code = 1;
+}
+
+service DeviceReportService {
+  // 更新容器信息
+  rpc ReportContainer(DeviceData) returns (NodeRes) {}
+}

@@ -12,13 +12,13 @@ import (
 	"nova-factory-server/app/middlewares/session"
 	"nova-factory-server/app/utils/bCryptPasswordEncoder"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
 	"go.uber.org/zap"
 	"image/color"
-	"nova-factory-server/app/utils/snowflake"
 )
 
 type LoginService struct {

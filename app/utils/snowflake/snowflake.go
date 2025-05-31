@@ -1,6 +1,7 @@
 package snowflake
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 	"time"
 
@@ -12,6 +13,7 @@ var sfNode *sf.Node
 func init() {
 	var id int64 = 1
 	var st time.Time
+	fmt.Println(viper.GetString("start_time"))
 	st, err := time.Parse("2006-01-02", viper.GetString("start_time"))
 	if err != nil {
 		panic(err)
