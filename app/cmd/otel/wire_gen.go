@@ -9,13 +9,22 @@ package main
 import (
 	"google.golang.org/grpc"
 	"nova-factory-server/app/business/metric/device/metricController"
+	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
+	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
+	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/routes"
 )
 
 // Injectors from wire.go:
 
 func wireApp() (*grpc.Server, func(), error) {
-	metric := metricController.NewMetric()
+	clickHouse, err := clickhouse.NewClickHouse()
+	if err != nil {
+		return nil, nil, err
+	}
+	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse)
+	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao)
+	metric := metricController.NewMetric(iMetricService)
 	metricServer := &metricController.MetricServer{
 		Metric: metric,
 	}

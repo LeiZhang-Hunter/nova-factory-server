@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"net"
-	v1 "nova-factory-server/app/pkg/metric/grpc/v1"
 	"time"
 )
 
@@ -12,7 +14,7 @@ type MetricServer struct {
 	v1.UnimplementedDeviceReportServiceServer
 }
 
-func (s MetricServer) ReportContainer(context.Context, *v1.DeviceData) (*v1.NodeRes, error) {
+func (s MetricServer) ReportContainer(context.Context, *v1.ExportMetricsServiceRequest) (*v1.NodeRes, error) {
 
 	fmt.Println("article 进来了")
 	return &v1.NodeRes{
@@ -34,12 +36,21 @@ func main() {
 		panic(err)
 	}
 	defer cleanup()
-	listen, err := net.Listen("tcp", "127.0.0.1:6002")
-	fmt.Println("监听6002端口。。。")
-	if err != nil {
-		fmt.Println("网络错误")
+	var host string
+	if viper.GetString("metric.host") == "" {
+		host = "0.0.0.0:6000"
+	} else {
+		host = viper.GetString("metric.host")
 	}
-	s.Serve(listen) // grpc服务启动
+	listen, err := net.Listen("tcp", host)
+	if err != nil {
+		panic(err)
+	}
+	zap.L().Info("start grpc server", zap.String("host", host))
+	err = s.Serve(listen)
+	if err != nil {
+		panic(err)
+	} // grpc服务启动
 
 	return
 }

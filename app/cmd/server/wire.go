@@ -18,6 +18,9 @@ import (
 	"nova-factory-server/app/business/craft/craftRouteController"
 	"nova-factory-server/app/business/craft/craftRouteDao/craftRouteDaoImpl"
 	"nova-factory-server/app/business/craft/craftRouteService/craftRouteServiceImpl"
+	"nova-factory-server/app/business/metric/device/metricController"
+	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
+	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/monitor/monitorDao/monitorDaoImpl"
 	"nova-factory-server/app/business/monitor/monitorService/monitorServiceImpl"
@@ -60,6 +63,10 @@ func wireApp() (*gin.Engine, func(), error) {
 		craftRouteDaoImpl.ProviderSet,
 		craftRouteServiceImpl.ProviderSet,
 		craftRouteController.ProviderSet,
+
+		metricDaoIMpl.ProviderSet,
+		metricServiceImpl.ProviderSet,
+		metricController.ProviderSet,
 
 		datasource.ProviderSet,
 		routes.ProviderSet,

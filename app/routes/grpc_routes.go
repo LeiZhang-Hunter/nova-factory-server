@@ -11,6 +11,6 @@ var GrpcProviderSet = wire.NewSet(NewGrpcEngine)
 func NewGrpcEngine(server *metricController.MetricServer) *grpc.Server {
 	// 创建grpc服务
 	s := grpc.NewServer()
-	server.Metric.PrivateRoutes(s)
+	server.Metric.PrivateGrpcRoutes(s)
 	return s
 }

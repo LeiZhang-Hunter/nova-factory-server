@@ -8,6 +8,7 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceController"
 	"nova-factory-server/app/business/asset/material/materialController"
 	"nova-factory-server/app/business/craft/craftRouteController"
+	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/system/systemController"
 	"nova-factory-server/app/business/tool/toolController"
@@ -39,6 +40,7 @@ func NewGinEngine(
 	materialC *materialController.Material,
 	ai *aiDataSetController.AiDataSet,
 	craft *craftRouteController.CraftRoute,
+	metric *metricController.MetricServer,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -103,6 +105,8 @@ func NewGinEngine(
 		craft.RouteProcess.PrivateRoutes(group)   //工艺组成
 		craft.RouteProduct.PrivateRoutes(group)
 		craft.RouteProductBom.PrivateRoutes(group)
+
+		metric.Metric.PrivateRoutes(group) //设备指标
 	}
 
 	r.NoRoute(func(c *gin.Context) {

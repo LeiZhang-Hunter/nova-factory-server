@@ -11,7 +11,8 @@ log:
 #  max_size: 200
 #  max_age: 30
 #  max_backups: 7
-
+clickhouse:
+  link: tcp://192.168.2.100:9999/nova_device_metric?username=default&password=asd1234567@
 mysql:
   host: localhost
   user: root
@@ -40,3 +41,5 @@ dataset:
   api_key: ragflow-JmNmIyYjk0MjY1NzExZjBiNmVlMDI0Mm
   host: http://192.168.2.100
   image_url: http://81.71.98.26:11105
+metric:
+  host: 0.0.0.0:6000

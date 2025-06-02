@@ -20,6 +20,9 @@ import (
 	"nova-factory-server/app/business/craft/craftRouteController"
 	"nova-factory-server/app/business/craft/craftRouteDao/craftRouteDaoImpl"
 	"nova-factory-server/app/business/craft/craftRouteService/craftRouteServiceImpl"
+	"nova-factory-server/app/business/metric/device/metricController"
+	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
+	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/monitor/monitorDao/monitorDaoImpl"
 	"nova-factory-server/app/business/monitor/monitorService/monitorServiceImpl"
@@ -30,6 +33,7 @@ import (
 	"nova-factory-server/app/business/tool/toolDao/toolDaoImpl"
 	"nova-factory-server/app/business/tool/toolService/toolServiceImpl"
 	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/datasource/mysql"
 	"nova-factory-server/app/datasource/objectFile"
 	"nova-factory-server/app/routes"
@@ -181,7 +185,18 @@ func wireApp() (*gin.Engine, func(), error) {
 		RouteProduct:    routeProduct,
 		RouteProductBom: routeProductBom,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute)
+	clickHouse, err := clickhouse.NewClickHouse()
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse)
+	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao)
+	metric := metricController.NewMetric(iMetricService)
+	metricServer := &metricController.MetricServer{
+		Metric: metric,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer)
 	return engine, func() {
 		cleanup()
 	}, nil
