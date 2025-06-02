@@ -147,3 +147,44 @@ CREATE TABLE `sys_dataset_document`  (
     PRIMARY KEY (`document_id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '文档管理' ROW_FORMAT = Dynamic;
 
+CREATE TABLE `sys_device_template`
+(
+    `template_id` bigint(20) NOT NULL COMMENT '设备主键',
+    `name` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '设备名称',
+    `template_type`  tinyint(1) NULL DEFAULT 0 COMMENT '模板类型0是私有1 是共有',
+    `vendor` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '供应商',
+    `protocol` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '协议类型',
+    `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL  COMMENT '备注',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`template_id`) USING BTREE
+) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'modbus数据模板' ROW_FORMAT = Dynamic;
+
+CREATE TABLE `sys_modbus_device_config_data`
+(
+    `device_config_id` bigint(20) NOT NULL COMMENT '文档id',
+    `name` bigint(20) NOT NULL COMMENT '文档id',
+    `type` bigint(20) NOT NULL COMMENT '文档id',
+    `slave` bigint(20) NOT NULL COMMENT '文档id',
+    `register` bigint(20) NOT NULL COMMENT '文档id',
+    `data_type` bigint(20) NOT NULL COMMENT '文档id',
+    `storage_type` bigint(20) NOT NULL COMMENT '文档id',
+    `unit` bigint(20) NOT NULL COMMENT '文档id',
+    `alias` bigint(20) NOT NULL COMMENT '文档id',
+    `precision` bigint(20) NOT NULL COMMENT '数据精度',
+    `function_code` bigint(20) NOT NULL COMMENT '数据精度',
+    `mode` bigint(20) NOT NULL COMMENT '数据精度',
+    `data_format` bigint(20) NOT NULL COMMENT '数据精度',
+    `sort` bigint(20) NOT NULL COMMENT '数据排序',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`document_id`) USING BTREE
+) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'modbus数据配置' ROW_FORMAT = Dynamic;

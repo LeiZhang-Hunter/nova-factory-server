@@ -73,7 +73,6 @@ func (m *IMetricServiceImpl) Export(c context.Context, request *v1.ExportMetrics
 			if err != nil {
 				return err
 			}
-
 		}
 
 	}
