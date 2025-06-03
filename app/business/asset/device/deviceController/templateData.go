@@ -10,12 +10,14 @@ import (
 )
 
 type TemplateData struct {
-	service deviceService.ISysModbusDeviceConfigDataService
+	service         deviceService.ISysModbusDeviceConfigDataService
+	templateService deviceService.IDeviceTemplateService
 }
 
-func NewTemplateData(service deviceService.ISysModbusDeviceConfigDataService) *TemplateData {
+func NewTemplateData(service deviceService.ISysModbusDeviceConfigDataService, templateService deviceService.IDeviceTemplateService) *TemplateData {
 	return &TemplateData{
-		service: service,
+		service:         service,
+		templateService: templateService,
 	}
 }
 
@@ -59,7 +61,12 @@ func (t *TemplateData) Set(c *gin.Context) {
 		return
 	}
 
-	if info.TemplateID > 0 {
+	tempInfo, err := t.templateService.GetById(c, info.DeviceConfigID)
+	if err != nil || tempInfo == nil {
+		baizeContext.Waring(c, "模板不存在")
+		return
+	}
+	if info.DeviceConfigID > 0 {
 		vo, err := t.service.Update(c, info)
 		if err != nil {
 			zap.L().Error("修改设备模板数据失败", zap.Error(err))

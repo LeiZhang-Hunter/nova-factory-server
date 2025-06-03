@@ -21,6 +21,12 @@ func NewIDeviceTemplateDaoImpl(ms *gorm.DB) deviceDao.IDeviceTemplateDao {
 	}
 }
 
+func (i *IDeviceTemplateDaoImpl) GetById(c *gin.Context, id int64) (*deviceModels.SysDeviceTemplate, error) {
+	var data *deviceModels.SysDeviceTemplate
+	ret := i.db.Table(i.tableName).Where("template_id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&data)
+	return data, ret.Error
+}
+
 func (i *IDeviceTemplateDaoImpl) Add(c *gin.Context, template *deviceModels.SysDeviceTemplate) (*deviceModels.SysDeviceTemplate, error) {
 	ret := i.db.Table(i.tableName).Create(template)
 	return template, ret.Error
