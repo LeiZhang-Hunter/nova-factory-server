@@ -2,4 +2,9 @@ package deviceDaoImpl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewSysDeviceDaoImpl, NewSysDeviceGroupDaoImpl)
+var ProviderSet = wire.NewSet(
+	NewSysDeviceDaoImpl,
+	NewSysDeviceGroupDaoImpl,
+	NewIDeviceTemplateDaoImpl,
+	NewISysModbusDeviceConfigDataDaoImp,
+)

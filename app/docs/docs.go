@@ -1457,6 +1457,138 @@ const docTemplate = `{
                 }
             }
         },
+        "/asset/device/template/list": {
+            "get": {
+                "description": "获取模板列表",
+                "tags": [
+                    "资产管理/设备模板管理"
+                ],
+                "summary": "获取模板列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/template/protocols": {
+            "get": {
+                "description": "读取协议列表",
+                "tags": [
+                    "资产管理/设备协议管理"
+                ],
+                "summary": "读取协议列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/template/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除设备模板",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资产管理/设备模板管理"
+                ],
+                "summary": "删除设备模板",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/template/set": {
+            "post": {
+                "description": "设置设备模板信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资产管理/设备模板管理"
+                ],
+                "summary": "设置设备模板信息",
+                "parameters": [
+                    {
+                        "description": "设备模板参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceModels.SysDeviceTemplateSetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置模板成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/asset/device/{deviceIds}": {
             "delete": {
                 "security": [
@@ -8241,7 +8373,8 @@ const docTemplate = `{
                 },
                 "process_id": {
                     "description": "工序ID",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "process_name": {
                     "description": "工序名称",
@@ -8641,6 +8774,37 @@ const docTemplate = `{
                 "deviceProtocolId": {
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "deviceModels.SysDeviceTemplateSetReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "protocol",
+                "vendor"
+            ],
+            "properties": {
+                "name": {
+                    "description": "设备名称",
+                    "type": "string"
+                },
+                "protocol": {
+                    "description": "协议类型",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "template_id": {
+                    "description": "设备主键",
+                    "type": "string",
+                    "example": "0"
+                },
+                "vendor": {
+                    "description": "供应商",
+                    "type": "string"
                 }
             }
         },

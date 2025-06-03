@@ -97,6 +97,7 @@ type SysDataset struct {
 	DatasetTokenNum               int64         `gorm:"column:dataset_token_num;not null;comment:token num" json:"dataset_token_num"`                                     // token num
 	DatasetUpdateDate             time.Time     `gorm:"column:dataset_update_date;comment:更新时间" json:"dataset_update_date"`                                               // 更新时间
 	DatasetUpdateTime             int64         `gorm:"column:dataset_update_time;not null;comment:更新时间" json:"dataset_update_time"`                                      // 更新时间
+	DatasetChunkCount             int64         `gorm:"column:dataset_chunk_count;not null;comment:dataset_chunk_count num" json:"dataset_chunk_count"`                   // token num
 	DatasetVectorSimilarityWeight float64       `gorm:"column:dataset_vector_similarity_weight;default:0.00;comment:矢量余弦相似性的权重。" json:"dataset_vector_similarity_weight"` // 矢量余弦相似性的权重。
 	ParserConfig                  *ParserConfig `gorm:"-" json:"parser_config,omitempty"`                                                                                 // 数据集解析器的配置设置。
 	State                         bool          `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"`                                                                 // 操作状态（0正常 -1删除）

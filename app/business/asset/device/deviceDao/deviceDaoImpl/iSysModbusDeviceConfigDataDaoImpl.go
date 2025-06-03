@@ -1,0 +1,80 @@
+package deviceDaoImpl
+
+import (
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"nova-factory-server/app/business/asset/device/deviceDao"
+	"nova-factory-server/app/business/asset/device/deviceModels"
+	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/utils/baizeContext"
+)
+
+type ISysModbusDeviceConfigDataDaoImpl struct {
+	db        *gorm.DB
+	tableName string
+}
+
+func NewISysModbusDeviceConfigDataDaoImp(ms *gorm.DB) deviceDao.ISysModbusDeviceConfigDataDao {
+	return &ISysModbusDeviceConfigDataDaoImpl{
+		db:        ms,
+		tableName: "sys_modbus_device_config_data",
+	}
+}
+
+func (i *ISysModbusDeviceConfigDataDaoImpl) Add(c *gin.Context, data *deviceModels.SysModbusDeviceConfigData) (*deviceModels.SysModbusDeviceConfigData, error) {
+	ret := i.db.Table(i.tableName).Create(data)
+	return data, ret.Error
+}
+
+func (i *ISysModbusDeviceConfigDataDaoImpl) Update(c *gin.Context, data *deviceModels.SysModbusDeviceConfigData) (*deviceModels.SysModbusDeviceConfigData, error) {
+	ret := i.db.Table(i.tableName).Where("device_config_id = ?", data.DeviceConfigID).Updates(data)
+	return data, ret.Error
+}
+
+func (i *ISysModbusDeviceConfigDataDaoImpl) Remove(c *gin.Context, ids []string) error {
+	ret := i.db.Table(i.tableName).Where("device_config_id in (?)", ids).Update("state", commonStatus.DELETE)
+	return ret.Error
+}
+
+func (i *ISysModbusDeviceConfigDataDaoImpl) List(c *gin.Context, req *deviceModels.SysModbusDeviceConfigDataListReq) (*deviceModels.SysModbusDeviceConfigDataListData, error) {
+	db := i.db.Table(i.tableName)
+	if req == nil {
+		req = &deviceModels.SysModbusDeviceConfigDataListReq{}
+	}
+	size := 0
+	if req == nil || req.Size <= 0 {
+		size = 20
+	} else {
+		size = int(req.Size)
+	}
+	offset := 0
+	if req == nil || req.Page <= 0 {
+		req.Page = 1
+	} else {
+		offset = int((req.Page - 1) * req.Size)
+	}
+
+	db = baizeContext.GetGormDataScope(c, db)
+	db = db.Where("state = ?", 0)
+
+	var total int64
+	ret := db.Count(&total)
+	if ret.Error != nil {
+		return &deviceModels.SysModbusDeviceConfigDataListData{
+			Rows:  make([]*deviceModels.SysModbusDeviceConfigData, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	var dto []*deviceModels.SysModbusDeviceConfigData
+	ret = db.Offset(offset).Limit(size).Order("create_time desc").Find(&dto)
+	if ret.Error != nil {
+		return &deviceModels.SysModbusDeviceConfigDataListData{
+			Rows:  make([]*deviceModels.SysModbusDeviceConfigData, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	return &deviceModels.SysModbusDeviceConfigDataListData{
+		Rows:  dto,
+		Total: total,
+	}, nil
+}

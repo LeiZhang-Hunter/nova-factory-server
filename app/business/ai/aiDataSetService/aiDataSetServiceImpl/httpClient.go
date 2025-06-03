@@ -26,7 +26,7 @@ func NewHttpClient() *http.Client {
 	// 创建HTTP客户端并设置自定义的Transport
 	client := &http.Client{
 		Transport: transport,
-		Timeout:   60 * time.Second, // 请求的总超时时间
+		Timeout:   120 * time.Second, // 请求的总超时时间
 	}
 	return client
 }

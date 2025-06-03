@@ -88,6 +88,7 @@ func (d *DataSetDaoImpl) Create(c *gin.Context, dataset *aiDataSetModels.DataSet
 		DatasetTokenNum:               int64(dataset.Data.TokenNum),
 		DatasetUpdateDate:             updateDate,
 		DatasetUpdateTime:             dataset.Data.UpdateTime,
+		DatasetChunkCount:             int64(dataset.Data.ChunkCount),
 		DatasetVectorSimilarityWeight: dataset.Data.VectorSimilarityWeight,
 		DeptID:                        baizeContext.GetDeptId(c),
 	}
@@ -224,6 +225,7 @@ func (d *DataSetDaoImpl) UpdateData(c *gin.Context, id int64, dataset *aiDataSet
 		DatasetUpdateDate:             updateDate,
 		DatasetUpdateTime:             dataset.UpdateTime,
 		DatasetVectorSimilarityWeight: dataset.VectorSimilarityWeight,
+		DatasetChunkCount:             int64(dataset.ChunkCount),
 		DeptID:                        baizeContext.GetDeptId(c),
 	}
 	data.SetUpdateBy(baizeContext.GetUserId(c))

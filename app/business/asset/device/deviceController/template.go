@@ -5,6 +5,8 @@ import (
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/asset/device/deviceService"
+	"nova-factory-server/app/constant/protocols"
+	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 )
 
@@ -20,9 +22,10 @@ func NewTemplate(d deviceService.IDeviceTemplateService) (*Template, error) {
 
 func (t *Template) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/asset/device/template")
-	group.POST("/list", t.List)
-	group.POST("/set", t.Set)
-	group.POST("/remove/:ids", t.Remove)
+	group.GET("/list", middlewares.HasPermission("asset:device:template:list"), t.List)
+	group.POST("/set", middlewares.HasPermission("asset:device:template:set"), t.Set)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("asset:device:template:remove"), t.Remove)
+	group.GET("/protocols", middlewares.HasPermission("asset:device:template:protocols"), t.Protocols)
 }
 
 // List 获取模板列表
@@ -40,6 +43,18 @@ func (t *Template) List(c *gin.Context) {
 		zap.L().Error("读取设备模板失败", zap.Error(err))
 	}
 	baizeContext.SuccessData(c, list)
+}
+
+// Protocols 读取协议列表
+// @Summary 读取协议列表
+// @Description 读取协议列表
+// @Tags 资产管理/设备协议管理
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /asset/device/template/protocols [get]
+func (t *Template) Protocols(c *gin.Context) {
+	baizeContext.SuccessData(c, []string{
+		protocols.MODBUS,
+	})
 }
 
 // Set 设置设备模板信息

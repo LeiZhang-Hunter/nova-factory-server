@@ -94,6 +94,7 @@ func NewGinEngine(
 
 		dc.Info.PrivateRoutes(group)  //资产管理---设备模块
 		dc.Group.PrivateRoutes(group) //资产管理---设备分组
+		dc.Template.PrivateRoutes(group)
 
 		materialC.Material.PrivateRoutes(group) //资产管理---物料管理
 

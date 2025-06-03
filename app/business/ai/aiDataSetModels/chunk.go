@@ -174,16 +174,17 @@ type RetrievalApiData struct {
 }
 
 type DocAggs struct {
-	Count   int    `json:"count"`
-	DocId   string `json:"doc_id"`
-	DocName string `json:"doc_name"`
+	Count    int    `json:"count"`
+	DocId    string `json:"doc_id"`
+	DocName  string `json:"doc_name"`
+	ImageUrl string `json:"image_url"`
 }
 
 type RetrievalApiListResponse struct {
 	Code int `json:"code"`
 	Data struct {
 		Chunks  []RetrievalApiData `json:"chunks"`
-		DocAggs interface{}        `json:"doc_aggs"`
+		DocAggs []DocAggs          `json:"doc_aggs"`
 		Total   int                `json:"total"`
 	} `json:"data"`
 	Message string `json:"message"`

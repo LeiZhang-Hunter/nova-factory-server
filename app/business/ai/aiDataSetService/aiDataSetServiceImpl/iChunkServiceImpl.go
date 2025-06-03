@@ -279,5 +279,10 @@ func (i *IChunkServiceImpl) RetrievalChunk(c *gin.Context, req *aiDataSetModels.
 			}
 		}
 	}
+	if len(response.Data.DocAggs) != 0 {
+		for k, doc := range response.Data.DocAggs {
+			response.Data.DocAggs[k].ImageUrl = fmt.Sprintf("%s/v1/document/get/%s", i.config.ImageUrl, doc.DocId)
+		}
+	}
 	return &response, nil
 }

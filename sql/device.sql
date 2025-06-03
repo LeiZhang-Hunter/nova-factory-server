@@ -110,6 +110,7 @@ Create Table: CREATE TABLE `sys_dataset` (
     `dataset_permission` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '指定谁可以访问要创建的数据集。',
     `dataset_similarity_threshold` decimal(10,2) DEFAULT '0.00' COMMENT '最小相似度分数',
     `dataset_token_num` bigint NOT NULL DEFAULT '0' COMMENT 'token num',
+    `dataset_chunk_count` bigint NOT NULL DEFAULT '0' COMMENT 'chunk num',
     `dataset_update_date` datetime DEFAULT NULL COMMENT '更新时间',
     `dataset_update_time` bigint NOT NULL COMMENT '更新时间',
     `dataset_vector_similarity_weight` decimal(10,2) DEFAULT '0.00' COMMENT '矢量余弦相似性的权重。',
@@ -147,6 +148,8 @@ CREATE TABLE `sys_dataset_document`  (
     PRIMARY KEY (`document_id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '文档管理' ROW_FORMAT = Dynamic;
 
+alter table add column `dataset_chunk_count` bigint NOT NULL DEFAULT '0' COMMENT 'chunk num';
+
 CREATE TABLE `sys_device_template`
 (
     `template_id` bigint(20) NOT NULL COMMENT '设备主键',
@@ -167,24 +170,24 @@ CREATE TABLE `sys_device_template`
 CREATE TABLE `sys_modbus_device_config_data`
 (
     `device_config_id` bigint(20) NOT NULL COMMENT '文档id',
-    `name` bigint(20) NOT NULL COMMENT '文档id',
-    `type` bigint(20) NOT NULL COMMENT '文档id',
-    `slave` bigint(20) NOT NULL COMMENT '文档id',
-    `register` bigint(20) NOT NULL COMMENT '文档id',
-    `data_type` bigint(20) NOT NULL COMMENT '文档id',
-    `storage_type` bigint(20) NOT NULL COMMENT '文档id',
-    `unit` bigint(20) NOT NULL COMMENT '文档id',
-    `alias` bigint(20) NOT NULL COMMENT '文档id',
+    `template_id` bigint(20) NOT NULL COMMENT '模板id',
+    `name` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '数据名称',
+    `type` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '数据类型',
+    `slave` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '从设备地址',
+    `register` bigint(20) NOT NULL COMMENT '寄存器/偏移量',
+    `storage_type` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '存储策略',
+    `unit`  varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '单位',
     `precision` bigint(20) NOT NULL COMMENT '数据精度',
-    `function_code` bigint(20) NOT NULL COMMENT '数据精度',
-    `mode` bigint(20) NOT NULL COMMENT '数据精度',
-    `data_format` bigint(20) NOT NULL COMMENT '数据精度',
-    `sort` bigint(20) NOT NULL COMMENT '数据排序',
+    `function_code` tinyint(1) NULL DEFAULT 0 COMMENT '功能码',
+    `mode` tinyint(1) NULL DEFAULT 0 COMMENT '功能码',
+    `data_format` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '读写方式',
+    `sort` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '数据排序',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
-    PRIMARY KEY (`document_id`) USING BTREE
+    PRIMARY KEY (`device_config_id`) USING BTREE,
+    INDEX `template_id`(`template_id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'modbus数据配置' ROW_FORMAT = Dynamic;

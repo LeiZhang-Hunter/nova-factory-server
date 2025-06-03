@@ -652,8 +652,6 @@ func (i *IChartServiceImpl) Ask(c *gin.Context, req *aiDataSetModels.AskRequest)
 	w := c.Writer
 	flusher, _ := w.(http.Flusher)
 
-	ret, _ := io.ReadAll(resp.Body)
-	fmt.Println(string(ret))
 	var isSse bool = false
 	for ev, err := range sse.Read(resp.Body, nil) {
 		if !isSse {

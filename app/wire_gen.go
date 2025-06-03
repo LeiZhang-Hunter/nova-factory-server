@@ -137,9 +137,17 @@ func wireApp() (*gin.Engine, func(), error) {
 	deviceInfo := deviceController.NewDeviceInfo(iDeviceService)
 	iDeviceGroupService := deviceServiceImpl.NewDeviceGroupService(iDeviceGroupDao, iUserDao)
 	deviceGroup := deviceController.NewDeviceGroup(iDeviceGroupService)
+	iDeviceTemplateDao := deviceDaoImpl.NewIDeviceTemplateDaoImpl(db)
+	iDeviceTemplateService := deviceServiceImpl.NewDeviceTemplateServiceImpl(iDeviceTemplateDao)
+	template, err := deviceController.NewTemplate(iDeviceTemplateService)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	device := &deviceController.Device{
-		Info:  deviceInfo,
-		Group: deviceGroup,
+		Info:     deviceInfo,
+		Group:    deviceGroup,
+		Template: template,
 	}
 	iMaterialDao := materialDaoImpl.NewMaterialDaoImpl(db)
 	iMaterialService := materialServiceImpl.NewMaterialService(iMaterialDao, iUserDao)
