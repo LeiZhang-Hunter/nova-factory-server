@@ -117,3 +117,11 @@ func (r *RedisCache) Publish(ctx context.Context, channel string, message interf
 func (r *RedisCache) Subscribe(ctx context.Context, channels ...string) *redis.PubSub {
 	return r.client.Subscribe(ctx, channels...)
 }
+
+func (r *RedisCache) ZRangeByScore(ctx context.Context, key string, opt *redis.ZRangeBy) *redis.StringSliceCmd {
+	return r.client.ZRangeByScore(ctx, key, opt)
+}
+
+func (r *RedisCache) ZAdd(ctx context.Context, key string, members ...redis.Z) *redis.IntCmd {
+	return r.client.ZAdd(ctx, key, members...)
+}

@@ -1457,6 +1457,124 @@ const docTemplate = `{
                 }
             }
         },
+        "/asset/device/template/data/list": {
+            "get": {
+                "description": "获取模板数据列表",
+                "tags": [
+                    "资产管理/设备模板管理"
+                ],
+                "summary": "获取模板数据列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "description": "模板id",
+                        "name": "template_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/template/data/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除设备数据模板",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资产管理/设备模板管理"
+                ],
+                "summary": "删除设备数据模板",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/template/data/set": {
+            "post": {
+                "description": "设置设备模板板数信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资产管理/设备模板管理"
+                ],
+                "summary": "设置设备模板板数信息",
+                "parameters": [
+                    {
+                        "description": "设置设备模板板数信息参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceModels.SetSysModbusDeviceConfigDataReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置模板成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/asset/device/template/list": {
             "get": {
                 "description": "获取模板列表",
@@ -8774,6 +8892,73 @@ const docTemplate = `{
                 "deviceProtocolId": {
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "deviceModels.SetSysModbusDeviceConfigDataReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "register",
+                "slave",
+                "sort",
+                "template_id",
+                "type"
+            ],
+            "properties": {
+                "data_format": {
+                    "description": "读写方式",
+                    "type": "string"
+                },
+                "device_config_id": {
+                    "description": "文档id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "function_code": {
+                    "description": "功能码",
+                    "type": "boolean"
+                },
+                "mode": {
+                    "description": "功能码",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "数据名称",
+                    "type": "string"
+                },
+                "precision": {
+                    "description": "数据精度",
+                    "type": "integer"
+                },
+                "register": {
+                    "description": "寄存器/偏移量",
+                    "type": "integer"
+                },
+                "slave": {
+                    "description": "从设备地址",
+                    "type": "string"
+                },
+                "sort": {
+                    "description": "数据排序",
+                    "type": "string"
+                },
+                "storage_type": {
+                    "description": "存储策略",
+                    "type": "string"
+                },
+                "template_id": {
+                    "description": "模板id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "type": {
+                    "description": "数据类型",
+                    "type": "string"
+                },
+                "unit": {
+                    "description": "单位",
+                    "type": "string"
                 }
             }
         },

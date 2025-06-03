@@ -36,3 +36,7 @@ func (i *IDeviceTemplateServiceImpl) Remove(c *gin.Context, ids []string) error 
 func (i *IDeviceTemplateServiceImpl) List(c *gin.Context, req *deviceModels.SysDeviceTemplateDQL) (*deviceModels.SysDeviceTemplateListData, error) {
 	return i.dao.List(c, req)
 }
+
+func (i *IDeviceTemplateServiceImpl) GetById(c *gin.Context, id int64) (*deviceModels.SysDeviceTemplate, error) {
+	return i.dao.GetById(c, id)
+}

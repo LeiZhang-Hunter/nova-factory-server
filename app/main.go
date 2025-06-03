@@ -28,6 +28,7 @@ func main() {
 		panic(err)
 	}
 	defer cleanup()
+
 	//redisListener.StartRedisListener()
 	//monitorServiceImpl.GetJobService().InitJobRun()
 	app.Run(fmt.Sprintf(":%d", setting.Conf.Port))

@@ -179,8 +179,8 @@ CREATE TABLE `sys_modbus_device_config_data`
     `unit`  varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '单位',
     `precision` bigint(20) NOT NULL COMMENT '数据精度',
     `function_code` tinyint(1) NULL DEFAULT 0 COMMENT '功能码',
-    `mode` tinyint(1) NULL DEFAULT 0 COMMENT '功能码',
-    `data_format` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '读写方式',
+    `mode` tinyint(1) NULL DEFAULT 0 COMMENT '读写权限',
+    `data_format` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '数据格式',
     `sort` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '数据排序',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
@@ -191,3 +191,64 @@ CREATE TABLE `sys_modbus_device_config_data`
     PRIMARY KEY (`device_config_id`) USING BTREE,
     INDEX `template_id`(`template_id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'modbus数据配置' ROW_FORMAT = Dynamic;
+
+
+CREATE TABLE `sys_iot_agent` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增标识',
+    `object_id` bigint(20) unsigned NOT NULL COMMENT 'agent uuid',
+    `company_uuid` varchar(32) NOT NULL COMMENT '公司uuid',
+    `name` varchar(64) not null comment 'agent名字',
+    `operate_state` int(2) NOT NULL DEFAULT 0 COMMENT '操作状态 1-启动中 2-停止中 3-启动失败 4-停止失败',
+    `operate_time` timestamp NULL COMMENT '操作时间',
+    `version` varchar(64) not null comment 'agent版本',
+    `config_uuid` varchar(64) not null default '' comment '配置版本',
+    `ipv4`varchar(32) not null default '' comment  'ipv4地址',
+    `ipv6`varchar(64) not null default '' comment  'ipv6地址',
+    `last_heartbeat_time` timestamp NULL COMMENT '上次心跳时间',
+    `update_config_time` timestamp NULL COMMENT '更新配置时间',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    INDEX (`company_uuid`),
+    UNIQUE INDEX (`object_id`),
+    PRIMARY KEY (`id`)
+) ENGINE=Innodb   COMMENT='agent信息';
+
+
+CREATE TABLE `sys_iot_agent_process` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增标识',
+    `agent_object_id` bigint(20) unsigned NOT NULL COMMENT 'agent uuid',
+    `status` int(2) NOT NULL COMMENT '状态 1-运行 2-停止',
+    `name` varchar(64) not null comment '名字',
+    `version` varchar(64) not null comment '版本',
+    `start_time` timestamp NULL COMMENT '启动时间',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    INDEX (`agent_object_id`, `name`, `version`, `state`),
+    UNIQUE INDEX (`agent_object_id`, `name`),
+    PRIMARY KEY (`id`)
+) ENGINE=Innodb   COMMENT='agent进程信息';
+
+CREATE TABLE `sys_iot_agent_config` (
+   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增标识',
+   `uuid` VARCHAR(32) NOT NULL COMMENT '配置 uuid',
+   `company_uuid` VARCHAR(32) NOT NULL COMMENT '公司 uuid',
+   `config_version` varchar(64) not null comment '配置版本',
+   `content` TEXT not null comment '配置内容',
+   `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+   `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+   `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+   `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+   `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+   PRIMARY KEY (`id`),
+   UNIQUE INDEX (`uuid`),
+   UNIQUE INDEX (`company_uuid`, `config_version`)
+) ENGINE=Innodb   COMMENT='agent配置';

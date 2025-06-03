@@ -41,6 +41,9 @@ func (i *ISysModbusDeviceConfigDataDaoImpl) List(c *gin.Context, req *deviceMode
 	if req == nil {
 		req = &deviceModels.SysModbusDeviceConfigDataListReq{}
 	}
+	if req.TemplateID != 0 {
+		db = db.Where("template_id = ?", req.TemplateID)
+	}
 	size := 0
 	if req == nil || req.Size <= 0 {
 		size = 20

@@ -1,26 +1,11 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"net"
 	"time"
 )
-
-type MetricServer struct {
-	v1.UnimplementedDeviceReportServiceServer
-}
-
-func (s MetricServer) ReportContainer(context.Context, *v1.ExportMetricsServiceRequest) (*v1.NodeRes, error) {
-
-	fmt.Println("article 进来了")
-	return &v1.NodeRes{
-		Code: 0,
-	}, nil
-}
 
 func main() {
 	location, err := time.LoadLocation("Asia/Shanghai")

@@ -231,6 +231,12 @@ func (b *BuildInMapCache) Publish(ctx context.Context, channel string, message i
 func (b *BuildInMapCache) Subscribe(ctx context.Context, channels ...string) *redis.PubSub {
 	panic("local 不支持请切换redis")
 }
+func (b *BuildInMapCache) ZRangeByScore(ctx context.Context, key string, opt *redis.ZRangeBy) *redis.StringSliceCmd {
+	panic("local 不支持请切换redis")
+}
+func (b *BuildInMapCache) ZAdd(ctx context.Context, key string, members ...redis.Z) *redis.IntCmd {
+	panic("local 不支持请切换redis")
+}
 func (b *BuildInMapCache) Close() error {
 	select {
 	case b.close <- struct{}{}:

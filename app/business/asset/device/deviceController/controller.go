@@ -11,7 +11,8 @@ var ProviderSet = wire.NewSet(NewDeviceInfo,
 	wire.Struct(new(Device), "*"))
 
 type Device struct {
-	Info     *DeviceInfo
-	Group    *DeviceGroup
-	Template *Template
+	Info         *DeviceInfo
+	Group        *DeviceGroup
+	Template     *Template
+	TemplateData *TemplateData
 }

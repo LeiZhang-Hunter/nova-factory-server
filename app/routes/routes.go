@@ -8,10 +8,12 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceController"
 	"nova-factory-server/app/business/asset/material/materialController"
 	"nova-factory-server/app/business/craft/craftRouteController"
+	"nova-factory-server/app/business/daemonize/daemonizeController"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/system/systemController"
 	"nova-factory-server/app/business/tool/toolController"
+	"nova-factory-server/app/daemonize"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/objectFile/localhostObject"
 	"nova-factory-server/app/utils/logger"
@@ -41,6 +43,7 @@ func NewGinEngine(
 	ai *aiDataSetController.AiDataSet,
 	craft *craftRouteController.CraftRoute,
 	metric *metricController.MetricServer,
+	controller *daemonizeController.DaemonizeServer,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -95,6 +98,7 @@ func NewGinEngine(
 		dc.Info.PrivateRoutes(group)  //资产管理---设备模块
 		dc.Group.PrivateRoutes(group) //资产管理---设备分组
 		dc.Template.PrivateRoutes(group)
+		dc.TemplateData.PrivateRoutes(group)
 
 		materialC.Material.PrivateRoutes(group) //资产管理---物料管理
 
@@ -108,6 +112,7 @@ func NewGinEngine(
 		craft.RouteProductBom.PrivateRoutes(group)
 
 		metric.Metric.PrivateRoutes(group) //设备指标
+
 	}
 
 	r.NoRoute(func(c *gin.Context) {
@@ -116,6 +121,9 @@ func NewGinEngine(
 		})
 	})
 
+	s := daemonize.CreateGRpcServer()
+	controller.Daemonize.PrivateRoutes(s)
+	s.Start()
 	return r
 
 }
@@ -130,5 +138,4 @@ func newCors() gin.HandlerFunc {
 	config.MaxAge = time.Hour
 	config.AllowCredentials = false
 	return cors.New(config)
-
 }

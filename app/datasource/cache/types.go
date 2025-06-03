@@ -39,4 +39,6 @@ type Cache interface {
 	SetNX(ctx context.Context, key string, value interface{}, expiration time.Duration) bool
 	Publish(ctx context.Context, channel string, message interface{})
 	Subscribe(ctx context.Context, channels ...string) *redis.PubSub
+	ZRangeByScore(ctx context.Context, key string, opt *redis.ZRangeBy) *redis.StringSliceCmd
+	ZAdd(ctx context.Context, key string, members ...redis.Z) *redis.IntCmd
 }
