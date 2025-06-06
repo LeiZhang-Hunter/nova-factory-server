@@ -37,7 +37,7 @@ func NewIotAgentDaoImpl(db *gorm.DB, cache cache.Cache) daemonizeDao.IotAgentDao
 // GetByObjectId 根据objectId获取agent信息
 func (s *IotAgentDaoImpl) GetByObjectId(ctx context.Context, objectId uint64) (agent *daemonizeModels.SysIotAgent, err error) {
 	var data *daemonizeModels.SysIotAgent
-	ret := s.db.Table(s.tableName).Where("object_id = ?", objectId).Where("status = ?", commonStatus.NORMAL).First(&data)
+	ret := s.db.Table(s.tableName).Where("object_id = ?", objectId).Where("state = ?", commonStatus.NORMAL).First(&data)
 	if ret.Error != nil {
 		return data, ret.Error
 	}
