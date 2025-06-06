@@ -33,21 +33,22 @@ func (d *Daemonize) AgentUnregister(context.Context, *v1.AgentUnregisterReq) (*v
 }
 
 // AgentHeartbeat agent 心跳
-func (d *Daemonize) AgentHeartbeat(context.Context, *v1.AgentHeartbeatReq) (*v1.AgentHeartbeatRes, error) {
-	return nil, nil
+func (d *Daemonize) AgentHeartbeat(c context.Context, req *v1.AgentHeartbeatReq) (*v1.AgentHeartbeatRes, error) {
+	return d.service.AgentHeartbeat(c, req)
 }
 
 // AgentOperate 操作agent stream长连接
-func (d *Daemonize) AgentOperate(*v1.AgentOperateReq, v1.AgentControllerService_AgentOperateServer) error {
-	return nil
+func (d *Daemonize) AgentOperate(req *v1.AgentOperateReq, stream v1.AgentControllerService_AgentOperateServer) error {
+	return d.service.AgentOperate(stream.Context(), req, stream)
 }
 
 // AgentGetConfig 获取配置
-func (d *Daemonize) AgentGetConfig(context.Context, *v1.AgentGetConfigReq) (*v1.AgentGetConfigRes, error) {
-	return nil, nil
+func (d *Daemonize) AgentGetConfig(c context.Context, req *v1.AgentGetConfigReq) (*v1.AgentGetConfigRes, error) {
+	return d.service.AgentGetConfig(c, req)
 }
 
 // AgentOperateProcess 操作agent的子进程 广播使用
-func (d *Daemonize) AgentOperateProcess(context.Context, *v1.AgentOperateProcessReq) (*v1.AgentOperateProcessRes, error) {
-	return nil, nil
+func (d *Daemonize) AgentOperateProcess(ctx context.Context, req *v1.AgentOperateProcessReq) (*v1.AgentOperateProcessRes, error) {
+	d.service.AgentOperateProcess(ctx, req.Cmd, req.OperateInfoList)
+	return &v1.AgentOperateProcessRes{}, nil
 }

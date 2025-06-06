@@ -48,7 +48,9 @@ func NewData() (sqly.SqlyContext, func(), error) {
 	db.SetConnMaxLifetime(time.Minute * 5)
 	sqly.SetLog(new(logger.SqlyLog))
 
-	return db, nil, err
+	return db, func() {
+
+	}, err
 }
 
 // NewDB .

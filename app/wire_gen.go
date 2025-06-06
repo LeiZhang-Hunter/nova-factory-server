@@ -21,6 +21,8 @@ import (
 	"nova-factory-server/app/business/craft/craftRouteDao/craftRouteDaoImpl"
 	"nova-factory-server/app/business/craft/craftRouteService/craftRouteServiceImpl"
 	"nova-factory-server/app/business/daemonize/daemonizeController"
+	"nova-factory-server/app/business/daemonize/daemonizeDao/daemonizeDaoImpl"
+	"nova-factory-server/app/business/daemonize/daemonizeService/daemonizeServiceImpl"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
 	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
@@ -209,7 +211,11 @@ func wireApp() (*gin.Engine, func(), error) {
 	metricServer := &metricController.MetricServer{
 		Metric: metric,
 	}
-	daemonize := daemonizeController.NewDaemonize()
+	iotAgentDao := daemonizeDaoImpl.NewIotAgentDaoImpl(db, cacheCache)
+	iotAgentProcess := daemonizeDaoImpl.NewIotAgentProcessDaoImpl(cacheCache)
+	iotAgentConfigDao := daemonizeDaoImpl.NewIotAgentConfigDaoImpl(db)
+	daemonizeService := daemonizeServiceImpl.NewDaemonizeServiceImpl(iotAgentDao, iotAgentProcess, iotAgentConfigDao)
+	daemonize := daemonizeController.NewDaemonize(daemonizeService)
 	daemonizeServer := &daemonizeController.DaemonizeServer{
 		Daemonize: daemonize,
 	}

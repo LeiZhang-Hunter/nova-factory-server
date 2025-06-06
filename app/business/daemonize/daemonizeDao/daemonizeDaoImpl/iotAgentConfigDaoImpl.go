@@ -1,4 +1,4 @@
-package daemonizeDao
+package daemonizeDaoImpl
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"nova-factory-server/app/business/daemonize/daemonizeDao"
 	"nova-factory-server/app/business/daemonize/daemonizeModels"
 )
 
@@ -14,8 +15,9 @@ type IotAgentConfigDaoImpl struct {
 	tableName string
 }
 
-func NewIotAgentConfigDaoImpl(db *gorm.DB) *IotAgentConfigDaoImpl {
+func NewIotAgentConfigDaoImpl(db *gorm.DB) daemonizeDao.IotAgentConfigDao {
 	return &IotAgentConfigDaoImpl{
+
 		db:        db,
 		tableName: "sys_iot_agent_config",
 	}

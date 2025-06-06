@@ -1,4 +1,4 @@
-package daemonizeDao
+package daemonizeDaoImpl
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"nova-factory-server/app/business/daemonize/daemonizeDao"
 	"nova-factory-server/app/business/daemonize/daemonizeModels"
 	"nova-factory-server/app/constant/agent"
 	"nova-factory-server/app/constant/commonStatus"
@@ -25,7 +26,7 @@ type IotAgentDaoImpl struct {
 	cache     cache.Cache
 }
 
-func NewIotAgentDaoImpl(db *gorm.DB, cache cache.Cache) *IotAgentDaoImpl {
+func NewIotAgentDaoImpl(db *gorm.DB, cache cache.Cache) daemonizeDao.IotAgentDao {
 	return &IotAgentDaoImpl{
 		db:        db,
 		tableName: "sys_iot_agent",
