@@ -194,10 +194,10 @@ CREATE TABLE `sys_modbus_device_config_data`
 
 
 CREATE TABLE `sys_iot_agent` (
-    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增标识',
     `object_id` bigint(20) unsigned NOT NULL COMMENT 'agent uuid',
-    `company_uuid` varchar(32) NOT NULL COMMENT '公司uuid',
     `name` varchar(64) not null comment 'agent名字',
+    `username` varchar(64) not null comment 'username',
+    `password` varchar(64) not null comment 'password',
     `operate_state` int(2) NOT NULL DEFAULT 0 COMMENT '操作状态 1-启动中 2-停止中 3-启动失败 4-停止失败',
     `operate_time` timestamp NULL COMMENT '操作时间',
     `version` varchar(64) not null comment 'agent版本',
@@ -212,9 +212,7 @@ CREATE TABLE `sys_iot_agent` (
     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
-    INDEX (`company_uuid`),
-    UNIQUE INDEX (`object_id`),
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`object_id`)
 ) ENGINE=Innodb   COMMENT='agent信息';
 
 

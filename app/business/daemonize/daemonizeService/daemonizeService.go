@@ -11,4 +11,5 @@ type DaemonizeService interface {
 	AgentHeartbeat(ctx context.Context, req *v1.AgentHeartbeatReq) (res *v1.AgentHeartbeatRes, err error)
 	AgentOperate(ctx context.Context, req *v1.AgentOperateReq, stream v1.AgentControllerService_AgentOperateServer) (err error)
 	AgentOperateProcess(ctx context.Context, cmd v1.AgentCmd, processOperateInfoList []*v1.ProcessOperateInfo)
+	BroadcastAgentOperateProcess(ctx context.Context, cmd v1.AgentCmd, processOperateInfoList []*v1.ProcessOperateInfo) error
 }

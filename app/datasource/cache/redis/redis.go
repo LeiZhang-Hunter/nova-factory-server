@@ -125,3 +125,8 @@ func (r *RedisCache) ZRangeByScore(ctx context.Context, key string, opt *redis.Z
 func (r *RedisCache) ZAdd(ctx context.Context, key string, members ...redis.Z) *redis.IntCmd {
 	return r.client.ZAdd(ctx, key, members...)
 }
+
+func (r *RedisCache) MGet(ctx context.Context, keys []string) *redis.SliceCmd {
+	result := r.client.MGet(ctx, keys...)
+	return result
+}

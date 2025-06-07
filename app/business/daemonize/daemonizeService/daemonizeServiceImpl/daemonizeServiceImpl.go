@@ -4,14 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/gogf/gf/contrib/rpc/grpcx/v2"
 	"github.com/gogf/gf/errors/gcode"
 	"github.com/gogf/gf/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	v1 "github.com/novawatcher-io/nova-factory-payload/daemonize/grpc/v1"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/metadata"
 	"nova-factory-server/app/business/daemonize/daemonizeDao"
 	"nova-factory-server/app/business/daemonize/daemonizeModels"
 	"nova-factory-server/app/business/daemonize/daemonizeService"
+	"nova-factory-server/app/constant/agent"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -21,14 +27,17 @@ type DaemonizeServiceImpl struct {
 	processDao daemonizeDao.IotAgentProcess
 	configDao  daemonizeDao.IotAgentConfigDao
 	manager    *ManagerServiceImpl
+	serverList []string
 }
 
 func NewDaemonizeServiceImpl(dao daemonizeDao.IotAgentDao, processDao daemonizeDao.IotAgentProcess, configDao daemonizeDao.IotAgentConfigDao) daemonizeService.DaemonizeService {
+	value := viper.GetStringSlice("daemonize.server_list")
 	return &DaemonizeServiceImpl{
 		dao:        dao,
 		configDao:  configDao,
 		processDao: processDao,
 		manager:    NewManagerServiceImpl(),
+		serverList: value,
 	}
 }
 
@@ -48,7 +57,7 @@ func (d *DaemonizeServiceImpl) AgentRegister(ctx context.Context, req *v1.AgentR
 	agent.Version = req.Version
 	agent.Ipv4 = req.Ipv4
 	agent.Ipv6 = req.Ipv6
-	err = d.dao.Update(ctx, agent)
+	_, err = d.dao.Update(ctx, agent)
 	if err != nil {
 		return nil, err
 	}
@@ -94,14 +103,14 @@ func (d *DaemonizeServiceImpl) AgentHeartbeat(ctx context.Context, req *v1.Agent
 	}
 	configUuid := agent.ConfigUUID
 	agent = &daemonizeModels.SysIotAgent{
-		ObjectID: int64(req.GetObjectId()),
+		ObjectID: uint64(req.GetObjectId()),
 		Name:     req.GetName(),
 		Version:  req.GetVersion(),
 	}
 	agentProcessList := make([]*daemonizeModels.SysIotAgentProcess, 0, len(req.AgentProcessInfo.ProcessList))
 	for _, processInfo := range req.AgentProcessInfo.ProcessList {
 		agentProcessList = append(agentProcessList, &daemonizeModels.SysIotAgentProcess{
-			AgentObjectID: agent.ObjectID,
+			AgentObjectID: int64(agent.ObjectID),
 			Status:        int32(processInfo.State),
 			Name:          processInfo.Name,
 			Version:       processInfo.Version,
@@ -157,7 +166,7 @@ func (d *DaemonizeServiceImpl) AgentOperateProcess(ctx context.Context, cmd v1.A
 			defer wg.Done()
 			stream := d.manager.getClient(info.AgentObjectId)
 			if stream == nil {
-				g.Log().Warningf(ctx, "get client empty:%v, object_id:%d", cmd, info.AgentObjectId)
+				zap.L().Error(fmt.Sprintf("get client empty:%v, object_id:%d", cmd, info.AgentObjectId))
 				return
 			}
 			err := stream.Send(&v1.AgentOperateRes{
@@ -165,12 +174,77 @@ func (d *DaemonizeServiceImpl) AgentOperateProcess(ctx context.Context, cmd v1.A
 				Names: info.Names,
 			})
 			if err != nil {
-				g.Log().Errorf(ctx, "send cmd[%v] to agent[%v] error, err:%v", cmd, info.AgentObjectId, err)
+				zap.L().Error(fmt.Sprintf("send cmd[%v] to agent[%v] error, err:%v", cmd, info.AgentObjectId, err))
 			}
-			g.Log().Infof(ctx, "send cmd[%v] to agent[%v] error", cmd, info.AgentObjectId)
+			zap.L().Info(fmt.Sprintf("send cmd[%v] to agent[%v] error", cmd, info.AgentObjectId))
 			return
 		}()
 	}
 	wg.Wait()
 	return
+}
+
+func (d *DaemonizeServiceImpl) BroadcastAgentOperateProcess(ctx context.Context, cmd v1.AgentCmd, processOperateInfoList []*v1.ProcessOperateInfo) error {
+	var broadcastList []*v1.ProcessOperateInfo = make([]*v1.ProcessOperateInfo, 0)
+	var objectIds []uint64 = make([]uint64, 0)
+	// 所有agent id 变成停止中
+	for _, info := range processOperateInfoList {
+		if info == nil {
+			continue
+		}
+		if info.AgentObjectId == 0 {
+			continue
+		}
+
+		if len(info.Names) == 0 {
+			continue
+		}
+
+		broadcastList = append(broadcastList, &v1.ProcessOperateInfo{
+			AgentObjectId: info.GetAgentObjectId(),
+			Names:         info.Names,
+		})
+		objectIds = append(objectIds, info.GetAgentObjectId())
+	}
+
+	if len(objectIds) == 0 {
+		return errors.New("请选择Agent")
+	}
+
+	info, err := d.dao.GetByObjectId(ctx, objectIds[0])
+	if err != nil {
+		return err
+	}
+
+	addressList := d.serverList
+	wg := sync.WaitGroup{}
+	wg.Add(len(addressList))
+	var hasFailed bool = false
+	grpcCtx := metadata.AppendToOutgoingContext(context.Background(),
+		agent.USERNAME, info.Username,
+		agent.PASSWORD, info.Password,
+		agent.GATEWAYID, strconv.FormatUint(info.ObjectID, 10),
+	)
+	for _, address := range addressList {
+		go func() {
+			defer wg.Done()
+			client := v1.NewAgentControllerServiceClient(grpcx.Client.MustNewGrpcClientConn(address))
+			_, err := client.AgentOperateProcess(grpcCtx, &v1.AgentOperateProcessReq{
+				Cmd:             cmd,
+				OperateInfoList: broadcastList,
+			})
+			if err != nil {
+				zap.L().Error("grpc call agent operate process error", zap.Error(err))
+				hasFailed = true
+				return
+			}
+			return
+		}()
+	}
+	wg.Wait()
+
+	if hasFailed {
+		return errors.New("部分节点发送失败")
+	}
+	return nil
 }

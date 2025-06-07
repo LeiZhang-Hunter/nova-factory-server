@@ -718,6 +718,43 @@ definitions:
         description: 单位
         type: string
     type: object
+  daemonizeModels.ProcessOperateInfo:
+    properties:
+      AgentObjectId:
+        type: integer
+      Names:
+        items:
+          type: string
+        type: array
+    type: object
+  daemonizeModels.StartProcessReq:
+    properties:
+      processOperateInfoList:
+        items:
+          $ref: '#/definitions/daemonizeModels.ProcessOperateInfo'
+        type: array
+    type: object
+  daemonizeModels.SysIotAgentSetReq:
+    properties:
+      config_uuid:
+        description: 配置版本
+        type: string
+      name:
+        description: agent名字
+        type: string
+      object_id:
+        description: agent uuid
+        type: integer
+      password:
+        description: password
+        type: string
+      username:
+        description: username
+        type: string
+      version:
+        description: agent版本
+        type: string
+    type: object
   deviceModels.DeviceGroup:
     properties:
       groupId:
@@ -3570,6 +3607,117 @@ paths:
       summary: 设置工艺路线
       tags:
       - 工艺管理
+  /daemonize/agent/list:
+    get:
+      description: Agent列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: Agent列表
+      tags:
+      - 网关管理/Agent管理
+  /daemonize/agent/process/start:
+    post:
+      description: 启动Agent进程
+      parameters:
+      - description: 设备分组参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/daemonizeModels.StartProcessReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 启动Agent进程
+      tags:
+      - 网关管理/Agent管理
+  /daemonize/agent/process/stop:
+    post:
+      description: 停止Agent进程
+      parameters:
+      - description: 设备分组参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/daemonizeModels.StartProcessReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 停止Agent进程
+      tags:
+      - 网关管理/Agent管理
+  /daemonize/agent/remove/{ids}:
+    delete:
+      description: 移除Agent
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 移除Agent
+      tags:
+      - 网关管理/Agent管理
+  /daemonize/agent/set:
+    post:
+      description: 设置Agent
+      parameters:
+      - description: 设备分组参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/daemonizeModels.SysIotAgentSetReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置Agent
+      tags:
+      - 网关管理/Agent管理
   /file/downloadPrivateFile:
     get:
       description: 租户下载私有文件
