@@ -168,6 +168,13 @@ func (i *IChartServiceImpl) SessionList(c *gin.Context, req *aiDataSetModels.Lis
 		zap.L().Error(fmt.Sprintf("读取会话列表失败: %s", response.Message))
 		return &aiDataSetModels.ListSessionResponse{}, errors.New("读取会话列表失败")
 	}
+	for dk, d := range response.Data {
+		for mk, m := range d.Messages {
+			for rk, r := range m.Reference {
+				response.Data[dk].Messages[mk].Reference[rk].DocUrl = fmt.Sprintf("%s/v1/document/get/%s", i.config.ImageUrl, r.DocumentId)
+			}
+		}
+	}
 	return &response, nil
 }
 

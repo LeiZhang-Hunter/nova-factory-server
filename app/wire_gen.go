@@ -216,8 +216,11 @@ func wireApp() (*gin.Engine, func(), error) {
 	iotAgentConfigDao := daemonizeDaoImpl.NewIotAgentConfigDaoImpl(db)
 	daemonizeService := daemonizeServiceImpl.NewDaemonizeServiceImpl(iotAgentDao, iotAgentProcess, iotAgentConfigDao)
 	daemonize := daemonizeController.NewDaemonize(daemonizeService)
+	iotAgentService := daemonizeServiceImpl.NewIotAgentServiceImpl(iotAgentDao)
+	iotAgent := daemonizeController.NewIotAgentController(iotAgentService)
 	daemonizeServer := &daemonizeController.DaemonizeServer{
 		Daemonize: daemonize,
+		IotAgent:  iotAgent,
 	}
 	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer)
 	return engine, func() {

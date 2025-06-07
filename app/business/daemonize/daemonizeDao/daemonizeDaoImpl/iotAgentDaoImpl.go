@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gogf/gf/os/gtime"
 	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -55,64 +54,6 @@ func (s *IotAgentDaoImpl) GetAgentStateByLastHeartbeatTime(lastHeartbeatTime *gt
 	}
 }
 
-// GetList 获取agent列表
-func (s *IotAgentDaoImpl) GetList(ctx *gin.Context, req *daemonizeModels.SysIotAgentListReq, state int, pageNum, pageSize int) (data *daemonizeModels.SysIotAgentListData, err error) {
-	agentList := make([]*daemonizeModels.SysIotAgent, 0)
-	model := s.db.Table(s.tableName)
-	if req.Name != "" {
-		model = model.Where("name  LIKE ?", "%"+req.Name+"%")
-	}
-	if req.Version != "" {
-		model = model.Where("version  = ?", req.Version)
-	}
-	if req.ConfigUUID != "" {
-		model = model.Where("config_uuid = ?", req.ConfigUUID)
-	}
-	model = model.Where("state", commonStatus.NORMAL)
-	model = baizeContext.GetGormDataScope(ctx, model)
-	// 在线和离线状态根据心跳时间判断，超过一分钟没有心跳为离线
-	//offlineTime := timestamppb.New(time.Now().Truncate(time.Minute))
-	//if state == consts.AgentStateOnline {
-	//	model = model.Where("last_heartbeat_time > ?", gconv.String(offlineTime))
-	//} else if state == consts.AgentStateOffline {
-	//	model = model.Where("last_heartbeat_time <= ?", gconv.String(offlineTime))
-	//}
-	size := 0
-	if req.Size <= 0 {
-		size = 20
-	} else {
-		size = int(req.Size)
-	}
-	offset := 0
-	if req.Page <= 0 {
-		req.Page = 1
-	} else {
-		offset = int((req.Page - 1) * req.Size)
-	}
-	offset = (pageNum - 1) * pageSize
-
-	var total int64
-	ret := model.Count(&total)
-	if ret.Error != nil {
-		return &daemonizeModels.SysIotAgentListData{
-			Rows:  make([]*daemonizeModels.SysIotAgent, 0),
-			Total: 0,
-		}, ret.Error
-	}
-
-	ret = model.Offset(offset).Order("create_time desc").Limit(size).Find(&agentList)
-	if ret.Error != nil {
-		return &daemonizeModels.SysIotAgentListData{
-			Rows:  make([]*daemonizeModels.SysIotAgent, 0),
-			Total: 0,
-		}, ret.Error
-	}
-	return &daemonizeModels.SysIotAgentListData{
-		Rows:  agentList,
-		Total: total,
-	}, nil
-}
-
 // GetDistinctVersionList 获取版本号列表
 func (s *IotAgentDaoImpl) GetDistinctVersionList(ctx context.Context) (versionList []string, err error) {
 	doAgentList := make([]*daemonizeModels.SysIotAgent, 0)
@@ -129,27 +70,28 @@ func (s *IotAgentDaoImpl) GetDistinctVersionList(ctx context.Context) (versionLi
 }
 
 // Create 创建agent
-func (s *IotAgentDaoImpl) Create(ctx context.Context, doAgent *daemonizeModels.SysIotAgent) (id int64, err error) {
+func (s *IotAgentDaoImpl) Create(ctx context.Context, doAgent *daemonizeModels.SysIotAgent) (data *daemonizeModels.SysIotAgent, err error) {
 	ret := s.db.Table(s.tableName).Create(&daemonizeModels.SysIotAgent{
-		ObjectID:    doAgent.ObjectID,
-		CompanyUUID: doAgent.CompanyUUID,
-		Name:        doAgent.Name,
-		Version:     doAgent.Version,
-		ConfigUUID:  doAgent.ConfigUUID,
-		Ipv4:        doAgent.Ipv4,
-		Ipv6:        doAgent.Ipv6,
-		State:       doAgent.State,
+		ObjectID:   doAgent.ObjectID,
+		Name:       doAgent.Name,
+		Version:    doAgent.Version,
+		ConfigUUID: doAgent.ConfigUUID,
+		Ipv4:       doAgent.Ipv4,
+		Ipv6:       doAgent.Ipv6,
+		Username:   doAgent.Username,
+		Password:   doAgent.Password,
+		State:      doAgent.State,
 	})
-	if ret != nil {
-		g.Log().Errorf(ctx, "agent[%+v] insert to db error: %v", doAgent, err.Error())
-		return doAgent.ID, ret.Error
+	if ret.Error != nil {
+		zap.L().Error("create agent error", zap.Error(err))
+		return nil, ret.Error
 	}
-	return
+	return doAgent, nil
 }
 
 // UpdateHeartBeat 更新心跳包
 func (s *IotAgentDaoImpl) UpdateHeartBeat(ctx context.Context, data *daemonizeModels.SysIotAgent) error {
-	ret := s.cache.ZAdd(ctx, fmt.Sprintf("%s%s", redisKey.AGENT_HEADETBEAT_CACHE, data.CompanyUUID), redis.Z{
+	ret := s.cache.ZAdd(ctx, fmt.Sprintf("%s%s", redisKey.AGENT_HEADETBEAT_CACHE, ""), redis.Z{
 		Score:  float64(gtime.Now().Unix()),
 		Member: data.ObjectID,
 	})
@@ -160,38 +102,16 @@ func (s *IotAgentDaoImpl) UpdateHeartBeat(ctx context.Context, data *daemonizeMo
 }
 
 // Update 更细agent信息
-func (s *IotAgentDaoImpl) Update(ctx context.Context, data *daemonizeModels.SysIotAgent) (err error) {
+func (s *IotAgentDaoImpl) Update(ctx context.Context, data *daemonizeModels.SysIotAgent) (*daemonizeModels.SysIotAgent, error) {
 	model := s.db.Table(s.tableName)
-	doAgent := &daemonizeModels.SysIotAgent{}
 
-	if data.CompanyUUID != "" {
-		doAgent.CompanyUUID = data.CompanyUUID
-	}
-	if data.Name != "" {
-		doAgent.Name = data.Name
-	}
-	if data.Version != "" {
-		doAgent.Version = data.Version
-	}
-	if data.ConfigUUID != "" {
-		doAgent.ConfigUUID = data.ConfigUUID
-	}
-	//if data.LastHeartbeatTime !=  {
-	//	doAgent.LastHeartbeatTime = time.New(agent.LastHeartbeatTime.AsTime())
-	//}
-	doAgent.State = data.State
-
-	if data.ID > 0 {
-		model = model.Where("id", data.ID)
-	} else if data.ObjectID > 0 {
-		model = model.Where("object_id", data.ObjectID)
-	}
-	ret := model.Update("last_heartbeat_time", data.LastHeartbeatTime)
+	model = model.Where("object_id", data.ObjectID)
+	ret := model.Updates(data)
 	if ret.Error != nil {
-		zap.L().Error("agent[%+v] update db error: %v", zap.Error(err))
-		return ret.Error
+		zap.L().Error("agent[%+v] update db error: %v", zap.Error(ret.Error))
+		return nil, ret.Error
 	}
-	return
+	return data, ret.Error
 }
 
 // DeleteByObjectId 根据objectId删除agent
@@ -317,65 +237,50 @@ func (s *IotAgentDaoImpl) getOnLineAgentId(ctx context.Context, cid string, page
 //	}
 //
 
-// GetEntityList 获取agent列表
-//func (s *IotAgentDaoImpl) GetEntityList(ctx context.Context, agent *daemonizeModels.SysIotAgent, state int, pageNum, pageSize int) (agentList []*entity.DoAgent, total int, err error) {
-//	agentList = make([]*entity.DoAgent, 0)
-//	model := dao.DoAgent.Ctx(ctx).OmitEmpty()
-//	if agent.Name != "" {
-//		model = model.WhereLike("name", "%"+agent.Name+"%")
-//	}
-//	if agent.Version != "" {
-//		model = model.Where(entity.DoAgent{
-//			Version: agent.Version,
-//		})
-//	}
-//	if agent.ConfigUuid != "" {
-//		model = model.Where(entity.DoAgent{
-//			ConfigUuid: agent.ConfigUuid,
-//		})
-//	}
-//	model = model.Where(entity.DoAgent{
-//		CompanyUuid: ctx.Value(common.Cid).(string),
-//	})
-//
-//	// 在线和离线状态根据心跳时间判断，超过一分钟没有心跳为离线,从redis有序集合里查找
-//	if state == consts.AgentStateOnline {
-//		ids, err := s.getOnLineAgentId(ctx, ctx.Value(common.Cid).(string), pageNum, pageSize)
-//		if err != nil {
-//			g.Log().Errorf(ctx, err.Error())
-//		} else {
-//			if len(ids) == 0 {
-//				return []*entity.DoAgent{}, 0, nil
-//			}
-//			model = model.WhereIn(dao.DoAgent.Columns().ObjectId, ids)
-//		}
-//	} else if state == consts.AgentStateOffline {
-//		ids, err := s.getOffLineAgentId(ctx, ctx.Value(common.Cid).(string), pageNum, pageSize)
-//		if err != nil {
-//			g.Log().Errorf(ctx, err.Error())
-//		} else {
-//			model = model.WhereIn(dao.DoAgent.Columns().ObjectId, ids)
-//		}
-//	}
-//	if pageNum <= 0 {
-//		pageNum = 1
-//	}
-//	if pageSize <= 0 || pageSize > 50 {
-//		pageSize = 50
-//	}
-//	offset := (pageNum - 1) * pageSize
-//	err = model.Limit(pageSize).Offset(offset).
-//		ScanAndCount(&agentList, &total, true)
-//	if err != nil {
-//		g.Log().Errorf(ctx, "agent list query db error: %v", err.Error())
-//		return nil, 0, gerror.NewCode(gcode.CodeDbOperationError, "agent list query db error")
-//	}
-//	for _, agentInfo := range agentList {
-//		score, err := s.getLastHeartBeatTime(ctx, ctx.Value(common.Cid).(string), agentInfo.ObjectId)
-//		if err != nil {
-//			g.Log().Errorf(ctx, "get agent heart beat error: %s", err.Error())
-//		}
-//		agentInfo.LastHeartbeatTime = gtime.NewFromTimeStamp(score)
-//	}
-//	return
-//}
+// GetAgentList 获取agent列表
+func (s *IotAgentDaoImpl) GetAgentList(ctx *gin.Context, req *daemonizeModels.SysIotAgentListReq) (*daemonizeModels.SysIotAgentListData, error) {
+	agentList := make([]*daemonizeModels.SysIotAgent, 0)
+	model := s.db.Table(s.tableName)
+	size := 0
+	if req == nil || req.Size <= 0 {
+		size = 20
+	} else {
+		size = int(req.Size)
+	}
+	offset := 0
+	if req == nil || req.Page <= 0 {
+		req.Page = 1
+	} else {
+		offset = int((req.Page - 1) * req.Size)
+	}
+
+	var total int64
+	ret := model.Count(&total)
+	if ret.Error != nil {
+		return &daemonizeModels.SysIotAgentListData{
+			Rows:  make([]*daemonizeModels.SysIotAgent, 0),
+			Total: 0,
+		}, ret.Error
+	}
+
+	model = model.Where("state", commonStatus.NORMAL)
+	model = baizeContext.GetGormDataScope(ctx, model)
+	ret = model.Offset(offset).Order("create_time desc").Limit(size).Find(&agentList)
+	if ret.Error != nil {
+		zap.L().Error("agent list query db error: %v", zap.Error(ret.Error))
+		return &daemonizeModels.SysIotAgentListData{
+			Rows:  make([]*daemonizeModels.SysIotAgent, 0),
+			Total: 0,
+		}, ret.Error
+	}
+
+	return &daemonizeModels.SysIotAgentListData{
+		Rows:  agentList,
+		Total: total,
+	}, nil
+}
+
+func (i *IotAgentDaoImpl) Remove(c *gin.Context, ids []string) error {
+	ret := i.db.Table(i.tableName).Where("object_id in (?)", ids).Update("state", commonStatus.DELETE)
+	return ret.Error
+}

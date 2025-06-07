@@ -62,8 +62,24 @@ type ListSessionResponse struct {
 		CreateTime int64  `json:"create_time"`
 		Id         string `json:"id"`
 		Messages   []struct {
-			Content string `json:"content"`
-			Role    string `json:"role"`
+			Content        string        `json:"content"`
+			Id             string        `json:"id,omitempty"`
+			Role           string        `json:"role"`
+			DocIds         []interface{} `json:"doc_ids,omitempty"`
+			Answer         string        `json:"answer,omitempty"`
+			ConversationId string        `json:"conversationId,omitempty"`
+			CreatedAt      float64       `json:"created_at,omitempty"`
+			Reference      []struct {
+				Content      string  `json:"content"`
+				DatasetId    string  `json:"dataset_id"`
+				DocumentId   string  `json:"document_id"`
+				DocumentName string  `json:"document_name"`
+				Id           string  `json:"id"`
+				ImageId      string  `json:"image_id"`
+				Positions    [][]int `json:"positions"`
+				DocUrl       string  `json:"doc_url"`
+			} `json:"reference,omitempty"`
+			SessionId string `json:"session_id,omitempty"`
 		} `json:"messages"`
 		Name       string `json:"name"`
 		UpdateDate string `json:"update_date"`

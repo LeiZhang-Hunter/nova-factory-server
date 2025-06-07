@@ -112,6 +112,7 @@ func NewGinEngine(
 		craft.RouteProductBom.PrivateRoutes(group)
 
 		metric.Metric.PrivateRoutes(group) //设备指标
+		controller.IotAgent.PrivateRoutes(group)
 
 	}
 

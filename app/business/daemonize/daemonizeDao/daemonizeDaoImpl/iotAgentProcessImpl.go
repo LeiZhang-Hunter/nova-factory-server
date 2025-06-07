@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"nova-factory-server/app/business/daemonize/daemonizeDao"
 	"nova-factory-server/app/business/daemonize/daemonizeModels"
+	"nova-factory-server/app/constant/agent"
 	"nova-factory-server/app/constant/redis"
 	"nova-factory-server/app/datasource/cache"
+	"time"
 )
 
 type IotAgentProcessDaoImpl struct {
@@ -28,6 +30,6 @@ func (i *IotAgentProcessDaoImpl) RecordHeardBeat(ctx context.Context, objectId u
 	if err != nil {
 		return err
 	}
-	i.cache.Set(ctx, key, string(content), 0)
+	i.cache.Set(ctx, key, string(content), time.Duration(agent.CHECK_ONLINE_DURATION)*time.Second)
 	return nil
 }

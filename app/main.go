@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"nova-factory-server/app/setting"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -31,6 +34,11 @@ func main() {
 
 	//redisListener.StartRedisListener()
 	//monitorServiceImpl.GetJobService().InitJobRun()
-	app.Run(fmt.Sprintf(":%d", setting.Conf.Port))
+	go app.Run(fmt.Sprintf(":%d", setting.Conf.Port))
 
+	//等待一个INT或TERM信号
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	fmt.Println("Shutting down...")
 }

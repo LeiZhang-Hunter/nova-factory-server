@@ -2881,6 +2881,114 @@ const docTemplate = `{
                 }
             }
         },
+        "/daemonize/agent/list": {
+            "get": {
+                "description": "Agent列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "Agent列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/daemonize/agent/remove/{ids}": {
+            "delete": {
+                "description": "移除Agent",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "移除Agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/daemonize/agent/set": {
+            "post": {
+                "description": "设置Agent",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "设置Agent",
+                "parameters": [
+                    {
+                        "description": "设备分组参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/daemonizeModels.SysIotAgentSetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/file/downloadPrivateFile": {
             "get": {
                 "security": [
@@ -8827,6 +8935,35 @@ const docTemplate = `{
                 },
                 "unit_of_measure": {
                     "description": "单位",
+                    "type": "string"
+                }
+            }
+        },
+        "daemonizeModels.SysIotAgentSetReq": {
+            "type": "object",
+            "properties": {
+                "config_uuid": {
+                    "description": "配置版本",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "agent名字",
+                    "type": "string"
+                },
+                "object_id": {
+                    "description": "agent uuid",
+                    "type": "integer"
+                },
+                "password": {
+                    "description": "password",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "username",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "agent版本",
                     "type": "string"
                 }
             }

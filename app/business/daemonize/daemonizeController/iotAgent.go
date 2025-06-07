@@ -1,0 +1,113 @@
+package daemonizeController
+
+import (
+	"github.com/gin-gonic/gin"
+	"nova-factory-server/app/business/daemonize/daemonizeModels"
+	"nova-factory-server/app/business/daemonize/daemonizeService"
+	"nova-factory-server/app/middlewares"
+	"nova-factory-server/app/utils/baizeContext"
+)
+
+type IotAgent struct {
+	service daemonizeService.IotAgentService
+}
+
+func NewIotAgentController(service daemonizeService.IotAgentService) *IotAgent {
+	return &IotAgent{
+		service: service,
+	}
+}
+
+func (i *IotAgent) PrivateRoutes(router *gin.RouterGroup) {
+	agent := router.Group("/daemonize/agent")
+	agent.GET("/list", middlewares.HasPermission("daemonize:agent:list"), i.List)                       // agent列表
+	agent.POST("/set", middlewares.HasPermission("daemonize:agent:set"), i.Set)                         // 设置agent
+	agent.DELETE("/remove/:ids", middlewares.HasPermission("daemonize:agent:remove"), i.Remove)         //移除agent
+	agent.DELETE("/process/start", middlewares.HasPermission("daemonize:agent:process:start"), i.Start) //启动进程
+	agent.DELETE("/process/stop", middlewares.HasPermission("daemonize:agent:process:stop"), i.Stop)    //停止进程
+}
+
+// List Agent列表
+// @Summary Agent列表
+// @Description Agent列表
+// @Tags 网关管理/Agent管理
+// @Param  object query daemonizeModels.SysIotAgentListReq true "设备分组参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /daemonize/agent/list [get]
+func (i *IotAgent) List(c *gin.Context) {
+	req := new(daemonizeModels.SysIotAgentListReq)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	list, err := i.service.List(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
+}
+
+// Set 设置Agent
+// @Summary 设置Agent
+// @Description 设置Agent
+// @Tags 网关管理/Agent管理
+// @Param  object body daemonizeModels.SysIotAgentSetReq true "设备分组参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /daemonize/agent/set [post]
+func (i *IotAgent) Set(c *gin.Context) {
+	req := new(daemonizeModels.SysIotAgentSetReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.ObjectID == 0 {
+		data, err := i.service.Add(c, req)
+		if err != nil {
+			baizeContext.Waring(c, "添加Agent失败")
+			return
+		}
+		baizeContext.SuccessData(c, data)
+	} else {
+		data, err := i.service.Update(c, req)
+		if err != nil {
+			baizeContext.Waring(c, "添加Agent失败")
+			return
+		}
+		baizeContext.SuccessData(c, data)
+	}
+}
+
+// Remove 移除Agent
+// @Summary 移除Agent
+// @Description 移除Agent
+// @Tags 网关管理/Agent管理
+// @Param  ids path string true "ids"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /daemonize/agent/remove/{ids} [delete]
+func (i *IotAgent) Remove(c *gin.Context) {
+	contextIds := baizeContext.ParamStringArray(c, "ids")
+	if len(contextIds) == 0 {
+		baizeContext.Waring(c, "请选择供需id")
+		return
+	}
+	err := i.service.Remove(c, contextIds)
+	if err != nil {
+		baizeContext.Waring(c, "删除失败")
+		return
+	}
+	baizeContext.Success(c)
+}
+
+func (i *IotAgent) Stop(c *gin.Context) {
+
+}
+
+func (i *IotAgent) Start(c *gin.Context) {
+
+}
