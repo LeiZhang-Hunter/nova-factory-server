@@ -8993,60 +8993,6 @@
                 }
             }
         },
-        "daemonizeModels.ProcessOperateInfo": {
-            "type": "object",
-            "properties": {
-                "AgentObjectId": {
-                    "type": "integer"
-                },
-                "Names": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "daemonizeModels.StartProcessReq": {
-            "type": "object",
-            "properties": {
-                "processOperateInfoList": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/daemonizeModels.ProcessOperateInfo"
-                    }
-                }
-            }
-        },
-        "daemonizeModels.SysIotAgentSetReq": {
-            "type": "object",
-            "properties": {
-                "config_uuid": {
-                    "description": "配置版本",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "agent名字",
-                    "type": "string"
-                },
-                "object_id": {
-                    "description": "agent uuid",
-                    "type": "integer"
-                },
-                "password": {
-                    "description": "password",
-                    "type": "string"
-                },
-                "username": {
-                    "description": "username",
-                    "type": "string"
-                },
-                "version": {
-                    "description": "agent版本",
-                    "type": "string"
-                }
-            }
-        },
         "deviceModels.DeviceGroup": {
             "type": "object",
             "properties": {

@@ -143,20 +143,4 @@ func (i *IotAgent) Stop(c *gin.Context) {
 // @Success 200 {object}  response.ResponseData "设置分组成功"
 // @Router /daemonize/agent/process/start [post]
 func (i *IotAgent) Start(c *gin.Context) {
-	req := new(daemonizeModels.StartProcessReq)
-	err := c.ShouldBindJSON(req)
-	if err != nil {
-		baizeContext.ParameterError(c)
-		return
-	}
-	if len(req.ProcessOperateInfoList) == 0 {
-		baizeContext.Waring(c, "请选择选项")
-		return
-	}
-	err = i.daemonize.BroadcastAgentOperateProcess(c, v1.AgentCmd_Start, daemonizeModels.ToPbProcessList(req.ProcessOperateInfoList))
-	if err != nil {
-		baizeContext.Waring(c, "操作失败")
-		return
-	}
-	baizeContext.Success(c)
 }
