@@ -23,10 +23,10 @@ func OfSysIotAgentConfig(set *SysIotAgentConfigSetReq) *SysIotAgentConfig {
 }
 
 type SysIotAgentConfigSetReq struct {
-	ID            uint64 `gorm:"column:id;primaryKey;autoIncrement:true;comment:自增标识" json:"id"`          // 自增标识
-	AgentObjectID int64  `gorm:"column:agent_object_id;not null;comment:agent id" json:"agent_object_id"` // agent id
-	ConfigVersion string `gorm:"column:config_version;not null;comment:配置版本" json:"config_version"`       // 配置版本
-	Content       string `gorm:"column:content;not null;comment:配置内容" json:"content"`                     // 配置内容
+	ID            uint64 `gorm:"column:id;primaryKey;autoIncrement:true;comment:自增标识" json:"id,string"`                             // 自增标识
+	AgentObjectID int64  `gorm:"column:agent_object_id;not null;comment:agent id" binding:"required" json:"agent_object_id,string"` // agent id
+	ConfigVersion string `gorm:"column:config_version;not null;comment:配置版本" binding:"required" json:"config_version"`              // 配置版本
+	Content       string `gorm:"column:content;not null;comment:配置内容" binding:"required" json:"content"`                            // 配置内容
 }
 
 type GenerateGatewayConfigReq struct {

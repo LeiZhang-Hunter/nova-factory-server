@@ -1,6 +1,7 @@
 package daemonizeService
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/daemonize/daemonizeModels"
 )
@@ -10,4 +11,5 @@ type IotAgentService interface {
 	List(ctx *gin.Context, req *daemonizeModels.SysIotAgentListReq) (*daemonizeModels.SysIotAgentListData, error)
 	Update(ctx *gin.Context, req *daemonizeModels.SysIotAgentSetReq) (*daemonizeModels.SysIotAgent, error)
 	Remove(c *gin.Context, ids []string) error
+	GetByObjectId(ctx context.Context, objectId uint64) (agent *daemonizeModels.SysIotAgent, err error)
 }

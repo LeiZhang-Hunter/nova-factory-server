@@ -6,18 +6,23 @@ import (
 	"nova-factory-server/app/business/daemonize/daemonizeService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gateway/v1/config/pipeline"
 	"nova-factory-server/app/utils/yaml"
 )
 
 type Config struct {
 	service       daemonizeService.IGatewayConfigService
 	configService daemonizeService.IotAgentConfigService
+	agentService  daemonizeService.IotAgentService
 }
 
-func NewConfig(service daemonizeService.IGatewayConfigService, configService daemonizeService.IotAgentConfigService) *Config {
+func NewConfig(service daemonizeService.IGatewayConfigService,
+	configService daemonizeService.IotAgentConfigService,
+	agentService daemonizeService.IotAgentService) *Config {
 	return &Config{
 		service:       service,
 		configService: configService,
+		agentService:  agentService,
 	}
 }
 
@@ -97,17 +102,34 @@ func (c *Config) Set(ctx *gin.Context) {
 		baizeContext.ParameterError(ctx)
 		return
 	}
+
+	var pipelines pipeline.PipelineConfig
+	err = yaml.Unmarshal([]byte(req.Content), &pipelines)
+	if err != nil {
+		baizeContext.Waring(ctx, err.Error())
+		return
+	}
+
+	info, err := c.agentService.GetByObjectId(ctx, uint64(req.AgentObjectID))
+	if err != nil {
+		baizeContext.Waring(ctx, "配置保存失败")
+		return
+	}
+	if info == nil {
+		baizeContext.Waring(ctx, "agent不存在")
+		return
+	}
 	if req.ID == 0 {
 		data, err := c.configService.Create(ctx, req)
 		if err != nil {
-			baizeContext.Waring(ctx, "添加Agent失败")
+			baizeContext.Waring(ctx, "配置保存失败")
 			return
 		}
 		baizeContext.SuccessData(ctx, data)
 	} else {
 		data, err := c.configService.Update(ctx, req)
 		if err != nil {
-			baizeContext.Waring(ctx, "添加Agent失败")
+			baizeContext.Waring(ctx, "配置保存失败")
 			return
 		}
 		baizeContext.SuccessData(ctx, data)

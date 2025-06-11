@@ -1,6 +1,7 @@
 package daemonizeServiceImpl
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/daemonize/daemonizeDao"
 	"nova-factory-server/app/business/daemonize/daemonizeModels"
@@ -61,4 +62,8 @@ func (i *iotAgentServiceImpl) Update(ctx *gin.Context, req *daemonizeModels.SysI
 
 func (i *iotAgentServiceImpl) Remove(c *gin.Context, ids []string) error {
 	return i.dao.Remove(c, ids)
+}
+
+func (i *iotAgentServiceImpl) GetByObjectId(ctx context.Context, objectId uint64) (agent *daemonizeModels.SysIotAgent, err error) {
+	return i.dao.GetByObjectId(ctx, objectId)
 }
