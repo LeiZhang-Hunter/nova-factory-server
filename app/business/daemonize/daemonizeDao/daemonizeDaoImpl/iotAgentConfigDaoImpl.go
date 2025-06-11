@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/daemonize/daemonizeDao"
 	"nova-factory-server/app/business/daemonize/daemonizeModels"
+	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/utils/baizeContext"
 )
 
 type IotAgentConfigDaoImpl struct {
@@ -17,7 +20,6 @@ type IotAgentConfigDaoImpl struct {
 
 func NewIotAgentConfigDaoImpl(db *gorm.DB) daemonizeDao.IotAgentConfigDao {
 	return &IotAgentConfigDaoImpl{
-
 		db:        db,
 		tableName: "sys_iot_agent_config",
 	}
@@ -56,8 +58,8 @@ func (i *IotAgentConfigDaoImpl) GetLastedConfigList(ctx context.Context, count i
 }
 
 // GetVersionListByUuidList 根据uuid列表获取version映射关系
-func (i *IotAgentConfigDaoImpl) GetVersionListByUuidList(ctx context.Context, uuidList []string) (versionMap map[string]string, err error) {
-	versionMap = make(map[string]string)
+func (i *IotAgentConfigDaoImpl) GetVersionListByUuidList(ctx context.Context, uuidList []string) (versionMap map[uint64]string, err error) {
+	versionMap = make(map[uint64]string)
 	if len(uuidList) == 0 {
 		return
 	}
@@ -68,7 +70,7 @@ func (i *IotAgentConfigDaoImpl) GetVersionListByUuidList(ctx context.Context, uu
 		return nil, ret.Error
 	}
 	for _, config := range configList {
-		versionMap[config.UUID] = config.ConfigVersion
+		versionMap[config.ID] = config.ConfigVersion
 	}
 	return
 }
@@ -87,16 +89,72 @@ func (i *IotAgentConfigDaoImpl) GetByVersion(ctx context.Context, configVersion 
 }
 
 // Create 保存配置数据
-func (i *IotAgentConfigDaoImpl) Create(ctx context.Context, config *daemonizeModels.SysIotAgentConfig) (err error) {
-	ret := i.db.Table(i.tableName).Create(&daemonizeModels.SysIotAgentConfig{
-		UUID:          config.UUID,
-		CompanyUUID:   config.CompanyUUID,
-		ConfigVersion: config.ConfigVersion,
-		Content:       config.Content,
-	})
-	if ret.Error != nil {
-		zap.L().Error("agent config[%+v] update db error: %v", zap.Any("config", config), zap.Error(err))
-		return ret.Error
+func (i *IotAgentConfigDaoImpl) Create(ctx context.Context, config *daemonizeModels.SysIotAgentConfig) (*daemonizeModels.SysIotAgentConfig, error) {
+	if config == nil {
+		return nil, errors.New("agent config is nil")
 	}
-	return
+	ret := i.db.Table(i.tableName).Create(config)
+	if ret.Error != nil {
+		zap.L().Error("agent config[%+v] update db error: %v", zap.Any("config", config), zap.Error(ret.Error))
+		return nil, ret.Error
+	}
+	return config, nil
+}
+
+// Update 保存配置数据
+func (i *IotAgentConfigDaoImpl) Update(ctx context.Context, config *daemonizeModels.SysIotAgentConfig) (*daemonizeModels.SysIotAgentConfig, error) {
+	if config == nil {
+		return nil, errors.New("agent config is nil")
+	}
+	ret := i.db.Table(i.tableName).Where("id = ?", config.ID).Updates(config)
+	if ret.Error != nil {
+		zap.L().Error("agent config[%+v] update db error: %v", zap.Any("config", config), zap.Error(ret.Error))
+		return nil, ret.Error
+	}
+	return config, nil
+}
+
+func (i *IotAgentConfigDaoImpl) List(c *gin.Context, req *daemonizeModels.SysIotAgentConfigListReq) (*daemonizeModels.SysIotAgentConfigListData, error) {
+	db := i.db.Table(i.tableName).Table(i.tableName)
+
+	if req != nil && req.AgentObjectID != 0 {
+		db = db.Where("agent_object_id = ?", req.AgentObjectID)
+	}
+
+	size := 0
+	if req == nil || req.Size <= 0 {
+		size = 20
+	} else {
+		size = int(req.Size)
+	}
+	offset := 0
+	if req == nil || req.Page <= 0 {
+		req.Page = 1
+	} else {
+		offset = int((req.Page - 1) * req.Size)
+	}
+	db = db.Where("state", commonStatus.NORMAL)
+	db = baizeContext.GetGormDataScope(c, db)
+	var dto []*daemonizeModels.SysIotAgentConfig
+
+	var total int64
+	ret := db.Count(&total)
+	if ret.Error != nil {
+		return &daemonizeModels.SysIotAgentConfigListData{
+			Rows:  make([]*daemonizeModels.SysIotAgentConfig, 0),
+			Total: 0,
+		}, ret.Error
+	}
+
+	ret = db.Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
+	if ret.Error != nil {
+		return &daemonizeModels.SysIotAgentConfigListData{
+			Rows:  make([]*daemonizeModels.SysIotAgentConfig, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	return &daemonizeModels.SysIotAgentConfigListData{
+		Rows:  dto,
+		Total: total,
+	}, nil
 }

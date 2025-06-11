@@ -10,4 +10,5 @@ type ISysModbusDeviceConfigDataDao interface {
 	Update(c *gin.Context, data *deviceModels.SysModbusDeviceConfigData) (*deviceModels.SysModbusDeviceConfigData, error)
 	Remove(c *gin.Context, ids []string) error
 	List(c *gin.Context, req *deviceModels.SysModbusDeviceConfigDataListReq) (*deviceModels.SysModbusDeviceConfigDataListData, error)
+	GetByIds(c *gin.Context, ids []uint64) ([]*deviceModels.SysModbusDeviceConfigData, error)
 }

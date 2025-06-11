@@ -1,6 +1,7 @@
 package deviceDaoImpl
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/asset/device/deviceDao"
@@ -80,4 +81,17 @@ func (i *ISysModbusDeviceConfigDataDaoImpl) List(c *gin.Context, req *deviceMode
 		Rows:  dto,
 		Total: total,
 	}, nil
+}
+
+func (i *ISysModbusDeviceConfigDataDaoImpl) GetByIds(c *gin.Context, ids []uint64) ([]*deviceModels.SysModbusDeviceConfigData, error) {
+	if ids == nil || len(ids) == 0 {
+		return nil, errors.New("ids is null")
+	}
+	var dto []*deviceModels.SysModbusDeviceConfigData
+	ret := i.db.Table(i.tableName).Where("template_id in (?)", ids).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+
+	return dto, nil
 }

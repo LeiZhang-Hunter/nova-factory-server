@@ -61,7 +61,7 @@ func (t *TemplateData) Set(c *gin.Context) {
 		return
 	}
 
-	tempInfo, err := t.templateService.GetById(c, info.DeviceConfigID)
+	tempInfo, err := t.templateService.GetById(c, info.TemplateID)
 	if err != nil || tempInfo == nil {
 		baizeContext.Waring(c, "模板不存在")
 		return

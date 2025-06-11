@@ -36,7 +36,8 @@ type SysDeviceTemplateSetReq struct {
 }
 
 type SysDeviceTemplateDQL struct {
-	Name string `form:"name"`
+	Name     string `form:"name"`
+	Protocol string `form:"protocol"` // 协议类型
 	baize.BaseEntityDQL
 }
 

@@ -44,26 +44,29 @@ func NewDaemonizeServiceImpl(dao daemonizeDao.IotAgentDao, processDao daemonizeD
 // AgentRegister agent注册
 func (d *DaemonizeServiceImpl) AgentRegister(ctx context.Context, req *v1.AgentRegisterReq) (res *v1.AgentRegisterRes, err error) {
 	res = &v1.AgentRegisterRes{}
-	agent, err := d.dao.GetByObjectId(ctx, req.GetObjectId())
+	agentData, err := d.dao.GetByObjectId(ctx, req.GetObjectId())
 	if err != nil {
 		zap.L().Error("dao.GetByObjectId error:", zap.Error(err))
 		return
 	}
 
-	if agent == nil {
+	if agentData == nil {
 		return nil, errors.New("agent not exist")
 	}
 
-	agent.Version = req.Version
-	agent.Ipv4 = req.Ipv4
-	agent.Ipv6 = req.Ipv6
-	_, err = d.dao.Update(ctx, agent)
-	if err != nil {
-		return nil, err
+	if agentData.Version == req.Version && agentData.Ipv6 == req.Ipv6 && agentData.Ipv4 == req.Ipv4 {
+		agentData.Version = req.Version
+		agentData.Ipv4 = req.Ipv4
+		agentData.Ipv6 = req.Ipv6
+		_, err = d.dao.Update(ctx, agentData)
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	//agent.ConfigUUID = req.
 	// 更新心跳包
-	err = d.dao.UpdateHeartBeat(ctx, agent)
+	err = d.dao.UpdateHeartBeat(ctx, agentData)
 	if err != nil {
 		return nil, err
 	}
@@ -76,6 +79,7 @@ func (d *DaemonizeServiceImpl) AgentGetConfig(ctx context.Context, req *v1.Agent
 	if err != nil {
 		return nil, err
 	}
+
 	if config != nil {
 
 		// 转化配置
@@ -97,12 +101,18 @@ func (d *DaemonizeServiceImpl) AgentGetConfig(ctx context.Context, req *v1.Agent
 
 // AgentHeartbeat grpc接口 agent心跳
 func (d *DaemonizeServiceImpl) AgentHeartbeat(ctx context.Context, req *v1.AgentHeartbeatReq) (res *v1.AgentHeartbeatRes, err error) {
-	agent, err := d.dao.GetByObjectId(ctx, req.ObjectId)
+	agentData, err := d.dao.GetByObjectId(ctx, req.ObjectId)
 	if err != nil {
+		zap.L().Error("dao.GetByObjectId error:", zap.Error(err))
 		return
 	}
-	configUuid := agent.ConfigUUID
-	agent = &daemonizeModels.SysIotAgent{
+	if agentData == nil {
+		return nil, errors.New("agent not exist")
+	}
+	// 更新心跳包
+	_ = d.dao.UpdateHeartBeat(ctx, agentData)
+	configUuid := agentData.ConfigUUID
+	agentData = &daemonizeModels.SysIotAgent{
 		ObjectID: uint64(req.GetObjectId()),
 		Name:     req.GetName(),
 		Version:  req.GetVersion(),
@@ -110,7 +120,7 @@ func (d *DaemonizeServiceImpl) AgentHeartbeat(ctx context.Context, req *v1.Agent
 	agentProcessList := make([]*daemonizeModels.SysIotAgentProcess, 0, len(req.AgentProcessInfo.ProcessList))
 	for _, processInfo := range req.AgentProcessInfo.ProcessList {
 		agentProcessList = append(agentProcessList, &daemonizeModels.SysIotAgentProcess{
-			AgentObjectID: int64(agent.ObjectID),
+			AgentObjectID: int64(agentData.ObjectID),
 			Status:        int32(processInfo.State),
 			Name:          processInfo.Name,
 			Version:       processInfo.Version,

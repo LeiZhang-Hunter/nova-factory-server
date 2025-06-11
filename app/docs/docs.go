@@ -1613,6 +1613,12 @@ const docTemplate = `{
                         "description": "数量",
                         "name": "pageSize",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "协议类型",
+                        "name": "protocol",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2881,6 +2887,176 @@ const docTemplate = `{
                 }
             }
         },
+        "/daemonize/agent/list": {
+            "get": {
+                "description": "Agent列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "Agent列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/daemonize/agent/process/start": {
+            "post": {
+                "description": "启动Agent进程",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "启动Agent进程",
+                "parameters": [
+                    {
+                        "description": "设备分组参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/daemonizeModels.StartProcessReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/daemonize/agent/process/stop": {
+            "post": {
+                "description": "停止Agent进程",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "停止Agent进程",
+                "parameters": [
+                    {
+                        "description": "设备分组参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/daemonizeModels.StartProcessReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/daemonize/agent/remove/{ids}": {
+            "delete": {
+                "description": "移除Agent",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "移除Agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/daemonize/agent/set": {
+            "post": {
+                "description": "设置Agent",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "设置Agent",
+                "parameters": [
+                    {
+                        "description": "设备分组参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/daemonizeModels.SysIotAgentSetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/file/downloadPrivateFile": {
             "get": {
                 "security": [
@@ -3053,6 +3229,34 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/gateway/agent/config/generate": {
+            "get": {
+                "description": "生成Agent配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "生成Agent配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "agent uuid",
+                        "name": "object_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -8913,10 +9117,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "Extension": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "Name": {
                     "type": "string"
@@ -8925,6 +9126,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "Type": {
+                    "type": "string"
+                },
+                "communication_type": {
+                    "description": "通信方式",
                     "type": "string"
                 },
                 "deviceBuildingId": {
@@ -8946,6 +9151,15 @@ const docTemplate = `{
                 "deviceProtocolId": {
                     "type": "string",
                     "example": "0"
+                },
+                "device_gateway_id": {
+                    "description": "网关id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "protocol_type": {
+                    "description": "协议类型",
+                    "type": "string"
                 }
             }
         },
@@ -8953,7 +9167,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "name",
-                "register",
                 "slave",
                 "sort",
                 "template_id",
@@ -8971,11 +9184,13 @@ const docTemplate = `{
                 },
                 "function_code": {
                     "description": "功能码",
-                    "type": "boolean"
+                    "type": "string",
+                    "example": "0"
                 },
                 "mode": {
                     "description": "功能码",
-                    "type": "boolean"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "description": "数据名称",
@@ -8983,11 +9198,13 @@ const docTemplate = `{
                 },
                 "precision": {
                     "description": "数据精度",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "register": {
                     "description": "寄存器/偏移量",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "slave": {
                     "description": "从设备地址",

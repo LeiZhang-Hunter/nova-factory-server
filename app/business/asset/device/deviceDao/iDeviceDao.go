@@ -12,4 +12,5 @@ type IDeviceDao interface {
 	GetNoExitIdDeviceGroupByName(c *gin.Context, name string, id uint64) (*deviceModels.DeviceVO, error)
 	SelectDeviceList(c *gin.Context, req *deviceModels.DeviceListReq) (*deviceModels.DeviceInfoListData, error)
 	DeleteByDeviceIds(c *gin.Context, ids []int64) error
+	GetLocalByGateWayId(c *gin.Context, id int64) ([]*deviceModels.DeviceVO, error)
 }

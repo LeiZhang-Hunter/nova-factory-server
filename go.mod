@@ -12,6 +12,7 @@ require (
 	github.com/gin-contrib/cors v1.7.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-sql-driver/mysql v1.9.1
+	github.com/goccy/go-yaml v1.18.0
 	github.com/gogf/gf v1.16.9
 	github.com/gogf/gf/contrib/rpc/grpcx/v2 v2.9.0
 	github.com/gogf/gf/v2 v2.9.0
@@ -151,6 +152,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250218202821-56aae31c358a // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

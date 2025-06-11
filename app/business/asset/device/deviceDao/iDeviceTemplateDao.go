@@ -11,4 +11,5 @@ type IDeviceTemplateDao interface {
 	Remove(c *gin.Context, ids []string) error
 	List(c *gin.Context, req *deviceModels.SysDeviceTemplateDQL) (*deviceModels.SysDeviceTemplateListData, error)
 	GetById(c *gin.Context, id int64) (*deviceModels.SysDeviceTemplate, error)
+	GetByIds(c *gin.Context, ids []uint64) ([]*deviceModels.SysDeviceTemplate, error)
 }

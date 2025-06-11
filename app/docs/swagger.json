@@ -1605,6 +1605,12 @@
                         "description": "数量",
                         "name": "pageSize",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "协议类型",
+                        "name": "protocol",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -3215,6 +3221,34 @@
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/gateway/agent/config/generate": {
+            "get": {
+                "description": "生成Agent配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "生成Agent配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "agent uuid",
+                        "name": "object_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -8993,6 +9027,60 @@
                 }
             }
         },
+        "daemonizeModels.ProcessOperateInfo": {
+            "type": "object",
+            "properties": {
+                "AgentObjectId": {
+                    "type": "integer"
+                },
+                "Names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "daemonizeModels.StartProcessReq": {
+            "type": "object",
+            "properties": {
+                "processOperateInfoList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/daemonizeModels.ProcessOperateInfo"
+                    }
+                }
+            }
+        },
+        "daemonizeModels.SysIotAgentSetReq": {
+            "type": "object",
+            "properties": {
+                "config_uuid": {
+                    "description": "配置版本",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "agent名字",
+                    "type": "string"
+                },
+                "object_id": {
+                    "description": "agent uuid",
+                    "type": "integer"
+                },
+                "password": {
+                    "description": "password",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "username",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "agent版本",
+                    "type": "string"
+                }
+            }
+        },
         "deviceModels.DeviceGroup": {
             "type": "object",
             "properties": {
@@ -9021,10 +9109,7 @@
                     "type": "integer"
                 },
                 "Extension": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "Name": {
                     "type": "string"
@@ -9033,6 +9118,10 @@
                     "type": "string"
                 },
                 "Type": {
+                    "type": "string"
+                },
+                "communication_type": {
+                    "description": "通信方式",
                     "type": "string"
                 },
                 "deviceBuildingId": {
@@ -9054,6 +9143,15 @@
                 "deviceProtocolId": {
                     "type": "string",
                     "example": "0"
+                },
+                "device_gateway_id": {
+                    "description": "网关id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "protocol_type": {
+                    "description": "协议类型",
+                    "type": "string"
                 }
             }
         },
@@ -9061,7 +9159,6 @@
             "type": "object",
             "required": [
                 "name",
-                "register",
                 "slave",
                 "sort",
                 "template_id",
@@ -9079,11 +9176,13 @@
                 },
                 "function_code": {
                     "description": "功能码",
-                    "type": "boolean"
+                    "type": "string",
+                    "example": "0"
                 },
                 "mode": {
                     "description": "功能码",
-                    "type": "boolean"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "description": "数据名称",
@@ -9091,11 +9190,13 @@
                 },
                 "precision": {
                     "description": "数据精度",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "register": {
                     "description": "寄存器/偏移量",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "slave": {
                     "description": "从设备地址",

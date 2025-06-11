@@ -20,7 +20,7 @@ func NewISysModbusDeviceConfigDataServiceImpl(dao deviceDao.ISysModbusDeviceConf
 }
 func (i *ISysModbusDeviceConfigDataServiceImpl) Add(c *gin.Context, template *deviceModels.SetSysModbusDeviceConfigDataReq) (*deviceModels.SysModbusDeviceConfigData, error) {
 	data := deviceModels.OfSysModbusDeviceConfigData(template)
-	data.TemplateID = snowflake.GenID()
+	data.DeviceConfigID = snowflake.GenID()
 	data.DeptID = baizeContext.GetDeptId(c)
 	data.SetCreateBy(baizeContext.GetUserId(c))
 	return i.dao.Add(c, data)

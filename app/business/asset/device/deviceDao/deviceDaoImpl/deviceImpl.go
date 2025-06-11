@@ -1,12 +1,15 @@
 package deviceDaoImpl
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/constant/protocols"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
 )
@@ -124,4 +127,25 @@ func (s *sysDeviceDataDao) SelectDeviceList(c *gin.Context, req *deviceModels.De
 func (s *sysDeviceDataDao) DeleteByDeviceIds(c *gin.Context, ids []int64) error {
 	ret := s.ms.Table(s.tableName).Where("device_id in (?)", ids).Update("state", commonStatus.DELETE)
 	return ret.Error
+}
+
+func (s *sysDeviceDataDao) GetLocalByGateWayId(c *gin.Context, id int64) ([]*deviceModels.DeviceVO, error) {
+	var dto []*deviceModels.DeviceVO
+	ret := s.ms.Table(s.tableName).Where("device_gateway_id in (?)", id).Where("communication_type = ?", protocols.LOCAL).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+
+	var res []*deviceModels.DeviceVO = make([]*deviceModels.DeviceVO, 0)
+	for k, v := range dto {
+		if v.Extension == "" {
+			continue
+		}
+		fmt.Println(v.Extension)
+		var ext deviceModels.ExtensionInfo
+		err := json.Unmarshal([]byte(v.Extension), &ext)
+		if err != nil {
+			continue
+		}
+		dto[k].ExtensionInfo = &ext
+		res = append(res, dto[k])
+	}
+	return res, ret.Error
 }

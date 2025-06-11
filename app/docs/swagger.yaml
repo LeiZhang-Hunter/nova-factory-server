@@ -774,14 +774,19 @@ definitions:
       ControlType:
         type: integer
       Extension:
-        additionalProperties:
-          type: string
-        type: object
+        type: string
       Name:
         type: string
       Number:
         type: string
       Type:
+        type: string
+      communication_type:
+        description: 通信方式
+        type: string
+      device_gateway_id:
+        description: 网关id
+        example: "0"
         type: string
       deviceBuildingId:
         example: "0"
@@ -798,6 +803,9 @@ definitions:
       deviceProtocolId:
         example: "0"
         type: string
+      protocol_type:
+        description: 协议类型
+        type: string
     type: object
   deviceModels.SetSysModbusDeviceConfigDataReq:
     properties:
@@ -810,19 +818,23 @@ definitions:
         type: string
       function_code:
         description: 功能码
-        type: boolean
+        example: "0"
+        type: string
       mode:
         description: 功能码
-        type: boolean
+        example: "0"
+        type: string
       name:
         description: 数据名称
         type: string
       precision:
         description: 数据精度
-        type: integer
+        example: "0"
+        type: string
       register:
         description: 寄存器/偏移量
-        type: integer
+        example: "0"
+        type: string
       slave:
         description: 从设备地址
         type: string
@@ -844,7 +856,6 @@ definitions:
         type: string
     required:
     - name
-    - register
     - slave
     - sort
     - template_id
@@ -2803,6 +2814,10 @@ paths:
         in: query
         name: pageSize
         type: integer
+      - description: 协议类型
+        in: query
+        name: protocol
+        type: string
       responses:
         "200":
           description: 获取成功
@@ -3829,6 +3844,24 @@ paths:
       summary: 上传私有文件原始文件名
       tags:
       - 租户上传文件
+  /gateway/agent/config/generate:
+    get:
+      description: 生成Agent配置
+      parameters:
+      - description: agent uuid
+        in: query
+        name: object_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 生成Agent配置
+      tags:
+      - 网关管理/Agent管理
   /gateway/protocol/list:
     get:
       description: 网关协议列表

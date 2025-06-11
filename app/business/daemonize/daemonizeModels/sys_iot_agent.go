@@ -3,12 +3,13 @@ package daemonizeModels
 import (
 	v1 "github.com/novawatcher-io/nova-factory-payload/daemonize/grpc/v1"
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/constant/agent"
 	"time"
 )
 
 // SysIotAgent agent信息
 type SysIotAgent struct {
-	ObjectID          uint64                `gorm:"column:object_id;primaryKey;comment:agent uuid" json:"object_id"`                           // agent uuid
+	ObjectID          uint64                `gorm:"column:object_id;primaryKey;comment:agent uuid" json:"object_id,string"`                    // agent uuid
 	Name              string                `gorm:"column:name;not null;comment:agent名字" json:"name"`                                          // agent名字
 	Username          string                `gorm:"column:username;not null;comment:username" json:"username"`                                 // username
 	Password          string                `gorm:"column:password;not null;comment:password" json:"password"`                                 // password
@@ -21,7 +22,8 @@ type SysIotAgent struct {
 	LastHeartbeatTime *time.Time            `gorm:"column:last_heartbeat_time;comment:上次心跳时间" json:"last_heartbeat_time"`                      // 上次心跳时间
 	UpdateConfigTime  *time.Time            `gorm:"column:update_config_time;comment:更新配置时间" json:"update_config_time"`                        // 更新配置时间
 	DeptID            int64                 `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                                // 部门ID
-	Processes         []*SysIotAgentProcess `gorm:"-" json:"processes"`                                                                        // processes
+	Active            agent.ACTIVE_STATUS   `gorm:"-" json:"active"`
+	Processes         []*SysIotAgentProcess `gorm:"-" json:"processes"` // processes
 	baize.BaseEntity
 	State bool `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"` // 操作状态（0正常 -1删除）
 }
@@ -38,12 +40,12 @@ func ToSysIotAgent(set *SysIotAgentSetReq) *SysIotAgent {
 }
 
 type SysIotAgentSetReq struct {
-	ObjectID   uint64 `gorm:"column:object_id;primaryKey;comment:agent uuid" json:"object_id"` // agent uuid
-	Name       string `gorm:"column:name;not null;comment:agent名字" json:"name"`                // agent名字
-	Username   string `gorm:"column:username;not null;comment:username" json:"username"`       // username
-	Password   string `gorm:"column:password;not null;comment:password" json:"password"`       // password
-	Version    string `gorm:"column:version;not null;comment:agent版本" json:"version"`          // agent版本
-	ConfigUUID string `gorm:"column:config_uuid;not null;comment:配置版本" json:"config_uuid"`     // 配置版本
+	ObjectID   uint64 `gorm:"column:object_id;primaryKey;comment:agent uuid" json:"object_id,string"` // agent uuid
+	Name       string `gorm:"column:name;not null;comment:agent名字" json:"name"`                       // agent名字
+	Username   string `gorm:"column:username;not null;comment:username" json:"username"`              // username
+	Password   string `gorm:"column:password;not null;comment:password" json:"password"`              // password
+	Version    string `gorm:"column:version;not null;comment:agent版本" json:"version"`                 // agent版本
+	ConfigUUID string `gorm:"column:config_uuid;not null;comment:配置版本" json:"config_uuid"`            // 配置版本
 }
 
 type SysIotAgentListReq struct {
@@ -51,8 +53,11 @@ type SysIotAgentListReq struct {
 }
 
 type SysIotAgentListData struct {
-	Rows  []*SysIotAgent `json:"rows"`
-	Total int64          `json:"total"`
+	Rows         []*SysIotAgent `json:"rows"`
+	Total        int64          `json:"total"`
+	OnLineCount  int64          `json:"onLineCount"`
+	OffLineCount int64          `json:"offLineCount"`
+	ErrorCount   int64          `json:"errorCount"`
 }
 
 type ProcessOperateInfo struct {

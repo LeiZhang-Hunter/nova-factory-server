@@ -113,6 +113,7 @@ func NewGinEngine(
 
 		metric.Metric.PrivateRoutes(group) //设备指标
 		controller.IotAgent.PrivateRoutes(group)
+		controller.Config.PrivateRoutes(group)
 
 	}
 

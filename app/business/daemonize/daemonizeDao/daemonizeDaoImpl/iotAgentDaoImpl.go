@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gogf/gf/os/gtime"
 	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/daemonize/daemonizeDao"
@@ -16,6 +15,7 @@ import (
 	redisKey "nova-factory-server/app/constant/redis"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/baizeContext"
+	"strconv"
 	"time"
 )
 
@@ -91,13 +91,11 @@ func (s *IotAgentDaoImpl) Create(ctx context.Context, doAgent *daemonizeModels.S
 
 // UpdateHeartBeat 更新心跳包
 func (s *IotAgentDaoImpl) UpdateHeartBeat(ctx context.Context, data *daemonizeModels.SysIotAgent) error {
-	ret := s.cache.ZAdd(ctx, fmt.Sprintf("%s%s", redisKey.AGENT_HEADETBEAT_CACHE, ""), redis.Z{
-		Score:  float64(gtime.Now().Unix()),
-		Member: data.ObjectID,
-	})
-	if ret.Err() != nil {
-		return ret.Err()
+	if data.ObjectID == 0 {
+		return nil
 	}
+	s.cache.Set(ctx, fmt.Sprintf("%s%d", redisKey.AGENT_HEADETBEAT_CACHE, data.ObjectID), fmt.Sprintf("%d", gtime.Now().Unix()),
+		300*time.Second)
 	return nil
 }
 
@@ -148,40 +146,6 @@ func (s *IotAgentDaoImpl) UpdateConfig(ctx context.Context, configUuid string, o
 	return
 }
 
-// UpdateOperateState 更新agent配置
-//func (s *IotAgentDaoImpl) UpdateOperateState(ctx context.Context, objectId uint64, operateState uint8) (err error) {
-//	ret := s.db.Table(s.tableName).Where("object_id = ?", objectId).Updates(gdb.Map{
-//		"operate_state": operateState,
-//		"operate_time":  gtime.Now(),
-//	})
-//	if ret.Error != nil {
-//		return ret.Error
-//	}
-//	return nil
-//}
-
-// GetByObjectIds 根据objectIds获取agent信息
-//func (s *IotAgentDaoImpl) GetByObjectIds(ctx context.Context, objectIds []uint64) (agent []daemonizeModels.SysIotAgent, err error) {
-//	var agents *[]daemonizeModels.SysIotAgent
-//	//ret := s.db.Table(s.tableName).Where("object in (?)", objectIds).
-//	//	Where("state = ?", commonStatus.NORMAL).Find(&agents)
-//	//if agents == nil {
-//	//	return make([]daemonizeModels.SysIotAgent, 0), nil
-//	//}
-//	//for k, agentInfo := range *agents {
-//	//	score, err := s.getLastHeartBeatTime(ctx, ctx.Value(common.Cid).(string), agentInfo.ObjectId)
-//	//	if err != nil {
-//	//		zap.L().Error("get agent heart beat error: %s", zap.Error(err))
-//	//	}
-//	//	(*agents)[k].LastHeartbeatTime = gtime.NewFromTimeStamp(score)
-//	//}
-//	//if ret.Error != nil {
-//	//	zap.L().Error("agent id[%v] query db error: %v", zap.Error(ret.Error))
-//	//	return nil, ret.Error
-//	//}
-//	return *agents, nil
-//}
-
 // UpdateOperateStateByObjectIds 更新agent配置
 func (s *IotAgentDaoImpl) UpdateOperateStateByObjectIds(ctx context.Context, objectId []uint64, operateState uint8) (err error) {
 	model := s.db.Table(s.tableName)
@@ -198,44 +162,9 @@ func (s *IotAgentDaoImpl) UpdateOperateStateByObjectIds(ctx context.Context, obj
 
 // getOffLineAgentId 读取在线的agent
 func (s *IotAgentDaoImpl) getOnLineAgentId(ctx context.Context, cid string, page int, size int) ([]string, error) {
-	//offlineTime := time.Now().Unix() - int64(agent.CHECK_ONLINE_DURATION)
-	//key := fmt.Sprintf("%s%s", redis.AGENT_HEADETBEAT_CACHE, cid)
-	//cmd := s.cache.ZRangeByScore(ctx, key, &redis2.ZRangeBy{
-	//	Min: (page-1)*size,
-	//})
-	//value, err := g.Redis().Do(ctx, "ZRANGEBYSCORE", key, fmt.Sprintf("(%d", offlineTime), "+inf", "LIMIT", (page-1)*size, page*size)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//fmt.Println(value)
-	//return value.Strings(), nil
+
 	return []string{}, nil
 }
-
-// // getOffLineAgentId 读取离线的agent
-//
-//	func (s *IotAgentDaoImpl) getOffLineAgentId(ctx context.Context, cid string, page int, size int) ([]string, error) {
-//		offlineTime := time.Now().Unix() - int64(common.CHECK_ONLINE_DURATION)
-//		key := fmt.Sprintf("%s%s", common.AGENT_HEADETBEAT_CACHE, cid)
-//		value, err := g.Redis().Do(ctx, "ZRANGEBYSCORE", key, fmt.Sprintf("(%d", offlineTime), "+inf", "LIMIT", (page-1)*size, page*size)
-//		if err != nil {
-//			return nil, err
-//		}
-//		fmt.Println(value)
-//		return value.Strings(), nil
-//	}
-//
-// // getOffLineAgentId 读取离线的agent
-//
-//	func (s *IotAgentDaoImpl) getLastHeartBeatTime(ctx context.Context, cid string, object uint64) (int64, error) {
-//		key := fmt.Sprintf("%s%s", common.AGENT_HEADETBEAT_CACHE, cid)
-//		score, err := g.Redis().ZScore(ctx, key, object)
-//		if err != nil {
-//			return 0, err
-//		}
-//		return int64(score), nil
-//	}
-//
 
 // GetAgentList 获取agent列表
 func (s *IotAgentDaoImpl) GetAgentList(ctx *gin.Context, req *daemonizeModels.SysIotAgentListReq) (*daemonizeModels.SysIotAgentListData, error) {
@@ -255,6 +184,7 @@ func (s *IotAgentDaoImpl) GetAgentList(ctx *gin.Context, req *daemonizeModels.Sy
 	}
 
 	var total int64
+	model = model.Where("state", commonStatus.NORMAL)
 	ret := model.Count(&total)
 	if ret.Error != nil {
 		return &daemonizeModels.SysIotAgentListData{
@@ -263,7 +193,6 @@ func (s *IotAgentDaoImpl) GetAgentList(ctx *gin.Context, req *daemonizeModels.Sy
 		}, ret.Error
 	}
 
-	model = model.Where("state", commonStatus.NORMAL)
 	model = baizeContext.GetGormDataScope(ctx, model)
 	ret = model.Offset(offset).Order("create_time desc").Limit(size).Find(&agentList)
 	if ret.Error != nil {
@@ -274,9 +203,54 @@ func (s *IotAgentDaoImpl) GetAgentList(ctx *gin.Context, req *daemonizeModels.Sy
 		}, ret.Error
 	}
 
+	var keys []string = make([]string, 0)
+	for _, data := range agentList {
+		keys = append(keys, fmt.Sprintf("%s%d", redisKey.AGENT_HEADETBEAT_CACHE, data.ObjectID))
+	}
+
+	var heartBeatMap map[string]int64 = make(map[string]int64)
+	slice := s.cache.MGet(ctx, keys)
+	if slice != nil {
+		values := slice.Val()
+		for index, key := range keys {
+			if values[index] == nil {
+				heartBeatMap[key] = 0
+			} else {
+				v := values[index].(string)
+				parseInt, err := strconv.ParseInt(v, 10, 64)
+				if err != nil {
+					zap.L().Error("agent get heart beat map error: %v", zap.Error(err))
+					continue
+				}
+				heartBeatMap[key] = parseInt
+			}
+
+		}
+	}
+	offLineCount := 0
+	onLineCount := 0
+	for k, data := range agentList {
+		key := fmt.Sprintf("%s%d", redisKey.AGENT_HEADETBEAT_CACHE, data.ObjectID)
+		heartBeat, ok := heartBeatMap[key]
+		if !ok {
+			continue
+		}
+		duration := time.Now().Unix() - heartBeat
+		if duration < int64(agent.CHECK_ONLINE_DURATION) {
+			onLineCount++
+			agentList[k].Active = agent.ONLINE
+		} else {
+			offLineCount++
+			agentList[k].Active = agent.OFFLINE
+		}
+
+	}
+
 	return &daemonizeModels.SysIotAgentListData{
-		Rows:  agentList,
-		Total: total,
+		Rows:         agentList,
+		Total:        total,
+		OffLineCount: int64(offLineCount),
+		OnLineCount:  int64(onLineCount),
 	}, nil
 }
 

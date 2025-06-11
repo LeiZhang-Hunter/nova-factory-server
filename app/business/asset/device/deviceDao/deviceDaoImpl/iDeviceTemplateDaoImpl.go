@@ -1,6 +1,7 @@
 package deviceDaoImpl
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/asset/device/deviceDao"
@@ -47,6 +48,9 @@ func (i *IDeviceTemplateDaoImpl) List(c *gin.Context, req *deviceModels.SysDevic
 	if req == nil {
 		req = &deviceModels.SysDeviceTemplateDQL{}
 	}
+	if req.Protocol != "" {
+		db = db.Where("protocol = ?", req.Protocol)
+	}
 	if req != nil && req.Name != "" {
 		db = db.Where("name LIKE ?", "%"+req.Name+"%")
 	}
@@ -86,4 +90,18 @@ func (i *IDeviceTemplateDaoImpl) List(c *gin.Context, req *deviceModels.SysDevic
 		Rows:  dto,
 		Total: total,
 	}, nil
+}
+
+func (i *IDeviceTemplateDaoImpl) GetByIds(c *gin.Context, ids []uint64) ([]*deviceModels.SysDeviceTemplate, error) {
+	if ids == nil || len(ids) == 0 {
+		return nil, errors.New("ids is null")
+	}
+	var dto []*deviceModels.SysDeviceTemplate
+	ret := i.db.Table(i.tableName).Where("template_id in (?)", ids).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+
+	return dto, nil
+
 }
