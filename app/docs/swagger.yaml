@@ -734,6 +734,21 @@ definitions:
           $ref: '#/definitions/daemonizeModels.ProcessOperateInfo'
         type: array
     type: object
+  daemonizeModels.SysIotAgentConfigSetReq:
+    properties:
+      agent_object_id:
+        description: agent id
+        type: integer
+      config_version:
+        description: 配置版本
+        type: string
+      content:
+        description: 配置内容
+        type: string
+      id:
+        description: 自增标识
+        type: integer
+    type: object
   daemonizeModels.SysIotAgentSetReq:
     properties:
       config_uuid:
@@ -744,7 +759,8 @@ definitions:
         type: string
       object_id:
         description: agent uuid
-        type: integer
+        example: "0"
+        type: string
       password:
         description: password
         type: string
@@ -3860,6 +3876,62 @@ paths:
           schema:
             $ref: '#/definitions/response.ResponseData'
       summary: 生成Agent配置
+      tags:
+      - 网关管理/Agent管理
+  /gateway/agent/config/list:
+    get:
+      description: Agent配置列表
+      parameters:
+      - description: agent id
+        in: query
+        name: agent_object_id
+        type: integer
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: Agent配置列表
+      tags:
+      - 网关管理/Agent管理
+  /gateway/agent/config/set:
+    post:
+      description: 设置Agent配置
+      parameters:
+      - description: 参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/daemonizeModels.SysIotAgentConfigSetReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置Agent配置
       tags:
       - 网关管理/Agent管理
   /gateway/protocol/list:
