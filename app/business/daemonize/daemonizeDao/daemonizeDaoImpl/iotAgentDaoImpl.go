@@ -2,6 +2,7 @@ package daemonizeDaoImpl
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gogf/gf/os/gtime"
@@ -70,20 +71,10 @@ func (s *IotAgentDaoImpl) GetDistinctVersionList(ctx context.Context) (versionLi
 }
 
 // Create 创建agent
-func (s *IotAgentDaoImpl) Create(ctx context.Context, doAgent *daemonizeModels.SysIotAgent) (data *daemonizeModels.SysIotAgent, err error) {
-	ret := s.db.Table(s.tableName).Create(&daemonizeModels.SysIotAgent{
-		ObjectID:   doAgent.ObjectID,
-		Name:       doAgent.Name,
-		Version:    doAgent.Version,
-		ConfigUUID: doAgent.ConfigUUID,
-		Ipv4:       doAgent.Ipv4,
-		Ipv6:       doAgent.Ipv6,
-		Username:   doAgent.Username,
-		Password:   doAgent.Password,
-		State:      doAgent.State,
-	})
+func (s *IotAgentDaoImpl) Create(ctx context.Context, doAgent *daemonizeModels.SysIotAgent) (*daemonizeModels.SysIotAgent, error) {
+	ret := s.db.Table(s.tableName).Create(doAgent)
 	if ret.Error != nil {
-		zap.L().Error("create agent error", zap.Error(err))
+		zap.L().Error("create agent error", zap.Error(ret.Error))
 		return nil, ret.Error
 	}
 	return doAgent, nil
@@ -133,12 +124,30 @@ func (s *IotAgentDaoImpl) DeleteByObjectIdList(ctx context.Context, objectIdList
 }
 
 // UpdateConfig 更新agent配置
-func (s *IotAgentDaoImpl) UpdateConfig(ctx context.Context, configUuid string, objectIdList []uint64) (err error) {
+func (s *IotAgentDaoImpl) UpdateConfig(ctx context.Context, configId uint64, objectIdList []uint64) (err error) {
 	model := s.db.Table(s.tableName)
 	if len(objectIdList) > 0 {
 		model = model.Where("object_id in (?)", objectIdList)
+	} else {
+		return errors.New("object id is empty")
 	}
-	ret := model.Where("config_uuid != ?", configUuid).Update("config_uuid", configUuid)
+	ret := model.Update("config_id", configId)
+	if ret.Error != nil {
+		zap.L().Error("agent[%v] update config[%v] error: %v", zap.Error(ret.Error))
+		return ret.Error
+	}
+	return
+}
+
+// UpdateLastConfig 更新agent配置
+func (s *IotAgentDaoImpl) UpdateLastConfig(ctx context.Context, configId uint64, objectIdList []uint64) (err error) {
+	model := s.db.Table(s.tableName)
+	if len(objectIdList) > 0 {
+		model = model.Where("object_id in (?)", objectIdList)
+	} else {
+		return errors.New("object id is empty")
+	}
+	ret := model.Update("last_config_id", configId)
 	if ret.Error != nil {
 		zap.L().Error("agent[%v] update config[%v] error: %v", zap.Error(ret.Error))
 		return ret.Error

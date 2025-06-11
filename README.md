@@ -147,6 +147,12 @@ wire gen
 swag init
 ```
 
+swag 地址:
+
+```
+http://localhost:8080/swagger/doc.json
+```
+
 
 ## 白泽管理系统交流群
 

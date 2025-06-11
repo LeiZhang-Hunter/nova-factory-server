@@ -21,6 +21,8 @@ type SysIotAgent struct {
 	Ipv6              string                `gorm:"column:ipv6;not null;comment:ipv6地址" json:"ipv6"`                                           // ipv6地址
 	LastHeartbeatTime *time.Time            `gorm:"column:last_heartbeat_time;comment:上次心跳时间" json:"last_heartbeat_time"`                      // 上次心跳时间
 	UpdateConfigTime  *time.Time            `gorm:"column:update_config_time;comment:更新配置时间" json:"update_config_time"`                        // 更新配置时间
+	LastConfigID      int64                 `gorm:"column:last_config_id;not null;comment:最后版本的配置id" json:"last_config_id"`                    // 最后版本的配置id
+	ConfigID          int64                 `gorm:"column:config_id;not null;comment:版本的配置id" json:"config_id"`                                // 版本的配置id
 	DeptID            int64                 `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                                // 部门ID
 	Active            agent.ACTIVE_STATUS   `gorm:"-" json:"active"`
 	Processes         []*SysIotAgentProcess `gorm:"-" json:"processes"` // processes

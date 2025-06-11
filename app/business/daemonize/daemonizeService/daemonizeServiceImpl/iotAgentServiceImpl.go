@@ -67,3 +67,10 @@ func (i *iotAgentServiceImpl) Remove(c *gin.Context, ids []string) error {
 func (i *iotAgentServiceImpl) GetByObjectId(ctx context.Context, objectId uint64) (agent *daemonizeModels.SysIotAgent, err error) {
 	return i.dao.GetByObjectId(ctx, objectId)
 }
+
+func (i *iotAgentServiceImpl) UpdateConfig(ctx context.Context, configId uint64, objectIdList []uint64) (err error) {
+	return i.dao.UpdateConfig(ctx, configId, objectIdList)
+}
+func (i *iotAgentServiceImpl) UpdateLastConfig(ctx context.Context, configId uint64, objectIdList []uint64) (err error) {
+	return i.dao.UpdateLastConfig(ctx, configId, objectIdList)
+}

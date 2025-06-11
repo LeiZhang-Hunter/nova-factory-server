@@ -2,6 +2,7 @@ package daemonizeController
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/daemonize/daemonizeModels"
 	"nova-factory-server/app/business/daemonize/daemonizeService"
 	"nova-factory-server/app/middlewares"
@@ -31,6 +32,11 @@ func (c *Config) PrivateRoutes(router *gin.RouterGroup) {
 	routers.GET("/generate", middlewares.HasPermission("gateway:agent:config:generate"), c.Generate) // 生成配置
 	routers.GET("/list", middlewares.HasPermission("gateway:agent:config:list"), c.List)             // 配置列表
 	routers.POST("/set", middlewares.HasPermission("gateway:agent:config:set"), c.Set)               // 保存配置
+}
+
+func (s *Config) PublicRoutes(router *gin.RouterGroup) {
+	routers := router.Group("/api/gateway/agent/config/v1")
+	routers.GET("/info", middlewares.HasPermission("gateway:agent:config:list"), s.List)
 }
 
 // Generate 生成Agent配置
@@ -125,6 +131,13 @@ func (c *Config) Set(ctx *gin.Context) {
 			baizeContext.Waring(ctx, "配置保存失败")
 			return
 		}
+
+		err = c.agentService.UpdateLastConfig(ctx, data.ID, []uint64{uint64(req.AgentObjectID)})
+		if err != nil {
+			zap.L().Error("UpdateLastConfig error", zap.Error(err))
+		}
+
+		// 更新gateway的最后一个配置id
 		baizeContext.SuccessData(ctx, data)
 	} else {
 		data, err := c.configService.Update(ctx, req)

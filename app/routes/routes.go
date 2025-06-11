@@ -67,8 +67,9 @@ func NewGinEngine(
 		if viper.GetString("upload_file.type") == "local" {
 			group.Static(localhostObject.ResourcePrefix, viper.GetString("upload_file.localhost.public_path"))
 		}
-		sc.Login.PublicRoutes(group) //登录
-		sc.Sse.PublicRoutes(group)   //SSE链接
+		sc.Login.PublicRoutes(group)          //登录
+		sc.Sse.PublicRoutes(group)            //SSE链接
+		controller.Config.PublicRoutes(group) //注册Agent公共配置接口
 
 	}
 	//做鉴权的

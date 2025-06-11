@@ -205,7 +205,8 @@ CREATE TABLE `sys_iot_agent` (
     `operate_state` int(2) NOT NULL DEFAULT 0 COMMENT '操作状态 1-启动中 2-停止中 3-启动失败 4-停止失败',
     `operate_time` timestamp NULL COMMENT '操作时间',
     `version` varchar(64) not null comment 'agent版本',
-    `config_uuid` varchar(64) not null default '' comment '配置版本',
+    `config_id` bigint(20) unsigned NOT NULL COMMENT '配置id',
+    `last_config_id` bigint(20) unsigned NOT NULL COMMENT '最后版本的配置id',
     `ipv4`varchar(32) not null default '' comment  'ipv4地址',
     `ipv6`varchar(64) not null default '' comment  'ipv6地址',
     `last_heartbeat_time` timestamp NULL COMMENT '上次心跳时间',
@@ -219,7 +220,7 @@ CREATE TABLE `sys_iot_agent` (
     PRIMARY KEY (`object_id`)
 ) ENGINE=Innodb   COMMENT='agent信息';
 
-
+alter table sys_iot_agent add column `config_id` bigint(20) unsigned NOT NULL COMMENT '版本的配置id',
 CREATE TABLE `sys_iot_agent_process` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增标识',
     `agent_object_id` bigint(20) unsigned NOT NULL COMMENT 'agent uuid',
@@ -248,7 +249,7 @@ CREATE TABLE `sys_iot_agent_config` (
    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
-   `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+   `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 `    -1删除）',
    PRIMARY KEY (`id`),
    INDEX `agent_object_id`(`agent_object_id`) USING BTREE
 ) ENGINE=Innodb   COMMENT='agent配置';
