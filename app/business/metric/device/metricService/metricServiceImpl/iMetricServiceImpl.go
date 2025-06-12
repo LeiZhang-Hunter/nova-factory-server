@@ -64,8 +64,8 @@ func (m *IMetricServiceImpl) Export(c context.Context, request *v1.ExportMetrics
 					Attributes: map[string]string{
 						"test": "1111",
 					},
-					StartTimeUnix: utils.NanoToGTime(mVale.StartTimeUnixNano),
-					TimeUnix:      utils.NanoToGTime(mVale.TimeUnixNano),
+					StartTimeUnix: utils.MicroToGTime(mVale.StartTimeUnixNano),
+					TimeUnix:      utils.MicroToGTime(mVale.TimeUnixNano),
 					Value:         v,
 				})
 			}

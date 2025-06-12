@@ -27,7 +27,6 @@ func (m *Metric) PrivateRoutes(router *gin.RouterGroup) {
 }
 
 func (m *Metric) ReportDeviceInfo(c context.Context, request *v1.ExportMetricsServiceRequest) (*v1.NodeRes, error) {
-
 	err := m.service.Export(c, request)
 	if err != nil {
 		return &v1.NodeRes{

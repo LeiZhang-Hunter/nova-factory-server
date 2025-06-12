@@ -8,10 +8,13 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/daemonize/daemonizeService"
 	"nova-factory-server/app/utils/gateway/v1/api"
+	"nova-factory-server/app/utils/gateway/v1/config/app/sink/metric_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/bhps7"
 	"nova-factory-server/app/utils/gateway/v1/config/cfg"
 	"nova-factory-server/app/utils/gateway/v1/config/pipeline"
+	"nova-factory-server/app/utils/gateway/v1/config/sink"
 	source2 "nova-factory-server/app/utils/gateway/v1/config/source"
+	"nova-factory-server/app/utils/snowflake"
 	"strconv"
 )
 
@@ -48,6 +51,7 @@ func OfBhps7Device(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDevi
 			Annotation:   v.Name,
 			DataFormat:   api.DataValueType(v.DataFormat),
 			Unit:         v.Unit,
+			TemplateId:   uint64(v.TemplateID),
 			Position:     uint16(v.Register),
 			FunctionCode: uint16(v.FunctionCode),
 			Sort:         api.ByteOrder(v.Sort),
@@ -147,6 +151,21 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		}
 		source.Properties = pack
 		pipelinesConfig.Sources = append(pipelinesConfig.Sources, &source)
+
+		var exportConfig metric_exporter.Config
+		exportConfig.Address = "localhost:6000"
+		packContent, err := cfg.Pack(exportConfig)
+		if err != nil {
+			zap.L().Error("cfg.Pack() failed", zap.Error(err))
+			continue
+		}
+		pipelinesConfig.Sink = &sink.Config{
+			Enabled:     &enabled,
+			Name:        fmt.Sprintf("sink-%d", snowflake.GenID()),
+			Type:        "metric_exporter",
+			Properties:  packContent,
+			Parallelism: 1,
+		}
 	}
 	pipelinesConfig.Name = fmt.Sprintf("gateway-pipeline-%d", gatewayId)
 	// 读取模板下的所有模板数据

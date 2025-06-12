@@ -1,12 +1,15 @@
 package utils
 
 import (
+	"fmt"
 	"github.com/gogf/gf/os/gtime"
 	"time"
 )
 
-func NanoToGTime(nano uint64) *gtime.Time {
-	t := time.Unix(0, int64(nano/1000/1000/1000)) // 从1970-01-01 00:00:00 UTC开始计算，ns纳秒后的时间点
-	return gtime.New(t)
+func MicroToGTime(micro uint64) *gtime.Time {
+	fmt.Println(time.Now().Unix())
+	t := micro / 1000 / 1000
+	timestamp := time.Unix(int64(t), 0)
+	return gtime.New(timestamp)
 
 }

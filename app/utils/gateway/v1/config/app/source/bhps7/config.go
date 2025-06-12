@@ -6,6 +6,7 @@ import (
 )
 
 type DataTypeConfig struct {
+	TemplateId   uint64 `yaml:"templateId"`
 	Name         string
 	Protocol     string
 	Annotation   string
