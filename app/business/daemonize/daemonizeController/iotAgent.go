@@ -28,6 +28,7 @@ func (i *IotAgent) PrivateRoutes(router *gin.RouterGroup) {
 	agent.DELETE("/remove/:ids", middlewares.HasPermission("daemonize:agent:remove"), i.Remove)       //移除agent
 	agent.POST("/process/start", middlewares.HasPermission("daemonize:agent:process:start"), i.Start) //启动进程
 	agent.POST("/process/stop", middlewares.HasPermission("daemonize:agent:process:stop"), i.Stop)    //停止进程
+	agent.GET("/info", middlewares.HasPermission("daemonize:agent:info"), i.Info)                     // agent列表
 }
 
 // List Agent列表
@@ -143,4 +144,43 @@ func (i *IotAgent) Stop(c *gin.Context) {
 // @Success 200 {object}  response.ResponseData "设置分组成功"
 // @Router /daemonize/agent/process/start [post]
 func (i *IotAgent) Start(c *gin.Context) {
+	req := new(daemonizeModels.StartProcessReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if len(req.ProcessOperateInfoList) == 0 {
+		baizeContext.Waring(c, "请选择选项")
+		return
+	}
+	err = i.daemonize.BroadcastAgentOperateProcess(c, v1.AgentCmd_Start, daemonizeModels.ToPbProcessList(req.ProcessOperateInfoList))
+	if err != nil {
+		baizeContext.Waring(c, "操作失败")
+		return
+	}
+	baizeContext.Success(c)
+}
+
+// Info agent详情
+// @Summary agent详情
+// @Description agent详情
+// @Tags 网关管理/Agent管理
+// @Param  object query daemonizeModels.SysIotAgentQueryReq true "设备分组参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /daemonize/agent/info [get]
+func (i *IotAgent) Info(c *gin.Context) {
+	req := new(daemonizeModels.SysIotAgentQueryReq)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	info, err := i.service.Info(c, req.ObjectID)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, info)
 }

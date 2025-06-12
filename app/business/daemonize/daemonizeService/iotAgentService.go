@@ -14,4 +14,5 @@ type IotAgentService interface {
 	GetByObjectId(ctx context.Context, objectId uint64) (agent *daemonizeModels.SysIotAgent, err error)
 	UpdateConfig(ctx context.Context, configId uint64, objectIdList []uint64) (err error)
 	UpdateLastConfig(ctx context.Context, configId uint64, objectIdList []uint64) (err error)
+	Info(ctx *gin.Context, objectId uint64) (*daemonizeModels.SysIotAgent, error)
 }

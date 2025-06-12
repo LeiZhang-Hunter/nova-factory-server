@@ -36,19 +36,24 @@ func (i *iotAgentServiceImpl) Add(ctx *gin.Context, req *daemonizeModels.SysIotA
 
 func (i *iotAgentServiceImpl) List(ctx *gin.Context, req *daemonizeModels.SysIotAgentListReq) (*daemonizeModels.SysIotAgentListData, error) {
 	list, err := i.dao.GetAgentList(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	if list == nil {
+		return nil, nil
+	}
 	var objectIds []uint64
-	if list != nil && len(list.Rows) != 0 {
-		for _, v := range list.Rows {
-			objectIds = append(objectIds, v.ObjectID)
+	for _, v := range list.Rows {
+		objectIds = append(objectIds, v.ObjectID)
+	}
+	processes := i.processDao.GetHeardBeatInfo(ctx, objectIds)
+
+	for _, v := range list.Rows {
+		processList, ok := processes[v.ObjectID]
+		if !ok {
+			continue
 		}
-		processes := i.processDao.GetHeardBeatInfo(ctx, objectIds)
-		for _, v := range list.Rows {
-			processList, ok := processes[v.ObjectID]
-			if !ok {
-				continue
-			}
-			v.Processes = processList
-		}
+		v.Processes = processList
 	}
 
 	return list, err
@@ -73,4 +78,22 @@ func (i *iotAgentServiceImpl) UpdateConfig(ctx context.Context, configId uint64,
 }
 func (i *iotAgentServiceImpl) UpdateLastConfig(ctx context.Context, configId uint64, objectIdList []uint64) (err error) {
 	return i.dao.UpdateLastConfig(ctx, configId, objectIdList)
+}
+
+func (i *iotAgentServiceImpl) Info(ctx *gin.Context, objectId uint64) (*daemonizeModels.SysIotAgent, error) {
+	info, err := i.dao.GetByObjectId(ctx, objectId)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, nil
+	}
+	processes := i.processDao.GetHeardBeatInfo(ctx, []uint64{objectId})
+	processList, ok := processes[objectId]
+	if !ok {
+		return info, nil
+	}
+	info.Processes = processList
+
+	return info, err
 }

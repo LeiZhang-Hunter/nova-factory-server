@@ -63,7 +63,7 @@ type SysIotAgentListData struct {
 }
 
 type ProcessOperateInfo struct {
-	AgentObjectId uint64   `protobuf:"varint,1,opt,name=AgentObjectId,proto3" json:"AgentObjectId,omitempty"`
+	AgentObjectId uint64   `protobuf:"varint,1,opt,name=AgentObjectId,proto3" json:"AgentObjectId,string"`
 	Names         []string `protobuf:"bytes,2,rep,name=Names,proto3" json:"Names,omitempty"`
 }
 
@@ -81,4 +81,8 @@ func ToPbProcessList(list []*ProcessOperateInfo) []*v1.ProcessOperateInfo {
 		})
 	}
 	return processOperateInfoList
+}
+
+type SysIotAgentQueryReq struct {
+	ObjectID uint64 `gorm:"column:object_id;primaryKey;comment:agent uuid" form:"object_id"` // agent uuid
 }

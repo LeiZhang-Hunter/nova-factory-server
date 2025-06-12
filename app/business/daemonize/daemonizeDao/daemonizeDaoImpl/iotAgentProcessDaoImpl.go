@@ -42,12 +42,13 @@ func (i *IotAgentProcessDaoImpl) GetHeardBeatInfo(ctx context.Context, objectIds
 	}
 	var objectIdMap map[uint64]uint64 = make(map[uint64]uint64)
 	var objectIdList []string
+	var objectIdsArray []uint64 = make([]uint64, 0)
 	for _, id := range objectIds {
 		objectIdMap[id] = id
 	}
 	for _, id := range objectIdMap {
 		objectIdList = append(objectIdList, redis.MakeCacheKey(redis.AgentProcessCacheKey, "", id))
-
+		objectIdsArray = append(objectIdsArray, id)
 	}
 	slice := i.cache.MGet(ctx, objectIdList).Val()
 	for k, v := range slice {
@@ -64,7 +65,7 @@ func (i *IotAgentProcessDaoImpl) GetHeardBeatInfo(ctx context.Context, objectIds
 			zap.L().Error("json Unmarshal error", zap.Error(err))
 			continue
 		}
-		processes[objectIds[k]] = process
+		processes[objectIdsArray[k]] = process
 	}
 	return processes
 }

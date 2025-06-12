@@ -1328,6 +1328,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/gateway/agent/config/v1/bind": {
+            "post": {
+                "description": "绑定Agent配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "绑定Agent配置",
+                "parameters": [
+                    {
+                        "description": "参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/daemonizeModels.BindGatewayConfigReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/gateway/agent/config/v1/info": {
+            "get": {
+                "description": "读取Agent配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "读取Agent配置",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "agent uuid",
+                        "name": "object_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "password",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "username",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/asset/device/list": {
             "get": {
                 "description": "获取设备列表",
@@ -2875,6 +2944,35 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/craftRouteModels.SysCraftRouteRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/daemonize/agent/info": {
+            "get": {
+                "description": "agent详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "agent详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "description": "agent uuid",
+                        "name": "object_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -9120,11 +9218,31 @@ const docTemplate = `{
                 }
             }
         },
+        "daemonizeModels.BindGatewayConfigReq": {
+            "type": "object",
+            "properties": {
+                "config_id": {
+                    "description": "版本的配置id",
+                    "type": "integer"
+                },
+                "object_id": {
+                    "description": "agent uuid",
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "daemonizeModels.ProcessOperateInfo": {
             "type": "object",
             "properties": {
                 "AgentObjectId": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "Names": {
                     "type": "array",
@@ -9147,10 +9265,16 @@ const docTemplate = `{
         },
         "daemonizeModels.SysIotAgentConfigSetReq": {
             "type": "object",
+            "required": [
+                "agent_object_id",
+                "config_version",
+                "content"
+            ],
             "properties": {
                 "agent_object_id": {
                     "description": "agent id",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "config_version": {
                     "description": "配置版本",
@@ -9162,7 +9286,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "自增标识",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },

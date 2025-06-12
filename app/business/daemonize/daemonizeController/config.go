@@ -34,9 +34,10 @@ func (c *Config) PrivateRoutes(router *gin.RouterGroup) {
 	routers.POST("/set", middlewares.HasPermission("gateway:agent:config:set"), c.Set)               // 保存配置
 }
 
-func (s *Config) PublicRoutes(router *gin.RouterGroup) {
+func (c *Config) PublicRoutes(router *gin.RouterGroup) {
 	routers := router.Group("/api/gateway/agent/config/v1")
-	routers.GET("/info", middlewares.HasPermission("gateway:agent:config:list"), s.List)
+	routers.GET("/info", c.Info)
+	routers.POST("/bind", c.Bind)
 }
 
 // Generate 生成Agent配置
@@ -147,4 +148,80 @@ func (c *Config) Set(ctx *gin.Context) {
 		}
 		baizeContext.SuccessData(ctx, data)
 	}
+}
+
+// Info 读取Agent配置
+// @Summary 读取Agent配置
+// @Description 读取Agent配置
+// @Tags 网关管理/Agent管理
+// @Param  object query daemonizeModels.GetGatewayConfigReq true "参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /api/gateway/agent/config/v1/info [get]
+func (c *Config) Info(ctx *gin.Context) {
+	req := new(daemonizeModels.GetGatewayConfigReq)
+	err := ctx.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(ctx)
+		return
+	}
+	info, err := c.agentService.GetByObjectId(ctx, req.ObjectID)
+	if err != nil {
+		baizeContext.Waring(ctx, "读取agent信息失败")
+		return
+	}
+	if info == nil {
+		baizeContext.Waring(ctx, "配置不存在")
+		return
+	}
+	if info.Username != req.Username || info.Password != req.Password {
+		baizeContext.Waring(ctx, "帐号或者密码错误")
+		return
+	}
+
+	list, err := c.configService.GetLastedConfig(ctx, req.ObjectID)
+	if err != nil {
+		baizeContext.Waring(ctx, err.Error())
+		return
+	}
+	baizeContext.SuccessData(ctx, list)
+}
+
+// Bind 绑定Agent配置
+// @Summary 绑定Agent配置
+// @Description 绑定Agent配置
+// @Tags 网关管理/Agent管理
+// @Param  object body daemonizeModels.BindGatewayConfigReq true "参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /api/gateway/agent/config/v1/bind [post]
+func (c *Config) Bind(ctx *gin.Context) {
+	req := new(daemonizeModels.BindGatewayConfigReq)
+	err := ctx.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(ctx)
+		return
+	}
+	info, err := c.agentService.GetByObjectId(ctx, req.ObjectID)
+	if err != nil {
+		baizeContext.Waring(ctx, "读取agent信息失败")
+		return
+	}
+	if info == nil {
+		baizeContext.Waring(ctx, "配置不存在")
+		return
+	}
+	if info.Username != req.Username || info.Password != req.Password {
+		baizeContext.Waring(ctx, "帐号或者密码错误")
+		return
+	}
+
+	err = c.agentService.UpdateConfig(ctx, uint64(req.ConfigID), []uint64{
+		req.ObjectID,
+	})
+	if err != nil {
+		baizeContext.Waring(ctx, "绑定配置失败")
+		return
+	}
+	baizeContext.Success(ctx)
 }

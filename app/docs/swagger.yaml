@@ -718,10 +718,24 @@ definitions:
         description: 单位
         type: string
     type: object
+  daemonizeModels.BindGatewayConfigReq:
+    properties:
+      config_id:
+        description: 版本的配置id
+        type: integer
+      object_id:
+        description: agent uuid
+        type: integer
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   daemonizeModels.ProcessOperateInfo:
     properties:
       AgentObjectId:
-        type: integer
+        example: "0"
+        type: string
       Names:
         items:
           type: string
@@ -738,7 +752,8 @@ definitions:
     properties:
       agent_object_id:
         description: agent id
-        type: integer
+        example: "0"
+        type: string
       config_version:
         description: 配置版本
         type: string
@@ -747,7 +762,12 @@ definitions:
         type: string
       id:
         description: 自增标识
-        type: integer
+        example: "0"
+        type: string
+    required:
+    - agent_object_id
+    - config_version
+    - content
     type: object
   daemonizeModels.SysIotAgentSetReq:
     properties:
@@ -2623,6 +2643,50 @@ paths:
       summary: 上传文档
       tags:
       - 工业智能体/文档管理
+  /api/gateway/agent/config/v1/bind:
+    post:
+      description: 绑定Agent配置
+      parameters:
+      - description: 参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/daemonizeModels.BindGatewayConfigReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 绑定Agent配置
+      tags:
+      - 网关管理/Agent管理
+  /api/gateway/agent/config/v1/info:
+    get:
+      description: 读取Agent配置
+      parameters:
+      - description: agent uuid
+        in: query
+        name: object_id
+        type: integer
+      - in: query
+        name: password
+        type: string
+      - in: query
+        name: username
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 读取Agent配置
+      tags:
+      - 网关管理/Agent管理
   /asset/device/{deviceIds}:
     delete:
       description: 删除设备
@@ -3638,6 +3702,25 @@ paths:
       summary: 设置工艺路线
       tags:
       - 工艺管理
+  /daemonize/agent/info:
+    get:
+      description: agent详情
+      parameters:
+      - description: agent uuid
+        example: "0"
+        in: query
+        name: object_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: agent详情
+      tags:
+      - 网关管理/Agent管理
   /daemonize/agent/list:
     get:
       description: Agent列表

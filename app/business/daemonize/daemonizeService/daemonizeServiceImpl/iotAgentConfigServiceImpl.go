@@ -1,6 +1,7 @@
 package daemonizeServiceImpl
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/daemonize/daemonizeDao"
 	"nova-factory-server/app/business/daemonize/daemonizeModels"
@@ -35,4 +36,8 @@ func (i *IotAgentConfigServiceImpl) Update(ctx *gin.Context, config *daemonizeMo
 
 func (i *IotAgentConfigServiceImpl) List(c *gin.Context, req *daemonizeModels.SysIotAgentConfigListReq) (*daemonizeModels.SysIotAgentConfigListData, error) {
 	return i.dao.List(c, req)
+}
+
+func (i *IotAgentConfigServiceImpl) GetLastedConfig(ctx context.Context, agentId uint64) (*daemonizeModels.SysIotAgentConfig, error) {
+	return i.dao.GetLastedConfig(ctx, agentId)
 }

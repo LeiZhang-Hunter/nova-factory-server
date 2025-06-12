@@ -8,7 +8,7 @@ import (
 
 type IotAgentConfigDao interface {
 	GetByUuid(ctx context.Context, uuid string) (*daemonizeModels.SysIotAgentConfig, error)
-	GetLastedConfig(ctx context.Context) (*daemonizeModels.SysIotAgentConfig, error)
+	GetLastedConfig(ctx context.Context, agentId uint64) (*daemonizeModels.SysIotAgentConfig, error)
 	GetLastedConfigList(ctx context.Context, count int) ([]*daemonizeModels.SysIotAgentConfig, error)
 	GetVersionListByUuidList(ctx context.Context, uuidList []string) (versionMap map[uint64]string, err error)
 	GetByVersion(ctx context.Context, configVersion string) (config *daemonizeModels.SysIotAgentConfig, err error)

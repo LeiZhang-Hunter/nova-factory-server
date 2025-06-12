@@ -47,3 +47,16 @@ type SysIotAgentConfigListData struct {
 	Rows  []*SysIotAgentConfig `json:"rows"`
 	Total int64                `json:"total"`
 }
+
+type GetGatewayConfigReq struct {
+	ObjectID uint64 `gorm:"column:object_id;primaryKey;comment:agent uuid" form:"object_id"` // agent uuid
+	Username string `gorm:"column:username" form:"username"`
+	Password string `gorm:"column:password" form:"password"`
+}
+
+type BindGatewayConfigReq struct {
+	ObjectID uint64 `gorm:"column:object_id;primaryKey;comment:agent uuid" json:"object_id"` // agent uuid
+	ConfigID int64  `gorm:"column:config_id;not null;comment:版本的配置id" json:"config_id"`      // 版本的配置id
+	Username string `gorm:"column:username" json:"username"`
+	Password string `gorm:"column:password" json:"password"`
+}

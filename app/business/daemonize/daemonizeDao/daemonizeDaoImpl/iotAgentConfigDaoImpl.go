@@ -37,9 +37,9 @@ func (i *IotAgentConfigDaoImpl) GetByUuid(ctx context.Context, uuid string) (*da
 }
 
 // GetLastedConfig 获取最新的配置
-func (i *IotAgentConfigDaoImpl) GetLastedConfig(ctx context.Context) (*daemonizeModels.SysIotAgentConfig, error) {
+func (i *IotAgentConfigDaoImpl) GetLastedConfig(ctx context.Context, agentId uint64) (*daemonizeModels.SysIotAgentConfig, error) {
 	var config *daemonizeModels.SysIotAgentConfig
-	ret := i.db.Table(i.tableName).First(&config)
+	ret := i.db.Table(i.tableName).Where("agent_object_id = ?", agentId).Order("create_time desc").Where("state = ?", commonStatus.NORMAL).First(&config)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}
