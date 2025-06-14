@@ -21,6 +21,8 @@ import (
 	"nova-factory-server/app/business/daemonize/daemonizeController"
 	"nova-factory-server/app/business/daemonize/daemonizeDao/daemonizeDaoImpl"
 	"nova-factory-server/app/business/daemonize/daemonizeService/daemonizeServiceImpl"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService/deviceMonitorServiceImpl"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
 	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
@@ -74,6 +76,9 @@ func wireApp() (*gin.Engine, func(), error) {
 		daemonizeDaoImpl.ProviderSet,
 		daemonizeServiceImpl.ProviderSet,
 		daemonizeController.ProviderSet,
+
+		deviceMonitorServiceImpl.ProviderSet,
+		deviceMonitorController.ProviderSet,
 
 		datasource.ProviderSet,
 		routes.ProviderSet,

@@ -23,6 +23,8 @@ import (
 	"nova-factory-server/app/business/daemonize/daemonizeController"
 	"nova-factory-server/app/business/daemonize/daemonizeDao/daemonizeDaoImpl"
 	"nova-factory-server/app/business/daemonize/daemonizeService/daemonizeServiceImpl"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService/deviceMonitorServiceImpl"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
 	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
@@ -206,7 +208,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		return nil, nil, err
 	}
 	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse)
-	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao)
+	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
 	metric := metricController.NewMetric(iMetricService)
 	metricServer := &metricController.MetricServer{
 		Metric: metric,
@@ -226,7 +228,12 @@ func wireApp() (*gin.Engine, func(), error) {
 		IotAgent:  iotAgent,
 		Config:    daemonizeControllerConfig,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer)
+	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache)
+	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
+	deviceMonitorControllerDeviceMonitorController := &deviceMonitorController.DeviceMonitorController{
+		DeviceMonitor: deviceMonitor,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController)
 	return engine, func() {
 		cleanup()
 	}, nil

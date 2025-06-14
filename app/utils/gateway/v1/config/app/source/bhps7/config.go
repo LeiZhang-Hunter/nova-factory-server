@@ -10,6 +10,7 @@ type DataTypeConfig struct {
 	Name         string
 	Protocol     string
 	Annotation   string
+	DataId       uint64            `yaml:"dataId"`
 	DataFormat   api.DataValueType `yaml:"dataFormat"`
 	Unit         string            `yaml:"unit"`
 	Position     uint16

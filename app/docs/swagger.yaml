@@ -3707,10 +3707,9 @@ paths:
       description: agent详情
       parameters:
       - description: agent uuid
-        example: "0"
         in: query
         name: object_id
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -3832,6 +3831,38 @@ paths:
       summary: 设置Agent
       tags:
       - 网关管理/Agent管理
+  /device/monitor/list:
+    get:
+      description: 设备监控
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设备监控
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设备监控
+      tags:
+      - 设备监控/设备监控
   /file/downloadPrivateFile:
     get:
       description: 租户下载私有文件

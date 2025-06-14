@@ -9,6 +9,7 @@ import (
 	"nova-factory-server/app/business/asset/material/materialController"
 	"nova-factory-server/app/business/craft/craftRouteController"
 	"nova-factory-server/app/business/daemonize/daemonizeController"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/system/systemController"
@@ -44,6 +45,7 @@ func NewGinEngine(
 	craft *craftRouteController.CraftRoute,
 	metric *metricController.MetricServer,
 	controller *daemonizeController.DaemonizeServer,
+	deviceMonitor *deviceMonitorController.DeviceMonitorController,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -115,6 +117,8 @@ func NewGinEngine(
 		metric.Metric.PrivateRoutes(group) //设备指标
 		controller.IotAgent.PrivateRoutes(group)
 		controller.Config.PrivateRoutes(group)
+
+		deviceMonitor.DeviceMonitor.PrivateRoutes(group)
 
 	}
 

@@ -2968,8 +2968,7 @@ const docTemplate = `{
                 "summary": "agent详情",
                 "parameters": [
                     {
-                        "type": "string",
-                        "example": "0",
+                        "type": "integer",
                         "description": "agent uuid",
                         "name": "object_id",
                         "in": "query"
@@ -3148,6 +3147,54 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/monitor/list": {
+            "get": {
+                "description": "设备监控",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "设备监控",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备监控",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }

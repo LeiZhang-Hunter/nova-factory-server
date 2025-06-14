@@ -48,6 +48,7 @@ func OfBhps7Device(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDevi
 		device.Template = append(device.Template, bhps7.DataTypeConfig{
 			Name:         v.Name,
 			Protocol:     "",
+			DataId:       uint64(v.DeviceConfigID),
 			Annotation:   v.Name,
 			DataFormat:   api.DataValueType(v.DataFormat),
 			Unit:         v.Unit,
