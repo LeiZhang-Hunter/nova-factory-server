@@ -2,6 +2,7 @@ package deviceMonitorServiceImpl
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceDao"
@@ -14,16 +15,18 @@ import (
 )
 
 type DeviceMonitorServiceImpl struct {
-	dao       deviceDao.IDeviceDao
-	metricDao metricDao.IMetricDao
-	cache     cache.Cache
+	dao                 deviceDao.IDeviceDao
+	metricDao           metricDao.IMetricDao
+	cache               cache.Cache
+	deviceConfigDataDao deviceDao.ISysModbusDeviceConfigDataDao
 }
 
-func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache, metricDao metricDao.IMetricDao) deviceMonitorService.DeviceMonitorService {
+func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache, metricDao metricDao.IMetricDao, deviceConfigDataDao deviceDao.ISysModbusDeviceConfigDataDao) deviceMonitorService.DeviceMonitorService {
 	return &DeviceMonitorServiceImpl{
-		dao:       dao,
-		cache:     cache,
-		metricDao: metricDao,
+		dao:                 dao,
+		cache:               cache,
+		metricDao:           metricDao,
+		deviceConfigDataDao: deviceConfigDataDao,
 	}
 }
 
@@ -65,5 +68,19 @@ func (d *DeviceMonitorServiceImpl) List(c *gin.Context) (*deviceModels.DeviceInf
 }
 
 func (d *DeviceMonitorServiceImpl) Metric(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error) {
-	return d.metricDao.Metric(c, req)
+	info, err := d.deviceConfigDataDao.GetById(c, req.DataId)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, errors.New("数据不存在")
+	}
+	data, err := d.metricDao.Metric(c, req)
+	if err != nil {
+		return data, err
+	}
+
+	data.Labels["unit"] = info.Unit
+	data.Labels["name"] = info.Name
+	return data, nil
 }

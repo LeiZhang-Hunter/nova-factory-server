@@ -228,7 +228,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		IotAgent:  iotAgent,
 		Config:    daemonizeControllerConfig,
 	}
-	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao)
+	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao)
 	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
 	deviceMonitorControllerDeviceMonitorController := &deviceMonitorController.DeviceMonitorController{
 		DeviceMonitor: deviceMonitor,

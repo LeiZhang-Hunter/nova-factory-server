@@ -83,12 +83,23 @@ func (i *ISysModbusDeviceConfigDataDaoImpl) List(c *gin.Context, req *deviceMode
 	}, nil
 }
 
-func (i *ISysModbusDeviceConfigDataDaoImpl) GetByIds(c *gin.Context, ids []uint64) ([]*deviceModels.SysModbusDeviceConfigData, error) {
+func (i *ISysModbusDeviceConfigDataDaoImpl) GetByTemplateIds(c *gin.Context, ids []uint64) ([]*deviceModels.SysModbusDeviceConfigData, error) {
 	if ids == nil || len(ids) == 0 {
 		return nil, errors.New("ids is null")
 	}
 	var dto []*deviceModels.SysModbusDeviceConfigData
 	ret := i.db.Table(i.tableName).Where("template_id in (?)", ids).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+
+	return dto, nil
+}
+
+func (i *ISysModbusDeviceConfigDataDaoImpl) GetById(c *gin.Context, id uint64) (*deviceModels.SysModbusDeviceConfigData, error) {
+
+	var dto *deviceModels.SysModbusDeviceConfigData
+	ret := i.db.Table(i.tableName).Where("device_config_id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&dto)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}

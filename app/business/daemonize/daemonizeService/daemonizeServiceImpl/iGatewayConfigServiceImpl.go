@@ -112,7 +112,7 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	}
 
 	// 读取设备模板数据
-	templatesData, err := i.templateDataDao.GetByIds(c, templateIds)
+	templatesData, err := i.templateDataDao.GetByTemplateIds(c, templateIds)
 	if err != nil {
 		return nil, err
 	}
