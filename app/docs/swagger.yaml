@@ -965,6 +965,29 @@ definitions:
       reason:
         type: string
     type: object
+  metricModels.MetricQueryReq:
+    properties:
+      data_id:
+        type: integer
+      device_id:
+        type: integer
+      end:
+        type: integer
+      expression:
+        type: string
+      limit:
+        type: integer
+      query:
+        type: string
+      service_name:
+        type: string
+      start:
+        type: integer
+      step:
+        type: integer
+      template_id:
+        type: integer
+    type: object
   monitorModels.JobDML:
     properties:
       createBy:
@@ -3861,6 +3884,26 @@ paths:
           schema:
             $ref: '#/definitions/response.ResponseData'
       summary: 设备监控
+      tags:
+      - 设备监控/设备监控
+  /device/monitor/metric:
+    post:
+      description: 设备指标
+      parameters:
+      - description: 设备监控
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/metricModels.MetricQueryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设备监控
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设备指标
       tags:
       - 设备监控/设备监控
   /file/downloadPrivateFile:

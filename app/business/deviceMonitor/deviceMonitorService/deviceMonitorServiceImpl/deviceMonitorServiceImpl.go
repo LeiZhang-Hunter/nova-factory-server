@@ -2,26 +2,28 @@ package deviceMonitorServiceImpl
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
+	"nova-factory-server/app/business/metric/device/metricDao"
 	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/datasource/cache"
 )
 
 type DeviceMonitorServiceImpl struct {
-	dao   deviceDao.IDeviceDao
-	cache cache.Cache
+	dao       deviceDao.IDeviceDao
+	metricDao metricDao.IMetricDao
+	cache     cache.Cache
 }
 
-func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache) deviceMonitorService.DeviceMonitorService {
+func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache, metricDao metricDao.IMetricDao) deviceMonitorService.DeviceMonitorService {
 	return &DeviceMonitorServiceImpl{
-		dao:   dao,
-		cache: cache,
+		dao:       dao,
+		cache:     cache,
+		metricDao: metricDao,
 	}
 }
 
@@ -43,7 +45,6 @@ func (d *DeviceMonitorServiceImpl) List(c *gin.Context) (*deviceModels.DeviceInf
 	}
 
 	slice := d.cache.MGet(c, keys)
-	fmt.Println(slice)
 	for k, v := range slice.Val() {
 		str, ok := v.(string)
 		if !ok {
@@ -61,4 +62,8 @@ func (d *DeviceMonitorServiceImpl) List(c *gin.Context) (*deviceModels.DeviceInf
 		list.Rows[k].TemplateList = deviceMetrics
 	}
 	return list, nil
+}
+
+func (d *DeviceMonitorServiceImpl) Metric(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error) {
+	return d.metricDao.Metric(c, req)
 }

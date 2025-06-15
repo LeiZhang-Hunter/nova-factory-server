@@ -3194,6 +3194,37 @@
                 }
             }
         },
+        "/device/monitor/metric": {
+            "post": {
+                "description": "设备指标",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "设备指标",
+                "parameters": [
+                    {
+                        "description": "设备监控",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备监控",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/file/downloadPrivateFile": {
             "get": {
                 "security": [
@@ -9597,6 +9628,41 @@
                 },
                 "reason": {
                     "type": "string"
+                }
+            }
+        },
+        "metricModels.MetricQueryReq": {
+            "type": "object",
+            "properties": {
+                "data_id": {
+                    "type": "integer"
+                },
+                "device_id": {
+                    "type": "integer"
+                },
+                "end": {
+                    "type": "integer"
+                },
+                "expression": {
+                    "type": "string"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "integer"
+                },
+                "step": {
+                    "type": "integer"
+                },
+                "template_id": {
+                    "type": "integer"
                 }
             }
         },

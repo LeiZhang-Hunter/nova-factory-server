@@ -3,6 +3,7 @@ module nova-factory-server
 go 1.24.3
 
 require (
+	github.com/ClickHouse/clickhouse-go/v2 v2.30.0
 	github.com/aws/aws-sdk-go-v2 v1.24.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.16.16
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.48.1
@@ -44,7 +45,6 @@ require (
 
 require (
 	github.com/ClickHouse/ch-go v0.61.5 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.30.0 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect

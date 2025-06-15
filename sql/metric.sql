@@ -1,8 +1,8 @@
 
 
-CREATE TABLE IF NOT EXISTS nova_metrics_device
+CREATE TABLE IF NOT EXISTS nova_metrics_device ON CLUSTER `default`
 (
-    `device_id` Int32 COMMENT '设备id',
+    `device_id` UInt64 COMMENT '设备id',
     `template_id` UInt64 COMMENT '设备模板id',
     `data_id` bigint(20) NOT NULL COMMENT '数据id',
     series_id UInt64 COMMENT '序列id',

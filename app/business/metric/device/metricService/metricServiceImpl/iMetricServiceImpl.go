@@ -10,7 +10,7 @@ import (
 	"nova-factory-server/app/business/metric/device/metricService"
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/datasource/cache"
-	"nova-factory-server/app/utils"
+	time2 "nova-factory-server/app/utils/time"
 	"time"
 )
 
@@ -73,8 +73,8 @@ func (m *IMetricServiceImpl) Export(c context.Context, request *v1.ExportMetrics
 					},
 					DataId:        mVale.DataId,
 					SeriesId:      request.SeriesId,
-					StartTimeUnix: utils.MicroToGTime(mVale.StartTimeUnixNano),
-					TimeUnix:      utils.MicroToGTime(mVale.TimeUnixNano),
+					StartTimeUnix: time2.MicroToGTime(mVale.StartTimeUnixNano),
+					TimeUnix:      time2.MicroToGTime(mVale.TimeUnixNano),
 					Value:         v,
 				})
 			}
@@ -105,9 +105,10 @@ func (m *IMetricServiceImpl) export(c context.Context, values []*metricModels.No
 			data.Data[uint64(v.DeviceId)][v.TemplateId] = make(map[uint64]*metricModels.DeviceMetricData)
 		}
 
+		mapValue := make(map[string]string)
 		data.Data[uint64(v.DeviceId)][uint64(v.TemplateId)][uint64(v.DataId)] = &metricModels.DeviceMetricData{
 			SeriesId:      seriesId,
-			Attributes:    v.Attributes,
+			Attributes:    mapValue,
 			StartTimeUnix: v.StartTimeUnix,
 			TimeUnix:      v.TimeUnix,
 			Value:         v.Value,
