@@ -1,0 +1,428 @@
+{
+  "edges": [
+    {
+      "id": "xy-edge__begin-Answer:SweetKeysSharec",
+      "markerEnd": "logo",
+      "source": "begin",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Answer:SweetKeysShare",
+      "targetHandle": "c",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    },
+    {
+      "id": "xy-edge__Baidu:ReadyColtsSniffc-Generate:EightEggsCleanc",
+      "markerEnd": "logo",
+      "source": "Baidu:ReadyColtsSniff",
+      "sourceHandle": "c",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Generate:EightEggsClean",
+      "targetHandle": "c",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    },
+    {
+      "id": "xy-edge__Answer:SweetKeysShareb-Template:CruelHatsDoc",
+      "markerEnd": "logo",
+      "selected": false,
+      "source": "Answer:SweetKeysShare",
+      "sourceHandle": "b",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Template:CruelHatsDo",
+      "targetHandle": "c",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    },
+    {
+      "id": "xy-edge__Template:CruelHatsDob-Retrieval:EasyBearsBeamc",
+      "markerEnd": "logo",
+      "source": "Template:CruelHatsDo",
+      "sourceHandle": "b",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Retrieval:EasyBearsBeam",
+      "targetHandle": "c",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    },
+    {
+      "id": "xy-edge__Retrieval:EasyBearsBeamb-Categorize:ColdJobsRemaina",
+      "markerEnd": "logo",
+      "source": "Retrieval:EasyBearsBeam",
+      "sourceHandle": "b",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Categorize:ColdJobsRemain",
+      "targetHandle": "a",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    },
+    {
+      "id": "xy-edge__Categorize:ColdJobsRemain知识库-Generate:MetalKnivesDropb",
+      "markerEnd": "logo",
+      "selected": false,
+      "source": "Categorize:ColdJobsRemain",
+      "sourceHandle": "知识库",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Generate:MetalKnivesDrop",
+      "targetHandle": "b",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    },
+    {
+      "id": "xy-edge__Categorize:ColdJobsRemain百度-Template:LazyCougarsHappenb",
+      "markerEnd": "logo",
+      "source": "Categorize:ColdJobsRemain",
+      "sourceHandle": "百度",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Template:LazyCougarsHappen",
+      "targetHandle": "b",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    },
+    {
+      "id": "xy-edge__Template:LazyCougarsHappenc-Baidu:ReadyColtsSniffb",
+      "markerEnd": "logo",
+      "source": "Template:LazyCougarsHappen",
+      "sourceHandle": "c",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Baidu:ReadyColtsSniff",
+      "targetHandle": "b",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    },
+    {
+      "id": "xy-edge__Generate:MetalKnivesDropc-Answer:SweetKeysSharec",
+      "markerEnd": "logo",
+      "source": "Generate:MetalKnivesDrop",
+      "sourceHandle": "c",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Answer:SweetKeysShare",
+      "targetHandle": "c",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    },
+    {
+      "id": "xy-edge__Generate:EightEggsCleanb-Answer:SweetKeysSharec",
+      "markerEnd": "logo",
+      "source": "Generate:EightEggsClean",
+      "sourceHandle": "b",
+      "style": {
+        "stroke": "rgb(202 197 245)",
+        "strokeWidth": 2
+      },
+      "target": "Answer:SweetKeysShare",
+      "targetHandle": "c",
+      "type": "buttonEdge",
+      "zIndex": 1001
+    }
+  ],
+  "nodes": [
+    {
+      "data": {
+        "label": "Begin",
+        "name": "begin"
+      },
+      "dragging": false,
+      "id": "begin",
+      "measured": {
+        "height": 44,
+        "width": 200
+      },
+      "position": {
+        "x": -1849.0036103994526,
+        "y": -73.0535340176301
+      },
+      "selected": false,
+      "sourcePosition": "left",
+      "targetPosition": "right",
+      "type": "beginNode"
+    },
+    {
+      "data": {
+        "form": {},
+        "label": "Answer",
+        "name": "获取用户问题"
+      },
+      "dragging": false,
+      "id": "Answer:SweetKeysShare",
+      "measured": {
+        "height": 44,
+        "width": 200
+      },
+      "position": {
+        "x": -1810.8968253718597,
+        "y": -380.11926578118835
+      },
+      "selected": false,
+      "sourcePosition": "right",
+      "targetPosition": "left",
+      "type": "logicNode"
+    },
+    {
+      "data": {
+        "form": {
+          "cite": true,
+          "frequencyPenaltyEnabled": true,
+          "frequency_penalty": 0.7,
+          "llm_id": "deepseek-r1:1.5b@Ollama",
+          "maxTokensEnabled": false,
+          "max_tokens": 256,
+          "message_history_window_size": 12,
+          "parameters": [],
+          "presencePenaltyEnabled": true,
+          "presence_penalty": 0.4,
+          "prompt": "请总结以下段落。注意数字，不要胡编乱造。段落如下：\n {Baidu:ReadyColtsSniff}\n根据以上内容回答用户的问题  {Answer:SweetKeysShare}",
+          "temperature": 0.1,
+          "temperatureEnabled": true,
+          "topPEnabled": true,
+          "top_p": 0.3
+        },
+        "label": "Generate",
+        "name": "百度回答"
+      },
+      "dragging": false,
+      "id": "Generate:EightEggsClean",
+      "measured": {
+        "height": 108,
+        "width": 200
+      },
+      "position": {
+        "x": -1524.507928434413,
+        "y": 21.776254733018575
+      },
+      "selected": false,
+      "sourcePosition": "right",
+      "targetPosition": "left",
+      "type": "generateNode"
+    },
+    {
+      "data": {
+        "form": {
+          "query": [
+            {
+              "component_id": "Template:CruelHatsDo",
+              "type": "reference"
+            }
+          ],
+          "top_n": 10
+        },
+        "label": "Baidu",
+        "name": "百度"
+      },
+      "dragging": false,
+      "id": "Baidu:ReadyColtsSniff",
+      "measured": {
+        "height": 64,
+        "width": 200
+      },
+      "position": {
+        "x": -1196.4300927732038,
+        "y": -67.92779811942813
+      },
+      "selected": false,
+      "sourcePosition": "right",
+      "targetPosition": "left",
+      "type": "ragNode"
+    },
+    {
+      "data": {
+        "form": {
+          "content": "{Answer:SweetKeysShare}",
+          "parameters": []
+        },
+        "label": "Template",
+        "name": "模板转换_0"
+      },
+      "dragging": false,
+      "id": "Template:CruelHatsDo",
+      "measured": {
+        "height": 76,
+        "width": 200
+      },
+      "position": {
+        "x": -1442.0442198762153,
+        "y": -393.3372066175922
+      },
+      "selected": false,
+      "sourcePosition": "right",
+      "targetPosition": "left",
+      "type": "templateNode"
+    },
+    {
+      "data": {
+        "form": {
+          "category_description": {
+            "百度": {
+              "description": "如果用户输入内容是空字符串,那么就属于百度分类",
+              "examples": "",
+              "index": 1,
+              "to": "Template:LazyCougarsHappen"
+            },
+            "知识库": {
+              "description": "如果用户输入内容不是空字符串,那么就属于知识库分类",
+              "index": 0,
+              "to": "Generate:MetalKnivesDrop"
+            }
+          },
+          "frequencyPenaltyEnabled": true,
+          "frequency_penalty": 0.7,
+          "llm_id": "deepseek-r1:1.5b@Ollama",
+          "maxTokensEnabled": false,
+          "max_tokens": 256,
+          "message_history_window_size": 1,
+          "presencePenaltyEnabled": true,
+          "presence_penalty": 0.4,
+          "query": [
+            {
+              "component_id": "Retrieval:EasyBearsBeam",
+              "type": "reference"
+            }
+          ],
+          "temperature": 0.1,
+          "temperatureEnabled": true,
+          "topPEnabled": true,
+          "top_p": 0.3
+        },
+        "label": "Categorize",
+        "name": "问题分类"
+      },
+      "dragging": false,
+      "id": "Categorize:ColdJobsRemain",
+      "measured": {
+        "height": 178,
+        "width": 200
+      },
+      "position": {
+        "x": -600.1573517614048,
+        "y": -445.75799239224614
+      },
+      "selected": true,
+      "sourcePosition": "right",
+      "targetPosition": "left",
+      "type": "categorizeNode"
+    },
+    {
+      "data": {
+        "form": {
+          "cite": true,
+          "frequencyPenaltyEnabled": true,
+          "frequency_penalty": 0.7,
+          "llm_id": "deepseek-r1:1.5b@Ollama",
+          "maxTokensEnabled": false,
+          "max_tokens": 256,
+          "message_history_window_size": 12,
+          "parameters": [],
+          "presencePenaltyEnabled": true,
+          "presence_penalty": 0.4,
+          "prompt": "请总结以下段落。注意数字，不要胡编乱造。段落如下：\n  {Retrieval:EasyBearsBeam}\n根据以上内容回答用户的问题  ",
+          "temperature": 0.1,
+          "temperatureEnabled": true,
+          "topPEnabled": true,
+          "top_p": 0.3
+        },
+        "label": "Generate",
+        "name": "知识库回答"
+      },
+      "dragging": false,
+      "id": "Generate:MetalKnivesDrop",
+      "measured": {
+        "height": 108,
+        "width": 200
+      },
+      "position": {
+        "x": -1466.6350723539563,
+        "y": -724.66408529615
+      },
+      "selected": false,
+      "sourcePosition": "right",
+      "targetPosition": "left",
+      "type": "generateNode"
+    },
+    {
+      "data": {
+        "form": {
+          "kb_ids": [
+            "14cc5b8627ba11f0b6370242ac120006"
+          ],
+          "kb_vars": [],
+          "keywords_similarity_weight": 0.7,
+          "query": [
+            {
+              "component_id": "Template:CruelHatsDo",
+              "type": "reference"
+            }
+          ],
+          "similarity_threshold": 0.4,
+          "top_n": 8,
+          "use_kg": false
+        },
+        "label": "Retrieval",
+        "name": "知识检索"
+      },
+      "dragging": false,
+      "id": "Retrieval:EasyBearsBeam",
+      "measured": {
+        "height": 106,
+        "width": 200
+      },
+      "position": {
+        "x": -1106.012369198699,
+        "y": -408.9371155452434
+      },
+      "selected": false,
+      "sourcePosition": "right",
+      "targetPosition": "left",
+      "type": "retrievalNode"
+    },
+    {
+      "data": {
+        "form": {
+          "content": "{Answer:SweetKeysShare}",
+          "parameters": []
+        },
+        "label": "Template",
+        "name": "模板转换_1"
+      },
+      "dragging": false,
+      "id": "Template:LazyCougarsHappen",
+      "measured": {
+        "height": 76,
+        "width": 200
+      },
+      "position": {
+        "x": -492.89330049599675,
+        "y": -4.947490866577088
+      },
+      "selected": false,
+      "sourcePosition": "right",
+      "targetPosition": "left",
+      "type": "templateNode"
+    }
+  ]
+}
