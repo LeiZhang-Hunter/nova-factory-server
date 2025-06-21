@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/cloudwego/eino/components/tool"
