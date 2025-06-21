@@ -26,19 +26,19 @@ func (p *ProcessContextDaoImpl) Add(c *gin.Context, processContext *craftRouteMo
 	context := craftRouteModels.NewSysProProcessContent(processContext)
 	context.ProcessID = snowflake.GenID()
 	context.SetCreateBy(baizeContext.GetUserId(c))
-	ret := p.db.Create(context)
+	ret := p.db.Table(p.tableName).Create(context)
 	return context, ret.Error
 }
 
 func (p *ProcessContextDaoImpl) Update(c *gin.Context, processContext *craftRouteModels.SysProSetProcessContent) (*craftRouteModels.SysProProcessContent, error) {
 	context := craftRouteModels.NewSysProProcessContent(processContext)
 	context.SetUpdateBy(baizeContext.GetUserId(c))
-	ret := p.db.Where("content_id = ?", processContext.ContentID).Updates(context)
+	ret := p.db.Table(p.tableName).Where("content_id = ?", processContext.ContentID).Updates(context)
 	return context, ret.Error
 }
 
 func (p *ProcessContextDaoImpl) Remove(c *gin.Context, ids []string) error {
-	ret := p.db.Where("content_id in (?)", ids).Update("state", commonStatus.DELETE)
+	ret := p.db.Table(p.tableName).Where("content_id in (?)", ids).Update("state", commonStatus.DELETE)
 	return ret.Error
 }
 
@@ -87,6 +87,6 @@ func (p *ProcessContextDaoImpl) List(c *gin.Context, req *craftRouteModels.SysPr
 
 func (p *ProcessContextDaoImpl) GetByProcessIds(c *gin.Context, ids []int64) ([]*craftRouteModels.SysProProcessContent, error) {
 	var data []*craftRouteModels.SysProProcessContent
-	ret := p.db.Where("process_id in (?)", ids).Where("state", commonStatus.DELETE).Find(&data)
+	ret := p.db.Table(p.tableName).Where("process_id in (?)", ids).Find(&data)
 	return data, ret.Error
 }

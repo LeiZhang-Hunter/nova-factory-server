@@ -64,9 +64,6 @@ func (craft *CraftRouteServiceImpl) DetailCraftRoute(c *gin.Context, req *craftR
 	if err != nil {
 		return &craftRouteModels.ProcessTopo{}, err
 	}
-	if len(processRouteRelations) == 0 {
-		return &craftRouteModels.ProcessTopo{}, nil
-	}
 
 	for _, value := range processRouteRelations {
 		processIds = append(processIds, value.ProcessID)

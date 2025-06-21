@@ -45,7 +45,7 @@ type SysCraftRouteListData struct {
 }
 
 type SysCraftRouteDetailRequest struct {
-	RouteID int64 `gorm:"column:route_id;primaryKey;comment:工艺路线ID" json:"route_id,string"` // 出库id
+	RouteID int64 `gorm:"column:route_id;primaryKey;comment:工艺路线ID" form:"route_id" json:"route_id,string"` // 出库id
 }
 
 type ProcessTopoNode struct {
