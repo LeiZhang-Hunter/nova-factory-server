@@ -67,6 +67,10 @@ func (d *Dataset) SessionList(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+	if req.ChatId == "" {
+		baizeContext.SuccessData(c, &aiDataSetModels.ListSessionResponse{})
+		return
+	}
 	list, err := d.chartsService.SessionList(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())

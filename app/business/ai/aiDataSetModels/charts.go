@@ -47,7 +47,7 @@ type UpdateSessionsResponse struct {
 
 // ListSessionRequest 列表请求
 type ListSessionRequest struct {
-	ChatId string `json:"chat_id" form:"chat_id" binding:"required"`
+	ChatId string `json:"chat_id" form:"chat_id"`
 	Name   string `json:"name" form:"name"`
 	Id     string `json:"id" form:"id"`
 	UserId string `json:"user_id" form:"user_id"`
