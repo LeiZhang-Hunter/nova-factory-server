@@ -7,6 +7,6 @@ import (
 )
 
 type DeviceMonitorService interface {
-	List(c *gin.Context) (*deviceModels.DeviceInfoListData, error)
+	List(c *gin.Context, req *deviceModels.DeviceListReq) (*deviceModels.DeviceInfoListData, error)
 	Metric(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error)
 }

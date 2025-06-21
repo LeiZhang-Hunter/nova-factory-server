@@ -55,6 +55,23 @@ type SysProSetProcessContent struct {
 	Attr4       int32  `gorm:"column:attr4;comment:预留字段4" json:"attr4"`                                             // 预留字段4
 }
 
+func OfSysProSetProcessContent(ctx *SysProProcessContent) *SysProSetProcessContent {
+	return &SysProSetProcessContent{
+		ContentID:   ctx.ContentID,
+		ProcessID:   ctx.ProcessID,
+		OrderNum:    ctx.OrderNum,
+		ContentText: ctx.ContentText,
+		Device:      ctx.Device,
+		Material:    ctx.Material,
+		DocURL:      ctx.DocURL,
+		Remark:      ctx.Remark,
+		Attr1:       ctx.Attr1,
+		Attr2:       ctx.Attr2,
+		Attr3:       ctx.Attr3,
+		Attr4:       ctx.Attr4,
+	}
+}
+
 type SysProProcessContextListReq struct {
 	ProcessID int64 `gorm:"column:process_id;not null;comment:工序ID" json:"process_id"` // 工序ID
 	baize.BaseEntityDQL

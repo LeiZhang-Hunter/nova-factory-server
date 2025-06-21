@@ -3,6 +3,7 @@ package deviceMonitorServiceImpl
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceDao"
@@ -30,8 +31,8 @@ func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache, me
 	}
 }
 
-func (d *DeviceMonitorServiceImpl) List(c *gin.Context) (*deviceModels.DeviceInfoListData, error) {
-	list, err := d.dao.SelectDeviceList(c, &deviceModels.DeviceListReq{})
+func (d *DeviceMonitorServiceImpl) List(c *gin.Context, req *deviceModels.DeviceListReq) (*deviceModels.DeviceInfoListData, error) {
+	list, err := d.dao.SelectDeviceList(c, req)
 	if err != nil {
 		zap.L().Error("device list select error", zap.Error(err))
 		return nil, err
@@ -62,7 +63,57 @@ func (d *DeviceMonitorServiceImpl) List(c *gin.Context) (*deviceModels.DeviceInf
 			zap.L().Error("json Unmarshal error", zap.Error(err))
 			continue
 		}
+		if deviceMetrics == nil {
+			list.Rows[k].Active = false
+		} else {
+			list.Rows[k].Active = true
+		}
 		list.Rows[k].TemplateList = deviceMetrics
+	}
+
+	// 处理数据
+	var dataIds []uint64 = make([]uint64, 0)
+	for _, v := range list.Rows {
+		for _, templateValue := range v.TemplateList {
+			for dataId, _ := range templateValue {
+				dataIds = append(dataIds, dataId)
+			}
+		}
+	}
+
+	datas, err := d.deviceConfigDataDao.GetByIds(c, dataIds)
+	if err != nil {
+		return nil, err
+	}
+
+	var dataMap map[uint64]*deviceModels.SysModbusDeviceConfigData = make(map[uint64]*deviceModels.SysModbusDeviceConfigData)
+	for _, dataValue := range datas {
+		dataMap[uint64(dataValue.DeviceConfigID)] = dataValue
+	}
+
+	fmt.Println(dataMap)
+	for k, v := range list.Rows {
+		for templateId, templateValue := range v.TemplateList {
+			for dataId, _ := range templateValue {
+				if list.Rows[k].TemplateList == nil {
+					continue
+				}
+				_, ok := list.Rows[k].TemplateList[templateId]
+				if !ok {
+					continue
+				}
+				_, ok = list.Rows[k].TemplateList[templateId][dataId]
+				if !ok {
+					continue
+				}
+				dataValue, ok := dataMap[dataId]
+				if !ok {
+					continue
+				}
+				list.Rows[k].TemplateList[templateId][dataId].Name = dataValue.Name
+				list.Rows[k].TemplateList[templateId][dataId].Unit = dataValue.Unit
+			}
+		}
 	}
 	return list, nil
 }

@@ -66,6 +66,26 @@ type SysSetProRouteProductBom struct {
 	Attr4         int32   `gorm:"column:attr4;comment:预留字段4" json:"attr4"`                                      // 预留字段4
 }
 
+func OfSysSetProRouteProductBom(data *SysProRouteProductBom) *SysSetProRouteProductBom {
+	return &SysSetProRouteProductBom{
+		RouteID:       data.RouteID,
+		ProcessID:     data.ProcessID,
+		ProductID:     data.ProductID,
+		ItemID:        data.ItemID,
+		ItemCode:      data.ItemCode,
+		ItemName:      data.ItemName,
+		Specification: data.Specification,
+		UnitOfMeasure: data.UnitOfMeasure,
+		UnitName:      data.UnitName,
+		Quantity:      data.Quantity,
+		Remark:        data.Remark,
+		Attr1:         data.Attr1,
+		Attr2:         data.Attr2,
+		Attr3:         data.Attr3,
+		Attr4:         data.Attr4,
+	}
+}
+
 type SysProRouteProductBomReq struct {
 	baize.BaseEntityDQL
 }

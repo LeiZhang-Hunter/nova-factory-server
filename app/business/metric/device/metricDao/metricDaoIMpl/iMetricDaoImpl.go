@@ -55,7 +55,7 @@ func (m *MetricDaoImpl) Metric(c *gin.Context, req *metricModels.MetricQueryReq)
 	if endTime != "" {
 		model = model.Where("time_unix <= ?", endTime)
 	}
-	if req.Step == 0 {
+	if req.Step <= 0 {
 		req.Step = 1
 	}
 
@@ -68,7 +68,7 @@ func (m *MetricDaoImpl) Metric(c *gin.Context, req *metricModels.MetricQueryReq)
 	ret := model.Where("device_id = ?", req.DeviceId).
 		Where("template_id = ?", req.TemplateId).
 		Where("data_id = ?", req.DataId).
-		Group("time_unix").Limit(500).Find(&list)
+		Group("time_unix").Order("time_unix desc").Limit(500).Find(&list)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}

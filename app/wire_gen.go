@@ -143,13 +143,13 @@ func wireApp() (*gin.Engine, func(), error) {
 	iDeviceGroupService := deviceServiceImpl.NewDeviceGroupService(iDeviceGroupDao, iUserDao)
 	deviceGroup := deviceController.NewDeviceGroup(iDeviceGroupService)
 	iDeviceTemplateDao := deviceDaoImpl.NewIDeviceTemplateDaoImpl(db)
-	iDeviceTemplateService := deviceServiceImpl.NewDeviceTemplateServiceImpl(iDeviceTemplateDao)
+	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
+	iDeviceTemplateService := deviceServiceImpl.NewDeviceTemplateServiceImpl(iDeviceTemplateDao, iSysModbusDeviceConfigDataDao)
 	template, err := deviceController.NewTemplate(iDeviceTemplateService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
 	iSysModbusDeviceConfigDataService := deviceServiceImpl.NewISysModbusDeviceConfigDataServiceImpl(iSysModbusDeviceConfigDataDao)
 	templateData := deviceController.NewTemplateData(iSysModbusDeviceConfigDataService, iDeviceTemplateService)
 	device := &deviceController.Device{
@@ -177,21 +177,21 @@ func wireApp() (*gin.Engine, func(), error) {
 		Dataset: dataset,
 	}
 	iCraftRouteDao := craftRouteDaoImpl.NewCraftRouteDaoImpl(db)
-	iCraftRouteService := craftRouteServiceImpl.NewCraftRouteServiceImpl(iCraftRouteDao)
-	craft := craftRouteController.NewCraft(iCraftRouteService)
 	iProcessDao := craftRouteDaoImpl.NewIProcessDaoImpl(db)
+	iRouteProcessDao := craftRouteDaoImpl.NewIProcessRouteDaoImpl(db)
+	iProcessContextDao := craftRouteDaoImpl.NewProcessContextDaoImpl(db)
+	iSysProRouteProductBomDao := craftRouteDaoImpl.NewSysProRouteProductBomDaoImpl(db)
+	iSysProRouteProductDao := craftRouteDaoImpl.NewISysProRouteProductDaoImpl(db)
+	iCraftRouteService := craftRouteServiceImpl.NewCraftRouteServiceImpl(iCraftRouteDao, iProcessDao, iRouteProcessDao, iProcessContextDao, iSysProRouteProductBomDao, iSysProRouteProductDao)
+	craft := craftRouteController.NewCraft(iCraftRouteService)
 	iCraftProcessService := craftRouteServiceImpl.NewICraftProcessServiceImpl(iProcessDao, iUserDao)
 	process := craftRouteController.NewProcess(iCraftProcessService)
-	iProcessContextDao := craftRouteDaoImpl.NewProcessContextDaoImpl(db)
 	iCraftProcessContextService := craftRouteServiceImpl.NewICraftProcessContextServiceImpl(iProcessContextDao, iUserDao)
 	processContext := craftRouteController.NewProcessContext(iCraftProcessContextService)
-	iRouteProcessDao := craftRouteDaoImpl.NewIProcessRouteDaoImpl(db)
 	iProcessRouteService := craftRouteServiceImpl.NewIProcessRouteServiceImpl(iRouteProcessDao, iProcessDao, iCraftRouteDao)
 	routeProcess := craftRouteController.NewSysProRouteProcess(iProcessRouteService)
-	iSysProRouteProductDao := craftRouteDaoImpl.NewISysProRouteProductDaoImpl(db)
 	iSysProRouteProductService := craftRouteServiceImpl.NewSysProRouteProductServiceImpl(iSysProRouteProductDao)
 	routeProduct := craftRouteController.NewRouteProduct(iSysProRouteProductService)
-	iSysProRouteProductBomDao := craftRouteDaoImpl.NewSysProRouteProductBomDaoImpl(db)
 	iSysProRouteProductBomService := craftRouteServiceImpl.NewISysProRouteProductBomServiceImpl(iSysProRouteProductBomDao)
 	routeProductBom := craftRouteController.NewRouteProductBom(iSysProRouteProductBomService)
 	craftRoute := &craftRouteController.CraftRoute{

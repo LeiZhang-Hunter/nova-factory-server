@@ -84,3 +84,9 @@ func (p *ProcessContextDaoImpl) List(c *gin.Context, req *craftRouteModels.SysPr
 		Total: total,
 	}, nil
 }
+
+func (p *ProcessContextDaoImpl) GetByProcessIds(c *gin.Context, ids []int64) ([]*craftRouteModels.SysProProcessContent, error) {
+	var data []*craftRouteModels.SysProProcessContent
+	ret := p.db.Where("process_id in (?)", ids).Where("state", commonStatus.DELETE).Find(&data)
+	return data, ret.Error
+}

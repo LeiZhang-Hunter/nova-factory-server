@@ -968,9 +968,11 @@ definitions:
   metricModels.MetricQueryReq:
     properties:
       data_id:
-        type: integer
+        example: "0"
+        type: string
       device_id:
-        type: integer
+        example: "0"
+        type: string
       end:
         type: integer
       expression:
@@ -986,7 +988,8 @@ definitions:
       step:
         type: integer
       template_id:
-        type: integer
+        example: "0"
+        type: string
     type: object
   monitorModels.JobDML:
     properties:
@@ -2758,6 +2761,9 @@ paths:
         in: query
         name: deviceProtocolId
         type: string
+      - in: query
+        name: end
+        type: integer
       - description: 排序规则  降序desc   asc升序
         in: query
         name: isAsc
@@ -2781,6 +2787,9 @@ paths:
         description: 数量
         in: query
         name: pageSize
+        type: integer
+      - in: query
+        name: start
         type: integer
       - in: query
         name: type
@@ -3441,6 +3450,25 @@ paths:
       summary: 设置工序
       tags:
       - 工艺管理/工序管理
+  /craft/route/detail:
+    get:
+      description: 工艺详情
+      parameters:
+      - description: 出库id
+        example: "0"
+        in: query
+        name: route_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 工艺详情
+      tags:
+      - 工艺管理
   /craft/route/list:
     get:
       description: 读取工艺列表
@@ -3858,9 +3886,41 @@ paths:
     get:
       description: 设备监控
       parameters:
+      - in: query
+        name: controlType
+        type: integer
+      - example: "0"
+        in: query
+        name: deviceBuildingId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceClassId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceGroupId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceProtocolId
+        type: string
+      - in: query
+        name: end
+        type: integer
       - description: 排序规则  降序desc   asc升序
         in: query
         name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: number
         type: string
       - description: 排序字段
         in: query
@@ -3876,6 +3936,12 @@ paths:
         in: query
         name: pageSize
         type: integer
+      - in: query
+        name: start
+        type: integer
+      - in: query
+        name: type
+        type: string
       produces:
       - application/json
       responses:

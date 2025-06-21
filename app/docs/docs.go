@@ -1444,6 +1444,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "integer",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "description": "排序规则  降序desc   asc升序",
                         "name": "isAsc",
@@ -1477,6 +1482,11 @@ const docTemplate = `{
                         "default": 10000,
                         "description": "数量",
                         "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "start",
                         "in": "query"
                     },
                     {
@@ -2523,6 +2533,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/craft/route/detail": {
+            "get": {
+                "description": "工艺详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理"
+                ],
+                "summary": "工艺详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "description": "出库id",
+                        "name": "route_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/craft/route/list": {
             "get": {
                 "description": "读取工艺列表",
@@ -3166,9 +3205,59 @@ const docTemplate = `{
                 "summary": "设备监控",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "name": "controlType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceBuildingId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceClassId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceGroupId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceProtocolId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "description": "排序规则  降序desc   asc升序",
                         "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "number",
                         "in": "query"
                     },
                     {
@@ -3189,6 +3278,16 @@ const docTemplate = `{
                         "default": 10000,
                         "description": "数量",
                         "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "type",
                         "in": "query"
                     }
                 ],
@@ -9643,10 +9742,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "device_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "end": {
                     "type": "integer"
@@ -9670,7 +9771,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "template_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },

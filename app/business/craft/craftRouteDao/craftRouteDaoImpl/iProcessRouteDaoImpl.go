@@ -38,7 +38,7 @@ func (i *IProcessRouteDaoImpl) Remove(c *gin.Context, ids []string) error {
 }
 
 func (i *IProcessRouteDaoImpl) List(c *gin.Context, req *craftRouteModels.SysProRouteProcessListReq) (*craftRouteModels.SysProRouteProcessList, error) {
-	db := i.db.Table(i.tableName).Table(i.tableName)
+	db := i.db.Table(i.tableName)
 
 	size := 0
 	if req == nil || req.Size <= 0 {
@@ -76,4 +76,10 @@ func (i *IProcessRouteDaoImpl) List(c *gin.Context, req *craftRouteModels.SysPro
 		Rows:  dto,
 		Total: total,
 	}, nil
+}
+
+func (i *IProcessRouteDaoImpl) GetByRouteId(c *gin.Context, routeId int64) ([]*craftRouteModels.SysProRouteProcess, error) {
+	var data []*craftRouteModels.SysProRouteProcess
+	ret := i.db.Table(i.tableName).Where("route_id = ?", routeId).Where("state = ?", commonStatus.NORMAL).Find(&data)
+	return data, ret.Error
 }

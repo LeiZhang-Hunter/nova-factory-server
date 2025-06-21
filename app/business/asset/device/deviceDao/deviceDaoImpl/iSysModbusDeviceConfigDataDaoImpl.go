@@ -106,3 +106,14 @@ func (i *ISysModbusDeviceConfigDataDaoImpl) GetById(c *gin.Context, id uint64) (
 
 	return dto, nil
 }
+
+func (i *ISysModbusDeviceConfigDataDaoImpl) GetByIds(c *gin.Context, id []uint64) ([]*deviceModels.SysModbusDeviceConfigData, error) {
+
+	var dto []*deviceModels.SysModbusDeviceConfigData
+	ret := i.db.Table(i.tableName).Where("device_config_id in (?)", id).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+
+	return dto, nil
+}

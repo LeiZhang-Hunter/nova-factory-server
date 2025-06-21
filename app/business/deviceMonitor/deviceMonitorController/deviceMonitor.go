@@ -2,6 +2,7 @@ package deviceMonitorController
 
 import (
 	"github.com/gin-gonic/gin"
+	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
 	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/middlewares"
@@ -28,12 +29,18 @@ func (d *DeviceMonitor) PrivateRoutes(router *gin.RouterGroup) {
 // @Summary 设备监控
 // @Description 设备监控
 // @Tags 设备监控/设备监控
-// @Param  object query daemonizeModels.SysIotAgentListReq true "设备监控"
+// @Param  object query deviceModels.DeviceListReq true "设备监控"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "设备监控"
 // @Router /device/monitor/list [get]
 func (d *DeviceMonitor) List(c *gin.Context) {
-	list, err := d.service.List(c)
+	req := new(deviceModels.DeviceListReq)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	list, err := d.service.List(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

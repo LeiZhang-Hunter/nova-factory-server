@@ -252,7 +252,8 @@ func (s *IotAgentDaoImpl) GetAgentList(ctx *gin.Context, req *daemonizeModels.Sy
 			offLineCount++
 			agentList[k].Active = agent.OFFLINE
 		}
-
+		heartBeatTime := time.Unix(heartBeat, 0)
+		agentList[k].LastHeartbeatTime = &heartBeatTime
 	}
 
 	return &daemonizeModels.SysIotAgentListData{

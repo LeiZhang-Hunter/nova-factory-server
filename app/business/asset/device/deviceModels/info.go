@@ -13,10 +13,12 @@ type DeviceListReq struct {
 	DeviceClassId    int64   `json:"deviceClassId,string" form:"deviceClassId"`
 	DeviceProtocolId int64   `json:"deviceProtocolId,string" form:"deviceProtocolId"`
 	DeviceBuildingId int64   `json:"deviceBuildingId,string" form:"deviceBuildingId"`
+	Start            uint64  `json:"start"`
+	End              uint64  `json:"end"`
 	Name             *string `json:"name" form:"name"`
 	Number           *string `json:"number" form:"number"`
 	Type             *string `json:"type" form:"type"`
-	ControlType      int     `json:"controlType" form:"controlType"`
+	ControlType      *int    `json:"controlType" form:"controlType"`
 	baize.BaseEntityDQL
 }
 
@@ -68,7 +70,8 @@ type DeviceVO struct {
 	Extension         string                                               `json:"Extension" db:"extension"`
 	ControlType       int                                                  `json:"ControlType" db:"control_type"`
 	ExtensionInfo     *ExtensionInfo                                       `json:"extension_info,omitempty" gorm:"-" db:"control_type"`
-	TemplateList      map[uint64]map[uint64]*metricModels.DeviceMetricData `json:"template_list,omitempty" gorm:"-" db:"template_list"`
+	TemplateList      map[uint64]map[uint64]*metricModels.DeviceMetricData `json:"template_list" gorm:"-" db:"template_list"`
+	Active            bool                                                 `json:"active" gorm:"-" db:"active"`
 	baize.BaseEntity
 }
 

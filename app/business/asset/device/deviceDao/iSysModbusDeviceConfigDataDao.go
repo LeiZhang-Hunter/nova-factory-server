@@ -12,4 +12,5 @@ type ISysModbusDeviceConfigDataDao interface {
 	List(c *gin.Context, req *deviceModels.SysModbusDeviceConfigDataListReq) (*deviceModels.SysModbusDeviceConfigDataListData, error)
 	GetByTemplateIds(c *gin.Context, ids []uint64) ([]*deviceModels.SysModbusDeviceConfigData, error)
 	GetById(c *gin.Context, id uint64) (*deviceModels.SysModbusDeviceConfigData, error)
+	GetByIds(c *gin.Context, id []uint64) ([]*deviceModels.SysModbusDeviceConfigData, error)
 }

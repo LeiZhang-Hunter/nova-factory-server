@@ -98,3 +98,9 @@ func (i *IProcessDaoImpl) GetById(c *gin.Context, id int64) (*craftRouteModels.S
 	ret := i.db.Table(i.tableName).Where("process_id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&data)
 	return data, ret.Error
 }
+
+func (i *IProcessDaoImpl) GetByIds(c *gin.Context, ids []int64) ([]*craftRouteModels.SysProProcess, error) {
+	var data []*craftRouteModels.SysProProcess
+	ret := i.db.Table(i.tableName).Where("process_id in (?)", ids).Where("state = ?", commonStatus.NORMAL).Find(&data)
+	return data, ret.Error
+}

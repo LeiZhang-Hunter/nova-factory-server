@@ -22,9 +22,10 @@ func NewCraft(craft craftRouteService.ICraftRouteService) *Craft {
 
 func (craft *Craft) PrivateRoutes(router *gin.RouterGroup) {
 	routers := router.Group("/craft/route")
-	routers.GET("/list", middlewares.HasPermission("craft:route"), craft.GetRouteList)                            // 知识库列表
+	routers.GET("/list", middlewares.HasPermission("craft:route"), craft.GetRouteList)                            // 工艺路线列表
 	routers.POST("/set", middlewares.HasPermission("craft:route:set"), craft.SetRoute)                            // 设置工艺路线
 	routers.DELETE("/remove/:craft_route_id", middlewares.HasPermission("craft:route:remove"), craft.RemoveRoute) //移除工艺路线
+	routers.GET("/detail", middlewares.HasPermission("craft:route:detail"), craft.Detail)                         // 工艺路线详情
 }
 
 // GetRouteList 读取工艺列表
@@ -106,4 +107,29 @@ func (craft *Craft) RemoveRoute(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// Detail 工艺详情
+// @Summary 工艺详情
+// @Description 工艺详情
+// @Tags 工艺管理
+// @Param  object query craftRouteModels.SysCraftRouteDetailRequest true "设备分组参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /craft/route/detail [get]
+func (craft *Craft) Detail(c *gin.Context) {
+	req := new(craftRouteModels.SysCraftRouteDetailRequest)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		zap.L().Error("解析错误", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+	route, err := craft.craftService.DetailCraftRoute(c, req)
+	if err != nil {
+		zap.L().Error("读取工艺失败", zap.Error(err))
+		baizeContext.Waring(c, "读取工艺失败")
+		return
+	}
+	baizeContext.SuccessData(c, route)
 }

@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/asset/device/deviceService"
+	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/constant/protocols"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -73,6 +74,12 @@ func (t *Template) Set(c *gin.Context) {
 		return
 	}
 
+	// 校验协议类型是否合法
+	if !device.CheckProtocol(info.Protocol) {
+		baizeContext.Waring(c, "协议类型错误")
+		return
+	}
+
 	if info.TemplateID > 0 {
 		vo, err := t.service.Update(c, info)
 		if err != nil {
@@ -109,7 +116,7 @@ func (t *Template) Remove(c *gin.Context) {
 	}
 	err := t.service.Remove(c, ids)
 	if err != nil {
-		baizeContext.Waring(c, "删除失败")
+		baizeContext.Waring(c, err.Error())
 		return
 	}
 	baizeContext.Success(c)

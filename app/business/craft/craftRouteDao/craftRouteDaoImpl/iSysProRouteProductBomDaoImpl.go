@@ -84,3 +84,9 @@ func (s *SysProRouteProductBomDaoImpl) List(c *gin.Context, req *craftRouteModel
 		Total: total,
 	}, nil
 }
+
+func (s *SysProRouteProductBomDaoImpl) GetByRouteId(c *gin.Context, routeID int64) ([]*craftRouteModels.SysProRouteProductBom, error) {
+	var boms []*craftRouteModels.SysProRouteProductBom
+	ret := s.db.Table(s.tableName).Where("route_id = ?", routeID).Where("state = ?", commonStatus.NORMAL).Find(&boms)
+	return boms, ret.Error
+}

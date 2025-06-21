@@ -10,4 +10,5 @@ type ISysProRouteProductBomDao interface {
 	Update(c *gin.Context, info *craftRouteModels.SysSetProRouteProductBom) (*craftRouteModels.SysProRouteProductBom, error)
 	Remove(c *gin.Context, ids []string) error
 	List(c *gin.Context, req *craftRouteModels.SysProRouteProductBomReq) (*craftRouteModels.SysProRouteProductBomList, error)
+	GetByRouteId(c *gin.Context, routeID int64) ([]*craftRouteModels.SysProRouteProductBom, error)
 }

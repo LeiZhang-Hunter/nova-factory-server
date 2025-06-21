@@ -11,4 +11,5 @@ type IProcessDao interface {
 	Update(c *gin.Context, process *craftRouteModels.SysProSetProcessReq) (*craftRouteModels.SysProProcess, error)
 	Remove(c *gin.Context, processIds []int64) error
 	GetById(c *gin.Context, id int64) (*craftRouteModels.SysProProcess, error)
+	GetByIds(c *gin.Context, ids []int64) ([]*craftRouteModels.SysProProcess, error)
 }
