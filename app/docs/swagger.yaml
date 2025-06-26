@@ -409,6 +409,184 @@ definitions:
           type: string
         type: array
     type: object
+  craftRouteModels.ProcessTopo:
+    properties:
+      edges:
+        items:
+          $ref: '#/definitions/craftRouteModels.ProcessTopoEdge'
+        type: array
+      nodes:
+        items:
+          $ref: '#/definitions/craftRouteModels.ProcessTopoNode'
+        type: array
+      products:
+        items:
+          $ref: '#/definitions/craftRouteModels.SysProRouteSetProduct'
+        type: array
+      route:
+        $ref: '#/definitions/craftRouteModels.SysCraftRoute'
+    type: object
+  craftRouteModels.ProcessTopoEdge:
+    properties:
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      color_code:
+        description: 甘特图显示颜色
+        type: string
+      default_pre_time:
+        description: 准备时间
+        type: integer
+      default_suf_time:
+        description: 等待时间
+        type: integer
+      esize:
+        type: string
+      is_check:
+        description: 是否检验
+        type: string
+      key_flag:
+        description: 关键工序
+        type: string
+      link_type:
+        description: 与下一道工序关系
+        type: string
+      next_process_code:
+        description: 工序编码
+        type: string
+      next_process_name:
+        description: 工序名称
+        type: string
+      order_num:
+        description: 序号
+        type: integer
+      process_code:
+        description: 工序编码
+        type: string
+      process_name:
+        description: 工序名称
+        type: string
+      remark:
+        description: 备注
+        type: string
+      route_id:
+        description: 工艺路线ID
+        type: integer
+      source:
+        example: "0"
+        type: string
+      target:
+        example: "0"
+        type: string
+    type: object
+  craftRouteModels.ProcessTopoNode:
+    properties:
+      attention:
+        description: 工艺要求
+        type: string
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      attr4:
+        description: 预留字段4
+        type: integer
+      boms:
+        items:
+          $ref: '#/definitions/craftRouteModels.SysSetProRouteProductBom'
+        type: array
+      context:
+        items:
+          $ref: '#/definitions/craftRouteModels.SysProProcessContent'
+        type: array
+      process_code:
+        description: 工序编码
+        type: string
+      process_id:
+        description: 工序ID
+        example: "0"
+        type: string
+      process_name:
+        description: 工序名称
+        type: string
+      remark:
+        description: 备注
+        type: string
+      status:
+        description: 是否启用（0禁用 1启用）
+        type: boolean
+    required:
+    - process_code
+    - process_name
+    type: object
+  craftRouteModels.SysCraftRoute:
+    properties:
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      attr4:
+        description: 预留字段4
+        type: integer
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      createUserName:
+        type: string
+      dept_id:
+        description: 部门ID
+        example: "0"
+        type: string
+      remark:
+        description: 备注
+        type: string
+      route_code:
+        description: 工艺路线编号
+        type: string
+      route_desc:
+        description: 工艺路线说明
+        type: string
+      route_id:
+        description: 工艺路线ID
+        example: "0"
+        type: string
+      route_name:
+        description: 工艺路线名称
+        type: string
+      state:
+        description: 操作状态（0正常 -1删除）
+        type: boolean
+      status:
+        description: 操作状态（0正常 1异常）
+        type: boolean
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+      updateUserName:
+        type: string
+    type: object
   craftRouteModels.SysCraftRouteRequest:
     properties:
       datasetId:
@@ -489,6 +667,66 @@ definitions:
     required:
     - process_code
     - process_name
+    type: object
+  craftRouteModels.SysProProcessContent:
+    properties:
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      attr4:
+        description: 预留字段4
+        type: integer
+      content_id:
+        description: 内容ID
+        example: "0"
+        type: string
+      content_text:
+        description: 内容说明
+        type: string
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      createUserName:
+        type: string
+      device:
+        description: 辅助设备
+        type: string
+      doc_url:
+        description: 材料URL
+        type: string
+      material:
+        description: 辅助材料
+        type: string
+      order_num:
+        description: 顺序编号
+        type: integer
+      process_id:
+        description: 工序ID
+        example: "0"
+        type: string
+      remark:
+        description: 备注
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+      updateUserName:
+        type: string
+    required:
+    - content_text
+    - process_id
     type: object
   craftRouteModels.SysProRouteProcessListReq:
     properties:
@@ -640,7 +878,8 @@ definitions:
         type: integer
       content_id:
         description: 内容ID
-        type: integer
+        example: "0"
+        type: string
       content_text:
         description: 内容说明
         type: string
@@ -2470,7 +2709,6 @@ paths:
       parameters:
       - in: query
         name: chat_id
-        required: true
         type: string
       - in: query
         name: id
@@ -3315,9 +3553,10 @@ paths:
         name: pageSize
         type: integer
       - description: 工序ID
+        example: "0"
         in: query
         name: process_id
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -3450,6 +3689,26 @@ paths:
       summary: 设置工序
       tags:
       - 工艺管理/工序管理
+  /craft/route/config/save:
+    post:
+      description: 保存工艺制图
+      parameters:
+      - description: 设备分组参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/craftRouteModels.ProcessTopo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 保存工艺制图
+      tags:
+      - 工艺管理
   /craft/route/detail:
     get:
       description: 工艺详情

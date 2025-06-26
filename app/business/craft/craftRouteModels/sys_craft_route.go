@@ -184,3 +184,14 @@ func (p *ProcessTopo) OfProcess(processes []*SysProProcess, processContexts []*S
 	p.Products = products
 
 }
+
+// SysCraftRouteConfig 工艺配置详情
+type SysCraftRouteConfig struct {
+	RouteConfigID int64        `gorm:"column:route_config_id;primaryKey;comment:工艺路线配置id" json:"route_config_id"` // 工艺路线配置id
+	RouteID       int64        `gorm:"column:route_id;not null;comment:工艺路线ID" json:"route_id"`                   // 工艺路线ID
+	Context       string       `gorm:"column:context;comment:配置" json:"context"`                                  // 配置
+	DeptID        int64        `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                // 部门ID
+	Topo          *ProcessTopo `gorm:"-" json:"topo"`
+	baize.BaseEntity
+	State bool `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"` // 操作状态（0正常 -1删除）
+}

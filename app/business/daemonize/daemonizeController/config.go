@@ -197,7 +197,7 @@ func (c *Config) Info(ctx *gin.Context) {
 // @Router /api/gateway/agent/config/v1/bind [post]
 func (c *Config) Bind(ctx *gin.Context) {
 	req := new(daemonizeModels.BindGatewayConfigReq)
-	err := ctx.ShouldBindQuery(req)
+	err := ctx.ShouldBindJSON(req)
 	if err != nil {
 		baizeContext.ParameterError(ctx)
 		return

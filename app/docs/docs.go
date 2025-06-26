@@ -1020,8 +1020,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "chat_id",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",
@@ -2331,7 +2330,8 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
+                        "type": "string",
+                        "example": "0",
                         "description": "工序ID",
                         "name": "process_id",
                         "in": "query"
@@ -2520,6 +2520,37 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/craftRouteModels.SysProProcess"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/config/save": {
+            "post": {
+                "description": "保存工艺制图",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理"
+                ],
+                "summary": "保存工艺制图",
+                "parameters": [
+                    {
+                        "description": "设备分组参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.ProcessTopo"
                         }
                     }
                 ],
@@ -8977,6 +9008,251 @@ const docTemplate = `{
                 }
             }
         },
+        "craftRouteModels.ProcessTopo": {
+            "type": "object",
+            "properties": {
+                "edges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.ProcessTopoEdge"
+                    }
+                },
+                "nodes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.ProcessTopoNode"
+                    }
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.SysProRouteSetProduct"
+                    }
+                },
+                "route": {
+                    "$ref": "#/definitions/craftRouteModels.SysCraftRoute"
+                }
+            }
+        },
+        "craftRouteModels.ProcessTopoEdge": {
+            "type": "object",
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "color_code": {
+                    "description": "甘特图显示颜色",
+                    "type": "string"
+                },
+                "default_pre_time": {
+                    "description": "准备时间",
+                    "type": "integer"
+                },
+                "default_suf_time": {
+                    "description": "等待时间",
+                    "type": "integer"
+                },
+                "esize": {
+                    "type": "string"
+                },
+                "is_check": {
+                    "description": "是否检验",
+                    "type": "string"
+                },
+                "key_flag": {
+                    "description": "关键工序",
+                    "type": "string"
+                },
+                "link_type": {
+                    "description": "与下一道工序关系",
+                    "type": "string"
+                },
+                "next_process_code": {
+                    "description": "工序编码",
+                    "type": "string"
+                },
+                "next_process_name": {
+                    "description": "工序名称",
+                    "type": "string"
+                },
+                "order_num": {
+                    "description": "序号",
+                    "type": "integer"
+                },
+                "process_code": {
+                    "description": "工序编码",
+                    "type": "string"
+                },
+                "process_name": {
+                    "description": "工序名称",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "route_id": {
+                    "description": "工艺路线ID",
+                    "type": "integer"
+                },
+                "source": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "target": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "craftRouteModels.ProcessTopoNode": {
+            "type": "object",
+            "required": [
+                "process_code",
+                "process_name"
+            ],
+            "properties": {
+                "attention": {
+                    "description": "工艺要求",
+                    "type": "string"
+                },
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "boms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.SysSetProRouteProductBom"
+                    }
+                },
+                "context": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.SysProProcessContent"
+                    }
+                },
+                "process_code": {
+                    "description": "工序编码",
+                    "type": "string"
+                },
+                "process_id": {
+                    "description": "工序ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "process_name": {
+                    "description": "工序名称",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "是否启用（0禁用 1启用）",
+                    "type": "boolean"
+                }
+            }
+        },
+        "craftRouteModels.SysCraftRoute": {
+            "type": "object",
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "createBy": {
+                    "description": "创建人",
+                    "type": "integer"
+                },
+                "createTime": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "createUserName": {
+                    "type": "string"
+                },
+                "dept_id": {
+                    "description": "部门ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "route_code": {
+                    "description": "工艺路线编号",
+                    "type": "string"
+                },
+                "route_desc": {
+                    "description": "工艺路线说明",
+                    "type": "string"
+                },
+                "route_id": {
+                    "description": "工艺路线ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "route_name": {
+                    "description": "工艺路线名称",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "操作状态（0正常 -1删除）",
+                    "type": "boolean"
+                },
+                "status": {
+                    "description": "操作状态（0正常 1异常）",
+                    "type": "boolean"
+                },
+                "updateBy": {
+                    "description": "修改人",
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "description": "修改时间",
+                    "type": "string"
+                },
+                "updateUserName": {
+                    "type": "string"
+                }
+            }
+        },
         "craftRouteModels.SysCraftRouteRequest": {
             "type": "object",
             "required": [
@@ -9073,6 +9349,87 @@ const docTemplate = `{
                 "status": {
                     "description": "是否启用（0禁用 1启用）",
                     "type": "boolean"
+                },
+                "updateBy": {
+                    "description": "修改人",
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "description": "修改时间",
+                    "type": "string"
+                },
+                "updateUserName": {
+                    "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.SysProProcessContent": {
+            "type": "object",
+            "required": [
+                "content_text",
+                "process_id"
+            ],
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "content_id": {
+                    "description": "内容ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "content_text": {
+                    "description": "内容说明",
+                    "type": "string"
+                },
+                "createBy": {
+                    "description": "创建人",
+                    "type": "integer"
+                },
+                "createTime": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "createUserName": {
+                    "type": "string"
+                },
+                "device": {
+                    "description": "辅助设备",
+                    "type": "string"
+                },
+                "doc_url": {
+                    "description": "材料URL",
+                    "type": "string"
+                },
+                "material": {
+                    "description": "辅助材料",
+                    "type": "string"
+                },
+                "order_num": {
+                    "description": "顺序编号",
+                    "type": "integer"
+                },
+                "process_id": {
+                    "description": "工序ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
                 },
                 "updateBy": {
                     "description": "修改人",
@@ -9293,7 +9650,8 @@ const docTemplate = `{
                 },
                 "content_id": {
                     "description": "内容ID",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "content_text": {
                     "description": "内容说明",

@@ -10,5 +10,6 @@ type ICraftRouteService interface {
 	UpdateCraftRoute(c *gin.Context, route *craftRouteModels.SysCraftRouteRequest) (*craftRouteModels.SysCraftRoute, error)
 	RemoveCraftRoute(c *gin.Context, ids []int64) error
 	SelectCraftRoute(c *gin.Context, req *craftRouteModels.SysCraftRouteListReq) (*craftRouteModels.SysCraftRouteListData, error)
-	DetailCraftRoute(c *gin.Context, req *craftRouteModels.SysCraftRouteDetailRequest) (*craftRouteModels.ProcessTopo, error)
+	DetailCraftRoute(c *gin.Context, req *craftRouteModels.SysCraftRouteDetailRequest) (*craftRouteModels.SysCraftRouteConfig, error)
+	SaveCraftRoute(c *gin.Context, topo *craftRouteModels.ProcessTopo) (*craftRouteModels.SysCraftRouteConfig, error)
 }

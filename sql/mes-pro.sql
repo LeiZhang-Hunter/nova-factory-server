@@ -22,6 +22,9 @@ create table sys_craft_route (
    primary key (route_id)
 ) engine=innodb auto_increment=0 comment = '工艺路线表';
 
+ 
+
+
 
 -- ----------------------------
 -- 2、生产工序表

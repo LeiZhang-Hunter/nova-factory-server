@@ -8,12 +8,12 @@ import (
 // DataSetRequest 创建知识库请求
 type DataSetRequest struct {
 	Name           string        `json:"name" binding:"required"`
-	Avatar         string        `json:"avatar"`
-	Description    string        `json:"description"`
-	EmbeddingModel string        `json:"embedding_model"`
-	Permission     string        `json:"permission"`
-	ChunkMethod    string        `json:"chunk_method"`
-	Pagerank       string        `json:"pagerank"`
+	Avatar         string        `json:"avatar,omitempty"`
+	Description    string        `json:"description,omitempty"`
+	EmbeddingModel string        `json:"embedding_model,omitempty"`
+	Permission     string        `json:"permission,omitempty"`
+	ChunkMethod    string        `json:"chunk_method,omitempty"`
+	Pagerank       string        `json:"pagerank,omitempty"`
 	ParserConfig   *ParserConfig `json:"parser_config,omitempty"`
 }
 

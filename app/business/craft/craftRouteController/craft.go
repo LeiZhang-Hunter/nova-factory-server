@@ -26,6 +26,7 @@ func (craft *Craft) PrivateRoutes(router *gin.RouterGroup) {
 	routers.POST("/set", middlewares.HasPermission("craft:route:set"), craft.SetRoute)                            // 设置工艺路线
 	routers.DELETE("/remove/:craft_route_id", middlewares.HasPermission("craft:route:remove"), craft.RemoveRoute) //移除工艺路线
 	routers.GET("/detail", middlewares.HasPermission("craft:route:detail"), craft.Detail)                         // 工艺路线详情
+	routers.GET("/config/save", middlewares.HasPermission("craft:route:config:save"), craft.Detail)               // 工艺路线详情
 }
 
 // GetRouteList 读取工艺列表
@@ -129,6 +130,31 @@ func (craft *Craft) Detail(c *gin.Context) {
 	if err != nil {
 		zap.L().Error("读取工艺失败", zap.Error(err))
 		baizeContext.Waring(c, "读取工艺失败")
+		return
+	}
+	baizeContext.SuccessData(c, route)
+}
+
+// Save 保存工艺制图
+// @Summary 保存工艺制图
+// @Description 保存工艺制图
+// @Tags 工艺管理
+// @Param  object body craftRouteModels.ProcessTopo true "设备分组参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /craft/route/config/save [post]
+func (craft *Craft) Save(c *gin.Context) {
+	req := new(craftRouteModels.ProcessTopo)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		zap.L().Error("解析错误", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+	route, err := craft.craftService.SaveCraftRoute(c, req)
+	if err != nil {
+		zap.L().Error("保存工艺制图失败", zap.Error(err))
+		baizeContext.Waring(c, "保存工艺制图失败")
 		return
 	}
 	baizeContext.SuccessData(c, route)

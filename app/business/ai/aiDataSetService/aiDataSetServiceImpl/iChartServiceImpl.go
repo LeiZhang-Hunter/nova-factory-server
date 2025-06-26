@@ -128,12 +128,13 @@ func (i *IChartServiceImpl) SessionList(c *gin.Context, req *aiDataSetModels.Lis
 	}
 	if req.Page > 0 {
 		params.Add("page", strconv.FormatInt(req.Page, 10))
+	} else {
+		params.Add("page", "1")
 	}
 	if req.Size > 0 {
 		params.Add("page_size", strconv.FormatInt(req.Size, 10))
-	}
-	if req.Id != "" {
-		params.Add("id", req.Id)
+	} else {
+		params.Add("page_size", "10")
 	}
 
 	request, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/chats/%s/sessions?%s",
