@@ -169,7 +169,18 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		}
 	}
 	pipelinesConfig.Name = fmt.Sprintf("gateway-pipeline-%d", gatewayId)
+
+	schedulerConfig := pipeline.NewConfig()
+	var scheduleEnabled bool = true
+	source := source2.Config{
+		Enabled: &scheduleEnabled,
+		Name:    "scheduler",
+		Type:    "scheduler",
+	}
+	schedulerConfig.Sources = append(schedulerConfig.Sources, &source)
+
 	// 读取模板下的所有模板数据
 	piplines.Pipelines = append(piplines.Pipelines, *pipelinesConfig)
+	piplines.Pipelines = append(piplines.Pipelines, *schedulerConfig)
 	return piplines, nil
 }
