@@ -2752,24 +2752,12 @@ const docTemplate = `{
         },
         "/craft/route/product/bom/list": {
             "get": {
-                "description": "生产工单列表",
+                "description": "产品制程物料BOM物料BOM列表",
                 "tags": [
-                    "工艺管理/生产工单管理"
+                    "工艺管理/产品制程物料BOM物料BOM管理"
                 ],
-                "summary": "生产工单列表",
+                "summary": "产品制程物料BOM物料BOM列表",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "客户编码",
-                        "name": "client_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "客户名称",
-                        "name": "client_name",
-                        "in": "query"
-                    },
                     {
                         "type": "string",
                         "description": "排序规则  降序desc   asc升序",
@@ -2794,48 +2782,6 @@ const docTemplate = `{
                         "default": 10000,
                         "description": "数量",
                         "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "产品编号",
-                        "name": "product_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "产品名称",
-                        "name": "product_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "需求日期",
-                        "name": "request_date",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "来源单据",
-                        "name": "source_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "工单编码",
-                        "name": "workorder_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "工单名称",
-                        "name": "workorder_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "工单类型",
-                        "name": "workorder_type",
                         "in": "query"
                     }
                 ],
@@ -3068,6 +3014,213 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/craftRouteModels.SysCraftRouteRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/task/list": {
+            "get": {
+                "description": "生产任务列表",
+                "tags": [
+                    "工艺管理/生产任务管理"
+                ],
+                "summary": "生产任务列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "生产工单ID",
+                        "name": "workorder_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/task/remove/{ids}": {
+            "delete": {
+                "description": "移除生产任务",
+                "tags": [
+                    "工艺管理/生产工单管理"
+                ],
+                "summary": "移除生产任务",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/task/set": {
+            "post": {
+                "description": "设置生产任务",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/生产任务管理"
+                ],
+                "summary": "设置生产任务",
+                "parameters": [
+                    {
+                        "description": "设置生生产任务",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.SysSetProTask"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/work_order/list": {
+            "get": {
+                "description": "生产工单列表",
+                "tags": [
+                    "工艺管理/生产工单管理"
+                ],
+                "summary": "生产工单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "客户编码",
+                        "name": "client_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "客户名称",
+                        "name": "client_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "产品编号",
+                        "name": "product_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "产品名称",
+                        "name": "product_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "需求日期",
+                        "name": "request_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "来源单据",
+                        "name": "source_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "工单编码",
+                        "name": "workorder_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "工单名称",
+                        "name": "workorder_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "工单类型",
+                        "name": "workorder_type",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -9878,6 +10031,171 @@ const docTemplate = `{
                 },
                 "unit_of_measure": {
                     "description": "单位",
+                    "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.SysSetProTask": {
+            "type": "object",
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "client_code": {
+                    "description": "客户编码",
+                    "type": "string"
+                },
+                "client_id": {
+                    "description": "客户ID",
+                    "type": "integer"
+                },
+                "client_name": {
+                    "description": "客户名称",
+                    "type": "string"
+                },
+                "client_nick": {
+                    "description": "客户简称",
+                    "type": "string"
+                },
+                "color_code": {
+                    "description": "甘特图显示颜色",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "生产时长",
+                    "type": "integer"
+                },
+                "end_time": {
+                    "description": "完成生产时间",
+                    "type": "string"
+                },
+                "item_code": {
+                    "description": "产品物料编码",
+                    "type": "string"
+                },
+                "item_id": {
+                    "description": "产品物料ID",
+                    "type": "integer"
+                },
+                "item_name": {
+                    "description": "产品物料名称",
+                    "type": "string"
+                },
+                "process_code": {
+                    "description": "工序编码",
+                    "type": "string"
+                },
+                "process_id": {
+                    "description": "工序ID",
+                    "type": "integer"
+                },
+                "process_name": {
+                    "description": "工序名称",
+                    "type": "string"
+                },
+                "quantity": {
+                    "description": "排产数量",
+                    "type": "number"
+                },
+                "quantity_changed": {
+                    "description": "调整数量",
+                    "type": "number"
+                },
+                "quantity_produced": {
+                    "description": "已生产数量",
+                    "type": "number"
+                },
+                "quantity_quanlify": {
+                    "description": "合格品数量",
+                    "type": "number"
+                },
+                "quantity_unquanlify": {
+                    "description": "不良品数量",
+                    "type": "number"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "request_date": {
+                    "description": "需求日期",
+                    "type": "string"
+                },
+                "route_code": {
+                    "description": "工艺编号",
+                    "type": "string"
+                },
+                "route_id": {
+                    "description": "工艺ID",
+                    "type": "integer"
+                },
+                "specification": {
+                    "description": "规格型号",
+                    "type": "string"
+                },
+                "start_time": {
+                    "description": "开始生产时间",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "生产状态",
+                    "type": "string"
+                },
+                "task_code": {
+                    "description": "任务编号",
+                    "type": "string"
+                },
+                "task_id": {
+                    "description": "任务ID",
+                    "type": "integer"
+                },
+                "task_name": {
+                    "description": "任务名称",
+                    "type": "string"
+                },
+                "unit_name": {
+                    "description": "单位名称",
+                    "type": "string"
+                },
+                "unit_of_measure": {
+                    "description": "单位",
+                    "type": "string"
+                },
+                "workorder_code": {
+                    "description": "生产工单编号",
+                    "type": "string"
+                },
+                "workorder_id": {
+                    "description": "生产工单ID",
+                    "type": "integer"
+                },
+                "workorder_name": {
+                    "description": "工单名称",
+                    "type": "string"
+                },
+                "workstation_code": {
+                    "description": "工作站编号",
+                    "type": "string"
+                },
+                "workstation_id": {
+                    "description": "工作站ID",
+                    "type": "integer"
+                },
+                "workstation_name": {
+                    "description": "工作站名称",
                     "type": "string"
                 }
             }

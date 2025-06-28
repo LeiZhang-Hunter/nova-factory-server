@@ -72,7 +72,7 @@ func (w *WorkOrderDaoImpl) List(c *gin.Context, req *craftRouteModels.SysProWork
 		db = db.Where("workorder_type = ?", req.WorkorderType)
 	}
 	if req.RequestDate != "" {
-		db = db.Where("request_date = ", req.RequestDate)
+		db = db.Where("request_date = ?", req.RequestDate)
 	}
 
 	offset := 0

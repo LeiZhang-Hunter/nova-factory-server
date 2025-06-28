@@ -113,7 +113,7 @@ func NewGinEngine(
 		craft.RouteProcess.PrivateRoutes(group)   //工艺组成
 		craft.RouteProduct.PrivateRoutes(group)
 		craft.RouteProductBom.PrivateRoutes(group)
-		craft.WorkOrder.PrivateRoutes(group)
+		craft.WorkOrder.PrivateRoutes(group) //生产工单
 
 		metric.Metric.PrivateRoutes(group) //设备指标
 		controller.IotAgent.PrivateRoutes(group)

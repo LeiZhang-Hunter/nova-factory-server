@@ -20,7 +20,7 @@ func NewWorkOrder(service craftRouteService.ISysProWorkorderService) *WorkOrder 
 
 func (w *WorkOrder) PrivateRoutes(router *gin.RouterGroup) {
 	routers := router.Group("/craft/route/work_order")
-	routers.GET("/list", middlewares.HasPermission("craft:route:work_order"), w.List)                    // 生产工单
+	routers.GET("/list", middlewares.HasPermission("craft:route:work_order:list"), w.List)               // 生产工单
 	routers.POST("/set", middlewares.HasPermission("craft:route:work_order:set"), w.Set)                 // 设置生产工单
 	routers.DELETE("/remove/:ids", middlewares.HasPermission("craft:route:work_order:remove"), w.Remove) //移除生产工单
 }
@@ -31,7 +31,7 @@ func (w *WorkOrder) PrivateRoutes(router *gin.RouterGroup) {
 // @Tags 工艺管理/生产工单管理
 // @Param  object query craftRouteModels.SysProWorkorderReq true "生产工单列表参数"
 // @Success 200 {object}  response.ResponseData "设置分组成功"
-// @Router /craft/route/product/bom/list [get]
+// @Router /craft/route/work_order/list [get]
 func (w *WorkOrder) List(c *gin.Context) {
 	req := new(craftRouteModels.SysProWorkorderReq)
 	err := c.ShouldBindQuery(req)

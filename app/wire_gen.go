@@ -198,6 +198,9 @@ func wireApp() (*gin.Engine, func(), error) {
 	iSysProWorkorderDao := craftRouteDaoImpl.NewWorkOrderDaoImpl(db)
 	iSysProWorkorderService := craftRouteServiceImpl.NewISysProWorkorderServiceImpl(iSysProWorkorderDao)
 	workOrder := craftRouteController.NewWorkOrder(iSysProWorkorderService)
+	iSysProTaskDao := craftRouteDaoImpl.NewISysProTaskDaoImpl(db)
+	iSysProTaskService := craftRouteServiceImpl.NewISysProTaskServiceImpl(iSysProWorkorderDao, iSysProTaskDao)
+	task := craftRouteController.NewTask(iSysProTaskService)
 	craftRoute := &craftRouteController.CraftRoute{
 		CraftRoute:      craft,
 		Process:         process,
@@ -206,6 +209,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		RouteProduct:    routeProduct,
 		RouteProductBom: routeProductBom,
 		WorkOrder:       workOrder,
+		Task:            task,
 	}
 	clickHouse, err := clickhouse.NewClickHouse()
 	if err != nil {
