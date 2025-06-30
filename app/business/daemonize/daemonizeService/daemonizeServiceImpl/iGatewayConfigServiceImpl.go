@@ -171,6 +171,7 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	pipelinesConfig.Name = fmt.Sprintf("gateway-pipeline-%d", gatewayId)
 
 	schedulerConfig := pipeline.NewConfig()
+	schedulerConfig.Name = "scheduler"
 	var scheduleEnabled bool = true
 	source := source2.Config{
 		Enabled: &scheduleEnabled,

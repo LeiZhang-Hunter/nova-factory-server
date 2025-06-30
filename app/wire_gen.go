@@ -200,7 +200,10 @@ func wireApp() (*gin.Engine, func(), error) {
 	workOrder := craftRouteController.NewWorkOrder(iSysProWorkorderService)
 	iSysProTaskDao := craftRouteDaoImpl.NewISysProTaskDaoImpl(db)
 	iSysProTaskService := craftRouteServiceImpl.NewISysProTaskServiceImpl(iSysProWorkorderDao, iSysProTaskDao)
-	task := craftRouteController.NewTask(iSysProTaskService)
+	iotAgentDao := daemonizeDaoImpl.NewIotAgentDaoImpl(db, cacheCache)
+	iotAgentProcess := daemonizeDaoImpl.NewIotAgentProcessDaoImpl(cacheCache)
+	iotAgentService := daemonizeServiceImpl.NewIotAgentServiceImpl(iotAgentDao, iotAgentProcess)
+	task := craftRouteController.NewTask(iSysProTaskService, iotAgentService)
 	craftRoute := &craftRouteController.CraftRoute{
 		CraftRoute:      craft,
 		Process:         process,
@@ -222,12 +225,9 @@ func wireApp() (*gin.Engine, func(), error) {
 	metricServer := &metricController.MetricServer{
 		Metric: metric,
 	}
-	iotAgentDao := daemonizeDaoImpl.NewIotAgentDaoImpl(db, cacheCache)
-	iotAgentProcess := daemonizeDaoImpl.NewIotAgentProcessDaoImpl(cacheCache)
 	iotAgentConfigDao := daemonizeDaoImpl.NewIotAgentConfigDaoImpl(db)
 	daemonizeService := daemonizeServiceImpl.NewDaemonizeServiceImpl(iotAgentDao, iotAgentProcess, iotAgentConfigDao)
 	daemonize := daemonizeController.NewDaemonize(daemonizeService)
-	iotAgentService := daemonizeServiceImpl.NewIotAgentServiceImpl(iotAgentDao, iotAgentProcess)
 	iotAgent := daemonizeController.NewIotAgentController(iotAgentService, daemonizeService)
 	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao)
 	iotAgentConfigService := daemonizeServiceImpl.NewIotAgentConfigServiceImpl(iotAgentConfigDao)

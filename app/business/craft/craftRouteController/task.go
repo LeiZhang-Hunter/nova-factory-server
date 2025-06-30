@@ -4,17 +4,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	"nova-factory-server/app/business/craft/craftRouteService"
+	"nova-factory-server/app/business/daemonize/daemonizeService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 )
 
 type Task struct {
-	service craftRouteService.ISysProTaskService
+	service      craftRouteService.ISysProTaskService
+	agentService daemonizeService.IotAgentService
 }
 
-func NewTask(service craftRouteService.ISysProTaskService) *Task {
+func NewTask(service craftRouteService.ISysProTaskService, agentService daemonizeService.IotAgentService) *Task {
 	return &Task{
-		service: service,
+		service:      service,
+		agentService: agentService,
 	}
 }
 
@@ -23,6 +26,51 @@ func (w *Task) PrivateRoutes(router *gin.RouterGroup) {
 	routers.GET("/list", middlewares.HasPermission("craft:route:task:list"), w.List)               // 生产工单
 	routers.POST("/set", middlewares.HasPermission("craft:route:task:set"), w.Set)                 // 设置生产工单
 	routers.DELETE("/remove/:ids", middlewares.HasPermission("craft:route:task:remove"), w.Remove) //移除生产工单
+}
+
+func (w *Task) PublicRoutes(router *gin.RouterGroup) {
+	routers := router.Group("/api/product/task/v1")
+	routers.POST("/schedule", w.Schedule)
+}
+
+// Schedule 读取调度任务
+// @Summary 读取调度任务
+// @Description 读取调度任务
+// @Tags 工艺管理/生产任务管理
+// @Param  object body craftRouteModels.ScheduleReq true "读取调度任务参数"
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /api/product/task/v1/schedule [post]
+func (w *Task) Schedule(c *gin.Context) {
+	req := new(craftRouteModels.ScheduleReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	info, err := w.agentService.Info(c, uint64(req.GatewayId))
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	if info == nil {
+		baizeContext.Waring(c, "agent is not found")
+		return
+	}
+	if info.Username != req.UserName {
+		baizeContext.Waring(c, "username error")
+		return
+	}
+	if info.Password != req.Password {
+		baizeContext.Waring(c, "password error")
+		return
+	}
+	list, err := w.service.Schedule(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
 }
 
 // List 生产任务列表

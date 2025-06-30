@@ -6,8 +6,10 @@ import (
 	"nova-factory-server/app/business/craft/craftRouteDao"
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/constant/task"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
+	"time"
 )
 
 type ISysProTaskDaoImpl struct {
@@ -88,4 +90,20 @@ func (i *ISysProTaskDaoImpl) List(ctx *gin.Context, req *craftRouteModels.SysPro
 		Rows:  dto,
 		Total: total,
 	}, nil
+}
+
+// Schedule 读取最新的任务,获取7天之内的50个任务
+func (i *ISysProTaskDaoImpl) Schedule(ctx *gin.Context, req *craftRouteModels.ScheduleReq) ([]*craftRouteModels.SysProTask, error) {
+	var dto []*craftRouteModels.SysProTask
+	// 计算七天前的时间
+	now := time.Now()
+	sevenDaysAgo := now.AddDate(0, 0, -7)
+	ret := i.db.Table(i.table).Where("gateway_id = ?", req.GatewayId).Where("start_time < ?", now).Where("start_time >= ?", sevenDaysAgo).
+		Where("status = ?", task.TASK_STATUS_NORMAL).Limit(int(req.Size)).Where("state = ?", commonStatus.NORMAL).
+		Find(&dto)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+
+	return dto, nil
 }

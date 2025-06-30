@@ -10,4 +10,5 @@ type ISysProTaskDao interface {
 	Update(c *gin.Context, info *craftRouteModels.SysSetProTask) (*craftRouteModels.SysProTask, error)
 	Remove(c *gin.Context, ids []string) error
 	List(ctx *gin.Context, req *craftRouteModels.SysProTaskReq) (*craftRouteModels.SysProTaskList, error)
+	Schedule(ctx *gin.Context, req *craftRouteModels.ScheduleReq) ([]*craftRouteModels.SysProTask, error)
 }

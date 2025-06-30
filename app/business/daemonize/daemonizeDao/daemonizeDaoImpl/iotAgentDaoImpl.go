@@ -39,6 +39,9 @@ func (s *IotAgentDaoImpl) GetByObjectId(ctx context.Context, objectId uint64) (a
 	var data *daemonizeModels.SysIotAgent
 	ret := s.db.Table(s.tableName).Where("object_id = ?", objectId).Where("state = ?", commonStatus.NORMAL).First(&data)
 	if ret.Error != nil {
+		if ret.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return data, ret.Error
 	}
 	return data, nil

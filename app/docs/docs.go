@@ -1396,6 +1396,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/product/task/v1/schedule": {
+            "post": {
+                "description": "读取调度任务",
+                "tags": [
+                    "工艺管理/生产任务管理"
+                ],
+                "summary": "读取调度任务",
+                "parameters": [
+                    {
+                        "description": "读取调度任务参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.ScheduleReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/asset/device/list": {
             "get": {
                 "description": "获取设备列表",
@@ -9458,6 +9486,38 @@ const docTemplate = `{
                 }
             }
         },
+        "craftRouteModels.ScheduleReq": {
+            "type": "object",
+            "properties": {
+                "gateway_id": {
+                    "type": "integer"
+                },
+                "isAsc": {
+                    "description": "排序规则  降序desc   asc升序",
+                    "type": "string"
+                },
+                "orderBy": {
+                    "description": "排序字段",
+                    "type": "string"
+                },
+                "pageNum": {
+                    "description": "第几页",
+                    "type": "integer",
+                    "default": 1
+                },
+                "pageSize": {
+                    "description": "数量",
+                    "type": "integer",
+                    "default": 10000
+                },
+                "password": {
+                    "type": "string"
+                },
+                "user_name": {
+                    "type": "string"
+                }
+            }
+        },
         "craftRouteModels.SysCraftRoute": {
             "type": "object",
             "properties": {
@@ -10037,6 +10097,15 @@ const docTemplate = `{
         },
         "craftRouteModels.SysSetProTask": {
             "type": "object",
+            "required": [
+                "route_code",
+                "route_id",
+                "task_code",
+                "task_name",
+                "workorder_code",
+                "workorder_id",
+                "workorder_name"
+            ],
             "properties": {
                 "attr1": {
                     "description": "预留字段1",
@@ -10081,6 +10150,10 @@ const docTemplate = `{
                 "end_time": {
                     "description": "完成生产时间",
                     "type": "string"
+                },
+                "gateway_id": {
+                    "description": "任务ID",
+                    "type": "integer"
                 },
                 "item_code": {
                     "description": "产品物料编码",
@@ -10152,7 +10225,7 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "生产状态",
-                    "type": "string"
+                    "type": "integer"
                 },
                 "task_code": {
                     "description": "任务编号",

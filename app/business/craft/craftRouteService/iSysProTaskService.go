@@ -10,4 +10,5 @@ type ISysProTaskService interface {
 	Update(ctx *gin.Context, req *craftRouteModels.SysSetProTask) (*craftRouteModels.SysProTask, error)
 	Remove(ctx *gin.Context, ids []string) error
 	List(ctx *gin.Context, req *craftRouteModels.SysProTaskReq) (*craftRouteModels.SysProTaskList, error)
+	Schedule(ctx *gin.Context, req *craftRouteModels.ScheduleReq) ([]*craftRouteModels.SysProTask, error)
 }
