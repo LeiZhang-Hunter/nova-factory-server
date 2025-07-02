@@ -182,7 +182,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	iProcessContextDao := craftRouteDaoImpl.NewProcessContextDaoImpl(db)
 	iSysProRouteProductBomDao := craftRouteDaoImpl.NewSysProRouteProductBomDaoImpl(db)
 	iSysProRouteProductDao := craftRouteDaoImpl.NewISysProRouteProductDaoImpl(db)
-	iCraftRouteService := craftRouteServiceImpl.NewCraftRouteServiceImpl(iCraftRouteDao, iProcessDao, iRouteProcessDao, iProcessContextDao, iSysProRouteProductBomDao, iSysProRouteProductDao)
+	iSysCraftRouteConfigDao := craftRouteDaoImpl.NewISysCraftRouteConfigDaoImpl(db)
+	iCraftRouteService := craftRouteServiceImpl.NewCraftRouteServiceImpl(iCraftRouteDao, iProcessDao, iRouteProcessDao, iProcessContextDao, iSysProRouteProductBomDao, iSysProRouteProductDao, iSysCraftRouteConfigDao)
 	craft := craftRouteController.NewCraft(iCraftRouteService)
 	iCraftProcessService := craftRouteServiceImpl.NewICraftProcessServiceImpl(iProcessDao, iUserDao)
 	process := craftRouteController.NewProcess(iCraftProcessService)
@@ -194,6 +195,15 @@ func wireApp() (*gin.Engine, func(), error) {
 	routeProduct := craftRouteController.NewRouteProduct(iSysProRouteProductService)
 	iSysProRouteProductBomService := craftRouteServiceImpl.NewISysProRouteProductBomServiceImpl(iSysProRouteProductBomDao)
 	routeProductBom := craftRouteController.NewRouteProductBom(iSysProRouteProductBomService)
+	iSysProWorkorderDao := craftRouteDaoImpl.NewWorkOrderDaoImpl(db)
+	iSysProWorkorderService := craftRouteServiceImpl.NewISysProWorkorderServiceImpl(iSysProWorkorderDao)
+	workOrder := craftRouteController.NewWorkOrder(iSysProWorkorderService)
+	iSysProTaskDao := craftRouteDaoImpl.NewISysProTaskDaoImpl(db)
+	iSysProTaskService := craftRouteServiceImpl.NewISysProTaskServiceImpl(iSysProWorkorderDao, iSysProTaskDao)
+	iotAgentDao := daemonizeDaoImpl.NewIotAgentDaoImpl(db, cacheCache)
+	iotAgentProcess := daemonizeDaoImpl.NewIotAgentProcessDaoImpl(cacheCache)
+	iotAgentService := daemonizeServiceImpl.NewIotAgentServiceImpl(iotAgentDao, iotAgentProcess)
+	task := craftRouteController.NewTask(iSysProTaskService, iotAgentService)
 	craftRoute := &craftRouteController.CraftRoute{
 		CraftRoute:      craft,
 		Process:         process,
@@ -201,6 +211,8 @@ func wireApp() (*gin.Engine, func(), error) {
 		RouteProcess:    routeProcess,
 		RouteProduct:    routeProduct,
 		RouteProductBom: routeProductBom,
+		WorkOrder:       workOrder,
+		Task:            task,
 	}
 	clickHouse, err := clickhouse.NewClickHouse()
 	if err != nil {
@@ -213,12 +225,9 @@ func wireApp() (*gin.Engine, func(), error) {
 	metricServer := &metricController.MetricServer{
 		Metric: metric,
 	}
-	iotAgentDao := daemonizeDaoImpl.NewIotAgentDaoImpl(db, cacheCache)
-	iotAgentProcess := daemonizeDaoImpl.NewIotAgentProcessDaoImpl(cacheCache)
 	iotAgentConfigDao := daemonizeDaoImpl.NewIotAgentConfigDaoImpl(db)
 	daemonizeService := daemonizeServiceImpl.NewDaemonizeServiceImpl(iotAgentDao, iotAgentProcess, iotAgentConfigDao)
 	daemonize := daemonizeController.NewDaemonize(daemonizeService)
-	iotAgentService := daemonizeServiceImpl.NewIotAgentServiceImpl(iotAgentDao, iotAgentProcess)
 	iotAgent := daemonizeController.NewIotAgentController(iotAgentService, daemonizeService)
 	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao)
 	iotAgentConfigService := daemonizeServiceImpl.NewIotAgentConfigServiceImpl(iotAgentConfigDao)

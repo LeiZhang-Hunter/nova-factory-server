@@ -72,13 +72,14 @@ func (i *IAssistantServiceImpl) AddAssistant(c *gin.Context, req *aiDataSetModel
 	return &response, nil
 }
 func (i *IAssistantServiceImpl) UpdateAssistant(c *gin.Context, req *aiDataSetModels.UpdateAssistantRequest) (*aiDataSetModels.UpdateAssistantResponse, error) {
-
+	chatId := req.ChatId
+	req.ChatId = ""
 	content, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 	request, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v1/chats/%s",
-		i.config.Host, req.ChatId), bytes.NewBuffer(content))
+		i.config.Host, chatId), bytes.NewBuffer(content))
 	if err != nil {
 		zap.L().Error("添加助理失败", zap.Error(err))
 		return nil, err

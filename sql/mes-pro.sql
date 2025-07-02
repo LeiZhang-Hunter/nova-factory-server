@@ -22,6 +22,9 @@ create table sys_craft_route (
    primary key (route_id)
 ) engine=innodb auto_increment=0 comment = '工艺路线表';
 
+ 
+
+
 
 -- ----------------------------
 -- 2、生产工序表
@@ -162,3 +165,97 @@ create table pro_route_product_bom (
    update_time                    datetime                                   comment '更新时间',
    primary key (record_id)
 ) engine=innodb auto_increment=0 comment = '产品制程物料BOM表';
+
+
+ create table sys_pro_workorder (
+   workorder_id                bigint(20)      not null auto_increment    comment '工单ID',
+   workorder_code              varchar(64)     not null                   comment '工单编码',
+   workorder_name              varchar(255)    not null                   comment '工单名称',
+   workorder_type              varchar(64)     default 'SELF'             comment '工单类型',
+   order_source                varchar(64)     not null                   comment '来源类型',
+   source_code                 varchar(64)                                comment '来源单据',
+   product_id                  bigint(20)      not null                   comment '产品ID',
+   product_code                varchar(64)     not null                   comment '产品编号',
+   product_name                varchar(255)    not null                   comment '产品名称',
+   product_spc                 varchar(255)                               comment '规格型号',
+   unit_of_measure             varchar(64)     not null                   comment '单位',
+   quantity                    double(14,2)    default 0 not null         comment '生产数量',
+   quantity_produced           double(14,2)    default 0                  comment '已生产数量',
+   quantity_changed            double(14,2)    default 0                  comment '调整数量',
+   quantity_scheduled          double(14,2)    default 0                  comment '已排产数量',
+   client_id                   bigint(20)                                 comment '客户ID',
+   client_code                 varchar(64)                                comment '客户编码',
+   client_name                 varchar(255)                               comment '客户名称',
+   vendor_id                   bigint(20)                                 comment '供应商ID',
+   vendor_code                 varchar(64)                                comment '供应商编号',
+   vendor_name                 varchar(255)                               comment '供应商名称',
+   batch_code                  varchar(64)                                comment '批次号',
+   request_date                datetime        not null                   comment '需求日期',
+   parent_id                   bigint(20)      default 0 not null         comment '父工单',
+   ancestors                   varchar(500)    not null                   comment '所有父节点ID',
+   finish_date                 datetime                                   comment '完成时间',
+   status                      varchar(64)     default 'PREPARE'          comment '单据状态',
+   remark                      varchar(500)    default ''                 comment '备注',
+   attr1                       varchar(64)     default null               comment '预留字段1',
+   attr2                       varchar(255)    default null               comment '预留字段2',
+   attr3                       int(11)         default 0                  comment '预留字段3',
+   attr4                       int(11)         default 0                  comment '预留字段4',
+   `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+   `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+   create_by                   varchar(64)     default ''                 comment '创建者',
+   create_time 	              datetime                                   comment '创建时间',
+   update_by                   varchar(64)     default ''                 comment '更新者',
+   update_time                 datetime                                   comment '更新时间',
+   primary key (workorder_id)
+) engine=innodb auto_increment=200 comment = '生产工单表';
+
+create table sys_pro_task (
+  task_id                        bigint(20)      not null auto_increment    comment '任务ID',
+  task_code                      varchar(64)     not null                   comment '任务编号',
+  task_name                      varchar(255)    not null                   comment '任务名称',
+  workorder_id                   bigint(20)      not null                   comment '生产工单ID',
+  workorder_code                 varchar(64)     not null                   comment '生产工单编号',
+  workorder_name                 varchar(255)    not null                   comment '工单名称',
+  workstation_id                 bigint(20)      not null                   comment '工作站ID',
+  gateway_id                   bigint(20)      not null                   comment '网关id',
+  workstation_code               varchar(64)     not null                   comment '工作站编号',
+  workstation_name               varchar(255)    not null                   comment '工作站名称',
+  route_id                       bigint(20)      not null                   comment '工艺ID',
+  route_code                     varchar(64)                                comment '工艺编号',
+  process_id                     bigint(20)      not null                   comment '工序ID',
+  process_code                   varchar(64)                                comment '工序编码',
+  process_name                   varchar(255)                               comment '工序名称',
+  item_id                        bigint(20)      not null                   comment '产品物料ID',
+  item_code                      varchar(64)     not null                   comment '产品物料编码',
+  item_name                      varchar(255)    not null                   comment '产品物料名称',
+  specification                  varchar(500)                               comment '规格型号',
+  unit_of_measure                varchar(64)     not null                   comment '单位',
+  unit_name                      varchar(64)                                comment '单位名称',
+  quantity                       double(14,2)    default 1 not null         comment '排产数量',
+  quantity_produced              double(14,2)    default 0                  comment '已生产数量',
+  quantity_quanlify              double(14,2)    default 0                  comment '合格品数量',
+  quantity_unquanlify            double(14,2)    default 0                  comment '不良品数量',
+  quantity_changed               double(14,2)    default 0                  comment '调整数量',
+  client_id                      bigint(20)                                 comment '客户ID',
+  client_code                    varchar(64)                                comment '客户编码',
+  client_name                    varchar(255)                               comment '客户名称',
+  client_nick                    varchar(255)                               comment '客户简称',
+  start_time                     datetime        default CURRENT_TIMESTAMP  comment '开始生产时间',
+  duration                       int(11)         default 1                  comment '生产时长',
+  end_time                       datetime                                   comment '完成生产时间',
+  color_code                     char(7)         default '#00AEF3'          comment '甘特图显示颜色',
+  request_date                   datetime                                   comment '需求日期',
+  status                         int     default 0           comment '生产状态 0 是暂停 1 是启动',
+  remark                         varchar(500)    default ''                 comment '备注',
+  attr1                          varchar(64)     default null               comment '预留字段1',
+  attr2                          varchar(255)    default null               comment '预留字段2',
+  attr3                          int(11)         default 0                  comment '预留字段3',
+  attr4                          int(11)         default 0                  comment '预留字段4',
+  `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+  `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+  create_by                      varchar(64)     default ''                 comment '创建者',
+  create_time 	                 datetime                                   comment '创建时间',
+  update_by                      varchar(64)     default ''                 comment '更新者',
+  update_time                    datetime                                   comment '更新时间',
+  primary key (task_id)
+) engine=innodb auto_increment=200 comment = '生产任务表';

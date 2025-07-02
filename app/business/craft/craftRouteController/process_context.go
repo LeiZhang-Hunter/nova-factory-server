@@ -63,7 +63,7 @@ func (p *ProcessContext) SetProcessContextList(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if req.ContentID != 0 {
+	if req.ContentID == 0 {
 		ret, err := p.processContextService.Add(c, req)
 		if err != nil {
 			baizeContext.Waring(c, err.Error())

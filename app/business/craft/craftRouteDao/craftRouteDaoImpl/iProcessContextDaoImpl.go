@@ -24,7 +24,7 @@ func NewProcessContextDaoImpl(db *gorm.DB) craftRouteDao.IProcessContextDao {
 
 func (p *ProcessContextDaoImpl) Add(c *gin.Context, processContext *craftRouteModels.SysProSetProcessContent) (*craftRouteModels.SysProProcessContent, error) {
 	context := craftRouteModels.NewSysProProcessContent(processContext)
-	context.ProcessID = snowflake.GenID()
+	context.ContentID = uint64(snowflake.GenID())
 	context.SetCreateBy(baizeContext.GetUserId(c))
 	ret := p.db.Table(p.tableName).Create(context)
 	return context, ret.Error
@@ -43,7 +43,7 @@ func (p *ProcessContextDaoImpl) Remove(c *gin.Context, ids []string) error {
 }
 
 func (p *ProcessContextDaoImpl) List(c *gin.Context, req *craftRouteModels.SysProProcessContextListReq) (*craftRouteModels.SysProProcessContextListData, error) {
-	db := p.db.Table(p.tableName).Table(p.tableName)
+	db := p.db.Table(p.tableName).Debug()
 
 	db = db.Where("process_id = ?", req.ProcessID)
 

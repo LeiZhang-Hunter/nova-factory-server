@@ -1,7 +1,9 @@
 package craftRouteServiceImpl
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/craft/craftRouteDao"
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	"nova-factory-server/app/business/craft/craftRouteService"
@@ -14,6 +16,7 @@ type CraftRouteServiceImpl struct {
 	contextDao      craftRouteDao.IProcessContextDao
 	bomDao          craftRouteDao.ISysProRouteProductBomDao
 	productDao      craftRouteDao.ISysProRouteProductDao
+	routeConfigDao  craftRouteDao.ISysCraftRouteConfigDao
 }
 
 func NewCraftRouteServiceImpl(dao craftRouteDao.ICraftRouteDao,
@@ -21,7 +24,8 @@ func NewCraftRouteServiceImpl(dao craftRouteDao.ICraftRouteDao,
 	routeProcessDao craftRouteDao.IRouteProcessDao,
 	contextDao craftRouteDao.IProcessContextDao,
 	bomDao craftRouteDao.ISysProRouteProductBomDao,
-	productDao craftRouteDao.ISysProRouteProductDao) craftRouteService.ICraftRouteService {
+	productDao craftRouteDao.ISysProRouteProductDao,
+	routeConfigDao craftRouteDao.ISysCraftRouteConfigDao) craftRouteService.ICraftRouteService {
 	return &CraftRouteServiceImpl{
 		dao:             dao,
 		processDao:      processDao,
@@ -29,6 +33,7 @@ func NewCraftRouteServiceImpl(dao craftRouteDao.ICraftRouteDao,
 		contextDao:      contextDao,
 		bomDao:          bomDao,
 		productDao:      productDao,
+		routeConfigDao:  routeConfigDao,
 	}
 }
 
@@ -48,56 +53,34 @@ func (craft *CraftRouteServiceImpl) SelectCraftRoute(c *gin.Context, req *craftR
 	return craft.dao.SelectCraftRoute(c, req)
 }
 
-func (craft *CraftRouteServiceImpl) DetailCraftRoute(c *gin.Context, req *craftRouteModels.SysCraftRouteDetailRequest) (*craftRouteModels.ProcessTopo, error) {
+func (craft *CraftRouteServiceImpl) DetailCraftRoute(c *gin.Context, req *craftRouteModels.SysCraftRouteDetailRequest) (*craftRouteModels.SysCraftRouteConfig, error) {
 	// 读取详情
-	info, err := craft.dao.GetById(c, req.RouteID)
+	info, err := craft.routeConfigDao.GetById(uint64(req.RouteID))
 	if err != nil {
-		return &craftRouteModels.ProcessTopo{}, err
+		return nil, err
+	}
+	return info, nil
+}
+
+func (craft *CraftRouteServiceImpl) SaveCraftRoute(c *gin.Context, topo *craftRouteModels.ProcessTopo) (*craftRouteModels.SysCraftRouteConfig, error) {
+	if topo == nil {
+		return nil, errors.New("参数错误")
+	}
+	if topo.Route == nil {
+		return nil, errors.New("工艺路线参数错误")
+	}
+	info, err := craft.dao.GetById(c, topo.Route.RouteID)
+	if err != nil {
+		zap.L().Error("读取工艺路线失败", zap.Error(err))
+		return nil, err
 	}
 	if info == nil {
-		return &craftRouteModels.ProcessTopo{}, nil
+		return nil, errors.New("工艺路线不存在")
 	}
 
-	// 工序组成表
-	var processIds []int64 = make([]int64, 0)
-	processRouteRelations, err := craft.routeProcessDao.GetByRouteId(c, info.RouteID)
+	data, err := craft.routeConfigDao.Save(c, uint64(topo.Route.RouteID), topo)
 	if err != nil {
-		return &craftRouteModels.ProcessTopo{}, err
+		return nil, err
 	}
-
-	for _, value := range processRouteRelations {
-		processIds = append(processIds, value.ProcessID)
-	}
-
-	// 读取工序列表
-	processes, err := craft.processDao.GetByIds(c, processIds)
-	if err != nil {
-		return &craftRouteModels.ProcessTopo{}, err
-	}
-
-	// 读取工序内容列表
-	processContexts, err := craft.contextDao.GetByProcessIds(c, processIds)
-	if err != nil {
-		return &craftRouteModels.ProcessTopo{}, err
-	}
-
-	// 读取工序物料列表
-	boms, err := craft.bomDao.GetByRouteId(c, info.RouteID)
-	if err != nil {
-		return &craftRouteModels.ProcessTopo{}, err
-	}
-	// 读取产品制程
-	products, err := craft.productDao.GetByRouteId(c, info.RouteID)
-	if err != nil {
-		return &craftRouteModels.ProcessTopo{}, err
-	}
-	topo := craftRouteModels.NewProcessTopo()
-	topo.Route = info
-	for _, relation := range processRouteRelations {
-		// 组装边
-		topo.Edges = append(topo.Edges, craftRouteModels.NewProcessTopoEdge(relation))
-	}
-	// 组装工序内容
-	topo.OfProcess(processes, processContexts, boms, products)
-	return topo, nil
+	return data, err
 }
