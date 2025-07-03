@@ -1,17 +1,21 @@
 package routes
 
 import (
-	"github.com/spf13/viper"
-	swaggerFiles "github.com/swaggo/files"
-	gs "github.com/swaggo/gin-swagger"
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/asset/device/deviceController"
 	"nova-factory-server/app/business/asset/material/materialController"
+	"nova-factory-server/app/business/batch/batchController"
 	"nova-factory-server/app/business/craft/craftRouteController"
 	"nova-factory-server/app/business/daemonize/daemonizeController"
+	"nova-factory-server/app/business/defect/defectController"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/monitor/monitorController"
+	"nova-factory-server/app/business/qcIndex/qcIndexController"
+	"nova-factory-server/app/business/qcIqc/qcIqcController"
+	"nova-factory-server/app/business/qcOqc/qcOqcController"
+	"nova-factory-server/app/business/qcRqc/qcRqcController"
+	"nova-factory-server/app/business/qcTemplate/qcTemplateController"
 	"nova-factory-server/app/business/system/systemController"
 	"nova-factory-server/app/business/tool/toolController"
 	"nova-factory-server/app/daemonize"
@@ -20,14 +24,21 @@ import (
 	"nova-factory-server/app/utils/logger"
 	"time"
 
+	"github.com/spf13/viper"
+	swaggerFiles "github.com/swaggo/files"
+	gs "github.com/swaggo/gin-swagger"
+
 	"nova-factory-server/app/middlewares"
 
-	"github.com/gin-contrib/cors"
-	"github.com/google/wire"
 	"net/http"
 	"nova-factory-server/app/docs"
 	"nova-factory-server/app/setting"
 	"strings"
+
+	"github.com/gin-contrib/cors"
+	"github.com/google/wire"
+
+	"nova-factory-server/app/business/qcIpqc/qcIpqcController"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,6 +57,14 @@ func NewGinEngine(
 	metric *metricController.MetricServer,
 	controller *daemonizeController.DaemonizeServer,
 	deviceMonitor *deviceMonitorController.DeviceMonitorController,
+	defect *defectController.DefectRoute,
+	batch *batchController.BatchController,
+	qcIndex *qcIndexController.QcIndexRoute,
+	qcIqc *qcIqcController.QcIqcController,
+	qcOqc *qcOqcController.QcOqcController,
+	qcRqc *qcRqcController.QcRqcController,
+	qcTemplate *qcTemplateController.QcTemplateRoute,
+	qcIpqc *qcIpqcController.QcIpqcController,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -122,6 +141,22 @@ func NewGinEngine(
 		controller.Config.PrivateRoutes(group)
 
 		deviceMonitor.DeviceMonitor.PrivateRoutes(group)
+
+		defect.DefectController.PrivateRoutes(group)
+
+		batch.PrivateRoutes(group)
+
+		qcIndex.QcIndexController.PrivateRoutes(group)
+
+		qcIqc.PrivateRoutes(group)
+
+		qcOqc.PrivateRoutes(group)
+
+		qcRqc.PrivateRoutes(group)
+
+		qcTemplate.QcTemplateController.PrivateRoutes(group)
+
+		qcIpqc.PrivateRoutes(group)
 
 	}
 
