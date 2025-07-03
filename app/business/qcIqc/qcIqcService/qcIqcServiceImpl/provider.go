@@ -1,0 +1,5 @@
+package qcIqcServiceImpl
+
+import "github.com/google/wire"
+
+var ProviderSet = wire.NewSet(NewQcIqcServiceImpl)
