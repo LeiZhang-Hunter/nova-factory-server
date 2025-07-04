@@ -66,6 +66,7 @@ create table sys_pro_process_content (
     attr2                          varchar(255)    default null               comment '预留字段2',
     attr3                          int(11)         default 0                  comment '预留字段3',
     attr4                          int(11)         default 0                  comment '预留字段4',
+    `extension` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL  COMMENT '扩展字段',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     create_by                      varchar(64)     default ''                 comment '创建者',

@@ -53,6 +53,7 @@ CREATE TABLE `sys_material`  (
    `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '编码',
    `model` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '型号',
    `unit` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '单位',
+   `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '物料类型',
    `factory` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '厂家',
    `address` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '存放地点',
    `price` decimal(10,2) COLLATE utf8mb4_general_ci NULL DEFAULT 0.0 COMMENT '价格',
@@ -67,6 +68,8 @@ CREATE TABLE `sys_material`  (
    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
    PRIMARY KEY (`material_id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '设备管理' ROW_FORMAT = Dynamic;
+
+
 
 CREATE TABLE `sys_material_inbound`  (
     `inbound_id` bigint(20) NOT NULL COMMENT '入库id',
@@ -177,6 +180,7 @@ CREATE TABLE `sys_modbus_device_config_data`
     `template_id` bigint(20) NOT NULL COMMENT '模板id',
     `name` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '数据名称',
     `type` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '数据类型',
+    `data_type` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '设备节点类型，到底是开关还是数值',
     `slave` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '从设备地址',
     `register` bigint(20) NOT NULL COMMENT '寄存器/偏移量',
     `storage_type` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '存储策略',

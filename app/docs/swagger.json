@@ -9310,6 +9310,89 @@
                 }
             }
         },
+        "craftRouteModels.ComputedPosition": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "z": {
+                    "type": "number"
+                }
+            }
+        },
+        "craftRouteModels.Dimensions": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "width": {
+                    "type": "integer"
+                }
+            }
+        },
+        "craftRouteModels.HandleBoundsSource": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "nodeId": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            }
+        },
+        "craftRouteModels.HandleBoundsTarget": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "nodeId": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            }
+        },
         "craftRouteModels.ProcessTopo": {
             "type": "object",
             "properties": {
@@ -9336,145 +9419,223 @@
                 }
             }
         },
+        "craftRouteModels.ProcessTopoData": {
+            "type": "object",
+            "properties": {
+                "config": {
+                    "type": "object",
+                    "properties": {
+                        "attention": {
+                            "type": "string"
+                        },
+                        "attr1": {
+                            "type": "string"
+                        },
+                        "attr2": {
+                            "type": "string"
+                        },
+                        "attr3": {
+                            "type": "integer"
+                        },
+                        "attr4": {
+                            "type": "integer"
+                        },
+                        "createBy": {
+                            "type": "integer"
+                        },
+                        "createTime": {
+                            "type": "string"
+                        },
+                        "createUserName": {
+                            "type": "string"
+                        },
+                        "process_code": {
+                            "type": "string"
+                        },
+                        "process_id": {
+                            "type": "string"
+                        },
+                        "process_name": {
+                            "type": "string"
+                        },
+                        "remark": {
+                            "type": "string"
+                        },
+                        "state": {
+                            "type": "boolean"
+                        },
+                        "status": {
+                            "type": "boolean"
+                        },
+                        "updateBy": {
+                            "type": "integer"
+                        },
+                        "updateTime": {
+                            "type": "string"
+                        },
+                        "updateUserName": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                }
+            }
+        },
         "craftRouteModels.ProcessTopoEdge": {
             "type": "object",
             "properties": {
-                "attr1": {
-                    "description": "预留字段1",
+                "animated": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "config": {},
+                        "description": {
+                            "type": "string"
+                        },
+                        "label": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "events": {
+                    "type": "object"
+                },
+                "id": {
                     "type": "string"
                 },
-                "attr2": {
-                    "description": "预留字段2",
+                "label": {
                     "type": "string"
                 },
-                "attr3": {
-                    "description": "预留字段3",
-                    "type": "integer"
-                },
-                "color_code": {
-                    "description": "甘特图显示颜色",
-                    "type": "string"
-                },
-                "default_pre_time": {
-                    "description": "准备时间",
-                    "type": "integer"
-                },
-                "default_suf_time": {
-                    "description": "等待时间",
-                    "type": "integer"
-                },
-                "esize": {
-                    "type": "string"
-                },
-                "is_check": {
-                    "description": "是否检验",
-                    "type": "string"
-                },
-                "key_flag": {
-                    "description": "关键工序",
-                    "type": "string"
-                },
-                "link_type": {
-                    "description": "与下一道工序关系",
-                    "type": "string"
-                },
-                "next_process_code": {
-                    "description": "工序编码",
-                    "type": "string"
-                },
-                "next_process_name": {
-                    "description": "工序名称",
-                    "type": "string"
-                },
-                "order_num": {
-                    "description": "序号",
-                    "type": "integer"
-                },
-                "process_code": {
-                    "description": "工序编码",
-                    "type": "string"
-                },
-                "process_name": {
-                    "description": "工序名称",
-                    "type": "string"
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string"
-                },
-                "route_id": {
-                    "description": "工艺路线ID",
-                    "type": "integer"
+                "markerEnd": {
+                    "type": "object",
+                    "properties": {
+                        "color": {
+                            "type": "string"
+                        },
+                        "height": {
+                            "type": "integer"
+                        },
+                        "type": {
+                            "type": "string"
+                        },
+                        "width": {
+                            "type": "integer"
+                        }
+                    }
                 },
                 "source": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "string"
+                },
+                "sourceHandle": {
+                    "type": "string"
+                },
+                "sourceX": {
+                    "type": "number"
+                },
+                "sourceY": {
+                    "type": "number"
+                },
+                "style": {
+                    "type": "object",
+                    "properties": {
+                        "stroke": {
+                            "type": "string"
+                        },
+                        "strokeWidth": {
+                            "type": "integer"
+                        }
+                    }
                 },
                 "target": {
-                    "type": "string",
-                    "example": "0"
+                    "type": "string"
+                },
+                "targetHandle": {
+                    "type": "string"
+                },
+                "targetX": {
+                    "type": "number"
+                },
+                "targetY": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
         "craftRouteModels.ProcessTopoNode": {
             "type": "object",
-            "required": [
-                "process_code",
-                "process_name"
-            ],
             "properties": {
-                "attention": {
-                    "description": "工艺要求",
-                    "type": "string"
+                "computedPosition": {
+                    "$ref": "#/definitions/craftRouteModels.ComputedPosition"
                 },
-                "attr1": {
-                    "description": "预留字段1",
-                    "type": "string"
+                "data": {
+                    "$ref": "#/definitions/craftRouteModels.ProcessTopoData"
                 },
-                "attr2": {
-                    "description": "预留字段2",
-                    "type": "string"
+                "dimensions": {
+                    "$ref": "#/definitions/craftRouteModels.Dimensions"
                 },
-                "attr3": {
-                    "description": "预留字段3",
-                    "type": "integer"
-                },
-                "attr4": {
-                    "description": "预留字段4",
-                    "type": "integer"
-                },
-                "boms": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/craftRouteModels.SysSetProRouteProductBom"
-                    }
-                },
-                "context": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/craftRouteModels.SysProProcessContent"
-                    }
-                },
-                "process_code": {
-                    "description": "工序编码",
-                    "type": "string"
-                },
-                "process_id": {
-                    "description": "工序ID",
-                    "type": "string",
-                    "example": "0"
-                },
-                "process_name": {
-                    "description": "工序名称",
-                    "type": "string"
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string"
-                },
-                "status": {
-                    "description": "是否启用（0禁用 1启用）",
+                "dragging": {
                     "type": "boolean"
+                },
+                "events": {
+                    "type": "object"
+                },
+                "handleBounds": {
+                    "type": "object",
+                    "properties": {
+                        "source": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/craftRouteModels.HandleBoundsSource"
+                            }
+                        },
+                        "target": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/craftRouteModels.HandleBoundsTarget"
+                            }
+                        }
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "initialized": {
+                    "type": "boolean"
+                },
+                "isParent": {
+                    "type": "boolean"
+                },
+                "position": {
+                    "$ref": "#/definitions/craftRouteModels.ProcessTopoNodePosition"
+                },
+                "resizing": {
+                    "type": "boolean"
+                },
+                "selected": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.ProcessTopoNodePosition": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
                 }
             }
         },
@@ -9683,87 +9844,6 @@
                 "status": {
                     "description": "是否启用（0禁用 1启用）",
                     "type": "boolean"
-                },
-                "updateBy": {
-                    "description": "修改人",
-                    "type": "integer"
-                },
-                "updateTime": {
-                    "description": "修改时间",
-                    "type": "string"
-                },
-                "updateUserName": {
-                    "type": "string"
-                }
-            }
-        },
-        "craftRouteModels.SysProProcessContent": {
-            "type": "object",
-            "required": [
-                "content_text",
-                "process_id"
-            ],
-            "properties": {
-                "attr1": {
-                    "description": "预留字段1",
-                    "type": "string"
-                },
-                "attr2": {
-                    "description": "预留字段2",
-                    "type": "string"
-                },
-                "attr3": {
-                    "description": "预留字段3",
-                    "type": "integer"
-                },
-                "attr4": {
-                    "description": "预留字段4",
-                    "type": "integer"
-                },
-                "content_id": {
-                    "description": "内容ID",
-                    "type": "string",
-                    "example": "0"
-                },
-                "content_text": {
-                    "description": "内容说明",
-                    "type": "string"
-                },
-                "createBy": {
-                    "description": "创建人",
-                    "type": "integer"
-                },
-                "createTime": {
-                    "description": "创建时间",
-                    "type": "string"
-                },
-                "createUserName": {
-                    "type": "string"
-                },
-                "device": {
-                    "description": "辅助设备",
-                    "type": "string"
-                },
-                "doc_url": {
-                    "description": "材料URL",
-                    "type": "string"
-                },
-                "material": {
-                    "description": "辅助材料",
-                    "type": "string"
-                },
-                "order_num": {
-                    "description": "顺序编号",
-                    "type": "integer"
-                },
-                "process_id": {
-                    "description": "工序ID",
-                    "type": "string",
-                    "example": "0"
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string"
                 },
                 "updateBy": {
                     "description": "修改人",
@@ -10015,6 +10095,9 @@
                 "remark": {
                     "description": "备注",
                     "type": "string"
+                },
+                "trigger_rules": {
+                    "$ref": "#/definitions/craftRouteModels.TriggerRules"
                 }
             }
         },
@@ -10410,6 +10493,82 @@
                 }
             }
         },
+        "craftRouteModels.TriggerRules": {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "controlTypeValue": {
+                                "type": "string"
+                            },
+                            "dataFormat": {
+                                "type": "string"
+                            },
+                            "dataId": {
+                                "type": "string"
+                            },
+                            "deviceId": {
+                                "type": "string"
+                            },
+                            "extension": {
+                                "type": "string"
+                            },
+                            "formatHint": {
+                                "type": "string"
+                            },
+                            "placeholder": {
+                                "type": "string"
+                            },
+                            "templateId": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "combined_rule": {
+                    "type": "string"
+                },
+                "dataIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "rule": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "connector": {
+                                "type": "string"
+                            },
+                            "dataId": {
+                                "type": "string",
+                                "example": "0"
+                            },
+                            "operator": {
+                                "type": "string"
+                            },
+                            "rule": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "daemonizeModels.BindGatewayConfigReq": {
             "type": "object",
             "properties": {
@@ -10601,6 +10760,10 @@
                     "description": "读写方式",
                     "type": "string"
                 },
+                "data_type": {
+                    "description": "设备节点类型，到底是开关还是数值",
+                    "type": "string"
+                },
                 "device_config_id": {
                     "description": "文档id",
                     "type": "string",
@@ -10708,6 +10871,7 @@
                 "factory",
                 "model",
                 "name",
+                "type",
                 "unit"
             ],
             "properties": {
@@ -10732,6 +10896,9 @@
                 },
                 "price": {
                     "type": "number"
+                },
+                "type": {
+                    "type": "string"
                 },
                 "unit": {
                     "type": "string"

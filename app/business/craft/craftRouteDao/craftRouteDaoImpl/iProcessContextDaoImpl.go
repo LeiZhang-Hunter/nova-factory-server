@@ -1,7 +1,9 @@
 package craftRouteDaoImpl
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/craft/craftRouteDao"
 	"nova-factory-server/app/business/craft/craftRouteModels"
@@ -26,6 +28,13 @@ func (p *ProcessContextDaoImpl) Add(c *gin.Context, processContext *craftRouteMo
 	context := craftRouteModels.NewSysProProcessContent(processContext)
 	context.ContentID = uint64(snowflake.GenID())
 	context.SetCreateBy(baizeContext.GetUserId(c))
+	if processContext.TriggerRules != nil {
+		content, err := json.Marshal(processContext.TriggerRules)
+		if err != nil {
+			zap.L().Error("json marshal error", zap.Error(err))
+		}
+		context.Extension = string(content)
+	}
 	ret := p.db.Table(p.tableName).Create(context)
 	return context, ret.Error
 }
@@ -33,6 +42,13 @@ func (p *ProcessContextDaoImpl) Add(c *gin.Context, processContext *craftRouteMo
 func (p *ProcessContextDaoImpl) Update(c *gin.Context, processContext *craftRouteModels.SysProSetProcessContent) (*craftRouteModels.SysProProcessContent, error) {
 	context := craftRouteModels.NewSysProProcessContent(processContext)
 	context.SetUpdateBy(baizeContext.GetUserId(c))
+	if processContext.TriggerRules != nil {
+		content, err := json.Marshal(processContext.TriggerRules)
+		if err != nil {
+			zap.L().Error("json marshal error", zap.Error(err))
+		}
+		context.Extension = string(content)
+	}
 	ret := p.db.Table(p.tableName).Where("content_id = ?", processContext.ContentID).Updates(context)
 	return context, ret.Error
 }
@@ -78,6 +94,16 @@ func (p *ProcessContextDaoImpl) List(c *gin.Context, req *craftRouteModels.SysPr
 			Rows:  make([]*craftRouteModels.SysProProcessContent, 0),
 			Total: 0,
 		}, ret.Error
+	}
+	for k, _ := range dto {
+		if dto[k].Extension != "" {
+			var triggerRule craftRouteModels.TriggerRules
+			err := json.Unmarshal([]byte(dto[k].Extension), &triggerRule)
+			if err != nil {
+				zap.L().Error("json unmarshal error", zap.Error(err))
+			}
+			dto[k].TriggerRules = &triggerRule
+		}
 	}
 	return &craftRouteModels.SysProProcessContextListData{
 		Rows:  dto,

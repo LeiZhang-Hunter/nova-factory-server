@@ -33,7 +33,11 @@ func (i *ISysCraftRouteConfigDaoImpl) Save(c *gin.Context, routeId uint64, topo 
 	ret := i.db.Table(i.tableName).Where("route_id = ?", routeId).Where("state = ?", commonStatus.NORMAL).First(&info)
 	if ret.Error != nil {
 		zap.L().Error("get info error", zap.Error(ret.Error))
+		info = nil
 	}
+
+	// 读取工序列表，工序内容
+
 	if info == nil {
 		var config craftRouteModels.SysCraftRouteConfig
 		config.RouteConfigID = snowflake.GenID()

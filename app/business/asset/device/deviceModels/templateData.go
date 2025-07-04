@@ -8,6 +8,7 @@ type SysModbusDeviceConfigData struct {
 	TemplateID     int64  `gorm:"column:template_id;not null;comment:模板id" json:"template_id,string"`             // 模板id
 	Name           string `gorm:"column:name;comment:数据名称" json:"name"`                                           // 数据名称
 	Type           string `gorm:"column:type;comment:数据类型" json:"type"`                                           // 数据类型
+	DataType       string `gorm:"column:data_type;comment:设备节点类型，到底是开关还是数值" json:"data_type"`                     // 设备节点类型，到底是开关还是数值
 	Slave          string `gorm:"column:slave;comment:从设备地址" json:"slave"`                                        // 从设备地址
 	Register       int64  `gorm:"column:register;not null;comment:寄存器/偏移量" json:"register,string"`                // 寄存器/偏移量
 	StorageType    string `gorm:"column:storage_type;comment:存储策略" json:"storage_type"`                           // 存储策略
@@ -45,6 +46,7 @@ type SetSysModbusDeviceConfigDataReq struct {
 	TemplateID     int64  `gorm:"column:template_id;not null;comment:模板id" binding:"required" json:"template_id,string"` // 模板id
 	Name           string `gorm:"column:name;comment:数据名称" binding:"required" json:"name"`                               // 数据名称
 	Type           string `gorm:"column:type;comment:数据类型" binding:"required" json:"type"`                               // 数据类型
+	DataType       string `gorm:"column:data_type;comment:设备节点类型，到底是开关还是数值" json:"data_type"`                            // 设备节点类型，到底是开关还是数值
 	Slave          string `gorm:"column:slave;comment:从设备地址" binding:"required" json:"slave"`                            // 从设备地址
 	Register       int64  `gorm:"column:register;not null;comment:寄存器/偏移量" json:"register,string"`                       // 寄存器/偏移量
 	StorageType    string `gorm:"column:storage_type;comment:存储策略" json:"storage_type"`                                  // 存储策略

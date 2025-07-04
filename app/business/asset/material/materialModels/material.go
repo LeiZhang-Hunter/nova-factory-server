@@ -8,6 +8,7 @@ import (
 type MaterialVO struct {
 	MaterialId   uint64  `json:"materialId,string" db:"material_id"`
 	Name         string  `json:"name" db:"name" binding:"required"`
+	Type         string  `json:"type" db:"type" form:"type" binding:"required"`
 	Code         string  `json:"code" db:"code" binding:"required"`
 	Model        string  `json:"model" db:"model" binding:"required"`
 	Unit         string  `json:"unit" db:"device_building_id" binding:"required"`
@@ -32,6 +33,7 @@ type MaterialValue struct {
 	MaterialId     uint64  `json:"materialId,string" db:"material_id"`
 	Name           string  `json:"name" db:"name" binding:"required"`
 	Code           string  `json:"code" db:"code" binding:"required"`
+	Type           string  `json:"type" db:"type" form:"type" binding:"required"`
 	Model          string  `json:"model" db:"model" binding:"required"`
 	Unit           string  `json:"unit" db:"device_building_id" binding:"required"`
 	Factory        string  `json:"factory" db:"device_building_id" binding:"required"`
@@ -50,6 +52,7 @@ type MaterialValue struct {
 type MaterialInfo struct {
 	MaterialId uint64  `json:"materialId,string" form:"material_id" db:"material_id"`
 	Name       string  `json:"name" db:"name" form:"name" binding:"required"`
+	Type       string  `json:"type" db:"type" form:"type" binding:"required"`
 	Code       string  `json:"code" db:"code" form:"code" binding:"required"`
 	Model      string  `json:"model" db:"model" form:"model" binding:"required"`
 	Unit       string  `json:"unit" db:"unit" form:"unit" binding:"required"`

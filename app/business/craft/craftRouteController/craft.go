@@ -1,8 +1,10 @@
 package craftRouteController
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"nova-factory-server/app/business/ai/aiDataSetModels"
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	"nova-factory-server/app/business/craft/craftRouteService"
@@ -26,7 +28,7 @@ func (craft *Craft) PrivateRoutes(router *gin.RouterGroup) {
 	routers.POST("/set", middlewares.HasPermission("craft:route:set"), craft.SetRoute)                            // 设置工艺路线
 	routers.DELETE("/remove/:craft_route_id", middlewares.HasPermission("craft:route:remove"), craft.RemoveRoute) //移除工艺路线
 	routers.GET("/detail", middlewares.HasPermission("craft:route:detail"), craft.Detail)                         // 工艺路线详情
-	routers.GET("/config/save", middlewares.HasPermission("craft:route:config:save"), craft.Detail)               // 工艺路线详情
+	routers.POST("/config/save", middlewares.HasPermission("craft:route:config:save"), craft.Save)                // 工艺路线详情
 }
 
 // GetRouteList 读取工艺列表
@@ -128,6 +130,12 @@ func (craft *Craft) Detail(c *gin.Context) {
 	}
 	route, err := craft.craftService.DetailCraftRoute(c, req)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			baizeContext.SuccessData(c, &craftRouteModels.SysCraftRouteConfig{
+				RouteID: req.RouteID,
+			})
+			return
+		}
 		zap.L().Error("读取工艺失败", zap.Error(err))
 		baizeContext.Waring(c, "读取工艺失败")
 		return
@@ -145,7 +153,7 @@ func (craft *Craft) Detail(c *gin.Context) {
 // @Router /craft/route/config/save [post]
 func (craft *Craft) Save(c *gin.Context) {
 	req := new(craftRouteModels.ProcessTopo)
-	err := c.ShouldBindQuery(req)
+	err := c.ShouldBindJSON(req)
 	if err != nil {
 		zap.L().Error("解析错误", zap.Error(err))
 		baizeContext.ParameterError(c)
@@ -154,7 +162,7 @@ func (craft *Craft) Save(c *gin.Context) {
 	route, err := craft.craftService.SaveCraftRoute(c, req)
 	if err != nil {
 		zap.L().Error("保存工艺制图失败", zap.Error(err))
-		baizeContext.Waring(c, "保存工艺制图失败")
+		baizeContext.Waring(c, err.Error())
 		return
 	}
 	baizeContext.SuccessData(c, route)
