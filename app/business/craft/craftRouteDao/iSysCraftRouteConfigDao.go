@@ -7,5 +7,5 @@ import (
 
 type ISysCraftRouteConfigDao interface {
 	GetById(routeId uint64) (*craftRouteModels.SysCraftRouteConfig, error)
-	Save(c *gin.Context, routeId uint64, topo *craftRouteModels.ProcessTopo) (*craftRouteModels.SysCraftRouteConfig, error)
+	Save(c *gin.Context, routeId uint64, topo *craftRouteModels.ProcessTopo, config []byte) (*craftRouteModels.SysCraftRouteConfig, error)
 }

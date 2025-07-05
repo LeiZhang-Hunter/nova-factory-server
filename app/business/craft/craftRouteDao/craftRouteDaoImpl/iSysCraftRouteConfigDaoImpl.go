@@ -24,7 +24,7 @@ func NewISysCraftRouteConfigDaoImpl(db *gorm.DB) craftRouteDao.ISysCraftRouteCon
 	}
 }
 
-func (i *ISysCraftRouteConfigDaoImpl) Save(c *gin.Context, routeId uint64, topo *craftRouteModels.ProcessTopo) (*craftRouteModels.SysCraftRouteConfig, error) {
+func (i *ISysCraftRouteConfigDaoImpl) Save(c *gin.Context, routeId uint64, topo *craftRouteModels.ProcessTopo, configContent []byte) (*craftRouteModels.SysCraftRouteConfig, error) {
 	var info *craftRouteModels.SysCraftRouteConfig
 	content, err := json.Marshal(topo)
 	if err != nil {
@@ -43,6 +43,7 @@ func (i *ISysCraftRouteConfigDaoImpl) Save(c *gin.Context, routeId uint64, topo 
 		config.RouteConfigID = snowflake.GenID()
 		config.RouteID = topo.Route.RouteID
 		config.Context = string(content)
+		config.Config = string(configContent)
 		config.SetCreateBy(baizeContext.GetUserId(c))
 		ret = i.db.Table(i.tableName).Create(&config)
 		if ret.Error != nil {

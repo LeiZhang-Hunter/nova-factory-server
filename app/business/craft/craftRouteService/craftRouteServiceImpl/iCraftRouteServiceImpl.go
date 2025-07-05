@@ -234,9 +234,12 @@ func (craft *CraftRouteServiceImpl) SaveCraftRoute(c *gin.Context, topo *craftRo
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(content)
 
-	data, err := craft.routeConfigDao.Save(c, uint64(topo.Route.RouteID), topo)
+	if content == nil {
+		return nil, errors.New("生成工艺路线配置失败")
+	}
+
+	data, err := craft.routeConfigDao.Save(c, uint64(topo.Route.RouteID), topo, content)
 	if err != nil {
 		return nil, err
 	}
@@ -263,6 +266,11 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 	}
 
 	contextList := make(map[uint64][]v1.ProcessContext, 0)
+
+	for _, process := range processes {
+		contextList[uint64(process.ProcessID)] = make([]v1.ProcessContext, 0)
+	}
+
 	// 组装工序内容
 	for _, processContext := range processContexts {
 		_, ok := contextList[processContext.ProcessID]
@@ -270,24 +278,28 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 			contextList[processContext.ProcessID] = make([]v1.ProcessContext, 0)
 		}
 
-		var rule craftRouteModels.TriggerRules
-		err := json.Unmarshal([]byte(processContext.Extension), &rule)
-		if err != nil {
-			zap.L().Error("解析触发规则失败", zap.Error(err))
-			return nil, err
+		var triggerRule *v1.DeviceTriggerRule
+		if processContext.Extension != "" {
+			var rule craftRouteModels.TriggerRules
+			err := json.Unmarshal([]byte(processContext.Extension), &rule)
+			if err != nil {
+				zap.L().Error("解析触发规则失败", zap.Error(err))
+				return nil, err
+			}
+			triggerRule = v1.NweDeviceTriggerRule()
+			triggerRule.Rule.Rule = rule.CombinedRule
+			triggerRule.Rule.DataId = rule.DataIds
+			for _, action := range rule.Actions {
+				triggerRule.Actions = append(triggerRule.Actions, &v1.DeviceAction{
+					DeviceId:   action.DeviceId,
+					TemplateId: action.TemplateId,
+					DataId:     action.DataId,
+					Value:      action.Value,
+					DataFormat: action.DataFormat,
+				})
+			}
 		}
-		triggerRule := v1.NweDeviceTriggerRule()
-		triggerRule.Rule.Rule = rule.CombinedRule
-		triggerRule.Rule.DataId = rule.DataIds
-		for _, action := range rule.Actions {
-			triggerRule.Actions = append(triggerRule.Actions, &v1.DeviceAction{
-				DeviceId:   action.DeviceId,
-				TemplateId: action.TemplateId,
-				DataId:     action.DataId,
-				Value:      action.Value,
-				DataFormat: action.DataFormat,
-			})
-		}
+
 		contextList[processContext.ProcessID] = append(contextList[processContext.ProcessID], v1.ProcessContext{
 			ContentID:    processContext.ContentID,
 			ProcessID:    processContext.ProcessID,

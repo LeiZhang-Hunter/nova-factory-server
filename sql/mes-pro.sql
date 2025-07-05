@@ -260,3 +260,19 @@ create table sys_pro_task (
   update_time                    datetime                                   comment '更新时间',
   primary key (task_id)
 ) engine=innodb auto_increment=200 comment = '生产任务表';
+
+
+CREATE TABLE `sys_craft_route_config` (
+  `route_config_id` bigint NOT NULL COMMENT '工艺路线配置id',
+  `route_id` bigint NOT NULL COMMENT '工艺路线ID',
+  `context` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '原始配置',
+  `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '下发配置',
+  `dept_id` bigint DEFAULT NULL COMMENT '部门ID',
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `state` tinyint(1) DEFAULT '0' COMMENT '操作状态（0正常 -1删除）',
+  PRIMARY KEY (`route_config_id`),
+  UNIQUE KEY `route_id` (`route_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='工艺路线表';
