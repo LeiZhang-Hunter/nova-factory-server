@@ -42,9 +42,16 @@ dataset:
   host: http://192.168.2.100
   image_url: http://81.71.98.26:11105
 metric:
+  datasource: iotdb
+#  datasource: clickhouse
   host: 0.0.0.0:6000
 daemonize:
   address: ":10050"
   server_list:
     - 127.0.0.1:10050
   debug: true
+iotdb:
+  host: 192.168.2.100
+  port: 6777
+  username: ""
+  password: ""

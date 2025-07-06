@@ -13,6 +13,7 @@ import (
 	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/clickhouse"
+	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/routes"
 )
 
@@ -23,7 +24,8 @@ func wireApp() (*grpc.Server, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse)
+	iotDb := iotdb.NewIotDb()
+	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
 	cacheCache := cache.NewCache()
 	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
 	metric := metricController.NewMetric(iMetricService)

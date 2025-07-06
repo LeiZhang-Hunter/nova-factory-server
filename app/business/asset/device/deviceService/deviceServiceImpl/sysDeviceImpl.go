@@ -8,6 +8,7 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/asset/device/deviceService"
+	"nova-factory-server/app/business/metric/device/metricDao"
 	"nova-factory-server/app/business/system/systemDao"
 	"nova-factory-server/app/business/system/systemModels"
 )
@@ -16,13 +17,16 @@ type DeviceService struct {
 	iDeviceDao      deviceDao.IDeviceDao
 	iDeviceGroupDao deviceDao.IDeviceGroupDao
 	iUserDao        systemDao.IUserDao
+	metricDao       metricDao.IMetricDao
 }
 
-func NewDeviceService(iDeviceDao deviceDao.IDeviceDao, iDeviceGroupDao deviceDao.IDeviceGroupDao, iUserDao systemDao.IUserDao) deviceService.IDeviceService {
+func NewDeviceService(iDeviceDao deviceDao.IDeviceDao, iDeviceGroupDao deviceDao.IDeviceGroupDao,
+	iUserDao systemDao.IUserDao, metricDao metricDao.IMetricDao) deviceService.IDeviceService {
 	return &DeviceService{
 		iDeviceDao:      iDeviceDao,
 		iDeviceGroupDao: iDeviceGroupDao,
 		iUserDao:        iUserDao,
+		metricDao:       metricDao,
 	}
 }
 
@@ -31,6 +35,7 @@ func (d *DeviceService) InsertDevice(c *gin.Context, job *deviceModels.DeviceInf
 	if err != nil {
 		return nil, err
 	}
+	d.metricDao.InstallDevice(c, vo)
 	return vo, nil
 }
 
@@ -169,5 +174,12 @@ func (d *DeviceService) SelectDeviceList(c *gin.Context, req *deviceModels.Devic
 }
 
 func (d *DeviceService) DeleteByDeviceIds(c *gin.Context, ids []int64) error {
-	return d.iDeviceDao.DeleteByDeviceIds(c, ids)
+	err := d.iDeviceDao.DeleteByDeviceIds(c, ids)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		d.metricDao.UnInStallDevice(c, id)
+	}
+	return nil
 }

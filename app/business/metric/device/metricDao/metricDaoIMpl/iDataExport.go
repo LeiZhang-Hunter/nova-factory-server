@@ -1,4 +1,4 @@
-package metricDao
+package metricDaoIMpl
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"nova-factory-server/app/business/metric/device/metricModels"
 )
 
-type IMetricDao interface {
+type iDaoExport interface {
 	Export(ctx context.Context, data []*metricModels.NovaMetricsDevice) error
 	Metric(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error)
 	InstallDevice(c *gin.Context, device *deviceModels.DeviceVO) error

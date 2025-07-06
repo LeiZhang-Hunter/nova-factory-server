@@ -39,6 +39,7 @@ import (
 	"nova-factory-server/app/business/tool/toolService/toolServiceImpl"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/clickhouse"
+	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/datasource/mysql"
 	"nova-factory-server/app/datasource/objectFile"
 	"nova-factory-server/app/routes"
@@ -138,7 +139,14 @@ func wireApp() (*gin.Engine, func(), error) {
 	db := mysql.NewDB()
 	iDeviceDao := deviceDaoImpl.NewSysDeviceDaoImpl(db)
 	iDeviceGroupDao := deviceDaoImpl.NewSysDeviceGroupDaoImpl(db)
-	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao)
+	clickHouse, err := clickhouse.NewClickHouse()
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	iotDb := iotdb.NewIotDb()
+	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
+	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao)
 	deviceInfo := deviceController.NewDeviceInfo(iDeviceService)
 	iDeviceGroupService := deviceServiceImpl.NewDeviceGroupService(iDeviceGroupDao, iUserDao)
 	deviceGroup := deviceController.NewDeviceGroup(iDeviceGroupService)
@@ -214,12 +222,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		WorkOrder:       workOrder,
 		Task:            task,
 	}
-	clickHouse, err := clickhouse.NewClickHouse()
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse)
 	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
 	metric := metricController.NewMetric(iMetricService)
 	metricServer := &metricController.MetricServer{
