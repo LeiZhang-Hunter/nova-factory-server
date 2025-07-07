@@ -131,6 +131,13 @@ func (d *DeviceMonitorServiceImpl) Metric(c *gin.Context, req *metricModels.Metr
 		return data, err
 	}
 
+	if data == nil {
+		return &metricModels.MetricQueryData{
+			Labels: make(map[string]string),
+			Values: make([]metricModels.MetricQueryValue, 0),
+		}, nil
+	}
+
 	data.Labels["unit"] = info.Unit
 	data.Labels["name"] = info.Name
 	return data, nil

@@ -10,6 +10,7 @@ import (
 	"nova-factory-server/app/business/metric/device/metricModels"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/iotdb"
+	"nova-factory-server/app/utils/time"
 )
 
 type iotDbExport struct {
@@ -28,10 +29,6 @@ func (i *iotDbExport) Export(ctx context.Context, data []*metricModels.NovaMetri
 		return err
 	}
 	defer i.iotDb.PutSession(session)
-	_, err = session.SetStorageGroup("root.device")
-	if err != nil {
-		return err
-	}
 
 	// 变更数据结构，根据设备id分类
 	var dataMap map[uint64][]*metricModels.NovaMetricsDevice = make(map[uint64][]*metricModels.NovaMetricsDevice)
@@ -50,15 +47,53 @@ func (i *iotDbExport) Export(ctx context.Context, data []*metricModels.NovaMetri
 		values := [][]interface{}{}
 		timestamps := []int64{}
 		for _, value := range list {
-			measurementsSlice = append(measurementsSlice, []string{})
+			measurementsSlice = append(measurementsSlice, []string{
+				"template_id", "data_id", "value",
+			})
+			dataTypes = append(dataTypes, []client.TSDataType{client.INT64, client.INT64, client.FLOAT})
+			values = append(values, []interface{}{int64(value.TemplateId), int64(value.DataId), float32(value.Value)})
+			timestamps = append(timestamps, value.StartTimeUnix.UnixMilli())
 		}
-		session.InsertRecordsOfOneDevice(name, timestamps, measurementsSlice, dataTypes, values, false)
+		stat, err := session.InsertRecordsOfOneDevice(name, timestamps, measurementsSlice, dataTypes, values, false)
+		if err != nil {
+			zap.L().Error("InsertRecordsOfOneDevice error", zap.Error(err))
+			continue
+		}
+		fmt.Println(stat)
 	}
+
 	return nil
 }
 
 func (i *iotDbExport) Metric(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error) {
-	return &metricModels.MetricQueryData{}, nil
+	if req == nil {
+		return nil, nil
+	}
+
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	var startTime string
+	if req.Start > 0 {
+		startTime = time.GetStartTime(req.Start, 200)
+	}
+	endTime := time.GetEndTimeUseNow(req.End, true)
+
+	whereSql := "where "
+	if startTime != "" && endTime != "" {
+		whereSql += "Time >= " + startTime
+	}
+	if endTime != "" {
+		whereSql += "and Time < " + endTime
+	}
+	if req.Step <= 0 {
+		req.Step = 1
+	}
+	return nil, nil
+
 }
 
 // InstallDevice 安装设备模板
