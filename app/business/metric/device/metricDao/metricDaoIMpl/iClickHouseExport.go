@@ -90,9 +90,9 @@ func (m *iClickHouseExport) Metric(c *gin.Context, req *metricModels.MetricQuery
 	return &data, nil
 }
 
-func (m *iClickHouseExport) InstallDevice(c *gin.Context, device *deviceModels.DeviceVO) error {
+func (m *iClickHouseExport) InstallDevice(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData) error {
 	return nil
 }
-func (m *iClickHouseExport) UnInStallDevice(c *gin.Context, deviceId int64) error {
+func (m *iClickHouseExport) UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error {
 	return nil
 }

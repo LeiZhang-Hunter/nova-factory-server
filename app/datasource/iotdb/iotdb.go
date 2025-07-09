@@ -1,6 +1,7 @@
 package iotdb
 
 import (
+	"errors"
 	"github.com/apache/iotdb-client-go/client"
 	"go.uber.org/zap"
 )
@@ -27,7 +28,7 @@ func NewIotDb() *IotDb {
 
 	defer pool.PutBack(session)
 
-	session.ExecuteStatement("create device template nova_device_template (template_id INT64, data_id INT64, value FLOAT)")
+	session.ExecuteStatement("create device template nova_device_template ALIGNED (value DOUBLE)")
 
 	return &IotDb{
 		pool: pool,
@@ -35,6 +36,9 @@ func NewIotDb() *IotDb {
 }
 
 func (i *IotDb) GetSession() (client.Session, error) {
+	if i == nil {
+		return client.Session{}, errors.New("<UNK>")
+	}
 	return i.pool.GetSession()
 }
 

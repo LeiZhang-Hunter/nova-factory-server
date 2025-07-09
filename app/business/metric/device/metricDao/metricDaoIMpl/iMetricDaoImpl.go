@@ -53,10 +53,10 @@ func (m *MetricDaoImpl) Metric(c *gin.Context, req *metricModels.MetricQueryReq)
 	return m.exporter.Metric(c, req)
 }
 
-func (m *MetricDaoImpl) InstallDevice(c *gin.Context, device *deviceModels.DeviceVO) error {
-	return m.exporter.InstallDevice(c, device)
+func (m *MetricDaoImpl) InstallDevice(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData) error {
+	return m.exporter.InstallDevice(c, deviceId, device)
 }
 
-func (m *MetricDaoImpl) UnInStallDevice(c *gin.Context, deviceId int64) error {
-	return m.exporter.UnInStallDevice(c, deviceId)
+func (m *MetricDaoImpl) UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error {
+	return m.exporter.UnInStallDevice(c, deviceId, templateId, dataId)
 }

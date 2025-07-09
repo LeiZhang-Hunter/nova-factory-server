@@ -2,6 +2,7 @@ package metricDaoIMpl
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/apache/iotdb-client-go/client"
 	"github.com/gin-gonic/gin"
@@ -40,26 +41,43 @@ func (i *iotDbExport) Export(ctx context.Context, data []*metricModels.NovaMetri
 		dataMap[d.DeviceId] = append(dataMap[d.DeviceId], d)
 	}
 
+	type pointData struct {
+		measurementsSlice [][]string
+		dataTypes         [][]client.TSDataType
+		values            [][]interface{}
+		timestamps        []int64
+	}
+
+	var pointDataMap map[string]*pointData = make(map[string]*pointData)
+
 	for deviceId, list := range dataMap {
-		name := fmt.Sprintf(iotdb2.ROOT_DEVICE_TEMPLATE_NAME, deviceId)
-		measurementsSlice := [][]string{}
-		dataTypes := [][]client.TSDataType{}
-		values := [][]interface{}{}
-		timestamps := []int64{}
 		for _, value := range list {
-			measurementsSlice = append(measurementsSlice, []string{
-				"template_id", "data_id", "value",
+			name := iotdb2.MakeDeviceTemplateName(int64(deviceId), int64(value.TemplateId), int64(value.DataId))
+			_, ok := pointDataMap[name]
+			if !ok {
+				pointDataMap[name] = &pointData{
+					measurementsSlice: make([][]string, 0),
+					dataTypes:         [][]client.TSDataType{},
+					values:            [][]interface{}{},
+					timestamps:        []int64{},
+				}
+			}
+			now := value.StartTimeUnix.UnixMilli()
+			pointDataMap[name].measurementsSlice = append(pointDataMap[name].measurementsSlice, []string{
+				"value",
 			})
-			dataTypes = append(dataTypes, []client.TSDataType{client.INT64, client.INT64, client.FLOAT})
-			values = append(values, []interface{}{int64(value.TemplateId), int64(value.DataId), float32(value.Value)})
-			timestamps = append(timestamps, value.StartTimeUnix.UnixMilli())
+			pointDataMap[name].dataTypes = append(pointDataMap[name].dataTypes, []client.TSDataType{client.DOUBLE})
+			pointDataMap[name].values = append(pointDataMap[name].values, []interface{}{(value.Value)})
+			pointDataMap[name].timestamps = append(pointDataMap[name].timestamps, now)
 		}
-		stat, err := session.InsertRecordsOfOneDevice(name, timestamps, measurementsSlice, dataTypes, values, false)
+	}
+
+	for name, point := range pointDataMap {
+		_, err := session.InsertRecordsOfOneDevice(name, point.timestamps, point.measurementsSlice, point.dataTypes, point.values, false)
 		if err != nil {
 			zap.L().Error("InsertRecordsOfOneDevice error", zap.Error(err))
 			continue
 		}
-		fmt.Println(stat)
 	}
 
 	return nil
@@ -82,22 +100,41 @@ func (i *iotDbExport) Metric(c *gin.Context, req *metricModels.MetricQueryReq) (
 	}
 	endTime := time.GetEndTimeUseNow(req.End, true)
 
-	whereSql := "where "
-	if startTime != "" && endTime != "" {
-		whereSql += "Time >= " + startTime
+	if startTime == "" {
+		return nil, errors.New("开始时间不能为空")
 	}
-	if endTime != "" {
-		whereSql += "and Time < " + endTime
+
+	if endTime == "" {
+		return nil, errors.New("结束时间不能为空")
 	}
-	if req.Step <= 0 {
-		req.Step = 1
+
+	name := iotdb2.MakeDeviceTemplateName(int64(req.DeviceId), int64(req.TemplateId), int64(req.DataId))
+	var timeout int64 = 5000
+	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
+	sql := fmt.Sprintf("select avg(value) as value from %s group by([%s, %s), %dm, %dm);",
+		name, startTime, endTime, req.Step, req.Step)
+	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
+		return nil, err
 	}
-	return nil, nil
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		timestamp := statement.GetTimestamp()
+		v := statement.GetDouble("value")
+		data.Values = append(data.Values, metricModels.MetricQueryValue{
+			Time:  timestamp,
+			Value: fmt.Sprintf("%f", v),
+		})
+
+	}
+	data.Id = name
+	return data, nil
 
 }
 
 // InstallDevice 安装设备模板
-func (i *iotDbExport) InstallDevice(c *gin.Context, device *deviceModels.DeviceVO) error {
+func (i *iotDbExport) InstallDevice(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData) error {
 	session, err := i.iotDb.GetSession()
 	if err != nil {
 		zap.L().Error("读取session失败", zap.Error(err))
@@ -105,7 +142,7 @@ func (i *iotDbExport) InstallDevice(c *gin.Context, device *deviceModels.DeviceV
 	}
 	defer i.iotDb.PutSession(session)
 
-	name := fmt.Sprintf(iotdb2.ROOT_DEVICE_TEMPLATE_NAME, device.DeviceId)
+	name := iotdb2.MakeDeviceTemplateName(deviceId, device.TemplateID, device.DeviceConfigID)
 	// 创建设备模板
 	group, err := session.SetStorageGroup(name)
 	if err != nil {
@@ -130,7 +167,7 @@ func (i *iotDbExport) InstallDevice(c *gin.Context, device *deviceModels.DeviceV
 }
 
 // UnInStallDevice 卸载设备模板
-func (i *iotDbExport) UnInStallDevice(c *gin.Context, deviceId int64) error {
+func (i *iotDbExport) UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error {
 	session, err := i.iotDb.GetSession()
 	if err != nil {
 		zap.L().Error("读取session失败", zap.Error(err))
@@ -138,7 +175,7 @@ func (i *iotDbExport) UnInStallDevice(c *gin.Context, deviceId int64) error {
 	}
 	defer i.iotDb.PutSession(session)
 
-	name := fmt.Sprintf(iotdb2.ROOT_DEVICE_TEMPLATE_NAME, deviceId)
+	name := fmt.Sprintf(iotdb2.ROOT_DEVICE_TEMPLATE_NAME, deviceId, templateId, dataId)
 
 	// 删除模板表示的某一组时间序列
 	_, err = session.ExecuteStatement(fmt.Sprintf("deactivate device template %s from %s", iotdb2.NOVA_DEVICE_TEMPLATE, name))

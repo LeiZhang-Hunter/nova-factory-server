@@ -46,6 +46,14 @@ type MetricQueryValue struct {
 type MetricQueryData struct {
 	Labels map[string]string `json:"label"`
 	Values []MetricQueryValue
+	Id     string
+}
+
+func NewMetricQueryData() *MetricQueryData {
+	return &MetricQueryData{
+		Labels: make(map[string]string),
+		Values: make([]MetricQueryValue, 0),
+	}
 }
 
 type MetricQueryReq struct {

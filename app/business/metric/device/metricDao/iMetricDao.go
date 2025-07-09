@@ -10,6 +10,6 @@ import (
 type IMetricDao interface {
 	Export(ctx context.Context, data []*metricModels.NovaMetricsDevice) error
 	Metric(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error)
-	InstallDevice(c *gin.Context, device *deviceModels.DeviceVO) error
-	UnInStallDevice(c *gin.Context, deviceId int64) error
+	InstallDevice(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData) error
+	UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error
 }

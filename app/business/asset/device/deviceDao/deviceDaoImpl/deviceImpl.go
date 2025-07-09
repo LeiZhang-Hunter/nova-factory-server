@@ -65,6 +65,15 @@ func (s *sysDeviceDataDao) GetDeviceGroupByName(c *gin.Context, name string) (*d
 	return &vo, nil
 }
 
+func (s *sysDeviceDataDao) GetByIds(c *gin.Context, ids []int64) ([]*deviceModels.DeviceVO, error) {
+	var list []*deviceModels.DeviceVO
+	ret := s.ms.Table(s.tableName).Where("device_id in (?)", ids).First(&list)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	return list, nil
+}
+
 func (s *sysDeviceDataDao) GetNoExitIdDeviceGroupByName(c *gin.Context, name string, id uint64) (*deviceModels.DeviceVO, error) {
 	var vo deviceModels.DeviceVO
 	ret := s.ms.Table(s.tableName).Where("group_id != ?", id).Where("name = ?", name).First(&vo)

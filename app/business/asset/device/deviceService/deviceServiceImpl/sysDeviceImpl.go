@@ -18,15 +18,17 @@ type DeviceService struct {
 	iDeviceGroupDao deviceDao.IDeviceGroupDao
 	iUserDao        systemDao.IUserDao
 	metricDao       metricDao.IMetricDao
+	dataDao         deviceDao.ISysModbusDeviceConfigDataDao
 }
 
 func NewDeviceService(iDeviceDao deviceDao.IDeviceDao, iDeviceGroupDao deviceDao.IDeviceGroupDao,
-	iUserDao systemDao.IUserDao, metricDao metricDao.IMetricDao) deviceService.IDeviceService {
+	iUserDao systemDao.IUserDao, metricDao metricDao.IMetricDao, dataDao deviceDao.ISysModbusDeviceConfigDataDao) deviceService.IDeviceService {
 	return &DeviceService{
 		iDeviceDao:      iDeviceDao,
 		iDeviceGroupDao: iDeviceGroupDao,
 		iUserDao:        iUserDao,
 		metricDao:       metricDao,
+		dataDao:         dataDao,
 	}
 }
 
@@ -35,8 +37,23 @@ func (d *DeviceService) InsertDevice(c *gin.Context, job *deviceModels.DeviceInf
 	if err != nil {
 		return nil, err
 	}
-	d.metricDao.InstallDevice(c, vo)
+
+	d.installTable(c, job)
 	return vo, nil
+}
+
+func (d *DeviceService) installTable(c *gin.Context, info *deviceModels.DeviceInfo) {
+	list, err := d.dataDao.GetByTemplateIds(c, []uint64{info.DeviceProtocolId})
+	if err != nil {
+		return
+	}
+
+	for _, v := range list {
+		err := d.metricDao.InstallDevice(c, int64(info.DeviceId), v)
+		if err != nil {
+			zap.L().Error("InstallDevice error", zap.Error(err))
+		}
+	}
 }
 
 func (d *DeviceService) UpdateDevice(c *gin.Context, job *deviceModels.DeviceInfo) (*deviceModels.DeviceVO, error) {
@@ -44,6 +61,7 @@ func (d *DeviceService) UpdateDevice(c *gin.Context, job *deviceModels.DeviceInf
 	if err != nil {
 		return nil, err
 	}
+	d.installTable(c, job)
 	return device, nil
 }
 
@@ -178,8 +196,27 @@ func (d *DeviceService) DeleteByDeviceIds(c *gin.Context, ids []int64) error {
 	if err != nil {
 		return err
 	}
-	for _, id := range ids {
-		d.metricDao.UnInStallDevice(c, id)
+	data, err := d.iDeviceDao.GetByIds(c, ids)
+	if err != nil {
+		zap.L().Error("get by ids error", zap.Error(err))
+		return err
+	}
+	for _, value := range data {
+		d.unInstallTable(c, value)
 	}
 	return nil
+}
+
+func (d *DeviceService) unInstallTable(c *gin.Context, info *deviceModels.DeviceVO) {
+	list, err := d.dataDao.GetByTemplateIds(c, []uint64{info.DeviceProtocolId})
+	if err != nil {
+		return
+	}
+
+	for _, v := range list {
+		err := d.metricDao.UnInStallDevice(c, int64(info.DeviceId), v.TemplateID, v.DeviceConfigID)
+		if err != nil {
+			zap.L().Error("InstallDevice error", zap.Error(err))
+		}
+	}
 }
