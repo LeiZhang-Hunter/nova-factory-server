@@ -53,6 +53,10 @@ func (m *MetricDaoImpl) Metric(c *gin.Context, req *metricModels.MetricQueryReq)
 	return m.exporter.Metric(c, req)
 }
 
+func (m *MetricDaoImpl) Predict(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error) {
+	return m.exporter.Predict(c, deviceId, device, req)
+}
+
 func (m *MetricDaoImpl) InstallDevice(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData) error {
 	return m.exporter.InstallDevice(c, deviceId, device)
 }

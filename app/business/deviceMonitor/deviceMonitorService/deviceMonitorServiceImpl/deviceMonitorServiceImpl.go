@@ -142,3 +142,28 @@ func (d *DeviceMonitorServiceImpl) Metric(c *gin.Context, req *metricModels.Metr
 	data.Labels["name"] = info.Name
 	return data, nil
 }
+
+func (d *DeviceMonitorServiceImpl) Predict(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error) {
+	info, err := d.deviceConfigDataDao.GetById(c, req.DataId)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, errors.New("数据不存在")
+	}
+	data, err := d.metricDao.Predict(c, int64(req.DeviceId), info, req)
+	if err != nil {
+		return data, err
+	}
+
+	if data == nil {
+		return &metricModels.MetricQueryData{
+			Labels: make(map[string]string),
+			Values: make([]metricModels.MetricQueryValue, 0),
+		}, nil
+	}
+
+	data.Labels["unit"] = info.Unit
+	data.Labels["name"] = info.Name
+	return data, nil
+}

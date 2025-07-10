@@ -70,3 +70,26 @@ func (d *DeviceMonitor) Metric(c *gin.Context) {
 	}
 	baizeContext.SuccessData(c, list)
 }
+
+// Predict 预测指标
+// @Summary 预测指标
+// @Description 预测指标
+// @Tags 设备监控/设备监控
+// @Param  object body metricModels.MetricQueryReq true "设备监控"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设备监控"
+// @Router /device/monitor/predict [post]
+func (d *DeviceMonitor) Predict(c *gin.Context) {
+	req := new(metricModels.MetricQueryReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	list, err := d.service.Predict(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
+}

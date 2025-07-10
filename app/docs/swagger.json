@@ -3647,6 +3647,37 @@
                 }
             }
         },
+        "/device/monitor/predict": {
+            "post": {
+                "description": "预测指标",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "预测指标",
+                "parameters": [
+                    {
+                        "description": "设备监控",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备监控",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/file/downloadPrivateFile": {
             "get": {
                 "security": [
@@ -9422,62 +9453,7 @@
         "craftRouteModels.ProcessTopoData": {
             "type": "object",
             "properties": {
-                "config": {
-                    "type": "object",
-                    "properties": {
-                        "attention": {
-                            "type": "string"
-                        },
-                        "attr1": {
-                            "type": "string"
-                        },
-                        "attr2": {
-                            "type": "string"
-                        },
-                        "attr3": {
-                            "type": "integer"
-                        },
-                        "attr4": {
-                            "type": "integer"
-                        },
-                        "createBy": {
-                            "type": "integer"
-                        },
-                        "createTime": {
-                            "type": "string"
-                        },
-                        "createUserName": {
-                            "type": "string"
-                        },
-                        "process_code": {
-                            "type": "string"
-                        },
-                        "process_id": {
-                            "type": "string"
-                        },
-                        "process_name": {
-                            "type": "string"
-                        },
-                        "remark": {
-                            "type": "string"
-                        },
-                        "state": {
-                            "type": "boolean"
-                        },
-                        "status": {
-                            "type": "boolean"
-                        },
-                        "updateBy": {
-                            "type": "integer"
-                        },
-                        "updateTime": {
-                            "type": "string"
-                        },
-                        "updateUserName": {
-                            "type": "string"
-                        }
-                    }
-                },
+                "config": {},
                 "description": {
                     "type": "string"
                 },

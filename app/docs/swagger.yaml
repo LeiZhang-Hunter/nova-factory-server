@@ -494,43 +494,7 @@ definitions:
     type: object
   craftRouteModels.ProcessTopoData:
     properties:
-      config:
-        properties:
-          attention:
-            type: string
-          attr1:
-            type: string
-          attr2:
-            type: string
-          attr3:
-            type: integer
-          attr4:
-            type: integer
-          createBy:
-            type: integer
-          createTime:
-            type: string
-          createUserName:
-            type: string
-          process_code:
-            type: string
-          process_id:
-            type: string
-          process_name:
-            type: string
-          remark:
-            type: string
-          state:
-            type: boolean
-          status:
-            type: boolean
-          updateBy:
-            type: integer
-          updateTime:
-            type: string
-          updateUserName:
-            type: string
-        type: object
+      config: {}
       description:
         type: string
       label:
@@ -4790,6 +4754,26 @@ paths:
           schema:
             $ref: '#/definitions/response.ResponseData'
       summary: 设备指标
+      tags:
+      - 设备监控/设备监控
+  /device/monitor/predict:
+    post:
+      description: 预测指标
+      parameters:
+      - description: 设备监控
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/metricModels.MetricQueryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设备监控
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 预测指标
       tags:
       - 设备监控/设备监控
   /file/downloadPrivateFile:

@@ -96,3 +96,10 @@ func (m *iClickHouseExport) InstallDevice(c *gin.Context, deviceId int64, device
 func (m *iClickHouseExport) UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error {
 	return nil
 }
+
+func (i *iClickHouseExport) Predict(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error) {
+	return &metricModels.MetricQueryData{
+		Labels: make(map[string]string),
+		Values: make([]metricModels.MetricQueryValue, 0),
+	}, nil
+}

@@ -107,12 +107,15 @@ func (i *iotDbExport) Metric(c *gin.Context, req *metricModels.MetricQueryReq) (
 	if endTime == "" {
 		return nil, errors.New("结束时间不能为空")
 	}
-
+	if req.Step <= 0 {
+		req.Step = 1
+	}
 	name := iotdb2.MakeDeviceTemplateName(int64(req.DeviceId), int64(req.TemplateId), int64(req.DataId))
 	var timeout int64 = 5000
 	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
 	sql := fmt.Sprintf("select avg(value) as value from %s group by([%s, %s), %dm, %dm);",
 		name, startTime, endTime, req.Step, req.Step)
+	fmt.Println(sql)
 	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
 	statement, err := session.ExecuteQueryStatement(sql, &timeout)
 	if err != nil {
@@ -196,4 +199,57 @@ func (i *iotDbExport) UnInStallDevice(c *gin.Context, deviceId int64, templateId
 		return err
 	}
 	return nil
+}
+
+// Predict 趋势预测
+func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error) {
+	if req == nil {
+		return nil, nil
+	}
+
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	var startTime string
+	if req.Start > 0 {
+		startTime = time.GetStartTime(req.Start, 200)
+	}
+	endTime := time.GetEndTimeUseNow(req.End, true)
+
+	if startTime == "" {
+		return nil, errors.New("开始时间不能为空")
+	}
+
+	if endTime == "" {
+		return nil, errors.New("结束时间不能为空")
+	}
+	if req.Step <= 0 {
+		req.Step = 1
+	}
+	name := iotdb2.MakeDeviceTemplateName(int64(req.DeviceId), int64(req.TemplateId), int64(req.DataId))
+	var timeout int64 = 5000
+	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
+	sql := fmt.Sprintf("call inference(_STLForecaster, \"select avg(value) as value from %s group by([%s, %s), %dm, %dm)\", generateTime=True, predict_length=10)",
+		name, startTime, endTime, req.Step, req.Step)
+	fmt.Println(sql)
+	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
+		return nil, err
+	}
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		timestamp := statement.GetTimestamp()
+		v := statement.GetDouble("value")
+		data.Values = append(data.Values, metricModels.MetricQueryValue{
+			Time:  timestamp,
+			Value: fmt.Sprintf("%f", v),
+		})
+
+	}
+	data.Id = name
+	return data, nil
 }
