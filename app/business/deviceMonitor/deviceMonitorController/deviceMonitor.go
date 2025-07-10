@@ -23,6 +23,7 @@ func (d *DeviceMonitor) PrivateRoutes(router *gin.RouterGroup) {
 	monitor := router.Group("/device/monitor")
 	monitor.GET("/list", middlewares.HasPermission("device:monitor:list"), d.List)
 	monitor.POST("/metric", middlewares.HasPermission("device:monitor:metric"), d.Metric)
+	monitor.POST("/predict", middlewares.HasPermission("device:monitor:metric"), d.Predict)
 }
 
 // List 设备监控

@@ -1425,6 +1425,9 @@ definitions:
         description: 功能码
         example: "0"
         type: string
+      graph_enable:
+        description: 是否开启图表
+        type: boolean
       mode:
         description: 功能码
         example: "0"
@@ -1432,10 +1435,18 @@ definitions:
       name:
         description: 数据名称
         type: string
+      perturbation_variables:
+        description: 扰动变量
+        items:
+          type: string
+        type: array
       precision:
         description: 数据精度
         example: "0"
         type: string
+      predict_enable:
+        description: 是否开启预测
+        type: boolean
       register:
         description: 寄存器/偏移量
         example: "0"

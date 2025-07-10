@@ -10758,6 +10758,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0"
                 },
+                "graph_enable": {
+                    "description": "是否开启图表",
+                    "type": "boolean"
+                },
                 "mode": {
                     "description": "功能码",
                     "type": "string",
@@ -10767,10 +10771,21 @@ const docTemplate = `{
                     "description": "数据名称",
                     "type": "string"
                 },
+                "perturbation_variables": {
+                    "description": "扰动变量",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "precision": {
                     "description": "数据精度",
                     "type": "string",
                     "example": "0"
+                },
+                "predict_enable": {
+                    "description": "是否开启预测",
+                    "type": "boolean"
                 },
                 "register": {
                     "description": "寄存器/偏移量",

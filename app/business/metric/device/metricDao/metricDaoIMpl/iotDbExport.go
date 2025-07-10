@@ -206,6 +206,7 @@ func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *deviceMode
 	if req == nil {
 		return nil, nil
 	}
+	// call inference(_STLForecaster, "select avg(value) from root.device.dev10366836907956274839,root.device.dev18109908223314572656 group by([2025-07-10 11:20:32, 2025-07-10 15:20:32), 3m, 3m) order by time desc  align by time", generateTime=True,predict_length=10);
 
 	session, err := i.iotDb.GetSession()
 	if err != nil {
@@ -232,18 +233,23 @@ func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *deviceMode
 	name := iotdb2.MakeDeviceTemplateName(int64(req.DeviceId), int64(req.TemplateId), int64(req.DataId))
 	var timeout int64 = 5000
 	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
-	sql := fmt.Sprintf("call inference(_STLForecaster, \"select avg(value) as value from %s group by([%s, %s), %dm, %dm)\", generateTime=True, predict_length=10)",
+	if device.AggFunction == "" {
+		device.AggFunction = "avg"
+	}
+	sql := fmt.Sprintf("select %s(value) as value from %s group by([%s, %s), %dm, %dm)", device.AggFunction,
 		name, startTime, endTime, req.Step, req.Step)
+	predictSql := fmt.Sprintf("call inference(_STLForecaster, \"%s\", generateTime=True, predict_length=10)",
+		sql)
 	fmt.Println(sql)
 	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
-	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	statement, err := session.ExecuteQueryStatement(predictSql, &timeout)
 	if err != nil {
 		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
 		return nil, err
 	}
 	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
 		timestamp := statement.GetTimestamp()
-		v := statement.GetDouble("value")
+		v := statement.GetDouble("output0")
 		data.Values = append(data.Values, metricModels.MetricQueryValue{
 			Time:  timestamp,
 			Value: fmt.Sprintf("%f", v),
