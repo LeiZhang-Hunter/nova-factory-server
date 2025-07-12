@@ -3516,6 +3516,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/device/monitor/data/dev/list": {
+            "get": {
+                "description": "设备测点列表",
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "设备测点列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/monitor/data/list": {
+            "get": {
+                "description": "实时数据",
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "实时数据",
+                "parameters": [
+                    {
+                        "description": "获取模板数据列表请求参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceMonitorModel.DevDataReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/device/monitor/list": {
             "get": {
                 "description": "设备监控",
@@ -10730,6 +10775,23 @@ const docTemplate = `{
                 }
             }
         },
+        "deviceModels.PerturbationVariableData": {
+            "type": "object",
+            "properties": {
+                "data_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "device_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "template_id": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
         "deviceModels.SetSysModbusDeviceConfigDataReq": {
             "type": "object",
             "required": [
@@ -10740,6 +10802,10 @@ const docTemplate = `{
                 "type"
             ],
             "properties": {
+                "agg_function": {
+                    "description": "聚合函数",
+                    "type": "string"
+                },
                 "data_format": {
                     "description": "读写方式",
                     "type": "string"
@@ -10775,7 +10841,7 @@ const docTemplate = `{
                     "description": "扰动变量",
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/deviceModels.PerturbationVariableData"
                     }
                 },
                 "precision": {
@@ -10847,6 +10913,41 @@ const docTemplate = `{
                 "vendor": {
                     "description": "供应商",
                     "type": "string"
+                }
+            }
+        },
+        "deviceMonitorModel.DevDataReq": {
+            "type": "object",
+            "properties": {
+                "dev": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "end": {
+                    "type": "integer"
+                },
+                "isAsc": {
+                    "description": "排序规则  降序desc   asc升序",
+                    "type": "string"
+                },
+                "orderBy": {
+                    "description": "排序字段",
+                    "type": "string"
+                },
+                "pageNum": {
+                    "description": "第几页",
+                    "type": "integer",
+                    "default": 1
+                },
+                "pageSize": {
+                    "description": "数量",
+                    "type": "integer",
+                    "default": 10000
+                },
+                "start": {
+                    "type": "integer"
                 }
             }
         },

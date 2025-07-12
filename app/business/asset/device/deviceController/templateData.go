@@ -89,7 +89,7 @@ func (t *TemplateData) Set(c *gin.Context) {
 			baizeContext.Waring(c, err.Error())
 			return
 		}
-		baizeContext.SuccessData(c, vo)
+		baizeContext.SuccessData(c, deviceModels.ToSetSysModbusDeviceConfigDataReq(vo))
 	} else {
 		vo, err := t.service.Add(c, info)
 		if err != nil {
@@ -97,7 +97,7 @@ func (t *TemplateData) Set(c *gin.Context) {
 			baizeContext.Waring(c, err.Error())
 			return
 		}
-		baizeContext.SuccessData(c, vo)
+		baizeContext.SuccessData(c, deviceModels.ToSetSysModbusDeviceConfigDataReq(vo))
 	}
 }
 

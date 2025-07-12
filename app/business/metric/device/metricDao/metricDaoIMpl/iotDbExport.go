@@ -8,10 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceModels"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricModels"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/utils/time"
+	"strings"
 )
 
 type iotDbExport struct {
@@ -240,7 +242,6 @@ func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *deviceMode
 		name, startTime, endTime, req.Step, req.Step)
 	predictSql := fmt.Sprintf("call inference(_STLForecaster, \"%s\", generateTime=True, predict_length=10)",
 		sql)
-	fmt.Println(sql)
 	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
 	statement, err := session.ExecuteQueryStatement(predictSql, &timeout)
 	if err != nil {
@@ -258,4 +259,100 @@ func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *deviceMode
 	}
 	data.Id = name
 	return data, nil
+}
+
+func (i *iotDbExport) List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error) {
+	var startTime string
+	if req.Start > 0 {
+		startTime = time.GetStartTime(req.Start, 200)
+	}
+	endTime := time.GetEndTimeUseNow(req.End, true)
+
+	if startTime == "" {
+		return nil, errors.New("开始时间不能为空")
+	}
+
+	if endTime == "" {
+		return nil, errors.New("结束时间不能为空")
+	}
+
+	if req.Size <= 0 {
+		req.Size = 20
+	}
+
+	if req.Size > 50 {
+		req.Size = 50
+	}
+
+	if req.Page < 1 {
+		req.Page = 1
+	}
+
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	offset := (req.Page - 1) * req.Size
+
+	where := ""
+
+	if startTime != "" {
+		where = where + fmt.Sprintf(" time >= %s", startTime)
+	}
+
+	if endTime != "" {
+		if where == "" {
+			where = where + fmt.Sprintf(" time < %s", endTime)
+		} else {
+			where = where + fmt.Sprintf(" and time < %s", endTime)
+		}
+	}
+
+	tableName := "root.device.*"
+	if len(req.Dev) != 0 {
+		tableName = strings.Join(req.Dev, ",")
+	}
+
+	if where != "" {
+		where = fmt.Sprintf(" where %s", where)
+	}
+	var resp deviceMonitorModel.DevDataResp
+	resp.Rows = make([]deviceMonitorModel.DevData, 0)
+	var timeout int64 = 5000
+	sql := fmt.Sprintf("select * from %s %s order by time desc limit %d offset %d align by device",
+		tableName, where, req.Size, offset)
+	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
+		return nil, err
+	}
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		timestamp := statement.GetTimestamp()
+		device := statement.GetText("Device")
+		value := statement.GetDouble("value")
+		resp.Rows = append(resp.Rows, deviceMonitorModel.DevData{
+			Time:  time.MillToTime(timestamp),
+			Value: value,
+			Dev:   device,
+		})
+
+	}
+
+	sql = fmt.Sprintf("select count(*) from %s %s order by time desc align by device",
+		tableName, where)
+	statement, err = session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
+		return nil, err
+	}
+	var sum uint64 = 0
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		count := statement.GetInt64("count(value)")
+		sum = sum + uint64(count)
+	}
+	resp.Total = sum
+	return &resp, nil
 }

@@ -1409,8 +1409,23 @@ definitions:
         description: 协议类型
         type: string
     type: object
+  deviceModels.PerturbationVariableData:
+    properties:
+      data_id:
+        example: "0"
+        type: string
+      device_id:
+        example: "0"
+        type: string
+      template_id:
+        example: "0"
+        type: string
+    type: object
   deviceModels.SetSysModbusDeviceConfigDataReq:
     properties:
+      agg_function:
+        description: 聚合函数
+        type: string
       data_format:
         description: 读写方式
         type: string
@@ -1438,7 +1453,7 @@ definitions:
       perturbation_variables:
         description: 扰动变量
         items:
-          type: string
+          $ref: '#/definitions/deviceModels.PerturbationVariableData'
         type: array
       precision:
         description: 数据精度
@@ -1499,6 +1514,31 @@ definitions:
     - name
     - protocol
     - vendor
+    type: object
+  deviceMonitorModel.DevDataReq:
+    properties:
+      dev:
+        items:
+          type: string
+        type: array
+      end:
+        type: integer
+      isAsc:
+        description: 排序规则  降序desc   asc升序
+        type: string
+      orderBy:
+        description: 排序字段
+        type: string
+      pageNum:
+        default: 1
+        description: 第几页
+        type: integer
+      pageSize:
+        default: 10000
+        description: 数量
+        type: integer
+      start:
+        type: integer
     type: object
   materialModels.InboundInfo:
     properties:
@@ -4677,6 +4717,35 @@ paths:
       summary: 设置Agent
       tags:
       - 网关管理/Agent管理
+  /device/monitor/data/dev/list:
+    get:
+      description: 设备测点列表
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设备测点列表
+      tags:
+      - 设备监控/设备监控
+  /device/monitor/data/list:
+    get:
+      description: 实时数据
+      parameters:
+      - description: 获取模板数据列表请求参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceMonitorModel.DevDataReq'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 实时数据
+      tags:
+      - 设备监控/设备监控
   /device/monitor/list:
     get:
       description: 设备监控

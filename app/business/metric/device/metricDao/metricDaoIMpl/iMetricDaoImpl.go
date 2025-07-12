@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"nova-factory-server/app/business/asset/device/deviceModels"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricDao"
 	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/constant/datasource"
@@ -63,4 +64,8 @@ func (m *MetricDaoImpl) InstallDevice(c *gin.Context, deviceId int64, device *de
 
 func (m *MetricDaoImpl) UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error {
 	return m.exporter.UnInStallDevice(c, deviceId, templateId, dataId)
+}
+
+func (m *MetricDaoImpl) List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error) {
+	return m.exporter.List(c, req)
 }

@@ -23,4 +23,5 @@ const (
 var NodeMap NodeType = map[string]FLOW_TYPE{
 	"process": "process",
 	"product": "product",
+	"default": "default",
 }

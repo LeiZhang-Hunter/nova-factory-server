@@ -1,17 +1,20 @@
 package time
 
 import (
-	"fmt"
 	"github.com/gogf/gf/os/gtime"
 	"time"
 )
 
 func MicroToGTime(micro uint64) *gtime.Time {
-	fmt.Println(time.Now().Unix())
 	t := micro / 1000 / 1000
 	timestamp := time.Unix(int64(t), 0)
 	return gtime.New(timestamp)
 
+}
+
+func MillToTime(mill int64) time.Time {
+	timestamp := time.UnixMilli(mill)
+	return timestamp
 }
 
 func GetStartTime(start uint64, minutes int64) string {

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceModels"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/utils/time"
@@ -102,4 +103,8 @@ func (i *iClickHouseExport) Predict(c *gin.Context, deviceId int64, device *devi
 		Labels: make(map[string]string),
 		Values: make([]metricModels.MetricQueryValue, 0),
 	}, nil
+}
+
+func (i *iClickHouseExport) List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error) {
+	return nil, nil
 }

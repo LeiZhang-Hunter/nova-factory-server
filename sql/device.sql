@@ -261,3 +261,21 @@ CREATE TABLE `sys_iot_agent_config` (
    PRIMARY KEY (`id`),
    INDEX `agent_object_id`(`agent_object_id`) USING BTREE
 ) ENGINE=Innodb   COMMENT='agent配置';
+
+CREATE TABLE `sys_iot_db_dev_map`
+(
+    `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增标识',
+    `device_id` bigint(20) NOT NULL COMMENT '设备id',
+    `template_id` bigint(20) NOT NULL COMMENT '模板id',
+    `data_id` bigint(20) NOT NULL COMMENT '测点id',
+    `device` varchar(128) not null comment '设备名字',
+    `data_name` varchar(128) not null comment '数据名字',
+    `dept_id` bigint(20) NULL DEFAULT 0 COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常-1删除）',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_dev` (`device`) USING BTREE
+) ENGINE=Innodb   COMMENT='数据和iotdb 对照表';

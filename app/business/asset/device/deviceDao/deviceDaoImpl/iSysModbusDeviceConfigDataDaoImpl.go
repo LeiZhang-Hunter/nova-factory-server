@@ -65,7 +65,7 @@ func (i *ISysModbusDeviceConfigDataDaoImpl) List(c *gin.Context, req *deviceMode
 	ret := db.Count(&total)
 	if ret.Error != nil {
 		return &deviceModels.SysModbusDeviceConfigDataListData{
-			Rows:  make([]*deviceModels.SysModbusDeviceConfigData, 0),
+			Rows:  make([]*deviceModels.SetSysModbusDeviceConfigDataReq, 0),
 			Total: 0,
 		}, ret.Error
 	}
@@ -73,12 +73,16 @@ func (i *ISysModbusDeviceConfigDataDaoImpl) List(c *gin.Context, req *deviceMode
 	ret = db.Offset(offset).Limit(size).Order("create_time desc").Find(&dto)
 	if ret.Error != nil {
 		return &deviceModels.SysModbusDeviceConfigDataListData{
-			Rows:  make([]*deviceModels.SysModbusDeviceConfigData, 0),
+			Rows:  make([]*deviceModels.SetSysModbusDeviceConfigDataReq, 0),
 			Total: 0,
 		}, ret.Error
 	}
+	var rows []*deviceModels.SetSysModbusDeviceConfigDataReq = make([]*deviceModels.SetSysModbusDeviceConfigDataReq, 0)
+	for _, data := range dto {
+		rows = append(rows, deviceModels.ToSetSysModbusDeviceConfigDataReq(data))
+	}
 	return &deviceModels.SysModbusDeviceConfigDataListData{
-		Rows:  dto,
+		Rows:  rows,
 		Total: total,
 	}, nil
 }

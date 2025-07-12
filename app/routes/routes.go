@@ -122,7 +122,7 @@ func NewGinEngine(
 		controller.Config.PrivateRoutes(group)
 
 		deviceMonitor.DeviceMonitor.PrivateRoutes(group)
-
+		deviceMonitor.DeviceReport.PrivateRoutes(group)
 	}
 
 	r.NoRoute(func(c *gin.Context) {
