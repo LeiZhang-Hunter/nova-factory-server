@@ -341,12 +341,74 @@ func (i *iotDbExport) List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (
 
 	}
 
-	sql = fmt.Sprintf("select count(*) from %s %s order by time desc align by device",
+	return &resp, nil
+}
+
+func (i *iotDbExport) Count(c *gin.Context, req *deviceMonitorModel.DevDataReq) (uint64, error) {
+	var startTime string
+	if req.Start > 0 {
+		startTime = time.GetStartTime(req.Start, 200)
+	}
+	endTime := time.GetEndTimeUseNow(req.End, true)
+
+	if startTime == "" {
+		return 0, errors.New("开始时间不能为空")
+	}
+
+	if endTime == "" {
+		return 0, errors.New("结束时间不能为空")
+	}
+
+	if req.Size <= 0 {
+		req.Size = 20
+	}
+
+	if req.Size > 50 {
+		req.Size = 50
+	}
+
+	if req.Page < 1 {
+		req.Page = 1
+	}
+
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		return 0, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	where := ""
+
+	if startTime != "" {
+		where = where + fmt.Sprintf(" time >= %s", startTime)
+	}
+
+	if endTime != "" {
+		if where == "" {
+			where = where + fmt.Sprintf(" time < %s", endTime)
+		} else {
+			where = where + fmt.Sprintf(" and time < %s", endTime)
+		}
+	}
+
+	tableName := "root.device.*"
+	if len(req.Dev) != 0 {
+		tableName = strings.Join(req.Dev, ",")
+	}
+
+	if where != "" {
+		where = fmt.Sprintf(" where %s", where)
+	}
+	var resp deviceMonitorModel.DevDataResp
+	resp.Rows = make([]deviceMonitorModel.DevData, 0)
+	var timeout int64 = 5000
+
+	sql := fmt.Sprintf("select count(*) from %s %s order by time desc align by device",
 		tableName, where)
-	statement, err = session.ExecuteQueryStatement(sql, &timeout)
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
 	if err != nil {
 		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
-		return nil, err
+		return 0, err
 	}
 	var sum uint64 = 0
 	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
@@ -354,5 +416,5 @@ func (i *iotDbExport) List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (
 		sum = sum + uint64(count)
 	}
 	resp.Total = sum
-	return &resp, nil
+	return resp.Total, nil
 }

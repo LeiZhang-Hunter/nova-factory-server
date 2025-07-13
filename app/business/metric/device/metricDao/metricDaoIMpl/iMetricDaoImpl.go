@@ -69,3 +69,7 @@ func (m *MetricDaoImpl) UnInStallDevice(c *gin.Context, deviceId int64, template
 func (m *MetricDaoImpl) List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error) {
 	return m.exporter.List(c, req)
 }
+
+func (m *MetricDaoImpl) Count(c *gin.Context, req *deviceMonitorModel.DevDataReq) (uint64, error) {
+	return m.exporter.Count(c, req)
+}

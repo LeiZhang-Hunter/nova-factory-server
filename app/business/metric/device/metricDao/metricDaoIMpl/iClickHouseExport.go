@@ -108,3 +108,7 @@ func (i *iClickHouseExport) Predict(c *gin.Context, deviceId int64, device *devi
 func (i *iClickHouseExport) List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error) {
 	return nil, nil
 }
+
+func (i *iClickHouseExport) Count(c *gin.Context, req *deviceMonitorModel.DevDataReq) (uint64, error) {
+	return 0, nil
+}

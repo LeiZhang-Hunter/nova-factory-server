@@ -4728,11 +4728,29 @@ paths:
       summary: 设备测点列表
       tags:
       - 设备监控/设备监控
+  /device/monitor/data/export:
+    post:
+      description: 导出实时数据
+      parameters:
+      - description: 实时数据表请求参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceMonitorModel.DevDataReq'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 导出实时数据
+      tags:
+      - 设备监控/设备监控
   /device/monitor/data/list:
-    get:
+    post:
       description: 实时数据
       parameters:
-      - description: 获取模板数据列表请求参数
+      - description: 实时数据表请求参数
         in: body
         name: object
         required: true

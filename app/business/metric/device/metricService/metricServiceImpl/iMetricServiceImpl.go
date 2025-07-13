@@ -140,6 +140,11 @@ func (m *IMetricServiceImpl) List(c *gin.Context, req *deviceMonitorModel.DevDat
 			Rows: make([]deviceMonitorModel.DevData, 0),
 		}, nil
 	}
+	total, err := m.dao.Count(c, req)
+	if err != nil {
+		return nil, err
+	}
+	list.Total = total
 	var devStrMap map[string]bool = make(map[string]bool)
 	for _, v := range list.Rows {
 		devStrMap[v.Dev] = true

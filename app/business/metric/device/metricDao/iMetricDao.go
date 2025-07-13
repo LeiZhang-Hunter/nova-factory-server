@@ -15,4 +15,5 @@ type IMetricDao interface {
 	UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error
 	Predict(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error)
 	List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error)
+	Count(c *gin.Context, req *deviceMonitorModel.DevDataReq) (uint64, error)
 }
