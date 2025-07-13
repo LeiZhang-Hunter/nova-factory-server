@@ -13,8 +13,9 @@ type SysIotDbDevMap struct {
 	DataID     int64  `gorm:"column:data_id;not null;comment:测点id" json:"data_id"`            // 测点id
 	Device     string `gorm:"column:device;not null;comment:设备名字" json:"device"`              // 设备名字
 	DataName   string `gorm:"column:data_name;not null;comment:数据名字" json:"data_name"`        // 数据名字
-	DeptID     int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                     // 部门ID
-	State      bool   `gorm:"column:state;comment:操作状态（0正常-1删除）" json:"state"`                // 操作状态（0正常-1删除）
+	Unit       string `gorm:"column:unit;not null;comment:数据单位" json:"unit"`
+	DeptID     int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`      // 部门ID
+	State      bool   `gorm:"column:state;comment:操作状态（0正常-1删除）" json:"state"` // 操作状态（0正常-1删除）
 	baize.BaseEntity
 }
 

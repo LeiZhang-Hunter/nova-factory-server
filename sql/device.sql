@@ -270,6 +270,7 @@ CREATE TABLE `sys_iot_db_dev_map`
     `data_id` bigint(20) NOT NULL COMMENT '测点id',
     `device` varchar(128) not null comment '设备名字',
     `data_name` varchar(128) not null comment '数据名字',
+    `unit` varchar(128) not null comment '数据单位',
     `dept_id` bigint(20) NULL DEFAULT 0 COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',

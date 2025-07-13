@@ -8,9 +8,12 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/asset/device/deviceService"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricDao"
 	"nova-factory-server/app/business/system/systemDao"
 	"nova-factory-server/app/business/system/systemModels"
+	"nova-factory-server/app/constant/iotdb"
 )
 
 type DeviceService struct {
@@ -19,16 +22,19 @@ type DeviceService struct {
 	iUserDao        systemDao.IUserDao
 	metricDao       metricDao.IMetricDao
 	dataDao         deviceDao.ISysModbusDeviceConfigDataDao
+	mapDao          deviceMonitorDao.IDeviceDataReportDao
 }
 
 func NewDeviceService(iDeviceDao deviceDao.IDeviceDao, iDeviceGroupDao deviceDao.IDeviceGroupDao,
-	iUserDao systemDao.IUserDao, metricDao metricDao.IMetricDao, dataDao deviceDao.ISysModbusDeviceConfigDataDao) deviceService.IDeviceService {
+	iUserDao systemDao.IUserDao, metricDao metricDao.IMetricDao, dataDao deviceDao.ISysModbusDeviceConfigDataDao,
+	mapDao deviceMonitorDao.IDeviceDataReportDao) deviceService.IDeviceService {
 	return &DeviceService{
 		iDeviceDao:      iDeviceDao,
 		iDeviceGroupDao: iDeviceGroupDao,
 		iUserDao:        iUserDao,
 		metricDao:       metricDao,
 		dataDao:         dataDao,
+		mapDao:          mapDao,
 	}
 }
 
@@ -49,7 +55,19 @@ func (d *DeviceService) installTable(c *gin.Context, info *deviceModels.DeviceIn
 	}
 
 	for _, v := range list {
-		err := d.metricDao.InstallDevice(c, int64(info.DeviceId), v)
+		devKey := iotdb.MakeDeviceTemplateName(int64(info.DeviceId), int64(info.DeviceProtocolId), v.DeviceConfigID)
+		err := d.mapDao.Save(c, &deviceMonitorModel.SysIotDbDevMap{
+			DeviceID:   int64(info.DeviceId),
+			TemplateID: int64(info.DeviceProtocolId),
+			DataID:     v.DeviceConfigID,
+			Device:     devKey,
+			DataName:   v.Name,
+			Unit:       v.Unit,
+		})
+		if err != nil {
+			zap.L().Error("save iotdb device map error", zap.Error(err))
+		}
+		err = d.metricDao.InstallDevice(c, int64(info.DeviceId), v)
 		if err != nil {
 			zap.L().Error("InstallDevice error", zap.Error(err))
 		}
@@ -214,6 +232,11 @@ func (d *DeviceService) unInstallTable(c *gin.Context, info *deviceModels.Device
 	}
 
 	for _, v := range list {
+		devKey := iotdb.MakeDeviceTemplateName(int64(info.DeviceId), int64(info.DeviceProtocolId), v.DeviceConfigID)
+		err = d.mapDao.Remove(c, devKey)
+		if err != nil {
+			zap.L().Error("uninstall device template error", zap.Error(err))
+		}
 		err := d.metricDao.UnInStallDevice(c, int64(info.DeviceId), v.TemplateID, v.DeviceConfigID)
 		if err != nil {
 			zap.L().Error("InstallDevice error", zap.Error(err))

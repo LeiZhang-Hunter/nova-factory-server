@@ -140,7 +140,18 @@ func (m *IMetricServiceImpl) List(c *gin.Context, req *deviceMonitorModel.DevDat
 			Rows: make([]deviceMonitorModel.DevData, 0),
 		}, nil
 	}
-	devList, err := m.mapDao.GetDevList(c, req.Dev)
+	var devStrMap map[string]bool = make(map[string]bool)
+	for _, v := range list.Rows {
+		devStrMap[v.Dev] = true
+	}
+	var devStrList []string = make([]string, len(devStrMap))
+	count := 0
+	for k, _ := range devStrMap {
+		devStrList[count] = k
+		count++
+	}
+
+	devList, err := m.mapDao.GetDevList(c, devStrList)
 	if err != nil {
 		return nil, err
 	}

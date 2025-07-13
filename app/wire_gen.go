@@ -148,7 +148,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	iotDb := iotdb.NewIotDb()
 	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
 	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
-	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao)
+	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
+	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao)
 	deviceInfo := deviceController.NewDeviceInfo(iDeviceService)
 	iDeviceGroupService := deviceServiceImpl.NewDeviceGroupService(iDeviceGroupDao, iUserDao)
 	deviceGroup := deviceController.NewDeviceGroup(iDeviceGroupService)
@@ -223,7 +224,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		WorkOrder:       workOrder,
 		Task:            task,
 	}
-	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
 	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, iDeviceDataReportDao, cacheCache)
 	metric := metricController.NewMetric(iMetricService)
 	metricServer := &metricController.MetricServer{
