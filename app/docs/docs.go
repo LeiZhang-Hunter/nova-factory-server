@@ -10558,28 +10558,28 @@ const docTemplate = `{
                     "items": {
                         "type": "object",
                         "properties": {
-                            "controlTypeValue": {
+                            "control_type_value": {
                                 "type": "string"
                             },
-                            "dataFormat": {
+                            "data_format": {
                                 "type": "string"
                             },
-                            "dataId": {
+                            "data_id": {
                                 "type": "string"
                             },
-                            "deviceId": {
+                            "device_id": {
                                 "type": "string"
                             },
                             "extension": {
                                 "type": "string"
                             },
-                            "formatHint": {
+                            "format_hint": {
                                 "type": "string"
                             },
                             "placeholder": {
                                 "type": "string"
                             },
-                            "templateId": {
+                            "template_id": {
                                 "type": "string"
                             },
                             "value": {
@@ -10588,10 +10588,47 @@ const docTemplate = `{
                         }
                     }
                 },
+                "cases": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "conditions": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "connector": {
+                                            "type": "string"
+                                        },
+                                        "data_id": {
+                                            "type": "string"
+                                        },
+                                        "operator": {
+                                            "type": "string"
+                                        },
+                                        "rule": {
+                                            "type": "string"
+                                        },
+                                        "value": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "connector": {
+                                "type": "string"
+                            },
+                            "next_step": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
                 "combined_rule": {
                     "type": "string"
                 },
-                "dataIds": {
+                "data_ids": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -10608,9 +10645,8 @@ const docTemplate = `{
                             "connector": {
                                 "type": "string"
                             },
-                            "dataId": {
-                                "type": "string",
-                                "example": "0"
+                            "data_id": {
+                                "type": "string"
                             },
                             "operator": {
                                 "type": "string"

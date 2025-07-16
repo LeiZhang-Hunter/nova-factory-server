@@ -45,7 +45,7 @@ func NewSysProProcessContent(context *SysProSetProcessContent) *SysProProcessCon
 type TriggerRules struct {
 	Name string `json:"name"`
 	Rule []struct {
-		DataId    uint64 `json:"dataId,string"`
+		DataId    string `json:"data_id"`
 		Operator  string `json:"operator"`
 		Value     string `json:"value"`
 		Rule      string `json:"rule"`
@@ -53,17 +53,28 @@ type TriggerRules struct {
 	} `json:"rule"`
 	Actions []struct {
 		Extension        string `json:"extension"`
-		DeviceId         string `json:"deviceId"`
-		DataId           string `json:"dataId"`
-		TemplateId       string `json:"templateId"`
+		DeviceId         string `json:"device_id"`
+		DataId           string `json:"data_id"`
+		TemplateId       string `json:"template_id"`
 		Value            string `json:"value"`
-		DataFormat       string `json:"dataFormat"`
-		ControlTypeValue string `json:"controlTypeValue"`
+		DataFormat       string `json:"data_format"`
+		ControlTypeValue string `json:"control_type_value"`
 		Placeholder      string `json:"placeholder"`
-		FormatHint       string `json:"formatHint"`
+		FormatHint       string `json:"format_hint"`
 	} `json:"actions"`
 	CombinedRule string   `json:"combined_rule"`
-	DataIds      []string `json:"dataIds"`
+	DataIds      []string `json:"data_ids"`
+	Cases        []struct {
+		NextStep   string `json:"next_step"`
+		Connector  string `json:"connector"`
+		Conditions []struct {
+			DataId    string `json:"data_id"`
+			Operator  string `json:"operator"`
+			Value     string `json:"value"`
+			Rule      string `json:"rule"`
+			Connector string `json:"connector"`
+		} `json:"conditions"`
+	} `json:"cases"`
 }
 
 type SysProSetProcessContent struct {

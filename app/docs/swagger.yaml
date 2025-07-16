@@ -1239,29 +1239,53 @@ definitions:
       actions:
         items:
           properties:
-            controlTypeValue:
+            control_type_value:
               type: string
-            dataFormat:
+            data_format:
               type: string
-            dataId:
+            data_id:
               type: string
-            deviceId:
+            device_id:
               type: string
             extension:
               type: string
-            formatHint:
+            format_hint:
               type: string
             placeholder:
               type: string
-            templateId:
+            template_id:
               type: string
             value:
               type: string
           type: object
         type: array
+      cases:
+        items:
+          properties:
+            conditions:
+              items:
+                properties:
+                  connector:
+                    type: string
+                  data_id:
+                    type: string
+                  operator:
+                    type: string
+                  rule:
+                    type: string
+                  value:
+                    type: string
+                type: object
+              type: array
+            connector:
+              type: string
+            next_step:
+              type: string
+          type: object
+        type: array
       combined_rule:
         type: string
-      dataIds:
+      data_ids:
         items:
           type: string
         type: array
@@ -1272,8 +1296,7 @@ definitions:
           properties:
             connector:
               type: string
-            dataId:
-              example: "0"
+            data_id:
               type: string
             operator:
               type: string
