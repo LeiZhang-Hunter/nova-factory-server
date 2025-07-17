@@ -44,6 +44,10 @@ func (mi *MaterialInfo) PrivateRoutes(router *gin.RouterGroup) {
 func (mi *MaterialInfo) GetMaterialInfoList(c *gin.Context) {
 	req := new(materialModels.MaterialListReq)
 	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
 	list, err := mi.iMaterialService.SelectMaterialList(c, req)
 	if err != nil {
 		zap.L().Error("读取设备分组失败", zap.Error(err))

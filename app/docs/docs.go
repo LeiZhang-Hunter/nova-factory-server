@@ -1327,6 +1327,296 @@ const docTemplate = `{
                 }
             }
         },
+        "/alert/rule/change": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "改变告警配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "告警管理/告警规则管理"
+                ],
+                "summary": "改变告警配置",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/alertModels.ChangeSysAlert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/alert/rule/list": {
+            "get": {
+                "description": "告警规则列表",
+                "tags": [
+                    "告警管理/告警规则管理"
+                ],
+                "summary": "告警规则列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "网关id",
+                        "name": "gateway_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "告警策略名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "模板id",
+                        "name": "template_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/alert/rule/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除告警规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "告警管理/告警规则管理"
+                ],
+                "summary": "删除告警规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/alert/rule/set": {
+            "post": {
+                "description": "设置告警规则",
+                "tags": [
+                    "告警管理/告警规则管理"
+                ],
+                "summary": "设置告警规则",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/alertModels.SetSysAlert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/alert/template/list": {
+            "get": {
+                "description": "告警发送配置",
+                "tags": [
+                    "告警管理/告警模板管理"
+                ],
+                "summary": "告警发送配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "addr",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "网关id",
+                        "name": "gateway_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "告警模板名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/alert/template/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除告警发送配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "告警管理/告警模板管理"
+                ],
+                "summary": "删除告警发送配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/alert/template/set": {
+            "post": {
+                "description": "设置告警发送配置",
+                "tags": [
+                    "告警管理/告警模板管理"
+                ],
+                "summary": "设置告警发送配置",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/alertModels.SetSysAlertSinkTemplate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/api/gateway/agent/config/v1/bind": {
             "post": {
                 "description": "绑定Agent配置",
@@ -9408,6 +9698,100 @@ const docTemplate = `{
                 },
                 "optional": {
                     "type": "boolean"
+                }
+            }
+        },
+        "alertModels.ChangeSysAlert": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "自增标识",
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "alertModels.SetSysAlert": {
+            "type": "object",
+            "properties": {
+                "additions": {
+                    "description": "注解",
+                    "type": "string"
+                },
+                "advanced": {
+                    "description": "告警规则",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "配置版本",
+                    "type": "string"
+                },
+                "gateway_id": {
+                    "description": "网关id",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "自增标识",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "告警策略名称",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "操作状态（0正常 1异常）",
+                    "type": "boolean"
+                },
+                "template_id": {
+                    "description": "模板id",
+                    "type": "integer"
+                }
+            }
+        },
+        "alertModels.SetSysAlertSinkTemplate": {
+            "type": "object",
+            "required": [
+                "addr",
+                "name",
+                "template"
+            ],
+            "properties": {
+                "addr": {
+                    "description": "发送alert的http地址，若为空，则不会发送",
+                    "type": "string"
+                },
+                "extension": {
+                    "description": "扩展信息",
+                    "type": "string"
+                },
+                "headers": {
+                    "description": "发送alert的http header",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "description": "自增标识",
+                    "type": "integer"
+                },
+                "method": {
+                    "description": "发送alert的http method, 如果不填put(不区分大小写)，都认为是POST",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "告警模板名称",
+                    "type": "string"
+                },
+                "template": {
+                    "description": "用来渲染的模板",
+                    "type": "string"
+                },
+                "timeout": {
+                    "description": "发送alert的http timeout",
+                    "type": "integer"
                 }
             }
         },

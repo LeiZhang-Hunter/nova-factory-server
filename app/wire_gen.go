@@ -11,6 +11,9 @@ import (
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
 	"nova-factory-server/app/business/ai/aiDataSetService/aiDataSetServiceImpl"
+	"nova-factory-server/app/business/alert/alertController"
+	"nova-factory-server/app/business/alert/alertDao/alertDaoImpl"
+	"nova-factory-server/app/business/alert/alertService/alertServiceImpl"
 	"nova-factory-server/app/business/asset/device/deviceController"
 	"nova-factory-server/app/business/asset/device/deviceDao/deviceDaoImpl"
 	"nova-factory-server/app/business/asset/device/deviceService/deviceServiceImpl"
@@ -249,7 +252,17 @@ func wireApp() (*gin.Engine, func(), error) {
 		DeviceMonitor: deviceMonitor,
 		DeviceReport:  deviceReport,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController)
+	alertRuleDao := alertDaoImpl.NewAlertRuleDaoImpl(db)
+	alertSinkTemplateDao := alertDaoImpl.NewAlertSinkTemplateDaoImpl(db)
+	alertRuleService := alertServiceImpl.NewAlertRuleServiceImpl(alertRuleDao, iotAgentDao, alertSinkTemplateDao)
+	alert := alertController.NewAlert(alertRuleService)
+	alertTemplateService := alertServiceImpl.NewAlertTemplateServiceImpl(alertSinkTemplateDao)
+	alertTemplate := alertController.NewAlertTemplate(alertTemplateService)
+	controller := &alertController.Controller{
+		Alert:         alert,
+		AlertTemplate: alertTemplate,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller)
 	return engine, func() {
 		cleanup()
 	}, nil

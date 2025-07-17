@@ -9,6 +9,9 @@ import (
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
 	"nova-factory-server/app/business/ai/aiDataSetService/aiDataSetServiceImpl"
+	"nova-factory-server/app/business/alert/alertController"
+	"nova-factory-server/app/business/alert/alertDao/alertDaoImpl"
+	"nova-factory-server/app/business/alert/alertService/alertServiceImpl"
 	"nova-factory-server/app/business/asset/device/deviceController"
 	"nova-factory-server/app/business/asset/device/deviceDao/deviceDaoImpl"
 	"nova-factory-server/app/business/asset/device/deviceService/deviceServiceImpl"
@@ -79,6 +82,10 @@ func wireApp() (*gin.Engine, func(), error) {
 
 		deviceMonitorServiceImpl.ProviderSet,
 		deviceMonitorController.ProviderSet,
+
+		alertDaoImpl.ProviderSet,
+		alertServiceImpl.ProviderSet,
+		alertController.ProviderSet,
 
 		datasource.ProviderSet,
 		routes.ProviderSet,

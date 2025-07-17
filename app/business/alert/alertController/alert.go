@@ -1,22 +1,133 @@
 package alertController
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"nova-factory-server/app/business/alert/alertModels"
+	"nova-factory-server/app/business/alert/alertService"
+	"nova-factory-server/app/middlewares"
+	"nova-factory-server/app/utils/baizeContext"
+)
 
 type Alert struct {
+	service alertService.AlertRuleService
 }
 
-func NewAlert() *Alert {
-	return &Alert{}
+func NewAlert(service alertService.AlertRuleService) *Alert {
+	return &Alert{
+		service: service,
+	}
 }
 
-func (a *Alert) GetAlertList(c *gin.Context) {
+func (a *Alert) PrivateRoutes(router *gin.RouterGroup) {
+	group := router.Group("/alert/rule")
+	group.GET("/list", middlewares.HasPermission("alert:rule:list"), a.List)        // 告警规则列表
+	group.POST("/set", middlewares.HasPermission("alert:rule:set"), a.Set)          // 设置物料信息
+	group.DELETE("/:ids", middlewares.HasPermission("alert:rule:remove"), a.Remove) //删除物料
+}
+
+// List 告警规则列表
+// @Summary 告警规则列表
+// @Description 告警规则列表
+// @Tags 告警管理/告警规则管理
+// @Param  object query alertModels.SysAlertListReq true "助理列表参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /alert/rule/list [get]
+func (a *Alert) List(c *gin.Context) {
+	req := new(alertModels.SysAlertListReq)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	list, err := a.service.List(c, req)
+	if err != nil {
+		zap.L().Error("get rule list error", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
 	return
 }
 
-func (a *Alert) SetAlert(c *gin.Context) {
-	return
+// Set 设置告警规则
+// @Summary 设置告警规则
+// @Description 设置告警规则
+// @Tags 告警管理/告警规则管理
+// @Param  object body alertModels.SetSysAlert true "助理列表参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /alert/rule/set [post]
+func (a *Alert) Set(c *gin.Context) {
+	info := new(alertModels.SetSysAlert)
+	err := c.ShouldBindJSON(info)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if info.ID == 0 {
+		value, err := a.service.Create(c, info)
+		if err != nil {
+			zap.L().Error("create rule error", zap.Error(err))
+			baizeContext.Waring(c, err.Error())
+			return
+		}
+		baizeContext.SuccessData(c, value)
+	} else {
+		value, err := a.service.Update(c, info)
+		if err != nil {
+			zap.L().Error("update rule error", zap.Error(err))
+			baizeContext.Waring(c, err.Error())
+			return
+		}
+		baizeContext.SuccessData(c, value)
+	}
 }
 
-func (a *Alert) RemoveAlert(c *gin.Context) {
-	return
+// Remove 删除告警规则
+// @Summary 删除告警规则
+// @Description 删除告警规则
+// @Tags 告警管理/告警规则管理
+// @Param  ids path string true "ids"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "成功"
+// @Router /alert/rule/remove/{ids}  [delete]
+func (a *Alert) Remove(c *gin.Context) {
+	ids := baizeContext.ParamStringArray(c, "ids")
+	if len(ids) == 0 {
+		baizeContext.Waring(c, "请选择删除选项")
+		return
+	}
+	err := a.service.Remove(c, ids)
+	if err != nil {
+		baizeContext.Waring(c, "删除失败")
+		return
+	}
+
+	baizeContext.Success(c)
+}
+
+// Change 改变告警配置
+// @Summary 改变告警配置
+// @Description 改变告警配置
+// @Tags 告警管理/告警规则管理
+// @Param  object body alertModels.ChangeSysAlert true "助理列表参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "成功"
+// @Router /alert/rule/change  [post]
+func (a *Alert) Change(c *gin.Context) {
+	info := new(alertModels.ChangeSysAlert)
+	err := c.ShouldBindJSON(info)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	err = a.service.Change(c, info)
+	if err != nil {
+		zap.L().Error("change rule error", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
 }

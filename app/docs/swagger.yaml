@@ -414,6 +414,74 @@ definitions:
       optional:
         type: boolean
     type: object
+  alertModels.ChangeSysAlert:
+    properties:
+      id:
+        description: 自增标识
+        type: integer
+      status:
+        type: boolean
+    type: object
+  alertModels.SetSysAlert:
+    properties:
+      additions:
+        description: 注解
+        type: string
+      advanced:
+        description: 告警规则
+        type: string
+      description:
+        description: 配置版本
+        type: string
+      gateway_id:
+        description: 网关id
+        type: integer
+      id:
+        description: 自增标识
+        type: integer
+      name:
+        description: 告警策略名称
+        type: string
+      status:
+        description: 操作状态（0正常 1异常）
+        type: boolean
+      template_id:
+        description: 模板id
+        type: integer
+    type: object
+  alertModels.SetSysAlertSinkTemplate:
+    properties:
+      addr:
+        description: 发送alert的http地址，若为空，则不会发送
+        type: string
+      extension:
+        description: 扩展信息
+        type: string
+      headers:
+        additionalProperties:
+          type: string
+        description: 发送alert的http header
+        type: object
+      id:
+        description: 自增标识
+        type: integer
+      method:
+        description: 发送alert的http method, 如果不填put(不区分大小写)，都认为是POST
+        type: string
+      name:
+        description: 告警模板名称
+        type: string
+      template:
+        description: 用来渲染的模板
+        type: string
+      timeout:
+        description: 发送alert的http timeout
+        type: integer
+    required:
+    - addr
+    - name
+    - template
+    type: object
   baize.List:
     properties:
       data:
@@ -3314,6 +3382,192 @@ paths:
       summary: 上传文档
       tags:
       - 工业智能体/文档管理
+  /alert/rule/change:
+    post:
+      description: 改变告警配置
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/alertModels.ChangeSysAlert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 改变告警配置
+      tags:
+      - 告警管理/告警规则管理
+  /alert/rule/list:
+    get:
+      description: 告警规则列表
+      parameters:
+      - description: 网关id
+        in: query
+        name: gateway_id
+        type: integer
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 告警策略名称
+        in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: status
+        type: boolean
+      - description: 模板id
+        in: query
+        name: template_id
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 告警规则列表
+      tags:
+      - 告警管理/告警规则管理
+  /alert/rule/remove/{ids}:
+    delete:
+      description: 删除告警规则
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除告警规则
+      tags:
+      - 告警管理/告警规则管理
+  /alert/rule/set:
+    post:
+      description: 设置告警规则
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/alertModels.SetSysAlert'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置告警规则
+      tags:
+      - 告警管理/告警规则管理
+  /alert/template/list:
+    get:
+      description: 告警发送配置
+      parameters:
+      - in: query
+        name: addr
+        type: string
+      - description: 网关id
+        in: query
+        name: gateway_id
+        type: integer
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 告警模板名称
+        in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 告警发送配置
+      tags:
+      - 告警管理/告警模板管理
+  /alert/template/remove/{ids}:
+    delete:
+      description: 删除告警发送配置
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除告警发送配置
+      tags:
+      - 告警管理/告警模板管理
+  /alert/template/set:
+    post:
+      description: 设置告警发送配置
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/alertModels.SetSysAlertSinkTemplate'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置告警发送配置
+      tags:
+      - 告警管理/告警模板管理
   /api/gateway/agent/config/v1/bind:
     post:
       description: 绑定Agent配置
