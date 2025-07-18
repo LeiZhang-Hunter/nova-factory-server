@@ -73,7 +73,7 @@ func (ac *AlertRuleDaoImpl) List(c *gin.Context, req *alertModels.SysAlertListRe
 	ret := db.Count(&total)
 	if ret.Error != nil {
 		return &alertModels.SysAlertList{
-			Rows:  make([]*alertModels.SysAlert, 0),
+			Rows:  make([]*alertModels.SetSysAlert, 0),
 			Total: 0,
 		}, ret.Error
 	}
@@ -81,12 +81,17 @@ func (ac *AlertRuleDaoImpl) List(c *gin.Context, req *alertModels.SysAlertListRe
 	ret = db.Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
 	if ret.Error != nil {
 		return &alertModels.SysAlertList{
-			Rows:  make([]*alertModels.SysAlert, 0),
+			Rows:  make([]*alertModels.SetSysAlert, 0),
 			Total: 0,
 		}, ret.Error
 	}
+
+	list := make([]*alertModels.SetSysAlert, 0)
+	for _, value := range dto {
+		list = append(list, alertModels.FromSysAlertToSetData(value))
+	}
 	return &alertModels.SysAlertList{
-		Rows:  dto,
+		Rows:  list,
 		Total: uint64(total),
 	}, nil
 }

@@ -1495,11 +1495,11 @@ const docTemplate = `{
         },
         "/alert/template/list": {
             "get": {
-                "description": "告警发送配置",
+                "description": "告警模板列表",
                 "tags": [
                     "告警管理/告警模板管理"
                 ],
-                "summary": "告警发送配置",
+                "summary": "告警模板列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -9718,11 +9718,18 @@ const docTemplate = `{
             "properties": {
                 "additions": {
                     "description": "注解",
-                    "type": "string"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "advanced": {
                     "description": "告警规则",
-                    "type": "string"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/logalert.Advanced"
+                        }
+                    ]
                 },
                 "description": {
                     "description": "配置版本",
@@ -9736,13 +9743,18 @@ const docTemplate = `{
                     "description": "自增标识",
                     "type": "integer"
                 },
+                "ignore": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/logalert.DeviceMetric"
+                    }
+                },
+                "matcher": {
+                    "$ref": "#/definitions/logalert.Matcher"
+                },
                 "name": {
                     "description": "告警策略名称",
                     "type": "string"
-                },
-                "status": {
-                    "description": "操作状态（0正常 1异常）",
-                    "type": "boolean"
                 },
                 "template_id": {
                     "description": "模板id",
@@ -9775,7 +9787,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "自增标识",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "method": {
                     "description": "发送alert的http method, 如果不填put(不区分大小写)，都认为是POST",
@@ -11396,6 +11409,94 @@ const docTemplate = `{
                 },
                 "start": {
                     "type": "integer"
+                }
+            }
+        },
+        "logalert.Advanced": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "type": "integer"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "matchType": {
+                    "type": "string"
+                },
+                "mode": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "rules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/logalert.Rule"
+                    }
+                }
+            }
+        },
+        "logalert.DeviceMetric": {
+            "type": "object",
+            "properties": {
+                "dataId": {
+                    "type": "string"
+                },
+                "deviceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "logalert.Group": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "operator": {
+                    "type": "string"
+                },
+                "operatorName": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "logalert.Matcher": {
+            "type": "object",
+            "properties": {
+                "contains": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/logalert.DeviceMetric"
+                    }
+                },
+                "targetHeader": {
+                    "type": "string"
+                }
+            }
+        },
+        "logalert.Rule": {
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/logalert.Group"
+                    }
+                },
+                "matchType": {
+                    "type": "string"
+                },
+                "ruleId": {
+                    "type": "string"
                 }
             }
         },

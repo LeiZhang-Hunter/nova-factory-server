@@ -425,11 +425,14 @@ definitions:
   alertModels.SetSysAlert:
     properties:
       additions:
+        additionalProperties:
+          type: string
         description: 注解
-        type: string
+        type: object
       advanced:
+        allOf:
+        - $ref: '#/definitions/logalert.Advanced'
         description: 告警规则
-        type: string
       description:
         description: 配置版本
         type: string
@@ -439,12 +442,15 @@ definitions:
       id:
         description: 自增标识
         type: integer
+      ignore:
+        items:
+          $ref: '#/definitions/logalert.DeviceMetric'
+        type: array
+      matcher:
+        $ref: '#/definitions/logalert.Matcher'
       name:
         description: 告警策略名称
         type: string
-      status:
-        description: 操作状态（0正常 1异常）
-        type: boolean
       template_id:
         description: 模板id
         type: integer
@@ -464,7 +470,8 @@ definitions:
         type: object
       id:
         description: 自增标识
-        type: integer
+        example: "0"
+        type: string
       method:
         description: 发送alert的http method, 如果不填put(不区分大小写)，都认为是POST
         type: string
@@ -1630,6 +1637,63 @@ definitions:
         type: integer
       start:
         type: integer
+    type: object
+  logalert.Advanced:
+    properties:
+      duration:
+        type: integer
+      enabled:
+        type: boolean
+      matchType:
+        type: string
+      mode:
+        items:
+          type: string
+        type: array
+      rules:
+        items:
+          $ref: '#/definitions/logalert.Rule'
+        type: array
+    type: object
+  logalert.DeviceMetric:
+    properties:
+      dataId:
+        type: string
+      deviceId:
+        type: string
+    type: object
+  logalert.Group:
+    properties:
+      key:
+        type: string
+      name:
+        type: string
+      operator:
+        type: string
+      operatorName:
+        type: string
+      value:
+        type: string
+    type: object
+  logalert.Matcher:
+    properties:
+      contains:
+        items:
+          $ref: '#/definitions/logalert.DeviceMetric'
+        type: array
+      targetHeader:
+        type: string
+    type: object
+  logalert.Rule:
+    properties:
+      groups:
+        items:
+          $ref: '#/definitions/logalert.Group'
+        type: array
+      matchType:
+        type: string
+      ruleId:
+        type: string
     type: object
   materialModels.InboundInfo:
     properties:
@@ -3490,7 +3554,7 @@ paths:
       - 告警管理/告警规则管理
   /alert/template/list:
     get:
-      description: 告警发送配置
+      description: 告警模板列表
       parameters:
       - in: query
         name: addr
@@ -3526,7 +3590,7 @@ paths:
           description: 获取成功
           schema:
             $ref: '#/definitions/response.ResponseData'
-      summary: 告警发送配置
+      summary: 告警模板列表
       tags:
       - 告警管理/告警模板管理
   /alert/template/remove/{ids}:

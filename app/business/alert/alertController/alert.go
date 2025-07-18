@@ -54,7 +54,7 @@ func (a *Alert) List(c *gin.Context) {
 // @Summary 设置告警规则
 // @Description 设置告警规则
 // @Tags 告警管理/告警规则管理
-// @Param  object body alertModels.SetSysAlert true "助理列表参数"
+// @Param object body alertModels.SetSysAlert true "助理列表参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
 // @Router /alert/rule/set [post]
 func (a *Alert) Set(c *gin.Context) {
@@ -71,7 +71,7 @@ func (a *Alert) Set(c *gin.Context) {
 			baizeContext.Waring(c, err.Error())
 			return
 		}
-		baizeContext.SuccessData(c, value)
+		baizeContext.SuccessData(c, alertModels.FromSysAlertToSetData(value))
 	} else {
 		value, err := a.service.Update(c, info)
 		if err != nil {
@@ -79,7 +79,7 @@ func (a *Alert) Set(c *gin.Context) {
 			baizeContext.Waring(c, err.Error())
 			return
 		}
-		baizeContext.SuccessData(c, value)
+		baizeContext.SuccessData(c, alertModels.FromSysAlertToSetData(value))
 	}
 }
 
