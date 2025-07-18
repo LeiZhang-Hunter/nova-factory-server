@@ -236,7 +236,9 @@ func wireApp() (*gin.Engine, func(), error) {
 	daemonizeService := daemonizeServiceImpl.NewDaemonizeServiceImpl(iotAgentDao, iotAgentProcess, iotAgentConfigDao)
 	daemonize := daemonizeController.NewDaemonize(daemonizeService)
 	iotAgent := daemonizeController.NewIotAgentController(iotAgentService, daemonizeService)
-	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao)
+	alertRuleDao := alertDaoImpl.NewAlertRuleDaoImpl(db)
+	alertSinkTemplateDao := alertDaoImpl.NewAlertSinkTemplateDaoImpl(db)
+	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao, alertRuleDao, alertSinkTemplateDao)
 	iotAgentConfigService := daemonizeServiceImpl.NewIotAgentConfigServiceImpl(iotAgentConfigDao)
 	daemonizeControllerConfig := daemonizeController.NewConfig(iGatewayConfigService, iotAgentConfigService, iotAgentService)
 	daemonizeServer := &daemonizeController.DaemonizeServer{
@@ -252,8 +254,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		DeviceMonitor: deviceMonitor,
 		DeviceReport:  deviceReport,
 	}
-	alertRuleDao := alertDaoImpl.NewAlertRuleDaoImpl(db)
-	alertSinkTemplateDao := alertDaoImpl.NewAlertSinkTemplateDaoImpl(db)
 	alertRuleService := alertServiceImpl.NewAlertRuleServiceImpl(alertRuleDao, iotAgentDao, alertSinkTemplateDao)
 	alert := alertController.NewAlert(alertRuleService)
 	alertTemplateService := alertServiceImpl.NewAlertTemplateServiceImpl(alertSinkTemplateDao)

@@ -117,3 +117,9 @@ func (ac *AlertRuleDaoImpl) Change(c *gin.Context, data *alertModels.ChangeSysAl
 	ret := ac.db.Table(ac.table).Where("id = ?", data.ID).Update("status", data.Status)
 	return ret.Error
 }
+
+func (ac *AlertRuleDaoImpl) GetOnlineByGatewayId(c *gin.Context, gatewayId uint64) (*alertModels.SysAlert, error) {
+	var dto *alertModels.SysAlert
+	ret := ac.db.Table(ac.table).Where("gateway_id = ?", gatewayId).Where("status = ?", 1).Where("state = ?", commonStatus.NORMAL).First(&dto)
+	return dto, ret.Error
+}

@@ -36,7 +36,7 @@ func ToSysAlertSinkTemplate(data *SetSysAlertSinkTemplate) *SysAlertSinkTemplate
 	var headerStr []byte
 	var err error
 	if len(data.Headers) != 0 {
-		headerStr, err = json.Marshal(data)
+		headerStr, err = json.Marshal(data.Headers)
 		if err != nil {
 			zap.L().Error("json marshal error", zap.Error(err))
 		}

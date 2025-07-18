@@ -1,37 +1,52 @@
 package daemonizeServiceImpl
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"nova-factory-server/app/business/alert/alertDao"
+	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/daemonize/daemonizeService"
 	"nova-factory-server/app/utils/gateway/v1/api"
+	logalertIntercept "nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
+	"nova-factory-server/app/utils/gateway/v1/config/app/sink/alertwebhook"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/metric_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/bhps7"
 	"nova-factory-server/app/utils/gateway/v1/config/cfg"
+	"nova-factory-server/app/utils/gateway/v1/config/interceptor"
+	"nova-factory-server/app/utils/gateway/v1/config/logalert"
 	"nova-factory-server/app/utils/gateway/v1/config/pipeline"
 	"nova-factory-server/app/utils/gateway/v1/config/sink"
 	source2 "nova-factory-server/app/utils/gateway/v1/config/source"
 	"nova-factory-server/app/utils/snowflake"
 	"strconv"
+	"time"
 )
 
 type iGatewayConfigServiceImpl struct {
 	deviceDao       deviceDao.IDeviceDao
 	templateDao     deviceDao.IDeviceTemplateDao
 	templateDataDao deviceDao.ISysModbusDeviceConfigDataDao
+	ruleDao         alertDao.AlertRuleDao
+	sinkDao         alertDao.AlertSinkTemplateDao
 }
 
 func NewIGatewayConfigServiceImpl(
 	deviceDao deviceDao.IDeviceDao,
 	templateDao deviceDao.IDeviceTemplateDao,
-	templateDataDao deviceDao.ISysModbusDeviceConfigDataDao) daemonizeService.IGatewayConfigService {
+	templateDataDao deviceDao.ISysModbusDeviceConfigDataDao,
+	ruleDao alertDao.AlertRuleDao,
+	sinkDao alertDao.AlertSinkTemplateDao) daemonizeService.IGatewayConfigService {
 	return &iGatewayConfigServiceImpl{
 		deviceDao:       deviceDao,
 		templateDao:     templateDao,
 		templateDataDao: templateDataDao,
+		ruleDao:         ruleDao,
+		sinkDao:         sinkDao,
 	}
 }
 
@@ -183,5 +198,102 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	// 读取模板下的所有模板数据
 	piplines.Pipelines = append(piplines.Pipelines, *pipelinesConfig)
 	piplines.Pipelines = append(piplines.Pipelines, *schedulerConfig)
+
+	// 通过网关id读取告警配置信息
+	alertConfig := pipeline.NewConfig()
+	alertRule, err := i.ruleDao.GetOnlineByGatewayId(c, uint64(gatewayId))
+	if err != nil {
+		zap.L().Error("GetOnlineByGatewayId() failed", zap.Error(err))
+		return nil, errors.New("告警规则不存在")
+	}
+	if alertRule == nil {
+		alertRule = &alertModels.SysAlert{}
+	}
+	sinkInfo, err := i.sinkDao.GetById(c, uint64(alertRule.TemplateID))
+	if err != nil {
+		return nil, errors.New("告警模板不存在")
+	}
+	notifierSourceConfig := source2.Config{
+		Enabled: &scheduleEnabled,
+		Name:    "notifier",
+		Type:    "notifier",
+	}
+	alertConfig.Sources = append(schedulerConfig.Sources, &notifierSourceConfig)
+
+	interceptorConfig := interceptor.Config{
+		Enabled: &scheduleEnabled,
+		Name:    "alert",
+		Type:    "logAlert",
+	}
+	var logAlertConfig logalertIntercept.Config
+	var advanced *logalertIntercept.Advanced
+	var ignore []logalertIntercept.DeviceMetric
+	var matcher *logalertIntercept.Matcher
+	var additions map[string]interface{}
+	if alertRule.Advanced != "" {
+		err = json.Unmarshal([]byte(alertRule.Advanced), &advanced)
+		if err != nil {
+			zap.L().Error("json.Unmarshal failed", zap.Error(err))
+		}
+	}
+	if alertRule.Ignore != "" {
+		err = json.Unmarshal([]byte(alertRule.Ignore), &ignore)
+		if err != nil {
+			zap.L().Error("json.Unmarshal failed", zap.Error(err))
+		}
+	}
+	if alertRule.Matcher != "" {
+		err = json.Unmarshal([]byte(alertRule.Matcher), &matcher)
+		if err != nil {
+			zap.L().Error("json.Unmarshal failed", zap.Error(err))
+		}
+	}
+	if alertRule.Additions != "" {
+		err = json.Unmarshal([]byte(alertRule.Additions), &additions)
+		if err != nil {
+			zap.L().Error("json.Unmarshal failed", zap.Error(err))
+		}
+	}
+	logAlertConfig.AlertId = strconv.FormatInt(alertRule.ID, 10)
+	logAlertConfig.Ignore = ignore
+	logAlertConfig.Matcher = *matcher
+	logAlertConfig.Additions = additions
+	logAlertConfig.SendOnlyMatched = true
+	logAlertConfig.Advanced = *advanced
+	pack, err := cfg.Pack(logAlertConfig)
+	if err != nil {
+		zap.L().Error("cfg.Pack() failed", zap.Error(err))
+	}
+	interceptorConfig.Properties = pack
+	alertConfig.Interceptors = append(alertConfig.Interceptors, &interceptorConfig)
+
+	//  告警输出
+	var headers map[string]string = make(map[string]string)
+	if len(sinkInfo.Headers) != 0 {
+		err := json.Unmarshal([]byte(sinkInfo.Headers), &headers)
+		if err != nil {
+			zap.L().Error("json.Unmarshal failed", zap.Error(err))
+		}
+	}
+	alertWebhookConfig := alertwebhook.Config{
+		Addr: sinkInfo.Addr,
+		AlertConfig: logalert.AlertConfig{
+			Template:              sinkInfo.Template,
+			Timeout:               time.Duration(sinkInfo.Timeout) * time.Second,
+			Headers:               headers,
+			Method:                sinkInfo.Method,
+			SendLogAlertAtOnce:    true,
+			SendNoDataAlertAtOnce: true,
+		},
+	}
+	alertWebhookConfigPacked, err := cfg.Pack(alertWebhookConfig)
+	alertConfig.Sink = &sink.Config{
+		Enabled:     &scheduleEnabled,
+		Name:        sinkInfo.Name,
+		Type:        "alertWebhook",
+		Parallelism: 1,
+		Properties:  alertWebhookConfigPacked,
+	}
+	piplines.Pipelines = append(piplines.Pipelines, *alertConfig)
 	return piplines, nil
 }

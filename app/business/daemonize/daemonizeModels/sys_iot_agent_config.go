@@ -30,7 +30,7 @@ type SysIotAgentConfigSetReq struct {
 }
 
 type GenerateGatewayConfigReq struct {
-	ObjectID uint64 `gorm:"column:object_id;primaryKey;comment:agent uuid" json:"object_id"` // agent uuid
+	ObjectID uint64 `gorm:"column:object_id;primaryKey;comment:agent uuid" form:"object_id"` // agent uuid
 }
 
 type GenerateGatewayConfigRes struct {
