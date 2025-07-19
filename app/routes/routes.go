@@ -75,7 +75,7 @@ func NewGinEngine(
 		sc.Sse.PublicRoutes(group)            //SSE链接
 		controller.Config.PublicRoutes(group) //注册Agent公共配置接口
 		craft.Task.PublicRoutes(group)
-
+		alert.AlertLog.PublicRoutes(group)
 	}
 	//做鉴权的
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())

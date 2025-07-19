@@ -258,9 +258,13 @@ func wireApp() (*gin.Engine, func(), error) {
 	alert := alertController.NewAlert(alertRuleService)
 	alertTemplateService := alertServiceImpl.NewAlertTemplateServiceImpl(alertSinkTemplateDao)
 	alertTemplate := alertController.NewAlertTemplate(alertTemplateService)
+	alertLogDao := alertDaoImpl.NewAlertLogDaoImpl(db)
+	alertLogService := alertServiceImpl.NewAlertLogServiceImpl(alertLogDao, alertRuleDao, iotAgentDao)
+	alertLog := alertController.NewAlertLog(alertLogService)
 	controller := &alertController.Controller{
 		Alert:         alert,
 		AlertTemplate: alertTemplate,
+		AlertLog:      alertLog,
 	}
 	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller)
 	return engine, func() {

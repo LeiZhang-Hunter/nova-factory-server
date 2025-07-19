@@ -39,3 +39,27 @@ CREATE TABLE `sys_alert_sink_template`
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`)
 )
+
+CREATE TABLE `sys_alert_log` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增标识',
+    `gateway_id` bigint(20) NOT NULL COMMENT '网关id',
+    `alert_id` bigint(20) NOT NULL COMMENT '告警id',
+    `device_id` bigint(20) NOT NULL COMMENT '设备id',
+    `device_template_id` bigint(20) NOT NULL COMMENT '设备模板id',
+    `device_data_id` bigint(20) NOT NULL COMMENT '设备数据id',
+    `context` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '内容',
+    `message` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '消息',
+    `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '消息快照',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    INDEX `gateway_id`(`gateway_id`) USING BTREE,
+    INDEX `alert_id`(`alert_id`) USING BTREE,
+    INDEX `device_id`(`device_id`) USING BTREE,
+    INDEX `device_template_id`(`device_template_id`) USING BTREE,
+    INDEX `device_data_id`(`device_data_id`) USING BTREE
+) ENGINE=Innodb   COMMENT='告警日志';
