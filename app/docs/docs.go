@@ -1617,6 +1617,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/alert/log/v1/export": {
+            "post": {
+                "description": "设置告警规则",
+                "tags": [
+                    "告警管理/告警规则管理"
+                ],
+                "summary": "设置告警规则",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/alertModels.AlertLogData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/api/gateway/agent/config/v1/bind": {
             "post": {
                 "description": "绑定Agent配置",
@@ -9701,6 +9729,77 @@ const docTemplate = `{
                 }
             }
         },
+        "alertModels.AlertLogData": {
+            "type": "object",
+            "properties": {
+                "alerts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "annotations": {
+                                "type": "object",
+                                "properties": {
+                                    "reason": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "endsAt": {
+                                "type": "string"
+                            },
+                            "labels": {
+                                "type": "object",
+                                "properties": {
+                                    "alert_id": {
+                                        "type": "string"
+                                    },
+                                    "context": {
+                                        "type": "string"
+                                    },
+                                    "data_id": {
+                                        "type": "string"
+                                    },
+                                    "device_id": {
+                                        "type": "string"
+                                    },
+                                    "group_id": {
+                                        "type": "string"
+                                    },
+                                    "message": {
+                                        "type": "string"
+                                    },
+                                    "template_id": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "startsAt": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "commonLabels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gatewayId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "alertModels.ChangeSysAlert": {
             "type": "object",
             "properties": {
@@ -11493,9 +11592,6 @@ const docTemplate = `{
                     }
                 },
                 "matchType": {
-                    "type": "string"
-                },
-                "ruleId": {
                     "type": "string"
                 }
             }

@@ -21,13 +21,13 @@ type SysIotDbDevMap struct {
 
 // SysIotDbDevMapData 返回数据
 type SysIotDbDevMapData struct {
-	ID         int64  `gorm:"column:id;primaryKey;autoIncrement:true;comment:自增标识" json:"id"` // 自增标识
-	DeviceID   int64  `gorm:"column:device_id;not null;comment:设备id" json:"device_id"`        // 设备id
-	TemplateID int64  `gorm:"column:template_id;not null;comment:模板id" json:"template_id"`    // 模板id
-	DataID     int64  `gorm:"column:data_id;not null;comment:测点id" json:"data_id"`            // 测点id
-	Device     string `gorm:"column:device;not null;comment:设备名字" json:"device"`              // 设备名字
-	DataName   string `gorm:"column:data_name;not null;comment:数据名字" json:"data_name"`        // 数据名字
-	Unit       string `gorm:"column:unit;not null;comment:单位" json:"unit"`                    // 数据名字
+	ID         int64  `gorm:"column:id;primaryKey;autoIncrement:true;comment:自增标识" json:"id,string"` // 自增标识
+	DeviceID   int64  `gorm:"column:device_id;not null;comment:设备id" json:"device_id"`               // 设备id
+	TemplateID int64  `gorm:"column:template_id;not null;comment:模板id" json:"template_id"`           // 模板id
+	DataID     int64  `gorm:"column:data_id;not null;comment:测点id" json:"data_id"`                   // 测点id
+	Device     string `gorm:"column:device;not null;comment:设备名字" json:"device"`                     // 设备名字
+	DataName   string `gorm:"column:data_name;not null;comment:数据名字" json:"data_name"`               // 数据名字
+	Unit       string `gorm:"column:unit;not null;comment:单位" json:"unit"`                           // 数据名字
 }
 
 // DevData 设备上报的数据
@@ -43,12 +43,16 @@ type DevData struct {
 }
 
 type DevDataReq struct {
-	Dev   []string `form:"dev"`
-	Start uint64   `form:"start"`
-	End   uint64   `form:"end"`
-	baize.BaseEntityDQL
+	Dev       []string `json:"dev" form:"dev"`
+	Start     uint64   `json:"start" form:"start"`
+	End       uint64   `json:"end" form:"end"`
+	DataScope string   `swaggerignore:"true"`
+	OrderBy   string   `json:"orderBy" form:"orderBy"`                   //排序字段
+	IsAsc     string   `json:"isAsc" form:"isAsc"`                       //排序规则  降序desc   asc升序
+	Page      int64    `json:"pageNum" default:"1" form:"pageNum"`       //第几页
+	Size      int64    `json:"pageSize" default:"10000" form:"pageSize"` //数量
 }
 type DevDataResp struct {
 	Rows  []DevData `json:"rows"`
-	Total uint64    `json:"total,string"`
+	Total uint64    `json:"total"`
 }

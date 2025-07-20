@@ -196,6 +196,7 @@ func (craft *CraftRouteServiceImpl) SaveCraftRoute(c *gin.Context, topo *craftRo
 	for _, process := range processIdDataMap {
 		parseInt, err := strconv.ParseInt(process.ProcessId, 10, 64)
 		if err != nil {
+			zap.L().Error("parse int error", zap.Error(err))
 			return nil, err
 		}
 		processList = append(processList, parseInt)
@@ -287,8 +288,41 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 				return nil, err
 			}
 			triggerRule = v1.NweDeviceTriggerRule()
-			triggerRule.Rule.Rule = rule.CombinedRule
 			triggerRule.Rule.DataId = rule.DataIds
+
+			combinedRule := ""
+			first := true
+			for caseKey, caseRule := range rule.Cases {
+				if !first {
+					combinedRule += " " + caseRule.Connector + " "
+				} else {
+					first = false
+					combinedRule += "("
+				}
+
+				firstCondition := true
+				conditionRule := ""
+				for k, condition := range caseRule.Conditions {
+					if !firstCondition {
+						conditionRule += " " + condition.Connector + " "
+					} else {
+						firstCondition = false
+						conditionRule += "("
+					}
+					conditionRule += condition.Rule
+					if k == len(caseRule.Conditions)-1 {
+						conditionRule += ")"
+					}
+				}
+
+				combinedRule += conditionRule
+				if len(rule.Cases)-1 == caseKey {
+					combinedRule += ")"
+				}
+				continue
+			}
+			triggerRule.Rule.Rule = combinedRule
+
 			for _, action := range rule.Actions {
 				triggerRule.Actions = append(triggerRule.Actions, &v1.DeviceAction{
 					DeviceId:   action.DeviceId,

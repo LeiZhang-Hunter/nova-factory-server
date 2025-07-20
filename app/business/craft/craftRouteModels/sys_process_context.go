@@ -63,7 +63,7 @@ type TriggerRules struct {
 		FormatHint       string `json:"format_hint"`
 	} `json:"actions"`
 	CombinedRule string   `json:"combined_rule"`
-	DataIds      []string `json:"data_ids"`
+	DataIds      []string `json:"dataIds"`
 	Cases        []struct {
 		NextStep   string `json:"next_step"`
 		Connector  string `json:"connector"`

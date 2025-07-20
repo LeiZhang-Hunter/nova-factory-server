@@ -133,6 +133,7 @@ func (m *IMetricServiceImpl) export(c context.Context, values []*metricModels.No
 func (m *IMetricServiceImpl) List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error) {
 	list, err := m.dao.List(c, req)
 	if err != nil {
+		zap.L().Error("get dev data list error", zap.Error(err))
 		return nil, err
 	}
 	if list == nil {

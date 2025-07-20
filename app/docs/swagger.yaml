@@ -414,6 +414,52 @@ definitions:
       optional:
         type: boolean
     type: object
+  alertModels.AlertLogData:
+    properties:
+      alerts:
+        items:
+          properties:
+            annotations:
+              properties:
+                reason:
+                  type: string
+              type: object
+            endsAt:
+              type: string
+            labels:
+              properties:
+                alert_id:
+                  type: string
+                context:
+                  type: string
+                data_id:
+                  type: string
+                device_id:
+                  type: string
+                group_id:
+                  type: string
+                message:
+                  type: string
+                template_id:
+                  type: string
+              type: object
+            startsAt:
+              type: string
+          type: object
+        type: array
+      commonLabels:
+        additionalProperties:
+          type: string
+        type: object
+      gatewayId:
+        type: integer
+      id:
+        type: integer
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   alertModels.ChangeSysAlert:
     properties:
       id:
@@ -1691,8 +1737,6 @@ definitions:
           $ref: '#/definitions/logalert.Group'
         type: array
       matchType:
-        type: string
-      ruleId:
         type: string
     type: object
   materialModels.InboundInfo:
@@ -3632,6 +3676,24 @@ paths:
       summary: 设置告警发送配置
       tags:
       - 告警管理/告警模板管理
+  /api/alert/log/v1/export:
+    post:
+      description: 设置告警规则
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/alertModels.AlertLogData'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置告警规则
+      tags:
+      - 告警管理/告警规则管理
   /api/gateway/agent/config/v1/bind:
     post:
       description: 绑定Agent配置

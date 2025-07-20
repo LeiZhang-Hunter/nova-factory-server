@@ -76,7 +76,7 @@ func (d *DeviceReport) List(c *gin.Context) {
 // @Router /device/monitor/data/export [post]
 func (d *DeviceReport) Export(c *gin.Context) {
 	req := new(deviceMonitorModel.DevDataReq)
-	err := c.ShouldBindJSON(req)
+	err := c.ShouldBind(req)
 	if err != nil {
 		baizeContext.ParameterError(c)
 		return
