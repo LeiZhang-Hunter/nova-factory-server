@@ -77,7 +77,7 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 	// 与聊天助手交谈
 	ai.POST("/session/charts/completions", middlewares.HasPermission("ai:dataset:session:charts:completions"), d.ChartsCompletions)
 	// 使用 agent 创建会话
-	ai.GET("/session/agents/create", middlewares.HasPermission("ai:dataset:session:agents:create"), d.AgentSessionCreate)
+	ai.POST("/session/agents/create", middlewares.HasPermission("ai:dataset:session:agents:create"), d.AgentSessionCreate)
 	// 与代理结合
 	ai.POST("/session/agents/completions", middlewares.HasPermission("ai:dataset:session:agents:completions"), d.AgentCompletions)
 	// list 代理会话

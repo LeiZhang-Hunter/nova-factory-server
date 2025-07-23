@@ -118,6 +118,7 @@ func NewGinEngine(
 		craft.RouteProductBom.PrivateRoutes(group)
 		craft.WorkOrder.PrivateRoutes(group) //生产工单
 		craft.Task.PrivateRoutes(group)      //工单任务
+		craft.Schedule.PrivateRoutes(group)
 
 		metric.Metric.PrivateRoutes(group) //设备指标
 		controller.IotAgent.PrivateRoutes(group)
@@ -128,6 +129,7 @@ func NewGinEngine(
 
 		alert.AlertTemplate.PrivateRoutes(group)
 		alert.Alert.PrivateRoutes(group)
+		alert.AlertLog.PrivateRoutes(group)
 	}
 
 	r.NoRoute(func(c *gin.Context) {

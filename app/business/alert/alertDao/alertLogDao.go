@@ -7,4 +7,5 @@ import (
 
 type AlertLogDao interface {
 	Export(c *gin.Context, data []*alertModels.SysAlertLog) error
+	List(c *gin.Context, req *alertModels.SysAlertLogListReq) (*alertModels.SysAlertLogList, error)
 }

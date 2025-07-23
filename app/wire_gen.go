@@ -217,6 +217,10 @@ func wireApp() (*gin.Engine, func(), error) {
 	iotAgentProcess := daemonizeDaoImpl.NewIotAgentProcessDaoImpl(cacheCache)
 	iotAgentService := daemonizeServiceImpl.NewIotAgentServiceImpl(iotAgentDao, iotAgentProcess)
 	task := craftRouteController.NewTask(iSysProTaskService, iotAgentService)
+	iScheduleDao := craftRouteDaoImpl.NewIScheduleDaoImpl(db)
+	iScheduleMapDao := craftRouteDaoImpl.NewIScheduleMapDaoImpl(db)
+	iScheduleService := craftRouteServiceImpl.NewIScheduleServiceImpl(iScheduleDao, iScheduleMapDao)
+	schedule := craftRouteController.NewSchedule(iScheduleService)
 	craftRoute := &craftRouteController.CraftRoute{
 		CraftRoute:      craft,
 		Process:         process,
@@ -226,6 +230,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		RouteProductBom: routeProductBom,
 		WorkOrder:       workOrder,
 		Task:            task,
+		Schedule:        schedule,
 	}
 	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, iDeviceDataReportDao, cacheCache)
 	metric := metricController.NewMetric(iMetricService)

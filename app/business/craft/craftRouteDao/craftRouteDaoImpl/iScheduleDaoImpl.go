@@ -1,0 +1,93 @@
+package craftRouteDaoImpl
+
+import (
+	"errors"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"nova-factory-server/app/business/craft/craftRouteDao"
+	"nova-factory-server/app/business/craft/craftRouteModels"
+	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
+)
+
+type IScheduleDaoImpl struct {
+	db    *gorm.DB
+	table string
+}
+
+func NewIScheduleDaoImpl(db *gorm.DB) craftRouteDao.IScheduleDao {
+	return &IScheduleDaoImpl{
+		db:    db,
+		table: "sys_product_schedule",
+	}
+}
+
+func (i *IScheduleDaoImpl) GetDailySchedule(c *gin.Context) ([]*craftRouteModels.SysProductSchedule, error) {
+	var list []*craftRouteModels.SysProductSchedule
+	db := i.db.Table(i.table).Where("schedule_type = ?", craftRouteModels.DAILY).
+		Where("state = ?", commonStatus.NORMAL)
+	db = baizeContext.GetGormDataScope(c, db)
+	ret := db.Find(&list)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return list, ret.Error
+}
+
+func (i *IScheduleDaoImpl) List(c *gin.Context, req *craftRouteModels.SysProductScheduleListReq) (*craftRouteModels.SysProductScheduleListData, error) {
+	db := i.db.Table(i.table)
+
+	if req != nil && req.Name != "" {
+		db = db.Where("process_name = ?", "%"+req.Name+"%")
+	}
+	size := 0
+	if req == nil || req.Size <= 0 {
+		size = 20
+	} else {
+		size = int(req.Size)
+	}
+	offset := 0
+	if req == nil || req.Page <= 0 {
+		req.Page = 1
+	} else {
+		offset = int((req.Page - 1) * req.Size)
+	}
+	db = db.Where("state", commonStatus.NORMAL)
+	db = baizeContext.GetGormDataScope(c, db)
+	var dto []*craftRouteModels.SysProductSchedule
+
+	var total int64
+	ret := db.Count(&total)
+	if ret.Error != nil {
+		return &craftRouteModels.SysProductScheduleListData{
+			Rows:  make([]*craftRouteModels.SysProductSchedule, 0),
+			Total: 0,
+		}, ret.Error
+	}
+
+	ret = db.Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
+	if ret.Error != nil {
+		return &craftRouteModels.SysProductScheduleListData{
+			Rows:  make([]*craftRouteModels.SysProductSchedule, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	return &craftRouteModels.SysProductScheduleListData{
+		Rows:  dto,
+		Total: total,
+	}, nil
+}
+
+func (i *IScheduleDaoImpl) Set(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) (*craftRouteModels.SysProductSchedule, error) {
+	value := craftRouteModels.ToSysProductSchedule(data)
+	if data.Id == 0 {
+		value.ID = snowflake.GenID()
+		value.DeptID = baizeContext.GetDeptId(c)
+		value.SetCreateBy(baizeContext.GetUserId(c))
+		ret := i.db.Table(i.table).Create(data)
+		return value, ret.Error
+	}
+	value.SetUpdateBy(baizeContext.GetUserId(c))
+	return value, nil
+}

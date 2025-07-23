@@ -2,6 +2,7 @@ package time
 
 import (
 	"github.com/gogf/gf/os/gtime"
+	"strconv"
 	"time"
 )
 
@@ -44,4 +45,26 @@ func GetEndTimeUseNow(end uint64, useNow bool) string {
 		t := time.Now()
 		return t.Format("2006-01-02 15:04:05")
 	}
+}
+
+// GetMonthStart 获取月份的第一天和最后一天
+func GetMonthStart(myYear string, myMonth string) time.Time {
+	// 数字月份必须前置补零
+	if len(myMonth) == 1 {
+		myMonth = "0" + myMonth
+	}
+	yInt, _ := strconv.Atoi(myYear)
+
+	timeLayout := "2006-01-02 15:04:05"
+	loc, _ := time.LoadLocation("Local")
+	theTime, _ := time.ParseInLocation(timeLayout, myYear+"-"+myMonth+"-01 00:00:00", loc)
+	newMonth := theTime.Month()
+
+	t1 := time.Date(yInt, newMonth, 1, 0, 0, 0, 0, time.Local)
+	return t1
+}
+
+// GetWeek 获取time是周几
+func GetWeek(t time.Time) int {
+	return int(t.Weekday())
 }

@@ -50,3 +50,7 @@ func (log *AlertLogServiceImpl) Export(c *gin.Context, data alertModels.AlertLog
 	}
 	return nil
 }
+
+func (log *AlertLogServiceImpl) List(c *gin.Context, req *alertModels.SysAlertLogListReq) (*alertModels.SysAlertLogList, error) {
+	return log.dao.List(c, req)
+}

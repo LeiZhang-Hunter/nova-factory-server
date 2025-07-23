@@ -535,6 +535,31 @@ definitions:
     - name
     - template
     type: object
+  alertModels.SysAlertLogListReq:
+    properties:
+      alert_id:
+        description: 告警id
+        type: integer
+      gateway_id:
+        description: 网关id
+        type: integer
+      isAsc:
+        description: 排序规则  降序desc   asc升序
+        type: string
+      message:
+        type: string
+      orderBy:
+        description: 排序字段
+        type: string
+      pageNum:
+        default: 1
+        description: 第几页
+        type: integer
+      pageSize:
+        default: 10000
+        description: 数量
+        type: integer
+    type: object
   baize.List:
     properties:
       data:
@@ -1062,6 +1087,13 @@ definitions:
     - content_text
     - process_id
     type: object
+  craftRouteModels.SysProductScheduleReq:
+    properties:
+      month:
+        type: string
+      year:
+        type: string
+    type: object
   craftRouteModels.SysSetProRouteProductBom:
     properties:
       attr1:
@@ -1406,7 +1438,7 @@ definitions:
         type: array
       combined_rule:
         type: string
-      data_ids:
+      dataIds:
         items:
           type: string
         type: array
@@ -3490,6 +3522,24 @@ paths:
       summary: 上传文档
       tags:
       - 工业智能体/文档管理
+  /alert/log/list:
+    get:
+      description: 告警数据列表
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/alertModels.SysAlertLogListReq'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 告警数据列表
+      tags:
+      - 告警管理/告警数据管理
   /alert/rule/change:
     post:
       description: 改变告警配置
@@ -3678,7 +3728,7 @@ paths:
       - 告警管理/告警模板管理
   /api/alert/log/v1/export:
     post:
-      description: 设置告警规则
+      description: 导入告警数据
       parameters:
       - description: 助理列表参数
         in: body
@@ -3691,9 +3741,9 @@ paths:
           description: 获取成功
           schema:
             $ref: '#/definitions/response.ResponseData'
-      summary: 设置告警规则
+      summary: 导入告警数据
       tags:
-      - 告警管理/告警规则管理
+      - 告警管理/告警数据管理
   /api/gateway/agent/config/v1/bind:
     post:
       description: 绑定Agent配置
@@ -4797,6 +4847,26 @@ paths:
       summary: 移除工艺
       tags:
       - 工艺管理
+  /craft/route/schedule/month/list:
+    get:
+      description: 月调度列表
+      parameters:
+      - description: 组成工序列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/craftRouteModels.SysProductScheduleReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 月调度列表
+      tags:
+      - 工艺管理/调度管理
   /craft/route/set:
     post:
       description: 设置工艺路线

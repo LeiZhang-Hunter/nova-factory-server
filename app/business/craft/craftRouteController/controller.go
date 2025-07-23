@@ -3,7 +3,7 @@ package craftRouteController
 import "github.com/google/wire"
 
 var ProviderSet = wire.NewSet(NewCraft, NewProcess, NewProcessContext, NewSysProRouteProcess,
-	NewRouteProduct, NewRouteProductBom, NewWorkOrder, NewTask,
+	NewRouteProduct, NewRouteProductBom, NewWorkOrder, NewTask, NewSchedule,
 	wire.Struct(new(CraftRoute), "*"))
 
 type CraftRoute struct {
@@ -15,4 +15,5 @@ type CraftRoute struct {
 	RouteProductBom *RouteProductBom
 	WorkOrder       *WorkOrder
 	Task            *Task
+	Schedule        *Schedule
 }

@@ -276,3 +276,39 @@ CREATE TABLE `sys_craft_route_config` (
   PRIMARY KEY (`route_config_id`),
   UNIQUE KEY `route_id` (`route_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='工艺路线表';
+
+CREATE TABLE `sys_product_schedule` (
+   `id` bigint(20) NOT NULL COMMENT '调度id',
+   `color` varchar(32) NOT NULL COMMENT '颜色值',
+   `gateway_id` bigint(20) NOT NULL  COMMENT '网关id',
+   `schedule_name` varchar(255) NOT NULL COMMENT '计划名称',
+   `time` varchar(64) NOT NULL COMMENT '时间序列化格式,普通日程,1,2,3,4,5;特殊日程:2025-04-04 ~ 2025-04-04',
+   `schedule_type` tinyint(1) NOT NULL COMMENT '0为普通日程 1为特殊日程',
+   `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '操作状态（0正常 1启动）',
+   `dept_id` bigint DEFAULT NULL COMMENT '部门ID',
+   `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+   `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+   `state` tinyint(1) DEFAULT '0' COMMENT '操作状态（0正常 -1删除）',
+   PRIMARY KEY (`id`),
+   KEY `schedule_type` (`schedule_type`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `sys_product_schedule_map` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `schedule_id` bigint(20) NOT NULL COMMENT '计划标识',
+    `begin_time` int(11) NOT NULL DEFAULT '0' COMMENT '开始时间',
+    `end_time` int(11) NOT NULL DEFAULT '0' COMMENT '结束时间',
+    `date` tinyint(1) NOT NULL DEFAULT '0' COMMENT '日期 1 2 3 4 5 6 7分别代表周几',
+    `craft_route_id` bigint(20) NOT NULL  COMMENT '工艺路线id',
+    `schedule_type` tinyint(1) NOT NULL COMMENT '0为 循环日程 1为特殊日程',
+    `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+    `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NOT NULL DEFAULT '1',
+    PRIMARY KEY (`id`),
+    KEY `schedule_id` (`schedule_id`) USING BTREE,
+    KEY `begin_time` (`begin_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=39797 DEFAULT CHARSET=utf8;

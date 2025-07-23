@@ -1327,6 +1327,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/alert/log/list": {
+            "get": {
+                "description": "告警数据列表",
+                "tags": [
+                    "告警管理/告警数据管理"
+                ],
+                "summary": "告警数据列表",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/alertModels.SysAlertLogListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/alert/rule/change": {
             "post": {
                 "security": [
@@ -1619,11 +1647,11 @@ const docTemplate = `{
         },
         "/api/alert/log/v1/export": {
             "post": {
-                "description": "设置告警规则",
+                "description": "导入告警数据",
                 "tags": [
-                    "告警管理/告警规则管理"
+                    "告警管理/告警数据管理"
                 ],
-                "summary": "设置告警规则",
+                "summary": "导入告警数据",
                 "parameters": [
                     {
                         "description": "助理列表参数",
@@ -3329,6 +3357,37 @@ const docTemplate = `{
                         "name": "craft_route_id",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/schedule/month/list": {
+            "get": {
+                "description": "月调度列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/调度管理"
+                ],
+                "summary": "月调度列表",
+                "parameters": [
+                    {
+                        "description": "组成工序列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.SysProductScheduleReq"
+                        }
                     }
                 ],
                 "responses": {
@@ -9907,6 +9966,40 @@ const docTemplate = `{
                 }
             }
         },
+        "alertModels.SysAlertLogListReq": {
+            "type": "object",
+            "properties": {
+                "alert_id": {
+                    "description": "告警id",
+                    "type": "integer"
+                },
+                "gateway_id": {
+                    "description": "网关id",
+                    "type": "integer"
+                },
+                "isAsc": {
+                    "description": "排序规则  降序desc   asc升序",
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "orderBy": {
+                    "description": "排序字段",
+                    "type": "string"
+                },
+                "pageNum": {
+                    "description": "第几页",
+                    "type": "integer",
+                    "default": 1
+                },
+                "pageSize": {
+                    "description": "数量",
+                    "type": "integer",
+                    "default": 10000
+                }
+            }
+        },
         "baize.List": {
             "type": "object",
             "properties": {
@@ -10654,6 +10747,17 @@ const docTemplate = `{
                 }
             }
         },
+        "craftRouteModels.SysProductScheduleReq": {
+            "type": "object",
+            "properties": {
+                "month": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "string"
+                }
+            }
+        },
         "craftRouteModels.SysSetProRouteProductBom": {
             "type": "object",
             "properties": {
@@ -11124,7 +11228,7 @@ const docTemplate = `{
                 "combined_rule": {
                     "type": "string"
                 },
-                "data_ids": {
+                "dataIds": {
                     "type": "array",
                     "items": {
                         "type": "string"

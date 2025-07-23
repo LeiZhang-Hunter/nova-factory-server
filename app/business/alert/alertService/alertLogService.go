@@ -7,4 +7,5 @@ import (
 
 type AlertLogService interface {
 	Export(c *gin.Context, data alertModels.AlertLogData) error
+	List(c *gin.Context, req *alertModels.SysAlertLogListReq) (*alertModels.SysAlertLogList, error)
 }
