@@ -75,13 +75,13 @@ func (schedule *Schedule) MonthList(c *gin.Context) {
 	baizeContext.SuccessData(c, monthSchedule)
 }
 
-// Set 月调度列表
-// @Summary 月调度列表
-// @Description 月调度列表
+// Set 设置调度日程
+// @Summary 设置调度日程
+// @Description 设置调度日程
 // @Tags 工艺管理/调度管理
-// @Param  object query craftRouteModels.SetSysProductSchedule true "组成工序列表参数"
+// @Param  object body craftRouteModels.SetSysProductSchedule true "设置调度日程参数"
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Success 200 {object}  response.ResponseData "设置调度日程参数"
 // @Router /craft/route/schedule/set [post]
 func (schedule *Schedule) Set(c *gin.Context) {
 	data := new(craftRouteModels.SetSysProductSchedule)
@@ -94,6 +94,36 @@ func (schedule *Schedule) Set(c *gin.Context) {
 	schedule.service.Set(c, data)
 }
 
+// Remove 删除调度日程
+// @Summary 删除调度日程
+// @Description 删除调度日程
+// @Tags 工艺管理/调度管理
+// @Param  ids path string true "ids"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置调度日程参数"
+// @Router /craft/route/schedule/remove [delete]
 func (schedule *Schedule) Remove(c *gin.Context) {
+	recordIds := baizeContext.ParamStringArray(c, "ids")
+	if len(recordIds) == 0 {
+		baizeContext.Waring(c, "请选择调度任务")
+		return
+	}
 
+	err := schedule.service.Remove(c, recordIds)
+	if err != nil {
+		baizeContext.Waring(c, "删除失败")
+		return
+	}
+	baizeContext.Success(c)
+}
+
+func (schedule *Schedule) Detail(c *gin.Context) {
+	req := new(craftRouteModels.DetailSysProductSchedule)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	schedule.service.Detail(c, req.Id)
+	return
 }

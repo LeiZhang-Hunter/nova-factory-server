@@ -67,3 +67,12 @@ type SetSysProductSchedule struct {
 	TimeManager  []*TimeManagerData `json:"time_manager" binding:"required"`
 	Type         int                `json:"type" binding:"required"`
 }
+
+type DetailSysProductSchedule struct {
+	Id int64 `json:"id,string" binding:"required"`
+}
+
+type DetailSysProductData struct {
+	Info *SysProductSchedule      `json:"info,omitempty"`
+	Data []*SysProductScheduleMap `json:"data"`
+}

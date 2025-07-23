@@ -91,3 +91,14 @@ func (i *IScheduleDaoImpl) Set(c *gin.Context, data *craftRouteModels.SetSysProd
 	value.SetUpdateBy(baizeContext.GetUserId(c))
 	return value, nil
 }
+
+func (i *IScheduleDaoImpl) Remove(c *gin.Context, ids []string) error {
+	ret := i.db.Table(i.table).Where("id in (?)", ids).Delete(&craftRouteModels.SysProductSchedule{})
+	return ret.Error
+}
+
+func (i *IScheduleDaoImpl) GetById(c *gin.Context, id int64) (*craftRouteModels.SysProductSchedule, error) {
+	var data *craftRouteModels.SysProductSchedule
+	ret := i.db.Table(i.table).Where("id = ?", id).First(&data)
+	return data, ret.Error
+}

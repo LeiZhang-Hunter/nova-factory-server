@@ -51,6 +51,67 @@ func (i *IScheduleMapDaoImpl) GetSpecialSchedule(c *gin.Context, beginTime int64
 
 // dealDaily 处理循环日程
 func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) error {
+	weeks := strings.Split(data.Time, ",")
+	if len(weeks) == 0 {
+		return errors.New("循环日期格式错误")
+	}
+
+	for _, v := range data.TimeManager {
+		beginArr := strings.Split(":", v.BeginTime)
+		if len(beginArr) != 2 {
+			return errors.New(fmt.Sprintf("日程安排错误:%s", v.BeginTime))
+		}
+		endArr := strings.Split(":", v.EndTime)
+		if len(endArr) != 2 {
+			return errors.New(fmt.Sprintf("日程安排错误:%s", v.EndTime))
+		}
+
+		beginHour, err := strconv.ParseInt(beginArr[0], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		beginMinute, err := strconv.ParseInt(beginArr[0], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		beginUnix := beginHour*3600 + beginMinute*60
+
+		endHour, err := strconv.ParseInt(beginArr[0], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		endMinute, err := strconv.ParseInt(beginArr[0], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		endUnix := endHour*3600 + endMinute*60
+		var mapList []*craftRouteModels.SysProductScheduleMap = make([]*craftRouteModels.SysProductScheduleMap, len(weeks))
+		for dayKey, dayValue := range weeks {
+			date, err := strconv.ParseInt(dayValue, 10, 10)
+			if err != nil {
+				zap.L().Error("dealDaily error", zap.Error(err))
+				return err
+			}
+			mapList[dayKey] = &craftRouteModels.SysProductScheduleMap{
+				ID:           snowflake.GenID(),
+				ScheduleID:   data.Id,
+				BeginTime:    beginUnix,
+				EndTime:      endUnix,
+				CraftRouteID: v.RoueId,
+				ScheduleType: craftRouteModels.DAILY,
+				Date:         int(date),
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -154,6 +215,7 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, data *craftRouteModels
 }
 
 func (i *IScheduleMapDaoImpl) Set(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) {
+	i.db.Table(i.table).Where("schedule_id = ?", data.Id).Delete(&craftRouteModels.SetSysProductSchedule{})
 	if data.Type == craftRouteModels.SPECIAL {
 		err := i.dealSpecial(c, data)
 		if err != nil {
@@ -165,4 +227,15 @@ func (i *IScheduleMapDaoImpl) Set(c *gin.Context, data *craftRouteModels.SetSysP
 			return
 		}
 	}
+}
+
+func (i *IScheduleMapDaoImpl) Remove(c *gin.Context, ids []string) error {
+	ret := i.db.Table(i.table).Where("schedule_id in (?)", ids).Delete(&craftRouteModels.SysProductScheduleMap{})
+	return ret.Error
+}
+
+func (i *IScheduleMapDaoImpl) GetByScheduleId(c *gin.Context, id int64) ([]*craftRouteModels.SysProductScheduleMap, error) {
+	var dto []*craftRouteModels.SysProductScheduleMap
+	ret := i.db.Table(i.table).Where("schedule_id = ?", id).Find(&dto)
+	return dto, ret.Error
 }

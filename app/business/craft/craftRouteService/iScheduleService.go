@@ -9,4 +9,6 @@ type IScheduleService interface {
 	GetMonthSchedule(c *gin.Context, req *craftRouteModels.SysProductScheduleReq) ([]*craftRouteModels.ScheduleStatusData, error)
 	List(c *gin.Context, req *craftRouteModels.SysProductScheduleListReq) (*craftRouteModels.SysProductScheduleListData, error)
 	Set(c *gin.Context, data *craftRouteModels.SetSysProductSchedule)
+	Remove(c *gin.Context, ids []string) error
+	Detail(c *gin.Context, id int64) (*craftRouteModels.DetailSysProductData, error)
 }

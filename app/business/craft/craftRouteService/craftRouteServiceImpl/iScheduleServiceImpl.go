@@ -136,7 +136,41 @@ func (i *IScheduleServiceImpl) Set(c *gin.Context, data *craftRouteModels.SetSys
 		return
 	}
 
+	data.Id = value.ID
 	// 保存调度子表
-	i.scheduleMapDao.Set(c, value)
+	i.scheduleMapDao.Set(c, data)
 	return
+}
+
+func (i *IScheduleServiceImpl) Remove(c *gin.Context, ids []string) error {
+	// 保存调度主表
+	err := i.scheduleDao.Remove(c, ids)
+	if err != nil {
+		zap.L().Error("remove schedule", zap.Error(err))
+		return err
+	}
+
+	// 保存调度子表
+	err = i.scheduleMapDao.Remove(c, ids)
+	if err != nil {
+		zap.L().Error("remove schedule", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (i *IScheduleServiceImpl) Detail(c *gin.Context, id int64) (*craftRouteModels.DetailSysProductData, error) {
+	scheduleInfo, err := i.scheduleDao.GetById(c, id)
+	if err != nil {
+		return &craftRouteModels.DetailSysProductData{}, err
+	}
+	scheduleMapList, err := i.scheduleMapDao.GetByScheduleId(c, id)
+	if err != nil {
+		return &craftRouteModels.DetailSysProductData{}, err
+	}
+
+	return &craftRouteModels.DetailSysProductData{
+		Info: scheduleInfo,
+		Data: scheduleMapList,
+	}, nil
 }
