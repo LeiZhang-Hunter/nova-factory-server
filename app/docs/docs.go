@@ -3369,6 +3369,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/craft/route/schedule/detail": {
+            "get": {
+                "description": "调度详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/调度管理"
+                ],
+                "summary": "调度详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/schedule/list": {
+            "get": {
+                "description": "度列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/调度管理"
+                ],
+                "summary": "度列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/craft/route/schedule/month/list": {
             "get": {
                 "description": "月调度列表",
@@ -3381,18 +3444,81 @@ const docTemplate = `{
                 "summary": "月调度列表",
                 "parameters": [
                     {
-                        "description": "组成工序列表参数",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProductScheduleReq"
-                        }
+                        "type": "string",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/schedule/remove": {
+            "delete": {
+                "description": "删除调度日程",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/调度管理"
+                ],
+                "summary": "删除调度日程",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置调度日程参数",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/craft/route/schedule/set": {
+            "post": {
+                "description": "设置调度日程",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工艺管理/调度管理"
+                ],
+                "summary": "设置调度日程",
+                "parameters": [
+                    {
+                        "description": "设置调度日程参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/craftRouteModels.SetSysProductSchedule"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置调度日程参数",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -9794,49 +9920,7 @@ const docTemplate = `{
                 "alerts": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "annotations": {
-                                "type": "object",
-                                "properties": {
-                                    "reason": {
-                                        "type": "string"
-                                    }
-                                }
-                            },
-                            "endsAt": {
-                                "type": "string"
-                            },
-                            "labels": {
-                                "type": "object",
-                                "properties": {
-                                    "alert_id": {
-                                        "type": "string"
-                                    },
-                                    "context": {
-                                        "type": "string"
-                                    },
-                                    "data_id": {
-                                        "type": "string"
-                                    },
-                                    "device_id": {
-                                        "type": "string"
-                                    },
-                                    "group_id": {
-                                        "type": "string"
-                                    },
-                                    "message": {
-                                        "type": "string"
-                                    },
-                                    "template_id": {
-                                        "type": "string"
-                                    }
-                                }
-                            },
-                            "startsAt": {
-                                "type": "string"
-                            }
-                        }
+                        "$ref": "#/definitions/alertModels.AlertValue"
                     }
                 },
                 "commonLabels": {
@@ -9855,6 +9939,51 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "alertModels.AlertValue": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "properties": {
+                        "reason": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "endsAt": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "properties": {
+                        "alert_id": {
+                            "type": "string"
+                        },
+                        "context": {
+                            "type": "string"
+                        },
+                        "data_id": {
+                            "type": "string"
+                        },
+                        "device_id": {
+                            "type": "string"
+                        },
+                        "group_id": {
+                            "type": "string"
+                        },
+                        "message": {
+                            "type": "string"
+                        },
+                        "template_id": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "startsAt": {
                     "type": "string"
                 }
             }
@@ -10317,6 +10446,40 @@ const docTemplate = `{
                 }
             }
         },
+        "craftRouteModels.SetSysProductSchedule": {
+            "type": "object",
+            "required": [
+                "schedule_name",
+                "time",
+                "time_manager",
+                "type"
+            ],
+            "properties": {
+                "gateway_id": {
+                    "description": "网关id",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "schedule_name": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "time_manager": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.TimeManagerData"
+                    }
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
         "craftRouteModels.SysCraftRoute": {
             "type": "object",
             "properties": {
@@ -10747,17 +10910,6 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SysProductScheduleReq": {
-            "type": "object",
-            "properties": {
-                "month": {
-                    "type": "string"
-                },
-                "year": {
-                    "type": "string"
-                }
-            }
-        },
         "craftRouteModels.SysSetProRouteProductBom": {
             "type": "object",
             "properties": {
@@ -11147,6 +11299,21 @@ const docTemplate = `{
                 "workorder_type": {
                     "description": "工单类型",
                     "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.TimeManagerData": {
+            "type": "object",
+            "properties": {
+                "begin_time": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "route_id": {
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },

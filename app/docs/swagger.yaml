@@ -418,34 +418,7 @@ definitions:
     properties:
       alerts:
         items:
-          properties:
-            annotations:
-              properties:
-                reason:
-                  type: string
-              type: object
-            endsAt:
-              type: string
-            labels:
-              properties:
-                alert_id:
-                  type: string
-                context:
-                  type: string
-                data_id:
-                  type: string
-                device_id:
-                  type: string
-                group_id:
-                  type: string
-                message:
-                  type: string
-                template_id:
-                  type: string
-              type: object
-            startsAt:
-              type: string
-          type: object
+          $ref: '#/definitions/alertModels.AlertValue'
         type: array
       commonLabels:
         additionalProperties:
@@ -458,6 +431,35 @@ definitions:
       password:
         type: string
       username:
+        type: string
+    type: object
+  alertModels.AlertValue:
+    properties:
+      annotations:
+        properties:
+          reason:
+            type: string
+        type: object
+      endsAt:
+        type: string
+      labels:
+        properties:
+          alert_id:
+            type: string
+          context:
+            type: string
+          data_id:
+            type: string
+          device_id:
+            type: string
+          group_id:
+            type: string
+          message:
+            type: string
+          template_id:
+            type: string
+        type: object
+      startsAt:
         type: string
     type: object
   alertModels.ChangeSysAlert:
@@ -768,6 +770,30 @@ definitions:
         type: string
       user_name:
         type: string
+    type: object
+  craftRouteModels.SetSysProductSchedule:
+    properties:
+      gateway_id:
+        description: 网关id
+        type: integer
+      id:
+        example: "0"
+        type: string
+      schedule_name:
+        type: string
+      time:
+        type: string
+      time_manager:
+        items:
+          $ref: '#/definitions/craftRouteModels.TimeManagerData'
+        type: array
+      type:
+        type: integer
+    required:
+    - schedule_name
+    - time
+    - time_manager
+    - type
     type: object
   craftRouteModels.SysCraftRoute:
     properties:
@@ -1087,13 +1113,6 @@ definitions:
     - content_text
     - process_id
     type: object
-  craftRouteModels.SysProductScheduleReq:
-    properties:
-      month:
-        type: string
-      year:
-        type: string
-    type: object
   craftRouteModels.SysSetProRouteProductBom:
     properties:
       attr1:
@@ -1385,6 +1404,16 @@ definitions:
         type: string
       workorder_type:
         description: 工单类型
+        type: string
+    type: object
+  craftRouteModels.TimeManagerData:
+    properties:
+      begin_time:
+        type: string
+      end_time:
+        type: string
+      route_id:
+        example: "0"
         type: string
     type: object
   craftRouteModels.TriggerRules:
@@ -4847,16 +4876,59 @@ paths:
       summary: 移除工艺
       tags:
       - 工艺管理
+  /craft/route/schedule/detail:
+    get:
+      description: 调度详情
+      parameters:
+      - example: "0"
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 调度详情
+      tags:
+      - 工艺管理/调度管理
+  /craft/route/schedule/list:
+    get:
+      description: 度列表
+      parameters:
+      - in: query
+        name: month
+        required: true
+        type: string
+      - in: query
+        name: year
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 度列表
+      tags:
+      - 工艺管理/调度管理
   /craft/route/schedule/month/list:
     get:
       description: 月调度列表
       parameters:
-      - description: 组成工序列表参数
-        in: body
-        name: object
+      - in: query
+        name: month
         required: true
-        schema:
-          $ref: '#/definitions/craftRouteModels.SysProductScheduleReq'
+        type: string
+      - in: query
+        name: year
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -4865,6 +4937,45 @@ paths:
           schema:
             $ref: '#/definitions/response.ResponseData'
       summary: 月调度列表
+      tags:
+      - 工艺管理/调度管理
+  /craft/route/schedule/remove:
+    delete:
+      description: 删除调度日程
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置调度日程参数
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除调度日程
+      tags:
+      - 工艺管理/调度管理
+  /craft/route/schedule/set:
+    post:
+      description: 设置调度日程
+      parameters:
+      - description: 设置调度日程参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/craftRouteModels.SetSysProductSchedule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置调度日程参数
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置调度日程
       tags:
       - 工艺管理/调度管理
   /craft/route/set:

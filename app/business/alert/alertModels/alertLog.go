@@ -10,24 +10,26 @@ import (
 	"time"
 )
 
+type AlertValue struct {
+	Labels struct {
+		DeviceId   string `json:"device_id"`
+		TemplateId string `json:"template_id"`
+		DataId     string `json:"data_id"`
+		AlertId    string `json:"alert_id"`
+		GroupId    string `json:"group_id"`
+		Context    string `json:"context"`
+		Message    string `json:"message"`
+	} `json:"labels"`
+	Annotations struct {
+		Reason string `json:"reason"`
+	} `json:"annotations"`
+	StartsAt time.Time `json:"startsAt"`
+	EndsAt   time.Time `json:"endsAt"`
+}
+
 type AlertLogData struct {
-	Id     uint64 `json:"id"`
-	Alerts []struct {
-		Labels struct {
-			DeviceId   string `json:"device_id"`
-			TemplateId string `json:"template_id"`
-			DataId     string `json:"data_id"`
-			AlertId    string `json:"alert_id"`
-			GroupId    string `json:"group_id"`
-			Context    string `json:"context"`
-			Message    string `json:"message"`
-		} `json:"labels"`
-		Annotations struct {
-			Reason string `json:"reason"`
-		} `json:"annotations"`
-		StartsAt time.Time `json:"startsAt"`
-		EndsAt   time.Time `json:"endsAt"`
-	} `json:"alerts"`
+	Id           uint64            `json:"id"`
+	Alerts       []AlertValue      `json:"alerts"`
 	CommonLabels map[string]string `json:"commonLabels"`
 	GatewayId    int64             `json:"gatewayId"`
 	Username     string            `json:"username"`

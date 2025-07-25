@@ -445,7 +445,7 @@ func (i *IChartServiceImpl) ChatsCompletions(c *gin.Context, req *aiDataSetModel
 		// 创建HTTP客户端并设置自定义的Transport
 		client = &http.Client{
 			Transport: transport,
-			Timeout:   120 * time.Second, // 请求的总超时时间
+			Timeout:   300 * time.Second, // 请求的总超时时间
 		}
 	}
 	resp, err := client.Do(request)
@@ -578,7 +578,7 @@ func (i *IChartServiceImpl) AgentsCompletions(c *gin.Context, req *aiDataSetMode
 		// 创建HTTP客户端并设置自定义的Transport
 		client = &http.Client{
 			Transport: transport,
-			Timeout:   120 * time.Second, // 请求的总超时时间
+			Timeout:   300 * time.Second, // 请求的总超时时间
 		}
 	}
 	resp, err := client.Do(request)

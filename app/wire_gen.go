@@ -219,8 +219,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	task := craftRouteController.NewTask(iSysProTaskService, iotAgentService)
 	iScheduleDao := craftRouteDaoImpl.NewIScheduleDaoImpl(db)
 	iScheduleMapDao := craftRouteDaoImpl.NewIScheduleMapDaoImpl(db)
-	iScheduleService := craftRouteServiceImpl.NewIScheduleServiceImpl(iScheduleDao, iScheduleMapDao)
-	schedule := craftRouteController.NewSchedule(iScheduleService)
+	iScheduleService := craftRouteServiceImpl.NewIScheduleServiceImpl(iScheduleDao, db, iScheduleMapDao, iCraftRouteDao)
+	schedule := craftRouteController.NewSchedule(iScheduleService, iotAgentService)
 	craftRoute := &craftRouteController.CraftRoute{
 		CraftRoute:      craft,
 		Process:         process,
@@ -232,7 +232,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Task:            task,
 		Schedule:        schedule,
 	}
-	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, iDeviceDataReportDao, cacheCache)
+	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
 	metric := metricController.NewMetric(iMetricService)
 	metricServer := &metricController.MetricServer{
 		Metric: metric,
@@ -254,7 +254,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao)
 	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
 	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao)
-	deviceReport := deviceMonitorController.NewDeviceReport(iMetricService, iDeviceDataReportService)
+	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao)
+	deviceReport := deviceMonitorController.NewDeviceReport(iMetricService, iDeviceDataReportService, iDevMapService)
 	deviceMonitorControllerDeviceMonitorController := &deviceMonitorController.DeviceMonitorController{
 		DeviceMonitor: deviceMonitor,
 		DeviceReport:  deviceReport,

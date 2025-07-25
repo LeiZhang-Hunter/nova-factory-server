@@ -56,12 +56,12 @@ type SysProductScheduleListData struct {
 type TimeManagerData struct {
 	BeginTime string `json:"begin_time"`
 	EndTime   string `json:"end_time"`
-	RoueId    int64  `json:"run_status"`
+	RoueId    int64  `json:"route_id,string"`
 }
 
 type SetSysProductSchedule struct {
-	Id           int64              `json:"id,string" binding:"required"`
-	GatewayID    int64              `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id"` // 网关id
+	Id           int64              `json:"id,string" `
+	GatewayID    int64              `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id,string"` // 网关id
 	ScheduleName string             `json:"schedule_name" binding:"required"`
 	Time         string             `json:"time" binding:"required"`
 	TimeManager  []*TimeManagerData `json:"time_manager" binding:"required"`

@@ -3,6 +3,7 @@ package deviceMonitorController
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
+	"go.uber.org/zap"
 	"net/url"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
@@ -15,12 +16,14 @@ import (
 type DeviceReport struct {
 	service             metricService.IMetricService
 	deviceReportService deviceMonitorService.IDeviceDataReportService
+	devMapService       metricService.IDevMapService
 }
 
-func NewDeviceReport(service metricService.IMetricService, deviceReportService deviceMonitorService.IDeviceDataReportService) *DeviceReport {
+func NewDeviceReport(service metricService.IMetricService, deviceReportService deviceMonitorService.IDeviceDataReportService, devMapService metricService.IDevMapService) *DeviceReport {
 	return &DeviceReport{
 		service:             service,
 		deviceReportService: deviceReportService,
+		devMapService:       devMapService,
 	}
 }
 
@@ -64,6 +67,34 @@ func (d *DeviceReport) List(c *gin.Context) {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
+
+	if list == nil {
+		baizeContext.SuccessData(c, list)
+		return
+	}
+
+	devList, err := d.devMapService.GetDevList(c, req.Dev)
+	if err != nil {
+		zap.L().Error("get dev list error", zap.Error(err))
+		return
+	}
+	var devMap map[string]*deviceMonitorModel.SysIotDbDevMapData = make(map[string]*deviceMonitorModel.SysIotDbDevMapData)
+
+	for _, dev := range devList {
+		devMap[dev.Device] = &dev
+	}
+
+	for k, v := range list.Rows {
+		value, ok := devMap[v.Dev]
+		if !ok {
+			continue
+		}
+		list.Rows[k].Name = value.DataName
+		list.Rows[k].Unit = value.Unit
+		list.Rows[k].DeviceID = value.DeviceID
+		list.Rows[k].TemplateID = value.TemplateID
+		list.Rows[k].DataID = value.DataID
+	}
 	baizeContext.SuccessData(c, list)
 }
 
@@ -104,6 +135,29 @@ func (d *DeviceReport) Export(c *gin.Context) {
 	if data == nil {
 		baizeContext.Waring(c, "导出失败")
 		return
+	}
+
+	devList, err := d.devMapService.GetDevList(c, req.Dev)
+	if err != nil {
+		zap.L().Error("get dev list error", zap.Error(err))
+		return
+	}
+	var devMap map[string]*deviceMonitorModel.SysIotDbDevMapData = make(map[string]*deviceMonitorModel.SysIotDbDevMapData)
+
+	for _, dev := range devList {
+		devMap[dev.Device] = &dev
+	}
+
+	for k, v := range data.Rows {
+		value, ok := devMap[v.Dev]
+		if !ok {
+			continue
+		}
+		data.Rows[k].Name = value.DataName
+		data.Rows[k].Unit = value.Unit
+		data.Rows[k].DeviceID = value.DeviceID
+		data.Rows[k].TemplateID = value.TemplateID
+		data.Rows[k].DataID = value.DataID
 	}
 	for i, row := range data.Rows {
 		_ = f.SetCellValue("Sheet1", "A"+strconv.Itoa(i+2), row.Name)

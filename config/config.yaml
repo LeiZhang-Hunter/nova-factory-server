@@ -14,9 +14,9 @@ log:
 clickhouse:
   link: tcp://192.168.2.100:9999/nova_device_metric?username=default&password=asd1234567@
 mysql:
-  host: localhost
+  host: 192.168.2.100
   user: root
-  password: zhang16621086246
+  password: root
   dbname: baize
   port: 3306
   max_open_conns: 20

@@ -50,18 +50,42 @@ func (i *IScheduleMapDaoImpl) GetSpecialSchedule(c *gin.Context, beginTime int64
 }
 
 // dealDaily 处理循环日程
-func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) error {
+func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, tx *gorm.DB, data *craftRouteModels.SetSysProductSchedule) error {
 	weeks := strings.Split(data.Time, ",")
 	if len(weeks) == 0 {
 		return errors.New("循环日期格式错误")
 	}
 
+	// 校验数据
+	var checkWeeks map[string]int = map[string]int{
+		"1": 0,
+		"2": 0,
+		"3": 0,
+		"4": 0,
+		"5": 0,
+		"6": 0,
+		"7": 0,
+	}
+
+	for k, week := range weeks {
+		value, ok := checkWeeks[week]
+		if !ok {
+			return errors.New("执行日期格式错误，只能是周一到周日")
+		}
+		if value != 0 {
+			return errors.New(fmt.Sprintf("执行日期格式错误，存在重复日期:%d", k))
+		}
+		checkWeeks[week]++
+	}
+
+	// 保存唯一日期，过滤防止重复
+
 	for _, v := range data.TimeManager {
-		beginArr := strings.Split(":", v.BeginTime)
+		beginArr := strings.Split(v.BeginTime, ":")
 		if len(beginArr) != 2 {
 			return errors.New(fmt.Sprintf("日程安排错误:%s", v.BeginTime))
 		}
-		endArr := strings.Split(":", v.EndTime)
+		endArr := strings.Split(v.EndTime, ":")
 		if len(endArr) != 2 {
 			return errors.New(fmt.Sprintf("日程安排错误:%s", v.EndTime))
 		}
@@ -110,13 +134,17 @@ func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, data *craftRouteModels.S
 				Date:         int(date),
 			}
 		}
+		ret := tx.Table(i.table).Create(mapList)
+		if ret.Error != nil {
+			return ret.Error
+		}
 	}
 
 	return nil
 }
 
 // dealSpecial 处理特殊日程
-func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) error {
+func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, tx *gorm.DB, data *craftRouteModels.SetSysProductSchedule) error {
 	if data.Time == "" {
 		return errors.New("执行日期格式错误")
 	}
@@ -132,11 +160,11 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, data *craftRouteModels
 
 	beginTIme := times[0]
 	endTIme := times[1]
-	beginTImeValue, err := time.Parse("2025-07-02", beginTIme)
+	beginTImeValue, err := time.Parse(time.DateOnly, beginTIme)
 	if err != nil {
 		return err
 	}
-	endTImeValue, err := time.Parse("2025-07-02", endTIme)
+	endTImeValue, err := time.Parse(time.DateOnly, endTIme)
 	if err != nil {
 		return err
 	}
@@ -158,11 +186,11 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, data *craftRouteModels
 	}
 
 	for _, v := range data.TimeManager {
-		beginArr := strings.Split(":", v.BeginTime)
+		beginArr := strings.Split(v.BeginTime, ":")
 		if len(beginArr) != 2 {
 			return errors.New(fmt.Sprintf("日程安排错误:%s", v.BeginTime))
 		}
-		endArr := strings.Split(":", v.EndTime)
+		endArr := strings.Split(v.EndTime, ":")
 		if len(endArr) != 2 {
 			return errors.New(fmt.Sprintf("日程安排错误:%s", v.EndTime))
 		}
@@ -205,7 +233,7 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, data *craftRouteModels
 				ScheduleType: craftRouteModels.SPECIAL,
 			}
 		}
-		ret := i.db.Table(i.table).Create(mapList)
+		ret := tx.Table(i.table).Create(mapList)
 		if ret.Error != nil {
 			zap.L().Error("create error", zap.Error(ret.Error))
 			return ret.Error
@@ -214,19 +242,24 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, data *craftRouteModels
 	return nil
 }
 
-func (i *IScheduleMapDaoImpl) Set(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) {
-	i.db.Table(i.table).Where("schedule_id = ?", data.Id).Delete(&craftRouteModels.SetSysProductSchedule{})
+func (i *IScheduleMapDaoImpl) Set(c *gin.Context, tx *gorm.DB, data *craftRouteModels.SetSysProductSchedule) error {
+	ret := tx.Table(i.table).Where("schedule_id = ?", data.Id).Delete(&craftRouteModels.SysProductScheduleMap{})
+	if ret.Error != nil {
+		zap.L().Error("delete error", zap.Error(ret.Error))
+		return ret.Error
+	}
 	if data.Type == craftRouteModels.SPECIAL {
-		err := i.dealSpecial(c, data)
+		err := i.dealSpecial(c, tx, data)
 		if err != nil {
-			return
+			return err
 		}
 	} else {
-		err := i.dealDaily(c, data)
+		err := i.dealDaily(c, tx, data)
 		if err != nil {
-			return
+			return err
 		}
 	}
+	return nil
 }
 
 func (i *IScheduleMapDaoImpl) Remove(c *gin.Context, ids []string) error {

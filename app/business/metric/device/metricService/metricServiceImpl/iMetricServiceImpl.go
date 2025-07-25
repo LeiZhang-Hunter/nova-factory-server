@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
 	"go.uber.org/zap"
-	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricDao"
 	"nova-factory-server/app/business/metric/device/metricModels"
@@ -18,16 +17,14 @@ import (
 )
 
 type IMetricServiceImpl struct {
-	dao    metricDao.IMetricDao
-	cache  cache.Cache
-	mapDao deviceMonitorDao.IDeviceDataReportDao
+	dao   metricDao.IMetricDao
+	cache cache.Cache
 }
 
-func NewIMetricServiceImpl(dao metricDao.IMetricDao, mapDao deviceMonitorDao.IDeviceDataReportDao, cache cache.Cache) metricService.IMetricService {
+func NewIMetricServiceImpl(dao metricDao.IMetricDao, cache cache.Cache) metricService.IMetricService {
 	return &IMetricServiceImpl{
-		dao:    dao,
-		cache:  cache,
-		mapDao: mapDao,
+		dao:   dao,
+		cache: cache,
 	}
 }
 
@@ -157,27 +154,5 @@ func (m *IMetricServiceImpl) List(c *gin.Context, req *deviceMonitorModel.DevDat
 		count++
 	}
 
-	devList, err := m.mapDao.GetDevList(c, devStrList)
-	if err != nil {
-		return nil, err
-	}
-
-	var devMap map[string]*deviceMonitorModel.SysIotDbDevMapData = make(map[string]*deviceMonitorModel.SysIotDbDevMapData)
-
-	for _, dev := range devList {
-		devMap[dev.Device] = &dev
-	}
-
-	for k, v := range list.Rows {
-		value, ok := devMap[v.Dev]
-		if !ok {
-			continue
-		}
-		list.Rows[k].Name = value.DataName
-		list.Rows[k].Unit = value.Unit
-		list.Rows[k].DeviceID = value.DeviceID
-		list.Rows[k].TemplateID = value.TemplateID
-		list.Rows[k].DataID = value.DataID
-	}
 	return list, nil
 }

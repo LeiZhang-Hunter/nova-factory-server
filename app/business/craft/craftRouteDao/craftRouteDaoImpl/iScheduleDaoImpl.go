@@ -79,17 +79,18 @@ func (i *IScheduleDaoImpl) List(c *gin.Context, req *craftRouteModels.SysProduct
 	}, nil
 }
 
-func (i *IScheduleDaoImpl) Set(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) (*craftRouteModels.SysProductSchedule, error) {
+func (i *IScheduleDaoImpl) Set(c *gin.Context, tx *gorm.DB, data *craftRouteModels.SetSysProductSchedule) (*craftRouteModels.SysProductSchedule, error) {
 	value := craftRouteModels.ToSysProductSchedule(data)
 	if data.Id == 0 {
 		value.ID = snowflake.GenID()
 		value.DeptID = baizeContext.GetDeptId(c)
 		value.SetCreateBy(baizeContext.GetUserId(c))
-		ret := i.db.Table(i.table).Create(data)
+		ret := tx.Table(i.table).Create(value)
 		return value, ret.Error
 	}
 	value.SetUpdateBy(baizeContext.GetUserId(c))
-	return value, nil
+	ret := tx.Table(i.table).Updates(value)
+	return value, ret.Error
 }
 
 func (i *IScheduleDaoImpl) Remove(c *gin.Context, ids []string) error {

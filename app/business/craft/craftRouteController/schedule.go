@@ -2,19 +2,23 @@ package craftRouteController
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	"nova-factory-server/app/business/craft/craftRouteService"
+	"nova-factory-server/app/business/daemonize/daemonizeService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 )
 
 type Schedule struct {
-	service craftRouteService.IScheduleService
+	service      craftRouteService.IScheduleService
+	agentService daemonizeService.IotAgentService
 }
 
-func NewSchedule(service craftRouteService.IScheduleService) *Schedule {
+func NewSchedule(service craftRouteService.IScheduleService, agentService daemonizeService.IotAgentService) *Schedule {
 	return &Schedule{
-		service: service,
+		service:      service,
+		agentService: agentService,
 	}
 }
 
@@ -25,6 +29,7 @@ func (schedule *Schedule) PrivateRoutes(router *gin.RouterGroup) {
 	routers.DELETE("/remove/:ids", middlewares.HasPermission("craft:schedule:product:remove"),
 		schedule.Remove) //移除调度
 	routers.GET("/month/list", middlewares.HasPermission("craft:route:product:month:list"), schedule.MonthList) // 调度列表
+	routers.GET("/detail", middlewares.HasPermission("craft:route:schedule:detail"), schedule.Detail)           // 调度列表
 }
 
 // List 度列表
@@ -91,7 +96,35 @@ func (schedule *Schedule) Set(c *gin.Context) {
 		return
 	}
 
-	schedule.service.Set(c, data)
+	if len(data.TimeManager) == 0 {
+		baizeContext.Waring(c, "日程安排错误")
+		return
+	}
+
+	// 检查type
+	if data.Type != craftRouteModels.SPECIAL && data.Type != craftRouteModels.DAILY {
+		baizeContext.Waring(c, "调度类型错误")
+		return
+	}
+
+	// 检查网关是否存在
+	info, err := schedule.agentService.GetByObjectId(c, uint64(data.GatewayID))
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	if info == nil {
+		baizeContext.Waring(c, "网关不存在")
+		return
+	}
+
+	err = schedule.service.Set(c, data)
+	if err != nil {
+		zap.L().Error("schedule Set failed", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
 }
 
 // Remove 删除调度日程
@@ -117,6 +150,14 @@ func (schedule *Schedule) Remove(c *gin.Context) {
 	baizeContext.Success(c)
 }
 
+// Detail 调度详情
+// @Summary 调度详情
+// @Description 调度详情
+// @Tags 工艺管理/调度管理
+// @Param  object query craftRouteModels.DetailSysProductSchedule true "组成工序列表参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设置分组成功"
+// @Router /craft/route/schedule/detail [get]
 func (schedule *Schedule) Detail(c *gin.Context) {
 	req := new(craftRouteModels.DetailSysProductSchedule)
 	err := c.ShouldBindQuery(req)

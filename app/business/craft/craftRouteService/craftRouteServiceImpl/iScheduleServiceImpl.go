@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"nova-factory-server/app/business/craft/craftRouteDao"
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	"nova-factory-server/app/business/craft/craftRouteService"
@@ -14,12 +15,16 @@ import (
 type IScheduleServiceImpl struct {
 	scheduleDao    craftRouteDao.IScheduleDao
 	scheduleMapDao craftRouteDao.IScheduleMapDao
+	routeDao       craftRouteDao.ICraftRouteDao
+	db             *gorm.DB
 }
 
-func NewIScheduleServiceImpl(scheduleDao craftRouteDao.IScheduleDao, scheduleMapDao craftRouteDao.IScheduleMapDao) craftRouteService.IScheduleService {
+func NewIScheduleServiceImpl(scheduleDao craftRouteDao.IScheduleDao, db *gorm.DB, scheduleMapDao craftRouteDao.IScheduleMapDao, routeDao craftRouteDao.ICraftRouteDao) craftRouteService.IScheduleService {
 	return &IScheduleServiceImpl{
 		scheduleDao:    scheduleDao,
 		scheduleMapDao: scheduleMapDao,
+		routeDao:       routeDao,
+		db:             db,
 	}
 }
 
@@ -129,17 +134,45 @@ func (i *IScheduleServiceImpl) List(c *gin.Context, req *craftRouteModels.SysPro
 	return i.scheduleDao.List(c, req)
 }
 
-func (i *IScheduleServiceImpl) Set(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) {
-	// 保存调度主表
-	value, err := i.scheduleDao.Set(c, data)
+func (i *IScheduleServiceImpl) Set(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) error {
+	// 校验控制id
+	var routerIds []int64 = make([]int64, 0)
+	for _, v := range data.TimeManager {
+		if v.RoueId == 0 {
+			return errors.New("控制流程id不存在")
+		}
+		routerIds = append(routerIds, v.RoueId)
+	}
+	var err error
+	var list []*craftRouteModels.SysCraftRoute
+	list, err = i.routeDao.GetByIds(c, routerIds)
 	if err != nil {
-		return
+		zap.L().Error("get by id list", zap.Error(err))
+		return err
+	}
+	if len(list) != len(routerIds) {
+		return errors.New("控制流程参数错误")
+	}
+
+	tx := i.db.Begin()
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		tx.Commit()
+	}()
+	// 保存调度主表
+	var value *craftRouteModels.SysProductSchedule
+	value, err = i.scheduleDao.Set(c, tx, data)
+	if err != nil {
+		return nil
 	}
 
 	data.Id = value.ID
 	// 保存调度子表
-	i.scheduleMapDao.Set(c, data)
-	return
+	err = i.scheduleMapDao.Set(c, tx, data)
+	return err
 }
 
 func (i *IScheduleServiceImpl) Remove(c *gin.Context, ids []string) error {
