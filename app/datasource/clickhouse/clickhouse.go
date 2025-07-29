@@ -12,6 +12,7 @@ type ClickHouse struct {
 }
 
 func NewClickHouse() (*ClickHouse, error) {
+	return nil, nil
 	dsn := viper.GetString("clickhouse.link")
 	db, err := gorm.Open(clickhouse.Open(dsn), &gorm.Config{})
 	if err != nil {

@@ -133,6 +133,8 @@ func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, tx *gorm.DB, data *craft
 				ScheduleType: craftRouteModels.DAILY,
 				Date:         int(date),
 			}
+			mapList[dayKey].SetCreateBy(baizeContext.GetUserId(c))
+			mapList[dayKey].DeptID = baizeContext.GetDeptId(c)
 		}
 		ret := tx.Table(i.table).Create(mapList)
 		if ret.Error != nil {
@@ -232,6 +234,8 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, tx *gorm.DB, data *cra
 				CraftRouteID: v.RoueId,
 				ScheduleType: craftRouteModels.SPECIAL,
 			}
+			mapList[dayKey].SetCreateBy(baizeContext.GetUserId(c))
+			mapList[dayKey].DeptID = baizeContext.GetDeptId(c)
 		}
 		ret := tx.Table(i.table).Create(mapList)
 		if ret.Error != nil {

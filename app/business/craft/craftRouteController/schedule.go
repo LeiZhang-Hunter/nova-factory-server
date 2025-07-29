@@ -165,6 +165,10 @@ func (schedule *Schedule) Detail(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	schedule.service.Detail(c, req.Id)
+	detail, err := schedule.service.Detail(c, req.Id)
+	if err != nil {
+		return
+	}
+	baizeContext.SuccessData(c, detail)
 	return
 }

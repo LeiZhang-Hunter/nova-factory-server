@@ -66,7 +66,7 @@ func (i *IScheduleDaoImpl) List(c *gin.Context, req *craftRouteModels.SysProduct
 		}, ret.Error
 	}
 
-	ret = db.Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
+	ret = db.Debug().Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
 	if ret.Error != nil {
 		return &craftRouteModels.SysProductScheduleListData{
 			Rows:  make([]*craftRouteModels.SysProductSchedule, 0),

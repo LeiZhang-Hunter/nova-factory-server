@@ -1,7 +1,9 @@
 package alertDaoImpl
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/alert/alertDao"
 	"nova-factory-server/app/business/alert/alertModels"
@@ -82,6 +84,19 @@ func (ac *AlertSinkTemplateDaoImpl) List(c *gin.Context, req *alertModels.SysAle
 			Rows:  make([]*alertModels.SysAlertSinkTemplate, 0),
 			Total: 0,
 		}, ret.Error
+	}
+	for k, v := range dto {
+		var headers map[string]string = map[string]string{}
+		if v.Headers == "" {
+			dto[k].MapHeaders = headers
+			continue
+		}
+		err := json.Unmarshal([]byte(v.Headers), &headers)
+		if err != nil {
+			zap.L().Error("json Unmarshal error", zap.Error(err))
+			continue
+		}
+		dto[k].MapHeaders = headers
 	}
 	return &alertModels.SysAlertSinkTemplateListData{
 		Rows:  dto,

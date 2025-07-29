@@ -21,9 +21,9 @@ func NewAlertTemplate(service alertService.AlertTemplateService) *AlertTemplate 
 
 func (ac *AlertTemplate) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/alert/template")
-	group.GET("/list", middlewares.HasPermission("alert:template:list"), ac.List)                // 物料列表
-	group.POST("/set", middlewares.HasPermission("alert:template:set"), ac.Set)                  // 设置物料信息
-	group.DELETE("/:materialIds", middlewares.HasPermission("alert:material:remove"), ac.Remove) //删除物料
+	group.GET("/list", middlewares.HasPermission("alert:template:list"), ac.List)               // 物料列表
+	group.POST("/set", middlewares.HasPermission("alert:template:set"), ac.Set)                 // 设置物料信息
+	group.DELETE("/remove/:ids", middlewares.HasPermission("alert:template:remove"), ac.Remove) //删除物料
 }
 
 // List 告警模板列表
@@ -71,7 +71,7 @@ func (ac *AlertTemplate) Set(c *gin.Context) {
 			baizeContext.Waring(c, err.Error())
 			return
 		}
-		baizeContext.SuccessData(c, value)
+		baizeContext.SuccessData(c, alertModels.FromSysAlertSinkTemplateToSet(value))
 	} else {
 		value, err := ac.service.Update(c, info)
 		if err != nil {
@@ -79,7 +79,7 @@ func (ac *AlertTemplate) Set(c *gin.Context) {
 			baizeContext.Waring(c, err.Error())
 			return
 		}
-		baizeContext.SuccessData(c, value)
+		baizeContext.SuccessData(c, alertModels.FromSysAlertSinkTemplateToSet(value))
 	}
 }
 
