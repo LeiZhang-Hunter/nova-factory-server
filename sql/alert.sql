@@ -63,3 +63,18 @@ CREATE TABLE `sys_alert_log` (
     INDEX `device_template_id`(`device_template_id`) USING BTREE,
     INDEX `device_data_id`(`device_data_id`) USING BTREE
 ) ENGINE=Innodb   COMMENT='告警日志';
+
+CREATE TABLE sys_alert_action (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name` varchar(255) not null comment '告警策略名称',
+  `period` VARCHAR(255) COMMENT '通知周期，逗号分隔',
+  `user_notify` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '通知用户',
+  `api_notify` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '回调通知',
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+  `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+  PRIMARY KEY (`id`)
+) COMMENT='告警处理动作';

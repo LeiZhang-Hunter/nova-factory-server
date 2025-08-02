@@ -1,8 +1,12 @@
 package time
 
 import (
+	"errors"
+	"fmt"
 	"github.com/gogf/gf/os/gtime"
+	"go.uber.org/zap"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -67,4 +71,45 @@ func GetMonthStart(myYear string, myMonth string) time.Time {
 // GetWeek 获取time是周几
 func GetWeek(t time.Time) int {
 	return int(t.Weekday())
+}
+
+func SecondsToTime(seconds uint64) string {
+	// 将秒数转换为 time.Duration
+	duration := time.Duration(seconds) * time.Second
+
+	// 创建一个零时间的 time.Time 对象
+	zeroTime := time.Time{}
+
+	// 将 duration 加到零时间上
+	timeValue := zeroTime.Add(duration)
+
+	// 格式化为 24 小时制时分秒
+	return timeValue.Format("15:04:05")
+}
+
+func TimeToString(format string) (int, error) {
+	timeArr := strings.Split(format, ":")
+	if len(timeArr) != 3 {
+		return 0, errors.New(fmt.Sprintf("TimeToString error :%s", format))
+	}
+
+	hour, err := strconv.ParseInt(timeArr[0], 10, 64)
+	if err != nil {
+		zap.L().Error("TimeToString error", zap.Error(err))
+		return 0, err
+	}
+
+	minute, err := strconv.ParseInt(timeArr[0], 10, 64)
+	if err != nil {
+		zap.L().Error("TimeToString error", zap.Error(err))
+		return 0, err
+	}
+
+	second, err := strconv.ParseInt(timeArr[0], 10, 64)
+	if err != nil {
+		zap.L().Error("TimeToString error", zap.Error(err))
+		return 0, err
+	}
+	ret := hour*3600*minute*60 + second
+	return int(ret), nil
 }

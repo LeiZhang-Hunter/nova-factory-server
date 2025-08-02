@@ -122,6 +122,12 @@ func (i *IDataSetServiceImpl) UpdateDataSet(c *gin.Context, request *aiDataSetMo
 		return nil, errors.New("知识库不存在")
 	}
 
+	if request.ParserConfig != nil && request.ParserConfig.Graphrag != nil && !request.ParserConfig.Graphrag.UseGraphrag {
+		request.ParserConfig.Graphrag = nil
+	}
+	if request.ParserConfig != nil && request.ParserConfig.Raptor != nil && !request.ParserConfig.Raptor.UseRaptor {
+		request.ParserConfig.Raptor = nil
+	}
 	content, err := json.Marshal(request)
 	if err != nil {
 		zap.L().Error("更新知识库失败", zap.Error(err))

@@ -1327,6 +1327,119 @@ const docTemplate = `{
                 }
             }
         },
+        "/alert/action/list": {
+            "get": {
+                "description": "告警动作列表",
+                "tags": [
+                    "告警管理/告警处理管理"
+                ],
+                "summary": "告警动作列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "告警策略名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/alert/action/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除告警发送配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "告警管理/告警处理管理"
+                ],
+                "summary": "删除告警发送配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/alert/action/set": {
+            "post": {
+                "description": "设置告警发送配置",
+                "tags": [
+                    "告警管理/告警处理管理"
+                ],
+                "summary": "设置告警发送配置",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/alertModels.SetAlertAction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/alert/log/list": {
             "get": {
                 "description": "告警数据列表",
@@ -8432,120 +8545,6 @@ const docTemplate = `{
             }
         },
         "/system/user": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "查询用户列表",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户相关"
-                ],
-                "summary": "查询用户列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "注册开始时间",
-                        "name": "beginTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "部门ID",
-                        "name": "deptId",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "注册结束时间",
-                        "name": "endTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "电话",
-                        "name": "phonenumber",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "状态",
-                        "name": "status",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "userName",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.ResponseData"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.ListData"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "Rows": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/systemModels.SysUserVo"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            },
             "put": {
                 "security": [
                     {
@@ -9043,6 +9042,122 @@ const docTemplate = `{
                             "items": {
                                 "type": "integer"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/system/user/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询用户列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户相关"
+                ],
+                "summary": "查询用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "注册开始时间",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "部门ID",
+                        "name": "deptId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "注册结束时间",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "电话",
+                        "name": "phonenumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "userName",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.ListData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "Rows": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/systemModels.SysUserVo"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -9578,27 +9693,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "raptor": {
-                    "type": "object",
-                    "properties": {
-                        "max_cluster": {
-                            "type": "integer"
-                        },
-                        "max_token": {
-                            "type": "integer"
-                        },
-                        "prompt": {
-                            "type": "string"
-                        },
-                        "random_seed": {
-                            "type": "integer"
-                        },
-                        "threshold": {
-                            "type": "number"
-                        },
-                        "use_raptor": {
-                            "type": "boolean"
-                        }
-                    }
+                    "$ref": "#/definitions/aiDataSetModels.Raptor"
                 },
                 "tag_kb_ids": {
                     "type": "integer"
@@ -9702,6 +9797,29 @@ const docTemplate = `{
                 },
                 "parser_config": {
                     "$ref": "#/definitions/aiDataSetModels.ParserConfig"
+                }
+            }
+        },
+        "aiDataSetModels.Raptor": {
+            "type": "object",
+            "properties": {
+                "max_cluster": {
+                    "type": "integer"
+                },
+                "max_token": {
+                    "type": "integer"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "random_seed": {
+                    "type": "integer"
+                },
+                "threshold": {
+                    "type": "number"
+                },
+                "use_raptor": {
+                    "type": "boolean"
                 }
             }
         },
@@ -9988,6 +10106,35 @@ const docTemplate = `{
                 }
             }
         },
+        "alertModels.ApiNotify": {
+            "type": "object",
+            "properties": {
+                "period": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "time_end": {
+                    "description": "通知结束时间",
+                    "type": "integer"
+                },
+                "time_range": {
+                    "description": "通知结束时间",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "time_start": {
+                    "description": "通知开始时间",
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "alertModels.ChangeSysAlert": {
             "type": "object",
             "properties": {
@@ -9997,6 +10144,34 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "boolean"
+                }
+            }
+        },
+        "alertModels.SetAlertAction": {
+            "type": "object",
+            "properties": {
+                "api_notify": {
+                    "description": "通知用户",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/alertModels.ApiNotify"
+                    }
+                },
+                "id": {
+                    "description": "主键",
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "description": "告警策略名称",
+                    "type": "string"
+                },
+                "user_notify": {
+                    "description": "通知周期，逗号分隔",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/alertModels.UserNotify"
+                    }
                 }
             }
         },
@@ -10024,11 +10199,13 @@ const docTemplate = `{
                 },
                 "gateway_id": {
                     "description": "网关id",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "id": {
                     "description": "自增标识",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "ignore": {
                     "type": "array",
@@ -10045,7 +10222,8 @@ const docTemplate = `{
                 },
                 "template_id": {
                     "description": "模板id",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -10126,6 +10304,44 @@ const docTemplate = `{
                     "description": "数量",
                     "type": "integer",
                     "default": 10000
+                }
+            }
+        },
+        "alertModels.UserNotify": {
+            "type": "object",
+            "properties": {
+                "channels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "period": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "receiver": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "time_end": {
+                    "description": "通知结束时间",
+                    "type": "integer"
+                },
+                "time_range": {
+                    "description": "通知结束时间",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "time_start": {
+                    "description": "通知开始时间",
+                    "type": "integer"
                 }
             }
         },
@@ -10457,7 +10673,8 @@ const docTemplate = `{
             "properties": {
                 "gateway_id": {
                     "description": "网关id",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "id": {
                     "type": "string",

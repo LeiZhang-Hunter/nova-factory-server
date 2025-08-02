@@ -70,12 +70,12 @@ func FromSysAlertToSetData(data *SysAlert) *SetSysAlert {
 }
 
 type SetSysAlert struct {
-	ID          int64                   `gorm:"column:id;primaryKey;autoIncrement:true;comment:自增标识" json:"id"` // 自增标识
-	GatewayID   int64                   `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id"`      // 网关id
-	TemplateID  int64                   `gorm:"column:template_id;not null;comment:模板id" json:"template_id"`    // 模板id
-	Name        string                  `gorm:"column:name;not null;comment:告警策略名称" json:"name"`                // 告警策略名称
-	Additions   map[string]string       `gorm:"column:additions;comment:注解" json:"additions"`                   // 注解
-	Advanced    *logalert.Advanced      `gorm:"column:advanced;comment:告警规则" json:"advanced"`                   // 告警规则
+	ID          int64                   `gorm:"column:id;primaryKey;autoIncrement:true;comment:自增标识" json:"id,string"` // 自增标识
+	GatewayID   int64                   `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id,string"`      // 网关id
+	TemplateID  int64                   `gorm:"column:template_id;not null;comment:模板id" json:"template_id,string"`    // 模板id
+	Name        string                  `gorm:"column:name;not null;comment:告警策略名称" json:"name"`                       // 告警策略名称
+	Additions   map[string]string       `gorm:"column:additions;comment:注解" json:"additions"`                          // 注解
+	Advanced    *logalert.Advanced      `gorm:"column:advanced;comment:告警规则" json:"advanced"`                          // 告警规则
 	Ignore      []logalert.DeviceMetric `gorm:"column:ignore;comment:忽略规则" json:"ignore"`
 	Matcher     *logalert.Matcher       `gorm:"column:matcher;comment:匹配规则" json:"matcher"`
 	Description string                  `gorm:"column:description;not null;comment:描述"  json:"description"` // 配置版本

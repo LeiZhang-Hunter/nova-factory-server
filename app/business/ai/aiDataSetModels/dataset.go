@@ -25,24 +25,26 @@ type Graphrag struct {
 	Community   bool     `json:"community"`
 }
 
+type Raptor struct {
+	UseRaptor  bool    `json:"use_raptor"`
+	Prompt     string  `json:"prompt"`
+	MaxToken   int     `json:"max_token"`
+	Threshold  float64 `json:"threshold"`
+	MaxCluster int     `json:"max_cluster"`
+	RandomSeed int     `json:"random_seed"`
+}
+
 type ParserConfig struct {
-	ChunkTokenNum   int    `json:"chunk_token_num"`
-	AutoKeywords    int    `json:"auto_keywords"`
-	AutoQuestions   int    `json:"auto_questions"`
-	TagKbIds        int    `json:"tag_kb_ids,omitempty"`
-	Delimiter       string `json:"delimiter"`
-	Html4Excel      bool   `json:"html4excel"`
-	LayoutRecognize string `json:"layout_recognize"`
-	Raptor          struct {
-		UseRaptor  bool    `json:"use_raptor"`
-		Prompt     string  `json:"prompt"`
-		MaxToken   int     `json:"max_token"`
-		Threshold  float64 `json:"threshold"`
-		MaxCluster int     `json:"max_cluster"`
-		RandomSeed int     `json:"random_seed"`
-	} `json:"raptor"`
-	TaskPageSize int       `json:"task_page_size"`
-	Graphrag     *Graphrag `json:"graphrag,omitempty"`
+	ChunkTokenNum   int       `json:"chunk_token_num"`
+	AutoKeywords    int       `json:"auto_keywords"`
+	AutoQuestions   int       `json:"auto_questions"`
+	TagKbIds        int       `json:"tag_kb_ids,omitempty"`
+	Delimiter       string    `json:"delimiter"`
+	Html4Excel      bool      `json:"html4excel"`
+	LayoutRecognize string    `json:"layout_recognize"`
+	Raptor          *Raptor   `json:"raptor"`
+	TaskPageSize    int       `json:"task_page_size"`
+	Graphrag        *Graphrag `json:"graphrag,omitempty"`
 }
 
 type DataSetData struct {

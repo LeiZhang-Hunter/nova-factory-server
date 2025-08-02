@@ -312,3 +312,4 @@ CREATE TABLE `sys_product_schedule_map` (
     KEY `schedule_id` (`schedule_id`) USING BTREE,
     KEY `begin_time` (`begin_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=39797 DEFAULT CHARSET=utf8;
+

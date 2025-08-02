@@ -11,6 +11,7 @@ import (
 
 type Alert struct {
 	service alertService.AlertRuleService
+	action  *AlertAction
 }
 
 func NewAlert(service alertService.AlertRuleService) *Alert {
