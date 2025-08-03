@@ -78,3 +78,18 @@ CREATE TABLE sys_alert_action (
   `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
   PRIMARY KEY (`id`)
 ) COMMENT='告警处理动作';
+
+CREATE TABLE sys_alert_ai_reason (
+    `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `name` varchar(255) not null comment '告警策略名称',
+    `prompt` text COMMENT '提示词设置',
+    `message` text COMMENT '提问消息模板',
+    `dataset_ids` text COMMENT '知识库id列表',
+    `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+    `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`)
+) COMMENT='告警ai 推理配置';
