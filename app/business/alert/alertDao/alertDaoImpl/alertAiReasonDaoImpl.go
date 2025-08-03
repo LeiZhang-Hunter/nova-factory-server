@@ -34,7 +34,7 @@ func (a *AlertAiReasonDaoImpl) Set(c *gin.Context, data *alertModels.SetAlertAiR
 		return value, ret.Error
 	} else {
 		value.SetUpdateBy(baizeContext.GetUserId(c))
-		ret := a.db.Table(a.table).Where("id = ?", value.ID).Updates(&value)
+		ret := a.db.Table(a.table).Debug().Where("id = ?", value.ID).Updates(&value)
 		return value, ret.Error
 	}
 }

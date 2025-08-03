@@ -270,11 +270,15 @@ func wireApp() (*gin.Engine, func(), error) {
 	alertActionDao := alertDaoImpl.NewAlertActionDaoImpl(db)
 	alertActionService := alertServiceImpl.NewAlertActionServiceImpl(alertActionDao)
 	alertAction := alertController.NewAlertAction(alertActionService, iDictDataService)
+	alertAiReasonDao := alertDaoImpl.NewAlertAiReasonDaoImpl(db)
+	alertAiReasonService := alertServiceImpl.NewAlertAiReasonServiceImpl(alertAiReasonDao)
+	alertAiReason := alertController.NewAlertAiReason(alertAiReasonService)
 	controller := &alertController.Controller{
 		Alert:         alert,
 		AlertTemplate: alertTemplate,
 		AlertLog:      alertLog,
 		AlertAction:   alertAction,
+		AlertAiReason: alertAiReason,
 	}
 	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller)
 	return engine, func() {

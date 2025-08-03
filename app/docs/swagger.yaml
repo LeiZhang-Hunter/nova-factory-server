@@ -492,6 +492,24 @@ definitions:
       status:
         type: boolean
     type: object
+  alertModels.Receiver:
+    properties:
+      email:
+        description: 邮箱
+        type: string
+      nickName:
+        description: 用户昵称
+        type: string
+      phonenumber:
+        description: 手机号
+        type: string
+      userName:
+        description: 用户名
+        type: string
+    required:
+    - nickName
+    - userName
+    type: object
   alertModels.SetAlertAction:
     properties:
       api_notify:
@@ -511,6 +529,26 @@ definitions:
         items:
           $ref: '#/definitions/alertModels.UserNotify'
         type: array
+    type: object
+  alertModels.SetAlertAiReason:
+    properties:
+      dataset_ids:
+        description: 知识库id列表
+        items:
+          type: string
+        type: array
+      id:
+        description: 主键
+        type: integer
+      message:
+        description: 提问消息模板
+        type: string
+      name:
+        description: 告警策略名称
+        type: string
+      prompt:
+        description: 提示词设置
+        type: string
     type: object
   alertModels.SetSysAlert:
     properties:
@@ -619,7 +657,7 @@ definitions:
         type: array
       receiver:
         items:
-          type: string
+          $ref: '#/definitions/alertModels.Receiver'
         type: array
       time_end:
         description: 通知结束时间
@@ -3714,6 +3752,84 @@ paths:
       summary: 告警数据列表
       tags:
       - 告警管理/告警数据管理
+  /alert/reason/list:
+    get:
+      description: 告警AI推理列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: message
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: prompt
+        type: string
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 告警AI推理列表
+      tags:
+      - 告警管理/告警AI推理管理
+  /alert/reason/remove/{ids}:
+    delete:
+      description: 删除告警AI推理发送配置
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除告警AI推理发送配置
+      tags:
+      - 告警管理/告警AI推理管理
+  /alert/reason/set:
+    post:
+      description: 设置告警AI推理发送配置
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/alertModels.SetAlertAiReason'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置告警AI推理发送配置
+      tags:
+      - 告警管理/告警AI推理管理
   /alert/rule/change:
     post:
       description: 改变告警配置

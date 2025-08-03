@@ -20,9 +20,9 @@ func NewAlertAiReason(service alertService.AlertAiReasonService) *AlertAiReason 
 
 func (a *AlertAiReason) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/alert/reason")
-	group.GET("/list", middlewares.HasPermission("alert:reason:list"), a.List)               // 告警规则列表
-	group.POST("/set", middlewares.HasPermission("alert:reason:set"), a.Set)                 // 设置物料信息
-	group.DELETE("/remove/:ids", middlewares.HasPermission("alert:reason:remove"), a.Remove) //删除物料
+	group.GET("/list", middlewares.HasPermission("alert:reason:list"), a.List)
+	group.POST("/set", middlewares.HasPermission("alert:reason:set"), a.Set)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("alert:reason:remove"), a.Remove)
 	return
 }
 
@@ -51,7 +51,7 @@ func (a *AlertAiReason) List(c *gin.Context) {
 // Set 设置告警AI推理发送配置
 // @Summary 设置告警AI推理发送配置
 // @Description 设置告警AI推理发送配置
-// @Tags 告警AI推理管理/告警AI推理管理
+// @Tags 告警管理/告警AI推理管理
 // @Param  object body alertModels.SetAlertAiReason true "助理列表参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
 // @Router /alert/reason/set [post]
@@ -71,7 +71,7 @@ func (a *AlertAiReason) Set(c *gin.Context) {
 // Remove 删除告警AI推理发送配置
 // @Summary 删除告警AI推理发送配置
 // @Description 删除告警AI推理发送配置
-// @Tags 告警AI推理管理/告警AI推理管理
+// @Tags 告警管理/告警AI推理管理
 // @Param  ids path string true "ids"
 // @Security BearerAuth
 // @Produce application/json
