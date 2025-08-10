@@ -36,6 +36,26 @@ type AlertLogData struct {
 	Password     string            `json:"password"`
 }
 
+type AlertLogInfo struct {
+	Id           uint64            `json:"id"`
+	Alert        *AlertValue       `json:"alert"`
+	CommonLabels map[string]string `json:"commonLabels"`
+	GatewayId    int64             `json:"gatewayId"`
+	Username     string            `json:"username"`
+	Password     string            `json:"password"`
+}
+
+func ToAlertLogInfo(data *AlertLogData, value *AlertValue) *AlertLogInfo {
+	return &AlertLogInfo{
+		Id:           data.Id,
+		CommonLabels: data.CommonLabels,
+		GatewayId:    data.GatewayId,
+		Username:     data.Username,
+		Password:     data.Password,
+		Alert:        value,
+	}
+}
+
 // SysAlertLog 告警日志
 type SysAlertLog struct {
 	ID               int64  `gorm:"column:id;primaryKey;autoIncrement:true;comment:自增标识" json:"id"`              // 自增标识
@@ -53,12 +73,15 @@ type SysAlertLog struct {
 }
 
 func FromDataToSysAlertLog(data *AlertLogData, deptId uint64, c *gin.Context) []*SysAlertLog {
-	alertJson, err := json.Marshal(data)
-	if err != nil {
-		return nil
-	}
 	ret := make([]*SysAlertLog, 0)
 	for _, alert := range data.Alerts {
+		info := ToAlertLogInfo(data, &alert)
+		alertJson, err := json.Marshal(info)
+		if err != nil {
+			zap.L().Error("json marshal fail", zap.Error(err))
+			continue
+		}
+
 		var alertLog SysAlertLog
 		alertLog.ID = snowflake.GenID()
 		alertLog.Data = string(alertJson)
