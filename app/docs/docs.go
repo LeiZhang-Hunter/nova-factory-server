@@ -3635,26 +3635,45 @@ const docTemplate = `{
         },
         "/craft/route/schedule/list": {
             "get": {
-                "description": "度列表",
+                "description": "调度列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "工艺管理/调度管理"
                 ],
-                "summary": "度列表",
+                "summary": "调度列表",
                 "parameters": [
                     {
                         "type": "string",
-                        "name": "month",
-                        "in": "query",
-                        "required": true
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "year",
-                        "in": "query",
-                        "required": true
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -10334,7 +10353,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "主键",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "message": {
                     "description": "提问消息模板",
@@ -10353,6 +10373,11 @@ const docTemplate = `{
         "alertModels.SetSysAlert": {
             "type": "object",
             "properties": {
+                "action_id": {
+                    "description": "处理id",
+                    "type": "string",
+                    "example": "0"
+                },
                 "additions": {
                     "description": "注解",
                     "type": "object",
@@ -10394,6 +10419,14 @@ const docTemplate = `{
                 "name": {
                     "description": "告警策略名称",
                     "type": "string"
+                },
+                "reason_id": {
+                    "description": "推理id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "status": {
+                    "type": "boolean"
                 },
                 "template_id": {
                     "description": "模板id",

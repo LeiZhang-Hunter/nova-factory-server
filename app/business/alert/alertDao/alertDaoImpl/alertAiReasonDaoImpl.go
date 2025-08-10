@@ -2,6 +2,7 @@ package alertDaoImpl
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -95,4 +96,15 @@ func (a *AlertAiReasonDaoImpl) List(c *gin.Context, req *alertModels.SysAlertAiR
 		Rows:  dto,
 		Total: uint64(total),
 	}, nil
+}
+
+func (a *AlertAiReasonDaoImpl) GetById(c *gin.Context, id int64) (*alertModels.SysAlertAiReason, error) {
+	var dto *alertModels.SysAlertAiReason
+	ret := a.db.Table(a.table).Where("id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&dto)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+	}
+	return dto, ret.Error
 }

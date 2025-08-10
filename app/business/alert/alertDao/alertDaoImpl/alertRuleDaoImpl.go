@@ -1,6 +1,7 @@
 package alertDaoImpl
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/alert/alertDao"
@@ -34,7 +35,7 @@ func (ac *AlertRuleDaoImpl) Create(c *gin.Context, data *alertModels.SetSysAlert
 func (ac *AlertRuleDaoImpl) Update(c *gin.Context, data *alertModels.SetSysAlert) (*alertModels.SysAlert, error) {
 	value := alertModels.ToSysAlert(data)
 	value.SetUpdateBy(baizeContext.GetUserId(c))
-	ret := ac.db.Table(ac.table).Where("id = ?", value.ID).Updates(&value)
+	ret := ac.db.Table(ac.table).Where("id = ?", value.ID).Save(&value)
 	return value, ret.Error
 }
 
@@ -121,5 +122,14 @@ func (ac *AlertRuleDaoImpl) Change(c *gin.Context, data *alertModels.ChangeSysAl
 func (ac *AlertRuleDaoImpl) GetOnlineByGatewayId(c *gin.Context, gatewayId uint64) (*alertModels.SysAlert, error) {
 	var dto *alertModels.SysAlert
 	ret := ac.db.Table(ac.table).Where("gateway_id = ?", gatewayId).Where("status = ?", 1).Where("state = ?", commonStatus.NORMAL).First(&dto)
+	return dto, ret.Error
+}
+
+func (ac *AlertRuleDaoImpl) FindOpen(c *gin.Context) (*alertModels.SysAlert, error) {
+	var dto *alertModels.SysAlert
+	ret := ac.db.Table(ac.table).Where("status = ?", 1).Where("state = ?", commonStatus.NORMAL).First(&dto)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return dto, ret.Error
 }

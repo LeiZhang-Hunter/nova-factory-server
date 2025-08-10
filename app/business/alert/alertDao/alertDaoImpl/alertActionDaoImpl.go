@@ -2,6 +2,7 @@ package alertDaoImpl
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -90,8 +91,8 @@ func (a *AlertActionDaoImpl) List(c *gin.Context, req *alertModels.SysAlertActio
 		if err != nil {
 			zap.L().Error("json unmarshal error", zap.Error(err))
 		}
-		var userCountMap map[int64]uint32 = make(map[int64]uint32)
 
+		var userCountMap map[int64]uint32 = make(map[int64]uint32)
 		dto[k].ApiNotifyList = make([]alertModels.ApiNotify, 0)
 		err = json.Unmarshal([]byte(v.ApiNotify), &dto[k].ApiNotifyList)
 		if err != nil {
@@ -124,4 +125,15 @@ func (a *AlertActionDaoImpl) List(c *gin.Context, req *alertModels.SysAlertActio
 		Rows:  dto,
 		Total: uint64(total),
 	}, nil
+}
+
+func (a *AlertActionDaoImpl) GetById(c *gin.Context, id int64) (*alertModels.SetAlertAction, error) {
+	var dto *alertModels.SetAlertAction
+	ret := a.db.Table(a.table).Where("id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&dto)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+	}
+	return dto, ret.Error
 }

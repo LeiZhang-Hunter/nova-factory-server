@@ -3,6 +3,7 @@ package alertServiceImpl
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/alert/alertDao"
 	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/alert/alertService"
@@ -13,13 +14,19 @@ type AlertRuleServiceImpl struct {
 	rule        alertDao.AlertRuleDao
 	agent       daemonizeDao.IotAgentDao
 	templateDao alertDao.AlertSinkTemplateDao
+	actionDao   alertDao.AlertActionDao
+	reasonDao   alertDao.AlertAiReasonDao
 }
 
-func NewAlertRuleServiceImpl(rule alertDao.AlertRuleDao, agent daemonizeDao.IotAgentDao, templateDao alertDao.AlertSinkTemplateDao) alertService.AlertRuleService {
+func NewAlertRuleServiceImpl(rule alertDao.AlertRuleDao, agent daemonizeDao.IotAgentDao,
+	templateDao alertDao.AlertSinkTemplateDao, actionDao alertDao.AlertActionDao,
+	reasonDao alertDao.AlertAiReasonDao) alertService.AlertRuleService {
 	return &AlertRuleServiceImpl{
 		rule:        rule,
 		agent:       agent,
 		templateDao: templateDao,
+		actionDao:   actionDao,
+		reasonDao:   reasonDao,
 	}
 }
 
@@ -38,6 +45,28 @@ func (a *AlertRuleServiceImpl) Create(c *gin.Context, data *alertModels.SetSysAl
 	}
 	if templateInfo == nil {
 		return nil, errors.New("告警模板不存在")
+	}
+
+	// 检查处理id 是否存在
+	actionInfo, err := a.actionDao.GetById(c, data.ActionId)
+	if err != nil {
+		zap.L().Error("get action info", zap.Error(err))
+		return nil, errors.New("读取处理通知策略失败")
+	}
+
+	if actionInfo == nil {
+		return nil, errors.New("处理通知策略不存在")
+	}
+
+	// 检查推理id 是否存在
+	reasonInfo, err := a.reasonDao.GetById(c, data.ReasonId)
+	if err != nil {
+		zap.L().Error("get reason info", zap.Error(err))
+		return nil, errors.New("读取ai 推理策略失败")
+	}
+
+	if reasonInfo == nil {
+		return nil, errors.New("ai 推理策略不存在")
 	}
 	return a.rule.Create(c, data)
 }
@@ -68,4 +97,8 @@ func (a *AlertRuleServiceImpl) Remove(c *gin.Context, ids []string) error {
 
 func (a *AlertRuleServiceImpl) Change(c *gin.Context, data *alertModels.ChangeSysAlert) error {
 	return a.rule.Change(c, data)
+}
+
+func (a *AlertRuleServiceImpl) FindOpen(c *gin.Context) (*alertModels.SysAlert, error) {
+	return a.rule.FindOpen(c)
 }

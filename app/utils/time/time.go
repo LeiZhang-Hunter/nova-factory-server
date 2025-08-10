@@ -74,19 +74,17 @@ func GetWeek(t time.Time) int {
 }
 
 func SecondsToTime(seconds uint64) string {
-	// 将秒数转换为 time.Duration
-	duration := time.Duration(seconds) * time.Second
+	if seconds == 0 {
+		return "00:00:00"
+	}
 
-	// 创建一个零时间的 time.Time 对象
-	zeroTime := time.Time{}
-
-	// 将 duration 加到零时间上
-	timeValue := zeroTime.Add(duration)
-
-	// 格式化为 24 小时制时分秒
-	return timeValue.Format("15:04:05")
+	hours := seconds / 3600          // 总小时数
+	minutes := (seconds % 3600) / 60 // 剩余分钟数
+	remainingSeconds := seconds % 60 // 剩余秒数
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, remainingSeconds)
 }
 
+// TimeToString 23:59:59 => int
 func TimeToString(format string) (int, error) {
 	timeArr := strings.Split(format, ":")
 	if len(timeArr) != 3 {
@@ -99,17 +97,17 @@ func TimeToString(format string) (int, error) {
 		return 0, err
 	}
 
-	minute, err := strconv.ParseInt(timeArr[0], 10, 64)
+	minute, err := strconv.ParseInt(timeArr[1], 10, 64)
 	if err != nil {
 		zap.L().Error("TimeToString error", zap.Error(err))
 		return 0, err
 	}
 
-	second, err := strconv.ParseInt(timeArr[0], 10, 64)
+	second, err := strconv.ParseInt(timeArr[2], 10, 64)
 	if err != nil {
 		zap.L().Error("TimeToString error", zap.Error(err))
 		return 0, err
 	}
-	ret := hour*3600*minute*60 + second
+	ret := hour*3600 + minute*60 + second
 	return int(ret), nil
 }

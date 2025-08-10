@@ -539,7 +539,8 @@ definitions:
         type: array
       id:
         description: 主键
-        type: integer
+        example: "0"
+        type: string
       message:
         description: 提问消息模板
         type: string
@@ -552,6 +553,10 @@ definitions:
     type: object
   alertModels.SetSysAlert:
     properties:
+      action_id:
+        description: 处理id
+        example: "0"
+        type: string
       additions:
         additionalProperties:
           type: string
@@ -581,6 +586,12 @@ definitions:
       name:
         description: 告警策略名称
         type: string
+      reason_id:
+        description: 推理id
+        example: "0"
+        type: string
+      status:
+        type: boolean
       template_id:
         description: 模板id
         example: "0"
@@ -5158,16 +5169,29 @@ paths:
       - 工艺管理/调度管理
   /craft/route/schedule/list:
     get:
-      description: 度列表
+      description: 调度列表
       parameters:
-      - in: query
-        name: month
-        required: true
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
         type: string
       - in: query
-        name: year
-        required: true
+        name: name
         type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
       produces:
       - application/json
       responses:
@@ -5175,7 +5199,7 @@ paths:
           description: 设置分组成功
           schema:
             $ref: '#/definitions/response.ResponseData'
-      summary: 度列表
+      summary: 调度列表
       tags:
       - 工艺管理/调度管理
   /craft/route/schedule/month/list:

@@ -260,17 +260,17 @@ func wireApp() (*gin.Engine, func(), error) {
 		DeviceMonitor: deviceMonitor,
 		DeviceReport:  deviceReport,
 	}
-	alertRuleService := alertServiceImpl.NewAlertRuleServiceImpl(alertRuleDao, iotAgentDao, alertSinkTemplateDao)
+	alertActionDao := alertDaoImpl.NewAlertActionDaoImpl(db)
+	alertAiReasonDao := alertDaoImpl.NewAlertAiReasonDaoImpl(db)
+	alertRuleService := alertServiceImpl.NewAlertRuleServiceImpl(alertRuleDao, iotAgentDao, alertSinkTemplateDao, alertActionDao, alertAiReasonDao)
 	alert := alertController.NewAlert(alertRuleService)
 	alertTemplateService := alertServiceImpl.NewAlertTemplateServiceImpl(alertSinkTemplateDao)
 	alertTemplate := alertController.NewAlertTemplate(alertTemplateService)
 	alertLogDao := alertDaoImpl.NewAlertLogDaoImpl(db)
 	alertLogService := alertServiceImpl.NewAlertLogServiceImpl(alertLogDao, alertRuleDao, iotAgentDao)
 	alertLog := alertController.NewAlertLog(alertLogService)
-	alertActionDao := alertDaoImpl.NewAlertActionDaoImpl(db)
 	alertActionService := alertServiceImpl.NewAlertActionServiceImpl(alertActionDao)
 	alertAction := alertController.NewAlertAction(alertActionService, iDictDataService)
-	alertAiReasonDao := alertDaoImpl.NewAlertAiReasonDaoImpl(db)
 	alertAiReasonService := alertServiceImpl.NewAlertAiReasonServiceImpl(alertAiReasonDao)
 	alertAiReason := alertController.NewAlertAiReason(alertAiReasonService)
 	controller := &alertController.Controller{

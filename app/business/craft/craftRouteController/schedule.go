@@ -32,11 +32,11 @@ func (schedule *Schedule) PrivateRoutes(router *gin.RouterGroup) {
 	routers.GET("/detail", middlewares.HasPermission("craft:route:schedule:detail"), schedule.Detail)           // 调度列表
 }
 
-// List 度列表
-// @Summary 度列表
-// @Description 度列表
+// List 调度列表
+// @Summary 调度列表
+// @Description 调度列表
 // @Tags 工艺管理/调度管理
-// @Param  object query craftRouteModels.SysProductScheduleReq true "组成工序列表参数"
+// @Param  object query craftRouteModels.SysProductScheduleListReq true "组成工序列表参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "设置分组成功"
 // @Router /craft/route/schedule/list [get]

@@ -3,6 +3,8 @@ CREATE TABLE `sys_alert` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增标识',
     `gateway_id` bigint(20) NOT NULL COMMENT '网关id',
     `template_id` bigint(20) NOT NULL COMMENT '模板id',
+    `reason_id` bigint(20) NOT NULL COMMENT '模型推理id',
+    `action_id` bigint(20) NOT NULL COMMENT '处理通知id',
     `name` varchar(255) not null comment '告警策略名称',
     `additions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '注解',
     `advanced` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '告警规则',
@@ -20,6 +22,7 @@ CREATE TABLE `sys_alert` (
     INDEX `gateway_id`(`gateway_id`) USING BTREE,
     INDEX `template_id`(`template_id`) USING BTREE
 ) ENGINE=Innodb   COMMENT='告警策略配置';
+
 
 CREATE TABLE `sys_alert_sink_template`
 (
@@ -93,3 +96,5 @@ CREATE TABLE sys_alert_ai_reason (
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`)
 ) COMMENT='告警ai 推理配置';
+
+alter table

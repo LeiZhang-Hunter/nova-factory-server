@@ -1,8 +1,10 @@
 package alertController
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/alert/alertService"
 	"nova-factory-server/app/middlewares"
@@ -74,6 +76,24 @@ func (a *Alert) Set(c *gin.Context) {
 		}
 		baizeContext.SuccessData(c, alertModels.FromSysAlertToSetData(value))
 	} else {
+		// 查询是否有开启策略，只能开启一个
+		open, err := a.service.FindOpen(c)
+		if err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				zap.L().Error("find rule error", zap.Error(err))
+				baizeContext.Waring(c, "读取开启数据失败")
+				return
+			}
+
+		}
+
+		if open != nil {
+			if open.ID != info.ID {
+				baizeContext.Waring(c, "告警策略只能开启一个")
+				return
+			}
+		}
+
 		value, err := a.service.Update(c, info)
 		if err != nil {
 			zap.L().Error("update rule error", zap.Error(err))
