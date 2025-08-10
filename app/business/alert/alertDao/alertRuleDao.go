@@ -14,5 +14,5 @@ type AlertRuleDao interface {
 	Change(c *gin.Context, data *alertModels.ChangeSysAlert) error
 	GetOnlineByGatewayId(c *gin.Context, gatewayId uint64) (*alertModels.SysAlert, error)
 	GetById(c *gin.Context, id uint64) (*alertModels.SysAlert, error)
-	FindOpen(c *gin.Context) (*alertModels.SysAlert, error)
+	FindOpen(c *gin.Context, gatewayId int64) (*alertModels.SysAlert, error)
 }

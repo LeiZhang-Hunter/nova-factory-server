@@ -125,9 +125,9 @@ func (ac *AlertRuleDaoImpl) GetOnlineByGatewayId(c *gin.Context, gatewayId uint6
 	return dto, ret.Error
 }
 
-func (ac *AlertRuleDaoImpl) FindOpen(c *gin.Context) (*alertModels.SysAlert, error) {
+func (ac *AlertRuleDaoImpl) FindOpen(c *gin.Context, gatewayId int64) (*alertModels.SysAlert, error) {
 	var dto *alertModels.SysAlert
-	ret := ac.db.Table(ac.table).Where("status = ?", 1).Where("state = ?", commonStatus.NORMAL).First(&dto)
+	ret := ac.db.Table(ac.table).Where("gateway_id = ?", gatewayId).Where("status = ?", 1).Where("state = ?", commonStatus.NORMAL).First(&dto)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}

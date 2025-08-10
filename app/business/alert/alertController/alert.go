@@ -24,9 +24,9 @@ func NewAlert(service alertService.AlertRuleService) *Alert {
 
 func (a *Alert) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/alert/rule")
-	group.GET("/list", middlewares.HasPermission("alert:rule:list"), a.List)        // 告警规则列表
-	group.POST("/set", middlewares.HasPermission("alert:rule:set"), a.Set)          // 设置物料信息
-	group.DELETE("/:ids", middlewares.HasPermission("alert:rule:remove"), a.Remove) //删除物料
+	group.GET("/list", middlewares.HasPermission("alert:rule:list"), a.List)               // 告警规则列表
+	group.POST("/set", middlewares.HasPermission("alert:rule:set"), a.Set)                 // 设置物料信息
+	group.DELETE("/remove/:ids", middlewares.HasPermission("alert:rule:remove"), a.Remove) //删除物料
 }
 
 // List 告警规则列表
@@ -77,7 +77,7 @@ func (a *Alert) Set(c *gin.Context) {
 		baizeContext.SuccessData(c, alertModels.FromSysAlertToSetData(value))
 	} else {
 		// 查询是否有开启策略，只能开启一个
-		open, err := a.service.FindOpen(c)
+		open, err := a.service.FindOpen(c, info.GatewayID)
 		if err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				zap.L().Error("find rule error", zap.Error(err))

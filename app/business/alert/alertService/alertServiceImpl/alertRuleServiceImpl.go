@@ -99,6 +99,6 @@ func (a *AlertRuleServiceImpl) Change(c *gin.Context, data *alertModels.ChangeSy
 	return a.rule.Change(c, data)
 }
 
-func (a *AlertRuleServiceImpl) FindOpen(c *gin.Context) (*alertModels.SysAlert, error) {
-	return a.rule.FindOpen(c)
+func (a *AlertRuleServiceImpl) FindOpen(c *gin.Context, gatewayId int64) (*alertModels.SysAlert, error) {
+	return a.rule.FindOpen(c, gatewayId)
 }
