@@ -2,7 +2,7 @@ package alertController
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewAlert, NewAlertTemplate, NewAlertLog, NewAlertAction, NewAlertAiReason, wire.Struct(new(Controller), "*"))
+var ProviderSet = wire.NewSet(NewAlert, NewAlertTemplate, NewAlertLog, NewAlertAction, NewAlertAiReason, NewRunner, wire.Struct(new(Controller), "*"))
 
 type Controller struct {
 	Alert         *Alert
@@ -10,4 +10,5 @@ type Controller struct {
 	AlertLog      *AlertLog
 	AlertAction   *AlertAction
 	AlertAiReason *AlertAiReason
+	Runner        *Runner
 }

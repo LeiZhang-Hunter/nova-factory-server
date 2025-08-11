@@ -273,12 +273,15 @@ func wireApp() (*gin.Engine, func(), error) {
 	alertAction := alertController.NewAlertAction(alertActionService, iDictDataService)
 	alertAiReasonService := alertServiceImpl.NewAlertAiReasonServiceImpl(alertAiReasonDao)
 	alertAiReason := alertController.NewAlertAiReason(alertAiReasonService)
+	runnerService := alertServiceImpl.NewRunnerServiceImpl(iChartService)
+	runner := alertController.NewRunner(alertRuleService, runnerService, iChartService, iDeviceDao, alertLogDao)
 	controller := &alertController.Controller{
 		Alert:         alert,
 		AlertTemplate: alertTemplate,
 		AlertLog:      alertLog,
 		AlertAction:   alertAction,
 		AlertAiReason: alertAiReason,
+		Runner:        runner,
 	}
 	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller)
 	return engine, func() {

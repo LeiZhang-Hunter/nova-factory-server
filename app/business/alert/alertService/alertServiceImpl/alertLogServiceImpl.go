@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"nova-factory-server/app/business/alert/alertController"
 	"nova-factory-server/app/business/alert/alertDao"
 	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/alert/alertService"
@@ -24,6 +25,7 @@ func NewAlertLogServiceImpl(dao alertDao.AlertLogDao, ruleDao alertDao.AlertRule
 	}
 }
 
+// Export 导出告警数据
 func (log *AlertLogServiceImpl) Export(c *gin.Context, data alertModels.AlertLogData) error {
 	// 校验网关帐号密码
 	gatewayInfo, err := log.agentDao.GetByObjectId(c, uint64(data.GatewayId))
@@ -40,13 +42,17 @@ func (log *AlertLogServiceImpl) Export(c *gin.Context, data alertModels.AlertLog
 		return errors.New("username or password error")
 	}
 
-	alertLogList := alertModels.FromDataToSysAlertLog(&data, uint64(gatewayInfo.DeptID), c)
-	for _, alertLog := range alertLogList {
-		alertLog.DeptID = gatewayInfo.DeptID
+	alertLogList, infos := alertModels.FromDataToSysAlertLog(&data, uint64(gatewayInfo.DeptID), c)
+	for k, _ := range alertLogList {
+		alertLogList[k].DeptID = gatewayInfo.DeptID
 	}
 	err = log.dao.Export(c, alertLogList)
 	if err != nil {
 		return err
+	}
+
+	for _, info := range infos {
+		alertController.GetAlertRunner().Push(info)
 	}
 	return nil
 }

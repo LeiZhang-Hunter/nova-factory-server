@@ -67,7 +67,7 @@ func (s *sysDeviceDataDao) GetDeviceGroupByName(c *gin.Context, name string) (*d
 
 func (s *sysDeviceDataDao) GetByIds(c *gin.Context, ids []int64) ([]*deviceModels.DeviceVO, error) {
 	var list []*deviceModels.DeviceVO
-	ret := s.ms.Table(s.tableName).Where("device_id in (?)", ids).First(&list)
+	ret := s.ms.Table(s.tableName).Where("device_id in (?)", ids).Find(&list)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}
@@ -160,4 +160,13 @@ func (s *sysDeviceDataDao) GetLocalByGateWayId(c *gin.Context, id int64) ([]*dev
 		res = append(res, dto[k])
 	}
 	return res, ret.Error
+}
+
+func (s *sysDeviceDataDao) GetByIdString(c *gin.Context, id string) (*deviceModels.DeviceVO, error) {
+	var info *deviceModels.DeviceVO
+	ret := s.ms.Table(s.tableName).Where("device_id = ?", id).First(&info)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	return info, nil
 }

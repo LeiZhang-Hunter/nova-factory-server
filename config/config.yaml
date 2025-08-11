@@ -4,6 +4,8 @@ port: 8080
 version: 2.0.0
 start_time: "2022-08-08"  #此日期用于雪花算法
 cluster: true   #如果集群部署 cache必须使用redis
+task_number: 4
+task_channel_number: 10
 host: http://81.71.98.26:11801
 log:
   level: trace

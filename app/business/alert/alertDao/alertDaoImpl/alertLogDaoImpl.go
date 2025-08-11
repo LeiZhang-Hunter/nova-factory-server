@@ -22,7 +22,7 @@ func NewAlertLogDaoImpl(db *gorm.DB) alertDao.AlertLogDao {
 }
 
 func (log *AlertLogDaoImpl) Export(c *gin.Context, data []*alertModels.SysAlertLog) error {
-	ret := log.db.Table(log.table).Create(data)
+	ret := log.db.Table(log.table).Save(data)
 	return ret.Error
 }
 
@@ -75,4 +75,9 @@ func (log *AlertLogDaoImpl) List(c *gin.Context, req *alertModels.SysAlertLogLis
 		Rows:  dto,
 		Total: total,
 	}, nil
+}
+
+func (log *AlertLogDaoImpl) UpdateReason(c *gin.Context, id int64, reason string) error {
+	ret := log.db.Table(log.table).Where("id = ?", id).Update("reason", reason)
+	return ret.Error
 }

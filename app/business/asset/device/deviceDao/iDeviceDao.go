@@ -14,4 +14,5 @@ type IDeviceDao interface {
 	DeleteByDeviceIds(c *gin.Context, ids []int64) error
 	GetLocalByGateWayId(c *gin.Context, id int64) ([]*deviceModels.DeviceVO, error)
 	GetByIds(c *gin.Context, ids []int64) ([]*deviceModels.DeviceVO, error)
+	GetByIdString(c *gin.Context, id string) (*deviceModels.DeviceVO, error)
 }

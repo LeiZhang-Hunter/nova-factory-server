@@ -1,8 +1,6 @@
 package alertModels
 
 import (
-	"encoding/json"
-	"go.uber.org/zap"
 	"nova-factory-server/app/baize"
 )
 
@@ -11,7 +9,7 @@ type SysAlertAiReason struct {
 	Name          string   `gorm:"column:name;not null;comment:告警策略名称" json:"name"`                     // 告警策略名称
 	Prompt        string   `gorm:"column:prompt;comment:提示词设置" json:"prompt"`                           // 提示词设置
 	Message       string   `gorm:"column:message;comment:提问消息模板" json:"message"`                        // 提问消息模板
-	DatasetIds    string   `gorm:"column:dataset_ids;comment:知识库id列表" json:"-"`                         // 知识库id列表
+	AgentId       string   `gorm:"column:agent_id;comment:知识库id列表" json:"agent_id"`                     // 大模型专家id
 	DatasetIdList []string `gorm:"-" json:"dataset_ids"`                                                // 知识库id列表
 	baize.BaseEntity
 	DeptID int64 `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`       // 部门ID
@@ -19,30 +17,21 @@ type SysAlertAiReason struct {
 }
 
 func FromSetAlertReasonToData(reason *SetAlertAiReason) *SysAlertAiReason {
-	var err error
-	var datasetIds []byte
-	if len(reason.DatasetIds) != 0 {
-		datasetIds, err = json.Marshal(reason.DatasetIds)
-		if err != nil {
-			zap.L().Error("json marshal", zap.Error(err))
-		}
-	}
-
 	return &SysAlertAiReason{
-		ID:         reason.ID,
-		Name:       reason.Name,
-		Prompt:     reason.Prompt,
-		Message:    reason.Message,
-		DatasetIds: string(datasetIds),
+		ID:      reason.ID,
+		Name:    reason.Name,
+		Prompt:  reason.Prompt,
+		Message: reason.Message,
+		AgentId: reason.AgentId,
 	}
 }
 
 type SetAlertAiReason struct {
-	ID         int64    `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键" json:"id,string"` // 主键
-	Name       string   `gorm:"column:name;not null;comment:告警策略名称" json:"name"`                     // 告警策略名称
-	Prompt     string   `gorm:"column:prompt;comment:提示词设置" json:"prompt"`                           // 提示词设置
-	Message    string   `gorm:"column:message;comment:提问消息模板" json:"message"`                        // 提问消息模板
-	DatasetIds []string `gorm:"column:dataset_ids;comment:知识库id列表" json:"dataset_ids"`               // 知识库id列表
+	ID      int64  `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键" json:"id,string"` // 主键
+	Name    string `gorm:"column:name;not null;comment:告警策略名称" json:"name"`                     // 告警策略名称
+	Prompt  string `gorm:"column:prompt;comment:提示词设置" json:"prompt"`                           // 提示词设置
+	Message string `gorm:"column:message;comment:提问消息模板" json:"message"`                        // 提问消息模板
+	AgentId string `gorm:"column:agent_id;comment:知识库id列表" json:"agent_id"`                     // 大模型专家id
 }
 
 type SysAlertAiReasonReq struct {

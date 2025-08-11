@@ -102,3 +102,25 @@ func (a *AlertRuleServiceImpl) Change(c *gin.Context, data *alertModels.ChangeSy
 func (a *AlertRuleServiceImpl) FindOpen(c *gin.Context, gatewayId int64) (*alertModels.SysAlert, error) {
 	return a.rule.FindOpen(c, gatewayId)
 }
+
+// GetReasonByGatewayId 通过网关id读取推理策略
+func (a *AlertRuleServiceImpl) GetReasonByGatewayId(c *gin.Context, gatewayId int64) (*alertModels.SysAlertAiReason, error) {
+	info, err := a.rule.FindOpen(c, gatewayId)
+	if err != nil {
+		return nil, err
+	}
+
+	if info == nil {
+		return nil, nil
+	}
+
+	reasonInfo, err := a.reasonDao.GetById(c, info.ReasonId)
+	if err != nil {
+		return nil, err
+	}
+
+	if reasonInfo == nil {
+		return nil, nil
+	}
+	return reasonInfo, nil
+}

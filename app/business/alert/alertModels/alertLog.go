@@ -65,6 +65,7 @@ type SysAlertLog struct {
 	DeviceTemplateID int64  `gorm:"column:device_template_id;not null;comment:设备模板id" json:"device_template_id"` // 设备模板id
 	DeviceDataID     int64  `gorm:"column:device_data_id;not null;comment:设备数据id" json:"device_data_id"`         // 设备数据id
 	Context          string `gorm:"column:context;comment:内容" json:"context"`                                    // 内容
+	Reason           string `gorm:"column:reason;comment:告警ai推理" json:"reason"`                                  // 内容
 	Message          string `gorm:"column:message;comment:消息" json:"message"`                                    // 消息
 	Data             string `gorm:"column:data;comment:消息快照" json:"data"`                                        // 消息快照
 	DeptID           int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                  // 部门ID
@@ -72,8 +73,9 @@ type SysAlertLog struct {
 	baize.BaseEntity
 }
 
-func FromDataToSysAlertLog(data *AlertLogData, deptId uint64, c *gin.Context) []*SysAlertLog {
+func FromDataToSysAlertLog(data *AlertLogData, deptId uint64, c *gin.Context) ([]*SysAlertLog, []*AlertLogInfo) {
 	ret := make([]*SysAlertLog, 0)
+	infos := make([]*AlertLogInfo, 0)
 	for _, alert := range data.Alerts {
 		info := ToAlertLogInfo(data, &alert)
 		alertJson, err := json.Marshal(info)
@@ -84,13 +86,19 @@ func FromDataToSysAlertLog(data *AlertLogData, deptId uint64, c *gin.Context) []
 
 		var alertLog SysAlertLog
 		alertLog.ID = snowflake.GenID()
+		info.Id = uint64(alertLog.ID)
 		alertLog.Data = string(alertJson)
 		alertLog.GatewayID = data.GatewayId
 		alertLog.AlertID = int64(data.Id)
-		alertLog.DeviceID, err = strconv.ParseInt(alert.Labels.DeviceId, 10, 64)
-		if err != nil {
-			zap.L().Error("parse int error", zap.Error(err))
+		if alert.Labels.DeviceId != "" {
+			alertLog.DeviceID, err = strconv.ParseInt(alert.Labels.DeviceId, 10, 64)
+			if err != nil {
+				zap.L().Error("parse int error", zap.Error(err))
+			}
+		} else {
+			alertLog.DeviceID = 0
 		}
+
 		alertLog.DeviceTemplateID, err = strconv.ParseInt(alert.Labels.TemplateId, 10, 64)
 		if err != nil {
 			zap.L().Error("parse int error", zap.Error(err))
@@ -105,9 +113,10 @@ func FromDataToSysAlertLog(data *AlertLogData, deptId uint64, c *gin.Context) []
 		alertLog.CreateTime = &alert.StartsAt
 		alertLog.UpdateTime = &alert.StartsAt
 		ret = append(ret, &alertLog)
+		infos = append(infos, info)
 	}
 
-	return ret
+	return ret, infos
 }
 
 type SysAlertLogListReq struct {

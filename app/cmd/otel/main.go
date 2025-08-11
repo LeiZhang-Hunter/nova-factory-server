@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/spf13/viper"
+	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
 	"net"
 	"time"
@@ -14,6 +15,11 @@ func main() {
 	}
 	// 设置为中国时区
 	time.Local = location
+
+	// Automatically set GOMAXPROCS to match Linux container CPU quota
+	if _, err := maxprocs.Set(); err != nil {
+		zap.L().Fatal("set maxprocs error: %v", zap.Error(err))
+	}
 
 	// 创建grpc服务
 	s, cleanup, err := wireApp()
@@ -31,6 +37,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	zap.L().Info("start grpc server", zap.String("host", host))
 	err = s.Serve(listen)
 	if err != nil {

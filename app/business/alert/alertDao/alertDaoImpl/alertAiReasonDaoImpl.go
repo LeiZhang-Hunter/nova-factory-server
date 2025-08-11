@@ -1,10 +1,8 @@
 package alertDaoImpl
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/alert/alertDao"
 	"nova-factory-server/app/business/alert/alertModels"
@@ -82,14 +80,6 @@ func (a *AlertAiReasonDaoImpl) List(c *gin.Context, req *alertModels.SysAlertAiR
 			Rows:  make([]*alertModels.SysAlertAiReason, 0),
 			Total: 0,
 		}, ret.Error
-	}
-
-	for k, v := range dto {
-		dto[k].DatasetIdList = make([]string, 0)
-		err := json.Unmarshal([]byte(v.DatasetIds), &dto[k].DatasetIdList)
-		if err != nil {
-			zap.L().Error("json unmarshal error", zap.Error(err))
-		}
 	}
 
 	return &alertModels.SysAlertReasonList{

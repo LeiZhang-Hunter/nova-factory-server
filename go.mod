@@ -40,6 +40,7 @@ require (
 	github.com/swaggo/swag v1.16.3
 	github.com/tmaxmax/go-sse v0.11.0
 	github.com/xuri/excelize/v2 v2.9.0
+	go.uber.org/automaxprocs v1.6.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.39.0
 	golang.org/x/text v0.26.0

@@ -132,6 +132,7 @@ func NewGinEngine(
 		alert.AlertLog.PrivateRoutes(group)
 		alert.AlertAction.PrivateRoutes(group)
 		alert.AlertAiReason.PrivateRoutes(group)
+		alert.Runner.Run()
 	}
 
 	r.NoRoute(func(c *gin.Context) {

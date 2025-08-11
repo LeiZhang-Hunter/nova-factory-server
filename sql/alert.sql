@@ -51,6 +51,7 @@ CREATE TABLE `sys_alert_log` (
     `device_template_id` bigint(20) NOT NULL COMMENT '设备模板id',
     `device_data_id` bigint(20) NOT NULL COMMENT '设备数据id',
     `context` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '内容',
+    `reason` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '推理数据',
     `message` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '消息',
     `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '消息快照',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
@@ -66,6 +67,7 @@ CREATE TABLE `sys_alert_log` (
     INDEX `device_template_id`(`device_template_id`) USING BTREE,
     INDEX `device_data_id`(`device_data_id`) USING BTREE
 ) ENGINE=Innodb   COMMENT='告警日志';
+
 
 CREATE TABLE sys_alert_action (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -87,7 +89,7 @@ CREATE TABLE sys_alert_ai_reason (
     `name` varchar(255) not null comment '告警策略名称',
     `prompt` text COMMENT '提示词设置',
     `message` text COMMENT '提问消息模板',
-    `dataset_ids` text COMMENT '知识库id列表',
+    `agent_id`  varchar(64) DEFAULT '' COMMENT '大模型agentid',
     `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
     `create_time` datetime DEFAULT NULL COMMENT '创建时间',
     `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
