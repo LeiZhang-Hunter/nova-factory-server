@@ -39,7 +39,7 @@ func (i *IScheduleMapDaoImpl) GetByScheduleIds(c *gin.Context, ids []int64) ([]*
 
 func (i *IScheduleMapDaoImpl) GetSpecialSchedule(c *gin.Context, beginTime int64) ([]*craftRouteModels.SysProductScheduleMap, error) {
 	var list []*craftRouteModels.SysProductScheduleMap
-	db := i.db.Table(i.table).Where("begin_time >= ?", beginTime).Where("schedule_type = ?", craftRouteModels.SPECIAL).
+	db := i.db.Table(i.table).Debug().Where("begin_time >= ?", beginTime).Where("schedule_type = ?", craftRouteModels.SPECIAL).
 		Where("state = ?", commonStatus.NORMAL)
 	db = baizeContext.GetGormDataScope(c, db)
 	ret := db.Find(&list)
@@ -96,7 +96,7 @@ func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, tx *gorm.DB, data *craft
 			return err
 		}
 
-		beginMinute, err := strconv.ParseInt(beginArr[0], 10, 64)
+		beginMinute, err := strconv.ParseInt(beginArr[1], 10, 64)
 		if err != nil {
 			zap.L().Error("dealDaily error", zap.Error(err))
 			return err
@@ -110,7 +110,7 @@ func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, tx *gorm.DB, data *craft
 			return err
 		}
 
-		endMinute, err := strconv.ParseInt(beginArr[0], 10, 64)
+		endMinute, err := strconv.ParseInt(beginArr[1], 10, 64)
 		if err != nil {
 			zap.L().Error("dealDaily error", zap.Error(err))
 			return err
@@ -203,7 +203,7 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, tx *gorm.DB, data *cra
 			return err
 		}
 
-		beginMinute, err := strconv.ParseInt(beginArr[0], 10, 64)
+		beginMinute, err := strconv.ParseInt(beginArr[1], 10, 64)
 		if err != nil {
 			zap.L().Error("dealDaily error", zap.Error(err))
 			return err
@@ -211,13 +211,13 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, tx *gorm.DB, data *cra
 
 		beginUnix := beginHour*3600 + beginMinute*60
 
-		endHour, err := strconv.ParseInt(beginArr[0], 10, 64)
+		endHour, err := strconv.ParseInt(endArr[0], 10, 64)
 		if err != nil {
 			zap.L().Error("dealDaily error", zap.Error(err))
 			return err
 		}
 
-		endMinute, err := strconv.ParseInt(beginArr[0], 10, 64)
+		endMinute, err := strconv.ParseInt(endArr[1], 10, 64)
 		if err != nil {
 			zap.L().Error("dealDaily error", zap.Error(err))
 			return err
