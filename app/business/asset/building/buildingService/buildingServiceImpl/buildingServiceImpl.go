@@ -1,4 +1,4 @@
-package buildingService
+package buildingServiceImpl
 
 import (
 	"github.com/gin-gonic/gin"

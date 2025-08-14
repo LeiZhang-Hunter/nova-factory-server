@@ -6,6 +6,7 @@ import (
 	gs "github.com/swaggo/gin-swagger"
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/alert/alertController"
+	"nova-factory-server/app/business/asset/building/buildingController"
 	"nova-factory-server/app/business/asset/device/deviceController"
 	"nova-factory-server/app/business/asset/material/materialController"
 	"nova-factory-server/app/business/craft/craftRouteController"
@@ -48,6 +49,7 @@ func NewGinEngine(
 	controller *daemonizeController.DaemonizeServer,
 	deviceMonitor *deviceMonitorController.DeviceMonitorController,
 	alert *alertController.Controller,
+	building buildingController.Controller,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -132,6 +134,9 @@ func NewGinEngine(
 		alert.AlertLog.PrivateRoutes(group)
 		alert.AlertAction.PrivateRoutes(group)
 		alert.AlertAiReason.PrivateRoutes(group)
+
+		building.Building.PrivateRoutes(group)
+
 		alert.Runner.Run()
 	}
 

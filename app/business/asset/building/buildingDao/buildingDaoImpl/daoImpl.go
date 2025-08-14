@@ -1,4 +1,4 @@
-package impl
+package buildingDaoImpl
 
 import "github.com/google/wire"
 

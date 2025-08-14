@@ -1,28 +1,15 @@
 {
-  "name" : "1212",
-  "rule" : null,
-  "actions" : [ {
-    "extension" : "",
-    "deviceId" : "375986234780028928",
-    "dataId" : "379545738792669184",
-    "templateId" : "375181194020524032",
-    "value" : "4",
-    "dataFormat" : "",
-    "controlTypeValue" : "input",
-    "placeholder" : "请输入值",
-    "formatHint" : ""
-  } ],
-  "combined_rule" : "",
-  "dataIds" : [ "387160275914067968" ],
-  "cases" : [ {
-    "nextStep" : "",
-    "connector" : "and",
-    "conditions" : [ {
-      "dataId" : "387160275914067968",
-      "operator" : ">",
-      "value" : "121",
-      "rule" : "387160275914067968 > 121",
-      "connector" : "and"
-    } ]
-  } ]
+  "buildingId": null,
+  "name": "11",
+  "code": "11",
+  "type": "workshop",
+  "status": "normal",
+  "area": 11,
+  "floors": 11,
+  "buildYear": "2025",
+  "lifeYears": 11,
+  "manager": "11",
+  "phone": "16621086246",
+  "address": "11",
+  "remark": "11"
 }

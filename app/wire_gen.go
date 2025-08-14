@@ -14,6 +14,9 @@ import (
 	"nova-factory-server/app/business/alert/alertController"
 	"nova-factory-server/app/business/alert/alertDao/alertDaoImpl"
 	"nova-factory-server/app/business/alert/alertService/alertServiceImpl"
+	"nova-factory-server/app/business/asset/building/buildingController"
+	"nova-factory-server/app/business/asset/building/buildingDao/buildingDaoImpl"
+	"nova-factory-server/app/business/asset/building/buildingService/buildingServiceImpl"
 	"nova-factory-server/app/business/asset/device/deviceController"
 	"nova-factory-server/app/business/asset/device/deviceDao/deviceDaoImpl"
 	"nova-factory-server/app/business/asset/device/deviceService/deviceServiceImpl"
@@ -283,7 +286,13 @@ func wireApp() (*gin.Engine, func(), error) {
 		AlertAiReason: alertAiReason,
 		Runner:        runner,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller)
+	buildingDao := buildingDaoImpl.NewBuildingDaoImpl(db)
+	buildingService := buildingServiceImpl.NewBuildingServiceImpl(buildingDao)
+	building := buildingController.NewBuilding(buildingService)
+	buildingControllerController := buildingController.Controller{
+		Building: building,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller, buildingControllerController)
 	return engine, func() {
 		cleanup()
 	}, nil
