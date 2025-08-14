@@ -39,7 +39,7 @@ func (i *IScheduleMapDaoImpl) GetByScheduleIds(c *gin.Context, ids []int64) ([]*
 
 func (i *IScheduleMapDaoImpl) GetSpecialSchedule(c *gin.Context, beginTime int64) ([]*craftRouteModels.SysProductScheduleMap, error) {
 	var list []*craftRouteModels.SysProductScheduleMap
-	db := i.db.Table(i.table).Debug().Where("begin_time >= ?", beginTime).Where("schedule_type = ?", craftRouteModels.SPECIAL).
+	db := i.db.Table(i.table).Where("begin_time >= ?", beginTime).Where("schedule_type = ?", craftRouteModels.SPECIAL).
 		Where("state = ?", commonStatus.NORMAL)
 	db = baizeContext.GetGormDataScope(c, db)
 	ret := db.Find(&list)

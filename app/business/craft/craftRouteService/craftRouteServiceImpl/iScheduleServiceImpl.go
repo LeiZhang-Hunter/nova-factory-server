@@ -84,7 +84,7 @@ func (i *IScheduleServiceImpl) GetMonthSchedule(c *gin.Context, req *craftRouteM
 	}
 
 	// 循环日期信息
-	var dailyIds map[int]int
+	var dailyIds map[int]int = make(map[int]int)
 	for _, schedule := range schedules {
 		dailyIds[schedule.Date] = schedule.Date
 	}
@@ -112,6 +112,7 @@ func (i *IScheduleServiceImpl) GetMonthSchedule(c *gin.Context, req *craftRouteM
 		_, ok := specialMap[v]
 		if ok {
 			data[k] = &craftRouteModels.ScheduleStatusData{
+				Time: systime.Unix(v, 0),
 				Type: craftRouteModels.SPECIAL,
 			}
 			continue
@@ -124,6 +125,7 @@ func (i *IScheduleServiceImpl) GetMonthSchedule(c *gin.Context, req *craftRouteM
 			continue
 		}
 		data[k] = &craftRouteModels.ScheduleStatusData{
+			Time: systime.Unix(v, 0),
 			Type: craftRouteModels.DAILY,
 		}
 	}
