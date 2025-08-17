@@ -20,9 +20,9 @@ func NewBuilding(service buildingService.BuildingService) *Building {
 
 func (b *Building) PrivateRoutes(router *gin.RouterGroup) {
 	building := router.Group("/asset/building")
-	building.GET("/list", middlewares.HasPermission("asset:building:list"), b.List)                    // 设备列表
-	building.POST("/set", middlewares.HasPermission("asset:building:set"), b.Set)                      // 设置设备信息
-	building.DELETE("/remove/:groupIds", middlewares.HasPermission("asset:building:remove"), b.Remove) //删除设备分组列表
+	building.GET("/list", middlewares.HasPermission("asset:building:list"), b.List)               // 设备列表
+	building.POST("/set", middlewares.HasPermission("asset:building:set"), b.Set)                 // 设置设备信息
+	building.DELETE("/remove/:ids", middlewares.HasPermission("asset:building:remove"), b.Remove) //删除设备分组列表
 }
 
 // Set 保存建筑物

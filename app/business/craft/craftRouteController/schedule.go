@@ -26,7 +26,7 @@ func (schedule *Schedule) PrivateRoutes(router *gin.RouterGroup) {
 	routers := router.Group("/craft/route/schedule")
 	routers.GET("/list", middlewares.HasPermission("craft:route:schedule:list"), schedule.List) // 调度列表
 	routers.POST("/set", middlewares.HasPermission("craft:route:schedule:set"), schedule.Set)   // 设置调度
-	routers.DELETE("/remove/:ids", middlewares.HasPermission("craft:schedule:product:remove"),
+	routers.DELETE("/remove/:ids", middlewares.HasPermission("craft:route:schedule:remove"),
 		schedule.Remove) //移除调度
 	routers.GET("/month/list", middlewares.HasPermission("craft:route:product:month:list"), schedule.MonthList) // 调度列表
 	routers.GET("/detail", middlewares.HasPermission("craft:route:schedule:detail"), schedule.Detail)           // 调度列表

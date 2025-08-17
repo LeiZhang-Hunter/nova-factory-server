@@ -29,6 +29,9 @@ import (
 	"nova-factory-server/app/business/daemonize/daemonizeController"
 	"nova-factory-server/app/business/daemonize/daemonizeDao/daemonizeDaoImpl"
 	"nova-factory-server/app/business/daemonize/daemonizeService/daemonizeServiceImpl"
+	"nova-factory-server/app/business/dashboard/dashboardController"
+	"nova-factory-server/app/business/dashboard/dashboardDao/dashboardDaoImpl"
+	"nova-factory-server/app/business/dashboard/dashboardService/dashboardServiceImpl"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService/deviceMonitorServiceImpl"
@@ -292,7 +295,13 @@ func wireApp() (*gin.Engine, func(), error) {
 	buildingControllerController := buildingController.Controller{
 		Building: building,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller, buildingControllerController)
+	dashboardDao := dashboardDaoImpl.NewDashboardDaoImpl(db)
+	dashboardService := dashboardServiceImpl.NewDashboardServiceImpl(dashboardDao)
+	dashboard := dashboardController.NewDashboard(dashboardService)
+	dashboardControllerController := dashboardController.Controller{
+		Dashboard: dashboard,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller, buildingControllerController, dashboardControllerController)
 	return engine, func() {
 		cleanup()
 	}, nil

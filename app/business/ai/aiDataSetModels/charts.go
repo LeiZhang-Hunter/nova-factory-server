@@ -338,3 +338,16 @@ type AskRequest struct {
 	Question   string   `json:"question"`
 	DatasetIds []string `json:"dataset_ids"`
 }
+
+type ChatData struct {
+	Code int `json:"code"`
+	Data struct {
+		Answer    string `json:"answer"`
+		Reference struct {
+			Chunks []interface{} `json:"chunks"`
+		} `json:"reference"`
+		AudioBinary interface{} `json:"audio_binary"`
+		Id          string      `json:"id"`
+		SessionId   string      `json:"session_id"`
+	} `json:"data"`
+}

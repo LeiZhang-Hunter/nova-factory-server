@@ -4395,6 +4395,124 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard/manager/list": {
+            "get": {
+                "description": "仪表盘列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "仪表盘/仪表盘管理"
+                ],
+                "summary": "仪表盘列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/manager/remove": {
+            "delete": {
+                "description": "删除仪表盘",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "仪表盘/仪表盘管理"
+                ],
+                "summary": "删除仪表盘",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除仪表盘参数",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/manager/set": {
+            "post": {
+                "description": "保存仪表盘",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "仪表盘/仪表盘管理"
+                ],
+                "summary": "保存仪表盘",
+                "parameters": [
+                    {
+                        "description": "设置仪表盘参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dashboardModels.SetSysDashboard"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/device/monitor/data/dev/list": {
             "get": {
                 "description": "设备测点列表",
@@ -12130,6 +12248,30 @@ const docTemplate = `{
                 },
                 "version": {
                     "description": "agent版本",
+                    "type": "string"
+                }
+            }
+        },
+        "dashboardModels.SetSysDashboard": {
+            "type": "object",
+            "required": [
+                "description",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "description": {
+                    "description": "描述",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "调度id",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }

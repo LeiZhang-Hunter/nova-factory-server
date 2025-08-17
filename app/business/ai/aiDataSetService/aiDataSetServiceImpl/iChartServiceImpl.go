@@ -434,10 +434,9 @@ func (i *IChartServiceImpl) ChatsCompletions(c *gin.Context, req *aiDataSetModel
 	var client *http.Client = i.client
 	if req.Stream {
 		transport := &http.Transport{
-			MaxIdleConns:        100,              // 整个客户端的最大空闲连接数
-			MaxIdleConnsPerHost: 60,               // 每个主机的最大空闲连接数
-			MaxConnsPerHost:     50,               // 每个主机的最大连接数
-			IdleConnTimeout:     60 * time.Second, // 空闲连接的超时时间
+			MaxIdleConns:        100, // 整个客户端的最大空闲连接数
+			MaxIdleConnsPerHost: 60,  // 每个主机的最大空闲连接数
+			MaxConnsPerHost:     50,  // 每个主机的最大连接数
 
 			DisableKeepAlives: false, // 不禁用连接保持活动
 			ForceAttemptHTTP2: true,  // 尝试使用HTTP/2
@@ -445,7 +444,7 @@ func (i *IChartServiceImpl) ChatsCompletions(c *gin.Context, req *aiDataSetModel
 		// 创建HTTP客户端并设置自定义的Transport
 		client = &http.Client{
 			Transport: transport,
-			Timeout:   300 * time.Second, // 请求的总超时时间
+			Timeout:   600 * time.Second, // 请求的总超时时间
 		}
 	}
 	resp, err := client.Do(request)
@@ -490,6 +489,7 @@ func (i *IChartServiceImpl) ChatsCompletions(c *gin.Context, req *aiDataSetModel
 				// handle read error
 				break // can end the loop as Read stops on first error anyway
 			}
+
 			fmt.Fprintf(w, "data: "+ev.Data+"\n\n")
 			// Do something with the events, parse the JSON or whatever.
 			flusher.Flush()
@@ -567,10 +567,9 @@ func (i *IChartServiceImpl) AgentsCompletions(c *gin.Context, req *aiDataSetMode
 	var client *http.Client = i.client
 	if req.Stream {
 		transport := &http.Transport{
-			MaxIdleConns:        100,              // 整个客户端的最大空闲连接数
-			MaxIdleConnsPerHost: 60,               // 每个主机的最大空闲连接数
-			MaxConnsPerHost:     50,               // 每个主机的最大连接数
-			IdleConnTimeout:     60 * time.Second, // 空闲连接的超时时间
+			MaxIdleConns:        100, // 整个客户端的最大空闲连接数
+			MaxIdleConnsPerHost: 60,  // 每个主机的最大空闲连接数
+			MaxConnsPerHost:     50,  // 每个主机的最大连接数
 
 			DisableKeepAlives: false, // 不禁用连接保持活动
 			ForceAttemptHTTP2: true,  // 尝试使用HTTP/2
@@ -578,7 +577,7 @@ func (i *IChartServiceImpl) AgentsCompletions(c *gin.Context, req *aiDataSetMode
 		// 创建HTTP客户端并设置自定义的Transport
 		client = &http.Client{
 			Transport: transport,
-			Timeout:   300 * time.Second, // 请求的总超时时间
+			Timeout:   600 * time.Second, // 请求的总超时时间
 		}
 	}
 	resp, err := client.Do(request)

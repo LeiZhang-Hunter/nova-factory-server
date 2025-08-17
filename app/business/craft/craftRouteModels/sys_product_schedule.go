@@ -1,6 +1,7 @@
 package craftRouteModels
 
 import (
+	"encoding/json"
 	"nova-factory-server/app/baize"
 	"time"
 )
@@ -11,10 +12,11 @@ const (
 )
 
 type SysProductSchedule struct {
-	ID           int64  `gorm:"column:id;primaryKey;comment:调度id" json:"id"`                                                  // 调度id
-	GatewayID    int64  `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id"`                                    // 网关id
+	ID           int64  `gorm:"column:id;primaryKey;comment:调度id" json:"id,string"`                                           // 调度id
+	GatewayID    int64  `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id,string"`                             // 网关id
 	ScheduleName string `gorm:"column:schedule_name;not null;comment:计划名称" json:"schedule_name"`                              // 计划名称
 	Time         string `gorm:"column:time;not null;comment:时间序列化格式,普通日程,1,2,3,4,5;特殊日程:2025-04-04 ~ 2025-04-04" json:"time"` // 时间序列化格式,普通日程,1,2,3,4,5;特殊日程:2025-04-04 ~ 2025-04-04
+	TimeManager  string `gorm:"column:time_manager;not null; json:"time_manager"`                                             // 时间序列化格式,普通日程,1,2,3,4,5;特殊日程:2025-04-04 ~ 2025-04-04
 	ScheduleType int    `gorm:"column:schedule_type;not null;comment:0为普通日程 1为特殊日程" json:"schedule_type"`                     // 0为普通日程 1为特殊日程
 	Status       bool   `gorm:"column:status;not null;comment:操作状态（0正常 1启动）" json:"status"`                                   // 操作状态（0正常 1启动）
 	DeptID       int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                                   // 部门ID
@@ -23,11 +25,20 @@ type SysProductSchedule struct {
 }
 
 func ToSysProductSchedule(data *SetSysProductSchedule) *SysProductSchedule {
+	var timeMangaer []byte = make([]byte, 0)
+	var err error
+	if len(data.TimeManager) > 0 {
+		timeMangaer, err = json.Marshal(data.TimeManager)
+		if err != nil {
+			return nil
+		}
+	}
 	return &SysProductSchedule{
 		ID:           data.Id,
 		GatewayID:    data.GatewayID,
 		ScheduleName: data.ScheduleName,
 		Time:         data.Time,
+		TimeManager:  string(timeMangaer),
 		ScheduleType: data.Type,
 	}
 }

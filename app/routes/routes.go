@@ -11,6 +11,7 @@ import (
 	"nova-factory-server/app/business/asset/material/materialController"
 	"nova-factory-server/app/business/craft/craftRouteController"
 	"nova-factory-server/app/business/daemonize/daemonizeController"
+	"nova-factory-server/app/business/dashboard/dashboardController"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/monitor/monitorController"
@@ -50,6 +51,7 @@ func NewGinEngine(
 	deviceMonitor *deviceMonitorController.DeviceMonitorController,
 	alert *alertController.Controller,
 	building buildingController.Controller,
+	dashboard dashboardController.Controller,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -136,6 +138,8 @@ func NewGinEngine(
 		alert.AlertAiReason.PrivateRoutes(group)
 
 		building.Building.PrivateRoutes(group)
+
+		dashboard.Dashboard.PrivateRoutes(group)
 
 		alert.Runner.Run()
 	}

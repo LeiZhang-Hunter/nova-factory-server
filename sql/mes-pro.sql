@@ -283,6 +283,7 @@ CREATE TABLE `sys_product_schedule` (
    `gateway_id` bigint(20) NOT NULL  COMMENT '网关id',
    `schedule_name` varchar(255) NOT NULL COMMENT '计划名称',
    `time` varchar(64) NOT NULL COMMENT '时间序列化格式,普通日程,1,2,3,4,5;特殊日程:2025-04-04 ~ 2025-04-04',
+   `time_manager` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '时间任务列表',
    `schedule_type` tinyint(1) NOT NULL COMMENT '0为普通日程 1为特殊日程',
    `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '操作状态（0正常 1启动）',
    `dept_id` bigint DEFAULT NULL COMMENT '部门ID',
@@ -294,7 +295,6 @@ CREATE TABLE `sys_product_schedule` (
    PRIMARY KEY (`id`),
    KEY `schedule_type` (`schedule_type`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
-
 CREATE TABLE `sys_product_schedule_map` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `schedule_id` bigint(20) NOT NULL COMMENT '计划标识',
