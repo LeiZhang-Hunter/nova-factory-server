@@ -336,6 +336,9 @@ func (i *IDataSetServiceImpl) GetInfoById(c *gin.Context, id int64) (*aiDataSetM
 	if err != nil {
 		return nil, err
 	}
+	if info == nil {
+		return nil, errors.New("知识库不存在")
+	}
 	if len(info.DatasetParserConfig) != 0 {
 		var parseConfig aiDataSetModels.ParserConfig
 		err := json.Unmarshal([]byte(info.DatasetParserConfig), &parseConfig)

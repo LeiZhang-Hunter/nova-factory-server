@@ -6,7 +6,7 @@ import (
 
 // SysDashboard mapped from table <sys_dashboard>
 type SysDashboard struct {
-	ID          int64  `gorm:"column:id;primaryKey;comment:调度id" json:"id"` // 调度id
+	ID          int64  `gorm:"column:id;primaryKey;comment:调度id" json:"id,string"` // 调度id
 	Name        string `gorm:"column:name;not null" json:"name"`
 	Type        string `gorm:"column:type;not null" json:"type"`
 	Description string `gorm:"column:description;not null;comment:描述" json:"description"` // 描述
@@ -16,15 +16,15 @@ type SysDashboard struct {
 }
 
 type SetSysDashboard struct {
-	ID          int64  `gorm:"column:id;primaryKey;comment:调度id"  json:"id"` // 调度id
+	ID          int64  `gorm:"column:id;primaryKey;comment:调度id"  json:"id,string"` // 调度id
 	Name        string `gorm:"column:name;not null"  binding:"required" json:"name"`
 	Type        string `gorm:"column:type;not null"  binding:"required" json:"type"`
 	Description string `gorm:"column:description;not null;comment:描述"  binding:"required" json:"description"` // 描述
 }
 
 type SysDashboardReq struct {
-	Name string `gorm:"column:name;not null" json:"name"`
-	Type string `gorm:"column:type;not null" json:"type"`
+	Name string `gorm:"column:name;not null" form:"name"`
+	Type string `gorm:"column:type;not null" form:"type"`
 	baize.BaseEntityDQL
 }
 
