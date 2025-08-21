@@ -5,15 +5,19 @@ import (
 	"nova-factory-server/app/business/dashboard/dashboardDao"
 	"nova-factory-server/app/business/dashboard/dashboardModels"
 	"nova-factory-server/app/business/dashboard/dashboardService"
+	"nova-factory-server/app/business/metric/device/metricDao"
+	"nova-factory-server/app/business/metric/device/metricModels"
 )
 
 type DashboardServiceImpl struct {
-	dao dashboardDao.DashboardDao
+	dao        dashboardDao.DashboardDao
+	metricCDao metricDao.IMetricDao
 }
 
-func NewDashboardServiceImpl(dao dashboardDao.DashboardDao) dashboardService.DashboardService {
+func NewDashboardServiceImpl(dao dashboardDao.DashboardDao, metricCDao metricDao.IMetricDao) dashboardService.DashboardService {
 	return &DashboardServiceImpl{
-		dao: dao,
+		dao:        dao,
+		metricCDao: metricCDao,
 	}
 }
 
@@ -25,4 +29,8 @@ func (d *DashboardServiceImpl) Set(c *gin.Context, data *dashboardModels.SetSysD
 }
 func (d *DashboardServiceImpl) Remove(c *gin.Context, ids []string) error {
 	return d.dao.Remove(c, ids)
+}
+
+func (d *DashboardServiceImpl) Query(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error) {
+	return d.metricCDao.Query(c, req)
 }

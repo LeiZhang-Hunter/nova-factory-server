@@ -16,4 +16,5 @@ type IMetricDao interface {
 	Predict(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error)
 	List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error)
 	Count(c *gin.Context, req *deviceMonitorModel.DevDataReq) (uint64, error)
+	Query(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error)
 }

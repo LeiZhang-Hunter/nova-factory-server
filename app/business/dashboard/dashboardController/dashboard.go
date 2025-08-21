@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/dashboard/dashboardModels"
 	"nova-factory-server/app/business/dashboard/dashboardService"
+	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 )
@@ -23,6 +24,7 @@ func (d *Dashboard) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", middlewares.HasPermission("dashboard:manager:list"), d.List)
 	group.POST("/set", middlewares.HasPermission("dashboard:manager:set"), d.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("dashboard:manager:remove"), d.Remove)
+	group.POST("/metric/query", middlewares.HasPermission("dashboard:manager:metric:query"), d.Query)
 }
 
 // List 仪表盘列表
@@ -93,4 +95,28 @@ func (d *Dashboard) Remove(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// Query 查询面板
+// @Summary 查询面板
+// @Description 查询面板
+// @Tags 仪表盘/仪表盘管理
+// @Param  object body metricModels.MetricDataQueryReq true "组成工序列表参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "删除仪表盘参数"
+// @Router /dashboard/manager/metric/query [post]
+func (d *Dashboard) Query(c *gin.Context) {
+	req := new(metricModels.MetricDataQueryReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	list, err := d.service.Query(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
+	return
 }

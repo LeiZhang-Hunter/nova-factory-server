@@ -296,7 +296,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Building: building,
 	}
 	dashboardDao := dashboardDaoImpl.NewDashboardDaoImpl(db)
-	dashboardService := dashboardServiceImpl.NewDashboardServiceImpl(dashboardDao)
+	dashboardService := dashboardServiceImpl.NewDashboardServiceImpl(dashboardDao, iMetricDao)
 	dashboard := dashboardController.NewDashboard(dashboardService)
 	dashboardControllerController := dashboardController.Controller{
 		Dashboard: dashboard,

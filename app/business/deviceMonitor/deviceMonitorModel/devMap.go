@@ -58,7 +58,7 @@ type DevDataResp struct {
 }
 
 type DevListReq struct {
-	DataName string `gorm:"column:data_name;not null;comment:数据名字" json:"data_name"` // 数据名字
+	DataName string `gorm:"column:data_name;not null;comment:数据名字" form:"data_name"` // 数据名字
 	baize.BaseEntityDQL
 }
 

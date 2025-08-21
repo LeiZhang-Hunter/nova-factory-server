@@ -2028,6 +2028,27 @@ definitions:
       reason:
         type: string
     type: object
+  metricModels.MetricDataQueryReq:
+    properties:
+      end:
+        type: integer
+      expression:
+        type: string
+      interval:
+        type: integer
+      limit:
+        type: integer
+      name:
+        type: string
+      predict:
+        $ref: '#/definitions/metricModels.Predict'
+      query:
+        type: string
+      start:
+        type: integer
+      step:
+        type: integer
+    type: object
   metricModels.MetricQueryReq:
     properties:
       data_id:
@@ -2052,6 +2073,15 @@ definitions:
         type: integer
       template_id:
         example: "0"
+        type: string
+    type: object
+  metricModels.Predict:
+    properties:
+      enable:
+        type: boolean
+      model:
+        type: string
+      param:
         type: string
     type: object
   monitorModels.JobDML:
@@ -5759,6 +5789,26 @@ paths:
           schema:
             $ref: '#/definitions/response.ResponseData'
       summary: 仪表盘列表
+      tags:
+      - 仪表盘/仪表盘管理
+  /dashboard/manager/metric/query:
+    post:
+      description: 查询面板
+      parameters:
+      - description: 组成工序列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/metricModels.MetricDataQueryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除仪表盘参数
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 查询面板
       tags:
       - 仪表盘/仪表盘管理
   /dashboard/manager/remove:

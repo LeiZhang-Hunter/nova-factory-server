@@ -4445,6 +4445,37 @@
                 }
             }
         },
+        "/dashboard/manager/metric/query": {
+            "post": {
+                "description": "查询面板",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "仪表盘/仪表盘管理"
+                ],
+                "summary": "查询面板",
+                "parameters": [
+                    {
+                        "description": "组成工序列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metricModels.MetricDataQueryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除仪表盘参数",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/dashboard/manager/remove": {
             "delete": {
                 "description": "删除仪表盘",
@@ -12778,6 +12809,38 @@
                 }
             }
         },
+        "metricModels.MetricDataQueryReq": {
+            "type": "object",
+            "properties": {
+                "end": {
+                    "type": "integer"
+                },
+                "expression": {
+                    "type": "string"
+                },
+                "interval": {
+                    "type": "integer"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "predict": {
+                    "$ref": "#/definitions/metricModels.Predict"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "integer"
+                },
+                "step": {
+                    "type": "integer"
+                }
+            }
+        },
         "metricModels.MetricQueryReq": {
             "type": "object",
             "properties": {
@@ -12813,6 +12876,20 @@
                 "template_id": {
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "metricModels.Predict": {
+            "type": "object",
+            "properties": {
+                "enable": {
+                    "type": "boolean"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "param": {
+                    "type": "string"
                 }
             }
         },
