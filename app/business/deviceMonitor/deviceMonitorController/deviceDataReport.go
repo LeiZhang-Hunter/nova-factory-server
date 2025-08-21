@@ -32,6 +32,9 @@ func (d *DeviceReport) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/dev/list", middlewares.HasPermission("device:monitor:data:dev:list"), d.DevList)
 	group.POST("/list", middlewares.HasPermission("device:monitor:data:list"), d.List)
 	group.POST("/export", middlewares.HasPermission("device:monitor:data:export"), d.Export)
+
+	metric := router.Group("/metric/time/seq")
+	metric.GET("/list", middlewares.HasPermission("metric:time:seq:list"), d.SearchTimeSeqList)
 }
 
 // DevList 设备测点列表
@@ -173,4 +176,26 @@ func (d *DeviceReport) Export(c *gin.Context) {
 
 	// 写入响应
 	_ = f.Write(c.Writer)
+}
+
+// SearchTimeSeqList 时序数据测点
+// @Summary 时序数据测点
+// @Description 时序数据测点
+// @Param  object query deviceModels.DeviceListReq true "时序数据测点"
+// @Tags 设备监控/设备监控
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /metric/time/seq/list [get]
+func (d *DeviceReport) SearchTimeSeqList(c *gin.Context) {
+	req := new(deviceMonitorModel.DevListReq)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	list, err := d.deviceReportService.GetDevList(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
 }

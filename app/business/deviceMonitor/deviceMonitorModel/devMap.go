@@ -56,3 +56,13 @@ type DevDataResp struct {
 	Rows  []DevData `json:"rows"`
 	Total uint64    `json:"total"`
 }
+
+type DevListReq struct {
+	DataName string `gorm:"column:data_name;not null;comment:数据名字" json:"data_name"` // 数据名字
+	baize.BaseEntityDQL
+}
+
+type DevListResp struct {
+	Rows  []*SysIotDbDevMap `json:"rows"`
+	Total uint64            `json:"total"`
+}

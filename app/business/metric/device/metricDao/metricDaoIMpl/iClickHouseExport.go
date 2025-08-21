@@ -112,3 +112,7 @@ func (i *iClickHouseExport) List(c *gin.Context, req *deviceMonitorModel.DevData
 func (i *iClickHouseExport) Count(c *gin.Context, req *deviceMonitorModel.DevDataReq) (uint64, error) {
 	return 0, nil
 }
+
+func (i *iClickHouseExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error) {
+	return nil, nil
+}

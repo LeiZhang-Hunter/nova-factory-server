@@ -24,7 +24,7 @@ func NewIDeviceDataReportDaoImpl(db *gorm.DB) deviceMonitorDao.IDeviceDataReport
 	}
 }
 
-func (i IDeviceDataReportDaoImpl) DevList(c *gin.Context) ([]deviceMonitorModel.SysIotDbDevMapData, error) {
+func (i *IDeviceDataReportDaoImpl) DevList(c *gin.Context) ([]deviceMonitorModel.SysIotDbDevMapData, error) {
 	var list []deviceMonitorModel.SysIotDbDevMapData
 	ret := i.db.Table(i.tableName).Where("state = ?", commonStatus.NORMAL).Limit(500).Find(&list)
 	if ret.Error != nil {
@@ -33,7 +33,7 @@ func (i IDeviceDataReportDaoImpl) DevList(c *gin.Context) ([]deviceMonitorModel.
 	return list, nil
 }
 
-func (i IDeviceDataReportDaoImpl) GetDevList(c *gin.Context, dev []string) ([]deviceMonitorModel.SysIotDbDevMapData, error) {
+func (i *IDeviceDataReportDaoImpl) GetDevList(c *gin.Context, dev []string) ([]deviceMonitorModel.SysIotDbDevMapData, error) {
 	var list []deviceMonitorModel.SysIotDbDevMapData
 	ret := i.db.Table(i.tableName).Where("device in (?)", dev).Where("state = ?", commonStatus.NORMAL).Limit(500).Find(&list)
 	if ret.Error != nil {
@@ -42,7 +42,7 @@ func (i IDeviceDataReportDaoImpl) GetDevList(c *gin.Context, dev []string) ([]de
 	return list, nil
 }
 
-func (i IDeviceDataReportDaoImpl) Save(c *gin.Context, data *deviceMonitorModel.SysIotDbDevMap) error {
+func (i *IDeviceDataReportDaoImpl) Save(c *gin.Context, data *deviceMonitorModel.SysIotDbDevMap) error {
 	if data == nil {
 		return nil
 	}
@@ -71,7 +71,52 @@ func (i IDeviceDataReportDaoImpl) Save(c *gin.Context, data *deviceMonitorModel.
 	return nil
 }
 
-func (i IDeviceDataReportDaoImpl) Remove(c *gin.Context, dev string) error {
+func (i *IDeviceDataReportDaoImpl) Remove(c *gin.Context, dev string) error {
 	ret := i.db.Table(i.tableName).Where("device = ?", dev).Update("state", commonStatus.DELETE)
 	return ret.Error
+}
+
+func (i *IDeviceDataReportDaoImpl) List(c *gin.Context, req *deviceMonitorModel.DevListReq) (*deviceMonitorModel.DevListResp, error) {
+	db := i.db.Table(i.tableName)
+
+	if req != nil && req.DataName != "" {
+		db = db.Where("data_name like ?", "%"+req.DataName+"%")
+	}
+	size := 0
+	if req == nil || req.Size <= 0 {
+		size = 20
+	} else {
+		size = int(req.Size)
+	}
+	offset := 0
+	if req == nil || req.Page <= 0 {
+		req.Page = 1
+	} else {
+		offset = int((req.Page - 1) * req.Size)
+	}
+	db = db.Where("state", commonStatus.NORMAL)
+	db = baizeContext.GetGormDataScope(c, db)
+	var dto []*deviceMonitorModel.SysIotDbDevMap
+
+	var total int64
+	ret := db.Count(&total)
+	if ret.Error != nil {
+		return &deviceMonitorModel.DevListResp{
+			Rows:  make([]*deviceMonitorModel.SysIotDbDevMap, 0),
+			Total: 0,
+		}, ret.Error
+	}
+
+	ret = db.Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
+	if ret.Error != nil {
+		return &deviceMonitorModel.DevListResp{
+			Rows:  make([]*deviceMonitorModel.SysIotDbDevMap, 0),
+			Total: 0,
+		}, ret.Error
+	}
+
+	return &deviceMonitorModel.DevListResp{
+		Rows:  dto,
+		Total: uint64(total),
+	}, nil
 }

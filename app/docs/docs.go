@@ -5295,6 +5295,111 @@ const docTemplate = `{
                 }
             }
         },
+        "/metric/time/seq/list": {
+            "get": {
+                "description": "时序数据测点",
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "时序数据测点",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "controlType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceBuildingId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceClassId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceGroupId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceProtocolId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/monitor/job": {
             "put": {
                 "security": [
@@ -12266,7 +12371,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "调度id",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "name": {
                     "type": "string"

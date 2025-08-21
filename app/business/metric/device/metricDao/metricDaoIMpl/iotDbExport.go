@@ -418,3 +418,65 @@ func (i *iotDbExport) Count(c *gin.Context, req *deviceMonitorModel.DevDataReq) 
 	resp.Total = sum
 	return resp.Total, nil
 }
+
+// Query dashboard 查询接口
+func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error) {
+	if req == nil {
+		return nil, nil
+	}
+
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	var startTime string
+	if req.Start > 0 {
+		startTime = time.GetStartTime(req.Start, 200)
+	}
+	endTime := time.GetEndTimeUseNow(req.End, true)
+
+	if startTime == "" {
+		return nil, errors.New("开始时间不能为空")
+	}
+
+	if endTime == "" {
+		return nil, errors.New("结束时间不能为空")
+	}
+	if req.Step <= 0 {
+		req.Step = 1
+	}
+	var timeout int64 = 5000
+	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
+	var sql string
+	if req.Step != 0 {
+		sql = fmt.Sprintf("select %s from %s group by([%s, %s), %dm, %dm);",
+			req.Expression, req.Name, startTime, endTime, req.Interval, req.Step)
+	} else {
+		sql = fmt.Sprintf("select %s from %s group by([%s, %s), %dm);",
+			req.Expression, req.Name, startTime, endTime, req.Interval)
+	}
+
+	if req.Predict.Enable {
+		sql = fmt.Sprintf("call inference(%s, \"%s\", generateTime=True, predict_length=10)",
+			req.Predict.Model, req.Predict.Param, sql)
+	}
+
+	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
+		return nil, err
+	}
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		timestamp := statement.GetTimestamp()
+		v := statement.GetDouble("value")
+		data.Values = append(data.Values, metricModels.MetricQueryValue{
+			Time:  timestamp,
+			Value: fmt.Sprintf("%f", v),
+		})
+
+	}
+	return data, nil
+}

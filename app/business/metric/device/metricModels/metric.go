@@ -68,3 +68,21 @@ type MetricQueryReq struct {
 	Expression  string `json:"expression"`
 	Limit       int    `json:"limit"`
 }
+
+type Predict struct {
+	Enable bool   `json:"enable"`
+	Model  string `json:"model"`
+	Param  string `json:"param"`
+}
+
+type MetricDataQueryReq struct {
+	Query      string  `json:"query"`
+	Name       string  `json:"name"`
+	Start      uint64  `json:"start"`
+	End        uint64  `json:"end"`
+	Step       int     `json:"step"`
+	Interval   int     `json:"interval"`
+	Expression string  `json:"expression"`
+	Limit      int     `json:"limit"`
+	Predict    Predict `json:"predict"`
+}

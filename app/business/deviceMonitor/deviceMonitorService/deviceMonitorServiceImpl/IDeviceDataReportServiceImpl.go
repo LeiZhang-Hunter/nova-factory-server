@@ -24,3 +24,11 @@ func (i *IDeviceDataReportServiceImpl) DevList(c *gin.Context) ([]deviceMonitorM
 	}
 	return list, nil
 }
+
+func (i *IDeviceDataReportServiceImpl) GetDevList(c *gin.Context, req *deviceMonitorModel.DevListReq) (*deviceMonitorModel.DevListResp, error) {
+	list, err := i.dao.List(c, req)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}

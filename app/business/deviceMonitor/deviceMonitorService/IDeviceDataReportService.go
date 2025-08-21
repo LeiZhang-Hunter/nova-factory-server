@@ -7,4 +7,5 @@ import (
 
 type IDeviceDataReportService interface {
 	DevList(c *gin.Context) ([]deviceMonitorModel.SysIotDbDevMapData, error)
+	GetDevList(c *gin.Context, req *deviceMonitorModel.DevListReq) (*deviceMonitorModel.DevListResp, error)
 }
