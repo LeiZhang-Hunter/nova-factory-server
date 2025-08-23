@@ -5763,6 +5763,45 @@ paths:
       summary: 设置Agent
       tags:
       - 网关管理/Agent管理
+  /dashboard/data/remove:
+    delete:
+      description: 删除面板
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除面板
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除面板
+      tags:
+      - 仪表盘/面板管理
+  /dashboard/data/set:
+    post:
+      description: 保存面板
+      parameters:
+      - description: 设置仪表盘参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/dashboardModels.SetSysDashboardData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 保存面板
+      tags:
+      - 仪表盘/面板管理
   /dashboard/manager/list:
     get:
       description: 仪表盘列表
@@ -5823,7 +5862,7 @@ paths:
       - 仪表盘/仪表盘管理
   /dashboard/manager/remove:
     delete:
-      description: 删除面板
+      description: 删除仪表盘
       parameters:
       - description: ids
         in: path
@@ -5834,22 +5873,22 @@ paths:
       - application/json
       responses:
         "200":
-          description: 删除面板
+          description: 删除仪表盘参数
           schema:
             $ref: '#/definitions/response.ResponseData'
-      summary: 删除面板
+      summary: 删除仪表盘
       tags:
-      - 仪表盘/面板管理
+      - 仪表盘/仪表盘管理
   /dashboard/manager/set:
     post:
-      description: 保存面板
+      description: 保存仪表盘
       parameters:
       - description: 设置仪表盘参数
         in: body
         name: object
         required: true
         schema:
-          $ref: '#/definitions/dashboardModels.SetSysDashboardData'
+          $ref: '#/definitions/dashboardModels.SetSysDashboard'
       produces:
       - application/json
       responses:
@@ -5857,9 +5896,9 @@ paths:
           description: 设置分组成功
           schema:
             $ref: '#/definitions/response.ResponseData'
-      summary: 保存面板
+      summary: 保存仪表盘
       tags:
-      - 仪表盘/面板管理
+      - 仪表盘/仪表盘管理
   /device/monitor/data/dev/list:
     get:
       description: 设备测点列表

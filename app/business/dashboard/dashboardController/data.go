@@ -21,8 +21,8 @@ func NewData(service dashboardService.DashboardDataService) *Data {
 func (d *Data) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/dashboard/data")
 	//group.GET("/list", middlewares.HasPermission("dashboard:manager:list"), d.List)
-	group.POST("/set", middlewares.HasPermission("dashboard:manager:set"), d.Set)
-	group.DELETE("/remove/:ids", middlewares.HasPermission("dashboard:manager:remove"), d.Remove)
+	group.POST("/set", middlewares.HasPermission("dashboard:data:set"), d.Set)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("dashboard:data:remove"), d.Remove)
 }
 
 // Set 保存面板
@@ -32,7 +32,7 @@ func (d *Data) PrivateRoutes(router *gin.RouterGroup) {
 // @Param  object body dashboardModels.SetSysDashboardData true "设置仪表盘参数"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "设置分组成功"
-// @Router /dashboard/manager/set [post]
+// @Router /dashboard/data/set [post]
 func (d *Data) Set(c *gin.Context) {
 	req := new(dashboardModels.SetSysDashboardData)
 	err := c.ShouldBindJSON(req)
@@ -55,7 +55,7 @@ func (d *Data) Set(c *gin.Context) {
 // @Param  ids path string true "ids"
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "删除面板"
-// @Router /dashboard/manager/remove [delete]
+// @Router /dashboard/data/remove [delete]
 func (d *Data) Remove(c *gin.Context) {
 	recordIds := baizeContext.ParamStringArray(c, "ids")
 	if len(recordIds) == 0 {

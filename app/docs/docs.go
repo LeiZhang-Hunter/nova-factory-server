@@ -4395,6 +4395,66 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard/data/remove": {
+            "delete": {
+                "description": "删除面板",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "仪表盘/面板管理"
+                ],
+                "summary": "删除面板",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除面板",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboard/data/set": {
+            "post": {
+                "description": "保存面板",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "仪表盘/面板管理"
+                ],
+                "summary": "保存面板",
+                "parameters": [
+                    {
+                        "description": "设置仪表盘参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dashboardModels.SetSysDashboardData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/dashboard/manager/list": {
             "get": {
                 "description": "仪表盘列表",
@@ -4486,14 +4546,14 @@ const docTemplate = `{
         },
         "/dashboard/manager/remove": {
             "delete": {
-                "description": "删除面板",
+                "description": "删除仪表盘",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "仪表盘/面板管理"
+                    "仪表盘/仪表盘管理"
                 ],
-                "summary": "删除面板",
+                "summary": "删除仪表盘",
                 "parameters": [
                     {
                         "type": "string",
@@ -4505,7 +4565,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "删除面板",
+                        "description": "删除仪表盘参数",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -4515,14 +4575,14 @@ const docTemplate = `{
         },
         "/dashboard/manager/set": {
             "post": {
-                "description": "保存面板",
+                "description": "保存仪表盘",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "仪表盘/面板管理"
+                    "仪表盘/仪表盘管理"
                 ],
-                "summary": "保存面板",
+                "summary": "保存仪表盘",
                 "parameters": [
                     {
                         "description": "设置仪表盘参数",
@@ -4530,7 +4590,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dashboardModels.SetSysDashboardData"
+                            "$ref": "#/definitions/dashboardModels.SetSysDashboard"
                         }
                     }
                 ],
