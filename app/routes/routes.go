@@ -140,6 +140,7 @@ func NewGinEngine(
 		building.Building.PrivateRoutes(group)
 
 		dashboard.Dashboard.PrivateRoutes(group)
+		dashboard.Data.PrivateRoutes(group)
 
 		alert.Runner.Run()
 	}

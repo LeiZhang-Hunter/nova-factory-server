@@ -76,13 +76,12 @@ type Predict struct {
 }
 
 type MetricDataQueryReq struct {
-	Query      string  `json:"query"`
+	Type       string  `json:"type"`
 	Name       string  `json:"name"`
 	Start      uint64  `json:"start"`
 	End        uint64  `json:"end"`
 	Step       int     `json:"step"`
 	Interval   int     `json:"interval"`
 	Expression string  `json:"expression"`
-	Limit      int     `json:"limit"`
 	Predict    Predict `json:"predict"`
 }

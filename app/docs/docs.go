@@ -4486,14 +4486,14 @@ const docTemplate = `{
         },
         "/dashboard/manager/remove": {
             "delete": {
-                "description": "删除仪表盘",
+                "description": "删除面板",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "仪表盘/仪表盘管理"
+                    "仪表盘/面板管理"
                 ],
-                "summary": "删除仪表盘",
+                "summary": "删除面板",
                 "parameters": [
                     {
                         "type": "string",
@@ -4505,7 +4505,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "删除仪表盘参数",
+                        "description": "删除面板",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -4515,14 +4515,14 @@ const docTemplate = `{
         },
         "/dashboard/manager/set": {
             "post": {
-                "description": "保存仪表盘",
+                "description": "保存面板",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "仪表盘/仪表盘管理"
+                    "仪表盘/面板管理"
                 ],
-                "summary": "保存仪表盘",
+                "summary": "保存面板",
                 "parameters": [
                     {
                         "description": "设置仪表盘参数",
@@ -4530,7 +4530,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dashboardModels.SetSysDashboard"
+                            "$ref": "#/definitions/dashboardModels.SetSysDashboardData"
                         }
                     }
                 ],
@@ -12413,6 +12413,23 @@ const docTemplate = `{
                 }
             }
         },
+        "dashboardModels.SetSysDashboardData": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "数据",
+                    "type": "string"
+                },
+                "datashboard_id": {
+                    "description": "仪表盘数据id",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "面板id",
+                    "type": "integer"
+                }
+            }
+        },
         "deviceModels.DeviceGroup": {
             "type": "object",
             "properties": {
@@ -12829,23 +12846,20 @@ const docTemplate = `{
                 "interval": {
                     "type": "integer"
                 },
-                "limit": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },
                 "predict": {
                     "$ref": "#/definitions/metricModels.Predict"
                 },
-                "query": {
-                    "type": "string"
-                },
                 "start": {
                     "type": "integer"
                 },
                 "step": {
                     "type": "integer"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },

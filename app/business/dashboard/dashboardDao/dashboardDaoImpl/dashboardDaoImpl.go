@@ -3,7 +3,6 @@ package dashboardDaoImpl
 import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"nova-factory-server/app/business/craft/craftRouteModels"
 	"nova-factory-server/app/business/dashboard/dashboardDao"
 	"nova-factory-server/app/business/dashboard/dashboardModels"
 	"nova-factory-server/app/constant/commonStatus"
@@ -79,10 +78,10 @@ func (i *DashboardDaoImpl) Set(c *gin.Context, data *dashboardModels.SetSysDashb
 		return value, ret.Error
 	}
 	value.SetUpdateBy(baizeContext.GetUserId(c))
-	ret := i.db.Table(i.table).Updates(value)
+	ret := i.db.Table(i.table).Where("id = ?", data.ID).Updates(value)
 	return value, ret.Error
 }
 func (i *DashboardDaoImpl) Remove(c *gin.Context, ids []string) error {
-	ret := i.db.Table(i.table).Where("id in (?)", ids).Delete(&craftRouteModels.SysProductSchedule{})
+	ret := i.db.Table(i.table).Where("id in (?)", ids).Delete(&dashboardModels.SysDashboard{})
 	return ret.Error
 }

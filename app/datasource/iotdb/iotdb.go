@@ -17,22 +17,21 @@ func NewIotDb() *IotDb {
 		UserName: "root",
 		Password: "root",
 	}
+	db := &IotDb{}
 	pool := client.NewSessionPool(config, 3, 60000, 60000, false)
 	//defer sessionPool.Close()
-
+	db.pool = pool
 	session, err := pool.GetSession()
 	if err != nil {
 		zap.L().Error("get session", zap.Error(err))
-		return nil
+		return db
 	}
 
 	defer pool.PutBack(session)
 
 	session.ExecuteStatement("create device template nova_device_template ALIGNED (value DOUBLE)")
 
-	return &IotDb{
-		pool: pool,
-	}
+	return db
 }
 
 func (i *IotDb) GetSession() (client.Session, error) {

@@ -298,8 +298,12 @@ func wireApp() (*gin.Engine, func(), error) {
 	dashboardDao := dashboardDaoImpl.NewDashboardDaoImpl(db)
 	dashboardService := dashboardServiceImpl.NewDashboardServiceImpl(dashboardDao, iMetricDao)
 	dashboard := dashboardController.NewDashboard(dashboardService)
+	dashboardDataDao := dashboardDaoImpl.NewDashboardDataDaoImpl(db)
+	dashboardDataService := dashboardServiceImpl.NewDashboardDataServiceImpl(dashboardDataDao)
+	data := dashboardController.NewData(dashboardDataService)
 	dashboardControllerController := dashboardController.Controller{
 		Dashboard: dashboard,
+		Data:      data,
 	}
 	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller, buildingControllerController, dashboardControllerController)
 	return engine, func() {

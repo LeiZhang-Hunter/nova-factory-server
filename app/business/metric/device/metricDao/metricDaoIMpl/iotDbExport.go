@@ -444,18 +444,28 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 	if endTime == "" {
 		return nil, errors.New("结束时间不能为空")
 	}
-	if req.Step <= 0 {
-		req.Step = 1
+
+	var interval int
+	if req.Interval == 0 {
+		interval = int((req.End - req.Start) / 60 / 30 / 1000)
+	} else {
+		interval = req.Interval
 	}
+
 	var timeout int64 = 5000
 	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
 	var sql string
-	if req.Step != 0 {
-		sql = fmt.Sprintf("select %s from %s group by([%s, %s), %dm, %dm);",
-			req.Expression, req.Name, startTime, endTime, req.Interval, req.Step)
+	if req.Type == "bar" || req.Type == "line" || req.Type == "area" || req.Type == "toplist" {
+		if req.Step != 0 {
+			sql = fmt.Sprintf("select %s as value from %s group by([%s, %s), %dm, %dm);",
+				req.Expression, req.Name, startTime, endTime, interval, req.Step)
+		} else {
+			sql = fmt.Sprintf("select %s as value from %s group by([%s, %s), %dm);",
+				req.Expression, req.Name, startTime, endTime, interval)
+		}
 	} else {
-		sql = fmt.Sprintf("select %s from %s group by([%s, %s), %dm);",
-			req.Expression, req.Name, startTime, endTime, req.Interval)
+		sql = fmt.Sprintf("select %s as value from %s where time > %s and time < %s;",
+			req.Expression, req.Name, startTime, endTime)
 	}
 
 	if req.Predict.Enable {
