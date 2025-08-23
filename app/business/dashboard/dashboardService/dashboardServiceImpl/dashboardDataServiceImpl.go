@@ -23,3 +23,6 @@ func (d *DashboardDataServiceImpl) Set(c *gin.Context, data *dashboardModels.Set
 func (d *DashboardDataServiceImpl) Remove(c *gin.Context, ids []string) error {
 	return d.dao.Remove(c, ids)
 }
+func (d *DashboardDataServiceImpl) Info(c *gin.Context, dashboardId int64) (*dashboardModels.SysDashboardData, error) {
+	return d.dao.Info(c, dashboardId)
+}

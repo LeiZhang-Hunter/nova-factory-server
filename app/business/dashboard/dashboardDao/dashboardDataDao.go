@@ -8,4 +8,5 @@ import (
 type DashboardDataDao interface {
 	Set(c *gin.Context, data *dashboardModels.SetSysDashboardData) (*dashboardModels.SysDashboardData, error)
 	Remove(c *gin.Context, ids []string) error
+	Info(c *gin.Context, dashboardId int64) (*dashboardModels.SysDashboardData, error)
 }

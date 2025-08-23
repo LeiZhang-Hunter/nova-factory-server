@@ -15,9 +15,9 @@ type SysDashboardData struct {
 }
 
 type SetSysDashboardData struct {
-	ID            int64  `gorm:"column:id;primaryKey;comment:面板id" json:"id"`                          // 面板id
-	DatashboardID int64  `gorm:"column:datashboard_id;not null;comment:仪表盘数据id" json:"datashboard_id"` // 仪表盘数据id
-	Data          string `gorm:"column:data;comment:数据" json:"data"`                                   // 数据
+	ID            int64  `gorm:"column:id;primaryKey;comment:面板id" json:"id,string"`                          // 面板id
+	DatashboardID int64  `gorm:"column:datashboard_id;not null;comment:仪表盘数据id" json:"datashboard_id,string"` // 仪表盘数据id
+	Data          string `gorm:"column:data;comment:数据" json:"data"`                                          // 数据
 }
 
 func ToSysDashboardData(set *SetSysDashboardData) *SysDashboardData {
@@ -35,4 +35,8 @@ type SysDashboardDataReq struct {
 type SysDashboardDataList struct {
 	Rows  []*SysDashboardData `json:"rows"`
 	Total int64               `json:"total"`
+}
+
+type GetSysDashboardData struct {
+	DatashboardID int64 `form:"datashboard_id,string"` // 仪表盘数据id
 }

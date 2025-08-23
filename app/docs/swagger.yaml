@@ -1749,10 +1749,12 @@ definitions:
         type: string
       datashboard_id:
         description: 仪表盘数据id
-        type: integer
+        example: "0"
+        type: string
       id:
         description: 面板id
-        type: integer
+        example: "0"
+        type: string
     type: object
   deviceModels.DeviceGroup:
     properties:
@@ -5763,6 +5765,24 @@ paths:
       summary: 设置Agent
       tags:
       - 网关管理/Agent管理
+  /dashboard/data/info:
+    get:
+      description: 读取面板
+      parameters:
+      - description: 仪表盘数据id
+        in: query
+        name: datashboard_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置分组成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 读取面板
+      tags:
+      - 仪表盘/面板管理
   /dashboard/data/remove:
     delete:
       description: 删除面板

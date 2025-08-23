@@ -4395,6 +4395,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/dashboard/data/info": {
+            "get": {
+                "description": "读取面板",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "仪表盘/面板管理"
+                ],
+                "summary": "读取面板",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "仪表盘数据id",
+                        "name": "datashboard_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/dashboard/data/remove": {
             "delete": {
                 "description": "删除面板",
@@ -12482,11 +12510,13 @@ const docTemplate = `{
                 },
                 "datashboard_id": {
                     "description": "仪表盘数据id",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "id": {
                     "description": "面板id",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },

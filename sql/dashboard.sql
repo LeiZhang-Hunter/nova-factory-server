@@ -23,5 +23,6 @@ CREATE TABLE IF NOT EXISTS `sys_dashboard_data` (
     `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
     `update_time` datetime DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) DEFAULT '0' COMMENT '操作状态（0正常 -1删除）',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE KEY  `datashboard_id`(`datashboard_id`) USING BTREE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
