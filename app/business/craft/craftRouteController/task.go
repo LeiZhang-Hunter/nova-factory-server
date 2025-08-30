@@ -28,11 +28,6 @@ func (w *Task) PrivateRoutes(router *gin.RouterGroup) {
 	routers.DELETE("/remove/:ids", middlewares.HasPermission("craft:route:task:remove"), w.Remove) //移除生产工单
 }
 
-func (w *Task) PublicRoutes(router *gin.RouterGroup) {
-	routers := router.Group("/api/product/task/v1")
-	routers.POST("/schedule", w.Schedule)
-}
-
 // Schedule 读取调度任务
 // @Summary 读取调度任务
 // @Description 读取调度任务

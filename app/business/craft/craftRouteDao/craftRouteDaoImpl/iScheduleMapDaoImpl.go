@@ -162,16 +162,19 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, tx *gorm.DB, data *cra
 
 	beginTIme := times[0]
 	endTIme := times[1]
-	beginTImeValue, err := time.Parse(time.DateOnly, beginTIme)
+	beginTImeValue, err := time.ParseInLocation(time.DateOnly, beginTIme, time.Local)
 	if err != nil {
 		return err
 	}
-	endTImeValue, err := time.Parse(time.DateOnly, endTIme)
+	endTImeValue, err := time.ParseInLocation(time.DateOnly, endTIme, time.Local)
 	if err != nil {
 		return err
 	}
 	beginTimeUnix := beginTImeValue.Unix()
 	endTimeUnix := endTImeValue.Unix()
+	//if endTimeUnix != 0 {
+	//	endTimeUnix += 86400
+	//}
 	if beginTimeUnix == endTimeUnix {
 		return errors.New("执行日期开始和结束不能相同")
 	}
@@ -180,7 +183,7 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, tx *gorm.DB, data *cra
 	}
 
 	dayCount := 0
-	day := (endTimeUnix - beginTimeUnix) / 86400
+	day := ((endTimeUnix - beginTimeUnix) / 86400) + 1
 	dayList := make([]int64, 0)
 	for ; dayCount < int(day); dayCount++ {
 		var v int64 = beginTimeUnix + int64(dayCount)*86400
@@ -228,6 +231,7 @@ func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, tx *gorm.DB, data *cra
 		for dayKey, dayValue := range dayList {
 			mapList[dayKey] = &craftRouteModels.SysProductScheduleMap{
 				ID:           snowflake.GenID(),
+				GatewayID:    data.GatewayID,
 				ScheduleID:   data.Id,
 				BeginTime:    dayValue + beginUnix,
 				EndTime:      dayValue + endUnix,
@@ -275,4 +279,43 @@ func (i *IScheduleMapDaoImpl) GetByScheduleId(c *gin.Context, id int64) ([]*craf
 	var dto []*craftRouteModels.SysProductScheduleMap
 	ret := i.db.Table(i.table).Where("schedule_id = ?", id).Find(&dto)
 	return dto, ret.Error
+}
+
+func (i *IScheduleMapDaoImpl) GetSpecialScheduleByNow(c *gin.Context, gatewayId int64) ([]*craftRouteModels.SysProductScheduleMap, error) {
+	timeNow := time.Now().Unix()
+	var list []*craftRouteModels.SysProductScheduleMap
+	db := i.db.Table(i.table).Where("gateway_id = ?", gatewayId).
+		Where("begin_time <= ?", timeNow).
+		Where("end_time > ?", timeNow).
+		Where("schedule_type = ?", craftRouteModels.SPECIAL).
+		Where("state = ?", commonStatus.NORMAL).Group("craft_route_id").Find(&list)
+	db = baizeContext.GetGormDataScope(c, db)
+	ret := db.Find(&list)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return list, ret.Error
+}
+
+func (i *IScheduleMapDaoImpl) GetNormalByTime(c *gin.Context, gatewayId int64) ([]*craftRouteModels.SysProductScheduleMap, error) {
+	var list []*craftRouteModels.SysProductScheduleMap
+	// 获取今天是周几，返回的是一个int，其中0表示周日，1表示周一，以此类推，直到6表示周六
+	timeNow := time.Now()
+	year, month, day := timeNow.Date()
+	// 创建一个新的时间，设置为当天的00:00:00
+	startOfDay := time.Date(year, month, day, 0, 0, 0, 0, timeNow.Location())
+	interval := timeNow.Unix() - startOfDay.Unix()
+	weekday := int(timeNow.Weekday())
+	db := i.db.Table(i.table).Debug().Where("gateway_id = ?", gatewayId).
+		Where("begin_time <= ?", interval).
+		Where("end_time > ?", interval).
+		Where("schedule_type = ?", craftRouteModels.DAILY).
+		Where("date", weekday).
+		Where("state = ?", commonStatus.NORMAL).Group("craft_route_id").Find(&list)
+	db = baizeContext.GetGormDataScope(c, db)
+	ret := db.Find(&list)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return list, ret.Error
 }

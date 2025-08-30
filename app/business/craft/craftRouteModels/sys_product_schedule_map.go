@@ -7,6 +7,7 @@ import (
 type SysProductScheduleMap struct {
 	ID           int64 `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	ScheduleID   int64 `gorm:"column:schedule_id;not null;comment:计划标识" json:"schedule_id"`               // 计划标识
+	GatewayID    int64 `gorm:"column:gateway_id;not null;comment:计划标识" json:"gateway_id"`                 // 计划标识
 	BeginTime    int64 `gorm:"column:begin_time;not null;comment:开始时间" json:"begin_time"`                 // 开始时间
 	EndTime      int64 `gorm:"column:end_time;not null;comment:结束时间" json:"end_time"`                     // 结束时间
 	Date         int   `gorm:"column:date;not null;comment:日期 1 2 3 4 5 6 7分别代表周几" json:"date"`           // 日期 1 2 3 4 5 6 7分别代表周几

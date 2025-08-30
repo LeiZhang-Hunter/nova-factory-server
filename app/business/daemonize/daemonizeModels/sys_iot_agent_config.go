@@ -38,7 +38,7 @@ type GenerateGatewayConfigRes struct {
 }
 
 type SysIotAgentConfigListReq struct {
-	AgentObjectID int64 `gorm:"column:agent_object_id;not null;comment:agent id" json:"agent_object_id"` // agent id
+	AgentObjectID int64 `gorm:"column:agent_object_id;not null;comment:agent id" form:"agent_object_id"` // agent id
 	baize.BaseEntityDQL
 }
 

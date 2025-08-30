@@ -3,6 +3,7 @@ package craftRouteService
 import (
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/craft/craftRouteModels"
+	v1 "nova-factory-server/app/business/craft/craftRouteModels/api/v1"
 )
 
 type IScheduleService interface {
@@ -11,4 +12,5 @@ type IScheduleService interface {
 	Set(c *gin.Context, data *craftRouteModels.SetSysProductSchedule) error
 	Remove(c *gin.Context, ids []string) error
 	Detail(c *gin.Context, id int64) (*craftRouteModels.DetailSysProductData, error)
+	Schedule(ctx *gin.Context, req *craftRouteModels.ScheduleReq) ([]*v1.Router, error)
 }

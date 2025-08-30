@@ -126,7 +126,14 @@ func (i *IDataSetServiceImpl) UpdateDataSet(c *gin.Context, request *aiDataSetMo
 		request.ParserConfig.Graphrag = nil
 	}
 	if request.ParserConfig != nil && request.ParserConfig.Raptor != nil && !request.ParserConfig.Raptor.UseRaptor {
-		request.ParserConfig.Raptor = nil
+		request.ParserConfig.Raptor = &aiDataSetModels.Raptor{
+			UseRaptor:  false,
+			MaxToken:   256,
+			Threshold:  0.10,
+			MaxCluster: 64,
+			RandomSeed: 0,
+			Prompt:     "请总结以下段落。 小心数字，不要编造。 段落如下：\n      {cluster_content}\n以上就是你需要总结的内容。",
+		}
 	}
 	content, err := json.Marshal(request)
 	if err != nil {

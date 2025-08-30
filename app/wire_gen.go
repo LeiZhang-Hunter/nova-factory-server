@@ -225,7 +225,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	task := craftRouteController.NewTask(iSysProTaskService, iotAgentService)
 	iScheduleDao := craftRouteDaoImpl.NewIScheduleDaoImpl(db)
 	iScheduleMapDao := craftRouteDaoImpl.NewIScheduleMapDaoImpl(db)
-	iScheduleService := craftRouteServiceImpl.NewIScheduleServiceImpl(iScheduleDao, db, iScheduleMapDao, iCraftRouteDao)
+	iScheduleService := craftRouteServiceImpl.NewIScheduleServiceImpl(iScheduleDao, db, iScheduleMapDao, iCraftRouteDao, iSysCraftRouteConfigDao)
 	schedule := craftRouteController.NewSchedule(iScheduleService, iotAgentService)
 	craftRoute := &craftRouteController.CraftRoute{
 		CraftRoute:      craft,

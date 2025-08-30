@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/craft/craftRouteDao"
 	"nova-factory-server/app/business/craft/craftRouteModels"
+	v1 "nova-factory-server/app/business/craft/craftRouteModels/api/v1"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
@@ -79,4 +80,26 @@ func (i *ISysCraftRouteConfigDaoImpl) GetById(routeId uint64) (*craftRouteModels
 	}
 	info.Topo = &topo
 	return info, nil
+}
+
+func (i *ISysCraftRouteConfigDaoImpl) GetConfigByIds(routeIds []int64) ([]*v1.Router, error) {
+	var list []*craftRouteModels.SysCraftRouteConfig
+	ret := i.db.Table(i.tableName).Debug().Where("route_id in (?)", routeIds).Where("state = ?", commonStatus.NORMAL).Find(&list)
+	if ret.Error != nil {
+		zap.L().Error("get info error", zap.Error(ret.Error))
+		return nil, ret.Error
+	}
+
+	routers := make([]*v1.Router, 0)
+	for _, info := range list {
+		var router v1.Router
+		err := json.Unmarshal([]byte(info.Config), &router)
+		if err != nil {
+			zap.L().Error("json unmarshal error", zap.Error(err))
+			return nil, err
+		}
+		routers = append(routers, &router)
+	}
+
+	return routers, nil
 }

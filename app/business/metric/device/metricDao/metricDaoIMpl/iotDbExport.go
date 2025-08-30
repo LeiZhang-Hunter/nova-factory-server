@@ -452,25 +452,33 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 		interval = req.Interval
 	}
 
+	if interval == 0 {
+		interval = 1
+	}
+
 	var timeout int64 = 5000
 	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
 	var sql string
 	if req.Type == "bar" || req.Type == "line" || req.Type == "area" || req.Type == "toplist" {
 		if req.Step != 0 {
-			sql = fmt.Sprintf("select %s as value from %s group by([%s, %s), %dm, %dm);",
+			sql = fmt.Sprintf("select %s as value from %s group by([%s, %s), %dm, %dm)",
 				req.Expression, req.Name, startTime, endTime, interval, req.Step)
 		} else {
-			sql = fmt.Sprintf("select %s as value from %s group by([%s, %s), %dm);",
+			sql = fmt.Sprintf("select %s as value from %s group by([%s, %s), %dm)",
 				req.Expression, req.Name, startTime, endTime, interval)
 		}
 	} else {
-		sql = fmt.Sprintf("select %s as value from %s where time > %s and time < %s;",
+		sql = fmt.Sprintf("select %s as value from %s where time > %s and time < %s",
 			req.Expression, req.Name, startTime, endTime)
 	}
 
+	if req.Predict.Param == "" {
+		req.Predict.Param = "generateTime=True, predict_length=30"
+	}
+
 	if req.Predict.Enable {
-		sql = fmt.Sprintf("call inference(%s, \"%s\", generateTime=True, predict_length=10)",
-			req.Predict.Model, req.Predict.Param, sql)
+		sql = fmt.Sprintf("call inference(%s, \"%s\", %s)",
+			req.Predict.Model, sql, req.Predict.Param)
 	}
 
 	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
@@ -481,7 +489,12 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 	}
 	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
 		timestamp := statement.GetTimestamp()
-		v := statement.GetDouble("value")
+		var v float64
+		if !req.Predict.Enable {
+			v = statement.GetDouble("value")
+		} else {
+			v = statement.GetDouble("output0")
+		}
 		data.Values = append(data.Values, metricModels.MetricQueryValue{
 			Time:  timestamp,
 			Value: fmt.Sprintf("%f", v),

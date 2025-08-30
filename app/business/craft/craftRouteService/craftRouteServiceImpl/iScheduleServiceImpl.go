@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/craft/craftRouteDao"
 	"nova-factory-server/app/business/craft/craftRouteModels"
+	v1 "nova-factory-server/app/business/craft/craftRouteModels/api/v1"
 	"nova-factory-server/app/business/craft/craftRouteService"
 	"nova-factory-server/app/utils/time"
 	systime "time"
@@ -16,15 +17,20 @@ type IScheduleServiceImpl struct {
 	scheduleDao    craftRouteDao.IScheduleDao
 	scheduleMapDao craftRouteDao.IScheduleMapDao
 	routeDao       craftRouteDao.ICraftRouteDao
+	routeConfigDao craftRouteDao.ISysCraftRouteConfigDao
 	db             *gorm.DB
 }
 
-func NewIScheduleServiceImpl(scheduleDao craftRouteDao.IScheduleDao, db *gorm.DB, scheduleMapDao craftRouteDao.IScheduleMapDao, routeDao craftRouteDao.ICraftRouteDao) craftRouteService.IScheduleService {
+func NewIScheduleServiceImpl(scheduleDao craftRouteDao.IScheduleDao, db *gorm.DB,
+	scheduleMapDao craftRouteDao.IScheduleMapDao,
+	routeDao craftRouteDao.ICraftRouteDao,
+	routeConfigDao craftRouteDao.ISysCraftRouteConfigDao) craftRouteService.IScheduleService {
 	return &IScheduleServiceImpl{
 		scheduleDao:    scheduleDao,
 		scheduleMapDao: scheduleMapDao,
 		routeDao:       routeDao,
 		db:             db,
+		routeConfigDao: routeConfigDao,
 	}
 }
 
@@ -208,4 +214,52 @@ func (i *IScheduleServiceImpl) Detail(c *gin.Context, id int64) (*craftRouteMode
 		Info: scheduleInfo,
 		Data: scheduleMapList,
 	}, nil
+}
+
+func (i *IScheduleServiceImpl) GetRouters(ctx *gin.Context, req *craftRouteModels.ScheduleReq) ([]int64, error) {
+	ids := make([]int64, 0)
+	//查找特殊日程
+	specialList, err := i.scheduleMapDao.GetSpecialScheduleByNow(ctx, req.GatewayId)
+	if err != nil {
+		return ids, err
+	}
+
+	if len(specialList) != 0 {
+		for _, v := range specialList {
+			ids = append(ids, v.CraftRouteID)
+		}
+		return ids, nil
+	}
+
+	normalList, err := i.scheduleMapDao.GetNormalByTime(ctx, req.GatewayId)
+	if err != nil {
+		return ids, err
+	}
+
+	if normalList == nil {
+		for _, v := range normalList {
+			ids = append(ids, v.CraftRouteID)
+		}
+		return ids, nil
+	}
+
+	return ids, nil
+}
+
+// Schedule 任务调度
+func (i *IScheduleServiceImpl) Schedule(ctx *gin.Context, req *craftRouteModels.ScheduleReq) ([]*v1.Router, error) {
+	routerIds, err := i.GetRouters(ctx, req)
+	if err != nil {
+		zap.L().Error("Get routers error", zap.Error(err))
+		return make([]*v1.Router, 0), err
+	}
+	if len(routerIds) == 0 {
+		return make([]*v1.Router, 0), nil
+	}
+
+	routers, err := i.routeConfigDao.GetConfigByIds(routerIds)
+	if err != nil {
+		return make([]*v1.Router, 0), err
+	}
+	return routers, nil
 }

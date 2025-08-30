@@ -78,7 +78,6 @@ func NewGinEngine(
 		sc.Login.PublicRoutes(group)          //登录
 		sc.Sse.PublicRoutes(group)            //SSE链接
 		controller.Config.PublicRoutes(group) //注册Agent公共配置接口
-		craft.Task.PublicRoutes(group)
 		alert.AlertLog.PublicRoutes(group)
 	}
 	//做鉴权的
@@ -123,6 +122,7 @@ func NewGinEngine(
 		craft.WorkOrder.PrivateRoutes(group) //生产工单
 		craft.Task.PrivateRoutes(group)      //工单任务
 		craft.Schedule.PrivateRoutes(group)
+		craft.Schedule.PublicRoutes(group)
 
 		metric.Metric.PrivateRoutes(group) //设备指标
 		controller.IotAgent.PrivateRoutes(group)

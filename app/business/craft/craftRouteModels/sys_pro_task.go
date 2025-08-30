@@ -159,5 +159,5 @@ type ScheduleReq struct {
 	GatewayId int64  `json:"gateway_id"`
 	UserName  string `json:"user_name"`
 	Password  string `json:"password"`
-	baize.BaseEntityDQL
+	Size      int64  `form:"pageSize" default:"10000"` //数量
 }
