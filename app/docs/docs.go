@@ -1327,6 +1327,119 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/prediction/list": {
+            "get": {
+                "description": "智能预警列表",
+                "tags": [
+                    "工业智能体/智能预警"
+                ],
+                "summary": "智能预警列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "告警策略名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/prediction/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除智能预警",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/智能预警"
+                ],
+                "summary": "删除智能预警",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/prediction/set": {
+            "post": {
+                "description": "设置智能预警",
+                "tags": [
+                    "工业智能体/智能预警"
+                ],
+                "summary": "设置智能预警",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aiDataSetModels.SetSysAiPrediction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/alert/action/list": {
             "get": {
                 "description": "告警动作列表",
@@ -1998,6 +2111,34 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/predict/metric": {
+            "post": {
+                "description": "导入告警数据",
+                "tags": [
+                    "告警管理/告警数据管理"
+                ],
+                "summary": "导入告警数据",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/alertModels.AlertLogData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -10521,6 +10662,55 @@ const docTemplate = `{
                 }
             }
         },
+        "aiDataSetModels.SetSysAiPrediction": {
+            "type": "object",
+            "properties": {
+                "action_id": {
+                    "description": "处理通知id",
+                    "type": "integer"
+                },
+                "advanced": {
+                    "description": "告警规则",
+                    "type": "string"
+                },
+                "agg_function": {
+                    "description": "聚合函数，用来计算图表",
+                    "type": "string"
+                },
+                "field": {
+                    "description": "预测字段",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "id",
+                    "type": "integer"
+                },
+                "interval": {
+                    "description": "预测时间段",
+                    "type": "integer"
+                },
+                "model": {
+                    "description": "预测模型",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "智能预警名称",
+                    "type": "string"
+                },
+                "perturbation_variables": {
+                    "description": "关联变量",
+                    "type": "string"
+                },
+                "predict_length": {
+                    "description": "预测长度",
+                    "type": "integer"
+                },
+                "reason_id": {
+                    "description": "模型推理id",
+                    "type": "integer"
+                }
+            }
+        },
         "aiDataSetModels.UpdateAssistantRequest": {
             "type": "object",
             "properties": {
@@ -11362,19 +11552,6 @@ const docTemplate = `{
             "properties": {
                 "gateway_id": {
                     "type": "integer"
-                },
-                "isAsc": {
-                    "description": "排序规则  降序desc   asc升序",
-                    "type": "string"
-                },
-                "orderBy": {
-                    "description": "排序字段",
-                    "type": "string"
-                },
-                "pageNum": {
-                    "description": "第几页",
-                    "type": "integer",
-                    "default": 1
                 },
                 "pageSize": {
                     "description": "数量",

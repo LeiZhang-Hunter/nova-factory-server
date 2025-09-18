@@ -92,5 +92,13 @@ func (d *Data) Info(c *gin.Context) {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
+	if value == nil {
+		baizeContext.SuccessData(c, &dashboardModels.SysDashboardData{
+			ID:            0,
+			Data:          "[]",
+			DatashboardID: req.DatashboardID,
+		})
+		return
+	}
 	baizeContext.SuccessData(c, value)
 }

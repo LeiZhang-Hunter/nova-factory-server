@@ -79,6 +79,7 @@ func NewGinEngine(
 		sc.Sse.PublicRoutes(group)            //SSE链接
 		controller.Config.PublicRoutes(group) //注册Agent公共配置接口
 		alert.AlertLog.PublicRoutes(group)
+		metric.Metric.PublicRoutes(group)
 	}
 	//做鉴权的
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
@@ -111,7 +112,9 @@ func NewGinEngine(
 
 		materialC.Material.PrivateRoutes(group) //资产管理---物料管理
 
-		ai.Dataset.PrivateRoutes(group) // 工业智能体
+		ai.Dataset.PrivateRoutes(group)    // 工业智能体
+		ai.Prediction.PrivateRoutes(group) // 工业智能体
+		ai.Exception.PrivateRoutes(group)  // 工业智能体
 
 		craft.CraftRoute.PrivateRoutes(group)     //工艺路线
 		craft.Process.PrivateRoutes(group)        //工序设置

@@ -192,8 +192,14 @@ func wireApp() (*gin.Engine, func(), error) {
 	iAssistantService := aiDataSetServiceImpl.NewIAssistantServiceImpl(client)
 	iChartService := aiDataSetServiceImpl.NewIChartServiceImpl(client)
 	dataset := aiDataSetController.NewDataset(iDataSetService, iDataSetDocumentService, iChunkService, iAssistantService, iChartService)
+	exception := aiDataSetController.NewException()
+	iAiPredictionListDao := aiDataSetDaoImpl.NewIAiPredictionListDaoImpl(db)
+	iAiPredictionService := aiDataSetServiceImpl.NewIAiPredictionServiceImpl(iAiPredictionListDao)
+	prediction := aiDataSetController.NewPrediction(iAiPredictionService)
 	aiDataSet := &aiDataSetController.AiDataSet{
-		Dataset: dataset,
+		Dataset:    dataset,
+		Exception:  exception,
+		Prediction: prediction,
 	}
 	iCraftRouteDao := craftRouteDaoImpl.NewCraftRouteDaoImpl(db)
 	iProcessDao := craftRouteDaoImpl.NewIProcessDaoImpl(db)
@@ -239,7 +245,8 @@ func wireApp() (*gin.Engine, func(), error) {
 		Schedule:        schedule,
 	}
 	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
-	metric := metricController.NewMetric(iMetricService)
+	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao)
+	metric := metricController.NewMetric(iMetricService, deviceMonitorService)
 	metricServer := &metricController.MetricServer{
 		Metric: metric,
 	}
@@ -257,7 +264,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		IotAgent:  iotAgent,
 		Config:    daemonizeControllerConfig,
 	}
-	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao)
 	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
 	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao)
 	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao)
