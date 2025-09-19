@@ -1,12 +1,15 @@
 package aiDataSetDaoImpl
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/ai/aiDataSetDao"
 	"nova-factory-server/app/business/ai/aiDataSetModels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
 	"nova-factory-server/app/utils/snowflake"
 )
 
@@ -79,6 +82,24 @@ func (a *IAiPredictionListDaoImpl) List(c *gin.Context, req *aiDataSetModels.Sys
 			Rows:  make([]*aiDataSetModels.SysAiPrediction, 0),
 			Total: 0,
 		}, ret.Error
+	}
+
+	for k, v := range dto {
+		var advanced logalert.Advanced
+		err := json.Unmarshal([]byte(v.Advanced), &advanced)
+		if err != nil {
+			zap.L().Error("json Unmarshal fail", zap.Error(err))
+			continue
+		}
+		dto[k].AdvancedData = &advanced
+
+		var devList []string
+		err = json.Unmarshal([]byte(v.Dev), &devList)
+		if err != nil {
+			zap.L().Error("json Unmarshal fail", zap.Error(err))
+			continue
+		}
+		dto[k].DevList = devList
 	}
 
 	return &aiDataSetModels.SysAiPredictionList{

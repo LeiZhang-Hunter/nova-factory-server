@@ -2,6 +2,7 @@ package aiDataSetController
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/ai/aiDataSetModels"
 	"nova-factory-server/app/business/ai/aiDataSetService"
 	"nova-factory-server/app/middlewares"
@@ -20,7 +21,7 @@ func NewPrediction(service aiDataSetService.IAiPredictionService) *Prediction {
 
 func (p *Prediction) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/ai/prediction")
-	group.POST("/list", middlewares.HasPermission("ai:prediction:list"), p.List)
+	group.GET("/list", middlewares.HasPermission("ai:prediction:list"), p.List)
 	group.POST("/set", middlewares.HasPermission("ai:prediction:set"), p.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:prediction:remove"), p.Remove)
 	return
@@ -37,6 +38,7 @@ func (p *Prediction) List(c *gin.Context) {
 	req := new(aiDataSetModels.SysAiPredictionListReq)
 	err := c.ShouldBindQuery(req)
 	if err != nil {
+		zap.L().Warn("参数错误", zap.Error(err))
 		baizeContext.ParameterError(c)
 		return
 	}
@@ -59,6 +61,7 @@ func (p *Prediction) Set(c *gin.Context) {
 	req := new(aiDataSetModels.SetSysAiPrediction)
 	err := c.ShouldBindJSON(req)
 	if err != nil {
+		zap.L().Warn("参数错误", zap.Error(err))
 		baizeContext.ParameterError(c)
 		return
 	}
