@@ -79,3 +79,22 @@ CREATE TABLE `sys_ai_prediction_list`  (
      PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '预测列表' ROW_FORMAT = Dynamic;
 
+CREATE TABLE `sys_ai_prediction_exception`  (
+    `id` bigint(20) NOT NULL COMMENT 'id',
+    `reason_id` bigint(20) NOT NULL COMMENT '模型推理id',
+    `action_id` bigint(20) NOT NULL COMMENT '处理通知id',
+    `threshold` bigint(5) NOT NULL COMMENT 'threshold',
+    `name` varchar(255) not null comment '智能预警名称',
+    `dev` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '测点名称',
+    `model` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '预测模型',
+    `interval` bigint(20) NOT NULL COMMENT '预测时间段',
+    `predict_length` bigint(20) unsigned NULL DEFAULT 0 COMMENT '预测长度',
+    `agg_function` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '聚合函数，用来计算图表',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '预测列表' ROW_FORMAT = Dynamic;
