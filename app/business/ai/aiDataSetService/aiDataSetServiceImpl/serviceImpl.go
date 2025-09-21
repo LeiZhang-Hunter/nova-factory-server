@@ -3,4 +3,4 @@ package aiDataSetServiceImpl
 import "github.com/google/wire"
 
 var ProviderSet = wire.NewSet(NewIDataSetServiceImpl, NewHttpClient, NewIDataSetDocumentServiceImpl,
-	NewIChunkServiceImpl, NewIAssistantServiceImpl, NewIChartServiceImpl, NewIAiPredictionServiceImpl, NewIAiPredictionExceptionServiceImpl)
+	NewIChunkServiceImpl, NewIAssistantServiceImpl, NewIChartServiceImpl, NewIAiPredictionServiceImpl, NewIAiPredictionExceptionServiceImpl, NewIAiPredictionControlServiceImpl)

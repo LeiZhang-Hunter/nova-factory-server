@@ -115,6 +115,7 @@ func NewGinEngine(
 		ai.Dataset.PrivateRoutes(group)    // 工业智能体
 		ai.Prediction.PrivateRoutes(group) // 工业智能体
 		ai.Exception.PrivateRoutes(group)  // 工业智能体
+		ai.Control.PrivateRoutes(group)
 
 		craft.CraftRoute.PrivateRoutes(group)     //工艺路线
 		craft.Process.PrivateRoutes(group)        //工序设置

@@ -198,10 +198,14 @@ func wireApp() (*gin.Engine, func(), error) {
 	iAiPredictionListDao := aiDataSetDaoImpl.NewIAiPredictionListDaoImpl(db)
 	iAiPredictionService := aiDataSetServiceImpl.NewIAiPredictionServiceImpl(iAiPredictionListDao)
 	prediction := aiDataSetController.NewPrediction(iAiPredictionService)
+	iAiPredictionControlDao := aiDataSetDaoImpl.NewIAiPredictionControlDaoImpl(db)
+	iAiPredictionControlService := aiDataSetServiceImpl.NewIAiPredictionControlServiceImpl(iAiPredictionControlDao)
+	control := aiDataSetController.NewControl(iAiPredictionControlService)
 	aiDataSet := &aiDataSetController.AiDataSet{
 		Dataset:    dataset,
 		Exception:  exception,
 		Prediction: prediction,
+		Control:    control,
 	}
 	iCraftRouteDao := craftRouteDaoImpl.NewCraftRouteDaoImpl(db)
 	iProcessDao := craftRouteDaoImpl.NewIProcessDaoImpl(db)
