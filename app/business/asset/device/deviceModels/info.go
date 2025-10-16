@@ -48,9 +48,18 @@ type NetworkInfo struct {
 	Slave int `json:"Name,omitempty"`
 }
 
+type MqttInfo struct {
+	Address  string `json:"address"`
+	Topic    string `json:"topic"`
+	ClientId string `json:"client_id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 // "{\"localInfo\":[{\"salve\":1,\"address\":\"81.71.98.26:11808\"}]}"
 type ExtensionInfo struct {
-	LocalInfo []LocalInfo `json:"localInfo,omitempty"`
+	LocalInfo     []LocalInfo `json:"localInfo,omitempty"`
+	LocalMqttInfo []MqttInfo  `json:"mqttInfo,omitempty"`
 	//NetworkInfo NetworkInfo `json:"networkInfo,omitempty"`
 }
 

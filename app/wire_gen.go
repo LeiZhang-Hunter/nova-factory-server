@@ -251,8 +251,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Schedule:        schedule,
 	}
 	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
-	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao)
-	metric := metricController.NewMetric(iMetricService, deviceMonitorService)
+	metric := metricController.NewMetric(iMetricService)
 	metricServer := &metricController.MetricServer{
 		Metric: metric,
 	}
@@ -270,6 +269,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		IotAgent:  iotAgent,
 		Config:    daemonizeControllerConfig,
 	}
+	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao)
 	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
 	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao)
 	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao)

@@ -11,6 +11,7 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/daemonize/daemonizeService"
+	device2 "nova-factory-server/app/constant/device"
 	"nova-factory-server/app/utils/gateway/v1/api"
 	logalertIntercept "nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/alertwebhook"
@@ -91,20 +92,37 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	var templatesMap map[uint64][]*deviceModels.SysModbusDeviceConfigData = make(map[uint64][]*deviceModels.SysModbusDeviceConfigData)
 	piplines := pipeline.NewPipelineConfig()
 	pipelinesConfig := pipeline.NewConfig()
+
+	// 组装设备
 	for _, device := range devices {
-		if len(device.ExtensionInfo.LocalInfo) == 0 {
+		if len(device.ExtensionInfo.LocalInfo) == 0 && len(device.ExtensionInfo.LocalMqttInfo) == 0 {
 			continue
 		}
-		address := device.ExtensionInfo.LocalInfo[0].Address
-		if address == "" {
-			continue
-		}
-		if deviceAddressMap[address] == nil {
-			deviceAddressMap[address] = make([]*deviceModels.DeviceVO, 0)
-		}
-		deviceAddressMap[address] = append(deviceAddressMap[address], device)
-		if device.DeviceProtocolId != 0 {
-			templateIdMap[device.DeviceProtocolId] = device.DeviceProtocolId
+
+		if device.ProtocolType == device2.MQTT {
+			address := device.ExtensionInfo.LocalMqttInfo[0].Address
+			if address == "" {
+				continue
+			}
+			if deviceAddressMap[address] == nil {
+				deviceAddressMap[address] = make([]*deviceModels.DeviceVO, 0)
+			}
+			deviceAddressMap[address] = append(deviceAddressMap[address], device)
+			if device.DeviceProtocolId != 0 {
+				templateIdMap[device.DeviceProtocolId] = device.DeviceProtocolId
+			}
+		} else if device.ProtocolType == device2.MODBUS_TCP {
+			address := device.ExtensionInfo.LocalInfo[0].Address
+			if address == "" {
+				continue
+			}
+			if deviceAddressMap[address] == nil {
+				deviceAddressMap[address] = make([]*deviceModels.DeviceVO, 0)
+			}
+			deviceAddressMap[address] = append(deviceAddressMap[address], device)
+			if device.DeviceProtocolId != 0 {
+				templateIdMap[device.DeviceProtocolId] = device.DeviceProtocolId
+			}
 		}
 	}
 

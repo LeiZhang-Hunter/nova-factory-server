@@ -9,6 +9,7 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/constant/protocols"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
@@ -151,13 +152,24 @@ func (s *sysDeviceDataDao) GetLocalByGateWayId(c *gin.Context, id int64) ([]*dev
 			continue
 		}
 		fmt.Println(v.Extension)
-		var ext deviceModels.ExtensionInfo
-		err := json.Unmarshal([]byte(v.Extension), &ext)
-		if err != nil {
-			continue
+		if v.ProtocolType == device.MQTT {
+			var ext deviceModels.ExtensionInfo
+			err := json.Unmarshal([]byte(v.Extension), &ext)
+			if err != nil {
+				continue
+			}
+			dto[k].ExtensionInfo = &ext
+			res = append(res, dto[k])
+		} else if v.ProtocolType == device.MODBUS_TCP {
+			var ext deviceModels.ExtensionInfo
+			err := json.Unmarshal([]byte(v.Extension), &ext)
+			if err != nil {
+				continue
+			}
+			dto[k].ExtensionInfo = &ext
+			res = append(res, dto[k])
 		}
-		dto[k].ExtensionInfo = &ext
-		res = append(res, dto[k])
+
 	}
 	return res, ret.Error
 }
