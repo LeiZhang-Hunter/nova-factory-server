@@ -8,6 +8,7 @@ var (
 	MODBUS_TCP = "modbus-tcp"
 	MODBUS_RTU = "modbus-rtu"
 	MLINK_TCP  = "mlink-tcp"
+	MQTT       = "mqtt"
 )
 
 func MakeDeviceKey(deviceId uint64) string {
@@ -15,7 +16,7 @@ func MakeDeviceKey(deviceId uint64) string {
 }
 
 func CheckProtocol(protocol string) bool {
-	if protocol != MODBUS_TCP && protocol != MODBUS_RTU && protocol != MLINK_TCP {
+	if protocol != MODBUS_TCP && protocol != MODBUS_RTU && protocol != MLINK_TCP && protocol != MQTT {
 		return false
 	}
 	return true

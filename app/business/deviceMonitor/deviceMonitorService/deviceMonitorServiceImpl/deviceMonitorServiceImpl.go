@@ -3,7 +3,6 @@ package deviceMonitorServiceImpl
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceDao"
@@ -91,7 +90,6 @@ func (d *DeviceMonitorServiceImpl) List(c *gin.Context, req *deviceModels.Device
 		dataMap[uint64(dataValue.DeviceConfigID)] = dataValue
 	}
 
-	fmt.Println(dataMap)
 	for k, v := range list.Rows {
 		for templateId, templateValue := range v.TemplateList {
 			for dataId, _ := range templateValue {

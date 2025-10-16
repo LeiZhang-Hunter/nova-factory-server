@@ -24,6 +24,9 @@ func (d *DeviceMonitor) PrivateRoutes(router *gin.RouterGroup) {
 	monitor.GET("/list", middlewares.HasPermission("device:monitor:list"), d.List)
 	monitor.POST("/metric", middlewares.HasPermission("device:monitor:metric"), d.Metric)
 	monitor.POST("/predict", middlewares.HasPermission("device:monitor:metric"), d.Predict)
+
+	group := router.Group("/api/v1")
+	group.GET("/metric/predict", d.MetricPredict)
 }
 
 // List 设备监控
@@ -93,4 +96,27 @@ func (d *DeviceMonitor) Predict(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, list)
+}
+
+// MetricPredict 指标预测
+// @Summary 导入告警数据
+// @Description 导入告警数据
+// @Tags 告警管理/告警数据管理
+// @Param object body alertModels.AlertLogData true "助理列表参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /api/v1/predict/metric [post]
+func (d *DeviceMonitor) MetricPredict(c *gin.Context) {
+	req := new(metricModels.MetricQueryReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	data, err := d.service.Predict(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
 }

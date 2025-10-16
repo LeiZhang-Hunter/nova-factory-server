@@ -155,10 +155,6 @@ func (d *DeviceService) SelectDeviceList(c *gin.Context, req *deviceModels.Devic
 			json.Unmarshal([]byte((v.Action)), &actions)
 		}
 
-		var extensions map[string]string = make(map[string]string)
-		if len(v.Extension) != 0 {
-			json.Unmarshal([]byte((v.Extension)), &extensions)
-		}
 		var groupName string
 		groupVo, ok := groupVoMap[v.DeviceGroupId]
 		if ok {

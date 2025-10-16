@@ -7,7 +7,6 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
-	"nova-factory-server/app/utils/gateway/v1/api"
 )
 
 type TemplateData struct {
@@ -61,21 +60,21 @@ func (t *TemplateData) Set(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-
-	if !api.CheckByteOrder(info.Sort) {
-		baizeContext.Waring(c, "数据排序参数错误")
-		return
-	}
-
-	if !api.CheckStorageType(info.StorageType) {
-		baizeContext.Waring(c, "存储策略错误")
-		return
-	}
-
-	if !api.CheckFunctionCode(info.FunctionCode) {
-		baizeContext.Waring(c, "功能码输入错误")
-		return
-	}
+	//
+	//if !api.CheckByteOrder(info.Sort) {
+	//	baizeContext.Waring(c, "数据排序参数错误")
+	//	return
+	//}
+	//
+	//if !api.CheckStorageType(info.StorageType) {
+	//	baizeContext.Waring(c, "存储策略错误")
+	//	return
+	//}
+	//
+	//if !api.CheckFunctionCode(info.FunctionCode) {
+	//	baizeContext.Waring(c, "功能码输入错误")
+	//	return
+	//}
 
 	tempInfo, err := t.templateService.GetById(c, info.TemplateID)
 	if err != nil || tempInfo == nil {

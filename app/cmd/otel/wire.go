@@ -15,6 +15,7 @@ import (
 
 func wireApp() (*grpc.Server, func(), error) {
 	panic(wire.Build(
+
 		metricDaoIMpl.ProviderSet,
 		metricServiceImpl.ProviderSet,
 		metricController.ProviderSet,
