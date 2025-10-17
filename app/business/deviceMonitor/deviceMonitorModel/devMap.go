@@ -28,6 +28,7 @@ type SysIotDbDevMapData struct {
 	Device     string `gorm:"column:device;not null;comment:设备名字" json:"device"`                     // 设备名字
 	DataName   string `gorm:"column:data_name;not null;comment:数据名字" json:"data_name"`               // 数据名字
 	Unit       string `gorm:"column:unit;not null;comment:单位" json:"unit"`                           // 数据名字
+	DevName    string `gorm:"-" json:"dev_name"`                                                     //设备名字
 }
 
 // DevData 设备上报的数据
@@ -40,6 +41,7 @@ type DevData struct {
 	TemplateID int64     `json:"template_id,string"` // 模板id
 	DataID     int64     `json:"data_id,string"`     // 测点id
 	Dev        string    `json:"dev"`
+	DevName    string    `json:"dev_name"` //设备名字
 }
 
 type DevDataReq struct {

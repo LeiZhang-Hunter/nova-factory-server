@@ -35,7 +35,11 @@ func (i *IDeviceDataReportDaoImpl) DevList(c *gin.Context) ([]deviceMonitorModel
 
 func (i *IDeviceDataReportDaoImpl) GetDevList(c *gin.Context, dev []string) ([]deviceMonitorModel.SysIotDbDevMapData, error) {
 	var list []deviceMonitorModel.SysIotDbDevMapData
-	ret := i.db.Table(i.tableName).Where("device in (?)", dev).Where("state = ?", commonStatus.NORMAL).Limit(500).Find(&list)
+	db := i.db.Table(i.tableName)
+	if len(dev) != 0 {
+		db = db.Where("device in (?)", dev)
+	}
+	ret := db.Where("state = ?", commonStatus.NORMAL).Limit(500).Find(&list)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}

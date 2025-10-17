@@ -272,7 +272,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao)
 	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
 	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao)
-	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao)
+	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	deviceReport := deviceMonitorController.NewDeviceReport(iMetricService, iDeviceDataReportService, iDevMapService)
 	deviceMonitorControllerDeviceMonitorController := &deviceMonitorController.DeviceMonitorController{
 		DeviceMonitor: deviceMonitor,

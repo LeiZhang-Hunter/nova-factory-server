@@ -97,6 +97,7 @@ func (d *DeviceReport) List(c *gin.Context) {
 		list.Rows[k].DeviceID = value.DeviceID
 		list.Rows[k].TemplateID = value.TemplateID
 		list.Rows[k].DataID = value.DataID
+		list.Rows[k].DevName = value.DevName
 	}
 	baizeContext.SuccessData(c, list)
 }

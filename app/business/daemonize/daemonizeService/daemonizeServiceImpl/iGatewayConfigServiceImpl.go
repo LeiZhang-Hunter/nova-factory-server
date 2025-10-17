@@ -12,15 +12,16 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/daemonize/daemonizeService"
 	device2 "nova-factory-server/app/constant/device"
-	"nova-factory-server/app/utils/gateway/v1/api"
 	logalertIntercept "nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/alertwebhook"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/metric_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/bhps7"
+	"nova-factory-server/app/utils/gateway/v1/config/app/source/mqtt"
 	"nova-factory-server/app/utils/gateway/v1/config/cfg"
 	"nova-factory-server/app/utils/gateway/v1/config/interceptor"
 	"nova-factory-server/app/utils/gateway/v1/config/logalert"
 	"nova-factory-server/app/utils/gateway/v1/config/pipeline"
+	"nova-factory-server/app/utils/gateway/v1/config/render"
 	"nova-factory-server/app/utils/gateway/v1/config/sink"
 	source2 "nova-factory-server/app/utils/gateway/v1/config/source"
 	"nova-factory-server/app/utils/snowflake"
@@ -51,33 +52,6 @@ func NewIGatewayConfigServiceImpl(
 	}
 }
 
-func OfBhps7Device(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDeviceConfigData) *bhps7.Device {
-	var device bhps7.Device
-	device.DeviceId = strconv.FormatUint(vo.DeviceId, 10)
-	if vo.Name != nil {
-		device.Name = *vo.Name
-	} else {
-		device.Name = strconv.FormatUint(vo.DeviceId, 10)
-	}
-	device.Template = make([]bhps7.DataTypeConfig, 0)
-	for _, v := range data {
-		device.Template = append(device.Template, bhps7.DataTypeConfig{
-			Name:         v.Name,
-			Protocol:     "",
-			DataId:       uint64(v.DeviceConfigID),
-			Annotation:   v.Name,
-			DataFormat:   api.DataValueType(v.DataFormat),
-			Unit:         v.Unit,
-			TemplateId:   uint64(v.TemplateID),
-			Position:     uint16(v.Register),
-			FunctionCode: uint16(v.FunctionCode),
-			Sort:         api.ByteOrder(v.Sort),
-		})
-	}
-
-	return &device
-}
-
 // Generate 渲染Agent配置
 func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*pipeline.PipelineConfig, error) {
 	// 生成配置
@@ -95,6 +69,11 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 
 	// 组装设备
 	for _, device := range devices {
+
+		if device.ExtensionInfo == nil {
+			continue
+		}
+
 		if len(device.ExtensionInfo.LocalInfo) == 0 && len(device.ExtensionInfo.LocalMqttInfo) == 0 {
 			continue
 		}
@@ -157,34 +136,87 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	//构建source
 	for addr, devicesData := range deviceAddressMap {
 		enabled := true
-		source := source2.Config{
-			Enabled: &enabled,
-			Name:    fmt.Sprintf("gateway-%s", addr),
-			Type:    "bhp_s7_gateway",
-		}
 
-		var config bhps7.Config
-		config.Address = addr
-		config.Devices = make([]bhps7.Device, 0)
-
-		for _, d := range devicesData {
-			templateDatas, ok := templatesMap[d.DeviceProtocolId]
-			if !ok {
-				continue
-			}
-			bhps7Device := OfBhps7Device(d, templateDatas)
-			if bhps7Device == nil {
-				continue
-			}
-			config.Devices = append(config.Devices, *bhps7Device)
-		}
-		pack, err := cfg.Pack(config)
-		if err != nil {
-			zap.L().Error("cfg.Pack() failed", zap.Error(err))
+		if len(devicesData) == 0 {
 			continue
 		}
-		source.Properties = pack
-		pipelinesConfig.Sources = append(pipelinesConfig.Sources, &source)
+
+		if devicesData[0].ExtensionInfo == nil {
+			continue
+		}
+
+		if len(devicesData[0].ExtensionInfo.LocalMqttInfo) == 0 && len(devicesData[0].ExtensionInfo.LocalInfo) == 0 {
+			continue
+		}
+
+		deviceType := devicesData[0].ProtocolType
+
+		if deviceType == device2.MODBUS_TCP {
+			source := source2.Config{
+				Enabled: &enabled,
+				Name:    fmt.Sprintf("gateway-%s", addr),
+				Type:    "bhp_s7_gateway",
+			}
+
+			var config bhps7.Config
+			config.Address = addr
+			config.Devices = make([]bhps7.Device, 0)
+
+			for _, d := range devicesData {
+				templateDatas, ok := templatesMap[d.DeviceProtocolId]
+				if !ok {
+					continue
+				}
+				bhps7Device := render.OfBhps7Device(d, templateDatas)
+				if bhps7Device == nil {
+					continue
+				}
+				config.Devices = append(config.Devices, *bhps7Device)
+			}
+			pack, err := cfg.Pack(config)
+			if err != nil {
+				zap.L().Error("cfg.Pack() failed", zap.Error(err))
+				continue
+			}
+			source.Properties = pack
+			pipelinesConfig.Sources = append(pipelinesConfig.Sources, &source)
+		} else if deviceType == device2.MQTT {
+			username := devicesData[0].ExtensionInfo.LocalMqttInfo[0].Username
+			password := devicesData[0].ExtensionInfo.LocalMqttInfo[0].Password
+			clientId := devicesData[0].ExtensionInfo.LocalMqttInfo[0].ClientId
+			source := source2.Config{
+				Enabled: &enabled,
+				Name:    fmt.Sprintf("gateway-%s", addr),
+				Type:    "mqtt",
+			}
+
+			var config mqtt.Config
+			config.Address = addr
+			config.Username = username
+			config.ClientId = clientId
+			config.Password = password
+			config.Devices = make([]mqtt.Device, 0)
+
+			for _, d := range devicesData {
+				templateDatas, ok := templatesMap[d.DeviceProtocolId]
+				if !ok {
+					continue
+				}
+				mqttDevice := render.OfMqttDevice(d, templateDatas)
+				if mqttDevice == nil {
+					continue
+				}
+				mqttDevice.Topic = d.ExtensionInfo.LocalMqttInfo[0].Topic
+				config.Devices = append(config.Devices, *mqttDevice)
+			}
+			pack, err := cfg.Pack(config)
+			if err != nil {
+				zap.L().Error("cfg.Pack() failed", zap.Error(err))
+				continue
+			}
+			source.Properties = pack
+			pipelinesConfig.Sources = append(pipelinesConfig.Sources, &source)
+		}
 
 		var exportConfig metric_exporter.Config
 		exportConfig.Address = "localhost:6000"
