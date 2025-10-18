@@ -99,6 +99,9 @@ func (s *sysDeviceDataDao) SelectDeviceList(c *gin.Context, req *deviceModels.De
 	if req != nil && req.ControlType != nil {
 		db = db.Where("control_type = ?", *req.ControlType)
 	}
+	if req != nil && req.Type != nil && *req.Type != "" {
+		db = db.Where("type = ?", *req.Type)
+	}
 	size := 0
 	if req == nil || req.Size <= 0 {
 		size = 20
@@ -176,7 +179,16 @@ func (s *sysDeviceDataDao) GetLocalByGateWayId(c *gin.Context, id int64) ([]*dev
 
 func (s *sysDeviceDataDao) GetByIdString(c *gin.Context, id string) (*deviceModels.DeviceVO, error) {
 	var info *deviceModels.DeviceVO
-	ret := s.ms.Table(s.tableName).Where("device_id = ?", id).First(&info)
+	ret := s.ms.Table(s.tableName).Where("device_id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&info)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	return info, nil
+}
+
+func (s *sysDeviceDataDao) GetById(c *gin.Context, id int64) (*deviceModels.DeviceVO, error) {
+	var info *deviceModels.DeviceVO
+	ret := s.ms.Table(s.tableName).Where("device_id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&info)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}

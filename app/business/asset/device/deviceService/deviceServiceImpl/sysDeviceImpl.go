@@ -239,3 +239,11 @@ func (d *DeviceService) unInstallTable(c *gin.Context, info *deviceModels.Device
 		}
 	}
 }
+
+func (d *DeviceService) GetById(c *gin.Context, id int64) (*deviceModels.DeviceVO, error) {
+	device, err := d.iDeviceDao.GetById(c, id)
+	if err != nil {
+		zap.L().Error("Get device error", zap.Error(err))
+	}
+	return device, err
+}

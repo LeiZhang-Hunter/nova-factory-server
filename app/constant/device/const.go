@@ -2,6 +2,12 @@ package device
 
 import "fmt"
 
+type RUN_STATUS int
+
+var STOPPING RUN_STATUS = 0
+var WAITING RUN_STATUS = 1
+var RUNNING RUN_STATUS = 2
+
 var (
 	DEVICE_KEY = "DEVICE_KEY_%d"
 

@@ -10,4 +10,5 @@ type IDeviceService interface {
 	UpdateDevice(c *gin.Context, job *deviceModels.DeviceInfo) (*deviceModels.DeviceVO, error)
 	SelectDeviceList(c *gin.Context, req *deviceModels.DeviceListReq) (*deviceModels.DeviceInfoListValue, error)
 	DeleteByDeviceIds(c *gin.Context, ids []int64) error
+	GetById(c *gin.Context, id int64) (*deviceModels.DeviceVO, error)
 }

@@ -249,3 +249,41 @@ CREATE TABLE `sys_building`  (
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '设备管理' ROW_FORMAT = Dynamic;
+
+CREATE TABLE `sys_building`  (
+     `id` bigint(20) NOT NULL COMMENT 'id',
+     `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '建筑物名称',
+     `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '建筑物编号',
+     `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '建筑物类型',
+     `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '建筑物状态',
+     `area` bigint(20) NOT NULL COMMENT '建筑面积',
+     `floors` bigint(20) NOT NULL COMMENT '楼层数',
+     `year` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '建造年份',
+     `lifeYears` bigint(20) NOT NULL COMMENT '使用年限',
+     `manager` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '负责人w',
+     `phone` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '单位',
+     `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '单位',
+     `remark` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '单位',
+     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+     PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '设备管理' ROW_FORMAT = Dynamic;
+
+CREATE TABLE `sys_device_electric_setting`  (
+     `id` bigint(20) NOT NULL COMMENT 'id',
+     `device_id` bigint(20) NOT NULL COMMENT 'device_id',
+     `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '配置名称',
+     `expression` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL  COMMENT '表达式',
+     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+     PRIMARY KEY (`id`) USING BTREE,
+     UNIQUE KEY `uniq_device_id` (`device_id`) USING BTREE
+) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '设备电流配置，用来计算设备电流是待机 停机 还是 运行' ROW_FORMAT = Dynamic;

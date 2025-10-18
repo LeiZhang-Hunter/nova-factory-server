@@ -15,4 +15,5 @@ type IDeviceDao interface {
 	GetLocalByGateWayId(c *gin.Context, id int64) ([]*deviceModels.DeviceVO, error)
 	GetByIds(c *gin.Context, ids []int64) ([]*deviceModels.DeviceVO, error)
 	GetByIdString(c *gin.Context, id string) (*deviceModels.DeviceVO, error)
+	GetById(c *gin.Context, id int64) (*deviceModels.DeviceVO, error)
 }

@@ -83,6 +83,10 @@ func (i *IDeviceDataReportDaoImpl) Remove(c *gin.Context, dev string) error {
 func (i *IDeviceDataReportDaoImpl) List(c *gin.Context, req *deviceMonitorModel.DevListReq) (*deviceMonitorModel.DevListResp, error) {
 	db := i.db.Table(i.tableName)
 
+	if req != nil && req.DeviceID != 0 {
+		db = db.Where("device_id = ?", req.DeviceID)
+	}
+
 	if req != nil && req.DataName != "" {
 		db = db.Where("data_name like ?", "%"+req.DataName+"%")
 	}

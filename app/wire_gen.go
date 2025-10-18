@@ -106,6 +106,22 @@ func wireApp() (*gin.Engine, func(), error) {
 	permission := systemController.NewPermission(iSysPermissionService)
 	iSelectBoxService := systemServiceImpl.NewSelectService(iPermissionDao, iDeptDao)
 	selectBox := systemController.NewSelectBox(iSelectBoxService)
+	db := mysql.NewDB()
+	iDeviceElectricDao := systemDaoImpl.NewIDeviceElectricDaoImpl(db)
+	iDeviceDao := deviceDaoImpl.NewSysDeviceDaoImpl(db)
+	iDeviceElectricService := systemServiceImpl.NewIDeviceElectricServiceImpl(iDeviceElectricDao, iDeviceDao)
+	iDeviceGroupDao := deviceDaoImpl.NewSysDeviceGroupDaoImpl(db)
+	clickHouse, err := clickhouse.NewClickHouse()
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	iotDb := iotdb.NewIotDb()
+	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
+	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
+	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
+	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao)
+	electric := systemController.NewElectric(iDeviceElectricService, iDeviceService)
 	system := &systemController.System{
 		Login:      login,
 		User:       user,
@@ -121,6 +137,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Notice:     notice,
 		Permission: permission,
 		SelectBox:  selectBox,
+		Electric:   electric,
 	}
 	infoServer := monitorController.NewInfoServer()
 	iUserOnlineService := monitorServiceImpl.NewUserOnlineService(cacheCache)
@@ -146,19 +163,6 @@ func wireApp() (*gin.Engine, func(), error) {
 	tool := &toolController.Tool{
 		GenTable: genTable,
 	}
-	db := mysql.NewDB()
-	iDeviceDao := deviceDaoImpl.NewSysDeviceDaoImpl(db)
-	iDeviceGroupDao := deviceDaoImpl.NewSysDeviceGroupDaoImpl(db)
-	clickHouse, err := clickhouse.NewClickHouse()
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	iotDb := iotdb.NewIotDb()
-	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
-	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
-	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
-	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao)
 	deviceInfo := deviceController.NewDeviceInfo(iDeviceService)
 	iDeviceGroupService := deviceServiceImpl.NewDeviceGroupService(iDeviceGroupDao, iUserDao)
 	deviceGroup := deviceController.NewDeviceGroup(iDeviceGroupService)

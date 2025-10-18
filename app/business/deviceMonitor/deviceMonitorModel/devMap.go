@@ -60,6 +60,7 @@ type DevDataResp struct {
 }
 
 type DevListReq struct {
+	DeviceID int64  `form:"device_id,string"`                                        // 设备id
 	DataName string `gorm:"column:data_name;not null;comment:数据名字" form:"data_name"` // 数据名字
 	baize.BaseEntityDQL
 }
