@@ -109,8 +109,6 @@ func wireApp() (*gin.Engine, func(), error) {
 	db := mysql.NewDB()
 	iDeviceElectricDao := systemDaoImpl.NewIDeviceElectricDaoImpl(db)
 	iDeviceDao := deviceDaoImpl.NewSysDeviceDaoImpl(db)
-	iDeviceElectricService := systemServiceImpl.NewIDeviceElectricServiceImpl(iDeviceElectricDao, iDeviceDao)
-	iDeviceGroupDao := deviceDaoImpl.NewSysDeviceGroupDaoImpl(db)
 	clickHouse, err := clickhouse.NewClickHouse()
 	if err != nil {
 		cleanup()
@@ -118,6 +116,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	iotDb := iotdb.NewIotDb()
 	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
+	iDeviceElectricService := systemServiceImpl.NewIDeviceElectricServiceImpl(iDeviceElectricDao, iDeviceDao, iMetricDao)
+	iDeviceGroupDao := deviceDaoImpl.NewSysDeviceGroupDaoImpl(db)
 	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
 	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
 	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao)

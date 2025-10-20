@@ -1,10 +1,13 @@
 package systemServiceImpl
 
 import (
+	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
+	"nova-factory-server/app/business/metric/device/metricDao"
 	"nova-factory-server/app/business/system/systemDao"
 	"nova-factory-server/app/business/system/systemModels"
 	"nova-factory-server/app/business/system/systemService"
@@ -13,16 +16,29 @@ import (
 type IDeviceElectricServiceImpl struct {
 	dao       systemDao.IDeviceElectricDao
 	deviceDao deviceDao.IDeviceDao
+	metricDao metricDao.IMetricDao
 }
 
-func NewIDeviceElectricServiceImpl(dao systemDao.IDeviceElectricDao, deviceDao deviceDao.IDeviceDao) systemService.IDeviceElectricService {
+func NewIDeviceElectricServiceImpl(dao systemDao.IDeviceElectricDao, deviceDao deviceDao.IDeviceDao, metricDao metricDao.IMetricDao) systemService.IDeviceElectricService {
 	return &IDeviceElectricServiceImpl{
 		dao:       dao,
 		deviceDao: deviceDao,
+		metricDao: metricDao,
 	}
 }
 
 func (i *IDeviceElectricServiceImpl) Set(c *gin.Context, setting *systemModels.SysDeviceElectricSettingVO) (*systemModels.SysDeviceElectricSetting, error) {
+	if setting == nil {
+		return nil, errors.New("setting is nil")
+	}
+	if setting.ID == 0 {
+		err := i.metricDao.InstallRunStatusDevice(c, setting.DeviceID)
+		if err != nil {
+			zap.L().Error("install device run status dev table error", zap.Error(err))
+		}
+	} else {
+
+	}
 	return i.dao.Set(c, setting)
 }
 func (i *IDeviceElectricServiceImpl) List(c *gin.Context, req *systemModels.SysDeviceElectricSettingDQL) (*systemModels.SysDeviceElectricSettingData, error) {
@@ -74,6 +90,20 @@ func (i *IDeviceElectricServiceImpl) List(c *gin.Context, req *systemModels.SysD
 	return list, nil
 }
 func (i *IDeviceElectricServiceImpl) Remove(c *gin.Context, ids []string) error {
+	list, err := i.dao.GetByIds(c, ids)
+	if err != nil {
+		zap.L().Error("get dev list error", zap.Error(err))
+		return err
+	}
+	if len(list) != 0 {
+		for _, v := range list {
+			err = i.metricDao.UnInStallRunStatusDevice(c, v.DeviceID)
+			if err != nil {
+				zap.L().Error("uninstall device run status dev table error", zap.Error(err))
+			}
+		}
+	}
+	fmt.Print(list)
 	return i.dao.Remove(c, ids)
 }
 

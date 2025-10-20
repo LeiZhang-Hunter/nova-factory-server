@@ -268,7 +268,8 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		Name:    "notifier",
 		Type:    "notifier",
 	}
-	alertConfig.Sources = append(schedulerConfig.Sources, &notifierSourceConfig)
+	alertConfig.Sources = append(alertConfig.Sources, &notifierSourceConfig)
+	alertConfig.Name = fmt.Sprintf("gateway-notifier-%d", gatewayId)
 
 	interceptorConfig := interceptor.Config{
 		Enabled: &scheduleEnabled,

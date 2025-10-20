@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
@@ -24,11 +25,11 @@ func newIClickHouseExport(clickhouse *clickhouse.ClickHouse) iDaoExport {
 	}
 }
 
-func (m *iClickHouseExport) Export(ctx context.Context, data []*metricModels.NovaMetricsDevice) error {
+func (i *iClickHouseExport) Export(ctx context.Context, data []*metricModels.NovaMetricsDevice) error {
 	if len(data) == 0 {
 		return nil
 	}
-	ret := m.clickhouse.DB().Table(m.tableName).Debug().Create(data)
+	ret := i.clickhouse.DB().Table(i.tableName).Debug().Create(data)
 	if ret.Error != nil {
 		zap.L().Error("create device metric data error:", zap.Error(ret.Error))
 		return ret.Error
@@ -36,12 +37,12 @@ func (m *iClickHouseExport) Export(ctx context.Context, data []*metricModels.Nov
 	return ret.Error
 }
 
-func (m *iClickHouseExport) Metric(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error) {
+func (i *iClickHouseExport) Metric(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error) {
 	if req == nil {
 		return nil, nil
 	}
 
-	model := m.clickhouse.DB().Table(m.tableName)
+	model := i.clickhouse.DB().Table(i.tableName)
 
 	var startTime string
 	if req.Start > 0 {
@@ -91,10 +92,10 @@ func (m *iClickHouseExport) Metric(c *gin.Context, req *metricModels.MetricQuery
 	return &data, nil
 }
 
-func (m *iClickHouseExport) InstallDevice(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData) error {
+func (i *iClickHouseExport) InstallDevice(c *gin.Context, deviceId int64, device *deviceModels.SysModbusDeviceConfigData) error {
 	return nil
 }
-func (m *iClickHouseExport) UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error {
+func (i *iClickHouseExport) UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error {
 	return nil
 }
 
@@ -115,4 +116,18 @@ func (i *iClickHouseExport) Count(c *gin.Context, req *deviceMonitorModel.DevDat
 
 func (i *iClickHouseExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error) {
 	return nil, nil
+}
+
+// InstallRunStatusDevice 运行状态设备模板
+func (i *iClickHouseExport) InstallRunStatusDevice(c *gin.Context, deviceId int64) error {
+	return nil
+}
+
+// UnInStallRunStatusDevice 卸载设备运行状态模板
+func (i *iClickHouseExport) UnInStallRunStatusDevice(c *gin.Context, deviceId int64) error {
+	return nil
+}
+
+func (i *iClickHouseExport) ExportTimeData(ctx context.Context, data map[string][]*v1.ResourceTimeMetrics) error {
+	return nil
 }

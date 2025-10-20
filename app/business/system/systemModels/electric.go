@@ -8,7 +8,7 @@ import (
 )
 
 type SysDeviceElectricSetting struct {
-	ID             int64       `gorm:"column:id;primaryKey;comment:id" json:"id"`                           // id
+	ID             int64       `gorm:"column:id;primaryKey;comment:id" json:"id,string"`                    // id
 	DeviceID       int64       `gorm:"column:device_id;not null;comment:device_id" json:"device_id,string"` // device_id
 	Name           string      `gorm:"column:name;not null;comment:智能预警名称" json:"name"`                     // 智能预警名称
 	DevName        string      `gorm:"-" json:"dev_name"`                                                   // 设备名字

@@ -156,3 +156,32 @@ func (m *IMetricServiceImpl) List(c *gin.Context, req *deviceMonitorModel.DevDat
 
 	return list, nil
 }
+
+func (m *IMetricServiceImpl) ExportTimeData(c context.Context, request *v1.ExportTimeDataRequest) error {
+	if request == nil {
+		return nil
+	}
+
+	if len(request.ResourceMetrics) == 0 {
+		return nil
+	}
+
+	var list map[string][]*v1.ResourceTimeMetrics = make(map[string][]*v1.ResourceTimeMetrics)
+	for _, v := range request.ResourceMetrics {
+		_, ok := list[v.Table]
+		if !ok {
+			list[v.Table] = make([]*v1.ResourceTimeMetrics, 0)
+		}
+		list[v.Table] = append(list[v.Table], v)
+	}
+
+	if len(list) == 0 {
+		return nil
+	}
+	err := m.dao.ExportTimeData(c, list)
+	if err != nil {
+		zap.L().Error("export time data error", zap.Error(err))
+		return err
+	}
+	return nil
+}

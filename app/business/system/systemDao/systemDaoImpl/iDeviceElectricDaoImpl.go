@@ -2,6 +2,7 @@ package systemDaoImpl
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -96,13 +97,17 @@ func (i *IDeviceElectricDaoImpl) List(c *gin.Context, req *systemModels.SysDevic
 }
 
 func (i *IDeviceElectricDaoImpl) Remove(c *gin.Context, ids []string) error {
-	ret := i.db.Table(i.table).Where("template_id in (?)", ids).Update("state", commonStatus.DELETE)
+	var info systemModels.SysDeviceElectricSetting
+	ret := i.db.Table(i.table).Where("id in (?)", ids).Delete(&info)
 	return ret.Error
 }
 
 func (i *IDeviceElectricDaoImpl) GetByDeviceId(c *gin.Context, id int64) (*systemModels.SysDeviceElectricSetting, error) {
 	var info *systemModels.SysDeviceElectricSetting
 	ret := i.db.Table(i.table).Where("device_id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&info)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	if ret.Error != nil {
 		return nil, ret.Error
 	}
@@ -116,4 +121,16 @@ func (i *IDeviceElectricDaoImpl) GetByNoDeviceId(c *gin.Context, id int64, devic
 		return nil, ret.Error
 	}
 	return info, nil
+}
+
+func (i *IDeviceElectricDaoImpl) GetByIds(c *gin.Context, ids []string) ([]*systemModels.SysDeviceElectricSetting, error) {
+	var dto []*systemModels.SysDeviceElectricSetting
+	ret := i.db.Table(i.table).Debug().Where("id in (?)", ids).Where("state = ?", commonStatus.NORMAL).First(&dto)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	return dto, nil
 }

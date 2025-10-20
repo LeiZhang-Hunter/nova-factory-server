@@ -29,8 +29,22 @@ func (m *Metric) PrivateRoutes(router *gin.RouterGroup) {
 func (m *Metric) PublicRoutes(router *gin.RouterGroup) {
 }
 
+// ReportDeviceInfo 导入设备指标
 func (m *Metric) ReportDeviceInfo(c context.Context, request *v1.ExportMetricsServiceRequest) (*v1.NodeRes, error) {
 	err := m.service.Export(c, request)
+	if err != nil {
+		return &v1.NodeRes{
+			Code: -1,
+		}, err
+	}
+	return &v1.NodeRes{
+		Code: 0,
+	}, nil
+}
+
+// ReportTimeData 更新时序数据
+func (m *Metric) ReportTimeData(c context.Context, request *v1.ExportTimeDataRequest) (*v1.NodeRes, error) {
+	err := m.service.ExportTimeData(c, request)
 	if err != nil {
 		return &v1.NodeRes{
 			Code: -1,

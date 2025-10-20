@@ -2,8 +2,10 @@ package iotdb
 
 import (
 	"errors"
+	"fmt"
 	"github.com/apache/iotdb-client-go/client"
 	"go.uber.org/zap"
+	iotdb2 "nova-factory-server/app/constant/iotdb"
 )
 
 type IotDb struct {
@@ -29,7 +31,10 @@ func NewIotDb() *IotDb {
 
 	defer pool.PutBack(session)
 
-	session.ExecuteStatement("create device template nova_device_template ALIGNED (value DOUBLE)")
+	// 创建设备数据采集模板
+	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (value DOUBLE)", iotdb2.NOVA_DEVICE_TEMPLATE))
+	// 创建设备运行时间统计模板
+	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (duration INT64, status INT64)", iotdb2.NOVA_DEVICE_RUN_TEMPLATE))
 
 	return db
 }

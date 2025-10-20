@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
 	"github.com/spf13/viper"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
@@ -66,6 +67,16 @@ func (m *MetricDaoImpl) UnInStallDevice(c *gin.Context, deviceId int64, template
 	return m.exporter.UnInStallDevice(c, deviceId, templateId, dataId)
 }
 
+// InstallRunStatusDevice 运行状态设备模板
+func (m *MetricDaoImpl) InstallRunStatusDevice(c *gin.Context, deviceId int64) error {
+	return m.exporter.InstallRunStatusDevice(c, deviceId)
+}
+
+// UnInStallRunStatusDevice 卸载设备运行状态模板
+func (m *MetricDaoImpl) UnInStallRunStatusDevice(c *gin.Context, deviceId int64) error {
+	return m.exporter.UnInStallRunStatusDevice(c, deviceId)
+}
+
 func (m *MetricDaoImpl) List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error) {
 	return m.exporter.List(c, req)
 }
@@ -76,4 +87,9 @@ func (m *MetricDaoImpl) Count(c *gin.Context, req *deviceMonitorModel.DevDataReq
 
 func (m *MetricDaoImpl) Query(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error) {
 	return m.exporter.Query(c, req)
+}
+
+// ExportTimeData 导出时序数据
+func (m *MetricDaoImpl) ExportTimeData(ctx context.Context, data map[string][]*v1.ResourceTimeMetrics) error {
+	return m.exporter.ExportTimeData(ctx, data)
 }
