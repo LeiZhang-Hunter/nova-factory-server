@@ -265,7 +265,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	iotAgent := daemonizeController.NewIotAgentController(iotAgentService, daemonizeService)
 	alertRuleDao := alertDaoImpl.NewAlertRuleDaoImpl(db)
 	alertSinkTemplateDao := alertDaoImpl.NewAlertSinkTemplateDaoImpl(db)
-	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao, alertRuleDao, alertSinkTemplateDao)
+	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao, alertRuleDao, alertSinkTemplateDao, iDeviceElectricDao, iDictDataDao)
 	iotAgentConfigService := daemonizeServiceImpl.NewIotAgentConfigServiceImpl(iotAgentConfigDao)
 	daemonizeControllerConfig := daemonizeController.NewConfig(iGatewayConfigService, iotAgentConfigService, iotAgentService)
 	daemonizeServer := &daemonizeController.DaemonizeServer{

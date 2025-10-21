@@ -12,4 +12,5 @@ type IDeviceElectricDao interface {
 	GetByDeviceId(c *gin.Context, id int64) (*systemModels.SysDeviceElectricSetting, error)
 	GetByNoDeviceId(c *gin.Context, id int64, deviceId int64) (*systemModels.SysDeviceElectricSetting, error)
 	GetByIds(c *gin.Context, ids []string) ([]*systemModels.SysDeviceElectricSetting, error)
+	All(c *gin.Context) ([]*systemModels.SysDeviceElectricSetting, error)
 }

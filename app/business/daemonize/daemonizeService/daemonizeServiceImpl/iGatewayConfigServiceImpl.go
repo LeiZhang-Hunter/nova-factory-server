@@ -11,12 +11,18 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/daemonize/daemonizeService"
+	"nova-factory-server/app/business/system/systemDao"
+	"nova-factory-server/app/business/system/systemModels"
 	device2 "nova-factory-server/app/constant/device"
+	"nova-factory-server/app/constant/gateway"
+	iotdb2 "nova-factory-server/app/constant/iotdb"
 	logalertIntercept "nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/alertwebhook"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/metric_exporter"
+	"nova-factory-server/app/utils/gateway/v1/config/app/sink/time_data_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/bhps7"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/mqtt"
+	"nova-factory-server/app/utils/gateway/v1/config/app/source/running_statistics"
 	"nova-factory-server/app/utils/gateway/v1/config/cfg"
 	"nova-factory-server/app/utils/gateway/v1/config/interceptor"
 	"nova-factory-server/app/utils/gateway/v1/config/logalert"
@@ -30,11 +36,13 @@ import (
 )
 
 type iGatewayConfigServiceImpl struct {
-	deviceDao       deviceDao.IDeviceDao
-	templateDao     deviceDao.IDeviceTemplateDao
-	templateDataDao deviceDao.ISysModbusDeviceConfigDataDao
-	ruleDao         alertDao.AlertRuleDao
-	sinkDao         alertDao.AlertSinkTemplateDao
+	deviceDao         deviceDao.IDeviceDao
+	templateDao       deviceDao.IDeviceTemplateDao
+	templateDataDao   deviceDao.ISysModbusDeviceConfigDataDao
+	ruleDao           alertDao.AlertRuleDao
+	sinkDao           alertDao.AlertSinkTemplateDao
+	electricConfigDao systemDao.IDeviceElectricDao
+	dictDataDao       systemDao.IDictDataDao
 }
 
 func NewIGatewayConfigServiceImpl(
@@ -42,13 +50,16 @@ func NewIGatewayConfigServiceImpl(
 	templateDao deviceDao.IDeviceTemplateDao,
 	templateDataDao deviceDao.ISysModbusDeviceConfigDataDao,
 	ruleDao alertDao.AlertRuleDao,
-	sinkDao alertDao.AlertSinkTemplateDao) daemonizeService.IGatewayConfigService {
+	sinkDao alertDao.AlertSinkTemplateDao, electricConfigDao systemDao.IDeviceElectricDao,
+	dictDataDao systemDao.IDictDataDao) daemonizeService.IGatewayConfigService {
 	return &iGatewayConfigServiceImpl{
-		deviceDao:       deviceDao,
-		templateDao:     templateDao,
-		templateDataDao: templateDataDao,
-		ruleDao:         ruleDao,
-		sinkDao:         sinkDao,
+		deviceDao:         deviceDao,
+		templateDao:       templateDao,
+		templateDataDao:   templateDataDao,
+		ruleDao:           ruleDao,
+		sinkDao:           sinkDao,
+		electricConfigDao: electricConfigDao,
+		dictDataDao:       dictDataDao,
 	}
 }
 
@@ -59,6 +70,13 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	if err != nil {
 		return nil, err
 	}
+
+	// 查找sink地址
+	addresses := i.dictDataDao.SelectDictDataByType(c, gateway.GRPC_SINK_ADDRESS)
+	if len(addresses) == 0 {
+		return nil, errors.New("网关数据写入地址不能是空")
+	}
+	sink_address := addresses[0].DictValue
 
 	var deviceAddressMap map[string][]*deviceModels.DeviceVO = make(map[string][]*deviceModels.DeviceVO)
 	var templateIdMap map[uint64]uint64 = make(map[uint64]uint64)
@@ -219,7 +237,7 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		}
 
 		var exportConfig metric_exporter.Config
-		exportConfig.Address = "localhost:6000"
+		exportConfig.Address = sink_address
 		packContent, err := cfg.Pack(exportConfig)
 		if err != nil {
 			zap.L().Error("cfg.Pack() failed", zap.Error(err))
@@ -249,6 +267,7 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	piplines.Pipelines = append(piplines.Pipelines, *pipelinesConfig)
 	piplines.Pipelines = append(piplines.Pipelines, *schedulerConfig)
 
+	// ====================================== 告警配置 =====================================================
 	// 通过网关id读取告警配置信息
 	alertConfig := pipeline.NewConfig()
 	alertRule, err := i.ruleDao.GetOnlineByGatewayId(c, uint64(gatewayId))
@@ -270,7 +289,6 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	}
 	alertConfig.Sources = append(alertConfig.Sources, &notifierSourceConfig)
 	alertConfig.Name = fmt.Sprintf("gateway-notifier-%d", gatewayId)
-
 	interceptorConfig := interceptor.Config{
 		Enabled: &scheduleEnabled,
 		Name:    "alert",
@@ -346,5 +364,85 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		Properties:  alertWebhookConfigPacked,
 	}
 	piplines.Pipelines = append(piplines.Pipelines, *alertConfig)
+
+	// 渲染用电量聚合统计算法
+	//  查询所有电流配置
+	// ====================================== 电流配置 =====================================================
+	electricConfig := pipeline.NewConfig()
+	electricConfig.Name = "electric_statistics"
+	all, err := i.electricConfigDao.All(c)
+	if err != nil {
+		return nil, err
+	}
+	var runningStatisticsConfig running_statistics.Config
+	runningStatisticsConfig.DeviceStatistics = make([]*running_statistics.DeviceStatistics, 0)
+	if len(all) != 0 {
+		for _, config := range all {
+			var statistics running_statistics.DeviceStatistics
+			if config.DeviceID == 0 {
+				continue
+			}
+			var ex systemModels.Expression
+			err := json.Unmarshal([]byte(config.Expression), &ex)
+			if err != nil {
+				zap.L().Error("json error", zap.Error(err))
+				continue
+			}
+
+			table := iotdb2.MakeRunDeviceTemplateName(config.DeviceID)
+			statistics.Table = table
+			statistics.DeviceId = fmt.Sprintf("%d", config.DeviceID)
+			statistics.Expression = running_statistics.Expression{
+				Rules: make([]running_statistics.StatisticsRule, 0),
+			}
+			for _, exRule := range ex.Rules {
+				var rule running_statistics.StatisticsRule
+				rule.RunStatus = int(exRule.RunStatus)
+				rule.MatchType = exRule.MatchType
+				rule.Groups = make([]running_statistics.GroupRule, 0)
+				for _, group := range exRule.Groups {
+					rule.Groups = append(rule.Groups, running_statistics.GroupRule{
+						Key:          group.Key,
+						Name:         group.Name,
+						Operator:     group.Operator,
+						OperatorName: group.OperatorName,
+						Value:        group.Value,
+					})
+				}
+				statistics.Expression.Rules = append(statistics.Expression.Rules, rule)
+			}
+
+			runningStatisticsConfig.DeviceStatistics = append(runningStatisticsConfig.DeviceStatistics, &statistics)
+		}
+	}
+	electricConfigSource := source2.Config{
+		Enabled: &scheduleEnabled,
+		Name:    "running_statistics",
+		Type:    "running_statistics",
+	}
+	pack, err = cfg.Pack(runningStatisticsConfig)
+	if err != nil {
+		zap.L().Error("cfg.Pack() failed", zap.Error(err))
+		return nil, err
+	}
+	electricConfigSource.Properties = pack
+	electricConfig.Sources = append(electricConfig.Sources, &electricConfigSource)
+	// 安装sink
+	exportConfig := time_data_exporter.Config{
+		Address: sink_address,
+	}
+	packContent, err := cfg.Pack(exportConfig)
+	if err != nil {
+		zap.L().Error("cfg.Pack() failed", zap.Error(err))
+		return nil, err
+	}
+	electricConfig.Sink = &sink.Config{
+		Enabled:     &scheduleEnabled,
+		Name:        fmt.Sprintf("sink-%d", snowflake.GenID()),
+		Type:        "time_data_exporter",
+		Properties:  packContent,
+		Parallelism: 1,
+	}
+	piplines.Pipelines = append(piplines.Pipelines, *electricConfig)
 	return piplines, nil
 }

@@ -134,3 +134,15 @@ func (i *IDeviceElectricDaoImpl) GetByIds(c *gin.Context, ids []string) ([]*syst
 	}
 	return dto, nil
 }
+
+func (i *IDeviceElectricDaoImpl) All(c *gin.Context) ([]*systemModels.SysDeviceElectricSetting, error) {
+	var dto []*systemModels.SysDeviceElectricSetting
+	ret := i.db.Table(i.table).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return make([]*systemModels.SysDeviceElectricSetting, 0), nil
+		}
+		return nil, ret.Error
+	}
+	return dto, nil
+}
