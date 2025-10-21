@@ -159,3 +159,7 @@ type SysModbusDeviceConfigDataListData struct {
 	Rows  []*SetSysModbusDeviceConfigDataReq `json:"rows"`
 	Total int64                              `json:"total"`
 }
+
+type DeviceReqInfo struct {
+	DeviceID int64 `gorm:"column:device_id;not null;comment:设备id" form:"device_id,string"` // 设备id
+}

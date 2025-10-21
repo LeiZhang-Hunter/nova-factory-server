@@ -118,6 +118,9 @@ func (i *IDeviceElectricDaoImpl) GetByNoDeviceId(c *gin.Context, id int64, devic
 	var info *systemModels.SysDeviceElectricSetting
 	ret := i.db.Table(i.table).Where("id   != ?", id).Where("device_id = ?", deviceId).Where("state = ?", commonStatus.NORMAL).First(&info)
 	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, ret.Error
 	}
 	return info, nil

@@ -3,6 +3,7 @@ package deviceController
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/asset/device/deviceService"
 	"nova-factory-server/app/middlewares"
@@ -12,12 +13,16 @@ import (
 type TemplateData struct {
 	service         deviceService.ISysModbusDeviceConfigDataService
 	templateService deviceService.IDeviceTemplateService
+	deviceService   deviceService.IDeviceService
 }
 
-func NewTemplateData(service deviceService.ISysModbusDeviceConfigDataService, templateService deviceService.IDeviceTemplateService) *TemplateData {
+func NewTemplateData(service deviceService.ISysModbusDeviceConfigDataService,
+	templateService deviceService.IDeviceTemplateService,
+	deviceService deviceService.IDeviceService) *TemplateData {
 	return &TemplateData{
 		service:         service,
 		templateService: templateService,
+		deviceService:   deviceService,
 	}
 }
 
@@ -26,6 +31,7 @@ func (t *TemplateData) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", middlewares.HasPermission("asset:device:template:data:list"), t.List)
 	group.POST("/set", middlewares.HasPermission("asset:device:template:data:set"), t.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("asset:device:template:data:remove"), t.Remove)
+	group.GET("/device", middlewares.HasPermission("asset:device:template:data:device"), t.GetDeviceTemplateData)
 }
 
 // List 获取模板数据列表
@@ -121,4 +127,34 @@ func (t *TemplateData) Remove(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// GetDeviceTemplateData 读取设备模板数据id
+func (t *TemplateData) GetDeviceTemplateData(c *gin.Context) {
+	info := new(deviceModels.DeviceReqInfo)
+	err := c.ShouldBindQuery(info)
+	if err != nil {
+		zap.L().Error("param error", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+	device, err := t.deviceService.GetById(c, info.DeviceID)
+	if err != nil {
+		zap.L().Error("get device error", zap.Error(err))
+		baizeContext.Waring(c, "读取数据列表失败")
+		return
+	}
+
+	list, err := t.service.List(c, &deviceModels.SysModbusDeviceConfigDataListReq{
+		TemplateID: int64(device.DeviceProtocolId),
+		BaseEntityDQL: baize.BaseEntityDQL{
+			Page: 1,
+			Size: 1000,
+		},
+	})
+	if err != nil {
+		baizeContext.Waring(c, "读取数据列表失败")
+		return
+	}
+	baizeContext.SuccessData(c, list)
 }

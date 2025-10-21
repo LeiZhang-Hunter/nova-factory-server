@@ -174,7 +174,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		return nil, nil, err
 	}
 	iSysModbusDeviceConfigDataService := deviceServiceImpl.NewISysModbusDeviceConfigDataServiceImpl(iSysModbusDeviceConfigDataDao)
-	templateData := deviceController.NewTemplateData(iSysModbusDeviceConfigDataService, iDeviceTemplateService)
+	templateData := deviceController.NewTemplateData(iSysModbusDeviceConfigDataService, iDeviceTemplateService, iDeviceService)
 	device := &deviceController.Device{
 		Info:         deviceInfo,
 		Group:        deviceGroup,

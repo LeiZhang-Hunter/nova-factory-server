@@ -28,3 +28,4 @@ config/config1.yaml
 vendor
 public/*
 nova-factory-server
+nova-factory-otel
