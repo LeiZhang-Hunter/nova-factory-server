@@ -13,13 +13,16 @@ import (
 	"strconv"
 )
 
+// DeviceReport 设备接入接口
 type DeviceReport struct {
 	service             metricService.IMetricService
 	deviceReportService deviceMonitorService.IDeviceDataReportService
 	devMapService       metricService.IDevMapService
 }
 
-func NewDeviceReport(service metricService.IMetricService, deviceReportService deviceMonitorService.IDeviceDataReportService, devMapService metricService.IDevMapService) *DeviceReport {
+func NewDeviceReport(service metricService.IMetricService,
+	deviceReportService deviceMonitorService.IDeviceDataReportService,
+	devMapService metricService.IDevMapService) *DeviceReport {
 	return &DeviceReport{
 		service:             service,
 		deviceReportService: deviceReportService,
@@ -35,6 +38,8 @@ func (d *DeviceReport) PrivateRoutes(router *gin.RouterGroup) {
 
 	metric := router.Group("/metric/time/seq")
 	metric.GET("/list", middlewares.HasPermission("metric:time:seq:list"), d.SearchTimeSeqList)
+	metric.POST("/set", middlewares.HasPermission("metric:time:seq:set"), d.SetDevMap)
+	metric.DELETE("/remove", middlewares.HasPermission("metric:time:seq:remove"), d.RemoveDevMap)
 }
 
 // DevList 设备测点列表
@@ -199,4 +204,50 @@ func (d *DeviceReport) SearchTimeSeqList(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, list)
+}
+
+// SetDevMap 设置测点映射
+// @Summary 设置测点映射
+// @Description 设置测点映射
+// @Param  object body deviceMonitorModel.SetDevMapInfo true "时序数据测点"
+// @Tags 设备监控/设置测点映射
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /metric/time/seq/set [post]
+func (d *DeviceReport) SetDevMap(c *gin.Context) {
+	info := new(deviceMonitorModel.SetDevMapInfo)
+	err := c.ShouldBindJSON(info)
+	if err != nil {
+		zap.L().Error("SetDevMap <UNK>", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+	err = d.deviceReportService.SetDevMap(c, info)
+	if err != nil {
+		zap.L().Error("SetDevMap <UNK>", zap.Error(err))
+		return
+	}
+	baizeContext.Success(c)
+}
+
+// RemoveDevMap 删除测点映射
+// @Summary 删除测点映射
+// @Description 删除测点映射
+// @Param  object body deviceMonitorModel.RemoveDevMapInfo true "时序数据测点"
+// @Tags 设备监控/删除测点映射
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /metric/time/seq/remove [delete]
+func (d *DeviceReport) RemoveDevMap(c *gin.Context) {
+	info := new(deviceMonitorModel.RemoveDevMapInfo)
+	err := c.ShouldBindJSON(info)
+	if err != nil {
+		zap.L().Error("SetDevMap <UNK>", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+	err = d.deviceReportService.RemoveDevMap(c, info.Device)
+	if err != nil {
+		zap.L().Error("SetDevMap <UNK>", zap.Error(err))
+		return
+	}
+	baizeContext.Success(c)
 }

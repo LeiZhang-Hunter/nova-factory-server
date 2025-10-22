@@ -2,7 +2,6 @@ package deviceDaoImpl
 
 import (
 	"github.com/google/wire"
-	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
 )
 
 var ProviderSet = wire.NewSet(
@@ -10,5 +9,4 @@ var ProviderSet = wire.NewSet(
 	NewSysDeviceGroupDaoImpl,
 	NewIDeviceTemplateDaoImpl,
 	NewISysModbusDeviceConfigDataDaoImp,
-	deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl,
 )

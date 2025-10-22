@@ -275,12 +275,16 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao)
 	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
-	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao)
+	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	deviceReport := deviceMonitorController.NewDeviceReport(iMetricService, iDeviceDataReportService, iDevMapService)
+	deviceUtilizationDao := deviceMonitorDaoImpl.NewDeviceUtilizationDaoImpl(iotDb)
+	deviceUtilizationService := deviceMonitorServiceImpl.NewDeviceUtilizationServiceImpl(deviceUtilizationDao)
+	deviceUtilization := deviceMonitorController.NewDeviceUtilization(deviceUtilizationService)
 	deviceMonitorControllerDeviceMonitorController := &deviceMonitorController.DeviceMonitorController{
-		DeviceMonitor: deviceMonitor,
-		DeviceReport:  deviceReport,
+		DeviceMonitor:     deviceMonitor,
+		DeviceReport:      deviceReport,
+		DeviceUtilization: deviceUtilization,
 	}
 	alertActionDao := alertDaoImpl.NewAlertActionDaoImpl(db)
 	alertAiReasonDao := alertDaoImpl.NewAlertAiReasonDaoImpl(db)

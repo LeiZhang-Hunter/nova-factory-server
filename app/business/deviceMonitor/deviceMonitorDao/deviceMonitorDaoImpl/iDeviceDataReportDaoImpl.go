@@ -60,16 +60,22 @@ func (i *IDeviceDataReportDaoImpl) Save(c *gin.Context, data *deviceMonitorModel
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		value = nil
 	}
-	if value == nil {
-		data.ID = snowflake.GenID()
-		data.SetCreateBy(baizeContext.GetUserId(c))
-		ret = i.db.Table(i.tableName).Create(data)
-		if ret.Error != nil {
+	if data.ID == 0 {
+		if value == nil {
+			data.ID = snowflake.GenID()
+			data.SetCreateBy(baizeContext.GetUserId(c))
+			ret = i.db.Table(i.tableName).Create(data)
+			if ret.Error != nil {
+				return ret.Error
+			}
+		} else {
+			data.SetUpdateBy(baizeContext.GetUserId(c))
+			ret = i.db.Table(i.tableName).Where("device = ?", data.Device).Updates(data)
 			return ret.Error
 		}
 	} else {
 		data.SetUpdateBy(baizeContext.GetUserId(c))
-		ret = i.db.Table(i.tableName).Where("device = ?", data.Device).Updates(data)
+		ret = i.db.Table(i.tableName).Where("id = ?", data.ID).Updates(data)
 		return ret.Error
 	}
 	return nil

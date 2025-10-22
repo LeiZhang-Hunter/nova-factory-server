@@ -18,6 +18,57 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/ai/control/list": {
+            "get": {
+                "description": "预测控制列表",
+                "tags": [
+                    "工业智能体/预测控制"
+                ],
+                "summary": "预测控制列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "告警策略名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/dataset/agents/list": {
             "get": {
                 "description": "Agen列表",
@@ -5152,6 +5203,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/device/monitor/utilization/stat": {
+            "post": {
+                "description": "稼动率统计",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "稼动率统计",
+                "parameters": [
+                    {
+                        "description": "稼动率统计",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备监控",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/file/downloadPrivateFile": {
             "get": {
                 "security": [
@@ -5784,6 +5866,62 @@ const docTemplate = `{
                         "type": "string",
                         "name": "type",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/metric/time/seq/remove": {
+            "delete": {
+                "description": "删除测点映射",
+                "tags": [
+                    "设备监控/删除测点映射"
+                ],
+                "summary": "删除测点映射",
+                "parameters": [
+                    {
+                        "description": "时序数据测点",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceMonitorModel.RemoveDevMapInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/metric/time/seq/set": {
+            "post": {
+                "description": "设置测点映射",
+                "tags": [
+                    "设备监控/设置测点映射"
+                ],
+                "summary": "设置测点映射",
+                "parameters": [
+                    {
+                        "description": "时序数据测点",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceMonitorModel.SetDevMapInfo"
+                        }
                     }
                 ],
                 "responses": {
@@ -7951,6 +8089,122 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    }
+                }
+            }
+        },
+        "/system/electric/list": {
+            "get": {
+                "description": "设备电流配置列表",
+                "tags": [
+                    "系统管理/设备配置"
+                ],
+                "summary": "设备电流配置列表",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "device_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/electric/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除设备电流配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统管理/设备配置"
+                ],
+                "summary": "删除设备电流配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/electric/set": {
+            "post": {
+                "description": "设置设备电流配置",
+                "tags": [
+                    "系统管理/设备配置"
+                ],
+                "summary": "设置设备电流配置",
+                "parameters": [
+                    {
+                        "description": "设备电流配置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/systemModels.SysDeviceElectricSettingVO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
                         }
                     }
                 }
@@ -10857,6 +11111,50 @@ const docTemplate = `{
                 }
             }
         },
+        "aiDataSetModels.SetSysAiPredictionControl": {
+            "type": "object",
+            "properties": {
+                "agg_function": {
+                    "description": "聚合函数，用来计算图表",
+                    "type": "string"
+                },
+                "device_gateway_id": {
+                    "description": "网关id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "id": {
+                    "description": "id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "interval": {
+                    "description": "预测时间段",
+                    "type": "string",
+                    "example": "0"
+                },
+                "model": {
+                    "description": "预测模型",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "智能预警名称",
+                    "type": "string"
+                },
+                "parallelism": {
+                    "description": "并发",
+                    "type": "integer"
+                },
+                "predict_length": {
+                    "description": "预测长度",
+                    "type": "integer"
+                },
+                "threshold": {
+                    "description": "threshold",
+                    "type": "integer"
+                }
+            }
+        },
         "aiDataSetModels.UpdateAssistantRequest": {
             "type": "object",
             "properties": {
@@ -12802,7 +13100,6 @@ const docTemplate = `{
         "dashboardModels.SetSysDashboard": {
             "type": "object",
             "required": [
-                "description",
                 "name",
                 "type"
             ],
@@ -12840,6 +13137,17 @@ const docTemplate = `{
                     "description": "面板id",
                     "type": "string",
                     "example": "0"
+                }
+            }
+        },
+        "deviceModels.Annotation": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
                 }
             }
         },
@@ -12938,7 +13246,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "name",
-                "slave",
                 "sort",
                 "template_id",
                 "type"
@@ -12947,6 +13254,13 @@ const docTemplate = `{
                 "agg_function": {
                     "description": "聚合函数",
                     "type": "string"
+                },
+                "annotation": {
+                    "description": "扰动变量",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/deviceModels.Annotation"
+                    }
                 },
                 "data_format": {
                     "description": "读写方式",
@@ -13090,6 +13404,37 @@ const docTemplate = `{
                 },
                 "start": {
                     "type": "integer"
+                }
+            }
+        },
+        "deviceMonitorModel.RemoveDevMapInfo": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "description": "设备名字",
+                    "type": "string"
+                }
+            }
+        },
+        "deviceMonitorModel.SetDevMapInfo": {
+            "type": "object",
+            "properties": {
+                "data_name": {
+                    "description": "数据名字",
+                    "type": "string"
+                },
+                "device": {
+                    "description": "设备名字",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "自增标识",
+                    "type": "string",
+                    "example": "0"
+                },
+                "unit": {
+                    "description": "数据名字",
+                    "type": "string"
                 }
             }
         },
@@ -13627,6 +13972,17 @@ const docTemplate = `{
                 }
             }
         },
+        "systemModels.Expression": {
+            "type": "object",
+            "properties": {
+                "rules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/systemModels.Rule"
+                    }
+                }
+            }
+        },
         "systemModels.GetInfo": {
             "type": "object",
             "properties": {
@@ -13644,6 +14000,26 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/systemModels.User"
+                }
+            }
+        },
+        "systemModels.Group": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "operator": {
+                    "type": "string"
+                },
+                "operatorName": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
                 }
             }
         },
@@ -13706,6 +14082,24 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/systemModels.SysDeptVo"
                     }
+                }
+            }
+        },
+        "systemModels.Rule": {
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/systemModels.Group"
+                    }
+                },
+                "matchType": {
+                    "type": "string"
+                },
+                "run_status": {
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -13830,6 +14224,33 @@ const docTemplate = `{
                 },
                 "updateTime": {
                     "description": "修改时间",
+                    "type": "string"
+                }
+            }
+        },
+        "systemModels.SysDeviceElectricSettingVO": {
+            "type": "object",
+            "properties": {
+                "device_id": {
+                    "description": "device_id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "expression": {
+                    "description": "表达式",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/systemModels.Expression"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "description": "智能预警名称",
                     "type": "string"
                 }
             }

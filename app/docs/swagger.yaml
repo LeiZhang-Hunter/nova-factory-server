@@ -382,6 +382,39 @@ definitions:
       threshold:
         type: integer
     type: object
+  aiDataSetModels.SetSysAiPredictionControl:
+    properties:
+      agg_function:
+        description: 聚合函数，用来计算图表
+        type: string
+      device_gateway_id:
+        description: 网关id
+        example: "0"
+        type: string
+      id:
+        description: id
+        example: "0"
+        type: string
+      interval:
+        description: 预测时间段
+        example: "0"
+        type: string
+      model:
+        description: 预测模型
+        type: string
+      name:
+        description: 智能预警名称
+        type: string
+      parallelism:
+        description: 并发
+        type: integer
+      predict_length:
+        description: 预测长度
+        type: integer
+      threshold:
+        description: threshold
+        type: integer
+    type: object
   aiDataSetModels.UpdateAssistantRequest:
     properties:
       avatar:
@@ -1770,7 +1803,6 @@ definitions:
       type:
         type: string
     required:
-    - description
     - name
     - type
     type: object
@@ -1786,6 +1818,13 @@ definitions:
       id:
         description: 面板id
         example: "0"
+        type: string
+    type: object
+  deviceModels.Annotation:
+    properties:
+      key:
+        type: string
+      value:
         type: string
     type: object
   deviceModels.DeviceGroup:
@@ -1857,6 +1896,11 @@ definitions:
       agg_function:
         description: 聚合函数
         type: string
+      annotation:
+        description: 扰动变量
+        items:
+          $ref: '#/definitions/deviceModels.Annotation'
+        type: array
       data_format:
         description: 读写方式
         type: string
@@ -1918,7 +1962,6 @@ definitions:
         type: string
     required:
     - name
-    - slave
     - sort
     - template_id
     - type
@@ -1970,6 +2013,28 @@ definitions:
         type: integer
       start:
         type: integer
+    type: object
+  deviceMonitorModel.RemoveDevMapInfo:
+    properties:
+      device:
+        description: 设备名字
+        type: string
+    type: object
+  deviceMonitorModel.SetDevMapInfo:
+    properties:
+      data_name:
+        description: 数据名字
+        type: string
+      device:
+        description: 设备名字
+        type: string
+      id:
+        description: 自增标识
+        example: "0"
+        type: string
+      unit:
+        description: 数据名字
+        type: string
     type: object
   logalert.Advanced:
     properties:
@@ -2338,6 +2403,13 @@ definitions:
     - status
     - userId
     type: object
+  systemModels.Expression:
+    properties:
+      rules:
+        items:
+          $ref: '#/definitions/systemModels.Rule'
+        type: array
+    type: object
   systemModels.GetInfo:
     properties:
       permissions:
@@ -2350,6 +2422,19 @@ definitions:
         type: array
       user:
         $ref: '#/definitions/systemModels.User'
+    type: object
+  systemModels.Group:
+    properties:
+      key:
+        type: string
+      name:
+        type: string
+      operator:
+        type: string
+      operatorName:
+        type: string
+      value:
+        type: string
     type: object
   systemModels.LoginBody:
     properties:
@@ -2394,6 +2479,18 @@ definitions:
         items:
           $ref: '#/definitions/systemModels.SysDeptVo'
         type: array
+    type: object
+  systemModels.Rule:
+    properties:
+      groups:
+        items:
+          $ref: '#/definitions/systemModels.Group'
+        type: array
+      matchType:
+        type: string
+      run_status:
+        example: "0"
+        type: string
     type: object
   systemModels.SelectPermission:
     properties:
@@ -2485,6 +2582,24 @@ definitions:
         type: integer
       updateTime:
         description: 修改时间
+        type: string
+    type: object
+  systemModels.SysDeviceElectricSettingVO:
+    properties:
+      device_id:
+        description: device_id
+        example: "0"
+        type: string
+      expression:
+        allOf:
+        - $ref: '#/definitions/systemModels.Expression'
+        description: 表达式
+      id:
+        description: id
+        example: "0"
+        type: string
+      name:
+        description: 智能预警名称
         type: string
     type: object
   systemModels.SysDictDataVo:
@@ -2962,6 +3077,40 @@ info:
   title: baize
   version: 2.0.x
 paths:
+  /ai/control/list:
+    get:
+      description: 预测控制列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 告警策略名称
+        in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 预测控制列表
+      tags:
+      - 工业智能体/预测控制
   /ai/dataset/agents/list:
     get:
       description: Agen列表
@@ -6288,6 +6437,26 @@ paths:
       summary: 预测指标
       tags:
       - 设备监控/设备监控
+  /device/monitor/utilization/stat:
+    post:
+      description: 稼动率统计
+      parameters:
+      - description: 稼动率统计
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/metricModels.MetricQueryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设备监控
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 稼动率统计
+      tags:
+      - 设备监控/设备监控
   /file/downloadPrivateFile:
     get:
       description: 租户下载私有文件
@@ -6699,6 +6868,42 @@ paths:
       summary: 时序数据测点
       tags:
       - 设备监控/设备监控
+  /metric/time/seq/remove:
+    delete:
+      description: 删除测点映射
+      parameters:
+      - description: 时序数据测点
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceMonitorModel.RemoveDevMapInfo'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除测点映射
+      tags:
+      - 设备监控/删除测点映射
+  /metric/time/seq/set:
+    post:
+      description: 设置测点映射
+      parameters:
+      - description: 时序数据测点
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceMonitorModel.SetDevMapInfo'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置测点映射
+      tags:
+      - 设备监控/设置测点映射
   /monitor/job:
     post:
       description: 新增定时任务
@@ -7973,6 +8178,81 @@ paths:
       summary: 更新字典缓存
       tags:
       - 字典相关
+  /system/electric/list:
+    get:
+      description: 设备电流配置列表
+      parameters:
+      - collectionFormat: csv
+        in: query
+        items:
+          type: string
+        name: device_id
+        type: array
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设备电流配置列表
+      tags:
+      - 系统管理/设备配置
+  /system/electric/remove/{ids}:
+    delete:
+      description: 删除设备电流配置
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除设备电流配置
+      tags:
+      - 系统管理/设备配置
+  /system/electric/set:
+    post:
+      description: 设置设备电流配置
+      parameters:
+      - description: 设备电流配置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysDeviceElectricSettingVO'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置设备电流配置
+      tags:
+      - 系统管理/设备配置
   /system/notice:
     post:
       description: 新增消息通知
