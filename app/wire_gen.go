@@ -122,6 +122,9 @@ func wireApp() (*gin.Engine, func(), error) {
 	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
 	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao)
 	electric := systemController.NewElectric(iDeviceElectricService, iDeviceService)
+	iSysShiftDao := systemDaoImpl.NewISysShiftDaoImpl(db)
+	iSysShiftService := systemServiceImpl.NewISysShiftServiceImpl(iSysShiftDao)
+	shift := systemController.NewShift(iSysShiftService)
 	system := &systemController.System{
 		Login:      login,
 		User:       user,
@@ -138,6 +141,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Permission: permission,
 		SelectBox:  selectBox,
 		Electric:   electric,
+		Shift:      shift,
 	}
 	infoServer := monitorController.NewInfoServer()
 	iUserOnlineService := monitorServiceImpl.NewUserOnlineService(cacheCache)

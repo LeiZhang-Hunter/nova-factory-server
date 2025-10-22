@@ -111,3 +111,24 @@ func TimeToString(format string) (int, error) {
 	ret := hour*3600 + minute*60 + second
 	return int(ret), nil
 }
+
+// FormatTodayTIme 格式化当日时间 00:00 => 0
+func FormatTodayTIme(time string) (int32, error) {
+	arr := strings.Split(time, ":")
+	if len(arr) != 2 {
+		return 0, errors.New(fmt.Sprintf("日程安排错误:%s", time))
+	}
+	beginHour, err := strconv.ParseInt(arr[0], 10, 64)
+	if err != nil {
+		zap.L().Error("dealDaily error", zap.Error(err))
+		return 0, err
+	}
+
+	beginMinute, err := strconv.ParseInt(arr[1], 10, 64)
+	if err != nil {
+		zap.L().Error("dealDaily error", zap.Error(err))
+		return 0, err
+	}
+	beginUnix := beginHour*3600 + beginMinute*60
+	return int32(beginUnix), nil
+}

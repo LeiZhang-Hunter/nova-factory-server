@@ -3,7 +3,7 @@ package systemController
 import "github.com/google/wire"
 
 var ProviderSet = wire.NewSet(NewUser, NewRole, NewPost, NewLogin, NewDictType, NewConfig, NewFile, NewNotice, NewPermission, NewSelectBox,
-	NewProfile, NewDictData, NewDept, NewSse, NewElectric, wire.Struct(new(System), "*"))
+	NewProfile, NewDictData, NewDept, NewSse, NewElectric, NewShift, wire.Struct(new(System), "*"))
 
 type System struct {
 	Login      *Login
@@ -21,4 +21,5 @@ type System struct {
 	Permission *Permission
 	SelectBox  *SelectBox
 	Electric   *Electric
+	Shift      *Shift
 }
