@@ -17,12 +17,12 @@ func NewDeviceUtilizationServiceImpl(deviceUtilizationDao deviceMonitorDao.Devic
 	}
 }
 
-func (d *DeviceUtilizationServiceImpl) Stat(c *gin.Context, req *deviceMonitorModel.DeviceUtilizationReq) {
+func (d *DeviceUtilizationServiceImpl) Stat(c *gin.Context, req *deviceMonitorModel.DeviceUtilizationReq) ([]*deviceMonitorModel.DeviceUtilizationData, error) {
 	//runMetrics, err := d.metricCDao.Query(c, &metricModels.MetricDataQueryReq{
 	//ByDevice: true,
 	//})
 	//if err != nil {
 	//	return
 	//}
-	d.deviceUtilizationDao.Stat(c, req)
+	return d.deviceUtilizationDao.Stat(c, req)
 }

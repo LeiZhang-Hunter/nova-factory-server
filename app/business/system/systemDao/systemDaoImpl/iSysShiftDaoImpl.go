@@ -1,6 +1,7 @@
 package systemDaoImpl
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/system/systemDao"
@@ -116,4 +117,13 @@ func (i *ISysShiftDaoImpl) Check(c *gin.Context, id int64, startTime int32, endT
 		return nil
 	}
 	return nil
+}
+
+func (i *ISysShiftDaoImpl) GetEnableShift(c *gin.Context) ([]*systemModels.SysWorkShiftSetting, error) {
+	var dto []*systemModels.SysWorkShiftSetting
+	ret := i.db.Table(i.table).Where("status = ?", 1).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return dto, ret.Error
 }

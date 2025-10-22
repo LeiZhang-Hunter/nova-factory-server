@@ -282,7 +282,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	deviceReport := deviceMonitorController.NewDeviceReport(iMetricService, iDeviceDataReportService, iDevMapService)
-	deviceUtilizationDao := deviceMonitorDaoImpl.NewDeviceUtilizationDaoImpl(iotDb)
+	buildingDao := buildingDaoImpl.NewBuildingDaoImpl(db)
+	deviceUtilizationDao := deviceMonitorDaoImpl.NewDeviceUtilizationDaoImpl(iotDb, iSysShiftDao, iDeviceDao, buildingDao)
 	deviceUtilizationService := deviceMonitorServiceImpl.NewDeviceUtilizationServiceImpl(deviceUtilizationDao)
 	deviceUtilization := deviceMonitorController.NewDeviceUtilization(deviceUtilizationService)
 	deviceMonitorControllerDeviceMonitorController := &deviceMonitorController.DeviceMonitorController{
@@ -313,7 +314,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		AlertAiReason: alertAiReason,
 		Runner:        runner,
 	}
-	buildingDao := buildingDaoImpl.NewBuildingDaoImpl(db)
 	buildingService := buildingServiceImpl.NewBuildingServiceImpl(buildingDao)
 	building := buildingController.NewBuilding(buildingService)
 	buildingControllerController := buildingController.Controller{

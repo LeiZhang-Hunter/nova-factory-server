@@ -132,3 +132,17 @@ func FormatTodayTIme(time string) (int32, error) {
 	beginUnix := beginHour*3600 + beginMinute*60
 	return int32(beginUnix), nil
 }
+
+func SecondsToHMS(seconds int64) string {
+	duration := time.Duration(seconds) * time.Second
+
+	hours := duration / time.Hour
+	duration -= hours * time.Hour
+
+	minutes := duration / time.Minute
+	duration -= minutes * time.Minute
+
+	secondsRemaining := duration / time.Second
+
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, secondsRemaining)
+}

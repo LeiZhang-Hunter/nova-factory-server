@@ -92,3 +92,12 @@ func (b *BuildingDaoImpl) Remove(c *gin.Context, ids []string) error {
 	ret := b.db.Table(b.table).Where("id = ?", ids).Update("state", commonStatus.DELETE)
 	return ret.Error
 }
+
+func (b *BuildingDaoImpl) GetByIds(c *gin.Context, ids []uint64) ([]*buildingModels.SysBuilding, error) {
+	var list []*buildingModels.SysBuilding
+	ret := b.db.Table(b.table).Where("id in (?)", ids).Find(&list)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	return list, nil
+}
