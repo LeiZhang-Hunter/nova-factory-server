@@ -54,6 +54,6 @@ daemonize:
   debug: true
 iotdb:
   host: 192.168.2.100
-  port: 6777
-  username: ""
-  password: ""
+  port: 6667
+  username: "root"
+  password: "root"

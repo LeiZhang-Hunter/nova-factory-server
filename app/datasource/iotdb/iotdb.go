@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/apache/iotdb-client-go/client"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 )
@@ -13,11 +14,22 @@ type IotDb struct {
 }
 
 func NewIotDb() *IotDb {
+	type IotDbConfig struct {
+		Host     string `mapstructure:"host"`
+		Port     string `mapstructure:"port"`
+		UserName string `mapstructure:"username"`
+		Password string `mapstructure:"password"`
+	}
+	// 把读取到的配置信息反序列化到 Conf 变量中
+	var d IotDbConfig
+	if err := viper.UnmarshalKey("iotdb", &d); err != nil {
+		panic(err)
+	}
 	config := &client.PoolConfig{
-		Host:     "192.168.2.100",
-		Port:     "6667",
-		UserName: "root",
-		Password: "root",
+		Host:     d.Host,
+		Port:     d.Port,
+		UserName: d.UserName,
+		Password: d.Password,
 	}
 	db := &IotDb{}
 	pool := client.NewSessionPool(config, 3, 60000, 60000, false)
