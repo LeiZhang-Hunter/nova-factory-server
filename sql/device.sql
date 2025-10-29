@@ -437,38 +437,6 @@ create table sys_device_check_record (
 ) engine=innodb auto_increment=200 comment = '设备点检记录表';
 
 
--- ----------------------------
--- 8、设备点检记录行表
--- ----------------------------
-drop table if exists sys_device_check_record_line;
-create table sys_device_check_record_line (
-    line_id                     bigint(20)      not null auto_increment    comment '计划ID',
-    record_id                   bigint(20)      not null                   comment '计划ID',
-    subject_id                  bigint(20)      not null                   comment '项目ID',
-    subject_code                varchar(64)     not null                   comment '项目编码',
-    subject_name                varchar(255)                               comment '项目名称',
-    subject_type                varchar(64)                                comment '项目类型',
-    subject_content             varchar(500)    not null                   comment '项目内容',
-    subject_standard            varchar(255)                               comment '标准',
-    check_status                varchar(64)     not null                   comment '点检结果',
-    check_result                varchar(500)                               comment '异常描述',
-    attr1                       varchar(64)     default null               comment '预留字段1',
-    attr2                       varchar(255)    default null               comment '预留字段2',
-    attr3                       int(11)         default 0                  comment '预留字段3',
-    attr4                       int(11)         default 0                  comment '预留字段4',
-    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
-    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
-    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
-    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
-    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
-    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
-    primary key (line_id)
-) engine=innodb auto_increment=200 comment = '设备点检记录行表';
-
-
-
-
-
 
 -- ----------------------------
 -- 7、设备保养记录表
