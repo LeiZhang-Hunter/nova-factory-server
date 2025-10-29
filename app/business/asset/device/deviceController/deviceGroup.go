@@ -36,7 +36,11 @@ func (di *DeviceGroup) PrivateRoutes(router *gin.RouterGroup) {
 // @Router /asset/deviceGroup/list [get]
 func (di *DeviceGroup) GetDeviceGroupList(c *gin.Context) {
 	req := new(deviceModels.DeviceGroupDQL)
-	_ = c.ShouldBind(req)
+	err := c.ShouldBind(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
 	list, err := di.iDeviceGroupService.SelectDeviceGroupList(c, req)
 	if err != nil {
 		zap.L().Error("读取设备分组失败", zap.Error(err))

@@ -179,11 +179,15 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	iSysModbusDeviceConfigDataService := deviceServiceImpl.NewISysModbusDeviceConfigDataServiceImpl(iSysModbusDeviceConfigDataDao)
 	templateData := deviceController.NewTemplateData(iSysModbusDeviceConfigDataService, iDeviceTemplateService, iDeviceService)
+	iDeviceSubjectDao := deviceDaoImpl.NewIDeviceSubjectDaoImpl(db)
+	iDeviceSubjectService := deviceServiceImpl.NewIDeviceSubjectServiceImpl(iDeviceSubjectDao)
+	deviceSubject := deviceController.NewDeviceSubject(iDeviceSubjectService)
 	device := &deviceController.Device{
-		Info:         deviceInfo,
-		Group:        deviceGroup,
-		Template:     template,
-		TemplateData: templateData,
+		Info:          deviceInfo,
+		Group:         deviceGroup,
+		Template:      template,
+		TemplateData:  templateData,
+		DeviceSubject: deviceSubject,
 	}
 	iMaterialDao := materialDaoImpl.NewMaterialDaoImpl(db)
 	iMaterialService := materialServiceImpl.NewMaterialService(iMaterialDao, iUserDao)

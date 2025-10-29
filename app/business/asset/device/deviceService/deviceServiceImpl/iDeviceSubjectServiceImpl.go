@@ -21,9 +21,10 @@ func (i *IDeviceSubjectServiceImpl) Set(c *gin.Context, data *deviceModels.SysDe
 	return i.dao.Set(c, data)
 }
 
-func (i *IDeviceSubjectServiceImpl) List(c *gin.Context, req *deviceModels.SysDeviceSubjectReq) {
-	i.dao.List(c, req)
+func (i *IDeviceSubjectServiceImpl) List(c *gin.Context, req *deviceModels.SysDeviceSubjectReq) (*deviceModels.SysDeviceSubjectListData, error) {
+	return i.dao.List(c, req)
 }
-func (i *IDeviceSubjectServiceImpl) Remove(c *gin.Context, ids []string) {
-	i.dao.Remove(c, ids)
+
+func (i *IDeviceSubjectServiceImpl) Remove(c *gin.Context, ids []string) error {
+	return i.dao.Remove(c, ids)
 }

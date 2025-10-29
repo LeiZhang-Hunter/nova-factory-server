@@ -7,6 +7,6 @@ import (
 
 type IDeviceSubjectService interface {
 	Set(c *gin.Context, data *deviceModels.SysDeviceSubjectVO) (*deviceModels.SysDeviceSubject, error)
-	List(c *gin.Context, req *deviceModels.SysDeviceSubjectReq)
-	Remove(c *gin.Context, ids []string)
+	List(c *gin.Context, req *deviceModels.SysDeviceSubjectReq) (*deviceModels.SysDeviceSubjectListData, error)
+	Remove(c *gin.Context, ids []string) error
 }

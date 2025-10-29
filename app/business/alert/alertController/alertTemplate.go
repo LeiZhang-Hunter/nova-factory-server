@@ -96,6 +96,7 @@ func (ac *AlertTemplate) Remove(c *gin.Context) {
 	ids := baizeContext.ParamStringArray(c, "ids")
 	if len(ids) == 0 {
 		baizeContext.Waring(c, "请选择删除选项")
+		baizeContext.ParameterError(c)
 		return
 	}
 	err := ac.service.Remove(c, ids)
