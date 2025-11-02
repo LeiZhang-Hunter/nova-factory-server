@@ -11,4 +11,6 @@ var ProviderSet = wire.NewSet(
 	NewDeviceTemplateServiceImpl,
 	NewISysModbusDeviceConfigDataServiceImpl,
 	deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl,
-	NewIDeviceSubjectServiceImpl)
+	NewIDeviceSubjectServiceImpl,
+	NewIDeviceCheckMachineryServiceImpl,
+	NewIDeviceCheckSubjectServiceImpl)

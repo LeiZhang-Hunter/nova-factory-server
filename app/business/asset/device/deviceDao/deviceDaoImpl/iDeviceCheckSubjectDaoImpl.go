@@ -11,29 +11,29 @@ import (
 	"nova-factory-server/app/utils/snowflake"
 )
 
-type IDeviceCheckPlanDaoImpl struct {
+type IDeviceCheckSubjectDaoImpl struct {
 	db    *gorm.DB
 	table string
 }
 
-func NewIDeviceCheckPlanDaoImpl(db *gorm.DB) deviceDao.IDeviceCheckPlanDao {
-	return &IDeviceCheckPlanDaoImpl{
+func NewIDeviceCheckSubjectDaoImpl(db *gorm.DB) deviceDao.IDeviceCheckSubjectDao {
+	return &IDeviceCheckSubjectDaoImpl{
 		db:    db,
-		table: "sys_device_check_plan",
+		table: "sys_device_check_subject",
 	}
 }
 
-func (i *IDeviceCheckPlanDaoImpl) Set(c *gin.Context, data *deviceModels.SysDeviceCheckPlanVO) (*deviceModels.SysDeviceCheckPlan, error) {
+func (i *IDeviceCheckSubjectDaoImpl) Set(c *gin.Context, data *deviceModels.SysDeviceCheckSubjectVO) (*deviceModels.SysDeviceCheckSubject, error) {
 	if data == nil {
 		return nil, errors.New("data should not be nil")
 	}
-	value := deviceModels.ToSysDeviceCheckPlan(data)
-	if data.PlanID != 0 {
+	value := deviceModels.ToSysDeviceCheckSubject(data)
+	if data.RecordID != 0 {
 		value.SetUpdateBy(baizeContext.GetUserId(c))
 		ret := i.db.Table(i.table).Where("plan_id = ?", data.PlanID).UpdateColumns(value)
 		return value, ret.Error
 	} else {
-		value.PlanID = snowflake.GenID()
+		value.RecordID = snowflake.GenID()
 		value.DeptID = baizeContext.GetDeptId(c)
 		value.SetCreateBy(baizeContext.GetUserId(c))
 		ret := i.db.Table(i.table).Create(value)
@@ -41,13 +41,13 @@ func (i *IDeviceCheckPlanDaoImpl) Set(c *gin.Context, data *deviceModels.SysDevi
 	}
 }
 
-func (i *IDeviceCheckPlanDaoImpl) List(c *gin.Context, req *deviceModels.SysDeviceCheckPlanReq) (*deviceModels.SysDeviceCheckPlanList, error) {
+func (i *IDeviceCheckSubjectDaoImpl) List(c *gin.Context, req *deviceModels.SysDeviceCheckSubjectReq) (*deviceModels.SysDeviceCheckSubjectList, error) {
 	db := i.db.Table(i.table)
 	if req == nil {
-		req = &deviceModels.SysDeviceCheckPlanReq{}
+		req = &deviceModels.SysDeviceCheckSubjectReq{}
 	}
-	if req != nil && req.Name != "" {
-		db = db.Where("name LIKE ?", "%"+req.Name+"%")
+	if req != nil && req.PlanID != 0 {
+		db = db.Where("plan_id = ?", req.PlanID)
 	}
 	size := 0
 	if req == nil || req.Size <= 0 {
@@ -68,26 +68,26 @@ func (i *IDeviceCheckPlanDaoImpl) List(c *gin.Context, req *deviceModels.SysDevi
 	var total int64
 	ret := db.Count(&total)
 	if ret.Error != nil {
-		return &deviceModels.SysDeviceCheckPlanList{
-			Rows:  make([]*deviceModels.SysDeviceCheckPlan, 0),
+		return &deviceModels.SysDeviceCheckSubjectList{
+			Rows:  make([]*deviceModels.SysDeviceCheckSubject, 0),
 			Total: 0,
 		}, ret.Error
 	}
-	var dto []*deviceModels.SysDeviceCheckPlan
+	var dto []*deviceModels.SysDeviceCheckSubject
 	ret = db.Offset(offset).Limit(size).Order("create_time desc").Find(&dto)
 	if ret.Error != nil {
-		return &deviceModels.SysDeviceCheckPlanList{
-			Rows:  make([]*deviceModels.SysDeviceCheckPlan, 0),
+		return &deviceModels.SysDeviceCheckSubjectList{
+			Rows:  make([]*deviceModels.SysDeviceCheckSubject, 0),
 			Total: 0,
 		}, ret.Error
 	}
-	return &deviceModels.SysDeviceCheckPlanList{
+	return &deviceModels.SysDeviceCheckSubjectList{
 		Rows:  dto,
 		Total: total,
 	}, nil
 }
 
-func (i *IDeviceCheckPlanDaoImpl) Remove(c *gin.Context, ids []string) error {
+func (i *IDeviceCheckSubjectDaoImpl) Remove(c *gin.Context, ids []string) error {
 	ret := i.db.Table(i.table).Where("id in (?)", ids).Update("state", commonStatus.DELETE)
 	return ret.Error
 }

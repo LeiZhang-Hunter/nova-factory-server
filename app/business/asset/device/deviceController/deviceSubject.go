@@ -66,6 +66,27 @@ func (ds *DeviceSubject) Set(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+	if vo.ID == 0 {
+		info, err := ds.service.GetBySubjectCode(c, vo.SubjectCode)
+		if err != nil {
+			baizeContext.Waring(c, err.Error())
+			return
+		}
+		if info != nil {
+			baizeContext.Waring(c, "设置点检保养项目编码存在")
+			return
+		}
+	} else {
+		info, err := ds.service.GetBySubjectCodeByNotId(c, vo.ID, vo.SubjectCode)
+		if err != nil {
+			baizeContext.Waring(c, err.Error())
+			return
+		}
+		if info != nil {
+			baizeContext.Waring(c, "设置点检保养项目编码存在")
+			return
+		}
+	}
 	set, err := ds.service.Set(c, vo)
 	if err != nil {
 		zap.L().Error("设置点检保养项目失败", zap.Error(err))

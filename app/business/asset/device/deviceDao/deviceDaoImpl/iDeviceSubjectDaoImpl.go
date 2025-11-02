@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
-	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
 )
@@ -30,13 +29,13 @@ func (i *IDeviceSubjectDaoImpl) Set(c *gin.Context, data *deviceModels.SysDevice
 	value := deviceModels.ToSysDeviceSubject(data)
 	if data.ID != 0 {
 		value.SetUpdateBy(baizeContext.GetUserId(c))
-		ret := i.db.Table(i.table).Debug().UpdateColumns(value)
+		ret := i.db.Table(i.table).Where("id = ?", data.ID).UpdateColumns(value)
 		return value, ret.Error
 	} else {
 		value.ID = snowflake.GenID()
 		value.DeptID = baizeContext.GetDeptId(c)
 		value.SetCreateBy(baizeContext.GetUserId(c))
-		ret := i.db.Table(i.table).Where("id = ?", data.ID).Create(value)
+		ret := i.db.Table(i.table).Create(value)
 		return value, ret.Error
 	}
 }
@@ -88,6 +87,30 @@ func (i *IDeviceSubjectDaoImpl) List(c *gin.Context, req *deviceModels.SysDevice
 }
 
 func (i *IDeviceSubjectDaoImpl) Remove(c *gin.Context, ids []string) error {
-	ret := i.db.Table(i.table).Where("id in (?)", ids).Update("state", commonStatus.DELETE)
+	ret := i.db.Table(i.table).Where("id in (?)", ids).Delete(&deviceModels.SysDeviceSubject{})
 	return ret.Error
+}
+
+func (i *IDeviceSubjectDaoImpl) GetBySubjectCode(c *gin.Context, code string) (*deviceModels.SysDeviceSubject, error) {
+	var info *deviceModels.SysDeviceSubject
+	ret := i.db.Table(i.table).Where("subject_code = ?", code).First(&info)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+	return info, nil
+}
+
+func (i *IDeviceSubjectDaoImpl) GetBySubjectCodeByNotId(c *gin.Context, id int64, code string) (*deviceModels.SysDeviceSubject, error) {
+	var info *deviceModels.SysDeviceSubject
+	ret := i.db.Table(i.table).Where("id != ?", id).Where("subject_code = ?", code).First(&info)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+	return info, nil
 }

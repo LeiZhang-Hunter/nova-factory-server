@@ -28,3 +28,11 @@ func (i *IDeviceSubjectServiceImpl) List(c *gin.Context, req *deviceModels.SysDe
 func (i *IDeviceSubjectServiceImpl) Remove(c *gin.Context, ids []string) error {
 	return i.dao.Remove(c, ids)
 }
+
+func (i *IDeviceSubjectServiceImpl) GetBySubjectCode(c *gin.Context, code string) (*deviceModels.SysDeviceSubject, error) {
+	return i.dao.GetBySubjectCode(c, code)
+}
+
+func (i *IDeviceSubjectServiceImpl) GetBySubjectCodeByNotId(c *gin.Context, id int64, code string) (*deviceModels.SysDeviceSubject, error) {
+	return i.dao.GetBySubjectCodeByNotId(c, id, code)
+}

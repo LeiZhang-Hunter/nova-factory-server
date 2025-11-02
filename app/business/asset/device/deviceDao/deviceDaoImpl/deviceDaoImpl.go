@@ -10,4 +10,7 @@ var ProviderSet = wire.NewSet(
 	NewIDeviceTemplateDaoImpl,
 	NewISysModbusDeviceConfigDataDaoImp,
 	NewIDeviceSubjectDaoImpl,
+	NewIDeviceCheckPlanDaoImpl,
+	NewIDeviceCheckMachineryDaoImpl,
+	NewIDeviceCheckSubjectDaoImpl,
 )

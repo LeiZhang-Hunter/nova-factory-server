@@ -311,7 +311,8 @@ create table sys_device_subject (
     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
-    primary key (id)
+    primary key (id),
+    UNIQUE KEY `uniq_subject_code` (`subject_code`) USING BTREE
 ) engine=innodb auto_increment=200 comment = '设备点检保养项目表';
 
 
@@ -369,7 +370,8 @@ create table sys_device_check_machinery (
     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
-    primary key (record_id)
+    primary key (record_id),
+    KEY `plan_id_idx` (`plan_id`) USING BTREE
 ) engine=innodb auto_increment=200 comment = '点检设备表';
 
 
