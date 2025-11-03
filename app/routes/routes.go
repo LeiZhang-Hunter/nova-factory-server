@@ -80,6 +80,7 @@ func NewGinEngine(
 		controller.Config.PublicRoutes(group) //注册Agent公共配置接口
 		alert.AlertLog.PublicRoutes(group)
 		metric.Metric.PublicRoutes(group)
+		ai.Dataset.PublicRoutes(group)
 	}
 	//做鉴权的
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())

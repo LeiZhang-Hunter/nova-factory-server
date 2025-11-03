@@ -76,10 +76,7 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 	ai.DELETE("/session/remove", middlewares.HasPermission("ai:dataset:session:remove"), d.SessionRemove)
 	// 与聊天助手交谈
 	ai.POST("/session/charts/completions", middlewares.HasPermission("ai:dataset:session:charts:completions"), d.ChartsCompletions)
-	// 使用 agent 创建会话
-	ai.POST("/session/agents/create", middlewares.HasPermission("ai:dataset:session:agents:create"), d.AgentSessionCreate)
-	// 与代理结合
-	ai.POST("/session/agents/completions", middlewares.HasPermission("ai:dataset:session:agents:completions"), d.AgentCompletions)
+
 	// list 代理会话
 	ai.GET("/session/agents/list", middlewares.HasPermission("ai:dataset:session:agents:list"), d.AgentsSessionList)
 	// 删除代理会话
@@ -88,8 +85,17 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 	ai.POST("/session/conversation/related_questions", middlewares.HasPermission("ai:dataset:session:conversation:related_questions"), d.ConversationRelatedQuestions)
 	// 智能问答
 	ai.POST("/session/ask", middlewares.HasPermission("ai:dataset:session:ask"), d.Ask)
+
+}
+
+func (d *Dataset) PublicRoutes(router *gin.RouterGroup) {
+	ai := router.Group("/ai/dataset")
 	// 清单代理
-	ai.GET("/agents/list", middlewares.HasPermission("ai:dataset:agents:list"), d.AgentList)
+	ai.GET("/agents/list", d.AgentList)
+	// 使用 agent 创建会话
+	ai.POST("/session/agents/create", d.AgentSessionCreate)
+	// 与代理结合
+	ai.POST("/session/agents/completions", d.AgentCompletions)
 }
 
 // GetAiDataSet 读取数据集列表
