@@ -306,7 +306,7 @@ func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *deviceMode
 	}
 	sql := fmt.Sprintf("select %s(value) as value from %s group by([%s, %s), %dm, %dm)", device.AggFunction,
 		name, startTime, endTime, req.Step, req.Step)
-	predictSql := fmt.Sprintf("call inference(_STLForecaster, \"%s\", generateTime=True, predict_length=10)",
+	predictSql := fmt.Sprintf("call inference(stl_forecaster, \"%s\", generateTime=True, predict_length=10)",
 		sql)
 	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
 	statement, err := session.ExecuteQueryStatement(predictSql, &timeout)
