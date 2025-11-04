@@ -12,4 +12,6 @@ type IMetricService interface {
 	List(c *gin.Context, req *deviceMonitorModel.DevDataReq) (*deviceMonitorModel.DevDataResp, error)
 	// ExportTimeData 导入时序数据
 	ExportTimeData(c context.Context, request *v1.ExportTimeDataRequest) error
+
+	ExportScheduleLog(c context.Context, request *v1.ExportTimeDataRequest) error
 }

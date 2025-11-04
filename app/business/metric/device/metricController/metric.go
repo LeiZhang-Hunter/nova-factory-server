@@ -54,3 +54,10 @@ func (m *Metric) ReportTimeData(c context.Context, request *v1.ExportTimeDataReq
 		Code: 0,
 	}, nil
 }
+
+// ReportScheduleLog 写入控制日志，写入clickhouse
+func (m *Metric) ReportScheduleLog(context.Context, *v1.ExportControlLogRequest) (*v1.NodeRes, error) {
+	return &v1.NodeRes{
+		Code: 0,
+	}, nil
+}
