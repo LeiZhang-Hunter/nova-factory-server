@@ -185,3 +185,7 @@ func (m *IMetricServiceImpl) ExportTimeData(c context.Context, request *v1.Expor
 	}
 	return nil
 }
+
+func (m *IMetricServiceImpl) ExportScheduleLog(c context.Context, request *v1.ExportTimeDataRequest) error {
+	return nil
+}

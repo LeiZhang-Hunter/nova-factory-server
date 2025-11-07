@@ -180,7 +180,7 @@ func (d *Dataset) AgentCompletions(c *gin.Context) {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
-	if req.Stream {
+	if !req.Stream {
 		baizeContext.SuccessData(c, response)
 	}
 }
