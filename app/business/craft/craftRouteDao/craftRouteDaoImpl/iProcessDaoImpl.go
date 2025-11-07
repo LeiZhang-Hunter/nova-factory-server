@@ -1,6 +1,7 @@
 package craftRouteDaoImpl
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/craft/craftRouteDao"
@@ -26,7 +27,26 @@ func (i *IProcessDaoImpl) Add(c *gin.Context, req *craftRouteModels.SysProSetPro
 	data := craftRouteModels.NewSysProProcess(req)
 	data.ProcessID = snowflake.GenID()
 	data.SetCreateBy(baizeContext.GetUserId(c))
-	ret := i.db.Table(i.tableName).Create(data)
+	var info *craftRouteModels.SysProProcess
+	ret := i.db.Table(i.tableName).Where("process_code = ?", req.ProcessCode).Where("state = ?", commonStatus.NORMAL).First(&info)
+	if ret.Error != nil {
+		if !errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, ret.Error
+		} else {
+			ret = i.db.Table(i.tableName).Create(data)
+			return data, ret.Error
+		}
+	}
+	if info == nil {
+		ret = i.db.Table(i.tableName).Create(data)
+		return data, ret.Error
+	}
+	data.ProcessID = info.ProcessID
+	data.CreateTime = info.CreateTime
+	ret = i.db.Table(i.tableName).Where("process_id = ?", info.ProcessID).Updates(data)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
 	return data, ret.Error
 }
 

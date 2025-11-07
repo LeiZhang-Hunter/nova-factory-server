@@ -126,6 +126,9 @@ func (i *IScheduleServiceImpl) GetMonthSchedule(c *gin.Context, req *craftRouteM
 
 		// 检查是否有循环日程
 		scheduleWeek := int(data[k].Time.Weekday())
+		if scheduleWeek == 0 {
+			scheduleWeek = 7
+		}
 		_, ok = dailyIds[scheduleWeek]
 		if !ok {
 			continue
