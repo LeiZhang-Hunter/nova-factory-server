@@ -55,6 +55,7 @@ func (i *ISysCraftRouteConfigDaoImpl) Save(c *gin.Context, routeId uint64, topo 
 		return &config, ret.Error
 	} else {
 		info.Context = string(content)
+		info.Config = string(configContent)
 		info.SetUpdateBy(baizeContext.GetUserId(c))
 		ret = i.db.Table(i.tableName).Where("route_id = ?", routeId).Updates(&info)
 		if ret.Error != nil {

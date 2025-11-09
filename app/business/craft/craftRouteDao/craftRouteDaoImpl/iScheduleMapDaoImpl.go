@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/craft/craftRouteDao"
 	"nova-factory-server/app/business/craft/craftRouteModels"
+	"nova-factory-server/app/business/daemonize/daemonizeModels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
@@ -104,13 +105,13 @@ func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, tx *gorm.DB, data *craft
 
 		beginUnix := beginHour*3600 + beginMinute*60
 
-		endHour, err := strconv.ParseInt(beginArr[0], 10, 64)
+		endHour, err := strconv.ParseInt(endArr[0], 10, 64)
 		if err != nil {
 			zap.L().Error("dealDaily error", zap.Error(err))
 			return err
 		}
 
-		endMinute, err := strconv.ParseInt(beginArr[1], 10, 64)
+		endMinute, err := strconv.ParseInt(endArr[1], 10, 64)
 		if err != nil {
 			zap.L().Error("dealDaily error", zap.Error(err))
 			return err
@@ -126,6 +127,7 @@ func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, tx *gorm.DB, data *craft
 			}
 			mapList[dayKey] = &craftRouteModels.SysProductScheduleMap{
 				ID:           snowflake.GenID(),
+				GatewayID:    data.GatewayID,
 				ScheduleID:   data.Id,
 				BeginTime:    beginUnix,
 				EndTime:      endUnix,
@@ -281,7 +283,7 @@ func (i *IScheduleMapDaoImpl) GetByScheduleId(c *gin.Context, id int64) ([]*craf
 	return dto, ret.Error
 }
 
-func (i *IScheduleMapDaoImpl) GetSpecialScheduleByNow(c *gin.Context, gatewayId int64) ([]*craftRouteModels.SysProductScheduleMap, error) {
+func (i *IScheduleMapDaoImpl) GetSpecialScheduleByNow(c *gin.Context, gatewayId int64, gatewayInfo *daemonizeModels.SysIotAgent) ([]*craftRouteModels.SysProductScheduleMap, error) {
 	timeNow := time.Now().Unix()
 	var list []*craftRouteModels.SysProductScheduleMap
 	db := i.db.Table(i.table).Where("gateway_id = ?", gatewayId).
@@ -289,7 +291,7 @@ func (i *IScheduleMapDaoImpl) GetSpecialScheduleByNow(c *gin.Context, gatewayId 
 		Where("end_time > ?", timeNow).
 		Where("schedule_type = ?", craftRouteModels.SPECIAL).
 		Where("state = ?", commonStatus.NORMAL).Group("craft_route_id").Find(&list)
-	db = baizeContext.GetGormDataScope(c, db)
+	//db = baizeContext.GetGormDataScopeById(c, db, gatewayInfo.CreateBy, gatewayInfo.DeptID)
 	ret := db.Find(&list)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
@@ -306,13 +308,16 @@ func (i *IScheduleMapDaoImpl) GetNormalByTime(c *gin.Context, gatewayId int64) (
 	startOfDay := time.Date(year, month, day, 0, 0, 0, 0, timeNow.Location())
 	interval := timeNow.Unix() - startOfDay.Unix()
 	weekday := int(timeNow.Weekday())
+	if weekday == 0 {
+		weekday = 7
+	}
 	db := i.db.Table(i.table).Debug().Where("gateway_id = ?", gatewayId).
 		Where("begin_time <= ?", interval).
 		Where("end_time > ?", interval).
 		Where("schedule_type = ?", craftRouteModels.DAILY).
-		Where("date", weekday).
+		Where("date = ?", weekday).
 		Where("state = ?", commonStatus.NORMAL).Group("craft_route_id").Find(&list)
-	db = baizeContext.GetGormDataScope(c, db)
+	//db = baizeContext.GetGormDataScope(c, db)
 	ret := db.Find(&list)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return nil, nil

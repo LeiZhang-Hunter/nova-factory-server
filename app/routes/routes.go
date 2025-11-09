@@ -81,6 +81,7 @@ func NewGinEngine(
 		alert.AlertLog.PublicRoutes(group)
 		metric.Metric.PublicRoutes(group)
 		ai.Dataset.PublicRoutes(group)
+		craft.Schedule.PublicRoutes(group)
 	}
 	//做鉴权的
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
@@ -133,7 +134,6 @@ func NewGinEngine(
 		craft.WorkOrder.PrivateRoutes(group) //生产工单
 		craft.Task.PrivateRoutes(group)      //工单任务
 		craft.Schedule.PrivateRoutes(group)
-		craft.Schedule.PublicRoutes(group)
 
 		metric.Metric.PrivateRoutes(group) //设备指标
 		controller.IotAgent.PrivateRoutes(group)

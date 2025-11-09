@@ -2,26 +2,27 @@ package deviceServiceImpl
 
 import (
 	"github.com/gin-gonic/gin"
+	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/asset/device/deviceService"
 )
 
 type IDeviceCheckPlanServiceImpl struct {
-	service deviceService.IDeviceCheckPlanService
+	dao deviceDao.IDeviceCheckPlanDao
 }
 
-func NewIDeviceCheckPlanServiceImpl(service deviceService.IDeviceCheckPlanService) deviceService.IDeviceCheckPlanService {
+func NewIDeviceCheckPlanServiceImpl(dao deviceDao.IDeviceCheckPlanDao) deviceService.IDeviceCheckPlanService {
 	return &IDeviceCheckPlanServiceImpl{
-		service: service,
+		dao: dao,
 	}
 }
 
 func (i *IDeviceCheckPlanServiceImpl) Set(c *gin.Context, data *deviceModels.SysDeviceCheckPlanVO) (*deviceModels.SysDeviceCheckPlan, error) {
-	return i.service.Set(c, data)
+	return i.dao.Set(c, data)
 }
 func (i *IDeviceCheckPlanServiceImpl) List(c *gin.Context, req *deviceModels.SysDeviceCheckPlanReq) (*deviceModels.SysDeviceCheckPlanList, error) {
-	return i.service.List(c, req)
+	return i.dao.List(c, req)
 }
 func (i *IDeviceCheckPlanServiceImpl) Remove(c *gin.Context, ids []string) error {
-	return i.service.Remove(c, ids)
+	return i.dao.Remove(c, ids)
 }

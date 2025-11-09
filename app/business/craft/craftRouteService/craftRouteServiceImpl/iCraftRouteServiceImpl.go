@@ -12,6 +12,7 @@ import (
 	v1 "nova-factory-server/app/business/craft/craftRouteModels/api/v1"
 	"nova-factory-server/app/business/craft/craftRouteService"
 	craft2 "nova-factory-server/app/constant/craft"
+	"nova-factory-server/app/utils/uuid"
 	"strconv"
 )
 
@@ -99,7 +100,6 @@ func (craft *CraftRouteServiceImpl) SaveCraftRoute(c *gin.Context, topo *craftRo
 	var processNodesMap map[string]*craftRouteModels.ProcessData = make(map[string]*craftRouteModels.ProcessData)
 	// 开始节点数量
 	var startCount uint32 = 0
-	var begin *craftRouteModels.ProcessTopoNode
 	// 开始节点对应的target
 	var beginTargetData *craftRouteModels.ProcessData
 
@@ -124,7 +124,6 @@ func (craft *CraftRouteServiceImpl) SaveCraftRoute(c *gin.Context, topo *craftRo
 
 		if node.Id == craft2.START_NAME {
 			startCount++
-			begin = node
 		}
 
 		if node.Type == craft2.NODE_PROCESS_TYPE {
@@ -228,7 +227,6 @@ func (craft *CraftRouteServiceImpl) SaveCraftRoute(c *gin.Context, topo *craftRo
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(processContexts, begin)
 
 	// 组装工序配置
 	content, err := craft.loadV1ProcessTopo(c, processes, processContexts, info, beginTargetData)
@@ -288,7 +286,16 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 				return nil, err
 			}
 			triggerRule = v1.NweDeviceTriggerRule()
-			triggerRule.Rule.DataId = rule.DataIds
+			triggerRule.Rule.DataId = make([]v1.DeviceRuleInfo, 0)
+
+			for _, v := range rule.Cases {
+				for _, caseValue := range v.Conditions {
+					var info v1.DeviceRuleInfo
+					info.DataId = caseValue.DataId
+					info.DeviceId = caseValue.DeviceId
+					triggerRule.Rule.DataId = append(triggerRule.Rule.DataId, info)
+				}
+			}
 
 			combinedRule := ""
 			first := true
@@ -356,6 +363,13 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 	}
 
 	content, err := json.Marshal(router)
+	if err != nil {
+		return nil, err
+	}
+
+	md5 := uuid.MakeMd5(content)
+	router.Md5 = md5
+	content, err = json.Marshal(router)
 	if err != nil {
 		return nil, err
 	}

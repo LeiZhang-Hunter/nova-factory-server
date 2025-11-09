@@ -21,3 +21,9 @@ func HashId() uint64 {
 	fmt.Println(h4) //输出753694413698530628
 	return (h4)
 }
+
+func MakeMd5(content []byte) string {
+	h := md5.New()
+	h.Write(content)
+	return hex.EncodeToString(h.Sum(nil))
+}

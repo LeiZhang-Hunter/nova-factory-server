@@ -1,6 +1,7 @@
 package aiDataSetDaoImpl
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/ai/aiDataSetDao"
@@ -85,4 +86,16 @@ func (a *IAiPredictionControlDaoImpl) List(c *gin.Context, req *aiDataSetModels.
 		Rows:  dto,
 		Total: uint64(total),
 	}, nil
+}
+
+func (a *IAiPredictionControlDaoImpl) Find(c *gin.Context) (*aiDataSetModels.SysAiPredictionControl, error) {
+	var info *aiDataSetModels.SysAiPredictionControl
+	ret := a.db.Table(a.table).Where("state = ?", commonStatus.NORMAL).First(&info)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+	return info, nil
 }

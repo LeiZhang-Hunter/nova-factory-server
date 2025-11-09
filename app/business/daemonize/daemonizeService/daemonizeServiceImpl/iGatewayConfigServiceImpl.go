@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"nova-factory-server/app/business/ai/aiDataSetDao"
 	"nova-factory-server/app/business/alert/alertDao"
 	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/asset/device/deviceDao"
@@ -22,7 +23,9 @@ import (
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/time_data_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/bhps7"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/mqtt"
+	"nova-factory-server/app/utils/gateway/v1/config/app/source/prediction"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/running_statistics"
+	"nova-factory-server/app/utils/gateway/v1/config/app/source/scheduler"
 	"nova-factory-server/app/utils/gateway/v1/config/cfg"
 	"nova-factory-server/app/utils/gateway/v1/config/interceptor"
 	"nova-factory-server/app/utils/gateway/v1/config/logalert"
@@ -43,6 +46,7 @@ type iGatewayConfigServiceImpl struct {
 	sinkDao           alertDao.AlertSinkTemplateDao
 	electricConfigDao systemDao.IDeviceElectricDao
 	dictDataDao       systemDao.IDictDataDao
+	predictionDao     aiDataSetDao.IAiPredictionControlDao
 }
 
 func NewIGatewayConfigServiceImpl(
@@ -51,7 +55,7 @@ func NewIGatewayConfigServiceImpl(
 	templateDataDao deviceDao.ISysModbusDeviceConfigDataDao,
 	ruleDao alertDao.AlertRuleDao,
 	sinkDao alertDao.AlertSinkTemplateDao, electricConfigDao systemDao.IDeviceElectricDao,
-	dictDataDao systemDao.IDictDataDao) daemonizeService.IGatewayConfigService {
+	dictDataDao systemDao.IDictDataDao, predictionDao aiDataSetDao.IAiPredictionControlDao) daemonizeService.IGatewayConfigService {
 	return &iGatewayConfigServiceImpl{
 		deviceDao:         deviceDao,
 		templateDao:       templateDao,
@@ -60,6 +64,7 @@ func NewIGatewayConfigServiceImpl(
 		sinkDao:           sinkDao,
 		electricConfigDao: electricConfigDao,
 		dictDataDao:       dictDataDao,
+		predictionDao:     predictionDao,
 	}
 }
 
@@ -77,6 +82,11 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		return nil, errors.New("网关数据写入地址不能是空")
 	}
 	sink_address := addresses[0].DictValue
+	serverHostInfo := i.dictDataDao.SelectDictDataByType(c, gateway.SERVER_HOST)
+	if len(serverHostInfo) == 0 {
+		return nil, errors.New("网关数据写入地址不能是空")
+	}
+	server_address := serverHostInfo[0].DictValue
 
 	var deviceAddressMap map[string][]*deviceModels.DeviceVO = make(map[string][]*deviceModels.DeviceVO)
 	var templateIdMap map[uint64]uint64 = make(map[uint64]uint64)
@@ -261,6 +271,14 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		Name:    "scheduler",
 		Type:    "scheduler",
 	}
+	var taskConfig scheduler.Config
+	taskConfig.Task.Enabled = true
+	taskConfig.Task.Version = "v1"
+	taskConfig.Task.Host = server_address
+	taskConfig.Task.Limit = 50
+	taskConfig.Task.PollTime = 5 * time.Minute
+	packContent, err := cfg.Pack(taskConfig)
+	source.Properties = packContent
 	schedulerConfig.Sources = append(schedulerConfig.Sources, &source)
 
 	// 读取模板下的所有模板数据
@@ -431,7 +449,7 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	exportConfig := time_data_exporter.Config{
 		Address: sink_address,
 	}
-	packContent, err := cfg.Pack(exportConfig)
+	packContent, err = cfg.Pack(exportConfig)
 	if err != nil {
 		zap.L().Error("cfg.Pack() failed", zap.Error(err))
 		return nil, err
@@ -444,5 +462,37 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		Parallelism: 1,
 	}
 	piplines.Pipelines = append(piplines.Pipelines, *electricConfig)
+
+	predictionInfo, err := i.predictionDao.Find(c)
+	if err != nil {
+		zap.L().Error("i.predictionDao.Find() failed", zap.Error(err))
+		return nil, err
+	}
+	if predictionInfo != nil {
+		//  查询预测配置
+		predictionPipeline := pipeline.NewConfig()
+		predictionPipeline.Name = "prediction"
+		predictionPipelineSource := source2.Config{
+			Enabled: &scheduleEnabled,
+			Name:    "prediction",
+			Type:    "prediction",
+		}
+		var predictionConfig prediction.Config
+		predictionConfig.Parallelism = uint16(predictionInfo.Parallelism)
+		predictionConfig.Model = predictionInfo.Model
+		predictionConfig.TimeWindow = time.Duration(predictionInfo.Interval)
+		predictionConfig.PredictLength = uint64(predictionInfo.PredictLength)
+		//predictionConfig.
+		pack, err = cfg.Pack(&predictionConfig)
+		if err != nil {
+			zap.L().Error("cfg.Pack() failed", zap.Error(err))
+			return nil, err
+		}
+		predictionPipelineSource.Properties = pack
+
+		predictionPipeline.Sources = append(predictionPipeline.Sources, &predictionPipelineSource)
+		piplines.Pipelines = append(piplines.Pipelines, *predictionPipeline)
+
+	}
 	return piplines, nil
 }

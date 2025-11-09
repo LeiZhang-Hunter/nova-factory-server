@@ -113,3 +113,18 @@ func GetGormDataScope(c *gin.Context, db *gorm.DB) *gorm.DB {
 	}
 	return db
 }
+
+func GetGormDataScopeById(c *gin.Context, db *gorm.DB, userId int64, deptId int64) *gorm.DB {
+	switch GetDataScopeAspect(c) {
+	case dataScopeAspect.DataScopeAll:
+	case dataScopeAspect.DataScopeCustom:
+		db.Where(fmt.Sprintf(" %s.dept_id IN ( SELECT dept_id FROM sys_user_dept_scope WHERE user_id = ? ) ", db.Statement.Table), userId)
+	case dataScopeAspect.DataScopeDept:
+		db.Where(fmt.Sprintf("  %s.dept_id = ? ", db.Statement.Table), deptId)
+	case dataScopeAspect.DataScopeDeptAndChild:
+		db.Where(fmt.Sprintf(" %s.dept_id IN ( SELECT dept_id FROM sys_dept WHERE dept_id = ? or find_in_set( ? , ancestors ) ) ", db.Statement.Table), deptId, deptId)
+	default:
+		db.Where(" 1=0")
+	}
+	return db
+}

@@ -9,6 +9,7 @@ import (
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	v1 "nova-factory-server/app/business/craft/craftRouteModels/api/v1"
 	"nova-factory-server/app/business/craft/craftRouteService"
+	"nova-factory-server/app/business/daemonize/daemonizeModels"
 	"nova-factory-server/app/utils/time"
 	systime "time"
 )
@@ -219,10 +220,10 @@ func (i *IScheduleServiceImpl) Detail(c *gin.Context, id int64) (*craftRouteMode
 	}, nil
 }
 
-func (i *IScheduleServiceImpl) GetRouters(ctx *gin.Context, req *craftRouteModels.ScheduleReq) ([]int64, error) {
+func (i *IScheduleServiceImpl) GetRouters(ctx *gin.Context, req *craftRouteModels.ScheduleReq, gatewayInfo *daemonizeModels.SysIotAgent) ([]int64, error) {
 	ids := make([]int64, 0)
 	//查找特殊日程
-	specialList, err := i.scheduleMapDao.GetSpecialScheduleByNow(ctx, req.GatewayId)
+	specialList, err := i.scheduleMapDao.GetSpecialScheduleByNow(ctx, req.GatewayId, gatewayInfo)
 	if err != nil {
 		return ids, err
 	}
@@ -239,7 +240,7 @@ func (i *IScheduleServiceImpl) GetRouters(ctx *gin.Context, req *craftRouteModel
 		return ids, err
 	}
 
-	if normalList == nil {
+	if normalList != nil {
 		for _, v := range normalList {
 			ids = append(ids, v.CraftRouteID)
 		}
@@ -250,8 +251,8 @@ func (i *IScheduleServiceImpl) GetRouters(ctx *gin.Context, req *craftRouteModel
 }
 
 // Schedule 任务调度
-func (i *IScheduleServiceImpl) Schedule(ctx *gin.Context, req *craftRouteModels.ScheduleReq) ([]*v1.Router, error) {
-	routerIds, err := i.GetRouters(ctx, req)
+func (i *IScheduleServiceImpl) Schedule(ctx *gin.Context, req *craftRouteModels.ScheduleReq, gatewayInfo *daemonizeModels.SysIotAgent) ([]*v1.Router, error) {
+	routerIds, err := i.GetRouters(ctx, req, gatewayInfo)
 	if err != nil {
 		zap.L().Error("Get routers error", zap.Error(err))
 		return make([]*v1.Router, 0), err

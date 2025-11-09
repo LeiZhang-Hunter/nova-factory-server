@@ -210,7 +210,7 @@ func (schedule *Schedule) Schedule(c *gin.Context) {
 		baizeContext.Waring(c, "password error")
 		return
 	}
-	list, err := schedule.service.Schedule(c, req)
+	list, err := schedule.service.Schedule(c, req, info)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

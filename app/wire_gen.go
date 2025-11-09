@@ -182,12 +182,24 @@ func wireApp() (*gin.Engine, func(), error) {
 	iDeviceSubjectDao := deviceDaoImpl.NewIDeviceSubjectDaoImpl(db)
 	iDeviceSubjectService := deviceServiceImpl.NewIDeviceSubjectServiceImpl(iDeviceSubjectDao)
 	deviceSubject := deviceController.NewDeviceSubject(iDeviceSubjectService)
+	iDeviceCheckPlanDao := deviceDaoImpl.NewIDeviceCheckPlanDaoImpl(db)
+	iDeviceCheckPlanService := deviceServiceImpl.NewIDeviceCheckPlanServiceImpl(iDeviceCheckPlanDao)
+	deviceCheckPlan := deviceController.NewDeviceCheckPlan(iDeviceCheckPlanService)
+	iDeviceCheckMachineryDao := deviceDaoImpl.NewIDeviceCheckMachineryDaoImpl(db)
+	iDeviceCheckMachineryService := deviceServiceImpl.NewIDeviceCheckMachineryServiceImpl(iDeviceCheckMachineryDao)
+	deviceCheckMachinery := deviceController.NewDeviceCheckMachinery(iDeviceCheckMachineryService)
+	iDeviceCheckSubjectDao := deviceDaoImpl.NewIDeviceCheckSubjectDaoImpl(db)
+	iDeviceCheckSubjectService := deviceServiceImpl.NewIDeviceCheckSubjectServiceImpl(iDeviceCheckSubjectDao)
+	deviceCheckSubject := deviceController.NewDeviceCheckSubject(iDeviceCheckSubjectService)
 	device := &deviceController.Device{
-		Info:          deviceInfo,
-		Group:         deviceGroup,
-		Template:      template,
-		TemplateData:  templateData,
-		DeviceSubject: deviceSubject,
+		Info:                 deviceInfo,
+		Group:                deviceGroup,
+		Template:             template,
+		TemplateData:         templateData,
+		DeviceSubject:        deviceSubject,
+		DeviceCheckPlan:      deviceCheckPlan,
+		DeviceCheckMachinery: deviceCheckMachinery,
+		DeviceCheckSubject:   deviceCheckSubject,
 	}
 	iMaterialDao := materialDaoImpl.NewMaterialDaoImpl(db)
 	iMaterialService := materialServiceImpl.NewMaterialService(iMaterialDao, iUserDao)
@@ -273,7 +285,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	iotAgent := daemonizeController.NewIotAgentController(iotAgentService, daemonizeService)
 	alertRuleDao := alertDaoImpl.NewAlertRuleDaoImpl(db)
 	alertSinkTemplateDao := alertDaoImpl.NewAlertSinkTemplateDaoImpl(db)
-	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao, alertRuleDao, alertSinkTemplateDao, iDeviceElectricDao, iDictDataDao)
+	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao, alertRuleDao, alertSinkTemplateDao, iDeviceElectricDao, iDictDataDao, iAiPredictionControlDao)
 	iotAgentConfigService := daemonizeServiceImpl.NewIotAgentConfigServiceImpl(iotAgentConfigDao)
 	daemonizeControllerConfig := daemonizeController.NewConfig(iGatewayConfigService, iotAgentConfigService, iotAgentService)
 	daemonizeServer := &daemonizeController.DaemonizeServer{

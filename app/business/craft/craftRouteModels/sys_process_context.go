@@ -42,10 +42,16 @@ func NewSysProProcessContent(context *SysProSetProcessContent) *SysProProcessCon
 	}
 }
 
+type DeviceRuleInfo struct {
+	DeviceId string `json:"deviceId"`
+	DataId   string `json:"dataId"`
+}
+
 type TriggerRules struct {
 	Name string `json:"name"`
 	Rule []struct {
 		DataId    string `json:"data_id"`
+		DeviceId  string `json:"device_id"`
 		Operator  string `json:"operator"`
 		Value     string `json:"value"`
 		Rule      string `json:"rule"`
@@ -62,17 +68,19 @@ type TriggerRules struct {
 		Placeholder      string `json:"placeholder"`
 		FormatHint       string `json:"format_hint"`
 	} `json:"actions"`
-	CombinedRule string   `json:"combined_rule"`
-	DataIds      []string `json:"dataIds"`
+	CombinedRule string           `json:"combined_rule"`
+	DataIds      []DeviceRuleInfo `json:"dataIds"`
 	Cases        []struct {
 		NextStep   string `json:"next_step"`
 		Connector  string `json:"connector"`
 		Conditions []struct {
-			DataId    string `json:"data_id"`
-			Operator  string `json:"operator"`
-			Value     string `json:"value"`
-			Rule      string `json:"rule"`
-			Connector string `json:"connector"`
+			DataId     string `json:"data_id"`
+			Operator   string `json:"operator"`
+			DeviceId   string `json:"device_id"`
+			TemplateId string `json:"template_id"`
+			Value      string `json:"value"`
+			Rule       string `json:"rule"`
+			Connector  string `json:"connector"`
 		} `json:"conditions"`
 	} `json:"cases"`
 }

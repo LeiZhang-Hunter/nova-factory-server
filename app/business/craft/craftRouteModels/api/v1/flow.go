@@ -13,9 +13,14 @@ type DeviceAction struct {
 	DataFormat string      `json:"dataFormat"`
 }
 
+type DeviceRuleInfo struct {
+	DeviceId string `json:"deviceId"`
+	DataId   string `json:"dataId"`
+}
+
 type DeviceRule struct {
-	DataId []string `json:"dataId"`
-	Rule   string   `json:"rule"`
+	DataId []DeviceRuleInfo `json:"dataId"`
+	Rule   string           `json:"rule"`
 }
 
 // DeviceTriggerRule 设备触发规则
@@ -27,18 +32,14 @@ type DeviceTriggerRule struct {
 	Actions    []*DeviceAction `json:"actions"`
 }
 
-func NweDeviceTriggerRule() *DeviceTriggerRule {
-	return &DeviceTriggerRule{
-		Rule:    &DeviceRule{},
-		Actions: make([]*DeviceAction, 0),
-	}
-}
-
 // ProcessContext 工序内容
 type ProcessContext struct {
 	ContentID    uint64             `gorm:"column:content_id;primaryKey;autoIncrement:true;comment:内容ID" json:"content_id,string"` // 内容ID
 	ProcessID    uint64             `gorm:"column:process_id;not null;comment:工序ID" json:"process_id,string" binding:"required"`   // 工序ID
 	ContentText  string             `gorm:"column:content_text;comment:内容说明" json:"content_text" binding:"required"`               // 内容说明
+	Device       string             `gorm:"column:device;comment:辅助设备" json:"device"`                                              // 辅助设备
+	DocURL       string             `gorm:"column:doc_url;comment:材料URL" json:"doc_url"`                                           // 材料URL
+	Remark       string             `gorm:"column:remark;comment:备注" json:"remark"`                                                // 备注
 	TriggerRules *DeviceTriggerRule `json:"trigger_rules"`
 }
 
@@ -79,5 +80,12 @@ func NewRouter() *Router {
 		Name:      "",
 		Id:        0,
 		Md5:       "",
+	}
+}
+
+func NweDeviceTriggerRule() *DeviceTriggerRule {
+	return &DeviceTriggerRule{
+		Rule:    &DeviceRule{},
+		Actions: make([]*DeviceAction, 0),
 	}
 }
