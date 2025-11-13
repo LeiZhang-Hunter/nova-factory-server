@@ -110,6 +110,9 @@ func (d *DeviceMonitorServiceImpl) List(c *gin.Context, req *deviceModels.Device
 				}
 				list.Rows[k].TemplateList[templateId][dataId].Name = dataValue.Name
 				list.Rows[k].TemplateList[templateId][dataId].Unit = dataValue.Unit
+				list.Rows[k].TemplateList[templateId][dataId].GraphEnable = *dataValue.GraphEnable
+				list.Rows[k].TemplateList[templateId][dataId].PredictEnable = *dataValue.PredictEnable
+				list.Rows[k].TemplateList[templateId][dataId].DataId = uint64(dataValue.DeviceConfigID)
 			}
 		}
 	}

@@ -22,6 +22,9 @@ type DeviceMetricData struct {
 	StartTimeUnix *gtime.Time       `json:"start_time_unix" gorm:"column:start_time_unix" description:"开始时间"`              //
 	Name          string            `json:"name" gorm:"-"`
 	Unit          string            `json:"unit" gorm:"-"`
+	PredictEnable bool              `json:"predict_enable" gorm:"-"`
+	DataId        uint64            `json:"data_id,string" gorm:"-"`
+	GraphEnable   bool              `json:"graph_enable" gorm:"-"`
 	TimeUnix      *gtime.Time       `json:"time_unix"       gorm:"column:time_unix"      description:"当前时间"` //
 	Value         float64           `json:"value"           gorm:"column:value"         description:"统计值"`   //
 }

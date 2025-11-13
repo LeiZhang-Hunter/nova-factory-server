@@ -43,6 +43,8 @@ func NewIotDb() *IotDb {
 
 	defer pool.PutBack(session)
 
+	// 创建数据库
+	session.ExecuteStatement("create database root.device")
 	// 创建设备数据采集模板
 	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (value DOUBLE)", iotdb2.NOVA_DEVICE_TEMPLATE))
 	// 创建设备运行时间统计模板
