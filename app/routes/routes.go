@@ -142,6 +142,7 @@ func NewGinEngine(
 		deviceMonitor.DeviceMonitor.PrivateRoutes(group)
 		deviceMonitor.DeviceReport.PrivateRoutes(group)
 		deviceMonitor.DeviceUtilization.PrivateRoutes(group)
+		deviceMonitor.ControlLog.PrivateRoutes(group)
 
 		alert.AlertTemplate.PrivateRoutes(group)
 		alert.Alert.PrivateRoutes(group)

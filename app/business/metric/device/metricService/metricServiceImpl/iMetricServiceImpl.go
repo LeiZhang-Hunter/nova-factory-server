@@ -121,7 +121,7 @@ func (m *IMetricServiceImpl) export(c context.Context, values []*metricModels.No
 			zap.L().Error("json marshal error", zap.Error(err))
 			continue
 		}
-		m.cache.Set(c, device.MakeDeviceKey(uint64(v.DeviceId)), string(bytes), 600*time.Second)
+		m.cache.Set(context.Background(), device.MakeDeviceKey(uint64(v.DeviceId)), string(bytes), 600*time.Second)
 	}
 
 	return m.dao.Export(c, values)

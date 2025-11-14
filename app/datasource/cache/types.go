@@ -14,9 +14,12 @@ func NewCache() (cache Cache) {
 	switch viper.GetString("cache.type") {
 	case "redis":
 		r := redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%d", viper.GetString("cache.redis.host"), viper.GetInt("cache.redis.port")),
-			Password: viper.GetString("cache.redis.password"),
-			DB:       viper.GetInt("cache.redis.db"),
+			Addr:            fmt.Sprintf("%s:%d", viper.GetString("cache.redis.host"), viper.GetInt("cache.redis.port")),
+			Password:        viper.GetString("cache.redis.password"),
+			DB:              viper.GetInt("cache.redis.db"),
+			MinRetryBackoff: 100 * time.Millisecond, // 最小100ms重试间隔
+			MaxRetryBackoff: 5 * time.Second,        // 最大5秒重试间隔
+			MaxRetries:      5,                      // 最大重试次数
 		})
 
 		cache = redis2.NewRedisCache(r)

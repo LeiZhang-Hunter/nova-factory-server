@@ -1,15 +1,12 @@
-package metricDao
+package deviceMonitorService
 
 import (
-	"context"
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricModels"
 )
 
-type IControlLogDao interface {
-	// Export 导出数据
-	Export(ctx context.Context, data []*metricModels.NovaControlLog) error
+type ControlLogService interface {
 	// List 控制日志列表
 	List(c *gin.Context, req *deviceMonitorModel.ControlLogListReq) (*metricModels.NovaControlLogList, error)
 }

@@ -304,10 +304,13 @@ func wireApp() (*gin.Engine, func(), error) {
 	deviceUtilizationDao := deviceMonitorDaoImpl.NewDeviceUtilizationDaoImpl(iotDb, iSysShiftDao, iDeviceDao, buildingDao)
 	deviceUtilizationService := deviceMonitorServiceImpl.NewDeviceUtilizationServiceImpl(deviceUtilizationDao)
 	deviceUtilization := deviceMonitorController.NewDeviceUtilization(deviceUtilizationService)
+	controlLogService := deviceMonitorServiceImpl.NewControlLogServiceImpl(iControlLogDao, iDeviceDao, iSysModbusDeviceConfigDataDao)
+	controlLog := deviceMonitorController.NewControlLog(controlLogService)
 	deviceMonitorControllerDeviceMonitorController := &deviceMonitorController.DeviceMonitorController{
 		DeviceMonitor:     deviceMonitor,
 		DeviceReport:      deviceReport,
 		DeviceUtilization: deviceUtilization,
+		ControlLog:        controlLog,
 	}
 	alertActionDao := alertDaoImpl.NewAlertActionDaoImpl(db)
 	alertAiReasonDao := alertDaoImpl.NewAlertAiReasonDaoImpl(db)
