@@ -2,4 +2,4 @@ package metricServiceImpl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewIMetricServiceImpl, NewIDevMapServiceImpl)
+var ProviderSet = wire.NewSet(NewIMetricServiceImpl, NewIDevMapServiceImpl, NewIControlLogServiceImpl)

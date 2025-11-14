@@ -4,18 +4,21 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"nova-factory-server/app/business/metric/device/metricService"
 )
 
 type Metric struct {
-	service metricService.IMetricService
+	service           metricService.IMetricService
+	logControlService metricService.IControlLogService
 	v1.UnimplementedDeviceReportServiceServer
 }
 
-func NewMetric(service metricService.IMetricService) *Metric {
+func NewMetric(service metricService.IMetricService, logControlService metricService.IControlLogService) *Metric {
 	return &Metric{
-		service: service,
+		service:           service,
+		logControlService: logControlService,
 	}
 }
 
@@ -56,7 +59,12 @@ func (m *Metric) ReportTimeData(c context.Context, request *v1.ExportTimeDataReq
 }
 
 // ReportScheduleLog 写入控制日志，写入clickhouse
-func (m *Metric) ReportScheduleLog(context.Context, *v1.ExportControlLogRequest) (*v1.NodeRes, error) {
+func (m *Metric) ReportScheduleLog(c context.Context, request *v1.ExportControlLogRequest) (*v1.NodeRes, error) {
+	err := m.logControlService.Export(c, request)
+	if err != nil {
+		zap.L().Error("Log Control Log Failed", zap.Error(err))
+		return nil, err
+	}
 	return &v1.NodeRes{
 		Code: 0,
 	}, nil

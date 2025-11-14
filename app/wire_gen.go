@@ -275,7 +275,9 @@ func wireApp() (*gin.Engine, func(), error) {
 		Schedule:        schedule,
 	}
 	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
-	metric := metricController.NewMetric(iMetricService)
+	iControlLogDao := metricDaoIMpl.NewIControlLogDaoImpl(clickHouse)
+	iControlLogService := metricServiceImpl.NewIControlLogServiceImpl(iControlLogDao)
+	metric := metricController.NewMetric(iMetricService, iControlLogService)
 	metricServer := &metricController.MetricServer{
 		Metric: metric,
 	}
