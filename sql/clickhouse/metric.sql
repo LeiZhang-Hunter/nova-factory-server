@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS nova_metrics_device ON CLUSTER `default`
     TTL toDateTime(time_unix) + toIntervalDay(180)
     SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1;
 
-CREATE TABLE IF NOT EXISTS nova_control_log ON CLUSTER `default`
+CREATE TABLE IF NOT EXISTS nova_control_log
 (
     `device_id` UInt64 COMMENT '设备id',
     `data_id` bigint(20) NOT NULL COMMENT '数据id',

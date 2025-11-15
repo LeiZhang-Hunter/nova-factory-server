@@ -86,7 +86,7 @@ func (i *IControlLogDaoImpl) List(c *gin.Context, req *deviceMonitorModel.Contro
 		}, ret.Error
 	}
 
-	ret = db.Debug().Offset(offset).Order("start_time_unix desc").Limit(size).Find(&dto)
+	ret = db.Offset(offset).Order("start_time_unix desc").Limit(size).Find(&dto)
 	if ret.Error != nil {
 		return &metricModels.NovaControlLogList{
 			Rows:  make([]*metricModels.NovaControlLog, 0),
