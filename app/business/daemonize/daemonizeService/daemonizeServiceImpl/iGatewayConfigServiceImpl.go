@@ -347,6 +347,7 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	logAlertConfig.Additions = additions
 	logAlertConfig.SendOnlyMatched = true
 	logAlertConfig.Advanced = *advanced
+	logAlertConfig.Advanced.Enable = true
 	pack, err := cfg.Pack(logAlertConfig)
 	if err != nil {
 		zap.L().Error("cfg.Pack() failed", zap.Error(err))

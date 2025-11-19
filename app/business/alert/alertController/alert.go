@@ -67,6 +67,36 @@ func (a *Alert) Set(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+
+	// 校验rule是否合法
+	if len(info.Advanced.Rules) != 0 {
+		for _, rule := range info.Advanced.Rules {
+			for _, group := range rule.Groups {
+				if group.Key == "" {
+					baizeContext.Waring(c, "数据id不能为空")
+					return
+				}
+				if group.Name == "" {
+					baizeContext.Waring(c, "数据id名称不能为空")
+					return
+				}
+				if group.Operator == "" {
+					baizeContext.Waring(c, "条件操作符号不能为空")
+					return
+				}
+				if group.OperatorName == "" {
+					baizeContext.Waring(c, "条件操作符号名称不能为空")
+					return
+				}
+				if group.Value == "" {
+					baizeContext.Waring(c, "规则数值不能是空")
+					return
+				}
+			}
+		}
+
+	}
+
 	if info.ID == 0 {
 		value, err := a.service.Create(c, info)
 		if err != nil {

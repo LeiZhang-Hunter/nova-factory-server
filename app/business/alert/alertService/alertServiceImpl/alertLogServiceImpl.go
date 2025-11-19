@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"nova-factory-server/app/business/alert/alertController"
 	"nova-factory-server/app/business/alert/alertDao"
 	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/alert/alertService"
@@ -42,15 +41,15 @@ func (log *AlertLogServiceImpl) Export(c *gin.Context, data alertModels.AlertLog
 		return errors.New("username or password error")
 	}
 
-	alertLogList, infos := alertModels.FromDataToNovaAlertLog(&data)
+	alertLogList, _ := alertModels.FromDataToNovaAlertLog(&data)
 	err = log.dao.Export(c, alertLogList)
 	if err != nil {
 		return err
 	}
 
-	for _, info := range infos {
-		alertController.GetAlertRunner().Push(info)
-	}
+	//for _, info := range infos {
+	//	alertController.GetAlertRunner().Push(info)
+	//}
 	return nil
 }
 
