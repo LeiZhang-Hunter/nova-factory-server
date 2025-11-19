@@ -85,7 +85,7 @@ func (i *ISysCraftRouteConfigDaoImpl) GetById(routeId uint64) (*craftRouteModels
 
 func (i *ISysCraftRouteConfigDaoImpl) GetConfigByIds(routeIds []int64) ([]*v1.Router, error) {
 	var list []*craftRouteModels.SysCraftRouteConfig
-	ret := i.db.Table(i.tableName).Debug().Where("route_id in (?)", routeIds).Where("state = ?", commonStatus.NORMAL).Find(&list)
+	ret := i.db.Table(i.tableName).Where("route_id in (?)", routeIds).Where("state = ?", commonStatus.NORMAL).Find(&list)
 	if ret.Error != nil {
 		zap.L().Error("get info error", zap.Error(ret.Error))
 		return nil, ret.Error

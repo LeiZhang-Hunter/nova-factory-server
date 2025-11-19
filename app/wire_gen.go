@@ -318,14 +318,15 @@ func wireApp() (*gin.Engine, func(), error) {
 	alert := alertController.NewAlert(alertRuleService)
 	alertTemplateService := alertServiceImpl.NewAlertTemplateServiceImpl(alertSinkTemplateDao)
 	alertTemplate := alertController.NewAlertTemplate(alertTemplateService)
-	alertLogDao := alertDaoImpl.NewAlertLogDaoImpl(db)
-	alertLogService := alertServiceImpl.NewAlertLogServiceImpl(alertLogDao, alertRuleDao, iotAgentDao)
+	alertLogClickhouseDao := alertDaoImpl.NewAlertLogClickhouseDaoImpl(clickHouse, iotAgentDao)
+	alertLogService := alertServiceImpl.NewAlertLogServiceImpl(alertLogClickhouseDao, alertRuleDao, iotAgentDao)
 	alertLog := alertController.NewAlertLog(alertLogService)
 	alertActionService := alertServiceImpl.NewAlertActionServiceImpl(alertActionDao)
 	alertAction := alertController.NewAlertAction(alertActionService, iDictDataService)
 	alertAiReasonService := alertServiceImpl.NewAlertAiReasonServiceImpl(alertAiReasonDao)
 	alertAiReason := alertController.NewAlertAiReason(alertAiReasonService)
 	runnerService := alertServiceImpl.NewRunnerServiceImpl(iChartService)
+	alertLogDao := alertDaoImpl.NewAlertLogDaoImpl(db)
 	runner := alertController.NewRunner(alertRuleService, runnerService, iChartService, iDeviceDao, alertLogDao)
 	controller := &alertController.Controller{
 		Alert:         alert,

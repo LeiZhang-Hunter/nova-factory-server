@@ -1,11 +1,9 @@
 package alertController
 
 import (
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	"nova-factory-server/app/business/ai/aiDataSetModels"
 	"nova-factory-server/app/business/ai/aiDataSetService"
 	"nova-factory-server/app/business/alert/alertDao"
 	"nova-factory-server/app/business/alert/alertModels"
@@ -117,13 +115,6 @@ func (r *Runner) handle(data *alertModels.AlertLogInfo) {
 		return
 	}
 
-	// 检查 Agent是否存在，不存在则创建Agent
-	sessionId, err := r.runnerService.Load(&ctx, reason.AgentId)
-	if err != nil {
-		zap.L().Error("runnerService.Load failed", zap.Error(err))
-		return
-	}
-
 	makeTemplate, err := template.MakeTemplate(reason.Message)
 	if err != nil {
 		zap.L().Error("MakeTemplate failed", zap.Error(err))
@@ -151,33 +142,5 @@ func (r *Runner) handle(data *alertModels.AlertLogInfo) {
 		return
 	}
 
-	// 发起聊天
-	completions, err := r.chatService.AgentsCompletions(&ctx, &aiDataSetModels.AgentsCompletionsRequest{
-		SessionId: sessionId,
-		Question:  buffer.String(),
-		Stream:    false,
-		AgentId:   reason.AgentId,
-	})
-	if err != nil {
-		zap.L().Error("chatService.AgentsCompletions failed", zap.Error(err))
-		return
-	}
-
-	if completions == nil {
-		zap.L().Error("chatService.AgentsCompletions failed", zap.Any("completions", completions))
-		return
-	}
-
-	alertMessage, err := json.Marshal(completions.Data)
-	if err != nil {
-		zap.L().Error("json.Marshal failed", zap.Error(err))
-		return
-	}
-	// 更新推理结果到数据库
-	err = r.logDao.UpdateReason(&ctx, int64(data.Id), string(alertMessage))
-	if err != nil {
-		zap.L().Error("UpdateReason failed", zap.Error(err))
-		return
-	}
 	return
 }

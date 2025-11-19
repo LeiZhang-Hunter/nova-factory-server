@@ -12,12 +12,12 @@ import (
 )
 
 type AlertLogServiceImpl struct {
-	dao      alertDao.AlertLogDao
+	dao      alertDao.AlertLogClickhouseDao
 	ruleDao  alertDao.AlertRuleDao
 	agentDao daemonizeDao.IotAgentDao
 }
 
-func NewAlertLogServiceImpl(dao alertDao.AlertLogDao, ruleDao alertDao.AlertRuleDao, agentDao daemonizeDao.IotAgentDao) alertService.AlertLogService {
+func NewAlertLogServiceImpl(dao alertDao.AlertLogClickhouseDao, ruleDao alertDao.AlertRuleDao, agentDao daemonizeDao.IotAgentDao) alertService.AlertLogService {
 	return &AlertLogServiceImpl{
 		dao:      dao,
 		ruleDao:  ruleDao,
@@ -42,10 +42,7 @@ func (log *AlertLogServiceImpl) Export(c *gin.Context, data alertModels.AlertLog
 		return errors.New("username or password error")
 	}
 
-	alertLogList, infos := alertModels.FromDataToSysAlertLog(&data, uint64(gatewayInfo.DeptID), c)
-	for k, _ := range alertLogList {
-		alertLogList[k].DeptID = gatewayInfo.DeptID
-	}
+	alertLogList, infos := alertModels.FromDataToNovaAlertLog(&data)
 	err = log.dao.Export(c, alertLogList)
 	if err != nil {
 		return err
@@ -57,6 +54,6 @@ func (log *AlertLogServiceImpl) Export(c *gin.Context, data alertModels.AlertLog
 	return nil
 }
 
-func (log *AlertLogServiceImpl) List(c *gin.Context, req *alertModels.SysAlertLogListReq) (*alertModels.SysAlertLogList, error) {
+func (log *AlertLogServiceImpl) List(c *gin.Context, req *alertModels.SysAlertLogListReq) (*alertModels.NovaAlertLogList, error) {
 	return log.dao.List(c, req)
 }
