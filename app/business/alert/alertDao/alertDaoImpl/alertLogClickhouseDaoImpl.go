@@ -24,7 +24,7 @@ func NewAlertLogClickhouseDaoImpl(clickhouse *clickhouse.ClickHouse, agentDao da
 
 // Export 导出告警数据
 func (log *AlertLogClickhouseDaoImpl) Export(c *gin.Context, data []*alertModels.NovaAlertLog) error {
-	ret := log.clickhouse.DB().Debug().Table(log.table).Create(data)
+	ret := log.clickhouse.DB().Table(log.table).Create(data)
 	if ret.Error != nil {
 		return ret.Error
 	}
