@@ -2,6 +2,7 @@ package alertController
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/alert/alertService"
 	"nova-factory-server/app/middlewares"
@@ -45,6 +46,7 @@ func (log *AlertLog) Export(c *gin.Context) {
 
 	err = log.service.Export(c, *data)
 	if err != nil {
+		zap.L().Error("export alert error", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}
