@@ -63,6 +63,109 @@ func (p *ProcessContext) SetProcessContextList(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+
+	if req.ControlRules == nil {
+		baizeContext.Waring(c, "控制算法不能为空")
+		return
+	}
+
+	if req.ControlType != "pid" && req.ControlType != "threshold" && req.ControlType != "mpc" {
+		baizeContext.Waring(c, "控制算法暂时不支持")
+		return
+	}
+
+	if req.ControlType == "threshold" {
+		if req.ControlRules.TriggerRules == nil {
+			baizeContext.Waring(c, "阈值算法规则不能为空")
+			return
+		}
+
+		if len(req.ControlRules.TriggerRules.Rule) == 0 {
+			baizeContext.Waring(c, "阈值算法规则不能为空")
+			return
+		}
+
+		for _, rule := range req.ControlRules.TriggerRules.Rule {
+			if rule.Rule == "" {
+				baizeContext.Waring(c, "触发规则条件不能为空")
+				return
+			}
+			if rule.DeviceId == "" {
+				baizeContext.Waring(c, "请选择设备")
+				return
+			}
+			if rule.DataId == "" {
+				baizeContext.Waring(c, "请选择数据id")
+				return
+			}
+		}
+
+		if len(req.ControlRules.TriggerRules.Actions) == 0 {
+			baizeContext.Waring(c, "控制动作不能为空")
+			return
+		}
+
+		for _, v := range req.ControlRules.TriggerRules.Actions {
+			if v.DeviceId == "" {
+				baizeContext.Waring(c, "调节设备不能为空")
+				return
+			}
+
+			if v.DataId == "" {
+				baizeContext.Waring(c, "调节数据不能为空")
+				return
+			}
+
+			if v.ControlMode != "concurrent_control" && v.ControlMode != "delay_control" {
+				baizeContext.Waring(c, "控制动作不能为空")
+				return
+			}
+
+		}
+	}
+
+	if req.ControlType == "pid" {
+		if req.ControlRules.PidRules == nil {
+			baizeContext.Waring(c, "pid算法规则不能为空")
+			return
+		}
+		if req.ControlRules.PidRules.DeviceId == "" {
+			baizeContext.Waring(c, "请选择设备")
+			return
+		}
+		if req.ControlRules.PidRules.DataId == "" {
+			baizeContext.Waring(c, "请选择数据id")
+			return
+		}
+		if req.ControlRules.PidRules.Proportional == 0 {
+			baizeContext.Waring(c, "PID规则百分比增益不能为空")
+			return
+		}
+
+		if len(req.ControlRules.PidRules.Actions) == 0 {
+			baizeContext.Waring(c, "控制动作不能为空")
+			return
+		}
+
+		for _, v := range req.ControlRules.PidRules.Actions {
+			if v.DeviceId == "" {
+				baizeContext.Waring(c, "调节设备不能为空")
+				return
+			}
+
+			if v.DataId == "" {
+				baizeContext.Waring(c, "调节数据不能为空")
+				return
+			}
+
+			if v.ControlMode != "concurrent_control" && v.ControlMode != "delay_control" {
+				baizeContext.Waring(c, "控制动作不能为空")
+				return
+			}
+
+		}
+	}
+
 	if req.ContentID == 0 {
 		ret, err := p.processContextService.Add(c, req)
 		if err != nil {

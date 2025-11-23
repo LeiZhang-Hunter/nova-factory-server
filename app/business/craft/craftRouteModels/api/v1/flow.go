@@ -5,12 +5,14 @@ type DeviceInfo struct {
 }
 
 type DeviceAction struct {
-	Address    string      `json:"address"`
-	DeviceId   string      `json:"deviceId"`
-	TemplateId string      `json:"templateId"`
-	DataId     string      `json:"dataId"`
-	Value      interface{} `json:"value"`
-	DataFormat string      `json:"dataFormat"`
+	Address     string      `json:"address"`
+	DeviceId    string      `json:"deviceId"`
+	DataId      string      `json:"dataId"`
+	Value       interface{} `json:"value"`
+	DataFormat  string      `json:"dataFormat"`
+	ControlMode string      `json:"control_mode"`
+	Condition   string      `json:"condition"`
+	Interval    string      `json:"interval"`
 }
 
 type DeviceRuleInfo struct {
@@ -23,7 +25,7 @@ type DeviceRule struct {
 	Rule   string           `json:"rule"`
 }
 
-// DeviceTriggerRule 设备触发规则
+// DeviceTriggerRule 设备触发规则,阈值规则
 type DeviceTriggerRule struct {
 	Name       string          `json:"name"`
 	Rule       *DeviceRule     `json:"rule"`
@@ -32,15 +34,30 @@ type DeviceTriggerRule struct {
 	Actions    []*DeviceAction `json:"actions"`
 }
 
+// PidRules 规则
+type PidRules struct {
+	Proportional int             `json:"proportional"`
+	Integral     int             `json:"integral"`
+	Derivative   int             `json:"derivative"`
+	ActualSignal int             `json:"actualSignal"`
+	DeviceId     string          `json:"device_id"`
+	DataId       string          `json:"data_id"`
+	Actions      []*DeviceAction `json:"actions"`
+}
+
+// ControlRules 控制算法
+type ControlRules struct {
+	TriggerRules *DeviceTriggerRule `json:"trigger_rules"`
+	PidRules     *PidRules          `json:"pid_rules"`
+}
+
 // ProcessContext 工序内容
 type ProcessContext struct {
-	ContentID    uint64             `gorm:"column:content_id;primaryKey;autoIncrement:true;comment:内容ID" json:"content_id,string"` // 内容ID
-	ProcessID    uint64             `gorm:"column:process_id;not null;comment:工序ID" json:"process_id,string" binding:"required"`   // 工序ID
-	ContentText  string             `gorm:"column:content_text;comment:内容说明" json:"content_text" binding:"required"`               // 内容说明
-	Device       string             `gorm:"column:device;comment:辅助设备" json:"device"`                                              // 辅助设备
-	DocURL       string             `gorm:"column:doc_url;comment:材料URL" json:"doc_url"`                                           // 材料URL
-	Remark       string             `gorm:"column:remark;comment:备注" json:"remark"`                                                // 备注
-	TriggerRules *DeviceTriggerRule `json:"trigger_rules"`
+	ContentID      uint64        `gorm:"column:content_id;primaryKey;autoIncrement:true;comment:内容ID" json:"content_id,string"` // 内容ID
+	ProcessID      uint64        `gorm:"column:process_id;not null;comment:工序ID" json:"process_id,string" binding:"required"`   // 工序ID
+	ControlName    string        `json:"control_name"`
+	ControllerType string        `json:"controller_type"`
+	ControlRules   *ControlRules `json:"control_rules"`
 }
 
 type Process struct {
@@ -87,5 +104,14 @@ func NweDeviceTriggerRule() *DeviceTriggerRule {
 	return &DeviceTriggerRule{
 		Rule:    &DeviceRule{},
 		Actions: make([]*DeviceAction, 0),
+	}
+}
+
+func NewControlRules() *ControlRules {
+	return &ControlRules{
+		TriggerRules: NweDeviceTriggerRule(),
+		PidRules: &PidRules{
+			Actions: make([]*DeviceAction, 0),
+		},
 	}
 }

@@ -99,4 +99,3 @@ CREATE TABLE sys_alert_ai_reason (
     PRIMARY KEY (`id`)
 ) COMMENT='告警ai 推理配置';
 
-alter table

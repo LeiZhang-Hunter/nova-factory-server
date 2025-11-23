@@ -11,6 +11,7 @@ import (
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	v1 "nova-factory-server/app/business/craft/craftRouteModels/api/v1"
 	"nova-factory-server/app/business/craft/craftRouteService"
+	"nova-factory-server/app/constant/control"
 	craft2 "nova-factory-server/app/constant/craft"
 	"nova-factory-server/app/utils/uuid"
 	"strconv"
@@ -277,75 +278,103 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 			contextList[processContext.ProcessID] = make([]v1.ProcessContext, 0)
 		}
 
-		var triggerRule *v1.DeviceTriggerRule
+		var controlRule *v1.ControlRules
 		if processContext.Extension != "" {
-			var rule craftRouteModels.TriggerRules
+			var rule craftRouteModels.ControlRule
 			err := json.Unmarshal([]byte(processContext.Extension), &rule)
 			if err != nil {
 				zap.L().Error("解析触发规则失败", zap.Error(err))
 				return nil, err
 			}
-			triggerRule = v1.NweDeviceTriggerRule()
-			triggerRule.Rule.DataId = make([]v1.DeviceRuleInfo, 0)
+			controlRule = v1.NewControlRules()
 
-			for _, v := range rule.Cases {
-				for _, caseValue := range v.Conditions {
-					var info v1.DeviceRuleInfo
-					info.DataId = caseValue.DataId
-					info.DeviceId = caseValue.DeviceId
-					triggerRule.Rule.DataId = append(triggerRule.Rule.DataId, info)
+			if processContext.ControlType == string(control.Pid) {
+				if rule.PidRules == nil {
+					continue
+				}
+				controlRule.PidRules.DeviceId = rule.PidRules.DeviceId
+				controlRule.PidRules.DataId = rule.PidRules.DataId
+				controlRule.PidRules.ActualSignal = rule.PidRules.ActualSignal
+				controlRule.PidRules.Proportional = rule.PidRules.Proportional
+				controlRule.PidRules.Integral = rule.PidRules.Integral
+				controlRule.PidRules.Derivative = rule.PidRules.Derivative
+
+				for _, action := range rule.PidRules.Actions {
+					controlRule.PidRules.Actions = append(controlRule.PidRules.Actions, &v1.DeviceAction{
+						DeviceId:    action.DeviceId,
+						DataId:      action.DataId,
+						Value:       action.Value,
+						DataFormat:  action.DataFormat,
+						ControlMode: action.ControlMode,
+						Condition:   action.Condition,
+						Interval:    action.Interval,
+					})
 				}
 			}
 
-			combinedRule := ""
-			first := true
-			for caseKey, caseRule := range rule.Cases {
-				if !first {
-					combinedRule += " " + caseRule.Connector + " "
-				} else {
-					first = false
-					combinedRule += "("
+			if processContext.ControlType == string(control.Threshold) {
+				for _, v := range rule.TriggerRules.Cases {
+					for _, caseValue := range v.Conditions {
+						var info v1.DeviceRuleInfo
+						info.DataId = caseValue.DataId
+						info.DeviceId = caseValue.DeviceId
+						controlRule.TriggerRules.Rule.DataId = append(controlRule.TriggerRules.Rule.DataId, info)
+					}
 				}
-
-				firstCondition := true
-				conditionRule := ""
-				for k, condition := range caseRule.Conditions {
-					if !firstCondition {
-						conditionRule += " " + condition.Connector + " "
+				combinedRule := ""
+				first := true
+				for caseKey, caseRule := range rule.TriggerRules.Cases {
+					if !first {
+						combinedRule += " " + caseRule.Connector + " "
 					} else {
-						firstCondition = false
-						conditionRule += "("
+						first = false
+						combinedRule += "("
 					}
-					conditionRule += condition.Rule
-					if k == len(caseRule.Conditions)-1 {
-						conditionRule += ")"
+
+					firstCondition := true
+					conditionRule := ""
+					for k, condition := range caseRule.Conditions {
+						if !firstCondition {
+							conditionRule += " " + condition.Connector + " "
+						} else {
+							firstCondition = false
+							conditionRule += "("
+						}
+						conditionRule += condition.Rule
+						if k == len(caseRule.Conditions)-1 {
+							conditionRule += ")"
+						}
 					}
-				}
 
-				combinedRule += conditionRule
-				if len(rule.Cases)-1 == caseKey {
-					combinedRule += ")"
+					combinedRule += conditionRule
+					if len(rule.TriggerRules.Cases)-1 == caseKey {
+						combinedRule += ")"
+					}
+					continue
 				}
-				continue
-			}
-			triggerRule.Rule.Rule = combinedRule
+				controlRule.TriggerRules.Rule.Rule = combinedRule
 
-			for _, action := range rule.Actions {
-				triggerRule.Actions = append(triggerRule.Actions, &v1.DeviceAction{
-					DeviceId:   action.DeviceId,
-					TemplateId: action.TemplateId,
-					DataId:     action.DataId,
-					Value:      action.Value,
-					DataFormat: action.DataFormat,
-				})
+				for _, action := range rule.TriggerRules.Actions {
+					controlRule.TriggerRules.Actions = append(controlRule.TriggerRules.Actions, &v1.DeviceAction{
+						DeviceId:    action.DeviceId,
+						DataId:      action.DataId,
+						Value:       action.Value,
+						DataFormat:  action.DataFormat,
+						ControlMode: action.ControlMode,
+						Condition:   action.Condition,
+						Interval:    action.Interval,
+					})
+				}
 			}
+
 		}
 
 		contextList[processContext.ProcessID] = append(contextList[processContext.ProcessID], v1.ProcessContext{
-			ContentID:    processContext.ContentID,
-			ProcessID:    processContext.ProcessID,
-			ContentText:  processContext.ContentText,
-			TriggerRules: triggerRule,
+			ContentID:      processContext.ContentID,
+			ProcessID:      processContext.ProcessID,
+			ControlName:    processContext.ControlName,
+			ControllerType: processContext.ControlType,
+			ControlRules:   controlRule,
 		})
 	}
 

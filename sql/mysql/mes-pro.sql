@@ -56,10 +56,12 @@ create table sys_pro_process (
 create table sys_pro_process_content (
     content_id                     bigint(20)      not null auto_increment    comment '内容ID',
     process_id                     bigint(20)      not null                   comment '工序ID',
+    control_name                   varchar(255)                               comment '控制名称',
     order_num                      int(4)          default 0                  comment '顺序编号',
     content_text                   varchar(500)                               comment '内容说明',
     device                         varchar(255)                               comment '辅助设备',
     material                       varchar(255)                               comment '辅助材料',
+    control_type                   varchar(255)                               comment '控制方式',
     doc_url                        varchar(255)                               comment '材料URL',
     remark                         varchar(500)    default ''                 comment '备注',
     attr1                          varchar(64)     default null               comment '预留字段1',
@@ -75,6 +77,8 @@ create table sys_pro_process_content (
     update_time                    datetime                                   comment '更新时间',
     primary key (content_id)
 ) engine=innodb auto_increment=0 comment = '生产工序内容表';
+
+
 
 -- ----------------------------
 -- 4、工艺组成表
