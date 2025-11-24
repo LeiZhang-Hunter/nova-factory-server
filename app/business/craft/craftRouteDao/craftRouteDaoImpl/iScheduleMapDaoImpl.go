@@ -311,7 +311,7 @@ func (i *IScheduleMapDaoImpl) GetNormalByTime(c *gin.Context, gatewayId int64) (
 	if weekday == 0 {
 		weekday = 7
 	}
-	db := i.db.Table(i.table).Debug().Where("gateway_id = ?", gatewayId).
+	db := i.db.Table(i.table).Where("gateway_id = ?", gatewayId).
 		Where("begin_time <= ?", interval).
 		Where("end_time > ?", interval).
 		Where("schedule_type = ?", craftRouteModels.DAILY).

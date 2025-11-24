@@ -287,6 +287,15 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 				return nil, err
 			}
 			controlRule = v1.NewControlRules()
+			if len(rule.CaptureData) > 0 {
+				for _, v := range rule.CaptureData {
+					controlRule.CaptureData = append(controlRule.CaptureData, &v1.CaptureData{
+						DeviceId:   v.DeviceId,
+						DataId:     v.DataId,
+						TemplateId: v.TemplateId,
+					})
+				}
+			}
 
 			if processContext.ControlType == string(control.Pid) {
 				if rule.PidRules == nil {
@@ -294,10 +303,11 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 				}
 				controlRule.PidRules.DeviceId = rule.PidRules.DeviceId
 				controlRule.PidRules.DataId = rule.PidRules.DataId
-				controlRule.PidRules.ActualSignal = rule.PidRules.ActualSignal
+				controlRule.PidRules.ReferenceSignal = rule.PidRules.ReferenceSignal
 				controlRule.PidRules.Proportional = rule.PidRules.Proportional
 				controlRule.PidRules.Integral = rule.PidRules.Integral
 				controlRule.PidRules.Derivative = rule.PidRules.Derivative
+				controlRule.PidRules.SamplingInterval = rule.PidRules.SamplingInterval
 
 				for _, action := range rule.PidRules.Actions {
 					controlRule.PidRules.Actions = append(controlRule.PidRules.Actions, &v1.DeviceAction{

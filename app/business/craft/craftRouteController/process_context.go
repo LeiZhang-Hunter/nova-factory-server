@@ -80,23 +80,14 @@ func (p *ProcessContext) SetProcessContextList(c *gin.Context) {
 			return
 		}
 
-		if len(req.ControlRules.TriggerRules.Rule) == 0 {
-			baizeContext.Waring(c, "阈值算法规则不能为空")
+		if len(req.ControlRules.TriggerRules.Cases) == 0 {
+			baizeContext.Waring(c, "阈值算法条件判断不能为空")
 			return
 		}
 
-		for _, rule := range req.ControlRules.TriggerRules.Rule {
-			if rule.Rule == "" {
-				baizeContext.Waring(c, "触发规则条件不能为空")
-				return
-			}
-			if rule.DeviceId == "" {
-				baizeContext.Waring(c, "请选择设备")
-				return
-			}
-			if rule.DataId == "" {
-				baizeContext.Waring(c, "请选择数据id")
-				return
+		for _, rule := range req.ControlRules.TriggerRules.Cases {
+			if rule.Connector == "" {
+				rule.Connector = "and"
 			}
 		}
 

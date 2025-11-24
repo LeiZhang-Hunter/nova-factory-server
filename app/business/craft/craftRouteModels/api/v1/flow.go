@@ -36,19 +36,28 @@ type DeviceTriggerRule struct {
 
 // PidRules 规则
 type PidRules struct {
-	Proportional int             `json:"proportional"`
-	Integral     int             `json:"integral"`
-	Derivative   int             `json:"derivative"`
-	ActualSignal int             `json:"actualSignal"`
-	DeviceId     string          `json:"device_id"`
-	DataId       string          `json:"data_id"`
-	Actions      []*DeviceAction `json:"actions"`
+	Proportional     float64         `json:"proportional"`
+	Integral         float64         `json:"integral"`
+	Derivative       float64         `json:"derivative"`
+	SamplingInterval uint64          `json:"sampling_interval"`
+	ReferenceSignal  float64         `json:"reference_signal"`
+	DeviceId         string          `json:"device_id"`
+	DataId           string          `json:"data_id"`
+	Actions          []*DeviceAction `json:"actions"`
+}
+
+// CaptureData 捕获数据
+type CaptureData struct {
+	DeviceId   string `json:"device_id"`
+	DataId     string `json:"data_id"`
+	TemplateId string `json:"template_id"`
 }
 
 // ControlRules 控制算法
 type ControlRules struct {
 	TriggerRules *DeviceTriggerRule `json:"trigger_rules"`
 	PidRules     *PidRules          `json:"pid_rules"`
+	CaptureData  []*CaptureData     `json:"captures"`
 }
 
 // ProcessContext 工序内容
@@ -113,5 +122,6 @@ func NewControlRules() *ControlRules {
 		PidRules: &PidRules{
 			Actions: make([]*DeviceAction, 0),
 		},
+		CaptureData: make([]*CaptureData, 0),
 	}
 }

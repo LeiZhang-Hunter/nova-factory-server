@@ -63,15 +63,7 @@ type ControllerAction struct {
 }
 
 type TriggerRules struct {
-	Name string `json:"name"`
-	Rule []struct {
-		DataId    string `json:"data_id"`
-		DeviceId  string `json:"device_id"`
-		Operator  string `json:"operator"`
-		Value     string `json:"value"`
-		Rule      string `json:"rule"`
-		Connector string `json:"connector"`
-	} `json:"rule"`
+	Name         string             `json:"name"`
 	Actions      []ControllerAction `json:"actions"`
 	CombinedRule string             `json:"combined_rule"`
 	DataIds      []DeviceRuleInfo   `json:"dataIds"`
@@ -91,26 +83,34 @@ type TriggerRules struct {
 }
 
 type PidRules struct {
-	Proportional int                `json:"proportional"`
-	Actions      []ControllerAction `json:"actions"`
-	Integral     int                `json:"integral"`
-	Derivative   int                `json:"derivative"`
-	ActualSignal int                `json:"actualSignal"`
-	DeviceId     string             `json:"device_id"`
-	DataId       string             `json:"data_id"`
+	Proportional     float64            `json:"proportional"`
+	Actions          []ControllerAction `json:"actions"`
+	Integral         float64            `json:"integral"`
+	Derivative       float64            `json:"derivative"`
+	ReferenceSignal  float64            `json:"reference_signal"`
+	SamplingInterval uint64             `json:"sampling_interval"`
+	DeviceId         string             `json:"device_id"`
+	DataId           string             `json:"data_id"`
+}
+
+type CaptureData struct {
+	DeviceId   string `json:"device_id"`
+	DataId     string `json:"data_id"`
+	TemplateId string `json:"template_id"`
 }
 
 // ControlRule 控制规则
 type ControlRule struct {
-	TriggerRules *TriggerRules `json:"trigger_rules,omitempty"`
-	PidRules     *PidRules     `json:"pid_rules"`
+	TriggerRules *TriggerRules  `json:"trigger_rules,omitempty"`
+	PidRules     *PidRules      `json:"pid_rules"`
+	CaptureData  []*CaptureData `json:"captures"`
 }
 
 // SysProSetProcessContent 设置工序内容请求
 type SysProSetProcessContent struct {
 	ContentID    uint64       `gorm:"column:content_id;primaryKey;autoIncrement:true;comment:内容ID" json:"content_id,string"` // 内容ID
 	ProcessID    uint64       `gorm:"column:process_id;not null;comment:工序ID" json:"process_id,string" binding:"required"`   // 工序ID
-	ControlName  string       `gorm:"column:control_name;comment:内容说明" json:"control_name" binding:"required"`               // 内容说明
+	ControlName  string       `gorm:"column:control_name;comment:内容说明" json:"control_name"`                                  // 内容说明
 	OrderNum     int32        `gorm:"column:order_num;comment:顺序编号" json:"order_num"`                                        // 顺序编号
 	ControlType  string       `json:"control_type"`
 	ContentText  string       `gorm:"column:content_text;comment:内容说明" json:"content_text" binding:"required"` // 内容说明
