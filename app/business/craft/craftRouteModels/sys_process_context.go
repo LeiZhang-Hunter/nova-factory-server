@@ -85,6 +85,8 @@ type TriggerRules struct {
 type PidRules struct {
 	Proportional     float64            `json:"proportional"`
 	Actions          []ControllerAction `json:"actions"`
+	MaxControl       float64            `json:"max_control"`
+	MinControl       float64            `json:"min_control"`
 	Integral         float64            `json:"integral"`
 	Derivative       float64            `json:"derivative"`
 	ReferenceSignal  float64            `json:"reference_signal"`

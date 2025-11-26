@@ -13,6 +13,8 @@ type DeviceAction struct {
 	ControlMode string      `json:"control_mode"`
 	Condition   string      `json:"condition"`
 	Interval    string      `json:"interval"`
+	MaxControl  float64     `json:"max_control"`
+	MinControl  float64     `json:"min_control"`
 }
 
 type DeviceRuleInfo struct {
@@ -41,6 +43,8 @@ type PidRules struct {
 	Derivative       float64         `json:"derivative"`
 	SamplingInterval uint64          `json:"sampling_interval"`
 	ReferenceSignal  float64         `json:"reference_signal"`
+	MaxControl       float64         `json:"max_control"`
+	MinControl       float64         `json:"min_control"`
 	DeviceId         string          `json:"device_id"`
 	DataId           string          `json:"data_id"`
 	Actions          []*DeviceAction `json:"actions"`

@@ -308,6 +308,8 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 				controlRule.PidRules.Integral = rule.PidRules.Integral
 				controlRule.PidRules.Derivative = rule.PidRules.Derivative
 				controlRule.PidRules.SamplingInterval = rule.PidRules.SamplingInterval
+				controlRule.PidRules.MaxControl = rule.PidRules.MaxControl
+				controlRule.PidRules.MinControl = rule.PidRules.MinControl
 
 				for _, action := range rule.PidRules.Actions {
 					controlRule.PidRules.Actions = append(controlRule.PidRules.Actions, &v1.DeviceAction{
