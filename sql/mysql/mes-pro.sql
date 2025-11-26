@@ -300,6 +300,7 @@ CREATE TABLE `sys_product_schedule` (
    KEY `schedule_type` (`schedule_type`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 
+
 CREATE TABLE `sys_product_schedule_map` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `schedule_id` bigint(20) NOT NULL COMMENT '计划标识',
@@ -309,6 +310,7 @@ CREATE TABLE `sys_product_schedule_map` (
     `date` tinyint(1) NOT NULL DEFAULT '0' COMMENT '日期 1 2 3 4 5 6 7分别代表周几',
     `craft_route_id` bigint(20) NOT NULL  COMMENT '工艺路线id',
     `schedule_type` tinyint(1) NOT NULL COMMENT '0为 循环日程 1为特殊日程',
+    `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '操作状态（0正常 1启动）',
     `dept_id` bigint DEFAULT NULL COMMENT '部门ID',
     `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
     `create_time` datetime DEFAULT NULL COMMENT '创建时间',

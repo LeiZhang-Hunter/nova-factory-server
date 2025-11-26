@@ -28,46 +28,6 @@ func (w *Task) PrivateRoutes(router *gin.RouterGroup) {
 	routers.DELETE("/remove/:ids", middlewares.HasPermission("craft:route:task:remove"), w.Remove) //移除生产工单
 }
 
-// Schedule 读取调度任务
-// @Summary 读取调度任务
-// @Description 读取调度任务
-// @Tags 工艺管理/生产任务管理
-// @Param  object body craftRouteModels.ScheduleReq true "读取调度任务参数"
-// @Success 200 {object}  response.ResponseData "设置分组成功"
-// @Router /api/product/task/v1/schedule [post]
-func (w *Task) Schedule(c *gin.Context) {
-	req := new(craftRouteModels.ScheduleReq)
-	err := c.ShouldBindJSON(req)
-	if err != nil {
-		baizeContext.ParameterError(c)
-		return
-	}
-
-	info, err := w.agentService.Info(c, uint64(req.GatewayId))
-	if err != nil {
-		baizeContext.Waring(c, err.Error())
-		return
-	}
-	if info == nil {
-		baizeContext.Waring(c, "agent is not found")
-		return
-	}
-	if info.Username != req.UserName {
-		baizeContext.Waring(c, "username error")
-		return
-	}
-	if info.Password != req.Password {
-		baizeContext.Waring(c, "password error")
-		return
-	}
-	list, err := w.service.Schedule(c, req)
-	if err != nil {
-		baizeContext.Waring(c, err.Error())
-		return
-	}
-	baizeContext.SuccessData(c, list)
-}
-
 // List 生产任务列表
 // @Summary 生产任务列表
 // @Description 生产任务列表

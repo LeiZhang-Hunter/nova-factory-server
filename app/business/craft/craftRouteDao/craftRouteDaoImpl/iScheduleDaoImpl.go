@@ -25,7 +25,7 @@ func NewIScheduleDaoImpl(db *gorm.DB) craftRouteDao.IScheduleDao {
 
 func (i *IScheduleDaoImpl) GetDailySchedule(c *gin.Context) ([]*craftRouteModels.SysProductSchedule, error) {
 	var list []*craftRouteModels.SysProductSchedule
-	db := i.db.Table(i.table).Where("schedule_type = ?", craftRouteModels.DAILY).
+	db := i.db.Table(i.table).Where("schedule_type = ?", craftRouteModels.DAILY).Where("status = ?", true).
 		Where("state = ?", commonStatus.NORMAL)
 	db = baizeContext.GetGormDataScope(c, db)
 	ret := db.Find(&list)

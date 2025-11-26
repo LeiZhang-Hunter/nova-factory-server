@@ -18,9 +18,9 @@ type SysProductSchedule struct {
 	Time         string `gorm:"column:time;not null;comment:时间序列化格式,普通日程,1,2,3,4,5;特殊日程:2025-04-04 ~ 2025-04-04" json:"time"` // 时间序列化格式,普通日程,1,2,3,4,5;特殊日程:2025-04-04 ~ 2025-04-04
 	TimeManager  string `gorm:"column:time_manager;not null; json:"time_manager"`                                             // 时间序列化格式,普通日程,1,2,3,4,5;特殊日程:2025-04-04 ~ 2025-04-04
 	ScheduleType int    `gorm:"column:schedule_type;not null;comment:0为普通日程 1为特殊日程" json:"schedule_type"`                     // 0为普通日程 1为特殊日程
-	Status       bool   `gorm:"column:status;not null;comment:操作状态（0正常 1启动）" json:"status"`                                   // 操作状态（0正常 1启动）
-	DeptID       int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                                   // 部门ID
-	State        bool   `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"`                                             // 操作状态（0正常 -1删除）
+	Status       *bool  `gorm:"column:status;comment:启用状态" json:"status"`
+	DeptID       int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`       // 部门ID
+	State        bool   `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"` // 操作状态（0正常 -1删除）
 	baize.BaseEntity
 }
 
@@ -40,6 +40,7 @@ func ToSysProductSchedule(data *SetSysProductSchedule) *SysProductSchedule {
 		Time:         data.Time,
 		TimeManager:  string(timeMangaer),
 		ScheduleType: data.Type,
+		Status:       data.Status,
 	}
 }
 
@@ -77,6 +78,7 @@ type SetSysProductSchedule struct {
 	Time         string             `json:"time" binding:"required"`
 	TimeManager  []*TimeManagerData `json:"time_manager" binding:"required"`
 	Type         int                `json:"type" binding:"required"`
+	Status       *bool              `gorm:"column:status;comment:启用状态" json:"status"`
 }
 
 type DetailSysProductSchedule struct {
