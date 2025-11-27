@@ -47,9 +47,10 @@ type MetricQueryValue struct {
 }
 
 type MetricQueryData struct {
-	Labels map[string]string `json:"label"`
-	Values []MetricQueryValue
-	Id     string
+	Labels      map[string]string `json:"label"`
+	Values      []MetricQueryValue
+	MultiValues [][]MetricQueryValue `json:"multi_values,omitempty"`
+	Id          string
 }
 
 func NewMetricQueryData() *MetricQueryData {
@@ -85,6 +86,8 @@ type MetricDataQueryReq struct {
 	End        uint64  `json:"end"`
 	Step       int     `json:"step"`
 	Interval   int     `json:"interval"`
+	Level      *int    `json:"level"`
 	Expression string  `json:"expression"`
+	Field      string  `json:"field"`
 	Predict    Predict `json:"predict"`
 }

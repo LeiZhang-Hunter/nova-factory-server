@@ -107,3 +107,12 @@ func (a *IAiPredictionListDaoImpl) List(c *gin.Context, req *aiDataSetModels.Sys
 		Total: uint64(total),
 	}, nil
 }
+
+func (a *IAiPredictionListDaoImpl) All(c *gin.Context) ([]*aiDataSetModels.SysAiPrediction, error) {
+	var list []*aiDataSetModels.SysAiPrediction
+	ret := a.db.Table(a.table).Where("state = ?", commonStatus.NORMAL).Find(&list)
+	if ret.Error != nil {
+		return list, ret.Error
+	}
+	return list, nil
+}

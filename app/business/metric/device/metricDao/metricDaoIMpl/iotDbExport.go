@@ -522,20 +522,24 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 		interval = 1
 	}
 
+	if req.Field == "" {
+		req.Field = " as value"
+	}
+
 	var timeout int64 = 5000
 	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
 	var sql string
 	if req.Type == "bar" || req.Type == "line" || req.Type == "area" || req.Type == "toplist" {
 		if req.Step != 0 {
-			sql = fmt.Sprintf("select %s as value from %s group by([%s, %s), %dm, %dm)",
-				req.Expression, req.Name, startTime, endTime, interval, req.Step)
+			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm, %dm)",
+				req.Expression, req.Field, req.Name, startTime, endTime, interval, req.Step)
 		} else {
-			sql = fmt.Sprintf("select %s as value from %s group by([%s, %s), %dm)",
-				req.Expression, req.Name, startTime, endTime, interval)
+			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm)",
+				req.Expression, req.Field, req.Name, startTime, endTime, interval)
 		}
 	} else {
-		sql = fmt.Sprintf("select %s as value from %s where time > %s and time < %s",
-			req.Expression, req.Name, startTime, endTime)
+		sql = fmt.Sprintf("select %s %s from %s where time > %s and time < %s",
+			req.Expression, req.Field, req.Name, startTime, endTime)
 	}
 
 	if req.Predict.Param == "" {
@@ -553,20 +557,39 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
 		return nil, err
 	}
-	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
-		timestamp := statement.GetTimestamp()
-		var v float64
-		if !req.Predict.Enable {
-			v = statement.GetDouble("value")
-		} else {
-			v = statement.GetDouble("output0")
-		}
-		data.Values = append(data.Values, metricModels.MetricQueryValue{
-			Time:  timestamp,
-			Value: fmt.Sprintf("%f", v),
-		})
 
+	if len(statement.GetColumnNames()) <= 1 {
+		for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+			timestamp := statement.GetTimestamp()
+			var v float64
+			if !req.Predict.Enable {
+				v = statement.GetDouble("value")
+			} else {
+				v = statement.GetDouble("output0")
+			}
+			data.Values = append(data.Values, metricModels.MetricQueryValue{
+				Time:  timestamp,
+				Value: fmt.Sprintf("%f", v),
+			})
+
+		}
+	} else {
+		data.MultiValues = make([][]metricModels.MetricQueryValue, len(statement.GetColumnNames()))
+
+		for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+			timestamp := statement.GetTimestamp()
+
+			for k, column := range statement.GetColumnNames() {
+				var v float64
+				v = statement.GetDouble(column)
+				data.MultiValues[k] = append(data.MultiValues[k], metricModels.MetricQueryValue{
+					Time:  timestamp,
+					Value: fmt.Sprintf("%f", v),
+				})
+			}
+		}
 	}
+
 	return data, nil
 }
 

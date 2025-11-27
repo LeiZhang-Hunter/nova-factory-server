@@ -5,20 +5,18 @@ package main
 
 import (
 	"github.com/google/wire"
-	"google.golang.org/grpc"
-	"nova-factory-server/app/business/metric/device/metricController"
+	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
 	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
-	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
 	"nova-factory-server/app/datasource"
-	"nova-factory-server/app/routes"
 )
 
-func wireApp() (*grpc.Server, func(), error) {
+func wireApp() (*Runner, func(), error) {
 	panic(wire.Build(
-
+		deviceMonitorDaoImpl.ProviderSet,
 		metricDaoIMpl.ProviderSet,
-		metricServiceImpl.ProviderSet,
-		metricController.ProviderSet,
+		aiDataSetDaoImpl.ProviderSet,
 		datasource.ProviderSet,
-		routes.GrpcProviderSet))
+		ProviderSet,
+	))
 }
