@@ -562,11 +562,45 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 		for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
 			timestamp := statement.GetTimestamp()
 			var v float64
-			if !req.Predict.Enable {
-				v = statement.GetDouble("value")
-			} else {
-				v = statement.GetDouble("output0")
+			dataType := statement.GetColumnDataType(0)
+			switch dataType {
+			case client.BOOLEAN:
+				{
+					dataValue := statement.GetBool(statement.GetColumnName(0))
+					if dataValue == true {
+						v = 1.0
+					} else {
+						v = 0.0
+					}
+					break
+				}
+			case client.INT32:
+				{
+					dataValue := statement.GetInt32(statement.GetColumnName(0))
+					v = float64(dataValue)
+					break
+				}
+			case client.INT64:
+				{
+					dataValue := statement.GetInt64(statement.GetColumnName(0))
+					v = float64(dataValue)
+					break
+				}
+			case client.FLOAT:
+				{
+					dataValue := statement.GetFloat(statement.GetColumnName(0))
+					v = float64(dataValue)
+					break
+				}
+			case client.DOUBLE:
+				{
+					dataValue := statement.GetDouble(statement.GetColumnName(0))
+					v = float64(dataValue)
+					break
+				}
+
 			}
+
 			data.Values = append(data.Values, metricModels.MetricQueryValue{
 				Time:  timestamp,
 				Value: fmt.Sprintf("%f", v),
@@ -581,7 +615,44 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 
 			for k, column := range statement.GetColumnNames() {
 				var v float64
-				v = statement.GetDouble(column)
+				dataType := statement.GetColumnDataType(0)
+				switch dataType {
+				case client.BOOLEAN:
+					{
+						dataValue := statement.GetBool(column)
+						if dataValue == true {
+							v = 1.0
+						} else {
+							v = 0.0
+						}
+						break
+					}
+				case client.INT32:
+					{
+						dataValue := statement.GetInt32(column)
+						v = float64(dataValue)
+						break
+					}
+				case client.INT64:
+					{
+						dataValue := statement.GetInt64(column)
+						v = float64(dataValue)
+						break
+					}
+				case client.FLOAT:
+					{
+						dataValue := statement.GetFloat(column)
+						v = float64(dataValue)
+						break
+					}
+				case client.DOUBLE:
+					{
+						dataValue := statement.GetDouble(column)
+						v = float64(dataValue)
+						break
+					}
+
+				}
 				data.MultiValues[k] = append(data.MultiValues[k], metricModels.MetricQueryValue{
 					Time:  timestamp,
 					Value: fmt.Sprintf("%f", v),

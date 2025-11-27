@@ -20,6 +20,7 @@ import (
 func wireApp() (*Runner, func(), error) {
 	db := mysql.NewDB()
 	iAiPredictionListDao := aiDataSetDaoImpl.NewIAiPredictionListDaoImpl(db)
+	iAiPredictionExceptionDao := aiDataSetDaoImpl.NewIAiPredictionExceptionDaoImpl(db)
 	clickHouse, err := clickhouse.NewClickHouse()
 	if err != nil {
 		return nil, nil, err
@@ -27,7 +28,7 @@ func wireApp() (*Runner, func(), error) {
 	iotDb := iotdb.NewIotDb()
 	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
 	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
-	runner := NewRunner(iAiPredictionListDao, iMetricDao, iDeviceDataReportDao)
+	runner := NewRunner(iAiPredictionListDao, iAiPredictionExceptionDao, iMetricDao, iDeviceDataReportDao)
 	return runner, func() {
 	}, nil
 }

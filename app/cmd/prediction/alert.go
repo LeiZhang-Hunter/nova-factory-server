@@ -10,7 +10,6 @@ import (
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricDao"
 	"nova-factory-server/app/business/metric/device/metricModels"
-	"nova-factory-server/app/cmd/prediction/condition"
 	"nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
 	"time"
 )
@@ -18,12 +17,14 @@ import (
 type alert struct {
 	metricCDao   metricDao.IMetricDao
 	deviceMapDao deviceMonitorDao.IDeviceDataReportDao
+	judge        *judge
 }
 
 func newAlert(metricCDao metricDao.IMetricDao, deviceMapDao deviceMonitorDao.IDeviceDataReportDao) *alert {
 	return &alert{
 		metricCDao:   metricCDao,
 		deviceMapDao: deviceMapDao,
+		judge:        newJudge(),
 	}
 }
 
@@ -98,7 +99,7 @@ func (a *alert) predict(config *aiDataSetModels.SysAiPrediction) {
 	}
 
 	if len(result.Values) > 0 {
-		if a.judge(config, &advanced, result.Values) {
+		if a.judge.judge(config, &advanced, result.Values) {
 			// 触发告警信息
 			fmt.Println(111)
 		}
@@ -107,7 +108,7 @@ func (a *alert) predict(config *aiDataSetModels.SysAiPrediction) {
 
 	if len(result.MultiValues) > 0 {
 		for _, v := range result.MultiValues {
-			if a.judge(config, &advanced, v) {
+			if a.judge.judge(config, &advanced, v) {
 				// 触发告警信息
 				fmt.Println(222)
 			}
@@ -116,56 +117,4 @@ func (a *alert) predict(config *aiDataSetModels.SysAiPrediction) {
 	}
 
 	return
-}
-
-// judge 判断告警条件
-func (a *alert) judge(config *aiDataSetModels.SysAiPrediction, advanced *logalert.Advanced, values []metricModels.MetricQueryValue) bool {
-
-	if len(values) < int(config.Threshold) {
-		return false
-	}
-
-	if len(advanced.Rules) == 0 {
-		return false
-	}
-
-	var ruleRet bool = true
-
-	for _, rule := range advanced.Rules {
-		var threshold int64 = 0
-		for _, value := range values {
-
-			for _, group := range rule.Groups {
-				operatorFun, ok := condition.OperatorMap[group.Operator]
-				if !ok {
-					continue
-				}
-				ret, err := operatorFun(value.Value, group.Value)
-				if err != nil {
-					zap.L().Error("规则比较失败", zap.Error(err))
-					continue
-				}
-
-				if !ret {
-					continue
-				}
-				threshold++
-				if config.Threshold <= threshold {
-					if rule.MatchType == condition.MatchTypeAny {
-						ruleRet = true
-						break
-					}
-				} else {
-					if rule.MatchType == condition.MatchTypeAny {
-						ruleRet = false
-					} else {
-						return false
-					}
-				}
-
-			}
-		}
-	}
-
-	return ruleRet
 }
