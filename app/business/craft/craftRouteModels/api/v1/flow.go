@@ -61,7 +61,19 @@ type CaptureData struct {
 type ControlRules struct {
 	TriggerRules *DeviceTriggerRule `json:"trigger_rules"`
 	PidRules     *PidRules          `json:"pid_rules"`
+	PredictRules *PredictRules      `json:"predict_rules"`
 	CaptureData  []*CaptureData     `json:"captures"`
+}
+
+// PredictRules 预测控制
+type PredictRules struct {
+	Actions       []*DeviceAction `json:"actions"`
+	Rule          *DeviceRule     `json:"rule"`
+	Threshold     int64           `json:"threshold"`       // threshold
+	Model         string          `json:"model"`           // 预测模型
+	Interval      int64           `json:"interval,string"` // 预测时间段
+	PredictLength int64           `json:"predict_length"`  // 预测长度
+	AggFunction   string          `json:"agg_function"`    // 聚合函数，用来计算图表
 }
 
 // ProcessContext 工序内容
@@ -127,5 +139,9 @@ func NewControlRules() *ControlRules {
 			Actions: make([]*DeviceAction, 0),
 		},
 		CaptureData: make([]*CaptureData, 0),
+		PredictRules: &PredictRules{
+			Actions: make([]*DeviceAction, 0),
+			Rule:    &DeviceRule{},
+		},
 	}
 }

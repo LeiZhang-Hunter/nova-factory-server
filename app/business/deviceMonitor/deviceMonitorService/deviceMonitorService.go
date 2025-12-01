@@ -10,4 +10,5 @@ type DeviceMonitorService interface {
 	List(c *gin.Context, req *deviceModels.DeviceListReq) (*deviceModels.DeviceInfoListData, error)
 	Metric(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error)
 	Predict(c *gin.Context, req *metricModels.MetricQueryReq) (*metricModels.MetricQueryData, error)
+	PredictQuery(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error)
 }

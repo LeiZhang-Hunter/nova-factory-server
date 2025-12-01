@@ -2,6 +2,7 @@ package craftRouteController
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/craft/craftRouteModels"
 	"nova-factory-server/app/business/craft/craftRouteService"
 	"nova-factory-server/app/middlewares"
@@ -60,6 +61,7 @@ func (p *ProcessContext) SetProcessContextList(c *gin.Context) {
 	req := new(craftRouteModels.SysProSetProcessContent)
 	err := c.ShouldBindJSON(req)
 	if err != nil {
+		zap.L().Error(err.Error())
 		baizeContext.ParameterError(c)
 		return
 	}
@@ -154,6 +156,72 @@ func (p *ProcessContext) SetProcessContextList(c *gin.Context) {
 				return
 			}
 
+		}
+	}
+
+	if req.ControlType == "mpc" {
+		if req.ControlRules.PredictRules == nil {
+			baizeContext.Waring(c, "阈值算法规则不能为空")
+			return
+		}
+
+		if len(req.ControlRules.PredictRules.Cases) == 0 {
+			baizeContext.Waring(c, "阈值算法条件判断不能为空")
+			return
+		}
+
+		for _, rule := range req.ControlRules.PredictRules.Cases {
+			if rule.Connector == "" {
+				rule.Connector = "and"
+			}
+		}
+
+		if len(req.ControlRules.PredictRules.Actions) == 0 {
+			baizeContext.Waring(c, "控制动作不能为空")
+			return
+		}
+
+		for _, v := range req.ControlRules.PredictRules.Actions {
+			if v.DeviceId == "" {
+				baizeContext.Waring(c, "调节设备不能为空")
+				return
+			}
+
+			if v.DataId == "" {
+				baizeContext.Waring(c, "调节数据不能为空")
+				return
+			}
+
+			if v.ControlMode != "concurrent_control" && v.ControlMode != "delay_control" {
+				baizeContext.Waring(c, "控制动作不能为空")
+				return
+			}
+
+		}
+
+		if req.ControlRules.PredictRules.Interval <= 0 {
+			baizeContext.Waring(c, "时间间隔格式错误")
+			return
+		}
+
+		if req.ControlRules.PredictRules.PredictLength <= 0 {
+			baizeContext.Waring(c, "预测长度错误")
+			return
+		}
+
+		if req.ControlRules.PredictRules.Threshold <= 0 {
+			baizeContext.Waring(c, "阀值错误")
+			return
+		}
+
+		if req.ControlRules.PredictRules.Model == "" {
+			baizeContext.Waring(c, "模型不能为空")
+			return
+		}
+
+		if req.ControlRules.PredictRules.AggFunction == "" {
+			baizeContext.Waring(c, "聚合函数不能为空")
+			return
 		}
 	}
 

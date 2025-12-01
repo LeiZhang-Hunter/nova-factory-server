@@ -27,6 +27,7 @@ func (d *DeviceMonitor) PrivateRoutes(router *gin.RouterGroup) {
 
 	group := router.Group("/api/v1")
 	group.GET("/metric/predict", d.MetricPredict)
+	group.GET("/metric/predict/query", d.MetricPredictQuery)
 }
 
 // List 设备监控
@@ -101,7 +102,7 @@ func (d *DeviceMonitor) Predict(c *gin.Context) {
 // MetricPredict 指标预测
 // @Summary 导入告警数据
 // @Description 导入告警数据
-// @Tags 告警管理/告警数据管理
+// @Tags 设备监控/设备监控
 // @Param object body alertModels.AlertLogData true "助理列表参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
 // @Router /api/v1/predict/metric [post]
@@ -114,6 +115,40 @@ func (d *DeviceMonitor) MetricPredict(c *gin.Context) {
 	}
 
 	data, err := d.service.Predict(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// MetricPredictQuery 指标预测查询
+// @Summary 指标预测查询
+// @Description 指标预测查询
+// @Tags 设备监控/设备监控
+// @Param object body metricModels.GatewayMetricDataQueryReq true "助理列表参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /api/v1/predict/metric/query [post]
+func (d *DeviceMonitor) MetricPredictQuery(c *gin.Context) {
+	req := new(metricModels.GatewayMetricDataQueryReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	data, err := d.service.PredictQuery(c, &metricModels.MetricDataQueryReq{
+		Type:       req.Type,
+		Name:       req.Name,
+		Start:      req.Start,
+		End:        req.End,
+		Step:       req.Step,
+		Interval:   req.Interval,
+		Level:      req.Level,
+		Expression: req.Expression,
+		Field:      req.Field,
+		Predict:    req.Predict,
+	})
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

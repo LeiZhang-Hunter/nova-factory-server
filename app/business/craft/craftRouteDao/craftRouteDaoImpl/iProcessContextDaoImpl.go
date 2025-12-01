@@ -100,6 +100,25 @@ func (p *ProcessContextDaoImpl) List(c *gin.Context, req *craftRouteModels.SysPr
 			if err != nil {
 				zap.L().Error("json unmarshal error", zap.Error(err))
 			}
+			if triggerRule.TriggerRules == nil {
+				triggerRule.TriggerRules = &craftRouteModels.TriggerRules{
+					Actions: make([]craftRouteModels.ControllerAction, 0),
+					Cases:   make([]craftRouteModels.TriggerCase, 0),
+				}
+			}
+
+			if triggerRule.PidRules == nil {
+				triggerRule.PidRules = &craftRouteModels.PidRules{
+					Actions: make([]craftRouteModels.ControllerAction, 0),
+				}
+			}
+
+			if triggerRule.PredictRules == nil {
+				triggerRule.PredictRules = &craftRouteModels.PredictRules{
+					Actions: make([]craftRouteModels.ControllerAction, 0),
+					Cases:   make([]craftRouteModels.TriggerCase, 0),
+				}
+			}
 			dto[k].ControlRules = &triggerRule
 		}
 	}

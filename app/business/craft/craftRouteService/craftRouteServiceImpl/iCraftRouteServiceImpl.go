@@ -256,6 +256,10 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 	router.Name = routerConfig.RouteName
 	router.Md5 = ""
 
+	if beginTargetData == nil {
+		return nil, errors.New("开始工序数据错误")
+	}
+
 	beginNextProcessId, err := strconv.ParseUint(beginTargetData.ProcessId, 10, 64)
 	if err != nil {
 		return nil, err
@@ -297,6 +301,7 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 				}
 			}
 
+			// 填充PId配置
 			if processContext.ControlType == string(control.Pid) {
 				if rule.PidRules == nil {
 					continue
@@ -324,6 +329,7 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 				}
 			}
 
+			// 填充阀值配置
 			if processContext.ControlType == string(control.Threshold) {
 				for _, v := range rule.TriggerRules.Cases {
 					for _, caseValue := range v.Conditions {
@@ -377,6 +383,45 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 						Interval:    action.Interval,
 					})
 				}
+			}
+
+			// 预测控制配置
+			if processContext.ControlType == string(control.MPC) {
+				if rule.PredictRules == nil {
+					continue
+				}
+
+				if controlRule.PredictRules.Rule.DataId == nil {
+					controlRule.PredictRules.Rule.DataId = make([]v1.DeviceRuleInfo, 0)
+				}
+
+				for _, v := range rule.PredictRules.Cases {
+					for _, caseValue := range v.Conditions {
+						var info v1.DeviceRuleInfo
+						info.DataId = caseValue.DataId
+						info.DeviceId = caseValue.DeviceId
+						controlRule.PredictRules.Rule.DataId = append(controlRule.PredictRules.Rule.DataId, info)
+					}
+				}
+
+				for _, action := range rule.PredictRules.Actions {
+					controlRule.PredictRules.Actions = append(controlRule.PredictRules.Actions, &v1.DeviceAction{
+						DeviceId:    action.DeviceId,
+						DataId:      action.DataId,
+						Value:       action.Value,
+						DataFormat:  action.DataFormat,
+						ControlMode: action.ControlMode,
+						Condition:   action.Condition,
+						Interval:    action.Interval,
+					})
+				}
+
+				controlRule.PredictRules.Threshold = rule.PredictRules.Threshold
+				controlRule.PredictRules.Model = rule.PredictRules.Model
+				controlRule.PredictRules.Interval = rule.PredictRules.Interval
+				controlRule.PredictRules.PredictLength = rule.PredictRules.PredictLength
+				controlRule.PredictRules.AggFunction = rule.PredictRules.AggFunction
+
 			}
 
 		}

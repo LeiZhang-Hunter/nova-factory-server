@@ -91,3 +91,20 @@ type MetricDataQueryReq struct {
 	Field      string  `json:"field"`
 	Predict    Predict `json:"predict"`
 }
+
+// GatewayMetricDataQueryReq 网关预测参数
+type GatewayMetricDataQueryReq struct {
+	GatewayId  int64   `json:"gatewayId,string"`
+	Username   string  `json:"username"`
+	Password   string  `json:"password"`
+	Type       string  `json:"type"`
+	Name       string  `json:"name"`
+	Start      uint64  `json:"start"`
+	End        uint64  `json:"end"`
+	Step       int     `json:"step"`
+	Interval   int     `json:"interval"`
+	Level      *int    `json:"level"`
+	Expression string  `json:"expression"`
+	Field      string  `json:"field"`
+	Predict    Predict `json:"predict"`
+}

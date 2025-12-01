@@ -168,3 +168,19 @@ func (d *DeviceMonitorServiceImpl) Predict(c *gin.Context, req *metricModels.Met
 	data.Labels["name"] = info.Name
 	return data, nil
 }
+
+func (d *DeviceMonitorServiceImpl) PredictQuery(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error) {
+	data, err := d.metricDao.Query(c, req)
+	if err != nil {
+		return data, err
+	}
+
+	if data == nil {
+		return &metricModels.MetricQueryData{
+			Labels: make(map[string]string),
+			Values: make([]metricModels.MetricQueryValue, 0),
+		}, nil
+	}
+
+	return data, nil
+}

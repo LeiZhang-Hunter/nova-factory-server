@@ -62,24 +62,26 @@ type ControllerAction struct {
 	DataFormat  string `json:"dataFormat"`
 }
 
+type TriggerCase struct {
+	NextStep   string `json:"next_step"`
+	Connector  string `json:"connector"`
+	Conditions []struct {
+		DataId     string `json:"data_id"`
+		Operator   string `json:"operator"`
+		DeviceId   string `json:"device_id"`
+		TemplateId string `json:"template_id"`
+		Value      string `json:"value"`
+		Rule       string `json:"rule"`
+		Connector  string `json:"connector"`
+	} `json:"conditions"`
+}
+
 type TriggerRules struct {
 	Name         string             `json:"name"`
 	Actions      []ControllerAction `json:"actions"`
 	CombinedRule string             `json:"combined_rule"`
 	DataIds      []DeviceRuleInfo   `json:"dataIds"`
-	Cases        []struct {
-		NextStep   string `json:"next_step"`
-		Connector  string `json:"connector"`
-		Conditions []struct {
-			DataId     string `json:"data_id"`
-			Operator   string `json:"operator"`
-			DeviceId   string `json:"device_id"`
-			TemplateId string `json:"template_id"`
-			Value      string `json:"value"`
-			Rule       string `json:"rule"`
-			Connector  string `json:"connector"`
-		} `json:"conditions"`
-	} `json:"cases"`
+	Cases        []TriggerCase      `json:"cases"`
 }
 
 type PidRules struct {
@@ -101,10 +103,21 @@ type CaptureData struct {
 	TemplateId string `json:"template_id"`
 }
 
+type PredictRules struct {
+	Actions       []ControllerAction `json:"actions"`
+	Cases         []TriggerCase      `json:"cases"`
+	Threshold     int64              `json:"threshold"`      // threshold
+	Model         string             `json:"model"`          // 预测模型
+	Interval      int64              `json:"interval"`       // 预测时间段
+	PredictLength int64              `json:"predict_length"` // 预测长度
+	AggFunction   string             `json:"agg_function"`   // 聚合函数，用来计算图表
+}
+
 // ControlRule 控制规则
 type ControlRule struct {
 	TriggerRules *TriggerRules  `json:"trigger_rules,omitempty"`
 	PidRules     *PidRules      `json:"pid_rules"`
+	PredictRules *PredictRules  `json:"predict_rules"`
 	CaptureData  []*CaptureData `json:"captures"`
 }
 
