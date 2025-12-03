@@ -103,14 +103,24 @@ type CaptureData struct {
 	TemplateId string `json:"template_id"`
 }
 
+type PredictData struct {
+	DeviceId   string `json:"device_id"`
+	DataId     string `json:"data_id"`
+	TemplateId string `json:"template_id"`
+}
+
 type PredictRules struct {
 	Actions       []ControllerAction `json:"actions"`
 	Cases         []TriggerCase      `json:"cases"`
+	Predicts      []*PredictData     `json:"predicts"`
 	Threshold     int64              `json:"threshold"`      // threshold
 	Model         string             `json:"model"`          // 预测模型
 	Interval      int64              `json:"interval"`       // 预测时间段
 	PredictLength int64              `json:"predict_length"` // 预测长度
 	AggFunction   string             `json:"agg_function"`   // 聚合函数，用来计算图表
+	IsContinue    bool               `json:"is_continue"`
+	Step          uint64             `json:"step"`        // 聚合窗口的滑动步长（可选，默认与聚合窗口大小相同）
+	WindowSize    uint64             `json:"window_size"` // 聚合窗口的大小（必须为正数）
 }
 
 // ControlRule 控制规则

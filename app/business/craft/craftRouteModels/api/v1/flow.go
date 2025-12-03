@@ -65,15 +65,26 @@ type ControlRules struct {
 	CaptureData  []*CaptureData     `json:"captures"`
 }
 
+// PredictData 预测数据
+type PredictData struct {
+	DeviceId   string `json:"device_id"`
+	DataId     string `json:"data_id"`
+	TemplateId string `json:"template_id"`
+}
+
 // PredictRules 预测控制
 type PredictRules struct {
 	Actions       []*DeviceAction `json:"actions"`
 	Rule          *DeviceRule     `json:"rule"`
+	Predicts      []*PredictData  `json:"predicts"`
 	Threshold     int64           `json:"threshold"`       // threshold
 	Model         string          `json:"model"`           // 预测模型
 	Interval      int64           `json:"interval,string"` // 预测时间段
 	PredictLength int64           `json:"predict_length"`  // 预测长度
 	AggFunction   string          `json:"agg_function"`    // 聚合函数，用来计算图表
+	IsContinue    bool            `json:"is_continue"`
+	Step          uint64          `json:"step"`
+	WindowSize    uint64          `json:"window_size"` // 聚合窗口的大小（必须为正数）
 }
 
 // ProcessContext 工序内容

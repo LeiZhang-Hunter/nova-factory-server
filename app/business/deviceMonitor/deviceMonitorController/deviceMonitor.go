@@ -25,9 +25,12 @@ func (d *DeviceMonitor) PrivateRoutes(router *gin.RouterGroup) {
 	monitor.POST("/metric", middlewares.HasPermission("device:monitor:metric"), d.Metric)
 	monitor.POST("/predict", middlewares.HasPermission("device:monitor:metric"), d.Predict)
 
+}
+
+func (d *DeviceMonitor) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1")
 	group.GET("/metric/predict", d.MetricPredict)
-	group.GET("/metric/predict/query", d.MetricPredictQuery)
+	group.POST("/metric/predict/query", d.MetricPredictQuery)
 }
 
 // List 设备监控
@@ -148,6 +151,7 @@ func (d *DeviceMonitor) MetricPredictQuery(c *gin.Context) {
 		Expression: req.Expression,
 		Field:      req.Field,
 		Predict:    req.Predict,
+		Having:     req.Having,
 	})
 	if err != nil {
 		baizeContext.Waring(c, err.Error())

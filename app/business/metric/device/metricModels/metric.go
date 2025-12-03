@@ -89,6 +89,7 @@ type MetricDataQueryReq struct {
 	Level      *int    `json:"level"`
 	Expression string  `json:"expression"`
 	Field      string  `json:"field"`
+	Having     string  `json:"having"`
 	Predict    Predict `json:"predict"`
 }
 
@@ -106,5 +107,6 @@ type GatewayMetricDataQueryReq struct {
 	Level      *int    `json:"level"`
 	Expression string  `json:"expression"`
 	Field      string  `json:"field"`
+	Having     string  `json:"having"`
 	Predict    Predict `json:"predict"`
 }

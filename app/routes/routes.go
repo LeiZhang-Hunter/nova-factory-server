@@ -82,6 +82,7 @@ func NewGinEngine(
 		metric.Metric.PublicRoutes(group)
 		ai.Dataset.PublicRoutes(group)
 		craft.Schedule.PublicRoutes(group)
+		deviceMonitor.DeviceMonitor.PublicRoutes(group)
 	}
 	//做鉴权的
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())

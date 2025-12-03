@@ -118,7 +118,6 @@ func (i *iotDbExport) Metric(c *gin.Context, req *metricModels.MetricQueryReq) (
 	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
 	sql := fmt.Sprintf("select avg(value) as value from %s group by([%s, %s), %dm, %dm);",
 		name, startTime, endTime, req.Step, req.Step)
-	fmt.Println(sql)
 	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
 	statement, err := session.ExecuteQueryStatement(sql, &timeout)
 	if err != nil {
@@ -526,16 +525,21 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 		req.Field = " as value"
 	}
 
+	var having string
+	if req.Having != "" {
+		having = " having " + req.Having
+	}
+
 	var timeout int64 = 5000
 	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
 	var sql string
 	if req.Type == "bar" || req.Type == "line" || req.Type == "area" || req.Type == "toplist" {
 		if req.Step != 0 {
-			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm, %dm)",
-				req.Expression, req.Field, req.Name, startTime, endTime, interval, req.Step)
+			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm, %dm)%s",
+				req.Expression, req.Field, req.Name, startTime, endTime, interval, req.Step, having)
 		} else {
-			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm)",
-				req.Expression, req.Field, req.Name, startTime, endTime, interval)
+			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm)%s",
+				req.Expression, req.Field, req.Name, startTime, endTime, interval, having)
 		}
 	} else {
 		sql = fmt.Sprintf("select %s %s from %s where time > %s and time < %s",
@@ -550,7 +554,7 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 		sql = fmt.Sprintf("call inference(%s, \"%s\", %s)",
 			req.Predict.Model, sql, req.Predict.Param)
 	}
-
+	zap.L().Info("iotdb search sql", zap.String("sql", sql))
 	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
 	statement, err := session.ExecuteQueryStatement(sql, &timeout)
 	if err != nil {

@@ -5,6 +5,7 @@
 create table sys_craft_route (
    route_id                       bigint(20)      not null auto_increment    comment '工艺路线ID',
    route_code                     varchar(64)     not null                   comment '工艺路线编号',
+   loop_time                      int(11)         default 30                  comment '循环执行时间',
    route_name                     varchar(255)    not null                   comment '工艺路线名称',
    route_desc                     varchar(500)                               comment '工艺路线说明',
    remark                         varchar(500)    default ''                 comment '备注',
@@ -21,10 +22,6 @@ create table sys_craft_route (
    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
    primary key (route_id)
 ) engine=innodb auto_increment=0 comment = '工艺路线表';
-
- 
-
-
 
 -- ----------------------------
 -- 2、生产工序表

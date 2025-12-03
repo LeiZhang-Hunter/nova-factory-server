@@ -395,6 +395,40 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 					controlRule.PredictRules.Rule.DataId = make([]v1.DeviceRuleInfo, 0)
 				}
 
+				// 初始化条件
+				first := true
+				combinedRule := ""
+				for caseKey, caseRule := range rule.PredictRules.Cases {
+					if !first {
+						combinedRule += " " + caseRule.Connector + " "
+					} else {
+						first = false
+						combinedRule += "("
+					}
+
+					firstCondition := true
+					conditionRule := ""
+					for k, condition := range caseRule.Conditions {
+						if !firstCondition {
+							conditionRule += " " + condition.Connector + " "
+						} else {
+							firstCondition = false
+							conditionRule += "("
+						}
+						conditionRule += condition.Rule
+						if k == len(caseRule.Conditions)-1 {
+							conditionRule += ")"
+						}
+					}
+
+					combinedRule += conditionRule
+					if len(rule.PredictRules.Cases)-1 == caseKey {
+						combinedRule += ")"
+					}
+					continue
+				}
+				controlRule.PredictRules.Rule.Rule = combinedRule
+
 				for _, v := range rule.PredictRules.Cases {
 					for _, caseValue := range v.Conditions {
 						var info v1.DeviceRuleInfo
@@ -416,12 +450,23 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 					})
 				}
 
+				controlRule.PredictRules.Predicts = make([]*v1.PredictData, 0)
+				for _, predict := range rule.PredictRules.Predicts {
+					controlRule.PredictRules.Predicts = append(controlRule.PredictRules.Predicts, &v1.PredictData{
+						DeviceId:   predict.DeviceId,
+						DataId:     predict.DataId,
+						TemplateId: predict.TemplateId,
+					})
+				}
+
 				controlRule.PredictRules.Threshold = rule.PredictRules.Threshold
 				controlRule.PredictRules.Model = rule.PredictRules.Model
 				controlRule.PredictRules.Interval = rule.PredictRules.Interval
 				controlRule.PredictRules.PredictLength = rule.PredictRules.PredictLength
 				controlRule.PredictRules.AggFunction = rule.PredictRules.AggFunction
-
+				controlRule.PredictRules.IsContinue = rule.PredictRules.IsContinue
+				controlRule.PredictRules.Step = rule.PredictRules.Step
+				controlRule.PredictRules.WindowSize = rule.PredictRules.WindowSize
 			}
 
 		}

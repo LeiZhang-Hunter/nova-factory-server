@@ -165,6 +165,11 @@ func (p *ProcessContext) SetProcessContextList(c *gin.Context) {
 			return
 		}
 
+		if len(req.ControlRules.PredictRules.Predicts) == 0 {
+			baizeContext.Waring(c, "预测数据不能为空")
+			return
+		}
+
 		if len(req.ControlRules.PredictRules.Cases) == 0 {
 			baizeContext.Waring(c, "阈值算法条件判断不能为空")
 			return
@@ -221,6 +226,16 @@ func (p *ProcessContext) SetProcessContextList(c *gin.Context) {
 
 		if req.ControlRules.PredictRules.AggFunction == "" {
 			baizeContext.Waring(c, "聚合函数不能为空")
+			return
+		}
+
+		if req.ControlRules.PredictRules.Step < 0 {
+			baizeContext.Waring(c, "步长格式错误")
+			return
+		}
+
+		if req.ControlRules.PredictRules.WindowSize < 0 {
+			baizeContext.Waring(c, "聚合窗口的大小（必须为正数）")
 			return
 		}
 	}

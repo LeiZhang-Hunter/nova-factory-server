@@ -41,8 +41,8 @@ upload_file:
     private_path: ./private/
 dataset:
   api_key: ragflow-JmNmIyYjk0MjY1NzExZjBiNmVlMDI0Mm
-  host: http://81.71.98.26:11105
-  image_url: http://81.71.98.26:11105
+  host: http://192.168.2.100
+  image_url: http://192.168.2.100
 metric:
   datasource: iotdb
 #  datasource: clickhouse

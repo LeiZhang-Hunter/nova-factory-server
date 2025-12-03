@@ -105,6 +105,10 @@ func (p *ProcessContextDaoImpl) List(c *gin.Context, req *craftRouteModels.SysPr
 					Actions: make([]craftRouteModels.ControllerAction, 0),
 					Cases:   make([]craftRouteModels.TriggerCase, 0),
 				}
+			} else {
+				if triggerRule.TriggerRules.Actions == nil {
+					triggerRule.TriggerRules.Actions = make([]craftRouteModels.ControllerAction, 0)
+				}
 			}
 
 			if triggerRule.PidRules == nil {

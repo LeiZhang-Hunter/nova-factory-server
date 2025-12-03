@@ -5,10 +5,11 @@ import (
 )
 
 type SysCraftRouteRequest struct {
-	RouteID   int64  `gorm:"column:route_id;primaryKey;comment:工艺路线ID" json:"datasetId,string"`              // 出库id
+	RouteID   int64  `gorm:"column:route_id;primaryKey;comment:工艺路线ID" json:"route_id,string"`               // 出库id
 	RouteCode string `gorm:"column:route_code;not null;comment:工艺路线编号" json:"route_code" binding:"required"` // 工艺路线编号
 	RouteName string `gorm:"column:route_name;not null;comment:工艺路线名称" json:"route_name" binding:"required"` // 工艺路线名称
 	RouteDesc string `gorm:"column:route_desc;comment:工艺路线说明" json:"route_desc"`                             // 工艺路线说明
+	LoopTime  int32  `gorm:"column:loop_time;default:30;comment:循环执行时间" json:"loop_time"`                    // 循环执行时间
 	Remark    string `gorm:"column:remark;comment:备注" json:"remark"`                                         // 备注
 	Status    bool   `gorm:"column:status;comment:操作状态（0正常 1异常）" json:"status"`                              // 操作状态（0正常 1异常）
 }
@@ -18,6 +19,7 @@ type SysCraftRoute struct {
 	RouteCode      string `gorm:"column:route_code;not null;comment:工艺路线编号" json:"route_code"`                         // 工艺路线编号
 	RouteName      string `gorm:"column:route_name;not null;comment:工艺路线名称" json:"route_name"`                         // 工艺路线名称
 	RouteDesc      string `gorm:"column:route_desc;comment:工艺路线说明" json:"route_desc"`                                  // 工艺路线说明
+	LoopTime       int32  `gorm:"column:loop_time;default:30;comment:循环执行时间" json:"loop_time"`                         // 循环执行时间
 	Remark         string `gorm:"column:remark;comment:备注" json:"remark"`                                              // 备注
 	Attr1          string `gorm:"column:attr1;comment:预留字段1" json:"attr1"`                                             // 预留字段1
 	Attr2          string `gorm:"column:attr2;comment:预留字段2" json:"attr2"`                                             // 预留字段2

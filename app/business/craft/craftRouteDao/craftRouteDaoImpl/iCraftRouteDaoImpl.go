@@ -31,6 +31,7 @@ func (dao *CraftRouteDaoImpl) AddCraftRoute(c *gin.Context, route *craftRouteMod
 		RouteName: route.RouteName,
 		RouteDesc: route.RouteDesc,
 		Remark:    route.Remark,
+		LoopTime:  route.LoopTime,
 		Status:    false,
 		DeptID:    baizeContext.GetDeptId(c),
 	}
@@ -44,12 +45,12 @@ func (dao *CraftRouteDaoImpl) UpdateCraftRoute(c *gin.Context, route *craftRoute
 		return nil, errors.New("route.RouteID == 0")
 	}
 	var info *craftRouteModels.SysCraftRoute
-	ret := dao.db.Table(dao.tableName).Where("id=?", route.RouteID).First(&info)
+	ret := dao.db.Table(dao.tableName).Where("route_id=?", route.RouteID).First(&info)
 	if ret.Error != nil {
 		zap.L().Error("读取工艺流程图错误", zap.Error(ret.Error))
 		return nil, errors.New("工艺流程图不存在")
 	}
-	ret = dao.db.Table(dao.tableName).Where("id=?", route.RouteID).Updates(&info)
+	ret = dao.db.Table(dao.tableName).Where("route_id=?", route.RouteID).Updates(&info)
 	return info, ret.Error
 }
 
