@@ -339,3 +339,28 @@ CREATE TABLE `sys_work_shift_setting` (
     `state` tinyint(1) NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- 化验单管理
+-- ----------------------------
+CREATE TABLE `sys_product_laboratory` (
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `material`  varchar(255)    not null   comment '物料',
+    `contact`  varchar(255)    not null   comment '采样人',
+    `address`  varchar(255)    not null   comment '采样地点',
+    `heat` decimal(10, 2) NOT NULL DEFAULT '0' COMMENT '含热量',
+    `sulphur`  decimal(10, 2) NOT NULL DEFAULT '0'   comment '含硫量',
+    `volatility`  decimal(10, 2) NOT NULL DEFAULT '0'   comment '挥发性',
+    `water`  decimal(10, 2) NOT NULL DEFAULT '0'   comment '含水量',
+    `weight` decimal(10, 2) NOT NULL DEFAULT '0'   comment '样重',
+    `number` varchar(255)    not null   comment '样号',
+    `img`  varchar(512)    not null   comment '图片地址',
+    `dept_id` bigint DEFAULT NULL COMMENT '部门ID',
+    `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+    `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NOT NULL DEFAULT '0',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;

@@ -15,6 +15,7 @@ import (
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/monitor/monitorController"
+	"nova-factory-server/app/business/product/productController"
 	"nova-factory-server/app/business/system/systemController"
 	"nova-factory-server/app/business/tool/toolController"
 	"nova-factory-server/app/daemonize"
@@ -52,6 +53,7 @@ func NewGinEngine(
 	alert *alertController.Controller,
 	building buildingController.Controller,
 	dashboard dashboardController.Controller,
+	product *productController.Product,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -83,6 +85,7 @@ func NewGinEngine(
 		ai.Dataset.PublicRoutes(group)
 		craft.Schedule.PublicRoutes(group)
 		deviceMonitor.DeviceMonitor.PublicRoutes(group)
+		product.Laboratory.PublicRoutes(group)
 	}
 	//做鉴权的
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
@@ -155,6 +158,9 @@ func NewGinEngine(
 
 		dashboard.Dashboard.PrivateRoutes(group)
 		dashboard.Data.PrivateRoutes(group)
+
+		// 生产管理
+		product.Laboratory.PrivateRoutes(group)
 
 		alert.Runner.Run()
 	}

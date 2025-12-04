@@ -41,6 +41,9 @@ import (
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/monitor/monitorDao/monitorDaoImpl"
 	"nova-factory-server/app/business/monitor/monitorService/monitorServiceImpl"
+	"nova-factory-server/app/business/product/productController"
+	"nova-factory-server/app/business/product/productDao/productDaoImpl"
+	"nova-factory-server/app/business/product/productService/productServiceImpl"
 	"nova-factory-server/app/business/system/systemController"
 	"nova-factory-server/app/business/system/systemDao/systemDaoImpl"
 	"nova-factory-server/app/business/system/systemService/systemServiceImpl"
@@ -351,7 +354,13 @@ func wireApp() (*gin.Engine, func(), error) {
 		Dashboard: dashboard,
 		Data:      data,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller, buildingControllerController, dashboardControllerController)
+	iSysProductLaboratoryDao := productDaoImpl.NewSysProductLaboratoryDao(db)
+	iSysProductLaboratoryService := productServiceImpl.NewSysProductLaboratoryService(iSysProductLaboratoryDao)
+	laboratory := productController.NewLaboratory(iSysProductLaboratoryService)
+	product := &productController.Product{
+		Laboratory: laboratory,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller, buildingControllerController, dashboardControllerController, product)
 	return engine, func() {
 		cleanup()
 	}, nil

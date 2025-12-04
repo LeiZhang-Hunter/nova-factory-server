@@ -39,6 +39,9 @@ import (
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/monitor/monitorDao/monitorDaoImpl"
 	"nova-factory-server/app/business/monitor/monitorService/monitorServiceImpl"
+	"nova-factory-server/app/business/product/productController"
+	"nova-factory-server/app/business/product/productDao/productDaoImpl"
+	"nova-factory-server/app/business/product/productService/productServiceImpl"
 	"nova-factory-server/app/business/system/systemController"
 	"nova-factory-server/app/business/system/systemDao/systemDaoImpl"
 	"nova-factory-server/app/business/system/systemService/systemServiceImpl"
@@ -102,6 +105,10 @@ func wireApp() (*gin.Engine, func(), error) {
 		dashboardDaoImpl.ProviderSet,
 		dashboardServiceImpl.ProviderSet,
 		dashboardController.ProviderSet,
+
+		productDaoImpl.ProviderSet,
+		productServiceImpl.ProviderSet,
+		productController.ProviderSet,
 
 		datasource.ProviderSet,
 		routes.ProviderSet,

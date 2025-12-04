@@ -1,0 +1,63 @@
+package productModels
+
+import "nova-factory-server/app/baize"
+
+type SysProductLaboratoryDQL struct {
+	Material string `form:"material" db:"material"`
+	Number   string `form:"number" db:"number"`
+	Contact  string `form:"contact" db:"contact"`
+	State    string `form:"state" db:"state"`
+	baize.BaseEntityDQL
+}
+
+type SysProductLaboratory struct {
+	Id         int64   `json:"id,string" db:"id"`
+	Material   string  `json:"material" db:"material" binding:"required"`
+	Contact    string  `json:"contact" db:"contact" binding:"required"`
+	Address    string  `json:"address" db:"address" binding:"required"`
+	Heat       float64 `json:"heat" db:"heat"`
+	Sulphur    float64 `json:"sulphur" db:"sulphur"`
+	Volatility float64 `json:"volatility" db:"volatility"`
+	Water      float64 `json:"water" db:"water"`
+	Weight     float64 `json:"weight" db:"weight"`
+	Number     string  `json:"number" db:"number" binding:"required"`
+	Img        string  `json:"img" db:"img"`
+	DeptId     int64   `json:"deptId" db:"dept_id"`
+	State      bool    `json:"state" db:"state"`
+	baize.BaseEntity
+}
+
+func ToSysProductLaboratory(vo *SysProductLaboratoryVo) *SysProductLaboratory {
+	return &SysProductLaboratory{
+		Id:         vo.Id,
+		Material:   vo.Material,
+		Contact:    vo.Contact,
+		Address:    vo.Address,
+		Heat:       vo.Heat,
+		Sulphur:    vo.Sulphur,
+		Volatility: vo.Volatility,
+		Water:      vo.Water,
+		Weight:     vo.Weight,
+		Number:     vo.Number,
+		Img:        vo.Img,
+	}
+}
+
+type SysProductLaboratoryVo struct {
+	Id         int64   `json:"id,string" db:"id"`
+	Material   string  `json:"material" db:"material" binding:"required"`
+	Contact    string  `json:"contact" db:"contact" `
+	Address    string  `json:"address" db:"address"`
+	Heat       float64 `json:"heat" db:"heat"`
+	Sulphur    float64 `json:"sulphur" db:"sulphur"`
+	Volatility float64 `json:"volatility" db:"volatility"`
+	Water      float64 `json:"water" db:"water"`
+	Weight     float64 `json:"weight" db:"weight"`
+	Number     string  `json:"number" db:"number" binding:"required"`
+	Img        string  `json:"img" db:"img"`
+}
+
+type SysProductLaboratoryList struct {
+	Rows  []*SysProductLaboratory `json:"rows"`
+	Total int64                   `json:"total"`
+}
