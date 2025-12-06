@@ -288,7 +288,7 @@ func (userDao *sysUserDao) SelectByUserIds(ctx context.Context, userIds []int64)
 	if len(userIds) == 0 {
 		return list
 	}
-	query, i, err := sqly.In("select user_id, user_name from sys_user where user_id in(?)", userIds)
+	query, i, err := sqly.In("select user_id, nick_name, user_name from sys_user where user_id in(?)", userIds)
 	if err != nil {
 		panic(err)
 	}

@@ -11,4 +11,6 @@ type ISysProductLaboratoryDao interface {
 	SelectLaboratoryById(ctx context.Context, id int64) (*productModels.SysProductLaboratoryVo, error)
 	Set(c *gin.Context, data *productModels.SysProductLaboratoryVo) (*productModels.SysProductLaboratory, error)
 	DeleteLaboratoryByIds(ctx context.Context, ids []int64) error
+	// SelectUserLaboratoryList 读取用户化验单
+	SelectUserLaboratoryList(ctx *gin.Context, dql *productModels.SysProductLaboratoryDQL) (list *productModels.SysProductLaboratoryList, err error)
 }

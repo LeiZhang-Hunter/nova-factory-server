@@ -355,7 +355,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Data:      data,
 	}
 	iSysProductLaboratoryDao := productDaoImpl.NewSysProductLaboratoryDao(db)
-	iSysProductLaboratoryService := productServiceImpl.NewSysProductLaboratoryService(iSysProductLaboratoryDao)
+	iSysProductLaboratoryService := productServiceImpl.NewSysProductLaboratoryService(iSysProductLaboratoryDao, iUserDao)
 	laboratory := productController.NewLaboratory(iSysProductLaboratoryService)
 	product := &productController.Product{
 		Laboratory: laboratory,

@@ -348,6 +348,7 @@ CREATE TABLE `sys_product_laboratory` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `material`  varchar(255)    not null   comment '物料',
     `contact`  varchar(255)    not null   comment '采样人',
+    `date`  varchar(255)    not null   comment '采样时间',
     `address`  varchar(255)    not null   comment '采样地点',
     `heat` decimal(10, 2) NOT NULL DEFAULT '0' COMMENT '含热量',
     `sulphur`  decimal(10, 2) NOT NULL DEFAULT '0'   comment '含硫量',

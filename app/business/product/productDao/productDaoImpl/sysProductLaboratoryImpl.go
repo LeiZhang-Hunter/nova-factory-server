@@ -91,12 +91,14 @@ func (dao *sysProductLaboratoryDao) Set(c *gin.Context, data *productModels.SysP
 	value := productModels.ToSysProductLaboratory(data)
 	if value.Id == 0 {
 		value.SetCreateBy(baizeContext.GetUserId(c))
+		value.Contact = baizeContext.GetUserName(c)
 		value.Id = snowflake.GenID()
 		value.DeptId = baizeContext.GetDeptId(c)
 		ret := dao.db.Table(dao.table).Create(&value)
 		return value, ret.Error
 	} else {
 		value.SetUpdateBy(baizeContext.GetUserId(c))
+		value.Contact = baizeContext.GetUserName(c)
 		ret := dao.db.Table(dao.table).Where("id = ?", value.Id).Updates(&value)
 		return value, ret.Error
 	}
@@ -113,4 +115,56 @@ func (dao *sysProductLaboratoryDao) DeleteLaboratoryByIds(ctx context.Context, i
 		return err
 	}
 	return nil
+}
+
+func (dao *sysProductLaboratoryDao) SelectUserLaboratoryList(ctx *gin.Context, dql *productModels.SysProductLaboratoryDQL) (list *productModels.SysProductLaboratoryList, err error) {
+	if dql == nil {
+		dql = &productModels.SysProductLaboratoryDQL{}
+	}
+	query := dao.db.Table(dao.table)
+	userId := baizeContext.GetUserId(ctx)
+	query = query.Where("create_by = ?", userId)
+	query = baizeContext.GetGormDataScope(ctx, query)
+
+	if dql.BeginTime != "" {
+		query = query.Where("create_time > ?", dql.BeginTime)
+	}
+
+	if dql.EndTime != "" {
+		query = query.Where("create_time <= ?", dql.EndTime)
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return &productModels.SysProductLaboratoryList{
+			Rows:  make([]*productModels.SysProductLaboratory, 0),
+			Total: 0,
+		}, nil
+	}
+
+	size := 0
+	if dql.Size <= 0 {
+		size = 20
+	} else {
+		size = int(dql.Size)
+	}
+	offset := 0
+	if dql.Page <= 0 {
+		dql.Page = 1
+	} else {
+		offset = int((dql.Page - 1) * dql.Size)
+	}
+
+	dto := make([]*productModels.SysProductLaboratory, 0)
+	ret := query.Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
+	if ret.Error != nil {
+		return &productModels.SysProductLaboratoryList{
+			Rows:  make([]*productModels.SysProductLaboratory, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	return &productModels.SysProductLaboratoryList{
+		Rows:  dto,
+		Total: total,
+	}, nil
 }

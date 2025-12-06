@@ -20,6 +20,7 @@ func NewLaboratory(ls productService.ISysProductLaboratoryService) *Laboratory {
 func (lc *Laboratory) PrivateRoutes(router *gin.RouterGroup) {
 	laboratory := router.Group("/product/laboratory")
 	laboratory.GET("/list", middlewares.HasPermission("product:laboratory:list"), lc.LaboratoryList)
+	laboratory.GET("/our/list", middlewares.HasPermission("product:laboratory:our:list"), lc.LaboratoryUserList)
 	laboratory.GET("/info/:id", middlewares.HasPermission("product:laboratory:info"), lc.LaboratoryGetInfo)
 	laboratory.POST("/set", middlewares.HasPermission("product:laboratory:set"), lc.Set)
 	laboratory.DELETE("/remove/:ids", middlewares.HasPermission("product:laboratory:remove"), lc.Remove)
@@ -119,4 +120,23 @@ func (lc *Laboratory) Remove(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// LaboratoryUserList 化验单列表
+// @Summary 化验单列表
+// @Description 化验单列表
+// @Tags 化验单管理
+// @Param  object query systemModels.SysProductLaboratoryDQL false "查询参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]systemModels.SysProductLaboratoryVo}} "成功"
+// @Router /product/laboratory/our/list [get]
+func (lc *Laboratory) LaboratoryUserList(c *gin.Context) {
+	dql := new(productModels.SysProductLaboratoryDQL)
+	_ = c.ShouldBindQuery(dql)
+	list, err := lc.ls.SelectUserLaboratoryList(c, dql)
+	if err != nil {
+		return
+	}
+	baizeContext.SuccessData(c, list)
 }
