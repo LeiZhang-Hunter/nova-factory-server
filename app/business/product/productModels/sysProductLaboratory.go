@@ -15,6 +15,8 @@ type SysProductLaboratoryDQL struct {
 type SysProductLaboratory struct {
 	Id             int64   `json:"id,string" db:"id"`
 	Material       string  `json:"material" db:"material" binding:"required"`
+	DryHigh        float64 `gorm:"column:dry_high;not null;default:0.00;comment:干燥基高位" json:"dry_high"`         // 干燥基高位
+	ReceivedLow    float64 `gorm:"column:received_low;not null;default:0.00;comment:收到基低位" json:"received_low"` // 收到基低位
 	Contact        string  `json:"contact" db:"contact" binding:"required"`
 	Date           string  `json:"date" db:"string" `
 	Address        string  `json:"address" db:"address" binding:"required"`
@@ -34,34 +36,38 @@ type SysProductLaboratory struct {
 
 func ToSysProductLaboratory(vo *SysProductLaboratoryVo) *SysProductLaboratory {
 	return &SysProductLaboratory{
-		Id:         vo.Id,
-		Material:   vo.Material,
-		Date:       vo.Date,
-		Contact:    vo.Contact,
-		Address:    vo.Address,
-		Heat:       vo.Heat,
-		Sulphur:    vo.Sulphur,
-		Volatility: vo.Volatility,
-		Water:      vo.Water,
-		Weight:     vo.Weight,
-		Number:     vo.Number,
-		Img:        vo.Img,
+		Id:          vo.Id,
+		Material:    vo.Material,
+		Date:        vo.Date,
+		DryHigh:     vo.DryHigh,
+		ReceivedLow: vo.ReceivedLow,
+		Contact:     vo.Contact,
+		Address:     vo.Address,
+		Heat:        vo.Heat,
+		Sulphur:     vo.Sulphur,
+		Volatility:  vo.Volatility,
+		Water:       vo.Water,
+		Weight:      vo.Weight,
+		Number:      vo.Number,
+		Img:         vo.Img,
 	}
 }
 
 type SysProductLaboratoryVo struct {
-	Id         int64   `json:"id,string" db:"id"`
-	Material   string  `json:"material" db:"material" binding:"required"`
-	Contact    string  `json:"contact" db:"contact" `
-	Date       string  `json:"date" db:"string" `
-	Address    string  `json:"address" db:"address"`
-	Heat       float64 `json:"heat" db:"heat"`
-	Sulphur    float64 `json:"sulphur" db:"sulphur"`
-	Volatility float64 `json:"volatility" db:"volatility"`
-	Water      float64 `json:"water" db:"water"`
-	Weight     float64 `json:"weight" db:"weight"`
-	Number     string  `json:"number" db:"number" binding:"required"`
-	Img        string  `json:"img" db:"img"`
+	Id          int64   `json:"id,string" db:"id"`
+	Material    string  `json:"material" db:"material" binding:"required"`
+	DryHigh     float64 `gorm:"column:dry_high;not null;default:0.00;comment:干燥基高位" json:"dry_high"`         // 干燥基高位
+	ReceivedLow float64 `gorm:"column:received_low;not null;default:0.00;comment:收到基低位" json:"received_low"` // 收到基低位
+	Contact     string  `json:"contact" db:"contact" `
+	Date        string  `json:"date" db:"string" `
+	Address     string  `json:"address" db:"address"`
+	Heat        float64 `json:"heat" db:"heat"`
+	Sulphur     float64 `json:"sulphur" db:"sulphur"`
+	Volatility  float64 `json:"volatility" db:"volatility"`
+	Water       float64 `json:"water" db:"water"`
+	Weight      float64 `json:"weight" db:"weight"`
+	Number      string  `json:"number" db:"number" binding:"required"`
+	Img         string  `json:"img" db:"img"`
 }
 
 type SysProductLaboratoryList struct {

@@ -350,6 +350,8 @@ CREATE TABLE `sys_product_laboratory` (
     `contact`  varchar(255)    not null   comment '采样人',
     `date`  varchar(255)    not null   comment '采样时间',
     `address`  varchar(255)    not null   comment '采样地点',
+    `dry_high` decimal(10, 2) NOT NULL DEFAULT '0' COMMENT '干燥基高位',
+    `received_low` decimal(10, 2) NOT NULL DEFAULT '0' COMMENT '收到基低位',
     `heat` decimal(10, 2) NOT NULL DEFAULT '0' COMMENT '含热量',
     `sulphur`  decimal(10, 2) NOT NULL DEFAULT '0'   comment '含硫量',
     `volatility`  decimal(10, 2) NOT NULL DEFAULT '0'   comment '挥发性',
