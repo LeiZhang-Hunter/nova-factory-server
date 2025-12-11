@@ -15,6 +15,7 @@ type DataTypeConfig struct {
 	Unit         string            `yaml:"unit"`
 	Position     uint16
 	FunctionCode uint16 `yaml:"functionCode"`
+	Expression   string `yaml:"expression"`
 	deviceId     string
 	Sort         api.ByteOrder `yaml:"sort"`
 }
@@ -28,6 +29,7 @@ type Device struct {
 type Config struct {
 	Enabled     *bool         `yaml:"enabled,omitempty"`
 	Address     string        `yaml:"address,omitempty"`
+	Quantity    uint16        `yaml:"quantity"`
 	SlaveId     byte          `yaml:"slaveId,omitempty"`
 	CollectTime time.Duration `yaml:"collectTime,omitempty" default:"5s"` // default 2 * read.timeout
 	Devices     []Device      `yaml:"devices,omitempty"`

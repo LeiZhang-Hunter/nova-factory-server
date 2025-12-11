@@ -24,6 +24,7 @@ type SysModbusDeviceConfigData struct {
 	Unit                  string `gorm:"column:unit;comment:单位" json:"unit"`                                             // 单位
 	Precision             int64  `gorm:"column:precision;not null;comment:数据精度" json:"precision,string"`                 // 数据精度
 	FunctionCode          int    `gorm:"column:function_code;comment:功能码" json:"function_code,string"`                   // 功能码
+	Expression            string `gorm:"column:expression;comment:表达式" json:"expression"`                                // 表达式
 	Mode                  int    `gorm:"column:mode;comment:功能码" json:"mode,string"`                                     // 功能码
 	DataFormat            string `gorm:"column:data_format;comment:读写方式" json:"data_format"`                             // 读写方式
 	Sort                  string `gorm:"column:sort;comment:数据排序" json:"sort"`                                           // 数据排序
@@ -72,6 +73,7 @@ func OfSysModbusDeviceConfigData(req *SetSysModbusDeviceConfigDataReq) *SysModbu
 		Annotation:            string(annotations),
 		PerturbationVariables: string(perturbationVariables),
 		GraphEnable:           req.GraphEnable,
+		Expression:            req.Expression,
 	}
 }
 
@@ -106,6 +108,7 @@ type SetSysModbusDeviceConfigDataReq struct {
 	FunctionCode          int                        `gorm:"column:function_code;comment:功能码" json:"function_code,string"`                          // 功能码
 	Mode                  int                        `gorm:"column:mode;comment:功能码" json:"mode,string"`                                            // 功能码
 	DataFormat            string                     `gorm:"column:data_format;comment:读写方式" json:"data_format"`                                    // 读写方式
+	Expression            string                     `gorm:"column:expression;comment:表达式" json:"expression"`                                       // 读写方式
 	Sort                  string                     `gorm:"column:sort;comment:数据排序" binding:"required" json:"sort"`                               // 数据排序
 }
 
@@ -141,6 +144,7 @@ func ToSetSysModbusDeviceConfigDataReq(req *SysModbusDeviceConfigData) *SetSysMo
 		Mode:                  req.Mode,
 		DataFormat:            req.DataFormat,
 		AggFunction:           req.AggFunction,
+		Expression:            req.Expression,
 		Sort:                  req.Sort,
 		DataType:              req.DataType,
 		PredictEnable:         req.PredictEnable,

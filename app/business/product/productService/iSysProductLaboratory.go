@@ -12,4 +12,8 @@ type ISysProductLaboratoryService interface {
 	DeleteLaboratoryByIds(c *gin.Context, ids []int64) error
 	// SelectUserLaboratoryList 读取用户化验单
 	SelectUserLaboratoryList(ctx *gin.Context, dql *productModels.SysProductLaboratoryDQL) (list *productModels.SysProductLaboratoryList, err error)
+	// FirstLaboratoryInfo 读取化验单
+	FirstLaboratoryInfo(ctx *gin.Context) (*productModels.SysProductLaboratory, error)
+	// FirstLaboratoryList 最新化验单列表
+	FirstLaboratoryList(ctx *gin.Context, dql *productModels.SysProductLaboratoryDQL) (*productModels.SysProductLaboratoryList, error)
 }

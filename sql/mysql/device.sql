@@ -135,6 +135,7 @@ CREATE TABLE `sys_modbus_device_config_data`
     `predict_enable` tinyint(1) NULL DEFAULT 0 COMMENT '是否开启趋势预测',
     `mode` tinyint(1) NULL DEFAULT 0 COMMENT '读写权限',
     `data_format` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '数据格式',
+    `expression` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '转换表达式',
     `annotation` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL  COMMENT '注解',
     `sort` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '数据排序',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
@@ -146,7 +147,7 @@ CREATE TABLE `sys_modbus_device_config_data`
     PRIMARY KEY (`device_config_id`) USING BTREE,
     INDEX `template_id`(`template_id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'modbus数据配置' ROW_FORMAT = Dynamic;
-
+-- alter table sys_modbus_device_config_data add column `expression` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '转换表达式';
 
 
 

@@ -94,3 +94,59 @@ func (s *SysProductLaboratoryService) DeleteLaboratoryByIds(c *gin.Context, ids 
 func (s *SysProductLaboratoryService) SelectUserLaboratoryList(ctx *gin.Context, dql *productModels.SysProductLaboratoryDQL) (list *productModels.SysProductLaboratoryList, err error) {
 	return s.dao.SelectUserLaboratoryList(ctx, dql)
 }
+
+// FirstLaboratoryInfo 读取用户化验单
+func (s *SysProductLaboratoryService) FirstLaboratoryInfo(ctx *gin.Context) (*productModels.SysProductLaboratory, error) {
+	return s.dao.FirstLaboratoryInfo(ctx)
+}
+
+func (s *SysProductLaboratoryService) FirstLaboratoryList(ctx *gin.Context, dql *productModels.SysProductLaboratoryDQL) (*productModels.SysProductLaboratoryList, error) {
+	list, err := s.dao.FirstLaboratoryList(ctx, dql)
+	if err != nil {
+		return nil, err
+	}
+	if list == nil {
+		return list, nil
+	}
+	//  读取用户id集合
+	userIdMap := make(map[int64]bool)
+	for _, v := range list.Rows {
+		if v.CreateBy > 0 {
+			userIdMap[v.CreateBy] = true
+		}
+
+		if v.UpdateBy > 0 {
+			userIdMap[v.UpdateBy] = true
+		}
+	}
+
+	// 格式化服务id
+	userIds := make([]int64, 0)
+	for k, _ := range userIdMap {
+		if k > 0 {
+			userIds = append(userIds, k)
+		}
+	}
+	users := s.iUserDao.SelectByUserIds(ctx, userIds)
+	userVoMap := make(map[int64]*systemModels.SysUserDML)
+	for _, v := range users {
+		userVoMap[v.UserId] = v
+	}
+
+	for k, v := range list.Rows {
+		var createUserName string
+		var updateUserName string
+		userVo, ok := userVoMap[v.CreateBy]
+		if ok {
+			createUserName = userVo.NickName
+		}
+
+		userVo, ok = userVoMap[v.UpdateBy]
+		if ok {
+			updateUserName = userVo.NickName
+		}
+		list.Rows[k].CreateUserName = createUserName
+		list.Rows[k].UpdateUserName = updateUserName
+	}
+	return list, nil
+}

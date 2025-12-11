@@ -168,3 +168,46 @@ func (dao *sysProductLaboratoryDao) SelectUserLaboratoryList(ctx *gin.Context, d
 		Total: total,
 	}, nil
 }
+
+func (dao *sysProductLaboratoryDao) FirstLaboratoryInfo(ctx *gin.Context) (*productModels.SysProductLaboratory, error) {
+	query := dao.db.Table(dao.table)
+	var dto productModels.SysProductLaboratory
+	ret := query.Order("create_time desc").Limit(1).Find(&dto)
+	if ret.Error != nil {
+		return &dto, ret.Error
+	}
+	return &dto, nil
+}
+
+func (dao *sysProductLaboratoryDao) FirstLaboratoryList(ctx *gin.Context, dql *productModels.SysProductLaboratoryDQL) (*productModels.SysProductLaboratoryList, error) {
+	if dql == nil {
+		dql = &productModels.SysProductLaboratoryDQL{}
+	}
+	query := dao.db.Table(dao.table)
+
+	size := 0
+	if dql.Size <= 0 {
+		size = 20
+	} else {
+		size = int(dql.Size)
+	}
+	offset := 0
+	if dql.Page <= 0 {
+		dql.Page = 1
+	} else {
+		offset = int((dql.Page - 1) * dql.Size)
+	}
+
+	dto := make([]*productModels.SysProductLaboratory, 0)
+	ret := query.Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
+	if ret.Error != nil {
+		return &productModels.SysProductLaboratoryList{
+			Rows:  make([]*productModels.SysProductLaboratory, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	return &productModels.SysProductLaboratoryList{
+		Rows:  dto,
+		Total: int64(len(dto)),
+	}, nil
+}

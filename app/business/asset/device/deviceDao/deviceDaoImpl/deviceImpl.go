@@ -3,8 +3,8 @@ package deviceDaoImpl
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
@@ -154,11 +154,11 @@ func (s *sysDeviceDataDao) GetLocalByGateWayId(c *gin.Context, id int64) ([]*dev
 		if v.Extension == "" {
 			continue
 		}
-		fmt.Println(v.Extension)
 		if v.ProtocolType == device.MQTT {
 			var ext deviceModels.ExtensionInfo
 			err := json.Unmarshal([]byte(v.Extension), &ext)
 			if err != nil {
+				zap.L().Error("get extension info error", zap.Error(err))
 				continue
 			}
 			dto[k].ExtensionInfo = &ext
@@ -167,6 +167,7 @@ func (s *sysDeviceDataDao) GetLocalByGateWayId(c *gin.Context, id int64) ([]*dev
 			var ext deviceModels.ExtensionInfo
 			err := json.Unmarshal([]byte(v.Extension), &ext)
 			if err != nil {
+				zap.L().Error("get extension info error", zap.Error(err))
 				continue
 			}
 			dto[k].ExtensionInfo = &ext

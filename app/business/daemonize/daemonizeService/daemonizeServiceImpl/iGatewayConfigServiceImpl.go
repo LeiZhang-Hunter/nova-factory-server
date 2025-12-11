@@ -188,6 +188,9 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 
 			var config bhps7.Config
 			config.Address = addr
+			if len(devicesData) > 0 && len(devicesData[0].ExtensionInfo.LocalInfo) > 0 {
+				config.Quantity = devicesData[0].ExtensionInfo.LocalInfo[0].Quantity
+			}
 			config.Devices = make([]bhps7.Device, 0)
 
 			for _, d := range devicesData {

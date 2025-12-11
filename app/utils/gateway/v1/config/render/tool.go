@@ -33,6 +33,7 @@ func OfBhps7Device(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDevi
 			Position:     uint16(v.Register),
 			FunctionCode: uint16(v.FunctionCode),
 			Sort:         api.ByteOrder(v.Sort),
+			Expression:   v.Expression,
 		})
 	}
 
