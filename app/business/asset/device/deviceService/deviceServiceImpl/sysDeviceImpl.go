@@ -17,6 +17,7 @@ import (
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/utils/math"
 )
 
 type DeviceService struct {
@@ -356,6 +357,7 @@ func (d *DeviceService) GetMetricByTag(c *gin.Context, req *deviceModels.DeviceT
 				list.Rows[k].TemplateList[templateId][dataId].GraphEnable = *dataValue.GraphEnable
 				list.Rows[k].TemplateList[templateId][dataId].PredictEnable = *dataValue.PredictEnable
 				list.Rows[k].TemplateList[templateId][dataId].DataId = uint64(dataValue.DeviceConfigID)
+				list.Rows[k].TemplateList[templateId][dataId].Value = math.RoundFloat(list.Rows[k].TemplateList[templateId][dataId].Value, 2)
 			}
 		}
 	}

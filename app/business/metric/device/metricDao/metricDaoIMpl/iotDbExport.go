@@ -607,7 +607,7 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 
 			data.Values = append(data.Values, metricModels.MetricQueryValue{
 				Time:  timestamp,
-				Value: fmt.Sprintf("%f", v),
+				Value: fmt.Sprintf("%.2f", v),
 			})
 
 		}
@@ -659,7 +659,7 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 				}
 				data.MultiValues[k] = append(data.MultiValues[k], metricModels.MetricQueryValue{
 					Time:  timestamp,
-					Value: fmt.Sprintf("%f", v),
+					Value: fmt.Sprintf("%2.f", v),
 				})
 			}
 		}
