@@ -17,4 +17,6 @@ type IDeviceDao interface {
 	GetByIdString(c *gin.Context, id string) (*deviceModels.DeviceVO, error)
 	GetById(c *gin.Context, id int64) (*deviceModels.DeviceVO, error)
 	GetByTag(c *gin.Context, number string) (*deviceModels.DeviceVO, error)
+	// SelectPublicDeviceList 非登录情况下请求的接口
+	SelectPublicDeviceList(c *gin.Context, req *deviceModels.DeviceListReq) (*deviceModels.DeviceInfoListData, error)
 }

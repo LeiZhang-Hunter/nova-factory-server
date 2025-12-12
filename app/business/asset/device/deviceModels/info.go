@@ -131,6 +131,11 @@ type DeviceInfoListValue struct {
 
 // DeviceTagListReq 根据标签读取设备
 type DeviceTagListReq struct {
-	Tags string `json:"tags"`
+	Tags string `form:"tags"`
 	baize.BaseEntityDQL
+}
+
+type DeviceMetricInfoListValue struct {
+	Rows  []*DeviceVO `json:"rows"`
+	Total int64       `json:"total"`
 }

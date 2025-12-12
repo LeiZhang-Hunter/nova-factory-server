@@ -204,3 +204,59 @@ func (s *sysDeviceDataDao) GetByTag(c *gin.Context, number string) (*deviceModel
 	}
 	return info, nil
 }
+
+// SelectPublicDeviceList 非登录情况下请求的接口
+func (s *sysDeviceDataDao) SelectPublicDeviceList(c *gin.Context, req *deviceModels.DeviceListReq) (*deviceModels.DeviceInfoListData, error) {
+	db := s.ms.Table(s.tableName)
+
+	if req != nil && req.Name != nil && *req.Name != "" {
+		db = db.Where("name LIKE ?", "%"+*req.Name+"%")
+	}
+	if req != nil && req.DeviceGroupId > 0 {
+		db = db.Where("device_group_id = ?", req.DeviceGroupId)
+	}
+	if req != nil && req.Number != nil && *req.Number != "" {
+		db = db.Where("number = ?", req.Number)
+	}
+	if req != nil && req.ControlType != nil {
+		db = db.Where("control_type = ?", *req.ControlType)
+	}
+	if req != nil && req.Type != nil && *req.Type != "" {
+		db = db.Where("type = ?", *req.Type)
+	}
+	size := 0
+	if req == nil || req.Size <= 0 {
+		size = 20
+	} else {
+		size = int(req.Size)
+	}
+	offset := 0
+	if req == nil || req.Page <= 0 {
+		req.Page = 1
+	} else {
+		offset = int((req.Page - 1) * req.Size)
+	}
+	db = db.Where("state", commonStatus.NORMAL)
+	var dto []*deviceModels.DeviceVO
+
+	var total int64
+	ret := db.Count(&total)
+	if ret.Error != nil {
+		return &deviceModels.DeviceInfoListData{
+			Rows:  make([]*deviceModels.DeviceVO, 0),
+			Total: 0,
+		}, ret.Error
+	}
+
+	ret = db.Offset(offset).Limit(size).Find(&dto).Order("create_time desc")
+	if ret.Error != nil {
+		return &deviceModels.DeviceInfoListData{
+			Rows:  make([]*deviceModels.DeviceVO, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	return &deviceModels.DeviceInfoListData{
+		Rows:  dto,
+		Total: total,
+	}, nil
+}

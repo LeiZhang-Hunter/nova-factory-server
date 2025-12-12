@@ -11,23 +11,28 @@ import (
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricDao"
+	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/business/system/systemDao"
 	"nova-factory-server/app/business/system/systemModels"
+	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/constant/iotdb"
+	"nova-factory-server/app/datasource/cache"
 )
 
 type DeviceService struct {
-	iDeviceDao      deviceDao.IDeviceDao
-	iDeviceGroupDao deviceDao.IDeviceGroupDao
-	iUserDao        systemDao.IUserDao
-	metricDao       metricDao.IMetricDao
-	dataDao         deviceDao.ISysModbusDeviceConfigDataDao
-	mapDao          deviceMonitorDao.IDeviceDataReportDao
+	iDeviceDao          deviceDao.IDeviceDao
+	iDeviceGroupDao     deviceDao.IDeviceGroupDao
+	iUserDao            systemDao.IUserDao
+	metricDao           metricDao.IMetricDao
+	dataDao             deviceDao.ISysModbusDeviceConfigDataDao
+	mapDao              deviceMonitorDao.IDeviceDataReportDao
+	cache               cache.Cache
+	deviceConfigDataDao deviceDao.ISysModbusDeviceConfigDataDao
 }
 
 func NewDeviceService(iDeviceDao deviceDao.IDeviceDao, iDeviceGroupDao deviceDao.IDeviceGroupDao,
 	iUserDao systemDao.IUserDao, metricDao metricDao.IMetricDao, dataDao deviceDao.ISysModbusDeviceConfigDataDao,
-	mapDao deviceMonitorDao.IDeviceDataReportDao) deviceService.IDeviceService {
+	mapDao deviceMonitorDao.IDeviceDataReportDao, cache cache.Cache) deviceService.IDeviceService {
 	return &DeviceService{
 		iDeviceDao:      iDeviceDao,
 		iDeviceGroupDao: iDeviceGroupDao,
@@ -35,6 +40,7 @@ func NewDeviceService(iDeviceDao deviceDao.IDeviceDao, iDeviceGroupDao deviceDao
 		metricDao:       metricDao,
 		dataDao:         dataDao,
 		mapDao:          mapDao,
+		cache:           cache,
 	}
 }
 
@@ -248,8 +254,8 @@ func (d *DeviceService) GetById(c *gin.Context, id int64) (*deviceModels.DeviceV
 	return device, err
 }
 
-func (d *DeviceService) GetMetricByTag(c *gin.Context, req *deviceModels.DeviceTagListReq) (*deviceModels.DeviceInfoListValue, error) {
-	list, err := d.iDeviceDao.SelectDeviceList(c, &deviceModels.DeviceListReq{
+func (d *DeviceService) GetMetricByTag(c *gin.Context, req *deviceModels.DeviceTagListReq) (*deviceModels.DeviceMetricInfoListValue, error) {
+	list, err := d.iDeviceDao.SelectPublicDeviceList(c, &deviceModels.DeviceListReq{
 		Number: &req.Tags,
 		BaseEntityDQL: baize.BaseEntityDQL{
 			DataScope: req.DataScope,
@@ -261,120 +267,100 @@ func (d *DeviceService) GetMetricByTag(c *gin.Context, req *deviceModels.DeviceT
 	})
 	if err != nil {
 		zap.L().Error("读取列表衰退", zap.Error(err))
-		return &deviceModels.DeviceInfoListValue{
-			Rows:  make([]*deviceModels.DeviceValue, 0),
+		return &deviceModels.DeviceMetricInfoListValue{
+			Rows:  make([]*deviceModels.DeviceVO, 0),
 			Total: 0,
 		}, err
 	}
 
 	if len(list.Rows) == 0 {
-		return &deviceModels.DeviceInfoListValue{
-			Rows:  make([]*deviceModels.DeviceValue, 0),
+		return &deviceModels.DeviceMetricInfoListValue{
+			Rows:  make([]*deviceModels.DeviceVO, 0),
 			Total: 0,
 		}, nil
 	}
 
-	// 读取分组id集合
-	groupIdMap := make(map[uint64]bool)
+	var deviceIds []uint64 = make([]uint64, 0)
 	for _, v := range list.Rows {
-		if v.DeviceGroupId > 0 {
-			groupIdMap[v.DeviceGroupId] = true
-		}
-	}
-	// 格式化服务id
-	groupIds := make([]uint64, 0)
-	for k, _ := range groupIdMap {
-		if k > 0 {
-			groupIds = append(groupIds, k)
-		}
+		deviceIds = append(deviceIds, v.DeviceId)
 	}
 
-	//  读取用户id集合
-	userIdMap := make(map[int64]bool)
+	var keys []string = make([]string, 0)
+	for _, v := range deviceIds {
+		keys = append(keys, device.MakeDeviceKey(uint64(v)))
+	}
+
+	slice := d.cache.MGet(c, keys)
+	for k, v := range slice.Val() {
+		str, ok := v.(string)
+		if !ok {
+			continue
+		}
+		if str == "" {
+			continue
+		}
+		deviceMetrics := make(map[uint64]map[uint64]*metricModels.DeviceMetricData) // template_id => data_id
+		err := json.Unmarshal([]byte(str), &deviceMetrics)
+		if err != nil {
+			zap.L().Error("json Unmarshal error", zap.Error(err))
+			continue
+		}
+		if deviceMetrics == nil {
+			list.Rows[k].Active = false
+		} else {
+			list.Rows[k].Active = true
+		}
+		list.Rows[k].TemplateList = deviceMetrics
+	}
+
+	// 处理数据
+	var dataIds []uint64 = make([]uint64, 0)
 	for _, v := range list.Rows {
-		if v.CreateBy > 0 {
-			userIdMap[v.CreateBy] = true
-		}
-
-		if v.UpdateBy > 0 {
-			userIdMap[v.UpdateBy] = true
+		for _, templateValue := range v.TemplateList {
+			for dataId, _ := range templateValue {
+				dataIds = append(dataIds, dataId)
+			}
 		}
 	}
 
-	// 格式化服务id
-	userIds := make([]int64, 0)
-	for k, _ := range userIdMap {
-		if k > 0 {
-			userIds = append(userIds, k)
-		}
+	datas, err := d.dataDao.GetByIds(c, dataIds)
+	if err != nil {
+		return nil, err
 	}
 
-	// 读取分组列表
-	groupList, _ := d.iDeviceGroupDao.GetDeviceGroupByIds(c, groupIds)
-	groupVoMap := make(map[uint64]*deviceModels.DeviceGroupVO)
-	for _, v := range groupList {
-		groupVoMap[v.GroupId] = v
+	var dataMap map[uint64]*deviceModels.SysModbusDeviceConfigData = make(map[uint64]*deviceModels.SysModbusDeviceConfigData)
+	for _, dataValue := range datas {
+		dataMap[uint64(dataValue.DeviceConfigID)] = dataValue
 	}
 
-	users := d.iUserDao.SelectByUserIds(c, userIds)
-	userVoMap := make(map[int64]*systemModels.SysUserDML)
-	for _, v := range users {
-		userVoMap[v.UserId] = v
+	for k, v := range list.Rows {
+		for templateId, templateValue := range v.TemplateList {
+			for dataId, _ := range templateValue {
+				if list.Rows[k].TemplateList == nil {
+					continue
+				}
+				_, ok := list.Rows[k].TemplateList[templateId]
+				if !ok {
+					continue
+				}
+				_, ok = list.Rows[k].TemplateList[templateId][dataId]
+				if !ok {
+					continue
+				}
+				dataValue, ok := dataMap[dataId]
+				if !ok {
+					continue
+				}
+				list.Rows[k].TemplateList[templateId][dataId].Name = dataValue.Name
+				list.Rows[k].TemplateList[templateId][dataId].Unit = dataValue.Unit
+				list.Rows[k].TemplateList[templateId][dataId].GraphEnable = *dataValue.GraphEnable
+				list.Rows[k].TemplateList[templateId][dataId].PredictEnable = *dataValue.PredictEnable
+				list.Rows[k].TemplateList[templateId][dataId].DataId = uint64(dataValue.DeviceConfigID)
+			}
+		}
 	}
-
-	ret := make([]*deviceModels.DeviceValue, 0)
-	for _, v := range list.Rows {
-		var actions []string = make([]string, 0)
-		if len(v.Action) != 0 {
-			json.Unmarshal([]byte((v.Action)), &actions)
-		}
-
-		var groupName string
-		groupVo, ok := groupVoMap[v.DeviceGroupId]
-		if ok {
-			groupName = groupVo.Name
-		}
-
-		var createUserName string
-		var updateUserName string
-		userVo, ok := userVoMap[v.CreateBy]
-		if ok {
-			createUserName = userVo.UserName
-		}
-
-		userVo, ok = userVoMap[v.UpdateBy]
-		if ok {
-			updateUserName = userVo.UserName
-		}
-
-		value := &deviceModels.DeviceValue{
-			DeviceId:          v.DeviceId,
-			DeviceGroupId:     v.DeviceGroupId,
-			DeviceClassId:     v.DeviceClassId,
-			DeviceProtocolId:  v.DeviceProtocolId,
-			DeviceBuildingId:  v.DeviceBuildingId,
-			Name:              *v.Name,
-			DeviceGroupName:   groupName,
-			CommunicationType: v.CommunicationType,
-			ProtocolType:      v.ProtocolType,
-			DeviceGatewayID:   v.DeviceGatewayID,
-			Number:            *v.Number,
-			Type:              *v.Type,
-			Action:            actions,
-			Extension:         v.Extension,
-			ControlType:       v.ControlType,
-			CreateUserName:    createUserName,
-			UpdateUserName:    updateUserName,
-			BaseEntity: baize.BaseEntity{
-				CreateTime: v.CreateTime,
-				UpdateTime: v.UpdateTime,
-			},
-		}
-
-		ret = append(ret, value)
-	}
-	return &deviceModels.DeviceInfoListValue{
-		Rows:  ret,
+	return &deviceModels.DeviceMetricInfoListValue{
+		Rows:  list.Rows,
 		Total: list.Total,
 	}, nil
 }

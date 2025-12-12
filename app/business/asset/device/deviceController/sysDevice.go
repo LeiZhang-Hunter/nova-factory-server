@@ -29,7 +29,7 @@ func (di *DeviceInfo) PrivateRoutes(router *gin.RouterGroup) {
 func (di *DeviceInfo) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/device")
 	// 根据标签读取设备数据
-	group.GET("/metric/tag", middlewares.HasPermission("asset:device"), di.GetDeviceMetricByTag)
+	group.GET("/metric/tag", di.GetDeviceMetricByTag)
 }
 
 // GetDeviceList 获取设备列表

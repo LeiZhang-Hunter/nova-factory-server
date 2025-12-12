@@ -123,7 +123,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	iDeviceGroupDao := deviceDaoImpl.NewSysDeviceGroupDaoImpl(db)
 	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
 	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
-	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao)
+	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao, cacheCache)
 	electric := systemController.NewElectric(iDeviceElectricService, iDeviceService)
 	iSysShiftDao := systemDaoImpl.NewISysShiftDaoImpl(db)
 	iSysShiftService := systemServiceImpl.NewISysShiftServiceImpl(iSysShiftDao)
