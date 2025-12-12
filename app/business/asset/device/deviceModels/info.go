@@ -128,3 +128,9 @@ type DeviceInfoListValue struct {
 	Rows  []*DeviceValue `json:"rows"`
 	Total int64          `json:"total"`
 }
+
+// DeviceTagListReq 根据标签读取设备
+type DeviceTagListReq struct {
+	Tags string `json:"tags"`
+	baize.BaseEntityDQL
+}

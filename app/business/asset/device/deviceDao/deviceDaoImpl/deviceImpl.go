@@ -195,3 +195,12 @@ func (s *sysDeviceDataDao) GetById(c *gin.Context, id int64) (*deviceModels.Devi
 	}
 	return info, nil
 }
+
+func (s *sysDeviceDataDao) GetByTag(c *gin.Context, number string) (*deviceModels.DeviceVO, error) {
+	var info *deviceModels.DeviceVO
+	ret := s.ms.Table(s.tableName).Where("number = ?", number).Where("state = ?", commonStatus.NORMAL).First(&info)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	return info, nil
+}

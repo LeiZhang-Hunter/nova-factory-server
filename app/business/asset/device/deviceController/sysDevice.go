@@ -26,6 +26,12 @@ func (di *DeviceInfo) PrivateRoutes(router *gin.RouterGroup) {
 	asset.DELETE("/:deviceIds", middlewares.HasPermission("asset:device:remove"), di.DeviceRemove) // 设置设备信息
 }
 
+func (di *DeviceInfo) PublicRoutes(router *gin.RouterGroup) {
+	group := router.Group("/api/v1/device")
+	// 根据标签读取设备数据
+	group.GET("/metric/tag", middlewares.HasPermission("asset:device"), di.GetDeviceMetricByTag)
+}
+
 // GetDeviceList 获取设备列表
 // @Summary 获取设备列表
 // @Description 获取设备列表
@@ -100,4 +106,22 @@ func (di *DeviceInfo) DeviceRemove(c *gin.Context) {
 	}
 	baizeContext.Success(c)
 
+}
+
+// GetDeviceMetricByTag 获取设备数据通过标签
+// @Summary 获取设备数据通过标签
+// @Description 获取设备数据通过标签
+// @Tags 资产管理
+// @Param  object query deviceModels.DeviceListReq true "设备列表请求参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /api/v1/device/metric/tag [get]
+func (di *DeviceInfo) GetDeviceMetricByTag(c *gin.Context) {
+	req := new(deviceModels.DeviceTagListReq)
+	err := c.ShouldBindQuery(req)
+	list, err := di.iDeviceService.GetMetricByTag(c, req)
+	if err != nil {
+		zap.L().Error("读取设备分组失败", zap.Error(err))
+	}
+	baizeContext.SuccessData(c, list)
 }

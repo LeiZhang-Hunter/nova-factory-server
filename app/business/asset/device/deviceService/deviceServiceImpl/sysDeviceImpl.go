@@ -247,3 +247,134 @@ func (d *DeviceService) GetById(c *gin.Context, id int64) (*deviceModels.DeviceV
 	}
 	return device, err
 }
+
+func (d *DeviceService) GetMetricByTag(c *gin.Context, req *deviceModels.DeviceTagListReq) (*deviceModels.DeviceInfoListValue, error) {
+	list, err := d.iDeviceDao.SelectDeviceList(c, &deviceModels.DeviceListReq{
+		Number: &req.Tags,
+		BaseEntityDQL: baize.BaseEntityDQL{
+			DataScope: req.DataScope,
+			OrderBy:   req.OrderBy,
+			IsAsc:     req.IsAsc,
+			Page:      req.Page,
+			Size:      req.Size,
+		},
+	})
+	if err != nil {
+		zap.L().Error("读取列表衰退", zap.Error(err))
+		return &deviceModels.DeviceInfoListValue{
+			Rows:  make([]*deviceModels.DeviceValue, 0),
+			Total: 0,
+		}, err
+	}
+
+	if len(list.Rows) == 0 {
+		return &deviceModels.DeviceInfoListValue{
+			Rows:  make([]*deviceModels.DeviceValue, 0),
+			Total: 0,
+		}, nil
+	}
+
+	// 读取分组id集合
+	groupIdMap := make(map[uint64]bool)
+	for _, v := range list.Rows {
+		if v.DeviceGroupId > 0 {
+			groupIdMap[v.DeviceGroupId] = true
+		}
+	}
+	// 格式化服务id
+	groupIds := make([]uint64, 0)
+	for k, _ := range groupIdMap {
+		if k > 0 {
+			groupIds = append(groupIds, k)
+		}
+	}
+
+	//  读取用户id集合
+	userIdMap := make(map[int64]bool)
+	for _, v := range list.Rows {
+		if v.CreateBy > 0 {
+			userIdMap[v.CreateBy] = true
+		}
+
+		if v.UpdateBy > 0 {
+			userIdMap[v.UpdateBy] = true
+		}
+	}
+
+	// 格式化服务id
+	userIds := make([]int64, 0)
+	for k, _ := range userIdMap {
+		if k > 0 {
+			userIds = append(userIds, k)
+		}
+	}
+
+	// 读取分组列表
+	groupList, _ := d.iDeviceGroupDao.GetDeviceGroupByIds(c, groupIds)
+	groupVoMap := make(map[uint64]*deviceModels.DeviceGroupVO)
+	for _, v := range groupList {
+		groupVoMap[v.GroupId] = v
+	}
+
+	users := d.iUserDao.SelectByUserIds(c, userIds)
+	userVoMap := make(map[int64]*systemModels.SysUserDML)
+	for _, v := range users {
+		userVoMap[v.UserId] = v
+	}
+
+	ret := make([]*deviceModels.DeviceValue, 0)
+	for _, v := range list.Rows {
+		var actions []string = make([]string, 0)
+		if len(v.Action) != 0 {
+			json.Unmarshal([]byte((v.Action)), &actions)
+		}
+
+		var groupName string
+		groupVo, ok := groupVoMap[v.DeviceGroupId]
+		if ok {
+			groupName = groupVo.Name
+		}
+
+		var createUserName string
+		var updateUserName string
+		userVo, ok := userVoMap[v.CreateBy]
+		if ok {
+			createUserName = userVo.UserName
+		}
+
+		userVo, ok = userVoMap[v.UpdateBy]
+		if ok {
+			updateUserName = userVo.UserName
+		}
+
+		value := &deviceModels.DeviceValue{
+			DeviceId:          v.DeviceId,
+			DeviceGroupId:     v.DeviceGroupId,
+			DeviceClassId:     v.DeviceClassId,
+			DeviceProtocolId:  v.DeviceProtocolId,
+			DeviceBuildingId:  v.DeviceBuildingId,
+			Name:              *v.Name,
+			DeviceGroupName:   groupName,
+			CommunicationType: v.CommunicationType,
+			ProtocolType:      v.ProtocolType,
+			DeviceGatewayID:   v.DeviceGatewayID,
+			Number:            *v.Number,
+			Type:              *v.Type,
+			Action:            actions,
+			Extension:         v.Extension,
+			ControlType:       v.ControlType,
+			CreateUserName:    createUserName,
+			UpdateUserName:    updateUserName,
+			BaseEntity: baize.BaseEntity{
+				CreateTime: v.CreateTime,
+				UpdateTime: v.UpdateTime,
+			},
+		}
+
+		ret = append(ret, value)
+	}
+	return &deviceModels.DeviceInfoListValue{
+		Rows:  ret,
+		Total: list.Total,
+	}, nil
+}
