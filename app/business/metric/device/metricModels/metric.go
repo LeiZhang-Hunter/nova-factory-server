@@ -80,33 +80,41 @@ type Predict struct {
 }
 
 type MetricDataQueryReq struct {
-	Type       string  `json:"type"`
-	Name       string  `json:"name"`
-	Start      uint64  `json:"start"`
-	End        uint64  `json:"end"`
-	Step       int     `json:"step"`
-	Interval   int     `json:"interval"`
-	Level      *int    `json:"level"`
-	Expression string  `json:"expression"`
-	Field      string  `json:"field"`
-	Having     string  `json:"having"`
-	Predict    Predict `json:"predict"`
+	Type        string                  `json:"type"`
+	Name        string                  `json:"name"`
+	Start       uint64                  `json:"start"`
+	End         uint64                  `json:"end"`
+	Step        int                     `json:"step"`
+	Interval    int                     `json:"interval"`
+	Level       *int                    `json:"level"`
+	Expression  string                  `json:"expression"`
+	Field       string                  `json:"field"`
+	Having      string                  `json:"having"`
+	QueryMetric []*MetricQueryCondition `json:"query_metric"`
+	Predict     Predict                 `json:"predict"`
+}
+
+type MetricQueryCondition struct {
+	DeviceId   int64 `yaml:"deviceId" json:"deviceId,string"`
+	TemplateId int64 `yaml:"templateId" json:"templateId,string"`
+	DataId     int64 `yaml:"dataId" json:"dataId,string"`
 }
 
 // GatewayMetricDataQueryReq 网关预测参数
 type GatewayMetricDataQueryReq struct {
-	GatewayId  int64   `json:"gatewayId,string"`
-	Username   string  `json:"username"`
-	Password   string  `json:"password"`
-	Type       string  `json:"type"`
-	Name       string  `json:"name"`
-	Start      uint64  `json:"start"`
-	End        uint64  `json:"end"`
-	Step       int     `json:"step"`
-	Interval   int     `json:"interval"`
-	Level      *int    `json:"level"`
-	Expression string  `json:"expression"`
-	Field      string  `json:"field"`
-	Having     string  `json:"having"`
-	Predict    Predict `json:"predict"`
+	GatewayId   int64                   `json:"gatewayId,string"`
+	Username    string                  `json:"username"`
+	Password    string                  `json:"password"`
+	Type        string                  `json:"type"`
+	Name        string                  `json:"name"`
+	Start       uint64                  `json:"start"`
+	End         uint64                  `json:"end"`
+	Step        int                     `json:"step"`
+	Interval    int                     `json:"interval"`
+	Level       *int                    `json:"level"`
+	QueryMetric []*MetricQueryCondition `json:"query_metric"`
+	Expression  string                  `json:"expression"`
+	Field       string                  `json:"field"`
+	Having      string                  `json:"having"`
+	Predict     Predict                 `json:"predict"`
 }

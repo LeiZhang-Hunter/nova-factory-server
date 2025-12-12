@@ -11,6 +11,7 @@ import (
 	"nova-factory-server/app/business/metric/device/metricDao"
 	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/constant/device"
+	"nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"
 )
 
@@ -170,6 +171,19 @@ func (d *DeviceMonitorServiceImpl) Predict(c *gin.Context, req *metricModels.Met
 }
 
 func (d *DeviceMonitorServiceImpl) PredictQuery(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error) {
+	if len(req.QueryMetric) != 0 {
+		name := ""
+		index := 0
+		for _, metric := range req.QueryMetric {
+			index++
+			str := iotdb.MakeDeviceTemplateName(metric.DeviceId, metric.TemplateId, metric.DataId)
+			name += str
+			if index != len(req.QueryMetric) {
+				name += ","
+			}
+		}
+		req.Name = name
+	}
 	data, err := d.metricDao.Query(c, req)
 	if err != nil {
 		return data, err

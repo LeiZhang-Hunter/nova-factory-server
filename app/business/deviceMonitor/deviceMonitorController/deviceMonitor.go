@@ -2,6 +2,7 @@ package deviceMonitorController
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
 	"nova-factory-server/app/business/metric/device/metricModels"
@@ -136,22 +137,24 @@ func (d *DeviceMonitor) MetricPredictQuery(c *gin.Context) {
 	req := new(metricModels.GatewayMetricDataQueryReq)
 	err := c.ShouldBindJSON(req)
 	if err != nil {
+		zap.L().Error("param error", zap.Error(err))
 		baizeContext.ParameterError(c)
 		return
 	}
 
 	data, err := d.service.PredictQuery(c, &metricModels.MetricDataQueryReq{
-		Type:       req.Type,
-		Name:       req.Name,
-		Start:      req.Start,
-		End:        req.End,
-		Step:       req.Step,
-		Interval:   req.Interval,
-		Level:      req.Level,
-		Expression: req.Expression,
-		Field:      req.Field,
-		Predict:    req.Predict,
-		Having:     req.Having,
+		Type:        req.Type,
+		Name:        req.Name,
+		Start:       req.Start,
+		End:         req.End,
+		Step:        req.Step,
+		Interval:    req.Interval,
+		Level:       req.Level,
+		Expression:  req.Expression,
+		Field:       req.Field,
+		Predict:     req.Predict,
+		Having:      req.Having,
+		QueryMetric: req.QueryMetric,
 	})
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
