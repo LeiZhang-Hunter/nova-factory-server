@@ -21,6 +21,7 @@ import (
 	"nova-factory-server/app/daemonize"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/objectFile/localhostObject"
+	"nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/logger"
 	"time"
 
@@ -175,6 +176,15 @@ func NewGinEngine(
 	s := daemonize.CreateGRpcServer()
 	controller.Daemonize.PrivateRoutes(s)
 	s.Start()
+	// --- Configure MCP Server ---
+	mpcServer := gin_mcp.New(r, &gin_mcp.Config{
+		Name:        "Product API",
+		Description: "API for managing products.",
+		BaseURL:     "http://localhost:8080",
+	})
+	dc.Info.PrivateMcpRoutes(mpcServer) //资产管理---设备模块
+	// 4. Mount the MCP server endpoint
+	mpcServer.Mount("/mcp") // MCP clients will connect here
 	return r
 
 }

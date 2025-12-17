@@ -38,10 +38,10 @@ func (lc *Laboratory) PublicRoutes(router *gin.RouterGroup) {
 // @Summary 化验单列表
 // @Description 化验单列表
 // @Tags 化验单管理
-// @Param  object query systemModels.SysProductLaboratoryDQL false "查询参数"
+// @Param  object query productModels.SysProductLaboratoryDQL false "查询参数"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]systemModels.SysProductLaboratoryVo}} "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]productModels.SysProductLaboratoryVo}} "成功"
 // @Router /product/laboratory/list [get]
 func (lc *Laboratory) LaboratoryList(c *gin.Context) {
 	dql := new(productModels.SysProductLaboratoryDQL)
@@ -60,7 +60,7 @@ func (lc *Laboratory) LaboratoryList(c *gin.Context) {
 // @Param id path string true "主键ID"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemModels.SysProductLaboratoryVo} "成功"
+// @Success 200 {object}  response.ResponseData{data=productModels.SysProductLaboratoryVo} "成功"
 // @Router /product/laboratory/info/{id} [get]
 func (lc *Laboratory) LaboratoryGetInfo(c *gin.Context) {
 	id := baizeContext.ParamInt64(c, "id")
@@ -81,7 +81,7 @@ func (lc *Laboratory) LaboratoryGetInfo(c *gin.Context) {
 // @Summary 保存化验单
 // @Description 保存化验单
 // @Tags 保存化验单
-// @Param  object body systemModels.SysProductLaboratoryVo true "请求体"
+// @Param  object body productModels.SysProductLaboratoryVo true "请求体"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
@@ -129,10 +129,10 @@ func (lc *Laboratory) Remove(c *gin.Context) {
 // @Summary 化验单列表
 // @Description 化验单列表
 // @Tags 化验单管理
-// @Param  object query systemModels.SysProductLaboratoryDQL false "查询参数"
+// @Param  object query productModels.SysProductLaboratoryDQL false "查询参数"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]systemModels.SysProductLaboratoryVo}} "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]productModels.SysProductLaboratoryVo}} "成功"
 // @Router /product/laboratory/our/list [get]
 func (lc *Laboratory) LaboratoryUserList(c *gin.Context) {
 	dql := new(productModels.SysProductLaboratoryDQL)

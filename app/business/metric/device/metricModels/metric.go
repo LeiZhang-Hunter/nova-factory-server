@@ -42,8 +42,8 @@ func NewMetricMap() *MetricMap {
 // 指标
 
 type MetricQueryValue struct {
-	Time  int64  `json:"time"`
-	Value string `json:"value"`
+	Time  int64   `json:"time"`
+	Value float64 `json:"value"`
 }
 
 type MetricQueryData struct {

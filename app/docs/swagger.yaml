@@ -805,6 +805,15 @@ definitions:
         description: 建造年份
         type: string
     type: object
+  craftRouteModels.CaptureData:
+    properties:
+      data_id:
+        type: string
+      device_id:
+        type: string
+      template_id:
+        type: string
+    type: object
   craftRouteModels.ComputedPosition:
     properties:
       x:
@@ -813,6 +822,45 @@ definitions:
         type: number
       z:
         type: number
+    type: object
+  craftRouteModels.ControlRule:
+    properties:
+      captures:
+        items:
+          $ref: '#/definitions/craftRouteModels.CaptureData'
+        type: array
+      pid_rules:
+        $ref: '#/definitions/craftRouteModels.PidRules'
+      predict_rules:
+        $ref: '#/definitions/craftRouteModels.PredictRules'
+      trigger_rules:
+        $ref: '#/definitions/craftRouteModels.TriggerRules'
+    type: object
+  craftRouteModels.ControllerAction:
+    properties:
+      condition:
+        type: string
+      control_mode:
+        type: string
+      data_id:
+        type: string
+      dataFormat:
+        type: string
+      device_id:
+        type: string
+      interval:
+        type: string
+      template_id:
+        type: string
+      value:
+        type: string
+    type: object
+  craftRouteModels.DeviceRuleInfo:
+    properties:
+      dataId:
+        type: string
+      deviceId:
+        type: string
     type: object
   craftRouteModels.Dimensions:
     properties:
@@ -858,6 +906,78 @@ definitions:
         type: number
       "y":
         type: number
+    type: object
+  craftRouteModels.PidRules:
+    properties:
+      actions:
+        items:
+          $ref: '#/definitions/craftRouteModels.ControllerAction'
+        type: array
+      data_id:
+        type: string
+      derivative:
+        type: number
+      device_id:
+        type: string
+      integral:
+        type: number
+      max_control:
+        type: number
+      min_control:
+        type: number
+      proportional:
+        type: number
+      reference_signal:
+        type: number
+      sampling_interval:
+        type: integer
+    type: object
+  craftRouteModels.PredictData:
+    properties:
+      data_id:
+        type: string
+      device_id:
+        type: string
+      template_id:
+        type: string
+    type: object
+  craftRouteModels.PredictRules:
+    properties:
+      actions:
+        items:
+          $ref: '#/definitions/craftRouteModels.ControllerAction'
+        type: array
+      agg_function:
+        description: 聚合函数，用来计算图表
+        type: string
+      cases:
+        items:
+          $ref: '#/definitions/craftRouteModels.TriggerCase'
+        type: array
+      interval:
+        description: 预测时间段
+        type: integer
+      is_continue:
+        type: boolean
+      model:
+        description: 预测模型
+        type: string
+      predict_length:
+        description: 预测长度
+        type: integer
+      predicts:
+        items:
+          $ref: '#/definitions/craftRouteModels.PredictData'
+        type: array
+      step:
+        description: 聚合窗口的滑动步长（可选，默认与聚合窗口大小相同）
+        type: integer
+      threshold:
+        description: threshold
+        type: integer
+      window_size:
+        description: 聚合窗口的大小（必须为正数）
+        type: integer
     type: object
   craftRouteModels.ProcessTopo:
     properties:
@@ -987,7 +1107,8 @@ definitions:
   craftRouteModels.ScheduleReq:
     properties:
       gateway_id:
-        type: integer
+        example: "0"
+        type: string
       pageSize:
         default: 10000
         description: 数量
@@ -1008,6 +1129,8 @@ definitions:
         type: string
       schedule_name:
         type: string
+      status:
+        type: boolean
       time:
         type: string
       time_manager:
@@ -1048,6 +1171,9 @@ definitions:
         description: 部门ID
         example: "0"
         type: string
+      loop_time:
+        description: 循环执行时间
+        type: integer
       remark:
         description: 备注
         type: string
@@ -1081,10 +1207,9 @@ definitions:
     type: object
   craftRouteModels.SysCraftRouteRequest:
     properties:
-      datasetId:
-        description: 出库id
-        example: "0"
-        type: string
+      loop_time:
+        description: 循环执行时间
+        type: integer
       remark:
         description: 备注
         type: string
@@ -1093,6 +1218,10 @@ definitions:
         type: string
       route_desc:
         description: 工艺路线说明
+        type: string
+      route_id:
+        description: 出库id
+        example: "0"
         type: string
       route_name:
         description: 工艺路线名称
@@ -1315,6 +1444,13 @@ definitions:
       content_text:
         description: 内容说明
         type: string
+      control_name:
+        description: 内容说明
+        type: string
+      control_rules:
+        $ref: '#/definitions/craftRouteModels.ControlRule'
+      control_type:
+        type: string
       device:
         description: 辅助设备
         type: string
@@ -1334,8 +1470,6 @@ definitions:
       remark:
         description: 备注
         type: string
-      trigger_rules:
-        $ref: '#/definitions/craftRouteModels.TriggerRules'
     required:
     - content_text
     - process_id
@@ -1643,24 +1777,20 @@ definitions:
         example: "0"
         type: string
     type: object
-  craftRouteModels.TriggerRules:
+  craftRouteModels.TriggerCase:
     properties:
-      actions:
+      conditions:
         items:
           properties:
-            control_type_value:
-              type: string
-            data_format:
+            connector:
               type: string
             data_id:
               type: string
             device_id:
               type: string
-            extension:
+            operator:
               type: string
-            format_hint:
-              type: string
-            placeholder:
+            rule:
               type: string
             template_id:
               type: string
@@ -1668,53 +1798,29 @@ definitions:
               type: string
           type: object
         type: array
+      connector:
+        type: string
+      next_step:
+        type: string
+    type: object
+  craftRouteModels.TriggerRules:
+    properties:
+      actions:
+        items:
+          $ref: '#/definitions/craftRouteModels.ControllerAction'
+        type: array
       cases:
         items:
-          properties:
-            conditions:
-              items:
-                properties:
-                  connector:
-                    type: string
-                  data_id:
-                    type: string
-                  operator:
-                    type: string
-                  rule:
-                    type: string
-                  value:
-                    type: string
-                type: object
-              type: array
-            connector:
-              type: string
-            next_step:
-              type: string
-          type: object
+          $ref: '#/definitions/craftRouteModels.TriggerCase'
         type: array
       combined_rule:
         type: string
       dataIds:
         items:
-          type: string
+          $ref: '#/definitions/craftRouteModels.DeviceRuleInfo'
         type: array
       name:
         type: string
-      rule:
-        items:
-          properties:
-            connector:
-              type: string
-            data_id:
-              type: string
-            operator:
-              type: string
-            rule:
-              type: string
-            value:
-              type: string
-          type: object
-        type: array
     type: object
   daemonizeModels.BindGatewayConfigReq:
     properties:
@@ -1911,6 +2017,9 @@ definitions:
         description: 文档id
         example: "0"
         type: string
+      expression:
+        description: 读写方式
+        type: string
       function_code:
         description: 功能码
         example: "0"
@@ -1965,6 +2074,136 @@ definitions:
     - sort
     - template_id
     - type
+    type: object
+  deviceModels.SysDeviceCheckPlanVO:
+    properties:
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      attr4:
+        description: 预留字段4
+        type: integer
+      cycle_count:
+        description: 次数
+        type: integer
+      cycle_type:
+        description: 频率
+        type: string
+      end_date:
+        description: 结束日期
+        type: string
+      plan_code:
+        description: 计划编码
+        type: string
+      plan_id:
+        description: 计划ID
+        example: "0"
+        type: string
+      plan_name:
+        description: 计划名称
+        type: string
+      plan_type:
+        description: 计划类型
+        type: string
+      remark:
+        description: 备注
+        type: string
+      start_date:
+        description: 开始日期
+        type: string
+      status:
+        description: 状态
+        type: string
+    type: object
+  deviceModels.SysDeviceCheckSubjectVO:
+    properties:
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      attr4:
+        description: 预留字段4
+        type: integer
+      plan_id:
+        description: 计划ID
+        example: "0"
+        type: string
+      record_id:
+        description: 流水号
+        example: "0"
+        type: string
+      remark:
+        description: 备注
+        type: string
+      subject_code:
+        description: 项目编码
+        type: string
+      subject_content:
+        description: 项目内容
+        type: string
+      subject_id:
+        description: 项目ID
+        type: integer
+      subject_name:
+        description: 项目名称
+        type: string
+      subject_standard:
+        description: 标准
+        type: string
+      subject_type:
+        description: 项目类型
+        type: string
+    type: object
+  deviceModels.SysDeviceSubjectVO:
+    properties:
+      attr1:
+        description: 预留字段1
+        type: string
+      attr2:
+        description: 预留字段2
+        type: string
+      attr3:
+        description: 预留字段3
+        type: integer
+      attr4:
+        description: 预留字段4
+        type: integer
+      id:
+        description: 项目ID
+        example: "0"
+        type: string
+      remark:
+        description: 备注
+        type: string
+      status:
+        description: 操作状态（0禁用 1启用）
+        type: boolean
+      subject_code:
+        description: 项目编码
+        type: string
+      subject_content:
+        description: 项目内容
+        type: string
+      subject_name:
+        description: 项目名称
+        type: string
+      subject_standard:
+        description: 标准
+        type: string
+      subject_type:
+        description: 项目类型
+        type: string
     type: object
   deviceModels.SysDeviceTemplateSetReq:
     properties:
@@ -2139,23 +2378,81 @@ definitions:
       reason:
         type: string
     type: object
+  metricModels.GatewayMetricDataQueryReq:
+    properties:
+      end:
+        type: integer
+      expression:
+        type: string
+      field:
+        type: string
+      gatewayId:
+        example: "0"
+        type: string
+      having:
+        type: string
+      interval:
+        type: integer
+      level:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+      predict:
+        $ref: '#/definitions/metricModels.Predict'
+      query_metric:
+        items:
+          $ref: '#/definitions/metricModels.MetricQueryCondition'
+        type: array
+      start:
+        type: integer
+      step:
+        type: integer
+      type:
+        type: string
+      username:
+        type: string
+    type: object
   metricModels.MetricDataQueryReq:
     properties:
       end:
         type: integer
       expression:
         type: string
+      field:
+        type: string
+      having:
+        type: string
       interval:
+        type: integer
+      level:
         type: integer
       name:
         type: string
       predict:
         $ref: '#/definitions/metricModels.Predict'
+      query_metric:
+        items:
+          $ref: '#/definitions/metricModels.MetricQueryCondition'
+        type: array
       start:
         type: integer
       step:
         type: integer
       type:
+        type: string
+    type: object
+  metricModels.MetricQueryCondition:
+    properties:
+      dataId:
+        example: "0"
+        type: string
+      deviceId:
+        example: "0"
+        type: string
+      templateId:
+        example: "0"
         type: string
     type: object
   metricModels.MetricQueryReq:
@@ -2298,6 +2595,43 @@ definitions:
         type: string
       userName:
         type: string
+    type: object
+  productModels.SysProductLaboratoryVo:
+    properties:
+      address:
+        type: string
+      contact:
+        type: string
+      date:
+        type: string
+      dry_high:
+        description: 干燥基高位
+        type: number
+      heat:
+        type: number
+      id:
+        example: "0"
+        type: string
+      img:
+        type: string
+      material:
+        type: string
+      number:
+        type: string
+      received_low:
+        description: 收到基低位
+        type: number
+      sulphur:
+        type: number
+      volatility:
+        type: number
+      water:
+        type: number
+      weight:
+        type: number
+    required:
+    - material
+    - number
     type: object
   response.ListData:
     properties:
@@ -3016,6 +3350,30 @@ definitions:
         type: string
       userName:
         type: string
+    type: object
+  systemModels.SysWorkShiftSettingVO:
+    properties:
+      begin_time:
+        description: 开始时间
+        type: integer
+      begin_time_str:
+        description: 开始时间字符串
+        type: string
+      end_time:
+        description: 结束时间
+        type: integer
+      end_time_str:
+        description: 结束时间字符串
+        type: string
+      id:
+        example: "0"
+        type: string
+      name:
+        description: 班次名称
+        type: string
+      status:
+        description: 是否启用班次设置
+        type: boolean
     type: object
   systemModels.User:
     properties:
@@ -4551,6 +4909,76 @@ paths:
       summary: 读取调度任务
       tags:
       - 工艺管理/生产任务管理
+  /api/v1/device/metric/tag:
+    get:
+      description: 获取设备数据通过标签
+      parameters:
+      - in: query
+        name: controlType
+        type: integer
+      - example: "0"
+        in: query
+        name: deviceBuildingId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceClassId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceGroupId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceId
+        type: string
+      - example: "0"
+        in: query
+        name: deviceProtocolId
+        type: string
+      - in: query
+        name: end
+        type: integer
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: number
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: start
+        type: integer
+      - in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 获取设备数据通过标签
+      tags:
+      - 资产管理
   /api/v1/predict/metric:
     post:
       description: 导入告警数据
@@ -4568,7 +4996,25 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       summary: 导入告警数据
       tags:
-      - 告警管理/告警数据管理
+      - 设备监控/设备监控
+  /api/v1/predict/metric/query:
+    post:
+      description: 指标预测查询
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/metricModels.GatewayMetricDataQueryReq'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 指标预测查询
+      tags:
+      - 设备监控/设备监控
   /asset/building/list:
     get:
       description: 读取建筑物列表
@@ -4668,9 +5114,231 @@ paths:
       summary: 删除设备
       tags:
       - 资产管理
+  /asset/device/check/machinery/list:
+    get:
+      description: 设备清单列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 计划ID
+        example: "0"
+        in: query
+        name: plan_id
+        type: string
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设备清单列表
+      tags:
+      - 设备管理/点检保养计划/设备清单
+  /asset/device/check/machinery/remove/{ids}:
+    delete:
+      description: 删除设备清单
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除设备清单
+      tags:
+      - 设备管理/点检保养计划/设备清单
+  /asset/device/check/machinery/set:
+    post:
+      description: 设置设备清单
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceModels.SysDeviceCheckPlanVO'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置设备清单
+      tags:
+      - 设备管理/点检保养计划/设备清单
+  /asset/device/check/subject/list:
+    get:
+      description: 点检项目列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 计划ID
+        example: "0"
+        in: query
+        name: plan_id
+        type: string
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 点检项目列表
+      tags:
+      - 设备管理/点检保养计划/点检项目
+  /asset/device/check/subject/remove/{ids}:
+    delete:
+      description: 删除点检项目
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除点检项目
+      tags:
+      - 设备管理/点检保养计划/点检项目
+  /asset/device/check/subject/set:
+    post:
+      description: 设置点检项目
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceModels.SysDeviceCheckSubjectVO'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置点检项目
+      tags:
+      - 设备管理/点检保养计划/点检项目
+  /asset/device/checkPlan/list:
+    get:
+      description: 点检保养计划列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 点检保养计划列表
+      tags:
+      - 设备管理/点检保养计划
+  /asset/device/checkPlan/remove/{ids}:
+    delete:
+      description: 删除点检保养计划
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除点检保养计划
+      tags:
+      - 设备管理/点检保养计划
+  /asset/device/checkPlan/set:
+    post:
+      description: 设置点检保养计划
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceModels.SysDeviceCheckPlanVO'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置点检保养计划
+      tags:
+      - 设备管理/点检保养计划
   /asset/device/list:
     get:
-      description: 获取设备列表
+      description: |-
+        获取设备列表
+        返回物联网管理系统的设备列表
       parameters:
       - in: query
         name: controlType
@@ -4758,6 +5426,78 @@ paths:
       summary: 设置设备信息
       tags:
       - 资产管理
+  /asset/device/subject/list:
+    get:
+      description: 点检保养项目列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 点检保养项目列表
+      tags:
+      - 设备管理/点检保养项目列表
+  /asset/device/subject/remove/{ids}:
+    delete:
+      description: 删除点检保养项目
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除点检保养项目
+      tags:
+      - 设备管理/删除点检保养项目
+  /asset/device/subject/set:
+    post:
+      description: 设置点检保养项目
+      parameters:
+      - description: 助理列表参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/deviceModels.SysDeviceSubjectVO'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置点检保养项目
+      tags:
+      - 设备管理/设置点检保养项目
   /asset/device/template/data/list:
     get:
       description: 获取模板数据列表
@@ -6280,6 +7020,50 @@ paths:
       summary: 保存仪表盘
       tags:
       - 仪表盘/仪表盘管理
+  /device/monitor/control/log/list:
+    get:
+      description: 控制记录列表
+      parameters:
+      - description: 设备id
+        in: query
+        name: data_id
+        type: integer
+      - description: 设备id
+        in: query
+        name: device_id
+        type: integer
+      - in: query
+        name: end
+        type: integer
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: start
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 控制记录列表
+      tags:
+      - 设备接入/控制记录
   /device/monitor/data/dev/list:
     get:
       description: 设备测点列表
@@ -7263,6 +8047,331 @@ paths:
       summary: 查询在线用户列表查询
       tags:
       - 在线用户
+  /product/laboratory/first:
+    get:
+      description: 最新的化验单
+      parameters:
+      - in: query
+        name: beginTime
+        type: string
+      - in: query
+        name: contact
+        type: string
+      - in: query
+        name: endTime
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: material
+        type: string
+      - in: query
+        name: number
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 最新的化验单
+      tags:
+      - 化验单管理
+  /product/laboratory/first/list:
+    get:
+      description: 最新化验单列表
+      parameters:
+      - in: query
+        name: beginTime
+        type: string
+      - in: query
+        name: contact
+        type: string
+      - in: query
+        name: endTime
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: material
+        type: string
+      - in: query
+        name: number
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 最新化验单列表
+      tags:
+      - 化验单管理
+  /product/laboratory/info/{id}:
+    get:
+      description: 化验单详情
+      parameters:
+      - description: 主键ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 化验单详情
+      tags:
+      - 化验单管理
+  /product/laboratory/list:
+    get:
+      description: 化验单列表
+      parameters:
+      - in: query
+        name: beginTime
+        type: string
+      - in: query
+        name: contact
+        type: string
+      - in: query
+        name: endTime
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: material
+        type: string
+      - in: query
+        name: number
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 化验单列表
+      tags:
+      - 化验单管理
+  /product/laboratory/our/list:
+    get:
+      description: 化验单列表
+      parameters:
+      - in: query
+        name: beginTime
+        type: string
+      - in: query
+        name: contact
+        type: string
+      - in: query
+        name: endTime
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: material
+        type: string
+      - in: query
+        name: number
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/response.ListData'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                        type: array
+                    type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 化验单列表
+      tags:
+      - 化验单管理
+  /product/laboratory/remove/{ids}:
+    delete:
+      description: 删除化验单
+      parameters:
+      - description: 主键ID,多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除化验单
+      tags:
+      - 化验单管理
+  /product/laboratory/set:
+    post:
+      description: 保存化验单
+      parameters:
+      - description: 请求体
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存化验单
+      tags:
+      - 保存化验单
   /register:
     post:
       description: 用户登录
@@ -9113,6 +10222,79 @@ paths:
       summary: 权限选择框
       tags:
       - 下拉框选项
+  /system/shift/list:
+    get:
+      description: 班次配置列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 班次配置列表
+      tags:
+      - 系统管理/班次配置
+  /system/shift/remove/{ids}:
+    delete:
+      description: 删除告警AI推理发送配置
+      parameters:
+      - description: ids
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除班次配置
+      tags:
+      - 告警管理/班次配置
+  /system/shift/set:
+    post:
+      description: 设置班次配置
+      parameters:
+      - description: 班次配置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/systemModels.SysWorkShiftSettingVO'
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置班次配置
+      tags:
+      - 系统管理/班次配置
   /system/sse/{token}:
     get:
       description: 建立SSE链接

@@ -2305,11 +2305,119 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/device/metric/tag": {
+            "get": {
+                "description": "获取设备数据通过标签",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资产管理"
+                ],
+                "summary": "获取设备数据通过标签",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "controlType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceBuildingId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceClassId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceGroupId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "deviceProtocolId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/predict/metric": {
             "post": {
                 "description": "导入告警数据",
                 "tags": [
-                    "告警管理/告警数据管理"
+                    "设备监控/设备监控"
                 ],
                 "summary": "导入告警数据",
                 "parameters": [
@@ -2320,6 +2428,34 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/alertModels.AlertLogData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/predict/metric/query": {
+            "post": {
+                "description": "指标预测查询",
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "指标预测查询",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metricModels.GatewayMetricDataQueryReq"
                         }
                     }
                 ],
@@ -2455,9 +2591,349 @@ const docTemplate = `{
                 }
             }
         },
+        "/asset/device/check/machinery/list": {
+            "get": {
+                "description": "设备清单列表",
+                "tags": [
+                    "设备管理/点检保养计划/设备清单"
+                ],
+                "summary": "设备清单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "description": "计划ID",
+                        "name": "plan_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/check/machinery/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除设备清单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备管理/点检保养计划/设备清单"
+                ],
+                "summary": "删除设备清单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/check/machinery/set": {
+            "post": {
+                "description": "设置设备清单",
+                "tags": [
+                    "设备管理/点检保养计划/设备清单"
+                ],
+                "summary": "设置设备清单",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceModels.SysDeviceCheckPlanVO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/check/subject/list": {
+            "get": {
+                "description": "点检项目列表",
+                "tags": [
+                    "设备管理/点检保养计划/点检项目"
+                ],
+                "summary": "点检项目列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "description": "计划ID",
+                        "name": "plan_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/check/subject/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除点检项目",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备管理/点检保养计划/点检项目"
+                ],
+                "summary": "删除点检项目",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/check/subject/set": {
+            "post": {
+                "description": "设置点检项目",
+                "tags": [
+                    "设备管理/点检保养计划/点检项目"
+                ],
+                "summary": "设置点检项目",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceModels.SysDeviceCheckSubjectVO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/checkPlan/list": {
+            "get": {
+                "description": "点检保养计划列表",
+                "tags": [
+                    "设备管理/点检保养计划"
+                ],
+                "summary": "点检保养计划列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/checkPlan/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除点检保养计划",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备管理/点检保养计划"
+                ],
+                "summary": "删除点检保养计划",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/checkPlan/set": {
+            "post": {
+                "description": "设置点检保养计划",
+                "tags": [
+                    "设备管理/点检保养计划"
+                ],
+                "summary": "设置点检保养计划",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceModels.SysDeviceCheckPlanVO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/asset/device/list": {
             "get": {
-                "description": "获取设备列表",
+                "description": "获取设备列表\n返回物联网管理系统的设备列表",
                 "produces": [
                     "application/json"
                 ],
@@ -2587,6 +3063,118 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/subject/list": {
+            "get": {
+                "description": "点检保养项目列表",
+                "tags": [
+                    "设备管理/点检保养项目列表"
+                ],
+                "summary": "点检保养项目列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/subject/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除点检保养项目",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备管理/删除点检保养项目"
+                ],
+                "summary": "删除点检保养项目",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/device/subject/set": {
+            "post": {
+                "description": "设置点检保养项目",
+                "tags": [
+                    "设备管理/设置点检保养项目"
+                ],
+                "summary": "设置点检保养项目",
+                "parameters": [
+                    {
+                        "description": "助理列表参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceModels.SysDeviceSubjectVO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -4960,6 +5548,73 @@ const docTemplate = `{
                 }
             }
         },
+        "/device/monitor/control/log/list": {
+            "get": {
+                "description": "控制记录列表",
+                "tags": [
+                    "设备接入/控制记录"
+                ],
+                "summary": "控制记录列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备id",
+                        "name": "data_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "设备id",
+                        "name": "device_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "start",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/device/monitor/data/dev/list": {
             "get": {
                 "description": "设备测点列表",
@@ -6538,6 +7193,562 @@ const docTemplate = `{
                         "name": "tokenId",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/laboratory/first": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "最新的化验单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "化验单管理"
+                ],
+                "summary": "最新的化验单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "contact",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "material",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.ListData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "rows": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/laboratory/first/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "最新化验单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "化验单管理"
+                ],
+                "summary": "最新化验单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "contact",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "material",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.ListData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "rows": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/laboratory/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "化验单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "化验单管理"
+                ],
+                "summary": "化验单详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/laboratory/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "化验单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "化验单管理"
+                ],
+                "summary": "化验单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "contact",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "material",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.ListData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "rows": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/laboratory/our/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "化验单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "化验单管理"
+                ],
+                "summary": "化验单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "contact",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "material",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.ListData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "rows": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/product/laboratory/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除化验单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "化验单管理"
+                ],
+                "summary": "删除化验单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID,多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/laboratory/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "保存化验单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "保存化验单"
+                ],
+                "summary": "保存化验单",
+                "parameters": [
+                    {
+                        "description": "请求体",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                        }
                     }
                 ],
                 "responses": {
@@ -9656,6 +10867,119 @@ const docTemplate = `{
                 }
             }
         },
+        "/system/shift/list": {
+            "get": {
+                "description": "班次配置列表",
+                "tags": [
+                    "系统管理/班次配置"
+                ],
+                "summary": "班次配置列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/shift/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除告警AI推理发送配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "告警管理/班次配置"
+                ],
+                "summary": "删除班次配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/system/shift/set": {
+            "post": {
+                "description": "设置班次配置",
+                "tags": [
+                    "系统管理/班次配置"
+                ],
+                "summary": "设置班次配置",
+                "parameters": [
+                    {
+                        "description": "班次配置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/systemModels.SysWorkShiftSettingVO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/system/sse/{token}": {
             "get": {
                 "security": [
@@ -11717,6 +13041,20 @@ const docTemplate = `{
                 }
             }
         },
+        "craftRouteModels.CaptureData": {
+            "type": "object",
+            "properties": {
+                "data_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "template_id": {
+                    "type": "string"
+                }
+            }
+        },
         "craftRouteModels.ComputedPosition": {
             "type": "object",
             "properties": {
@@ -11728,6 +13066,66 @@ const docTemplate = `{
                 },
                 "z": {
                     "type": "number"
+                }
+            }
+        },
+        "craftRouteModels.ControlRule": {
+            "type": "object",
+            "properties": {
+                "captures": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.CaptureData"
+                    }
+                },
+                "pid_rules": {
+                    "$ref": "#/definitions/craftRouteModels.PidRules"
+                },
+                "predict_rules": {
+                    "$ref": "#/definitions/craftRouteModels.PredictRules"
+                },
+                "trigger_rules": {
+                    "$ref": "#/definitions/craftRouteModels.TriggerRules"
+                }
+            }
+        },
+        "craftRouteModels.ControllerAction": {
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "type": "string"
+                },
+                "control_mode": {
+                    "type": "string"
+                },
+                "dataFormat": {
+                    "type": "string"
+                },
+                "data_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "interval": {
+                    "type": "string"
+                },
+                "template_id": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.DeviceRuleInfo": {
+            "type": "object",
+            "properties": {
+                "dataId": {
+                    "type": "string"
+                },
+                "deviceId": {
+                    "type": "string"
                 }
             }
         },
@@ -11797,6 +13195,112 @@ const docTemplate = `{
                 },
                 "y": {
                     "type": "number"
+                }
+            }
+        },
+        "craftRouteModels.PidRules": {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.ControllerAction"
+                    }
+                },
+                "data_id": {
+                    "type": "string"
+                },
+                "derivative": {
+                    "type": "number"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "integral": {
+                    "type": "number"
+                },
+                "max_control": {
+                    "type": "number"
+                },
+                "min_control": {
+                    "type": "number"
+                },
+                "proportional": {
+                    "type": "number"
+                },
+                "reference_signal": {
+                    "type": "number"
+                },
+                "sampling_interval": {
+                    "type": "integer"
+                }
+            }
+        },
+        "craftRouteModels.PredictData": {
+            "type": "object",
+            "properties": {
+                "data_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "template_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.PredictRules": {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.ControllerAction"
+                    }
+                },
+                "agg_function": {
+                    "description": "聚合函数，用来计算图表",
+                    "type": "string"
+                },
+                "cases": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.TriggerCase"
+                    }
+                },
+                "interval": {
+                    "description": "预测时间段",
+                    "type": "integer"
+                },
+                "is_continue": {
+                    "type": "boolean"
+                },
+                "model": {
+                    "description": "预测模型",
+                    "type": "string"
+                },
+                "predict_length": {
+                    "description": "预测长度",
+                    "type": "integer"
+                },
+                "predicts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.PredictData"
+                    }
+                },
+                "step": {
+                    "description": "聚合窗口的滑动步长（可选，默认与聚合窗口大小相同）",
+                    "type": "integer"
+                },
+                "threshold": {
+                    "description": "threshold",
+                    "type": "integer"
+                },
+                "window_size": {
+                    "description": "聚合窗口的大小（必须为正数）",
+                    "type": "integer"
                 }
             }
         },
@@ -11995,7 +13499,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "gateway_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "pageSize": {
                     "description": "数量",
@@ -12030,6 +13535,9 @@ const docTemplate = `{
                 },
                 "schedule_name": {
                     "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
                 },
                 "time": {
                     "type": "string"
@@ -12080,6 +13588,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0"
                 },
+                "loop_time": {
+                    "description": "循环执行时间",
+                    "type": "integer"
+                },
                 "remark": {
                     "description": "备注",
                     "type": "string"
@@ -12129,10 +13641,9 @@ const docTemplate = `{
                 "route_name"
             ],
             "properties": {
-                "datasetId": {
-                    "description": "出库id",
-                    "type": "string",
-                    "example": "0"
+                "loop_time": {
+                    "description": "循环执行时间",
+                    "type": "integer"
                 },
                 "remark": {
                     "description": "备注",
@@ -12145,6 +13656,11 @@ const docTemplate = `{
                 "route_desc": {
                     "description": "工艺路线说明",
                     "type": "string"
+                },
+                "route_id": {
+                    "description": "出库id",
+                    "type": "string",
+                    "example": "0"
                 },
                 "route_name": {
                     "description": "工艺路线名称",
@@ -12445,6 +13961,16 @@ const docTemplate = `{
                     "description": "内容说明",
                     "type": "string"
                 },
+                "control_name": {
+                    "description": "内容说明",
+                    "type": "string"
+                },
+                "control_rules": {
+                    "$ref": "#/definitions/craftRouteModels.ControlRule"
+                },
+                "control_type": {
+                    "type": "string"
+                },
                 "device": {
                     "description": "辅助设备",
                     "type": "string"
@@ -12469,9 +13995,6 @@ const docTemplate = `{
                 "remark": {
                     "description": "备注",
                     "type": "string"
-                },
-                "trigger_rules": {
-                    "$ref": "#/definitions/craftRouteModels.TriggerRules"
                 }
             }
         },
@@ -12882,18 +14405,15 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.TriggerRules": {
+        "craftRouteModels.TriggerCase": {
             "type": "object",
             "properties": {
-                "actions": {
+                "conditions": {
                     "type": "array",
                     "items": {
                         "type": "object",
                         "properties": {
-                            "control_type_value": {
-                                "type": "string"
-                            },
-                            "data_format": {
+                            "connector": {
                                 "type": "string"
                             },
                             "data_id": {
@@ -12902,13 +14422,10 @@ const docTemplate = `{
                             "device_id": {
                                 "type": "string"
                             },
-                            "extension": {
+                            "operator": {
                                 "type": "string"
                             },
-                            "format_hint": {
-                                "type": "string"
-                            },
-                            "placeholder": {
+                            "rule": {
                                 "type": "string"
                             },
                             "template_id": {
@@ -12920,41 +14437,27 @@ const docTemplate = `{
                         }
                     }
                 },
+                "connector": {
+                    "type": "string"
+                },
+                "next_step": {
+                    "type": "string"
+                }
+            }
+        },
+        "craftRouteModels.TriggerRules": {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/craftRouteModels.ControllerAction"
+                    }
+                },
                 "cases": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "conditions": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "connector": {
-                                            "type": "string"
-                                        },
-                                        "data_id": {
-                                            "type": "string"
-                                        },
-                                        "operator": {
-                                            "type": "string"
-                                        },
-                                        "rule": {
-                                            "type": "string"
-                                        },
-                                        "value": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            },
-                            "connector": {
-                                "type": "string"
-                            },
-                            "next_step": {
-                                "type": "string"
-                            }
-                        }
+                        "$ref": "#/definitions/craftRouteModels.TriggerCase"
                     }
                 },
                 "combined_rule": {
@@ -12963,34 +14466,11 @@ const docTemplate = `{
                 "dataIds": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/craftRouteModels.DeviceRuleInfo"
                     }
                 },
                 "name": {
                     "type": "string"
-                },
-                "rule": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "connector": {
-                                "type": "string"
-                            },
-                            "data_id": {
-                                "type": "string"
-                            },
-                            "operator": {
-                                "type": "string"
-                            },
-                            "rule": {
-                                "type": "string"
-                            },
-                            "value": {
-                                "type": "string"
-                            }
-                        }
-                    }
                 }
             }
         },
@@ -13275,6 +14755,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0"
                 },
+                "expression": {
+                    "description": "读写方式",
+                    "type": "string"
+                },
                 "function_code": {
                     "description": "功能码",
                     "type": "string",
@@ -13337,6 +14821,181 @@ const docTemplate = `{
                 },
                 "unit": {
                     "description": "单位",
+                    "type": "string"
+                }
+            }
+        },
+        "deviceModels.SysDeviceCheckPlanVO": {
+            "type": "object",
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "cycle_count": {
+                    "description": "次数",
+                    "type": "integer"
+                },
+                "cycle_type": {
+                    "description": "频率",
+                    "type": "string"
+                },
+                "end_date": {
+                    "description": "结束日期",
+                    "type": "string"
+                },
+                "plan_code": {
+                    "description": "计划编码",
+                    "type": "string"
+                },
+                "plan_id": {
+                    "description": "计划ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "plan_name": {
+                    "description": "计划名称",
+                    "type": "string"
+                },
+                "plan_type": {
+                    "description": "计划类型",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "start_date": {
+                    "description": "开始日期",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "string"
+                }
+            }
+        },
+        "deviceModels.SysDeviceCheckSubjectVO": {
+            "type": "object",
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "plan_id": {
+                    "description": "计划ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "record_id": {
+                    "description": "流水号",
+                    "type": "string",
+                    "example": "0"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "subject_code": {
+                    "description": "项目编码",
+                    "type": "string"
+                },
+                "subject_content": {
+                    "description": "项目内容",
+                    "type": "string"
+                },
+                "subject_id": {
+                    "description": "项目ID",
+                    "type": "integer"
+                },
+                "subject_name": {
+                    "description": "项目名称",
+                    "type": "string"
+                },
+                "subject_standard": {
+                    "description": "标准",
+                    "type": "string"
+                },
+                "subject_type": {
+                    "description": "项目类型",
+                    "type": "string"
+                }
+            }
+        },
+        "deviceModels.SysDeviceSubjectVO": {
+            "type": "object",
+            "properties": {
+                "attr1": {
+                    "description": "预留字段1",
+                    "type": "string"
+                },
+                "attr2": {
+                    "description": "预留字段2",
+                    "type": "string"
+                },
+                "attr3": {
+                    "description": "预留字段3",
+                    "type": "integer"
+                },
+                "attr4": {
+                    "description": "预留字段4",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "项目ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "remark": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "操作状态（0禁用 1启用）",
+                    "type": "boolean"
+                },
+                "subject_code": {
+                    "description": "项目编码",
+                    "type": "string"
+                },
+                "subject_content": {
+                    "description": "项目内容",
+                    "type": "string"
+                },
+                "subject_name": {
+                    "description": "项目名称",
+                    "type": "string"
+                },
+                "subject_standard": {
+                    "description": "标准",
+                    "type": "string"
+                },
+                "subject_type": {
+                    "description": "项目类型",
                     "type": "string"
                 }
             }
@@ -13592,7 +15251,7 @@ const docTemplate = `{
                 }
             }
         },
-        "metricModels.MetricDataQueryReq": {
+        "metricModels.GatewayMetricDataQueryReq": {
             "type": "object",
             "properties": {
                 "end": {
@@ -13601,14 +15260,36 @@ const docTemplate = `{
                 "expression": {
                     "type": "string"
                 },
+                "field": {
+                    "type": "string"
+                },
+                "gatewayId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "having": {
+                    "type": "string"
+                },
                 "interval": {
+                    "type": "integer"
+                },
+                "level": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
                 },
+                "password": {
+                    "type": "string"
+                },
                 "predict": {
                     "$ref": "#/definitions/metricModels.Predict"
+                },
+                "query_metric": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/metricModels.MetricQueryCondition"
+                    }
                 },
                 "start": {
                     "type": "integer"
@@ -13618,6 +15299,70 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "metricModels.MetricDataQueryReq": {
+            "type": "object",
+            "properties": {
+                "end": {
+                    "type": "integer"
+                },
+                "expression": {
+                    "type": "string"
+                },
+                "field": {
+                    "type": "string"
+                },
+                "having": {
+                    "type": "string"
+                },
+                "interval": {
+                    "type": "integer"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "predict": {
+                    "$ref": "#/definitions/metricModels.Predict"
+                },
+                "query_metric": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/metricModels.MetricQueryCondition"
+                    }
+                },
+                "start": {
+                    "type": "integer"
+                },
+                "step": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "metricModels.MetricQueryCondition": {
+            "type": "object",
+            "properties": {
+                "dataId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "deviceId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "templateId": {
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -13825,6 +15570,60 @@ const docTemplate = `{
                 },
                 "userName": {
                     "type": "string"
+                }
+            }
+        },
+        "productModels.SysProductLaboratoryVo": {
+            "type": "object",
+            "required": [
+                "material",
+                "number"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "contact": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "dry_high": {
+                    "description": "干燥基高位",
+                    "type": "number"
+                },
+                "heat": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "img": {
+                    "type": "string"
+                },
+                "material": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "string"
+                },
+                "received_low": {
+                    "description": "收到基低位",
+                    "type": "number"
+                },
+                "sulphur": {
+                    "type": "number"
+                },
+                "volatility": {
+                    "type": "number"
+                },
+                "water": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
                 }
             }
         },
@@ -14832,6 +16631,39 @@ const docTemplate = `{
                 },
                 "userName": {
                     "type": "string"
+                }
+            }
+        },
+        "systemModels.SysWorkShiftSettingVO": {
+            "type": "object",
+            "properties": {
+                "begin_time": {
+                    "description": "开始时间",
+                    "type": "integer"
+                },
+                "begin_time_str": {
+                    "description": "开始时间字符串",
+                    "type": "string"
+                },
+                "end_time": {
+                    "description": "结束时间",
+                    "type": "integer"
+                },
+                "end_time_str": {
+                    "description": "结束时间字符串",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "description": "班次名称",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "是否启用班次设置",
+                    "type": "boolean"
                 }
             }
         },

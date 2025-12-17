@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 )
 
 type DeviceInfo struct {
@@ -17,6 +18,10 @@ func NewDeviceInfo(d deviceService.IDeviceService) *DeviceInfo {
 	return &DeviceInfo{
 		iDeviceService: d,
 	}
+}
+
+func (di *DeviceInfo) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterSchema("GET", "/asset/device/list", nil, deviceModels.DeviceListReq{})
 }
 
 func (di *DeviceInfo) PrivateRoutes(router *gin.RouterGroup) {

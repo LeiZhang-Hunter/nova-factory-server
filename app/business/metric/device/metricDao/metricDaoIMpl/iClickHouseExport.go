@@ -10,6 +10,7 @@ import (
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/datasource/clickhouse"
+	"nova-factory-server/app/utils/math"
 	"nova-factory-server/app/utils/time"
 )
 
@@ -87,7 +88,7 @@ func (i *iClickHouseExport) Metric(c *gin.Context, req *metricModels.MetricQuery
 	data.Values = make([]metricModels.MetricQueryValue, len(list))
 	for i := 0; i < len(list); i++ {
 		data.Values[i].Time = list[i].TimeUnix.UnixMilli()
-		data.Values[i].Value = fmt.Sprintf("%f", list[i].Value)
+		data.Values[i].Value = math.RoundFloat(list[i].Value, 2)
 	}
 	return &data, nil
 }

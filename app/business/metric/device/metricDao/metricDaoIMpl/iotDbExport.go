@@ -13,6 +13,7 @@ import (
 	"nova-factory-server/app/business/metric/device/metricModels"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/iotdb"
+	"nova-factory-server/app/utils/math"
 	"nova-factory-server/app/utils/time"
 	"strings"
 )
@@ -129,7 +130,7 @@ func (i *iotDbExport) Metric(c *gin.Context, req *metricModels.MetricQueryReq) (
 		v := statement.GetDouble("value")
 		data.Values = append(data.Values, metricModels.MetricQueryValue{
 			Time:  timestamp,
-			Value: fmt.Sprintf("%f", v),
+			Value: math.RoundFloat(v, 2),
 		})
 
 	}
@@ -318,7 +319,7 @@ func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *deviceMode
 		v := statement.GetDouble("output0")
 		data.Values = append(data.Values, metricModels.MetricQueryValue{
 			Time:  timestamp,
-			Value: fmt.Sprintf("%f", v),
+			Value: math.RoundFloat(v, 2),
 		})
 
 	}
@@ -607,7 +608,7 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 
 			data.Values = append(data.Values, metricModels.MetricQueryValue{
 				Time:  timestamp,
-				Value: fmt.Sprintf("%.2f", v),
+				Value: math.RoundFloat(v, 2),
 			})
 
 		}
@@ -659,7 +660,7 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 				}
 				data.MultiValues[k] = append(data.MultiValues[k], metricModels.MetricQueryValue{
 					Time:  timestamp,
-					Value: fmt.Sprintf("%2.f", v),
+					Value: math.RoundFloat(v, 2),
 				})
 			}
 		}
