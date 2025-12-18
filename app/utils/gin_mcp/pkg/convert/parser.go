@@ -116,7 +116,7 @@ type Parser struct {
 
 	NewTools          []types.Tool
 	Operations        map[string]types.Operation
-	registeredSchemas map[string]types.RegisteredSchemaInfo
+	RegisteredSchemas map[string]types.RegisteredSchemaInfo
 
 	// packages store entities of APIs, definitions, file, package path etc.  and their relations
 	packages *PackagesDefinitions
@@ -256,7 +256,7 @@ func New(options ...func(*Parser)) *Parser {
 		Overrides:          make(map[string]string),
 		NewTools:           make([]types.Tool, 0),
 		Operations:         make(map[string]types.Operation),
-		registeredSchemas:  make(map[string]types.RegisteredSchemaInfo),
+		RegisteredSchemas:  make(map[string]types.RegisteredSchemaInfo),
 	}
 
 	for _, option := range options {
@@ -1263,12 +1263,14 @@ func processRouterOperation(parser *Parser, operation *Operation) error {
 		}
 
 		// Generate schema for the tool's input
-		inputSchema := generateInputSchemaExtension(routeProperties, parser.registeredSchemas)
+		inputSchema := generateInputSchemaExtension(routeProperties, parser.RegisteredSchemas)
 		// Add parameter descriptions to schema if available
 		if len(operation.Parameters) > 0 {
 			for _, paramDesc := range operation.Parameters {
-				if prop, ok := inputSchema.Properties[paramDesc.Name]; ok {
-					prop.Description = paramDesc.Description
+				if _, ok := inputSchema.Properties[paramDesc.Name]; ok {
+					if paramDesc.Description != "" {
+						inputSchema.Properties[paramDesc.Name].Description = paramDesc.Description
+					}
 				}
 			}
 		}

@@ -8,17 +8,17 @@ import (
 )
 
 type DeviceListReq struct {
-	DeviceId         int64   `json:"deviceId,string" form:"deviceId"`
-	DeviceGroupId    int64   `json:"deviceGroupId,string" form:"deviceGroupId"`
-	DeviceClassId    int64   `json:"deviceClassId,string" form:"deviceClassId"`
-	DeviceProtocolId int64   `json:"deviceProtocolId,string" form:"deviceProtocolId"`
-	DeviceBuildingId int64   `json:"deviceBuildingId,string" form:"deviceBuildingId"`
+	DeviceId         int64   `json:"deviceId,string" form:"deviceId" jsonschema:"description=设备id，数据库主键"`
+	DeviceGroupId    int64   `json:"deviceGroupId,string" form:"deviceGroupId" jsonschema:"description=设备分组id"`
+	DeviceClassId    int64   `json:"deviceClassId,string" form:"deviceClassId" jsonschema:"description=设备分类id"`
+	DeviceProtocolId int64   `json:"deviceProtocolId,string" form:"deviceProtocolId" jsonschema:"description=设备模板id,设备的协议解析规范，目前支持modbus协议解析和mqtt"`
+	DeviceBuildingId int64   `json:"deviceBuildingId,string" form:"deviceBuildingId" jsonschema:"description=设备所在的建筑物id"`
 	Start            uint64  `json:"start"`
 	End              uint64  `json:"end"`
-	Name             *string `json:"name" form:"name"`
-	Number           *string `json:"number" form:"number"`
-	Type             *string `json:"type" form:"type"`
-	ControlType      *int    `json:"controlType" form:"controlType"`
+	Name             *string `json:"name" form:"name" jsonschema:"description=设备名字"`
+	Number           *string `json:"number" form:"number" jsonschema:"description=设备标签，用来给设备打上标识"`
+	Type             *string `json:"type" form:"type" jsonschema:"description=设备类型"`
+	ControlType      *int    `json:"controlType" form:"controlType" jsonschema:"description=设备控制类型"`
 	baize.BaseEntityDQL
 }
 

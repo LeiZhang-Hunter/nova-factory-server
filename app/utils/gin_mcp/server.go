@@ -418,6 +418,7 @@ func (m *GinMCP) SetupServer() error {
 		p := convert.New()
 		newTools := make([]types.Tool, 0)
 		operations := make(map[string]types.Operation)
+		p.RegisteredSchemas = m.registeredSchemas
 		err := p.ParseAPI("/home/zhanglei/project/zhanglei/nova-factory-server/app", "main.go", 100)
 		if err != nil {
 			return err
