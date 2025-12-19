@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"nova-factory-server/app/business/ai/aiDataSetDao"
 	"nova-factory-server/app/business/alert/alertDao"
-	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/daemonize/daemonizeService"
@@ -293,99 +293,109 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	alertConfig := pipeline.NewConfig()
 	alertRule, err := i.ruleDao.GetOnlineByGatewayId(c, uint64(gatewayId))
 	if err != nil {
-		zap.L().Error("GetOnlineByGatewayId() failed", zap.Error(err))
-		return nil, errors.New("告警规则不存在")
-	}
-	if alertRule == nil {
-		alertRule = &alertModels.SysAlert{}
-	}
-	sinkInfo, err := i.sinkDao.GetById(c, uint64(alertRule.TemplateID))
-	if err != nil {
-		return nil, errors.New("告警模板不存在")
-	}
-	notifierSourceConfig := source2.Config{
-		Enabled: &scheduleEnabled,
-		Name:    "notifier",
-		Type:    "notifier",
-	}
-	alertConfig.Sources = append(alertConfig.Sources, &notifierSourceConfig)
-	alertConfig.Name = fmt.Sprintf("gateway-notifier-%d", gatewayId)
-	interceptorConfig := interceptor.Config{
-		Enabled: &scheduleEnabled,
-		Name:    "alert",
-		Type:    "logAlert",
-	}
-	var logAlertConfig logalertIntercept.Config
-	var advanced *logalertIntercept.Advanced
-	var ignore []logalertIntercept.DeviceMetric
-	var matcher *logalertIntercept.Matcher
-	var additions map[string]interface{}
-	if alertRule.Advanced != "" {
-		err = json.Unmarshal([]byte(alertRule.Advanced), &advanced)
-		if err != nil {
-			zap.L().Error("json.Unmarshal failed", zap.Error(err))
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			zap.L().Error("GetOnlineByGatewayId() failed", zap.Error(err))
+			return nil, errors.New("读取告警配置失败")
+		} else {
+			alertRule = nil
 		}
-	}
-	if alertRule.Ignore != "" {
-		err = json.Unmarshal([]byte(alertRule.Ignore), &ignore)
-		if err != nil {
-			zap.L().Error("json.Unmarshal failed", zap.Error(err))
-		}
-	}
-	if alertRule.Matcher != "" {
-		err = json.Unmarshal([]byte(alertRule.Matcher), &matcher)
-		if err != nil {
-			zap.L().Error("json.Unmarshal failed", zap.Error(err))
-		}
-	}
-	if alertRule.Additions != "" {
-		err = json.Unmarshal([]byte(alertRule.Additions), &additions)
-		if err != nil {
-			zap.L().Error("json.Unmarshal failed", zap.Error(err))
-		}
-	}
-	logAlertConfig.AlertId = strconv.FormatInt(alertRule.ID, 10)
-	logAlertConfig.Ignore = ignore
-	logAlertConfig.Matcher = *matcher
-	logAlertConfig.Additions = additions
-	logAlertConfig.SendOnlyMatched = true
-	logAlertConfig.Advanced = *advanced
-	logAlertConfig.Advanced.Enable = true
-	pack, err := cfg.Pack(logAlertConfig)
-	if err != nil {
-		zap.L().Error("cfg.Pack() failed", zap.Error(err))
-	}
-	interceptorConfig.Properties = pack
-	alertConfig.Interceptors = append(alertConfig.Interceptors, &interceptorConfig)
 
-	//  告警输出
-	var headers map[string]string = make(map[string]string)
-	if len(sinkInfo.Headers) != 0 {
-		err := json.Unmarshal([]byte(sinkInfo.Headers), &headers)
+	}
+
+	if alertRule != nil {
+		sinkInfo, err := i.sinkDao.GetById(c, uint64(alertRule.TemplateID))
 		if err != nil {
-			zap.L().Error("json.Unmarshal failed", zap.Error(err))
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, errors.New("告警模板不存在")
+			}
+		}
+
+		if sinkInfo != nil {
+			notifierSourceConfig := source2.Config{
+				Enabled: &scheduleEnabled,
+				Name:    "notifier",
+				Type:    "notifier",
+			}
+			alertConfig.Sources = append(alertConfig.Sources, &notifierSourceConfig)
+			alertConfig.Name = fmt.Sprintf("gateway-notifier-%d", gatewayId)
+			interceptorConfig := interceptor.Config{
+				Enabled: &scheduleEnabled,
+				Name:    "alert",
+				Type:    "logAlert",
+			}
+			var logAlertConfig logalertIntercept.Config
+			var advanced *logalertIntercept.Advanced
+			var ignore []logalertIntercept.DeviceMetric
+			var matcher *logalertIntercept.Matcher
+			var additions map[string]interface{}
+			if alertRule.Advanced != "" {
+				err = json.Unmarshal([]byte(alertRule.Advanced), &advanced)
+				if err != nil {
+					zap.L().Error("json.Unmarshal failed", zap.Error(err))
+				}
+			}
+			if alertRule.Ignore != "" {
+				err = json.Unmarshal([]byte(alertRule.Ignore), &ignore)
+				if err != nil {
+					zap.L().Error("json.Unmarshal failed", zap.Error(err))
+				}
+			}
+			if alertRule.Matcher != "" {
+				err = json.Unmarshal([]byte(alertRule.Matcher), &matcher)
+				if err != nil {
+					zap.L().Error("json.Unmarshal failed", zap.Error(err))
+				}
+			}
+			if alertRule.Additions != "" {
+				err = json.Unmarshal([]byte(alertRule.Additions), &additions)
+				if err != nil {
+					zap.L().Error("json.Unmarshal failed", zap.Error(err))
+				}
+			}
+			logAlertConfig.AlertId = strconv.FormatInt(alertRule.ID, 10)
+			logAlertConfig.Ignore = ignore
+			logAlertConfig.Matcher = *matcher
+			logAlertConfig.Additions = additions
+			logAlertConfig.SendOnlyMatched = true
+			logAlertConfig.Advanced = *advanced
+			logAlertConfig.Advanced.Enable = true
+			pack, err := cfg.Pack(logAlertConfig)
+			if err != nil {
+				zap.L().Error("cfg.Pack() failed", zap.Error(err))
+			}
+			interceptorConfig.Properties = pack
+			alertConfig.Interceptors = append(alertConfig.Interceptors, &interceptorConfig)
+
+			//  告警输出
+			var headers map[string]string = make(map[string]string)
+			if len(sinkInfo.Headers) != 0 {
+				err := json.Unmarshal([]byte(sinkInfo.Headers), &headers)
+				if err != nil {
+					zap.L().Error("json.Unmarshal failed", zap.Error(err))
+				}
+			}
+			alertWebhookConfig := alertwebhook.Config{
+				Addr: sinkInfo.Addr,
+				AlertConfig: logalert.AlertConfig{
+					Template:              sinkInfo.Template,
+					Timeout:               time.Duration(sinkInfo.Timeout) * time.Second,
+					Headers:               headers,
+					Method:                sinkInfo.Method,
+					SendLogAlertAtOnce:    true,
+					SendNoDataAlertAtOnce: true,
+				},
+			}
+			alertWebhookConfigPacked, err := cfg.Pack(alertWebhookConfig)
+			alertConfig.Sink = &sink.Config{
+				Enabled:     &scheduleEnabled,
+				Name:        sinkInfo.Name,
+				Type:        "alertWebhook",
+				Parallelism: 1,
+				Properties:  alertWebhookConfigPacked,
+			}
+			piplines.Pipelines = append(piplines.Pipelines, *alertConfig)
 		}
 	}
-	alertWebhookConfig := alertwebhook.Config{
-		Addr: sinkInfo.Addr,
-		AlertConfig: logalert.AlertConfig{
-			Template:              sinkInfo.Template,
-			Timeout:               time.Duration(sinkInfo.Timeout) * time.Second,
-			Headers:               headers,
-			Method:                sinkInfo.Method,
-			SendLogAlertAtOnce:    true,
-			SendNoDataAlertAtOnce: true,
-		},
-	}
-	alertWebhookConfigPacked, err := cfg.Pack(alertWebhookConfig)
-	alertConfig.Sink = &sink.Config{
-		Enabled:     &scheduleEnabled,
-		Name:        sinkInfo.Name,
-		Type:        "alertWebhook",
-		Parallelism: 1,
-		Properties:  alertWebhookConfigPacked,
-	}
-	piplines.Pipelines = append(piplines.Pipelines, *alertConfig)
 
 	// 渲染用电量聚合统计算法
 	//  查询所有电流配置
@@ -442,7 +452,7 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		Name:    "running_statistics",
 		Type:    "running_statistics",
 	}
-	pack, err = cfg.Pack(runningStatisticsConfig)
+	pack, err := cfg.Pack(runningStatisticsConfig)
 	if err != nil {
 		zap.L().Error("cfg.Pack() failed", zap.Error(err))
 		return nil, err
