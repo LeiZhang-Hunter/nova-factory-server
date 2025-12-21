@@ -8,6 +8,7 @@ import (
 	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 )
 
 type DeviceMonitor struct {
@@ -32,6 +33,10 @@ func (d *DeviceMonitor) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1")
 	group.GET("/metric/predict", d.MetricPredict)
 	group.POST("/metric/predict/query", d.MetricPredictQuery)
+}
+
+func (d *DeviceMonitor) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterSchema("POST", "/api/v1/metric/predict/query", nil, metricModels.GatewayMetricDataQueryReq{})
 }
 
 // List 设备监控
@@ -109,7 +114,7 @@ func (d *DeviceMonitor) Predict(c *gin.Context) {
 // @Tags 设备监控/设备监控
 // @Param object body alertModels.AlertLogData true "助理列表参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
-// @Router /api/v1/predict/metric [post]
+// @Router /api/v1/metric/predict [post]
 func (d *DeviceMonitor) MetricPredict(c *gin.Context) {
 	req := new(metricModels.MetricQueryReq)
 	err := c.ShouldBindJSON(req)
@@ -130,9 +135,9 @@ func (d *DeviceMonitor) MetricPredict(c *gin.Context) {
 // @Summary 指标预测查询
 // @Description 指标预测查询
 // @Tags 设备监控/设备监控
-// @Param object body metricModels.GatewayMetricDataQueryReq true "助理列表参数"
+// @Param object body metricModels.GatewayMetricDataQueryReq true "指标预测查询参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
-// @Router /api/v1/predict/metric/query [post]
+// @Router /api/v1/metric/predict/query [post]
 func (d *DeviceMonitor) MetricPredictQuery(c *gin.Context) {
 	req := new(metricModels.GatewayMetricDataQueryReq)
 	err := c.ShouldBindJSON(req)

@@ -3,12 +3,12 @@ package productModels
 import "nova-factory-server/app/baize"
 
 type SysProductLaboratoryDQL struct {
-	Material  string `form:"material" db:"material"`
-	Number    string `form:"number" db:"number"`
-	Contact   string `form:"contact" db:"contact"`
+	Material  string `form:"material" db:"material" jsonschema:"description=物料编码"`
+	Number    string `form:"number" db:"number" jsonschema:"description=物料化验单样号"`
+	Contact   string `form:"contact" db:"contact" jsonschema:"description=采样人"`
 	State     string `form:"state" db:"state"`
-	BeginTime string `form:"beginTime"`
-	EndTime   string `form:"endTime"`
+	BeginTime string `form:"beginTime" jsonschema:"description=开始时间，时间格式是:2006-01-02 15:04:05"`
+	EndTime   string `form:"endTime" jsonschema:"description=结束时间，时间格式是:2006-01-02 15:04:05"`
 	baize.BaseEntityDQL
 }
 

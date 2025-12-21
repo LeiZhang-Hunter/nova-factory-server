@@ -183,6 +183,8 @@ func NewGinEngine(
 		BaseURL:     "http://localhost:8080",
 	})
 	dc.Info.PrivateMcpRoutes(mpcServer) //资产管理---设备模块
+	deviceMonitor.DeviceMonitor.PrivateMcpRoutes(mpcServer)
+	product.Laboratory.PrivateMcpRoutes(mpcServer)
 	// 4. Mount the MCP server endpoint
 	mpcServer.Mount("/mcp") // MCP clients will connect here
 	return r

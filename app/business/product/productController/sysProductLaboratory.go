@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/product/productService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 )
 
 type Laboratory struct {
@@ -32,6 +33,10 @@ func (lc *Laboratory) PublicRoutes(router *gin.RouterGroup) {
 	laboratoryApi := router.Group("/api/v1/product/laboratory")
 	laboratoryApi.GET("/first", lc.LaboratoryFirst)
 	laboratoryApi.GET("/first/list", lc.LaboratoryFirstList)
+}
+
+func (lc *Laboratory) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterSchema("GET", "/api/v1/product/laboratory/first/list", nil, productModels.SysProductLaboratoryDQL{})
 }
 
 // LaboratoryList 化验单列表
@@ -145,14 +150,14 @@ func (lc *Laboratory) LaboratoryUserList(c *gin.Context) {
 }
 
 // LaboratoryFirst 最新的化验单
-// @Summary 最新的化验单
-// @Description 最新的化验单
+// @Summary 最新化验单
+// @Description 最近一份的采样化验单
 // @Tags 化验单管理
 // @Param  object query productModels.SysProductLaboratoryDQL false "查询参数"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]productModels.SysProductLaboratoryVo}} "成功"
-// @Router /product/laboratory/first [get]
+// @Router /api/v1/product/laboratory/first [get]
 func (lc *Laboratory) LaboratoryFirst(c *gin.Context) {
 	list, err := lc.ls.FirstLaboratoryInfo(c)
 	if err != nil {
@@ -170,7 +175,7 @@ func (lc *Laboratory) LaboratoryFirst(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]productModels.SysProductLaboratoryVo}} "成功"
-// @Router /product/laboratory/first/list [get]
+// @Router /api/v1/product/laboratory/first/list [get]
 func (lc *Laboratory) LaboratoryFirstList(c *gin.Context) {
 	dql := new(productModels.SysProductLaboratoryDQL)
 	list, err := lc.ls.FirstLaboratoryList(c, dql)
