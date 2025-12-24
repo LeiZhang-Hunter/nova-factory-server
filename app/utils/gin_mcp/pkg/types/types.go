@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"reflect"
 	"strconv"
 	"strings"
@@ -44,7 +45,8 @@ const (
 
 // MCPMessage represents a standard JSON-RPC 2.0 message used in MCP
 type MCPMessage struct {
-	Jsonrpc string      `json:"jsonrpc"`          // Must be "2.0"
+	Jsonrpc string `json:"jsonrpc"` // Must be "2.0"
+	Context *gin.Context
 	ID      RawMessage  `json:"id,omitempty"`     // Use our RawMessage type here
 	Method  string      `json:"method,omitempty"` // Method name (e.g., "initialize", "tools/list")
 	Params  interface{} `json:"params,omitempty"` // Parameters (object or array)

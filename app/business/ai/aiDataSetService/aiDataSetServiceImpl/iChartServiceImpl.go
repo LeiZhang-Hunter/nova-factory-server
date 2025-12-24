@@ -549,6 +549,9 @@ func (i *IChartServiceImpl) AgentsCompletions(c *gin.Context, req *aiDataSetMode
 	data.SessionId = req.SessionId
 	data.UserId = req.UserId
 	data.SyncDsl = req.SyncDsl
+	data.CustomHeader = map[string]string{
+		"authorization": c.GetHeader("authorization"),
+	}
 	content, err := json.Marshal(data)
 	if err != nil {
 		zap.L().Error("与聊天助手交谈失败", zap.Error(err))

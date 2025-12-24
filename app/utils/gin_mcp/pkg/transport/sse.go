@@ -282,6 +282,7 @@ func (s *SSETransport) HandleMessage(c *gin.Context) {
 
 	// Read and parse message
 	var reqMsg types.MCPMessage
+	reqMsg.Context = c
 	if err := c.ShouldBindJSON(&reqMsg); err != nil {
 		log.Errorf("[SSE] Failed to parse message: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid message format: %v", err)})

@@ -309,11 +309,12 @@ type AgentsCompletionsRequest struct {
 }
 
 type AgentsCompletionsApiRequest struct {
-	Question  string `json:"question"`
-	Stream    bool   `json:"stream"`
-	SessionId string `json:"session_id"`
-	UserId    string `json:"user_id"`
-	SyncDsl   bool   `json:"sync_dsl"`
+	Question     string            `json:"question"`
+	Stream       bool              `json:"stream"`
+	SessionId    string            `json:"session_id"`
+	UserId       string            `json:"user_id"`
+	SyncDsl      bool              `json:"sync_dsl"`
+	CustomHeader map[string]string `json:"custom_header"`
 }
 
 type AgentsCompletionsApiResponse struct {

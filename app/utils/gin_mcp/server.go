@@ -330,7 +330,6 @@ func (m *GinMCP) handleToolCall(msg *types.MCPMessage) *types.MCPMessage {
 			Error: map[string]interface{}{"code": -32602, "message": "Invalid parameters format"},
 		}
 	}
-
 	// Get tool name and arguments from the params
 	toolName, nameOk := reqParams["name"].(string)
 	// The actual arguments passed by the LLM are nested under "arguments"
