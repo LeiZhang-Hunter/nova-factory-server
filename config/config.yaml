@@ -6,7 +6,7 @@ start_time: "2022-08-08"  #此日期用于雪花算法
 cluster: true   #如果集群部署 cache必须使用redis
 task_number: 4
 task_channel_number: 10
-host: http://192.168.2.122:8080
+host: http://192.168.0.113:8080
 log:
   level: trace
 #  filename: /Volumes/disk01/baizelog/baizelog.log  #默认./log
@@ -14,19 +14,19 @@ log:
 #  max_age: 30
 #  max_backups: 7
 clickhouse:
-  link: tcp://192.168.2.100:9999/nova_device_metric?username=default&password=asd1234567@
+  link: tcp://192.168.0.113:9999/nova_device_metric?username=default&password=asd1234567@
 mysql:
-  host: 192.168.2.100
+  host: 192.168.0.113
   user: root
-  password: root
-  dbname: baize
+  password: zhang16621086246
+  dbname: nova
   port: 3306
   max_open_conns: 20
   max_idle_conns: 5
 cache:
   type: redis
   redis:
-    host: 192.168.2.100
+    host: 192.168.0.113
     port: 6380
     password:
     db: 1
@@ -41,8 +41,8 @@ upload_file:
     private_path: ./private/
 dataset:
   api_key: ragflow-JmNmIyYjk0MjY1NzExZjBiNmVlMDI0Mm
-  host: http://192.168.2.100
-  image_url: http://192.168.2.100
+  host: http://192.168.0.113
+  image_url: http://192.168.0.113
 metric:
   datasource: iotdb
 #  datasource: clickhouse
@@ -53,7 +53,7 @@ daemonize:
     - 127.0.0.1:10050
   debug: true
 iotdb:
-  host: 192.168.2.100
+  host: 192.168.0.113
   port: 6667
   username: "root"
   password: "root"

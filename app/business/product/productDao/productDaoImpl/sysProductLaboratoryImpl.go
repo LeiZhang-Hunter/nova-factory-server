@@ -29,6 +29,8 @@ func (dao *sysProductLaboratoryDao) SelectLaboratoryList(ctx *gin.Context, dql *
 	}
 	query := dao.db.Table(dao.table)
 
+	query = query.Where("type = ?", dql.Type)
+
 	if dql.Material != "" {
 		query = query.Where("material = ?", dql.Material)
 	}

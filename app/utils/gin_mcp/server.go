@@ -2,8 +2,12 @@ package gin_mcp
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcp-go/server"
+	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -39,9 +43,12 @@ type GinMCP struct {
 	config            *Config
 	registeredSchemas map[string]types.RegisteredSchemaInfo
 	schemasMu         sync.RWMutex
+	path              string
 	// executeToolFunc holds the function used to execute a tool.
 	// It defaults to defaultExecuteTool but can be overridden for testing.
 	executeToolFunc func(operationID string, parameters map[string]interface{}) (interface{}, error)
+	mcpServer       *server.MCPServer
+	handler         http.Handler
 }
 
 // Config represents the configuration options for GinMCP
@@ -53,6 +60,7 @@ type Config struct {
 	ExcludeOperations []string
 	IncludeTags       []string
 	ExcludeTags       []string
+	Path              string
 }
 
 // New creates a new GinMCP instance
@@ -64,6 +72,14 @@ func New(engine *gin.Engine, config *Config) *GinMCP {
 		}
 	}
 
+	// Create a new MCP server
+	s := server.NewMCPServer(
+		"Calculator Demo",
+		"1.0.0",
+		server.WithToolCapabilities(false),
+		server.WithRecovery(),
+	)
+
 	m := &GinMCP{
 		engine:            engine,
 		name:              config.Name,
@@ -72,6 +88,8 @@ func New(engine *gin.Engine, config *Config) *GinMCP {
 		operations:        make(map[string]types.Operation),
 		config:            config,
 		registeredSchemas: make(map[string]types.RegisteredSchemaInfo),
+		path:              config.Path,
+		mcpServer:         s,
 	}
 
 	m.executeToolFunc = m.defaultExecuteTool // Initialize with the default implementation
@@ -143,73 +161,140 @@ func (m *GinMCP) RegisterSchema(method string, path string, queryType interface{
 }
 
 // Mount sets up the MCP routes on the given path
-func (m *GinMCP) Mount(mountPath string) {
-	if mountPath == "" {
-		mountPath = "/mcp"
-	}
-
-	// 1. Setup tools
-	if err := m.SetupServer(); err != nil {
-		if isDebugMode() {
-			log.Printf("Failed to setup server: %v", err)
-		}
+func (m *GinMCP) Mount(path string, operationsPath string) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		zap.L().Error("read mcp config error", zap.Error(err))
 		return
 	}
 
-	// 2. Create transport and register handlers
-	m.transport = transport.NewSSETransport(mountPath)
-	m.transport.RegisterHandler("initialize", m.handleInitialize)
-	m.transport.RegisterHandler("tools/list", m.handleToolsList)
-	m.transport.RegisterHandler("tools/call", m.handleToolCall)
-
-	// 3. Setup CORS middleware
-	m.engine.Use(func(c *gin.Context) {
-		if isDebugMode() {
-			log.Printf("[Middleware] Processing request: Method=%s, Path=%s, RemoteAddr=%s", c.Request.Method, c.Request.URL.Path, c.Request.RemoteAddr)
-		}
-
-		if strings.HasPrefix(c.Request.URL.Path, mountPath) {
-			if isDebugMode() {
-				log.Printf("[Middleware] Path %s matches mountPath %s. Applying headers.", c.Request.URL.Path, mountPath)
-			}
-			c.Header("Access-Control-Allow-Origin", "*")
-			c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-			c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, X-Connection-ID")
-			c.Header("Access-Control-Expose-Headers", "X-Connection-ID")
-
-			if c.Request.Method == "OPTIONS" {
-				if isDebugMode() {
-					log.Printf("[Middleware] OPTIONS request for %s. Aborting with 204.", c.Request.URL.Path)
-				}
-				c.AbortWithStatus(204)
-				return
-			} else if c.Request.Method == "POST" {
-				if isDebugMode() {
-					log.Printf("[Middleware] POST request for %s. Proceeding to handler.", c.Request.URL.Path)
-				}
-			}
-		} else {
-			if isDebugMode() {
-				log.Printf("[Middleware] Path %s does NOT match mountPath %s. Skipping custom logic.", c.Request.URL.Path, mountPath)
-			}
-		}
-		c.Next() // Ensure processing continues
-		if isDebugMode() {
-			log.Printf("[Middleware] Finished processing request: Method=%s, Path=%s, Status=%d", c.Request.Method, c.Request.URL.Path, c.Writer.Status())
-		}
-	})
-
-	// 4. Setup endpoints
-	if isDebugMode() {
-		log.Printf("[Server Mount DEBUG] Defining GET %s route", mountPath)
+	operationsContent, err := os.ReadFile(operationsPath)
+	if err != nil {
+		zap.L().Error("read mcp config error", zap.Error(err))
+		return
 	}
-	m.engine.GET(mountPath, m.handleMCPConnection)
-	if isDebugMode() {
-		log.Printf("[Server Mount DEBUG] Defining POST %s route", mountPath)
+
+	var tools []mcp.Tool = make([]mcp.Tool, 0)
+	err = json.Unmarshal(content, &tools)
+	if err != nil {
+		panic(err)
 	}
-	m.engine.POST(mountPath, func(c *gin.Context) {
-		m.transport.HandleMessage(c)
+
+	err = json.Unmarshal(operationsContent, &m.operations)
+	if err != nil {
+		panic(err)
+	}
+
+	if len(tools) == 0 {
+		return
+	}
+
+	for _, tool := range tools {
+		m.mcpServer.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+			// Execute the actual Gin endpoint via internal HTTP call
+			//execResult, err := m.executeToolFunc(tool.Name, request.Params) // Use the function field
+			arguments, ok := request.Params.Arguments.(map[string]interface{})
+			if !ok {
+				arguments = make(map[string]interface{})
+			}
+			result, err := m.executeToolFunc(tool.Name, arguments)
+			if err != nil {
+				message := fmt.Sprintf("Error executing tool '%s': %v", tool.Name, err)
+				return mcp.NewToolResultError(message), err
+			}
+			text, err := json.Marshal(result)
+			if err != nil {
+				message := fmt.Sprintf("Error executing tool '%s': %v", tool.Name, err)
+				return mcp.NewToolResultError(message), err
+			}
+			return mcp.NewToolResultText(string(text)), nil
+		})
+	}
+
+	sseServer := server.NewSSEServer(m.mcpServer, server.WithStaticBasePath("/mcp"))
+
+	//httpWrap := &wrappedHTTP{Handler: sseServer}
+	//m.handler = sseServer
+	//m.engine.Any("/mcp", func(c *gin.Context) {
+	//	sseServer.SSEHandler().ServeHTTP(c.Writer, c.Request)
+	//})
+
+	m.engine.Any("/mcp", func(c *gin.Context) {
+		sseServer.SSEHandler().ServeHTTP(c.Writer, c.Request)
+		//httpWrap.ServeHTTP(c.Writer, c.Request)
 	})
+	m.engine.Any("/mcp/message", func(c *gin.Context) {
+
+		sseServer.MessageHandler().ServeHTTP(c.Writer, c.Request)
+		//httpWrap.ServeHTTP(c.Writer, c.Request)
+	})
+	return
+	//if mountPath == "" {
+	//	mountPath = "/mcp"
+	//}
+	//
+	//// 1. Setup tools
+	//if err := m.SetupServer(); err != nil {
+	//	if isDebugMode() {
+	//		log.Printf("Failed to setup server: %v", err)
+	//	}
+	//	return
+	//}
+	//
+	//// 2. Create transport and register handlers
+	//m.transport = transport.NewSSETransport(mountPath)
+	//m.transport.RegisterHandler("initialize", m.handleInitialize)
+	//m.transport.RegisterHandler("tools/list", m.handleToolsList)
+	//m.transport.RegisterHandler("tools/call", m.handleToolCall)
+	//
+	//// 3. Setup CORS middleware
+	//m.engine.Use(func(c *gin.Context) {
+	//	if isDebugMode() {
+	//		log.Printf("[Middleware] Processing request: Method=%s, Path=%s, RemoteAddr=%s", c.Request.Method, c.Request.URL.Path, c.Request.RemoteAddr)
+	//	}
+	//
+	//	if strings.HasPrefix(c.Request.URL.Path, mountPath) {
+	//		if isDebugMode() {
+	//			log.Printf("[Middleware] Path %s matches mountPath %s. Applying headers.", c.Request.URL.Path, mountPath)
+	//		}
+	//		c.Header("Access-Control-Allow-Origin", "*")
+	//		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	//		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, X-Connection-ID")
+	//		c.Header("Access-Control-Expose-Headers", "X-Connection-ID")
+	//
+	//		if c.Request.Method == "OPTIONS" {
+	//			if isDebugMode() {
+	//				log.Printf("[Middleware] OPTIONS request for %s. Aborting with 204.", c.Request.URL.Path)
+	//			}
+	//			c.AbortWithStatus(204)
+	//			return
+	//		} else if c.Request.Method == "POST" {
+	//			if isDebugMode() {
+	//				log.Printf("[Middleware] POST request for %s. Proceeding to handler.", c.Request.URL.Path)
+	//			}
+	//		}
+	//	} else {
+	//		if isDebugMode() {
+	//			log.Printf("[Middleware] Path %s does NOT match mountPath %s. Skipping custom logic.", c.Request.URL.Path, mountPath)
+	//		}
+	//	}
+	//	c.Next() // Ensure processing continues
+	//	if isDebugMode() {
+	//		log.Printf("[Middleware] Finished processing request: Method=%s, Path=%s, Status=%d", c.Request.Method, c.Request.URL.Path, c.Writer.Status())
+	//	}
+	//})
+	//
+	//// 4. Setup endpoints
+	//if isDebugMode() {
+	//	log.Printf("[Server Mount DEBUG] Defining GET %s route", mountPath)
+	//}
+	//m.engine.GET(mountPath, m.handleMCPConnection)
+	//if isDebugMode() {
+	//	log.Printf("[Server Mount DEBUG] Defining POST %s route", mountPath)
+	//}
+	//m.engine.POST(mountPath, func(c *gin.Context) {
+	//	m.transport.HandleMessage(c)
+	//})
 }
 
 // handleMCPConnection handles a new MCP connection request
@@ -418,16 +503,13 @@ func (m *GinMCP) SetupServer() error {
 		newTools := make([]types.Tool, 0)
 		operations := make(map[string]types.Operation)
 		p.RegisteredSchemas = m.registeredSchemas
-		err := p.ParseAPI("/home/zhanglei/project/zhanglei/nova-factory-server/app", "main.go", 100)
+		err := p.ParseAPI(m.path, "main.go", 100)
 		if err != nil {
 			return err
 		}
 		newTools = p.NewTools
 		operations = p.Operations
 		m.schemasMu.RUnlock()
-
-		// Check if tools have changed
-		toolsChanged := m.haveToolsChanged(newTools)
 
 		// Update tools and operations
 		m.tools = newTools
@@ -436,13 +518,17 @@ func (m *GinMCP) SetupServer() error {
 		// Filter tools based on configuration (operation/tag filters)
 		m.filterTools()
 
-		// Notify clients if tools have changed
-		if toolsChanged && m.transport != nil {
-			m.transport.NotifyToolsChanged()
-		}
 	}
 
 	return nil
+}
+
+func (m *GinMCP) GetTools() []types.Tool {
+	return m.tools
+}
+
+func (m *GinMCP) GetOperations() map[string]types.Operation {
+	return m.operations
 }
 
 // haveToolsChanged checks if the tools list has changed

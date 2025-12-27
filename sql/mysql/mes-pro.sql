@@ -346,6 +346,7 @@ CREATE TABLE `sys_work_shift_setting` (
 -- ----------------------------
 CREATE TABLE `sys_product_laboratory` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
+    `type` tinyint(1) NOT NULL COMMENT '0 为物料化验 1为 配料化验',
     `material`  varchar(255)    not null   comment '物料',
     `contact`  varchar(255)    not null   comment '采样人',
     `date`  varchar(255)    not null   comment '采样时间',
@@ -365,5 +366,10 @@ CREATE TABLE `sys_product_laboratory` (
     `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
     `update_time` datetime DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NOT NULL DEFAULT '0',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    KEY `idx_type` (`type`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
+
+
+
+

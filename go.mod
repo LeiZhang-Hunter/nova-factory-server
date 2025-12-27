@@ -3,6 +3,7 @@ module nova-factory-server
 go 1.24.3
 
 require (
+	github.com/Andrew-M-C/go-bytesize v0.0.0-20230105080248-c93b078d58b3
 	github.com/apache/iotdb-client-go v1.3.4
 	github.com/aws/aws-sdk-go-v2 v1.33.0
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.54

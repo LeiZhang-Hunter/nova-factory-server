@@ -21,11 +21,10 @@ import (
 	"nova-factory-server/app/daemonize"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/objectFile/localhostObject"
+	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/logger"
 	"time"
-
-	"nova-factory-server/app/middlewares"
 
 	"github.com/gin-contrib/cors"
 	"github.com/google/wire"
@@ -186,7 +185,8 @@ func NewGinEngine(
 	deviceMonitor.DeviceMonitor.PrivateMcpRoutes(mpcServer)
 	product.Laboratory.PrivateMcpRoutes(mpcServer)
 	// 4. Mount the MCP server endpoint
-	mpcServer.Mount("/mcp") // MCP clients will connect here
+	mpcServer.Mount("/home/zhanglei/project/zhanglei/nova-factory-server/config/mcp.json",
+		"/home/zhanglei/project/zhanglei/nova-factory-server/config/operations.json") // MCP clients will connect here
 	return r
 
 }

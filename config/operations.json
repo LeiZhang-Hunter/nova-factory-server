@@ -1,0 +1,1913 @@
+{
+	"DELETE_ai_dataset_assistant_remove_{assistantIds}": {
+		"Method": "DELETE",
+		"Path": "/ai/dataset/assistant/remove/{assistantIds}",
+		"Tags": [
+			"工业智能体/助理管理"
+		]
+	},
+	"DELETE_ai_dataset_chunk_remove": {
+		"Method": "DELETE",
+		"Path": "/ai/dataset/chunk/remove",
+		"Tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	"DELETE_ai_dataset_remove": {
+		"Method": "DELETE",
+		"Path": "/ai/dataset/remove",
+		"Tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	"DELETE_ai_dataset_remove_document": {
+		"Method": "DELETE",
+		"Path": "/ai/dataset/remove/document",
+		"Tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	"DELETE_ai_dataset_session_agents_delete": {
+		"Method": "DELETE",
+		"Path": "/ai/dataset/session/agents/delete",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"DELETE_ai_dataset_session_remove": {
+		"Method": "DELETE",
+		"Path": "/ai/dataset/session/remove",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"DELETE_ai_exception_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/ai/exception/remove/{ids}",
+		"Tags": [
+			"工业智能体/异常预警"
+		]
+	},
+	"DELETE_ai_prediction_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/ai/prediction/remove/{ids}",
+		"Tags": [
+			"工业智能体/智能预警"
+		]
+	},
+	"DELETE_alert_action_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/alert/action/remove/{ids}",
+		"Tags": [
+			"告警管理/告警处理管理"
+		]
+	},
+	"DELETE_alert_reason_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/alert/reason/remove/{ids}",
+		"Tags": [
+			"告警管理/告警AI推理管理"
+		]
+	},
+	"DELETE_alert_rule_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/alert/rule/remove/{ids}",
+		"Tags": [
+			"告警管理/告警规则管理"
+		]
+	},
+	"DELETE_alert_template_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/alert/template/remove/{ids}",
+		"Tags": [
+			"告警管理/告警模板管理"
+		]
+	},
+	"DELETE_asset_building_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/asset/building/remove/{ids}",
+		"Tags": [
+			"资产管理/建筑物管理"
+		]
+	},
+	"DELETE_asset_deviceGroup_{groupIds}": {
+		"Method": "DELETE",
+		"Path": "/asset/deviceGroup/{groupIds}",
+		"Tags": [
+			"资产管理"
+		]
+	},
+	"DELETE_asset_device_checkPlan_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/asset/device/checkPlan/remove/{ids}",
+		"Tags": [
+			"设备管理/点检保养计划"
+		]
+	},
+	"DELETE_asset_device_check_machinery_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/asset/device/check/machinery/remove/{ids}",
+		"Tags": [
+			"设备管理/点检保养计划/设备清单"
+		]
+	},
+	"DELETE_asset_device_check_subject_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/asset/device/check/subject/remove/{ids}",
+		"Tags": [
+			"设备管理/点检保养计划/点检项目"
+		]
+	},
+	"DELETE_asset_device_subject_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/asset/device/subject/remove/{ids}",
+		"Tags": [
+			"设备管理/删除点检保养项目"
+		]
+	},
+	"DELETE_asset_device_template_data_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/asset/device/template/data/remove/{ids}",
+		"Tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	"DELETE_asset_device_template_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/asset/device/template/remove/{ids}",
+		"Tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	"DELETE_asset_device_{deviceIds}": {
+		"Method": "DELETE",
+		"Path": "/asset/device/{deviceIds}",
+		"Tags": [
+			"资产管理"
+		]
+	},
+	"DELETE_asset_material_{materialIds}": {
+		"Method": "DELETE",
+		"Path": "/asset/material/{materialIds}",
+		"Tags": [
+			"物料管理"
+		]
+	},
+	"DELETE_craft_process_context_remove_{context_ids}": {
+		"Method": "DELETE",
+		"Path": "/craft/process/context/remove/{context_ids}",
+		"Tags": [
+			"工艺管理/工序内容管理"
+		]
+	},
+	"DELETE_craft_process_remove_{process_ids}": {
+		"Method": "DELETE",
+		"Path": "/craft/process/remove/{process_ids}",
+		"Tags": [
+			"工艺管理/工序管理"
+		]
+	},
+	"DELETE_craft_route_process_remove": {
+		"Method": "DELETE",
+		"Path": "/craft/route/process/remove",
+		"Tags": [
+			"工艺管理/工序组成管理"
+		]
+	},
+	"DELETE_craft_route_product_bom_remove_{record_ids}": {
+		"Method": "DELETE",
+		"Path": "/craft/route/product/bom/remove/{record_ids}",
+		"Tags": [
+			"工艺管理/产品制程物料BOM管理"
+		]
+	},
+	"DELETE_craft_route_product_remove_{record_ids}": {
+		"Method": "DELETE",
+		"Path": "/craft/route/product/remove/{record_ids}",
+		"Tags": [
+			"工艺管理/产品制程管理"
+		]
+	},
+	"DELETE_craft_route_remove_{craft_route_id}": {
+		"Method": "DELETE",
+		"Path": "/craft/route/remove/{craft_route_id}",
+		"Tags": [
+			"工艺管理"
+		]
+	},
+	"DELETE_craft_route_schedule_remove": {
+		"Method": "DELETE",
+		"Path": "/craft/route/schedule/remove",
+		"Tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	"DELETE_craft_route_task_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/craft/route/task/remove/{ids}",
+		"Tags": [
+			"工艺管理/生产工单管理"
+		]
+	},
+	"DELETE_craft_route_work_order_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/craft/route/work_order/remove/{ids}",
+		"Tags": [
+			"工艺管理/生产工单管理"
+		]
+	},
+	"DELETE_daemonize_agent_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/daemonize/agent/remove/{ids}",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"DELETE_dashboard_data_remove": {
+		"Method": "DELETE",
+		"Path": "/dashboard/data/remove",
+		"Tags": [
+			"仪表盘/面板管理"
+		]
+	},
+	"DELETE_dashboard_manager_remove": {
+		"Method": "DELETE",
+		"Path": "/dashboard/manager/remove",
+		"Tags": [
+			"仪表盘/仪表盘管理"
+		]
+	},
+	"DELETE_gateway_protocol_remove": {
+		"Method": "DELETE",
+		"Path": "/gateway/protocol/remove",
+		"Tags": [
+			"网关管理/协议管理"
+		]
+	},
+	"DELETE_metric_time_seq_remove": {
+		"Method": "DELETE",
+		"Path": "/metric/time/seq/remove",
+		"Tags": [
+			"设备监控/删除测点映射"
+		]
+	},
+	"DELETE_monitor_job_{jobIds}": {
+		"Method": "DELETE",
+		"Path": "/monitor/job/{jobIds}",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"DELETE_monitor_online_{tokenId}": {
+		"Method": "DELETE",
+		"Path": "/monitor/online/{tokenId}",
+		"Tags": [
+			"在线用户"
+		]
+	},
+	"DELETE_product_laboratory_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/product/laboratory/remove/{ids}",
+		"Tags": [
+			"化验单管理"
+		]
+	},
+	"DELETE_system_Config_{configId}": {
+		"Method": "DELETE",
+		"Path": "/system/Config/{configId}",
+		"Tags": [
+			"配置相关"
+		]
+	},
+	"DELETE_system_consumption_noticeDelete_{ids}": {
+		"Method": "DELETE",
+		"Path": "/system/consumption/noticeDelete/{ids}",
+		"Tags": [
+			"消息通知"
+		]
+	},
+	"DELETE_system_dept_{deptId}": {
+		"Method": "DELETE",
+		"Path": "/system/dept/{deptId}",
+		"Tags": [
+			"部门相关"
+		]
+	},
+	"DELETE_system_dict_data_{dictCodes}": {
+		"Method": "DELETE",
+		"Path": "/system/dict/data/{dictCodes}",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"DELETE_system_dict_type": {
+		"Method": "DELETE",
+		"Path": "/system/dict/type",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"DELETE_system_electric_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/system/electric/remove/{ids}",
+		"Tags": [
+			"系统管理/设备配置"
+		]
+	},
+	"DELETE_system_permission_{permissionId}": {
+		"Method": "DELETE",
+		"Path": "/system/permission/{permissionId}",
+		"Tags": [
+			"系统权限"
+		]
+	},
+	"DELETE_system_post_{postIds}": {
+		"Method": "DELETE",
+		"Path": "/system/post/{postIds}",
+		"Tags": [
+			"岗位相关"
+		]
+	},
+	"DELETE_system_role_{rolesIds}": {
+		"Method": "DELETE",
+		"Path": "/system/role/{rolesIds}",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"DELETE_system_shift_remove_{ids}": {
+		"Method": "DELETE",
+		"Path": "/system/shift/remove/{ids}",
+		"Tags": [
+			"告警管理/班次配置"
+		]
+	},
+	"DELETE_system_user_userIds": {
+		"Method": "DELETE",
+		"Path": "/system/user/:userIds",
+		"Tags": [
+			"系统用户"
+		]
+	},
+	"GET_ai_control_list": {
+		"Method": "GET",
+		"Path": "/ai/control/list",
+		"Tags": [
+			"工业智能体/预测控制"
+		]
+	},
+	"GET_ai_dataset_agents_list": {
+		"Method": "GET",
+		"Path": "/ai/dataset/agents/list",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"GET_ai_dataset_assistant_list": {
+		"Method": "GET",
+		"Path": "/ai/dataset/assistant/list",
+		"Tags": [
+			"工业智能体/助理管理"
+		]
+	},
+	"GET_ai_dataset_chunk_list": {
+		"Method": "GET",
+		"Path": "/ai/dataset/chunk/list",
+		"Tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	"GET_ai_dataset_config": {
+		"Method": "GET",
+		"Path": "/ai/dataset/config",
+		"Tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	"GET_ai_dataset_download_document_{document_id}": {
+		"Method": "GET",
+		"Path": "/ai/dataset/download/document/{document_id}",
+		"Tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	"GET_ai_dataset_info": {
+		"Method": "GET",
+		"Path": "/ai/dataset/info",
+		"Tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	"GET_ai_dataset_list": {
+		"Method": "GET",
+		"Path": "/ai/dataset/list",
+		"Tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	"GET_ai_dataset_list_document": {
+		"Method": "GET",
+		"Path": "/ai/dataset/list/document",
+		"Tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	"GET_ai_dataset_session_agents_list": {
+		"Method": "GET",
+		"Path": "/ai/dataset/session/agents/list",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"GET_ai_dataset_session_list": {
+		"Method": "GET",
+		"Path": "/ai/dataset/session/list",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"GET_ai_exception_list": {
+		"Method": "GET",
+		"Path": "/ai/exception/list",
+		"Tags": [
+			"工业智能体/异常预警"
+		]
+	},
+	"GET_ai_prediction_list": {
+		"Method": "GET",
+		"Path": "/ai/prediction/list",
+		"Tags": [
+			"工业智能体/智能预警"
+		]
+	},
+	"GET_alert_action_list": {
+		"Method": "GET",
+		"Path": "/alert/action/list",
+		"Tags": [
+			"告警管理/告警处理管理"
+		]
+	},
+	"GET_alert_log_list": {
+		"Method": "GET",
+		"Path": "/alert/log/list",
+		"Tags": [
+			"告警管理/告警数据管理"
+		]
+	},
+	"GET_alert_reason_list": {
+		"Method": "GET",
+		"Path": "/alert/reason/list",
+		"Tags": [
+			"告警管理/告警AI推理管理"
+		]
+	},
+	"GET_alert_rule_list": {
+		"Method": "GET",
+		"Path": "/alert/rule/list",
+		"Tags": [
+			"告警管理/告警规则管理"
+		]
+	},
+	"GET_alert_template_list": {
+		"Method": "GET",
+		"Path": "/alert/template/list",
+		"Tags": [
+			"告警管理/告警模板管理"
+		]
+	},
+	"GET_api_gateway_agent_config_v1_info": {
+		"Method": "GET",
+		"Path": "/api/gateway/agent/config/v1/info",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"GET_api_v1_device_metric_tag": {
+		"Method": "GET",
+		"Path": "/api/v1/device/metric/tag",
+		"Tags": [
+			"资产管理"
+		]
+	},
+	"GET_api_v1_product_laboratory_first": {
+		"Method": "GET",
+		"Path": "/api/v1/product/laboratory/first",
+		"Tags": [
+			"化验单管理"
+		]
+	},
+	"GET_api_v1_product_laboratory_first_list": {
+		"Method": "GET",
+		"Path": "/api/v1/product/laboratory/first/list",
+		"Tags": [
+			"化验单管理"
+		]
+	},
+	"GET_asset_building_list": {
+		"Method": "GET",
+		"Path": "/asset/building/list",
+		"Tags": [
+			"资产管理/建筑物管理"
+		]
+	},
+	"GET_asset_deviceGroup_list": {
+		"Method": "GET",
+		"Path": "/asset/deviceGroup/list",
+		"Tags": [
+			"资产管理"
+		]
+	},
+	"GET_asset_device_checkPlan_list": {
+		"Method": "GET",
+		"Path": "/asset/device/checkPlan/list",
+		"Tags": [
+			"设备管理/点检保养计划"
+		]
+	},
+	"GET_asset_device_check_machinery_list": {
+		"Method": "GET",
+		"Path": "/asset/device/check/machinery/list",
+		"Tags": [
+			"设备管理/点检保养计划/设备清单"
+		]
+	},
+	"GET_asset_device_check_subject_list": {
+		"Method": "GET",
+		"Path": "/asset/device/check/subject/list",
+		"Tags": [
+			"设备管理/点检保养计划/点检项目"
+		]
+	},
+	"GET_asset_device_list": {
+		"Method": "GET",
+		"Path": "/asset/device/list",
+		"Tags": [
+			"资产管理"
+		]
+	},
+	"GET_asset_device_subject_list": {
+		"Method": "GET",
+		"Path": "/asset/device/subject/list",
+		"Tags": [
+			"设备管理/点检保养项目列表"
+		]
+	},
+	"GET_asset_device_template_data_list": {
+		"Method": "GET",
+		"Path": "/asset/device/template/data/list",
+		"Tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	"GET_asset_device_template_list": {
+		"Method": "GET",
+		"Path": "/asset/device/template/list",
+		"Tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	"GET_asset_device_template_protocols": {
+		"Method": "GET",
+		"Path": "/asset/device/template/protocols",
+		"Tags": [
+			"资产管理/设备协议管理"
+		]
+	},
+	"GET_asset_material_inbound_list": {
+		"Method": "GET",
+		"Path": "/asset/material/inbound/list",
+		"Tags": [
+			"物料管理"
+		]
+	},
+	"GET_asset_material_list": {
+		"Method": "GET",
+		"Path": "/asset/material/list",
+		"Tags": [
+			"物料管理"
+		]
+	},
+	"GET_asset_material_outbound_list": {
+		"Method": "GET",
+		"Path": "/asset/material/outbound/list",
+		"Tags": [
+			"物料管理"
+		]
+	},
+	"GET_captchaImage": {
+		"Method": "GET",
+		"Path": "/captchaImage",
+		"Tags": [
+			"登录"
+		]
+	},
+	"GET_craft_process_context_list": {
+		"Method": "GET",
+		"Path": "/craft/process/context/list",
+		"Tags": [
+			"工艺管理/工序内容管理"
+		]
+	},
+	"GET_craft_process_list": {
+		"Method": "GET",
+		"Path": "/craft/process/list",
+		"Tags": [
+			"工艺管理/工序管理"
+		]
+	},
+	"GET_craft_route_detail": {
+		"Method": "GET",
+		"Path": "/craft/route/detail",
+		"Tags": [
+			"工艺管理"
+		]
+	},
+	"GET_craft_route_list": {
+		"Method": "GET",
+		"Path": "/craft/route/list",
+		"Tags": [
+			"工艺管理"
+		]
+	},
+	"GET_craft_route_process_list": {
+		"Method": "GET",
+		"Path": "/craft/route/process/list",
+		"Tags": [
+			"工艺管理/工序组成管理"
+		]
+	},
+	"GET_craft_route_product_bom_list": {
+		"Method": "GET",
+		"Path": "/craft/route/product/bom/list",
+		"Tags": [
+			"工艺管理/产品制程物料BOM物料BOM管理"
+		]
+	},
+	"GET_craft_route_product_list": {
+		"Method": "GET",
+		"Path": "/craft/route/product/list",
+		"Tags": [
+			"工艺管理/产品制程管理"
+		]
+	},
+	"GET_craft_route_schedule_detail": {
+		"Method": "GET",
+		"Path": "/craft/route/schedule/detail",
+		"Tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	"GET_craft_route_schedule_list": {
+		"Method": "GET",
+		"Path": "/craft/route/schedule/list",
+		"Tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	"GET_craft_route_schedule_month_list": {
+		"Method": "GET",
+		"Path": "/craft/route/schedule/month/list",
+		"Tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	"GET_craft_route_task_list": {
+		"Method": "GET",
+		"Path": "/craft/route/task/list",
+		"Tags": [
+			"工艺管理/生产任务管理"
+		]
+	},
+	"GET_craft_route_work_order_list": {
+		"Method": "GET",
+		"Path": "/craft/route/work_order/list",
+		"Tags": [
+			"工艺管理/生产工单管理"
+		]
+	},
+	"GET_daemonize_agent_info": {
+		"Method": "GET",
+		"Path": "/daemonize/agent/info",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"GET_daemonize_agent_list": {
+		"Method": "GET",
+		"Path": "/daemonize/agent/list",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"GET_dashboard_data_info": {
+		"Method": "GET",
+		"Path": "/dashboard/data/info",
+		"Tags": [
+			"仪表盘/面板管理"
+		]
+	},
+	"GET_dashboard_manager_list": {
+		"Method": "GET",
+		"Path": "/dashboard/manager/list",
+		"Tags": [
+			"仪表盘/仪表盘管理"
+		]
+	},
+	"GET_device_monitor_control_log_list": {
+		"Method": "GET",
+		"Path": "/device/monitor/control/log/list",
+		"Tags": [
+			"设备接入/控制记录"
+		]
+	},
+	"GET_device_monitor_data_dev_list": {
+		"Method": "GET",
+		"Path": "/device/monitor/data/dev/list",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"GET_device_monitor_list": {
+		"Method": "GET",
+		"Path": "/device/monitor/list",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"GET_file_downloadPrivateFile": {
+		"Method": "GET",
+		"Path": "/file/downloadPrivateFile",
+		"Tags": [
+			"租户上传文件"
+		]
+	},
+	"GET_gateway_agent_config_generate": {
+		"Method": "GET",
+		"Path": "/gateway/agent/config/generate",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"GET_gateway_agent_config_list": {
+		"Method": "GET",
+		"Path": "/gateway/agent/config/list",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"GET_gateway_protocol_list": {
+		"Method": "GET",
+		"Path": "/gateway/protocol/list",
+		"Tags": [
+			"网关管理/协议管理"
+		]
+	},
+	"GET_getInfo": {
+		"Method": "GET",
+		"Path": "/getInfo",
+		"Tags": [
+			"登录"
+		]
+	},
+	"GET_metric_time_seq_list": {
+		"Method": "GET",
+		"Path": "/metric/time/seq/list",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"GET_monitor_job_funList": {
+		"Method": "GET",
+		"Path": "/monitor/job/funList",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"GET_monitor_job_idAndNameAll": {
+		"Method": "GET",
+		"Path": "/monitor/job/idAndNameAll",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"GET_monitor_job_list": {
+		"Method": "GET",
+		"Path": "/monitor/job/list",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"GET_monitor_job_log_list": {
+		"Method": "GET",
+		"Path": "/monitor/job/log/list",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"GET_monitor_job_log_{jobLogId}": {
+		"Method": "GET",
+		"Path": "/monitor/job/log/{jobLogId}",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"GET_monitor_job_{jobId}": {
+		"Method": "GET",
+		"Path": "/monitor/job/{jobId}",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"GET_monitor_online_list": {
+		"Method": "GET",
+		"Path": "/monitor/online/list",
+		"Tags": [
+			"在线用户"
+		]
+	},
+	"GET_product_laboratory_info_{id}": {
+		"Method": "GET",
+		"Path": "/product/laboratory/info/{id}",
+		"Tags": [
+			"化验单管理"
+		]
+	},
+	"GET_product_laboratory_list": {
+		"Method": "GET",
+		"Path": "/product/laboratory/list",
+		"Tags": [
+			"化验单管理"
+		]
+	},
+	"GET_product_laboratory_our_list": {
+		"Method": "GET",
+		"Path": "/product/laboratory/our/list",
+		"Tags": [
+			"化验单管理"
+		]
+	},
+	"GET_system_config_list": {
+		"Method": "GET",
+		"Path": "/system/config/list",
+		"Tags": [
+			"配置相关"
+		]
+	},
+	"GET_system_config_{configId}": {
+		"Method": "GET",
+		"Path": "/system/config/{configId}",
+		"Tags": [
+			"配置相关"
+		]
+	},
+	"GET_system_consumption_newMessage": {
+		"Method": "GET",
+		"Path": "/system/consumption/newMessage",
+		"Tags": [
+			"消息通知"
+		]
+	},
+	"GET_system_consumption_userNoticeList": {
+		"Method": "GET",
+		"Path": "/system/consumption/userNoticeList",
+		"Tags": [
+			"消息通知"
+		]
+	},
+	"GET_system_consumption_{id}": {
+		"Method": "GET",
+		"Path": "/system/consumption/{id}",
+		"Tags": [
+			"消息通知"
+		]
+	},
+	"GET_system_dept": {
+		"Method": "GET",
+		"Path": "/system/dept",
+		"Tags": [
+			"部门相关"
+		]
+	},
+	"GET_system_dept_roleDeptTreeSelect_{roleId}": {
+		"Method": "GET",
+		"Path": "/system/dept/roleDeptTreeSelect/{roleId}",
+		"Tags": [
+			"部门相关"
+		]
+	},
+	"GET_system_dept_{deptId}": {
+		"Method": "GET",
+		"Path": "/system/dept/{deptId}",
+		"Tags": [
+			"部门相关"
+		]
+	},
+	"GET_system_dict_data_list": {
+		"Method": "GET",
+		"Path": "/system/dict/data/list",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"GET_system_dict_data_type_{dictType}": {
+		"Method": "GET",
+		"Path": "/system/dict/data/type/{dictType}",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"GET_system_dict_data_{dictCode}": {
+		"Method": "GET",
+		"Path": "/system/dict/data/{dictCode}",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"GET_system_dict_type_list": {
+		"Method": "GET",
+		"Path": "/system/dict/type/list",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"GET_system_dict_type_{dictCode}": {
+		"Method": "GET",
+		"Path": "/system/dict/type/{dictCode}",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"GET_system_electric_list": {
+		"Method": "GET",
+		"Path": "/system/electric/list",
+		"Tags": [
+			"系统管理/设备配置"
+		]
+	},
+	"GET_system_notice_list": {
+		"Method": "GET",
+		"Path": "/system/notice/list",
+		"Tags": [
+			"消息通知"
+		]
+	},
+	"GET_system_notice_{id}": {
+		"Method": "GET",
+		"Path": "/system/notice/{id}",
+		"Tags": [
+			"消息通知"
+		]
+	},
+	"GET_system_permission_byRoleIds_{roleIds}": {
+		"Method": "GET",
+		"Path": "/system/permission/byRoleIds/{roleIds}",
+		"Tags": [
+			"系统权限"
+		]
+	},
+	"GET_system_permission_list": {
+		"Method": "GET",
+		"Path": "/system/permission/list",
+		"Tags": [
+			"系统权限"
+		]
+	},
+	"GET_system_permission_{permissionId}": {
+		"Method": "GET",
+		"Path": "/system/permission/{permissionId}",
+		"Tags": [
+			"系统权限"
+		]
+	},
+	"GET_system_post_list": {
+		"Method": "GET",
+		"Path": "/system/post/list",
+		"Tags": [
+			"岗位相关"
+		]
+	},
+	"GET_system_post_{postId}": {
+		"Method": "GET",
+		"Path": "/system/post/{postId}",
+		"Tags": [
+			"岗位相关"
+		]
+	},
+	"GET_system_role_changeStatus": {
+		"Method": "GET",
+		"Path": "/system/role/changeStatus",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"GET_system_role_list": {
+		"Method": "GET",
+		"Path": "/system/role/list",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"GET_system_role_{roleId}": {
+		"Method": "GET",
+		"Path": "/system/role/{roleId}",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"GET_system_selectBox_dept": {
+		"Method": "GET",
+		"Path": "/system/selectBox/dept",
+		"Tags": [
+			"下拉框选项"
+		]
+	},
+	"GET_system_selectBox_permission": {
+		"Method": "GET",
+		"Path": "/system/selectBox/permission",
+		"Tags": [
+			"下拉框选项"
+		]
+	},
+	"GET_system_shift_list": {
+		"Method": "GET",
+		"Path": "/system/shift/list",
+		"Tags": [
+			"系统管理/班次配置"
+		]
+	},
+	"GET_system_sse_{token}": {
+		"Method": "GET",
+		"Path": "/system/sse/{token}",
+		"Tags": [
+			"建立SSE链接"
+		]
+	},
+	"GET_system_user_": {
+		"Method": "GET",
+		"Path": "/system/user/",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"GET_system_user_authRole_{userId}": {
+		"Method": "GET",
+		"Path": "/system/user/authRole/{userId}",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"GET_system_user_dataScope_{userId}": {
+		"Method": "GET",
+		"Path": "/system/user/dataScope/{userId}",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"GET_system_user_list": {
+		"Method": "GET",
+		"Path": "/system/user/list",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"GET_system_user_profile": {
+		"Method": "GET",
+		"Path": "/system/user/profile",
+		"Tags": [
+			"个人资料"
+		]
+	},
+	"GET_system_user_{userId}": {
+		"Method": "GET",
+		"Path": "/system/user/{userId}",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"POST_ai_dataset_assistant_create": {
+		"Method": "POST",
+		"Path": "/ai/dataset/assistant/create",
+		"Tags": [
+			"工业智能体/助理管理"
+		]
+	},
+	"POST_ai_dataset_chunk_add": {
+		"Method": "POST",
+		"Path": "/ai/dataset/chunk/add",
+		"Tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	"POST_ai_dataset_chunk_retrieval": {
+		"Method": "POST",
+		"Path": "/ai/dataset/chunk/retrieval",
+		"Tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	"POST_ai_dataset_create": {
+		"Method": "POST",
+		"Path": "/ai/dataset/create",
+		"Tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	"POST_ai_dataset_session_agents_completions": {
+		"Method": "POST",
+		"Path": "/ai/dataset/session/agents/completions",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"POST_ai_dataset_session_agents_create": {
+		"Method": "POST",
+		"Path": "/ai/dataset/session/agents/create",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"POST_ai_dataset_session_ask": {
+		"Method": "POST",
+		"Path": "/ai/dataset/session/ask",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"POST_ai_dataset_session_charts_completions": {
+		"Method": "POST",
+		"Path": "/ai/dataset/session/charts/completions",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"POST_ai_dataset_session_conversation_related_questions": {
+		"Method": "POST",
+		"Path": "/ai/dataset/session/conversation/related_questions",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"POST_ai_dataset_session_create": {
+		"Method": "POST",
+		"Path": "/ai/dataset/session/create",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"POST_ai_dataset_session_update": {
+		"Method": "POST",
+		"Path": "/ai/dataset/session/update",
+		"Tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	"POST_ai_dataset_start_document": {
+		"Method": "POST",
+		"Path": "/ai/dataset/start/document",
+		"Tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	"POST_ai_dataset_stop_document": {
+		"Method": "POST",
+		"Path": "/ai/dataset/stop/document",
+		"Tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	"POST_ai_dataset_upload_document_{datasetId}": {
+		"Method": "POST",
+		"Path": "/ai/dataset/upload/document/{datasetId}",
+		"Tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	"POST_ai_exception_set": {
+		"Method": "POST",
+		"Path": "/ai/exception/set",
+		"Tags": [
+			"工业智能体/异常预警"
+		]
+	},
+	"POST_ai_prediction_set": {
+		"Method": "POST",
+		"Path": "/ai/prediction/set",
+		"Tags": [
+			"工业智能体/智能预警"
+		]
+	},
+	"POST_alert_action_set": {
+		"Method": "POST",
+		"Path": "/alert/action/set",
+		"Tags": [
+			"告警管理/告警处理管理"
+		]
+	},
+	"POST_alert_reason_set": {
+		"Method": "POST",
+		"Path": "/alert/reason/set",
+		"Tags": [
+			"告警管理/告警AI推理管理"
+		]
+	},
+	"POST_alert_rule_change": {
+		"Method": "POST",
+		"Path": "/alert/rule/change",
+		"Tags": [
+			"告警管理/告警规则管理"
+		]
+	},
+	"POST_alert_rule_set": {
+		"Method": "POST",
+		"Path": "/alert/rule/set",
+		"Tags": [
+			"告警管理/告警规则管理"
+		]
+	},
+	"POST_alert_template_set": {
+		"Method": "POST",
+		"Path": "/alert/template/set",
+		"Tags": [
+			"告警管理/告警模板管理"
+		]
+	},
+	"POST_api_alert_log_v1_export": {
+		"Method": "POST",
+		"Path": "/api/alert/log/v1/export",
+		"Tags": [
+			"告警管理/告警数据管理"
+		]
+	},
+	"POST_api_gateway_agent_config_v1_bind": {
+		"Method": "POST",
+		"Path": "/api/gateway/agent/config/v1/bind",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"POST_api_product_task_v1_schedule": {
+		"Method": "POST",
+		"Path": "/api/product/task/v1/schedule",
+		"Tags": [
+			"工艺管理/生产任务管理"
+		]
+	},
+	"POST_api_v1_metric_predict": {
+		"Method": "POST",
+		"Path": "/api/v1/metric/predict",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"POST_api_v1_metric_predict_query": {
+		"Method": "POST",
+		"Path": "/api/v1/metric/predict/query",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"POST_asset_building_set": {
+		"Method": "POST",
+		"Path": "/asset/building/set",
+		"Tags": [
+			"资产管理/建筑物管理"
+		]
+	},
+	"POST_asset_deviceGroup_set": {
+		"Method": "POST",
+		"Path": "/asset/deviceGroup/set",
+		"Tags": [
+			"资产管理"
+		]
+	},
+	"POST_asset_device_checkPlan_set": {
+		"Method": "POST",
+		"Path": "/asset/device/checkPlan/set",
+		"Tags": [
+			"设备管理/点检保养计划"
+		]
+	},
+	"POST_asset_device_check_machinery_set": {
+		"Method": "POST",
+		"Path": "/asset/device/check/machinery/set",
+		"Tags": [
+			"设备管理/点检保养计划/设备清单"
+		]
+	},
+	"POST_asset_device_check_subject_set": {
+		"Method": "POST",
+		"Path": "/asset/device/check/subject/set",
+		"Tags": [
+			"设备管理/点检保养计划/点检项目"
+		]
+	},
+	"POST_asset_device_set": {
+		"Method": "POST",
+		"Path": "/asset/device/set",
+		"Tags": [
+			"资产管理"
+		]
+	},
+	"POST_asset_device_subject_set": {
+		"Method": "POST",
+		"Path": "/asset/device/subject/set",
+		"Tags": [
+			"设备管理/设置点检保养项目"
+		]
+	},
+	"POST_asset_device_template_data_set": {
+		"Method": "POST",
+		"Path": "/asset/device/template/data/set",
+		"Tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	"POST_asset_device_template_set": {
+		"Method": "POST",
+		"Path": "/asset/device/template/set",
+		"Tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	"POST_asset_material_inbound_add": {
+		"Method": "POST",
+		"Path": "/asset/material/inbound/add",
+		"Tags": [
+			"物料管理"
+		]
+	},
+	"POST_asset_material_outbound_add": {
+		"Method": "POST",
+		"Path": "/asset/material/outbound/add",
+		"Tags": [
+			"物料管理"
+		]
+	},
+	"POST_asset_material_set": {
+		"Method": "POST",
+		"Path": "/asset/material/set",
+		"Tags": [
+			"物料管理"
+		]
+	},
+	"POST_craft_process_context_set": {
+		"Method": "POST",
+		"Path": "/craft/process/context/set",
+		"Tags": [
+			"工艺管理/工序内容管理"
+		]
+	},
+	"POST_craft_process_set": {
+		"Method": "POST",
+		"Path": "/craft/process/set",
+		"Tags": [
+			"工艺管理/工序管理"
+		]
+	},
+	"POST_craft_route_config_save": {
+		"Method": "POST",
+		"Path": "/craft/route/config/save",
+		"Tags": [
+			"工艺管理"
+		]
+	},
+	"POST_craft_route_process_set": {
+		"Method": "POST",
+		"Path": "/craft/route/process/set",
+		"Tags": [
+			"工艺管理/工序组成管理"
+		]
+	},
+	"POST_craft_route_product_bom_set": {
+		"Method": "POST",
+		"Path": "/craft/route/product/bom/set",
+		"Tags": [
+			"工艺管理/产品制程物料BOM管理"
+		]
+	},
+	"POST_craft_route_product_set": {
+		"Method": "POST",
+		"Path": "/craft/route/product/set",
+		"Tags": [
+			"工艺管理/产品制程管理"
+		]
+	},
+	"POST_craft_route_schedule_set": {
+		"Method": "POST",
+		"Path": "/craft/route/schedule/set",
+		"Tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	"POST_craft_route_set": {
+		"Method": "POST",
+		"Path": "/craft/route/set",
+		"Tags": [
+			"工艺管理"
+		]
+	},
+	"POST_craft_route_task_set": {
+		"Method": "POST",
+		"Path": "/craft/route/task/set",
+		"Tags": [
+			"工艺管理/生产任务管理"
+		]
+	},
+	"POST_craft_route_work_order_set": {
+		"Method": "POST",
+		"Path": "/craft/route/work_order/set",
+		"Tags": [
+			"工艺管理/生产工单管理"
+		]
+	},
+	"POST_daemonize_agent_process_start": {
+		"Method": "POST",
+		"Path": "/daemonize/agent/process/start",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"POST_daemonize_agent_process_stop": {
+		"Method": "POST",
+		"Path": "/daemonize/agent/process/stop",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"POST_daemonize_agent_set": {
+		"Method": "POST",
+		"Path": "/daemonize/agent/set",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"POST_dashboard_data_set": {
+		"Method": "POST",
+		"Path": "/dashboard/data/set",
+		"Tags": [
+			"仪表盘/面板管理"
+		]
+	},
+	"POST_dashboard_manager_metric_query": {
+		"Method": "POST",
+		"Path": "/dashboard/manager/metric/query",
+		"Tags": [
+			"仪表盘/仪表盘管理"
+		]
+	},
+	"POST_dashboard_manager_set": {
+		"Method": "POST",
+		"Path": "/dashboard/manager/set",
+		"Tags": [
+			"仪表盘/仪表盘管理"
+		]
+	},
+	"POST_device_monitor_data_export": {
+		"Method": "POST",
+		"Path": "/device/monitor/data/export",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"POST_device_monitor_data_list": {
+		"Method": "POST",
+		"Path": "/device/monitor/data/list",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"POST_device_monitor_metric": {
+		"Method": "POST",
+		"Path": "/device/monitor/metric",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"POST_device_monitor_predict": {
+		"Method": "POST",
+		"Path": "/device/monitor/predict",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"POST_device_monitor_utilization_stat": {
+		"Method": "POST",
+		"Path": "/device/monitor/utilization/stat",
+		"Tags": [
+			"设备监控/设备监控"
+		]
+	},
+	"POST_file_uploadFileOriginalName": {
+		"Method": "POST",
+		"Path": "/file/uploadFileOriginalName",
+		"Tags": [
+			"租户上传文件"
+		]
+	},
+	"POST_file_uploadFileRandomName": {
+		"Method": "POST",
+		"Path": "/file/uploadFileRandomName",
+		"Tags": [
+			"租户上传文件"
+		]
+	},
+	"POST_file_uploadFiles": {
+		"Method": "POST",
+		"Path": "/file/uploadFiles",
+		"Tags": [
+			"租户上传文件"
+		]
+	},
+	"POST_file_uploadPrivateFileOriginalName": {
+		"Method": "POST",
+		"Path": "/file/uploadPrivateFileOriginalName",
+		"Tags": [
+			"租户上传文件"
+		]
+	},
+	"POST_gateway_agent_config_set": {
+		"Method": "POST",
+		"Path": "/gateway/agent/config/set",
+		"Tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	"POST_gateway_protocol_set": {
+		"Method": "POST",
+		"Path": "/gateway/protocol/set",
+		"Tags": [
+			"网关管理/协议管理"
+		]
+	},
+	"POST_login": {
+		"Method": "POST",
+		"Path": "/login",
+		"Tags": [
+			"登录"
+		]
+	},
+	"POST_logout": {
+		"Method": "POST",
+		"Path": "/logout",
+		"Tags": [
+			"登录"
+		]
+	},
+	"POST_metric_time_seq_set": {
+		"Method": "POST",
+		"Path": "/metric/time/seq/set",
+		"Tags": [
+			"设备监控/设置测点映射"
+		]
+	},
+	"POST_monitor_job": {
+		"Method": "POST",
+		"Path": "/monitor/job",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"POST_product_laboratory_set": {
+		"Method": "POST",
+		"Path": "/product/laboratory/set",
+		"Tags": [
+			"保存化验单"
+		]
+	},
+	"POST_register": {
+		"Method": "POST",
+		"Path": "/register",
+		"Tags": [
+			"登录"
+		]
+	},
+	"POST_system_Config": {
+		"Method": "POST",
+		"Path": "/system/Config",
+		"Tags": [
+			"配置相关"
+		]
+	},
+	"POST_system_config_export": {
+		"Method": "POST",
+		"Path": "/system/config/export",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"POST_system_dept": {
+		"Method": "POST",
+		"Path": "/system/dept",
+		"Tags": [
+			"部门相关"
+		]
+	},
+	"POST_system_dict_data": {
+		"Method": "POST",
+		"Path": "/system/dict/data",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"POST_system_dict_type": {
+		"Method": "POST",
+		"Path": "/system/dict/type",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"POST_system_electric_set": {
+		"Method": "POST",
+		"Path": "/system/electric/set",
+		"Tags": [
+			"系统管理/设备配置"
+		]
+	},
+	"POST_system_notice": {
+		"Method": "POST",
+		"Path": "/system/notice",
+		"Tags": [
+			"消息通知"
+		]
+	},
+	"POST_system_permission": {
+		"Method": "POST",
+		"Path": "/system/permission",
+		"Tags": [
+			"系统权限"
+		]
+	},
+	"POST_system_post": {
+		"Method": "POST",
+		"Path": "/system/post",
+		"Tags": [
+			"岗位相关"
+		]
+	},
+	"POST_system_post_export": {
+		"Method": "POST",
+		"Path": "/system/post/export",
+		"Tags": [
+			"岗位相关"
+		]
+	},
+	"POST_system_role": {
+		"Method": "POST",
+		"Path": "/system/role",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"POST_system_shift_set": {
+		"Method": "POST",
+		"Path": "/system/shift/set",
+		"Tags": [
+			"系统管理/班次配置"
+		]
+	},
+	"POST_system_user": {
+		"Method": "POST",
+		"Path": "/system/user",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"POST_system_user_export": {
+		"Method": "POST",
+		"Path": "/system/user/export",
+		"Tags": [
+			"系统用户"
+		]
+	},
+	"POST_system_user_importData": {
+		"Method": "POST",
+		"Path": "/system/user/importData",
+		"Tags": [
+			"系统用户"
+		]
+	},
+	"POST_system_user_input": {
+		"Method": "POST",
+		"Path": "/system/user/input",
+		"Tags": [
+			"系统用户"
+		]
+	},
+	"POST_system_user_profile_avatar": {
+		"Method": "POST",
+		"Path": "/system/user/profile/avatar",
+		"Tags": [
+			"个人资料"
+		]
+	},
+	"PUT_ai_dataset_assistant_update": {
+		"Method": "PUT",
+		"Path": "/ai/dataset/assistant/update",
+		"Tags": [
+			"工业智能体/助理管理"
+		]
+	},
+	"PUT_ai_dataset_chunk_update": {
+		"Method": "PUT",
+		"Path": "/ai/dataset/chunk/update",
+		"Tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	"PUT_ai_dataset_update_document_{document_id}": {
+		"Method": "PUT",
+		"Path": "/ai/dataset/update/document/{document_id}",
+		"Tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	"PUT_ai_dataset_update_{dataset_id}": {
+		"Method": "PUT",
+		"Path": "/ai/dataset/update/{dataset_id}",
+		"Tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	"PUT_monitor_job": {
+		"Method": "PUT",
+		"Path": "/monitor/job",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"PUT_monitor_job_changeStatus": {
+		"Method": "PUT",
+		"Path": "/monitor/job/changeStatus",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"PUT_monitor_job_run": {
+		"Method": "PUT",
+		"Path": "/monitor/job/run",
+		"Tags": [
+			"定时任务"
+		]
+	},
+	"PUT_system_Config": {
+		"Method": "PUT",
+		"Path": "/system/Config",
+		"Tags": [
+			"配置相关"
+		]
+	},
+	"PUT_system_consumption_noticeReadAll": {
+		"Method": "PUT",
+		"Path": "/system/consumption/noticeReadAll",
+		"Tags": [
+			"消息通知"
+		]
+	},
+	"PUT_system_consumption_noticeRead_{id}": {
+		"Method": "PUT",
+		"Path": "/system/consumption/noticeRead/{id}",
+		"Tags": [
+			"消息通知"
+		]
+	},
+	"PUT_system_dept": {
+		"Method": "PUT",
+		"Path": "/system/dept",
+		"Tags": [
+			"部门相关"
+		]
+	},
+	"PUT_system_dict_data": {
+		"Method": "PUT",
+		"Path": "/system/dict/data",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"PUT_system_dict_type": {
+		"Method": "PUT",
+		"Path": "/system/dict/type",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"PUT_system_dict_type_optionSelect": {
+		"Method": "PUT",
+		"Path": "/system/dict/type/optionSelect",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"PUT_system_dict_type_refreshCache": {
+		"Method": "PUT",
+		"Path": "/system/dict/type/refreshCache",
+		"Tags": [
+			"字典相关"
+		]
+	},
+	"PUT_system_permission": {
+		"Method": "PUT",
+		"Path": "/system/permission",
+		"Tags": [
+			"系统权限"
+		]
+	},
+	"PUT_system_post": {
+		"Method": "PUT",
+		"Path": "/system/post",
+		"Tags": [
+			"岗位相关"
+		]
+	},
+	"PUT_system_role": {
+		"Method": "PUT",
+		"Path": "/system/role",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"PUT_system_role_authUser_cancel": {
+		"Method": "PUT",
+		"Path": "/system/role/authUser/cancel",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"PUT_system_role_authUser_cancelAll": {
+		"Method": "PUT",
+		"Path": "/system/role/authUser/cancelAll",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"PUT_system_role_authUser_selectAll": {
+		"Method": "PUT",
+		"Path": "/system/role/authUser/selectAll",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"PUT_system_role_authUser_unallocatedList": {
+		"Method": "PUT",
+		"Path": "/system/role/authUser/unallocatedList",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"PUT_system_role_changeStatus": {
+		"Method": "PUT",
+		"Path": "/system/role/changeStatus",
+		"Tags": [
+			"角色相关"
+		]
+	},
+	"PUT_system_user": {
+		"Method": "PUT",
+		"Path": "/system/user",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"PUT_system_user_authRole": {
+		"Method": "PUT",
+		"Path": "/system/user/authRole",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"PUT_system_user_changeStatus": {
+		"Method": "PUT",
+		"Path": "/system/user/changeStatus",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"PUT_system_user_dataScope": {
+		"Method": "PUT",
+		"Path": "/system/user/dataScope",
+		"Tags": [
+			"用户相关"
+		]
+	},
+	"PUT_system_user_profile": {
+		"Method": "PUT",
+		"Path": "/system/user/profile",
+		"Tags": [
+			"个人资料"
+		]
+	},
+	"PUT_system_user_profile_updatePwd": {
+		"Method": "PUT",
+		"Path": "/system/user/profile/updatePwd",
+		"Tags": [
+			"个人资料"
+		]
+	},
+	"PUT_system_user_resetPwd": {
+		"Method": "PUT",
+		"Path": "/system/user/resetPwd",
+		"Tags": [
+			"用户相关"
+		]
+	}
+}

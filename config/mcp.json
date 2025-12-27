@@ -1,0 +1,2781 @@
+[
+	{
+		"name": "POST_ai_dataset_assistant_create",
+		"description": "创建助理\n\n创建助理",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/助理管理"
+		]
+	},
+	{
+		"name": "PUT_ai_dataset_assistant_update",
+		"description": "更新助理\n\n更新助理",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/助理管理"
+		]
+	},
+	{
+		"name": "DELETE_ai_dataset_assistant_remove_{assistantIds}",
+		"description": "删除助理\n\n删除助理",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/助理管理"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_assistant_list",
+		"description": "读取助理列表\n\n读取助理列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/助理管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_session_create",
+		"description": "创建助理会话\n\n创建助理会话",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_session_update",
+		"description": "更新助理会话\n\n更新助理会话",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_session_list",
+		"description": "助理会话列表\n\n助理会话列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "DELETE_ai_dataset_session_remove",
+		"description": "删除会话\n\n删除会话",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_session_charts_completions",
+		"description": "与聊天助手交谈\n\n与聊天助手交谈",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_session_agents_create",
+		"description": "创建agent会话\n\n创建agent会话",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_session_agents_completions",
+		"description": "Agent聊天\n\nAgent聊天",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_session_agents_list",
+		"description": "Agent会话列表\n\nAgent会话列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "DELETE_ai_dataset_session_agents_delete",
+		"description": "删除Agent会话\n\n删除Agent会话",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_session_conversation_related_questions",
+		"description": "相关提问\n\n相关提问",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_session_ask",
+		"description": "智能问答\n\n智能问答",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_agents_list",
+		"description": "Agen列表\n\nAgen列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/会话管理"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_chunk_list",
+		"description": "chunk列表\n\nchunk列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_chunk_add",
+		"description": "添加chunk\n\n添加chunk",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	{
+		"name": "DELETE_ai_dataset_chunk_remove",
+		"description": "移除chunk\n\n移除chunk",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	{
+		"name": "PUT_ai_dataset_chunk_update",
+		"description": "更新chunk\n\n更新chunk",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_chunk_retrieval",
+		"description": "检索chunk\n\n检索chunk",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/分块管理"
+		]
+	},
+	{
+		"name": "GET_ai_control_list",
+		"description": "预测控制列表\n\n预测控制列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/预测控制"
+		]
+	},
+	{
+		"name": "POST_ai_prediction_set",
+		"description": "设置智能控制\n\n设置智能控制",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/预测控制"
+		]
+	},
+	{
+		"name": "DELETE_ai_prediction_remove_{ids}",
+		"description": "删除预测控制\n\n删除预测控制",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/预测控制"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_list",
+		"description": "读取数据集列表\n\n读取数据集列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_create",
+		"description": "添加数据集\n\n添加数据集",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	{
+		"name": "DELETE_ai_dataset_remove",
+		"description": "移除数据集\n\n移除数据集",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	{
+		"name": "PUT_ai_dataset_update_{dataset_id}",
+		"description": "更新数据集\n\n更新数据集",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_info",
+		"description": "读取数据集\n\n读取数据集",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_config",
+		"description": "读取知识库配置\n\n读取知识库配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/知识库管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_upload_document_{datasetId}",
+		"description": "上传文档\n\n上传文档",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	{
+		"name": "PUT_ai_dataset_update_document_{document_id}",
+		"description": "更新文档\n\n更新文档",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_download_document_{document_id}",
+		"description": "下载文档\n\n下载文档",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	{
+		"name": "GET_ai_dataset_list_document",
+		"description": "文档列表\n\n文档列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	{
+		"name": "DELETE_ai_dataset_remove_document",
+		"description": "删除文档\n\n删除文档",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_start_document",
+		"description": "解析文档\n\n解析文档",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	{
+		"name": "POST_ai_dataset_stop_document",
+		"description": "停止解析文档\n\n停止解析文档",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/文档管理"
+		]
+	},
+	{
+		"name": "GET_ai_exception_list",
+		"description": "异常预警列表\n\n异常预警列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/异常预警"
+		]
+	},
+	{
+		"name": "POST_ai_exception_set",
+		"description": "设置异常预警\n\n设置异常预警",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/异常预警"
+		]
+	},
+	{
+		"name": "DELETE_ai_exception_remove_{ids}",
+		"description": "删除异常预警\n\n删除异常预警",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/异常预警"
+		]
+	},
+	{
+		"name": "GET_ai_prediction_list",
+		"description": "智能预警列表\n\n智能预警列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/智能预警"
+		]
+	},
+	{
+		"name": "POST_ai_prediction_set",
+		"description": "设置智能预警\n\n设置智能预警",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/智能预警"
+		]
+	},
+	{
+		"name": "DELETE_ai_prediction_remove_{ids}",
+		"description": "删除智能预警\n\n删除智能预警",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工业智能体/智能预警"
+		]
+	},
+	{
+		"name": "GET_alert_rule_list",
+		"description": "告警规则列表\n\n告警规则列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警规则管理"
+		]
+	},
+	{
+		"name": "POST_alert_rule_set",
+		"description": "设置告警规则\n\n设置告警规则",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警规则管理"
+		]
+	},
+	{
+		"name": "DELETE_alert_rule_remove_{ids}",
+		"description": "删除告警规则\n\n删除告警规则",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警规则管理"
+		]
+	},
+	{
+		"name": "POST_alert_rule_change",
+		"description": "改变告警配置\n\n改变告警配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警规则管理"
+		]
+	},
+	{
+		"name": "GET_alert_action_list",
+		"description": "告警动作列表\n\n告警动作列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警处理管理"
+		]
+	},
+	{
+		"name": "POST_alert_action_set",
+		"description": "设置告警发送配置\n\n设置告警发送配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警处理管理"
+		]
+	},
+	{
+		"name": "DELETE_alert_action_remove_{ids}",
+		"description": "删除告警发送配置\n\n删除告警发送配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警处理管理"
+		]
+	},
+	{
+		"name": "GET_alert_reason_list",
+		"description": "告警AI推理列表\n\n告警AI推理列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警AI推理管理"
+		]
+	},
+	{
+		"name": "POST_alert_reason_set",
+		"description": "设置告警AI推理发送配置\n\n设置告警AI推理发送配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警AI推理管理"
+		]
+	},
+	{
+		"name": "DELETE_alert_reason_remove_{ids}",
+		"description": "删除告警AI推理发送配置\n\n删除告警AI推理发送配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警AI推理管理"
+		]
+	},
+	{
+		"name": "POST_api_alert_log_v1_export",
+		"description": "导入告警数据\n\n导入告警数据",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警数据管理"
+		]
+	},
+	{
+		"name": "GET_alert_log_list",
+		"description": "告警数据列表\n\n告警数据列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警数据管理"
+		]
+	},
+	{
+		"name": "GET_alert_template_list",
+		"description": "告警模板列表\n\n告警模板列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警模板管理"
+		]
+	},
+	{
+		"name": "POST_alert_template_set",
+		"description": "设置告警发送配置\n\n设置告警发送配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警模板管理"
+		]
+	},
+	{
+		"name": "DELETE_alert_template_remove_{ids}",
+		"description": "删除告警发送配置\n\n删除告警发送配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/告警模板管理"
+		]
+	},
+	{
+		"name": "POST_asset_building_set",
+		"description": "保存建筑物\n\n保存建筑物",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/建筑物管理"
+		]
+	},
+	{
+		"name": "DELETE_asset_building_remove_{ids}",
+		"description": "删除建筑物\n\n删除建筑物",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/建筑物管理"
+		]
+	},
+	{
+		"name": "GET_asset_building_list",
+		"description": "读取建筑物列表\n\n读取建筑物列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/建筑物管理"
+		]
+	},
+	{
+		"name": "GET_asset_device_check_machinery_list",
+		"description": "设备清单列表\n\n设备清单列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养计划/设备清单"
+		]
+	},
+	{
+		"name": "POST_asset_device_check_machinery_set",
+		"description": "设置设备清单\n\n设置设备清单",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养计划/设备清单"
+		]
+	},
+	{
+		"name": "DELETE_asset_device_check_machinery_remove_{ids}",
+		"description": "删除设备清单\n\n删除设备清单",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养计划/设备清单"
+		]
+	},
+	{
+		"name": "GET_asset_device_checkPlan_list",
+		"description": "点检保养计划列表\n\n点检保养计划列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养计划"
+		]
+	},
+	{
+		"name": "POST_asset_device_checkPlan_set",
+		"description": "设置点检保养计划\n\n设置点检保养计划",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养计划"
+		]
+	},
+	{
+		"name": "DELETE_asset_device_checkPlan_remove_{ids}",
+		"description": "删除点检保养计划\n\n删除点检保养计划",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养计划"
+		]
+	},
+	{
+		"name": "POST_asset_device_check_subject_set",
+		"description": "设置点检项目\n\n设置点检项目",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养计划/点检项目"
+		]
+	},
+	{
+		"name": "DELETE_asset_device_check_subject_remove_{ids}",
+		"description": "删除点检项目\n\n删除点检项目",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养计划/点检项目"
+		]
+	},
+	{
+		"name": "GET_asset_device_check_subject_list",
+		"description": "点检项目列表\n\n点检项目列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养计划/点检项目"
+		]
+	},
+	{
+		"name": "GET_asset_deviceGroup_list",
+		"description": "获取设备分组列表\n\n获取设备分组列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理"
+		]
+	},
+	{
+		"name": "POST_asset_deviceGroup_set",
+		"description": "设置设备分组信息\n\n设置设备分组信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理"
+		]
+	},
+	{
+		"name": "DELETE_asset_deviceGroup_{groupIds}",
+		"description": "删除设备组\n\n删除设备组",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理"
+		]
+	},
+	{
+		"name": "GET_asset_device_subject_list",
+		"description": "点检保养项目列表\n\n点检保养项目列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/点检保养项目列表"
+		]
+	},
+	{
+		"name": "POST_asset_device_subject_set",
+		"description": "设置点检保养项目\n\n设置点检保养项目",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/设置点检保养项目"
+		]
+	},
+	{
+		"name": "DELETE_asset_device_subject_remove_{ids}",
+		"description": "删除点检保养项目\n\n删除点检保养项目",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备管理/删除点检保养项目"
+		]
+	},
+	{
+		"name": "GET_asset_device_list",
+		"description": "获取设备列表\n\n获取设备列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理"
+		]
+	},
+	{
+		"name": "POST_asset_device_set",
+		"description": "设置设备信息\n\n设置设备信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理"
+		]
+	},
+	{
+		"name": "DELETE_asset_device_{deviceIds}",
+		"description": "删除设备\n\n删除设备",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理"
+		]
+	},
+	{
+		"name": "GET_api_v1_device_metric_tag",
+		"description": "获取设备数据通过标签\n\n获取设备数据通过标签",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理"
+		]
+	},
+	{
+		"name": "GET_asset_device_template_list",
+		"description": "获取模板列表\n\n获取模板列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	{
+		"name": "GET_asset_device_template_protocols",
+		"description": "读取协议列表\n\n读取协议列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/设备协议管理"
+		]
+	},
+	{
+		"name": "POST_asset_device_template_set",
+		"description": "设置设备模板信息\n\n设置设备模板信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	{
+		"name": "DELETE_asset_device_template_remove_{ids}",
+		"description": "删除设备模板\n\n删除设备模板",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	{
+		"name": "GET_asset_device_template_data_list",
+		"description": "获取模板数据列表\n\n获取模板数据列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	{
+		"name": "POST_asset_device_template_data_set",
+		"description": "设置设备模板板数信息\n\n设置设备模板板数信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	{
+		"name": "DELETE_asset_device_template_data_remove_{ids}",
+		"description": "删除设备数据模板\n\n删除设备数据模板",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"资产管理/设备模板管理"
+		]
+	},
+	{
+		"name": "GET_asset_material_list",
+		"description": "物料管理列表\n\n物料管理列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"物料管理"
+		]
+	},
+	{
+		"name": "POST_asset_material_set",
+		"description": "登记物料\n\n登记物料",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"物料管理"
+		]
+	},
+	{
+		"name": "DELETE_asset_material_{materialIds}",
+		"description": "删除物料\n\n删除物料",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"物料管理"
+		]
+	},
+	{
+		"name": "GET_asset_material_inbound_list",
+		"description": "物料入库列表\n\n物料入库列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"物料管理"
+		]
+	},
+	{
+		"name": "POST_asset_material_inbound_add",
+		"description": "登记物料入库\n\n登记物料入库",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"物料管理"
+		]
+	},
+	{
+		"name": "GET_asset_material_outbound_list",
+		"description": "物料出库列表\n\n物料出库列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"物料管理"
+		]
+	},
+	{
+		"name": "POST_asset_material_outbound_add",
+		"description": "登记物料出库\n\n登记物料出库",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"物料管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_list",
+		"description": "读取工艺列表\n\n读取工艺列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理"
+		]
+	},
+	{
+		"name": "POST_craft_route_set",
+		"description": "设置工艺路线\n\n设置工艺路线",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理"
+		]
+	},
+	{
+		"name": "DELETE_craft_route_remove_{craft_route_id}",
+		"description": "移除工艺\n\n移除工艺",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_detail",
+		"description": "工艺详情\n\n工艺详情",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理"
+		]
+	},
+	{
+		"name": "POST_craft_route_config_save",
+		"description": "保存工艺制图\n\n保存工艺制图",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理"
+		]
+	},
+	{
+		"name": "GET_craft_process_list",
+		"description": "工序列表\n\n工序列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/工序管理"
+		]
+	},
+	{
+		"name": "POST_craft_process_set",
+		"description": "设置工序\n\n设置工序",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/工序管理"
+		]
+	},
+	{
+		"name": "DELETE_craft_process_remove_{process_ids}",
+		"description": "删除工序\n\n删除工序",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/工序管理"
+		]
+	},
+	{
+		"name": "GET_craft_process_context_list",
+		"description": "工序内容列表\n\n工序内容列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/工序内容管理"
+		]
+	},
+	{
+		"name": "POST_craft_process_context_set",
+		"description": "设置工序内容\n\n设置工序内容",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/工序内容管理"
+		]
+	},
+	{
+		"name": "DELETE_craft_process_context_remove_{context_ids}",
+		"description": "移除工序内容\n\n移除工序内容",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/工序内容管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_process_list",
+		"description": "组成工序列表\n\n组成工序列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/工序组成管理"
+		]
+	},
+	{
+		"name": "POST_craft_route_process_set",
+		"description": "设置组成工序\n\n设置组成工序",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/工序组成管理"
+		]
+	},
+	{
+		"name": "DELETE_craft_route_process_remove",
+		"description": "删除组成工序\n\n删除组成工序",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/工序组成管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_product_list",
+		"description": "产品制程列表\n\n产品制程列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/产品制程管理"
+		]
+	},
+	{
+		"name": "POST_craft_route_product_set",
+		"description": "设置产品制程\n\n设置产品制程",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/产品制程管理"
+		]
+	},
+	{
+		"name": "DELETE_craft_route_product_remove_{record_ids}",
+		"description": "删除产品制程\n\n删除产品制程",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/产品制程管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_product_bom_list",
+		"description": "产品制程物料BOM物料BOM列表\n\n产品制程物料BOM物料BOM列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/产品制程物料BOM物料BOM管理"
+		]
+	},
+	{
+		"name": "POST_craft_route_product_bom_set",
+		"description": "设置产品制程物料BOM\n\n设置产品制程物料BOM",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/产品制程物料BOM管理"
+		]
+	},
+	{
+		"name": "DELETE_craft_route_product_bom_remove_{record_ids}",
+		"description": "删除产品制程物料BOM\n\n删除产品制程物料BOM",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/产品制程物料BOM管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_schedule_list",
+		"description": "调度列表\n\n调度列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_schedule_month_list",
+		"description": "月调度列表\n\n月调度列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	{
+		"name": "POST_craft_route_schedule_set",
+		"description": "设置调度日程\n\n设置调度日程",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	{
+		"name": "DELETE_craft_route_schedule_remove",
+		"description": "删除调度日程\n\n删除调度日程",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_schedule_detail",
+		"description": "调度详情\n\n调度详情",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/调度管理"
+		]
+	},
+	{
+		"name": "POST_api_product_task_v1_schedule",
+		"description": "读取调度任务\n\n读取调度任务",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/生产任务管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_task_list",
+		"description": "生产任务列表\n\n生产任务列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/生产任务管理"
+		]
+	},
+	{
+		"name": "POST_craft_route_task_set",
+		"description": "设置生产任务\n\n设置生产任务",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/生产任务管理"
+		]
+	},
+	{
+		"name": "DELETE_craft_route_task_remove_{ids}",
+		"description": "移除生产任务\n\n移除生产任务",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/生产工单管理"
+		]
+	},
+	{
+		"name": "GET_craft_route_work_order_list",
+		"description": "生产工单列表\n\n生产工单列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/生产工单管理"
+		]
+	},
+	{
+		"name": "POST_craft_route_work_order_set",
+		"description": "设置生产工单\n\n设置生产工单",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/生产工单管理"
+		]
+	},
+	{
+		"name": "DELETE_craft_route_work_order_remove_{ids}",
+		"description": "移除生产工单\n\n移除生产工单",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"工艺管理/生产工单管理"
+		]
+	},
+	{
+		"name": "GET_gateway_agent_config_generate",
+		"description": "生成Agent配置\n\n生成Agent配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "GET_gateway_agent_config_list",
+		"description": "Agent配置列表\n\nAgent配置列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "POST_gateway_agent_config_set",
+		"description": "设置Agent配置\n\n设置Agent配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "GET_api_gateway_agent_config_v1_info",
+		"description": "读取Agent配置\n\n读取Agent配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "POST_api_gateway_agent_config_v1_bind",
+		"description": "绑定Agent配置\n\n绑定Agent配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "GET_daemonize_agent_list",
+		"description": "Agent列表\n\nAgent列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "POST_daemonize_agent_set",
+		"description": "设置Agent\n\n设置Agent",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "DELETE_daemonize_agent_remove_{ids}",
+		"description": "移除Agent\n\n移除Agent",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "POST_daemonize_agent_process_stop",
+		"description": "停止Agent进程\n\n停止Agent进程",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "POST_daemonize_agent_process_start",
+		"description": "启动Agent进程\n\n启动Agent进程",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "GET_daemonize_agent_info",
+		"description": "agent详情\n\nagent详情",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/Agent管理"
+		]
+	},
+	{
+		"name": "GET_dashboard_manager_list",
+		"description": "仪表盘列表\n\n仪表盘列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"仪表盘/仪表盘管理"
+		]
+	},
+	{
+		"name": "POST_dashboard_manager_set",
+		"description": "保存仪表盘\n\n保存仪表盘",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"仪表盘/仪表盘管理"
+		]
+	},
+	{
+		"name": "DELETE_dashboard_manager_remove",
+		"description": "删除仪表盘\n\n删除仪表盘",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"仪表盘/仪表盘管理"
+		]
+	},
+	{
+		"name": "POST_dashboard_manager_metric_query",
+		"description": "查询面板\n\n查询面板",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"仪表盘/仪表盘管理"
+		]
+	},
+	{
+		"name": "POST_dashboard_data_set",
+		"description": "保存面板\n\n保存面板",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"仪表盘/面板管理"
+		]
+	},
+	{
+		"name": "DELETE_dashboard_data_remove",
+		"description": "删除面板\n\n删除面板",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"仪表盘/面板管理"
+		]
+	},
+	{
+		"name": "GET_dashboard_data_info",
+		"description": "读取面板\n\n读取面板",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"仪表盘/面板管理"
+		]
+	},
+	{
+		"name": "GET_device_monitor_control_log_list",
+		"description": "控制记录列表\n\n控制记录列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备接入/控制记录"
+		]
+	},
+	{
+		"name": "GET_device_monitor_data_dev_list",
+		"description": "设备测点列表\n\n设备测点列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "POST_device_monitor_data_list",
+		"description": "实时数据\n\n实时数据",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "POST_device_monitor_data_export",
+		"description": "导出实时数据\n\n导出实时数据",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "GET_metric_time_seq_list",
+		"description": "时序数据测点\n\n时序数据测点",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "POST_metric_time_seq_set",
+		"description": "设置测点映射\n\n设置测点映射",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设置测点映射"
+		]
+	},
+	{
+		"name": "DELETE_metric_time_seq_remove",
+		"description": "删除测点映射\n\n删除测点映射",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/删除测点映射"
+		]
+	},
+	{
+		"name": "GET_device_monitor_list",
+		"description": "设备监控\n\n设备监控",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "POST_device_monitor_metric",
+		"description": "设备指标\n\n设备指标",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "POST_device_monitor_predict",
+		"description": "预测指标\n\n预测指标",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "POST_api_v1_metric_predict",
+		"description": "导入告警数据\n\n导入告警数据",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "POST_api_v1_metric_predict_query",
+		"description": "指标预测查询\n\n指标预测查询",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "POST_device_monitor_utilization_stat",
+		"description": "稼动率统计\n\n稼动率统计",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"设备监控/设备监控"
+		]
+	},
+	{
+		"name": "GET_gateway_protocol_list",
+		"description": "网关协议列表\n\n网关协议列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/协议管理"
+		]
+	},
+	{
+		"name": "POST_gateway_protocol_set",
+		"description": "设置网关协议\n\n设置网关协议",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/协议管理"
+		]
+	},
+	{
+		"name": "DELETE_gateway_protocol_remove",
+		"description": "删除网关协议\n\n删除网关协议",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"网关管理/协议管理"
+		]
+	},
+	{
+		"name": "GET_monitor_job_list",
+		"description": "查询定时任务列表\n\n查询定时任务列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "GET_monitor_job_{jobId}",
+		"description": "查询定时任务信息\n\n查询定时任务信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "POST_monitor_job",
+		"description": "新增定时任务\n\n新增定时任务",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "PUT_monitor_job",
+		"description": "编辑定时任务\n\n编辑定时任务",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "PUT_monitor_job_changeStatus",
+		"description": "修改定时任务状态\n\n修改定时任务状态",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "PUT_monitor_job_run",
+		"description": "执行定时任务\n\n执行定时任务",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "DELETE_monitor_job_{jobIds}",
+		"description": "删除定时任务\n\n删除定时任务",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "GET_monitor_job_funList",
+		"description": "获取方法列表\n\n获取方法列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "GET_monitor_job_log_list",
+		"description": "查询定时任务日志列表\n\n查询定时任务日志列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "GET_monitor_job_log_{jobLogId}",
+		"description": "查询定时任务日志信息\n\n查询定时任务日志信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "GET_monitor_job_idAndNameAll",
+		"description": "查询定时任务id和名称\n\n查询定时任务id和名称",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"定时任务"
+		]
+	},
+	{
+		"name": "GET_monitor_online_list",
+		"description": "查询在线用户列表查询\n\n查询在线用户列表查询",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"在线用户"
+		]
+	},
+	{
+		"name": "DELETE_monitor_online_{tokenId}",
+		"description": "强退在线用户列表\n\n强退在线用户列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"在线用户"
+		]
+	},
+	{
+		"name": "GET_product_laboratory_list",
+		"description": "化验单列表\n\n化验单列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"化验单管理"
+		]
+	},
+	{
+		"name": "GET_product_laboratory_info_{id}",
+		"description": "化验单详情\n\n化验单详情",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"化验单管理"
+		]
+	},
+	{
+		"name": "POST_product_laboratory_set",
+		"description": "保存化验单\n\n保存化验单",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"保存化验单"
+		]
+	},
+	{
+		"name": "DELETE_product_laboratory_remove_{ids}",
+		"description": "删除化验单\n\n删除化验单",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"化验单管理"
+		]
+	},
+	{
+		"name": "GET_product_laboratory_our_list",
+		"description": "化验单列表\n\n化验单列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"化验单管理"
+		]
+	},
+	{
+		"name": "GET_api_v1_product_laboratory_first",
+		"description": "最新化验单\n\n最近一份的采样化验单",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"化验单管理"
+		]
+	},
+	{
+		"name": "GET_api_v1_product_laboratory_first_list",
+		"description": "最新化验单列表\n\n最新化验单列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"化验单管理"
+		]
+	},
+	{
+		"name": "POST_system_electric_set",
+		"description": "设置设备电流配置\n\n设置设备电流配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统管理/设备配置"
+		]
+	},
+	{
+		"name": "GET_system_electric_list",
+		"description": "设备电流配置列表\n\n设备电流配置列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统管理/设备配置"
+		]
+	},
+	{
+		"name": "DELETE_system_electric_remove_{ids}",
+		"description": "删除设备电流配置\n\n删除设备电流配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统管理/设备配置"
+		]
+	},
+	{
+		"name": "GET_system_selectBox_permission",
+		"description": "权限选择框\n\n权限选择框",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"下拉框选项"
+		]
+	},
+	{
+		"name": "GET_system_selectBox_dept",
+		"description": "部门选择框\n\n部门选择框",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"下拉框选项"
+		]
+	},
+	{
+		"name": "POST_system_shift_set",
+		"description": "设置班次配置\n\n设置班次配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统管理/班次配置"
+		]
+	},
+	{
+		"name": "GET_system_shift_list",
+		"description": "班次配置列表\n\n班次配置列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统管理/班次配置"
+		]
+	},
+	{
+		"name": "DELETE_system_shift_remove_{ids}",
+		"description": "删除班次配置\n\n删除告警AI推理发送配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"告警管理/班次配置"
+		]
+	},
+	{
+		"name": "GET_system_config_list",
+		"description": "查询配置列表查询\n\n查询配置列表查询",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"配置相关"
+		]
+	},
+	{
+		"name": "POST_system_config_export",
+		"description": "导出配置\n\n导出配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"配置相关"
+		]
+	},
+	{
+		"name": "GET_system_config_{configId}",
+		"description": "根据配置ID获取配置信息\n\n根据配置ID获取配置信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"配置相关"
+		]
+	},
+	{
+		"name": "POST_system_Config",
+		"description": "添加配置\n\n添加配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"配置相关"
+		]
+	},
+	{
+		"name": "PUT_system_Config",
+		"description": "修改配置\n\n修改配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"配置相关"
+		]
+	},
+	{
+		"name": "DELETE_system_Config_{configId}",
+		"description": "删除配置\n\n删除配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"配置相关"
+		]
+	},
+	{
+		"name": "GET_system_dept",
+		"description": "查询部门列表查询\n\n查询部门列表查询",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"部门相关"
+		]
+	},
+	{
+		"name": "GET_system_dept_{deptId}",
+		"description": "根据部门ID获取部门信息\n\n根据部门ID获取部门信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"部门相关"
+		]
+	},
+	{
+		"name": "GET_system_dept_roleDeptTreeSelect_{roleId}",
+		"description": "获取角色部门\n\n获取角色部门",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"部门相关"
+		]
+	},
+	{
+		"name": "POST_system_dept",
+		"description": "添加部门\n\n添加部门",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"部门相关"
+		]
+	},
+	{
+		"name": "PUT_system_dept",
+		"description": "修改部门\n\n修改部门",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"部门相关"
+		]
+	},
+	{
+		"name": "DELETE_system_dept_{deptId}",
+		"description": "删除部门\n\n删除部门",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"部门相关"
+		]
+	},
+	{
+		"name": "GET_system_dict_data_list",
+		"description": "查询字典列表\n\n查询字典列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "POST_system_config_export",
+		"description": "导出配置\n\n导出配置",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"配置相关"
+		]
+	},
+	{
+		"name": "GET_system_dict_data_{dictCode}",
+		"description": "根据dictCode获取字典信息\n\n根据dictCode获取字典信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "GET_system_dict_data_type_{dictType}",
+		"description": "查询字典列表\n\n查询字典列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "POST_system_dict_data",
+		"description": "添加字典数据\n\n添加字典数据",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "PUT_system_dict_data",
+		"description": "修改字典数据\n\n修改字典数据",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "DELETE_system_dict_data_{dictCodes}",
+		"description": "根据dictCode获取字典信息\n\n根据dictCode获取字典信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "GET_system_dict_type_list",
+		"description": "查询字典类型列表\n\n查询字典类型列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "POST_system_config_export",
+		"description": "导出字典类型\n\n导出字典类型",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "GET_system_dict_type_{dictCode}",
+		"description": "根据dictCode获取字典类型信息\n\n根据dictCode获取字典类型信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "POST_system_dict_type",
+		"description": "添加字典类型数据\n\n添加字典类型数据",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "PUT_system_dict_type",
+		"description": "修改字典类型数据\n\n修改字典类型数据",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "DELETE_system_dict_type",
+		"description": "根据dictCode获取字典类型信息\n\n根据dictCode获取字典类型信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "PUT_system_dict_type_refreshCache",
+		"description": "更新字典缓存\n\n更新字典缓存",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "PUT_system_dict_type_optionSelect",
+		"description": "查询字典列表\n\n查询字典列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"字典相关"
+		]
+	},
+	{
+		"name": "POST_file_uploadFileRandomName",
+		"description": "上传文件随即文件名\n\n上传文件随即文件名",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"租户上传文件"
+		]
+	},
+	{
+		"name": "POST_file_uploadFiles",
+		"description": "上传多个文件随即文件名\n\n上传多个文件随即文件名",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"租户上传文件"
+		]
+	},
+	{
+		"name": "POST_file_uploadFileOriginalName",
+		"description": "上传文件原始文件名\n\n上传文件原始文件名",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"租户上传文件"
+		]
+	},
+	{
+		"name": "POST_file_uploadPrivateFileOriginalName",
+		"description": "上传私有文件原始文件名\n\n上传私有文件原始文件名",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"租户上传文件"
+		]
+	},
+	{
+		"name": "GET_file_downloadPrivateFile",
+		"description": "租户下载私有文件\n\n租户下载私有文件",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"租户上传文件"
+		]
+	},
+	{
+		"name": "POST_login",
+		"description": "用户登录\n\n用户登录",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"登录"
+		]
+	},
+	{
+		"name": "POST_register",
+		"description": "用户登录\n\n用户登录",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"登录"
+		]
+	},
+	{
+		"name": "GET_getInfo",
+		"description": "获取用户个人信息\n\n获取用户个人信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"登录"
+		]
+	},
+	{
+		"name": "POST_logout",
+		"description": "退出\n\n退出",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"登录"
+		]
+	},
+	{
+		"name": "GET_captchaImage",
+		"description": "获取验证码\n\n获取验证码",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"登录"
+		]
+	},
+	{
+		"name": "GET_system_notice_list",
+		"description": "消息通知列表\n\n消息通知列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"消息通知"
+		]
+	},
+	{
+		"name": "GET_system_notice_{id}",
+		"description": "根据id消息通知\n\n根据id消息通知",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"消息通知"
+		]
+	},
+	{
+		"name": "POST_system_notice",
+		"description": "新增消息通知\n\n新增消息通知",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"消息通知"
+		]
+	},
+	{
+		"name": "GET_system_consumption_newMessage",
+		"description": "未读消息通知数量\n\n未读消息通知数量",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"消息通知"
+		]
+	},
+	{
+		"name": "GET_system_consumption_{id}",
+		"description": "消费方获取消息根据ID\n\n消费方获取消息根据ID",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"消息通知"
+		]
+	},
+	{
+		"name": "GET_system_consumption_userNoticeList",
+		"description": "消费方获取消息列表\n\n消费方获取消息列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"消息通知"
+		]
+	},
+	{
+		"name": "PUT_system_consumption_noticeRead_{id}",
+		"description": "消费方消息修改为已读\n\n消费方消息修改为已读",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"消息通知"
+		]
+	},
+	{
+		"name": "PUT_system_consumption_noticeReadAll",
+		"description": "消费方所有消息修改为已读\n\n消费方所有消息修改为已读",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"消息通知"
+		]
+	},
+	{
+		"name": "DELETE_system_consumption_noticeDelete_{ids}",
+		"description": "消费方消息删除消息\n\n消费方消息删除消息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"消息通知"
+		]
+	},
+	{
+		"name": "GET_system_permission_list",
+		"description": "系统权限列表\n\n系统权限列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统权限"
+		]
+	},
+	{
+		"name": "GET_system_permission_{permissionId}",
+		"description": "根据id查询系统权限\n\n根据id查询系统权限",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统权限"
+		]
+	},
+	{
+		"name": "GET_system_permission_byRoleIds_{roleIds}",
+		"description": "根据id查询系统权限\n\n根据id查询系统权限",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统权限"
+		]
+	},
+	{
+		"name": "POST_system_permission",
+		"description": "新增系统权限\n\n新增系统权限",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统权限"
+		]
+	},
+	{
+		"name": "PUT_system_permission",
+		"description": "修改系统权限\n\n修改系统权限",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统权限"
+		]
+	},
+	{
+		"name": "DELETE_system_permission_{permissionId}",
+		"description": "删除系统权限\n\n删除系统权限",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统权限"
+		]
+	},
+	{
+		"name": "GET_system_post_list",
+		"description": "查询岗位列表查询\n\n查询岗位列表查询",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"岗位相关"
+		]
+	},
+	{
+		"name": "POST_system_post_export",
+		"description": "导出岗位\n\n导出岗位",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"岗位相关"
+		]
+	},
+	{
+		"name": "GET_system_post_{postId}",
+		"description": "根据岗位ID获取岗位信息\n\n根据岗位ID获取岗位信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"岗位相关"
+		]
+	},
+	{
+		"name": "POST_system_post",
+		"description": "添加岗位\n\n添加岗位",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"岗位相关"
+		]
+	},
+	{
+		"name": "PUT_system_post",
+		"description": "修改岗位\n\n修改岗位",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"岗位相关"
+		]
+	},
+	{
+		"name": "DELETE_system_post_{postIds}",
+		"description": "删除岗位\n\n删除岗位",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"岗位相关"
+		]
+	},
+	{
+		"name": "GET_system_user_profile",
+		"description": "查看个人资料\n\n查看个人资料",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"个人资料"
+		]
+	},
+	{
+		"name": "PUT_system_user_profile",
+		"description": "修改个人资料\n\n修改个人资料",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"个人资料"
+		]
+	},
+	{
+		"name": "PUT_system_user_profile_updatePwd",
+		"description": "修改密码\n\n修改密码",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"个人资料"
+		]
+	},
+	{
+		"name": "POST_system_user_profile_avatar",
+		"description": "修改头像\n\n修改头像",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"个人资料"
+		]
+	},
+	{
+		"name": "GET_system_role_list",
+		"description": "查询角色列表查询\n\n查询角色列表查询",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "GET_system_role_{roleId}",
+		"description": "根据角色ID获取角色信息\n\n根据角色ID获取角色信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "POST_system_role",
+		"description": "添加角色\n\n添加角色",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "PUT_system_role",
+		"description": "修改角色\n\n修改角色",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "PUT_system_role_changeStatus",
+		"description": "修改角色状态\n\n修改角色状态",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "DELETE_system_role_{rolesIds}",
+		"description": "删除角色\n\n删除角色",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "GET_system_role_changeStatus",
+		"description": "查询角色授权用户列表查询\n\n查询角色授权用户列表查询",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "PUT_system_role_authUser_unallocatedList",
+		"description": "查询角色未授权用户列表查询\n\n查询角色未授权用户列表查询",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "PUT_system_role_authUser_selectAll",
+		"description": "角色授权用户\n\n角色授权用户",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "PUT_system_role_authUser_cancel",
+		"description": "取消用户角色\n\n取消用户角色",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "PUT_system_role_authUser_cancelAll",
+		"description": "取消角色授权用户\n\n取消角色授权用户",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"角色相关"
+		]
+	},
+	{
+		"name": "GET_system_sse_{token}",
+		"description": "建立SSE链接\n\n建立SSE链接",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"建立SSE链接"
+		]
+	},
+	{
+		"name": "PUT_system_user_changeStatus",
+		"description": "修改用户状态\n\n修改用户状态",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "PUT_system_user_resetPwd",
+		"description": "重置密码\n\n重置密码",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "PUT_system_user",
+		"description": "修改用户\n\n修改用户",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "PUT_system_user_dataScope",
+		"description": "修改数据权限\n\n修改数据权限",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "GET_system_user_dataScope_{userId}",
+		"description": "查询用户数据权限\n\n查询用户数据权限",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "POST_system_user",
+		"description": "添加用户\n\n添加用户",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "GET_system_user_list",
+		"description": "查询用户列表\n\n查询用户列表",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "GET_system_user_",
+		"description": "获取当前用户信息\n\n获取当前用户信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "GET_system_user_authRole_{userId}",
+		"description": "根据用户编号获取授权角色\n\n根据用户编号获取授权角色",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "GET_system_user_{userId}",
+		"description": "根据用户ID获取用户信息\n\n根据用户ID获取用户信息",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	},
+	{
+		"name": "DELETE_system_user_userIds",
+		"description": "删除用户\n\n删除用户",
+		"inputSchema": {
+			"type": "object",
+			"properties": {
+				"userIds": {
+					"type": "string",
+					"description": "userIds"
+				}
+			},
+			"required": [
+				"userIds"
+			]
+		},
+		"tags": [
+			"系统用户"
+		]
+	},
+	{
+		"name": "POST_system_user_importData",
+		"description": "导入用户\n\n导入用户",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统用户"
+		]
+	},
+	{
+		"name": "POST_system_user_export",
+		"description": "导出用户\n\n导出用户",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统用户"
+		]
+	},
+	{
+		"name": "POST_system_user_input",
+		"description": "导出用户\n\n导出用户",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"系统用户"
+		]
+	},
+	{
+		"name": "PUT_system_user_authRole",
+		"description": "授权角色\n\n授权角色",
+		"inputSchema": {
+			"type": "object"
+		},
+		"tags": [
+			"用户相关"
+		]
+	}
+]
