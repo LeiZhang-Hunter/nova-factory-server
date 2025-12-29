@@ -171,10 +171,10 @@ func (dao *sysProductLaboratoryDao) SelectUserLaboratoryList(ctx *gin.Context, d
 	}, nil
 }
 
-func (dao *sysProductLaboratoryDao) FirstLaboratoryInfo(ctx *gin.Context) (*productModels.SysProductLaboratory, error) {
+func (dao *sysProductLaboratoryDao) FirstLaboratoryInfo(ctx *gin.Context, req *productModels.SysProductLaboratoryInfoDQL) (*productModels.SysProductLaboratory, error) {
 	query := dao.db.Table(dao.table)
 	var dto productModels.SysProductLaboratory
-	ret := query.Order("create_time desc").Limit(1).Find(&dto)
+	ret := query.Where("type = ?", req.Type).Order("create_time desc").Limit(1).Find(&dto)
 	if ret.Error != nil {
 		return &dto, ret.Error
 	}
@@ -199,6 +199,8 @@ func (dao *sysProductLaboratoryDao) FirstLaboratoryList(ctx *gin.Context, dql *p
 	} else {
 		offset = int((dql.Page - 1) * dql.Size)
 	}
+
+	query = query.Where("type = ?", dql.Type)
 
 	dto := make([]*productModels.SysProductLaboratory, 0)
 	ret := query.Offset(offset).Order("create_time desc").Limit(size).Find(&dto)

@@ -159,7 +159,12 @@ func (lc *Laboratory) LaboratoryUserList(c *gin.Context) {
 // @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]productModels.SysProductLaboratoryVo}} "成功"
 // @Router /api/v1/product/laboratory/first [get]
 func (lc *Laboratory) LaboratoryFirst(c *gin.Context) {
-	list, err := lc.ls.FirstLaboratoryInfo(c)
+	dql := new(productModels.SysProductLaboratoryInfoDQL)
+	err := c.ShouldBindQuery(dql)
+	if err != nil {
+		return
+	}
+	list, err := lc.ls.FirstLaboratoryInfo(c, dql)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -178,6 +183,11 @@ func (lc *Laboratory) LaboratoryFirst(c *gin.Context) {
 // @Router /api/v1/product/laboratory/first/list [get]
 func (lc *Laboratory) LaboratoryFirstList(c *gin.Context) {
 	dql := new(productModels.SysProductLaboratoryDQL)
+	err := c.ShouldBindQuery(dql)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
 	list, err := lc.ls.FirstLaboratoryList(c, dql)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())

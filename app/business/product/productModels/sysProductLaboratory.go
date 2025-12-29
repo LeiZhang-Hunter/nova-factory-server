@@ -78,3 +78,7 @@ type SysProductLaboratoryList struct {
 	Rows  []*SysProductLaboratory `json:"rows"`
 	Total int64                   `json:"total"`
 }
+
+type SysProductLaboratoryInfoDQL struct {
+	Type int `form:"type" db:"type" jsonschema:"description=化验类型，0是物料化验，1是配料化验"`
+}

@@ -96,8 +96,8 @@ func (s *SysProductLaboratoryService) SelectUserLaboratoryList(ctx *gin.Context,
 }
 
 // FirstLaboratoryInfo 读取用户化验单
-func (s *SysProductLaboratoryService) FirstLaboratoryInfo(ctx *gin.Context) (*productModels.SysProductLaboratory, error) {
-	return s.dao.FirstLaboratoryInfo(ctx)
+func (s *SysProductLaboratoryService) FirstLaboratoryInfo(ctx *gin.Context, req *productModels.SysProductLaboratoryInfoDQL) (*productModels.SysProductLaboratory, error) {
+	return s.dao.FirstLaboratoryInfo(ctx, req)
 }
 
 func (s *SysProductLaboratoryService) FirstLaboratoryList(ctx *gin.Context, dql *productModels.SysProductLaboratoryDQL) (*productModels.SysProductLaboratoryList, error) {
