@@ -7,23 +7,29 @@ import (
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricDao"
 	"nova-factory-server/app/business/system/systemDao"
 	"nova-factory-server/app/business/system/systemModels"
 	"nova-factory-server/app/business/system/systemService"
+	"nova-factory-server/app/constant/iotdb"
 )
 
 type IDeviceElectricServiceImpl struct {
 	dao       systemDao.IDeviceElectricDao
 	deviceDao deviceDao.IDeviceDao
 	metricDao metricDao.IMetricDao
+	mapDao    deviceMonitorDao.IDeviceDataReportDao
 }
 
-func NewIDeviceElectricServiceImpl(dao systemDao.IDeviceElectricDao, deviceDao deviceDao.IDeviceDao, metricDao metricDao.IMetricDao) systemService.IDeviceElectricService {
+func NewIDeviceElectricServiceImpl(dao systemDao.IDeviceElectricDao, deviceDao deviceDao.IDeviceDao,
+	metricDao metricDao.IMetricDao, mapDao deviceMonitorDao.IDeviceDataReportDao) systemService.IDeviceElectricService {
 	return &IDeviceElectricServiceImpl{
 		dao:       dao,
 		deviceDao: deviceDao,
 		metricDao: metricDao,
+		mapDao:    mapDao,
 	}
 }
 
@@ -35,9 +41,21 @@ func (i *IDeviceElectricServiceImpl) Set(c *gin.Context, setting *systemModels.S
 		err := i.metricDao.InstallRunStatusDevice(c, setting.DeviceID)
 		if err != nil {
 			zap.L().Error("install device run status dev table error", zap.Error(err))
+			return nil, err
 		}
-	} else {
+	}
 
+	devKey := iotdb.MakeRunDeviceTemplateName(setting.DeviceID)
+	err := i.mapDao.Save(c, &deviceMonitorModel.SysIotDbDevMap{
+		DeviceID:   setting.DeviceID,
+		TemplateID: 0,
+		DataID:     0,
+		Device:     devKey,
+		DataName:   setting.Name,
+		Unit:       "",
+	})
+	if err != nil {
+		zap.L().Error("save iotdb device map error", zap.Error(err))
 	}
 	return i.dao.Set(c, setting)
 }

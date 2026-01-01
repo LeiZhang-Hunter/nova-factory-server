@@ -1,8 +1,10 @@
 package deviceController
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/asset/device/deviceService"
@@ -140,8 +142,16 @@ func (t *TemplateData) GetDeviceTemplateData(c *gin.Context) {
 	}
 	device, err := t.deviceService.GetById(c, info.DeviceID)
 	if err != nil {
-		zap.L().Error("get device error", zap.Error(err))
-		baizeContext.Waring(c, "读取数据列表失败")
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			zap.L().Error("get device error", zap.Error(err))
+			baizeContext.Waring(c, "读取数据列表失败")
+			return
+		}
+
+	}
+
+	if device == nil {
+		baizeContext.Waring(c, "设备不存在")
 		return
 	}
 

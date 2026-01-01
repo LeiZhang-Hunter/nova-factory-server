@@ -87,6 +87,7 @@ func NewGinEngine(
 		deviceMonitor.DeviceMonitor.PublicRoutes(group)
 		product.Laboratory.PublicRoutes(group)
 		dc.Info.PublicRoutes(group)
+		deviceMonitor.DeviceUtilization.PublicRoutes(group)
 	}
 	//做鉴权的
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())

@@ -36,6 +36,7 @@ type DeviceInfo struct {
 	Type              *string   `json:"Type" db:"type"`
 	Action            []*string `json:"Action" db:"action"`
 	Extension         *string   `json:"Extension" db:"extension"`
+	Status            *bool     `json:"status" gorm:"column:status;comment:是否启用 0 禁用 1 启用" `
 	ControlType       int       `json:"ControlType" db:"control_type"`
 }
 
@@ -77,6 +78,7 @@ type DeviceVO struct {
 	Number            *string                                              `json:"Number" db:"number"`
 	Type              *string                                              `json:"Type" db:"type"`
 	Action            string                                               `json:"Action" db:"action"`
+	Status            *bool                                                `json:"status" gorm:"column:status;comment:是否启用 0 禁用 1 启用" `
 	Extension         string                                               `json:"Extension" db:"extension"`
 	ControlType       int                                                  `json:"ControlType" db:"control_type"`
 	ExtensionInfo     *ExtensionInfo                                       `json:"extension_info,omitempty" gorm:"-" db:"control_type"`
@@ -114,6 +116,7 @@ type DeviceValue struct {
 	Action            []string `json:"action"`
 	Extension         string   `json:"extension"`
 	ControlType       int      `json:"controlType"`
+	Status            *bool    `json:"status"`
 	CreateUserName    string   `json:"createUserName"`
 	UpdateUserName    string   `json:"updateUserName"`
 	baize.BaseEntity

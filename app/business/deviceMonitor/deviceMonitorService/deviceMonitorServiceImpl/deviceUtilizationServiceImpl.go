@@ -26,3 +26,8 @@ func (d *DeviceUtilizationServiceImpl) Stat(c *gin.Context, req *deviceMonitorMo
 	//}
 	return d.deviceUtilizationDao.Stat(c, req)
 }
+
+func (d *DeviceUtilizationServiceImpl) Search(c *gin.Context,
+	req *deviceMonitorModel.DeviceUtilizationReq) (*deviceMonitorModel.DeviceUtilizationPublicDataList, error) {
+	return d.deviceUtilizationDao.Search(c, req)
+}

@@ -147,7 +147,7 @@ func (s *sysDeviceDataDao) DeleteByDeviceIds(c *gin.Context, ids []int64) error 
 
 func (s *sysDeviceDataDao) GetLocalByGateWayId(c *gin.Context, id int64) ([]*deviceModels.DeviceVO, error) {
 	var dto []*deviceModels.DeviceVO
-	ret := s.ms.Table(s.tableName).Where("device_gateway_id in (?)", id).Where("communication_type = ?", protocols.LOCAL).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+	ret := s.ms.Table(s.tableName).Where("device_gateway_id in (?)", id).Where("status = ?", true).Where("communication_type = ?", protocols.LOCAL).Where("state = ?", commonStatus.NORMAL).Find(&dto)
 
 	var res []*deviceModels.DeviceVO = make([]*deviceModels.DeviceVO, 0)
 	for k, v := range dto {
