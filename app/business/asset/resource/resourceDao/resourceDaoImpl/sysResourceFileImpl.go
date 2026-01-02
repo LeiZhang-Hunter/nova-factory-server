@@ -29,7 +29,7 @@ func (dao *sysResourceFileDao) InsertResource(ctx context.Context, resource *res
 }
 
 func (dao *sysResourceFileDao) UpdateResource(ctx context.Context, resource *resourceModels.SysResourceFile) (*resourceModels.SysResourceFile, error) {
-	ret := dao.db.Table(dao.table).Where("resourceId = ?", resource.ResourceId).Updates(&resource)
+	ret := dao.db.Table(dao.table).Where("resourceId = ?", resource.ResourceID).Updates(&resource)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}
@@ -75,7 +75,7 @@ func (dao *sysResourceFileDao) List(ctx context.Context, query *resourceModels.S
 		size = int(query.Size)
 	}
 	list := make([]*resourceModels.SysResourceFileVo, 0)
-	err := dbQuery.Offset(offset).Order("create_time desc").Limit(size).Find(list)
+	err := dbQuery.Offset(offset).Order("create_time desc").Limit(size).Find(&list)
 	if err != nil {
 		return result, ret.Error
 	}

@@ -22,7 +22,7 @@ func NewSysResourceFileService(resourceDao resourceDao.IResourceFileDao) resourc
 func (s *sysResourceFileService) InsertResource(c *gin.Context, resource *resourceModels.SysResourceFileDML) (*resourceModels.SysResourceFile, error) {
 	value := resourceModels.ToSysResourceFile(resource)
 	value.SetCreateBy(baizeContext.GetUserId(c))
-	value.ResourceId = snowflake.GenID()
+	value.ResourceID = snowflake.GenID()
 	// Default status
 	return s.resourceDao.InsertResource(c, value)
 }

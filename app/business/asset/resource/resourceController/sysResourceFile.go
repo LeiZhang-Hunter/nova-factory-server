@@ -19,7 +19,7 @@ func NewResourceFile(service resourceService.IResourceFileService) *ResourceFile
 
 func (rf *ResourceFile) PrivateRoutes(router *gin.RouterGroup) {
 	resource := router.Group("/asset/resource")
-	resource.GET("/list", middlewares.HasPermission("asset:resource"), rf.List)                    // 资料列表
+	resource.GET("/list", middlewares.HasPermission("asset:resource:list"), rf.List)               // 资料列表
 	resource.POST("/set", middlewares.HasPermission("asset:resource:set"), rf.Set)                 // 设置资料信息
 	resource.DELETE("/remove/:ids", middlewares.HasPermission("asset:resource:remove"), rf.Remove) //删除资料
 }
@@ -40,7 +40,7 @@ func (rf *ResourceFile) Set(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if req.ResourceId <= 0 {
+	if req.ResourceID <= 0 {
 		resource, err := rf.service.InsertResource(c, req)
 		if err != nil {
 			baizeContext.Waring(c, "创建资源失败")
