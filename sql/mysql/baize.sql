@@ -665,4 +665,73 @@ CREATE TABLE `sys_user_role`  (
 INSERT INTO `sys_user_role` VALUES (1, 1);
 INSERT INTO `sys_user_role` VALUES (2, 2);
 
+CREATE TABLE `sys_user_role`  (
+    `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+    `role_id` bigint(20) NOT NULL COMMENT '角色ID',
+    PRIMARY KEY (`user_id`, `role_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户和角色关联表' ROW_FORMAT = Dynamic;
+
+CREATE TABLE IF NOT EXISTS sys_resource_file (
+    resource_id bigint(20) NOT NULL  COMMENT '主键ID',
+
+    -- 基础信息
+    name VARCHAR(255) NOT NULL COMMENT '资源名称',
+    original_name VARCHAR(255) COMMENT '原始文件名（仅文件有）',
+    extension VARCHAR(50) COMMENT '文件扩展名（仅文件有）',
+    mime_type VARCHAR(100) COMMENT 'MIME类型（仅文件有）',
+
+    -- 类型标识
+    type ENUM('FILE', 'FOLDER') NOT NULL DEFAULT 'FILE' COMMENT '类型：FILE-文件，FOLDER-文件夹',
+    is_folder TINYINT(1) GENERATED ALWAYS AS (IF(type = 'FOLDER', 1, 0)) VIRTUAL COMMENT '是否文件夹（虚拟列，方便查询）',
+
+    -- 存储路径
+    path VARCHAR(1000) NOT NULL COMMENT '完整路径（不含域名）',
+
+    -- 文件信息（仅文件有）
+    file_size BIGINT UNSIGNED DEFAULT 0 COMMENT '文件大小（字节）',
+    md5_hash VARCHAR(32) COMMENT '文件MD5哈希值',
+    storage_key VARCHAR(500) COMMENT '存储服务中的唯一标识',
+    storage_type ENUM('LOCAL', 'OSS', 'S3', 'COS') DEFAULT 'LOCAL' COMMENT '存储类型',
+
+    -- 目录结构
+    parent_id BIGINT UNSIGNED DEFAULT 0 COMMENT '父级ID（0表示根目录）',
+    level TINYINT UNSIGNED DEFAULT 0 COMMENT '层级深度',
+    lineage VARCHAR(1000) COMMENT '层级路径，格式：/父ID/祖父ID/...',
+
+    -- 权限和所有者
+    owner_id BIGINT UNSIGNED COMMENT '所有者ID',
+    owner_type VARCHAR(50) COMMENT '所有者类型：USER-用户，DEPARTMENT-部门等',
+    is_public TINYINT(1) DEFAULT 0 COMMENT '是否公开',
+    permission_mask INT UNSIGNED DEFAULT 0 COMMENT '权限掩码',
+
+    -- 版本控制（仅文件有）
+    version INT UNSIGNED DEFAULT 1 COMMENT '版本号',
+    is_latest TINYINT(1) DEFAULT 1 COMMENT '是否最新版本',
+    previous_version_id BIGINT UNSIGNED COMMENT '上一个版本ID',
+
+    -- 业务分类
+    category VARCHAR(50) COMMENT '分类：IMAGE, DOCUMENT, VIDEO, AUDIO等',
+    tags JSON COMMENT '标签数组',
+
+
+    -- 状态
+    status TINYINT(1) DEFAULT 1 COMMENT '状态：0-删除，1-正常，2-隐藏',
+
+    -- 元数据
+    description TEXT COMMENT '描述',
+    metadata JSON COMMENT '元数据（如：图片宽高、视频时长等）',
+
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+
+    PRIMARY KEY (resource_id),
+    KEY idx_parent_id (parent_id),
+    KEY idx_owner (owner_type, owner_id),
+    KEY idx_type_category (type, category),
+    KEY idx_md5_hash (md5_hash)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='系统资源文件表';
 SET FOREIGN_KEY_CHECKS = 1;

@@ -23,6 +23,9 @@ import (
 	"nova-factory-server/app/business/asset/material/materialController"
 	"nova-factory-server/app/business/asset/material/materialDao/materialDaoImpl"
 	"nova-factory-server/app/business/asset/material/materialService/materialServiceImpl"
+	"nova-factory-server/app/business/asset/resource/resourceController"
+	"nova-factory-server/app/business/asset/resource/resourceDao/resourceDaoImpl"
+	"nova-factory-server/app/business/asset/resource/resourceService/resourceServiceImpl"
 	"nova-factory-server/app/business/craft/craftRouteController"
 	"nova-factory-server/app/business/craft/craftRouteDao/craftRouteDaoImpl"
 	"nova-factory-server/app/business/craft/craftRouteService/craftRouteServiceImpl"
@@ -360,7 +363,13 @@ func wireApp() (*gin.Engine, func(), error) {
 	product := &productController.Product{
 		Laboratory: laboratory,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller, buildingControllerController, dashboardControllerController, product)
+	iResourceFileDao := resourceDaoImpl.NewSysResourceFileDao(db)
+	iResourceFileService := resourceServiceImpl.NewSysResourceFileService(iResourceFileDao)
+	resourceFile := resourceController.NewResourceFile(iResourceFileService)
+	resourceControllerResourceController := &resourceController.ResourceController{
+		ResourceFile: resourceFile,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController)
 	return engine, func() {
 		cleanup()
 	}, nil
