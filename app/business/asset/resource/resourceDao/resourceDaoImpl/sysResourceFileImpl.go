@@ -108,7 +108,7 @@ func (dao *sysResourceFileDao) CheckNameUnique(ctx context.Context, parentId int
 	query = query.Where("name = ?", name).Where("state = ?", commonStatus.NORMAL)
 
 	var count int64
-	ret := query.Count(&count)
+	ret := query.Debug().Count(&count)
 	if ret.Error != nil {
 		return 0
 	}
