@@ -682,7 +682,6 @@ CREATE TABLE IF NOT EXISTS sys_resource_file (
 
     -- 类型标识
     type ENUM('FILE', 'FOLDER') NOT NULL DEFAULT 'FILE' COMMENT '类型：FILE-文件，FOLDER-文件夹',
-    is_folder TINYINT(1) GENERATED ALWAYS AS (IF(type = 'FOLDER', 1, 0)) VIRTUAL COMMENT '是否文件夹（虚拟列，方便查询）',
 
     -- 存储路径
     path VARCHAR(1000) NOT NULL COMMENT '完整路径（不含域名）',
@@ -699,19 +698,10 @@ CREATE TABLE IF NOT EXISTS sys_resource_file (
     lineage VARCHAR(1000) COMMENT '层级路径，格式：/父ID/祖父ID/...',
 
     -- 权限和所有者
-    owner_id BIGINT UNSIGNED COMMENT '所有者ID',
-    owner_type VARCHAR(50) COMMENT '所有者类型：USER-用户，DEPARTMENT-部门等',
-    is_public TINYINT(1) DEFAULT 0 COMMENT '是否公开',
     permission_mask INT UNSIGNED DEFAULT 0 COMMENT '权限掩码',
-
-    -- 版本控制（仅文件有）
-    version INT UNSIGNED DEFAULT 1 COMMENT '版本号',
-    is_latest TINYINT(1) DEFAULT 1 COMMENT '是否最新版本',
-    previous_version_id BIGINT UNSIGNED COMMENT '上一个版本ID',
 
     -- 业务分类
     category VARCHAR(50) COMMENT '分类：IMAGE, DOCUMENT, VIDEO, AUDIO等',
-    tags JSON COMMENT '标签数组',
 
 
     -- 状态
@@ -719,7 +709,6 @@ CREATE TABLE IF NOT EXISTS sys_resource_file (
 
     -- 元数据
     description TEXT COMMENT '描述',
-    metadata JSON COMMENT '元数据（如：图片宽高、视频时长等）',
 
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
@@ -730,7 +719,6 @@ CREATE TABLE IF NOT EXISTS sys_resource_file (
 
     PRIMARY KEY (resource_id),
     KEY idx_parent_id (parent_id),
-    KEY idx_owner (owner_type, owner_id),
     KEY idx_type_category (type, category),
     KEY idx_md5_hash (md5_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='系统资源文件表';

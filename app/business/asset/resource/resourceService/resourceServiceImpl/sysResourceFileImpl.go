@@ -40,3 +40,10 @@ func (s *sysResourceFileService) List(ctx context.Context, query *resourceModels
 func (s *sysResourceFileService) Remove(ctx context.Context, ids []string) error {
 	return s.resourceDao.Remove(ctx, ids)
 }
+
+func (s *sysResourceFileService) CheckNameUnique(ctx context.Context, parentId int64, name string, resourceId int64) int64 {
+	return s.resourceDao.CheckNameUnique(ctx, parentId, name, resourceId)
+}
+func (s *sysResourceFileService) CheckChildren(ctx context.Context, resourceId int64) int64 {
+	return s.resourceDao.CheckChildren(ctx, resourceId)
+}

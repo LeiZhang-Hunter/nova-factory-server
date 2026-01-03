@@ -29,7 +29,7 @@ func (dao *sysResourceFileDao) InsertResource(ctx context.Context, resource *res
 }
 
 func (dao *sysResourceFileDao) UpdateResource(ctx context.Context, resource *resourceModels.SysResourceFile) (*resourceModels.SysResourceFile, error) {
-	ret := dao.db.Table(dao.table).Where("resourceId = ?", resource.ResourceID).Updates(&resource)
+	ret := dao.db.Table(dao.table).Where("resource_id = ?", resource.ResourceID).Updates(&resource)
 	if ret.Error != nil {
 		return nil, ret.Error
 	}
@@ -51,7 +51,9 @@ func (dao *sysResourceFileDao) List(ctx context.Context, query *resourceModels.S
 	if query.Category != "" {
 		dbQuery = dbQuery.Where("category = ?", query.Category)
 	}
-	dbQuery = dbQuery.Where("parent_id = ?", query.ParentId)
+	if query.ParentId != nil {
+		dbQuery = dbQuery.Where("parent_id = ?", *query.ParentId)
+	}
 
 	if query.Status != nil {
 		dbQuery = dbQuery.Where("status = ?", query.Status)
@@ -75,16 +77,51 @@ func (dao *sysResourceFileDao) List(ctx context.Context, query *resourceModels.S
 		size = int(query.Size)
 	}
 	list := make([]*resourceModels.SysResourceFileVo, 0)
-	err := dbQuery.Offset(offset).Order("create_time desc").Limit(size).Find(&list)
-	if err != nil {
-		return result, ret.Error
+	if query.Type == "FOLDER" {
+		ret = dbQuery.Where("state = ?", commonStatus.NORMAL).Offset(0).Order("create_time desc").Limit(1000).Find(&list)
+		if ret.Error != nil {
+			return result, ret.Error
+		}
+	} else {
+		ret = dbQuery.Offset(offset).Order("create_time desc").Limit(size).Find(&list)
+		if ret.Error != nil {
+			return result, ret.Error
+		}
 	}
+
 	result.List = list
 	result.Total = total
 	return result, ret.Error
 }
 
 func (dao *sysResourceFileDao) Remove(ctx context.Context, ids []string) error {
-	ret := dao.db.Table(dao.table).Where("id in (?)", ids).Update("state", commonStatus.DELETE)
+	ret := dao.db.Table(dao.table).Where("resource_id in (?)", ids).Update("state", commonStatus.DELETE)
 	return ret.Error
+}
+
+func (dao *sysResourceFileDao) CheckNameUnique(ctx context.Context, parentId int64, name string, resourceId int64) int64 {
+	query := dao.db.Table(dao.table)
+	if resourceId > 0 {
+		query = query.Where("resource_id != ?", resourceId)
+	}
+	query = query.Where("parent_id = ?", parentId)
+	query = query.Where("name = ?", name).Where("state = ?", commonStatus.NORMAL)
+
+	var count int64
+	ret := query.Count(&count)
+	if ret.Error != nil {
+		return 0
+	}
+	return count
+}
+
+func (dao *sysResourceFileDao) CheckChildren(ctx context.Context, resourceId int64) int64 {
+	query := dao.db.Table(dao.table)
+	query = query.Where("parent_id = ?", resourceId).Where("state = ?", commonStatus.NORMAL)
+	var count int64
+	ret := query.Count(&count)
+	if ret.Error != nil {
+		return 0
+	}
+	return count
 }

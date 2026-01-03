@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/asset/resource/resourceService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"strconv"
 )
 
 type ResourceFile struct {
@@ -41,6 +42,11 @@ func (rf *ResourceFile) Set(c *gin.Context) {
 		return
 	}
 	if req.ResourceID <= 0 {
+		count := rf.service.CheckNameUnique(c, req.ParentID, req.Name, req.ResourceID)
+		if count > 0 {
+			baizeContext.Waring(c, "资源已经存在")
+			return
+		}
 		resource, err := rf.service.InsertResource(c, req)
 		if err != nil {
 			baizeContext.Waring(c, "创建资源失败")
@@ -48,6 +54,11 @@ func (rf *ResourceFile) Set(c *gin.Context) {
 		}
 		baizeContext.SuccessData(c, resource)
 	} else {
+		count := rf.service.CheckNameUnique(c, req.ParentID, req.Name, req.ResourceID)
+		if count > 0 {
+			baizeContext.Waring(c, "资源已经存在")
+			return
+		}
 		resource, err := rf.service.UpdateResource(c, req)
 		if err != nil {
 			baizeContext.Waring(c, "更新资源失败")
@@ -95,6 +106,18 @@ func (rf *ResourceFile) Remove(c *gin.Context) {
 	if len(ids) == 0 {
 		baizeContext.Waring(c, "请选择删除选项")
 		return
+	}
+	for _, id := range ids {
+		idValue, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			baizeContext.Waring(c, err.Error())
+			return
+		}
+		count := rf.service.CheckChildren(c, int64(idValue))
+		if count > 0 {
+			baizeContext.Waring(c, "存在子文件或者文件夹不能删除")
+			return
+		}
 	}
 	err := rf.service.Remove(c, ids)
 	if err != nil {
