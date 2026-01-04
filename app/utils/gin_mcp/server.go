@@ -46,7 +46,7 @@ type GinMCP struct {
 	path              string
 	// executeToolFunc holds the function used to execute a tool.
 	// It defaults to defaultExecuteTool but can be overridden for testing.
-	executeToolFunc func(operationID string, parameters map[string]interface{}) (interface{}, error)
+	executeToolFunc func(ctx context.Context, operationID string, parameters map[string]interface{}, headers http.Header) (interface{}, error)
 	mcpServer       *server.MCPServer
 	handler         http.Handler
 }
@@ -112,7 +112,7 @@ func New(engine *gin.Engine, config *Config) *GinMCP {
 
 // SetExecuteToolFunc allows overriding the default tool execution function.
 // This is useful for implementing dynamic baseURL resolution or custom execution logic.
-func (m *GinMCP) SetExecuteToolFunc(fn func(operationID string, parameters map[string]interface{}) (interface{}, error)) {
+func (m *GinMCP) SetExecuteToolFunc(fn func(ctx context.Context, operationID string, parameters map[string]interface{}, headers http.Header) (interface{}, error)) {
 	m.executeToolFunc = fn
 }
 
@@ -197,7 +197,7 @@ func (m *GinMCP) Mount(path string, operationsPath string) {
 			if !ok {
 				arguments = make(map[string]interface{})
 			}
-			result, err := m.executeToolFunc(tool.Name, arguments)
+			result, err := m.executeToolFunc(ctx, tool.Name, arguments, request.Header)
 			if err != nil {
 				message := fmt.Sprintf("Error executing tool '%s': %v", tool.Name, err)
 				return mcp.NewToolResultError(message), err
@@ -405,91 +405,6 @@ func (m *GinMCP) handleToolsList(msg *types.MCPMessage) *types.MCPMessage {
 	}
 }
 
-// handleToolCall handles the tools/call request
-func (m *GinMCP) handleToolCall(msg *types.MCPMessage) *types.MCPMessage {
-	// Parse parameters from the incoming MCP message
-	reqParams, ok := msg.Params.(map[string]interface{})
-	if !ok {
-		return &types.MCPMessage{
-			Jsonrpc: "2.0", ID: msg.ID,
-			Error: map[string]interface{}{"code": -32602, "message": "Invalid parameters format"},
-		}
-	}
-	// Get tool name and arguments from the params
-	toolName, nameOk := reqParams["name"].(string)
-	// The actual arguments passed by the LLM are nested under "arguments"
-	toolArgs, argsOk := reqParams["arguments"].(map[string]interface{})
-	if !nameOk || !argsOk {
-		return &types.MCPMessage{
-			Jsonrpc: "2.0", ID: msg.ID,
-			Error: map[string]interface{}{"code": -32602, "message": "Missing tool name or arguments"},
-		}
-	}
-
-	// *** Add check for tool existence BEFORE executing ***
-	if _, exists := m.operations[toolName]; !exists {
-		if isDebugMode() {
-			log.Printf("Error: Tool '%s' not found in operations map.", toolName)
-		}
-		return &types.MCPMessage{
-			Jsonrpc: "2.0",
-			ID:      msg.ID,
-			Error: map[string]interface{}{
-				"code":    -32601, // Method not found
-				"message": fmt.Sprintf("Tool '%s' not found", toolName),
-			},
-		}
-	}
-
-	if isDebugMode() {
-		log.Printf("Handling tool call: %s with args: %v", toolName, toolArgs)
-	}
-
-	// Execute the actual Gin endpoint via internal HTTP call
-	execResult, err := m.executeToolFunc(toolName, toolArgs) // Use the function field
-	if err != nil {
-		// Handle execution error
-		return &types.MCPMessage{
-			Jsonrpc: "2.0",
-			ID:      msg.ID,
-			Error: map[string]interface{}{
-				"code":    -32603, // Internal error
-				"message": fmt.Sprintf("Error executing tool '%s': %v", toolName, err),
-			},
-		}
-	}
-
-	// Convert execResult to JSON string for the content field
-	resultBytes, err := json.Marshal(execResult)
-	if err != nil {
-		// Handle potential marshalling error if execResult is complex/invalid
-		return &types.MCPMessage{
-			Jsonrpc: "2.0",
-			ID:      msg.ID,
-			Error: map[string]interface{}{ // Use appropriate error code
-				"code":    -32603, // Internal error
-				"message": fmt.Sprintf("Failed to marshal tool execution result: %v", err),
-			},
-		}
-	}
-
-	// Construct the success response using the expected content structure
-	return &types.MCPMessage{
-		Jsonrpc: "2.0",
-		ID:      msg.ID,
-		Result: map[string]interface{}{ // Standard MCP result wrapper
-			"content": []map[string]interface{}{ // Content is an array
-				{
-					"type": string(types.ContentTypeText), // Assuming text response
-					"text": string(resultBytes),           // Actual result as JSON string
-				},
-			},
-			// Add other potential fields like isError=false if needed by spec/client
-			// "isError": false,
-		},
-	}
-}
-
 // SetupServer initializes the MCP server by discovering routes and converting them to tools
 func (m *GinMCP) SetupServer() error {
 	if len(m.tools) == 0 {
@@ -655,44 +570,9 @@ func hasMatchingTag(toolTags []string, filterTags map[string]bool) bool {
 	return false
 }
 
-// ExecuteToolWithDynamicURL executes a tool with a dynamically resolved baseURL.
-// This is a helper function for implementing custom executeToolFunc with dynamic baseURL logic.
-func (m *GinMCP) ExecuteToolWithDynamicURL(operationID string, parameters map[string]interface{}, baseURL string) (interface{}, error) {
-	return m.executeToolWithBaseURL(operationID, parameters, baseURL)
-}
-
-// ExecuteToolWithResolver executes a tool using a baseURL resolver function.
-// The resolver function can extract baseURL from headers, environment, or any other source.
-func (m *GinMCP) ExecuteToolWithResolver(operationID string, parameters map[string]interface{}, resolver func() string) (interface{}, error) {
-	baseURL := resolver()
-	return m.executeToolWithBaseURL(operationID, parameters, baseURL)
-}
-
-// executeToolWithBaseURL is the internal implementation that accepts a specific baseURL
-func (m *GinMCP) executeToolWithBaseURL(operationID string, parameters map[string]interface{}, baseURL string) (interface{}, error) {
-	if isDebugMode() {
-		log.Printf("[Tool Execution] Starting execution of tool '%s' with parameters: %+v, baseURL: %s", operationID, parameters, baseURL)
-	}
-
-	// Find the operation associated with the tool name (operationID)
-	operation, ok := m.operations[operationID]
-	if !ok {
-		if isDebugMode() {
-			log.Printf("Error: Operation details not found for tool '%s'", operationID)
-		}
-		return nil, fmt.Errorf("operation '%s' not found", operationID)
-	}
-	if isDebugMode() {
-		log.Printf("[Tool Execution] Found operation for tool '%s': Method=%s, Path=%s", operationID, operation.Method, operation.Path)
-	}
-
-	// Continue with the existing tool execution logic using the provided baseURL
-	return m.executeToolLogic(operation, parameters, baseURL)
-}
-
 // defaultExecuteTool is the default implementation for executing a tool.
 // It handles the actual invocation of the underlying Gin handler using the configured baseURL.
-func (m *GinMCP) defaultExecuteTool(operationID string, parameters map[string]interface{}) (interface{}, error) {
+func (m *GinMCP) defaultExecuteTool(ctx context.Context, operationID string, parameters map[string]interface{}, headers http.Header) (interface{}, error) {
 	if isDebugMode() {
 		log.Printf("[Tool Execution] Starting execution of tool '%s' with parameters: %+v", operationID, parameters)
 	}
@@ -719,12 +599,12 @@ func (m *GinMCP) defaultExecuteTool(operationID string, parameters map[string]in
 		}
 	}
 
-	return m.executeToolLogic(operation, parameters, baseURL)
+	return m.executeToolLogic(ctx, operation, parameters, baseURL, headers)
 }
 
 // executeToolLogic contains the core tool execution logic that can be reused
 // with different baseURL resolution strategies
-func (m *GinMCP) executeToolLogic(operation types.Operation, parameters map[string]interface{}, baseURL string) (interface{}, error) {
+func (m *GinMCP) executeToolLogic(ctx context.Context, operation types.Operation, parameters map[string]interface{}, baseURL string, headers http.Header) (interface{}, error) {
 
 	path := operation.Path
 	queryParams := url.Values{}
@@ -803,7 +683,11 @@ func (m *GinMCP) executeToolLogic(operation types.Operation, parameters map[stri
 		return nil, err
 	}
 
+	// 再次创建一个可取消的 context，嵌套原始的 context
+	authorization := headers.Get("Authorization")
+	//req.Header.Set("Authorization")
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", authorization)
 	if reqBody != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
