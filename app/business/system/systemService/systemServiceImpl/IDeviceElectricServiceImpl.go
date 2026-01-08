@@ -41,7 +41,6 @@ func (i *IDeviceElectricServiceImpl) Set(c *gin.Context, setting *systemModels.S
 		err := i.metricDao.InstallRunStatusDevice(c, setting.DeviceID)
 		if err != nil {
 			zap.L().Error("install device run status dev table error", zap.Error(err))
-			return nil, err
 		}
 	}
 
