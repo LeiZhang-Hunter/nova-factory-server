@@ -657,7 +657,7 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 			runProcess.List[k].DeviceId = deviceId
 			runProcess.List[k].Value[device.RUNNING] = v.Value
 
-			stopProcessTime := 1800 - runProcess.List[k].Value[device.RUNNING] - runProcess.List[k].Value[device.WAITING]
+			stopProcessTime := 7200 - runProcess.List[k].Value[device.RUNNING] - runProcess.List[k].Value[device.WAITING]
 			runProcess.List[k].Value[device.STOPPING] = stopProcessTime
 		}
 		deviceUtilizationList.ProcessList[build] = append(deviceUtilizationList.ProcessList[build], runProcess)
