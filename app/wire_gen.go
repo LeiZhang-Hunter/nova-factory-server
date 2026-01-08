@@ -359,7 +359,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	iSysProductLaboratoryDao := productDaoImpl.NewSysProductLaboratoryDao(db)
 	iSysProductLaboratoryService := productServiceImpl.NewSysProductLaboratoryService(iSysProductLaboratoryDao, iUserDao)
-	laboratory := productController.NewLaboratory(iSysProductLaboratoryService)
+	laboratory := productController.NewLaboratory(iSysProductLaboratoryService, iDictDataService)
 	product := &productController.Product{
 		Laboratory: laboratory,
 	}

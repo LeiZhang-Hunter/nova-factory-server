@@ -5,17 +5,23 @@ import (
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/product/productModels"
 	"nova-factory-server/app/business/product/productService"
+	"nova-factory-server/app/business/system/systemModels"
+	"nova-factory-server/app/business/system/systemService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/gin_mcp"
 )
 
 type Laboratory struct {
-	ls productService.ISysProductLaboratoryService
+	ls  productService.ISysProductLaboratoryService
+	dds systemService.IDictDataService
 }
 
-func NewLaboratory(ls productService.ISysProductLaboratoryService) *Laboratory {
-	return &Laboratory{ls: ls}
+func NewLaboratory(ls productService.ISysProductLaboratoryService, dds systemService.IDictDataService) *Laboratory {
+	return &Laboratory{
+		ls:  ls,
+		dds: dds,
+	}
 }
 
 func (lc *Laboratory) PrivateRoutes(router *gin.RouterGroup) {
@@ -33,6 +39,7 @@ func (lc *Laboratory) PublicRoutes(router *gin.RouterGroup) {
 	laboratoryApi := router.Group("/api/v1/product/laboratory")
 	laboratoryApi.GET("/first", lc.LaboratoryFirst)
 	laboratoryApi.GET("/first/list", lc.LaboratoryFirstList)
+	laboratoryApi.GET("/dict", lc.LaboratoryDict)
 }
 
 func (lc *Laboratory) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
@@ -194,4 +201,20 @@ func (lc *Laboratory) LaboratoryFirstList(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, list)
+}
+
+// LaboratoryDict 配料物料列表
+// @Summary 配料物料列表
+// @Description 配料物料列表
+// @Tags 化验单管理
+// @Param  object query systemModels.SysDictDataDQL false "查询参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]productModels.SysProductLaboratoryVo}} "成功"
+// @Router /api/v1/product/laboratory/dict [get]
+func (lc *Laboratory) LaboratoryDict(c *gin.Context) {
+	dictData := new(systemModels.SysDictDataDQL)
+	dictData.DictType = "laboratory_material"
+	list, count := lc.dds.SelectDictDataList(c, dictData)
+	baizeContext.SuccessListData(c, list, count)
 }

@@ -186,6 +186,11 @@ func (dao *sysProductLaboratoryDao) FirstLaboratoryList(ctx *gin.Context, dql *p
 		dql = &productModels.SysProductLaboratoryDQL{}
 	}
 	query := dao.db.Table(dao.table)
+	query.Where("type = ?", dql.Type)
+
+	if dql.Material != "" {
+		query.Where("material = ?", dql.Material)
+	}
 
 	size := 0
 	if dql.Size <= 0 {
