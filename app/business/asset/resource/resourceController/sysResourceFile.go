@@ -18,6 +18,13 @@ func NewResourceFile(service resourceService.IResourceFileService) *ResourceFile
 	return &ResourceFile{service: service}
 }
 
+func (rf *ResourceFile) PublicRoutes(router *gin.RouterGroup) {
+	group := router.Group("/api/v1/resource")
+	// 根据标签读取设备数据
+	group.GET("/list", rf.ResourceList)
+
+}
+
 func (rf *ResourceFile) PrivateRoutes(router *gin.RouterGroup) {
 	resource := router.Group("/asset/resource")
 	resource.GET("/list", middlewares.HasPermission("asset:resource:list"), rf.List)               // 资料列表
@@ -126,4 +133,28 @@ func (rf *ResourceFile) Remove(c *gin.Context) {
 	}
 
 	baizeContext.Success(c)
+}
+
+// ResourceList 资料管理列表公共接口
+// @Summary 资料管理列表
+// @Description 资料管理列表
+// @Tags 资料管理
+// @Param  object query resourceModels.SysResourceFileDQL true "资料管理列表请求参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /api/v1/resource/list [get]
+func (rf *ResourceFile) ResourceList(c *gin.Context) {
+	query := new(resourceModels.SysResourceFileDQL)
+	err := c.ShouldBindQuery(query)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		zap.L().Error("param error", zap.Error(err))
+		return
+	}
+	list, err := rf.service.List(c, query)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
 }
