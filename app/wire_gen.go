@@ -344,8 +344,12 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	buildingService := buildingServiceImpl.NewBuildingServiceImpl(buildingDao)
 	building := buildingController.NewBuilding(buildingService)
+	floorDao := buildingDaoImpl.NewFloorDaoImpl(db)
+	floorService := buildingServiceImpl.NewFloorServiceImpl(floorDao)
+	floor := buildingController.NewFloor(floorService)
 	buildingControllerController := buildingController.Controller{
 		Building: building,
+		Floor:    floor,
 	}
 	dashboardDao := dashboardDaoImpl.NewDashboardDaoImpl(db)
 	dashboardService := dashboardServiceImpl.NewDashboardServiceImpl(dashboardDao, iMetricDao)
