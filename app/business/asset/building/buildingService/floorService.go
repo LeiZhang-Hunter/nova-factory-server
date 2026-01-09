@@ -1,0 +1,14 @@
+package buildingService
+
+import (
+	"nova-factory-server/app/business/asset/building/buildingModels"
+
+	"github.com/gin-gonic/gin"
+)
+
+type FloorService interface {
+	Set(c *gin.Context, data *buildingModels.SetSysFloor) (*buildingModels.SysFloor, error)
+	List(c *gin.Context, req *buildingModels.SetSysFloorListReq) (*buildingModels.SetSysFloorList, error)
+	Remove(c *gin.Context, ids []string) error
+	CheckUniqueFloor(c *gin.Context, id int64, buildingId int64, level int8) (int64, error)
+}

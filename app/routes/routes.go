@@ -161,6 +161,7 @@ func NewGinEngine(
 		alert.AlertAiReason.PrivateRoutes(group)
 
 		building.Building.PrivateRoutes(group)
+		building.Floor.PrivateRoutes(group)
 
 		dashboard.Dashboard.PrivateRoutes(group)
 		dashboard.Data.PrivateRoutes(group)
