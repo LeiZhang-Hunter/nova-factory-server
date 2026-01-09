@@ -37,15 +37,13 @@ func (i *IDeviceElectricServiceImpl) Set(c *gin.Context, setting *systemModels.S
 	if setting == nil {
 		return nil, errors.New("setting is nil")
 	}
-	if setting.ID == 0 {
-		err := i.metricDao.InstallRunStatusDevice(c, setting.DeviceID)
-		if err != nil {
-			zap.L().Error("install device run status dev table error", zap.Error(err))
-		}
+	err := i.metricDao.InstallRunStatusDevice(c, setting.DeviceID)
+	if err != nil {
+		zap.L().Error("install device run status dev table error", zap.Error(err))
 	}
 
 	devKey := iotdb.MakeRunDeviceTemplateName(setting.DeviceID)
-	err := i.mapDao.Save(c, &deviceMonitorModel.SysIotDbDevMap{
+	err = i.mapDao.Save(c, &deviceMonitorModel.SysIotDbDevMap{
 		DeviceID:   setting.DeviceID,
 		TemplateID: 0,
 		DataID:     0,

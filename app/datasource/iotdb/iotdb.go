@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
+	"time"
 )
 
 type IotDb struct {
@@ -38,13 +39,61 @@ func NewIotDb() *IotDb {
 	session, err := pool.GetSession()
 	if err != nil {
 		zap.L().Error("get session", zap.Error(err))
-		return db
+		if err.Error() != "sessionPool has closed" && err.Error() != "get session timeout" {
+			return db
+		}
 	}
 
 	defer pool.PutBack(session)
 
-	// 创建数据库
-	session.ExecuteStatement("create database root.device")
+	for {
+		statement, err := session.ExecuteStatement("count databases root.device")
+		if err != nil {
+			zap.L().Error("execute statement", zap.Error(err))
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		hasDatabase, err := statement.Next()
+		if err != nil {
+			zap.L().Error("get hasDatabase", zap.Error(err))
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		count := statement.GetInt32("count")
+		if count < 1 {
+			session.ExecuteStatement("create database root.device")
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		statement, err = session.ExecuteStatement("count databases root.run_status_device")
+		if err != nil {
+			time.Sleep(1 * time.Second)
+			return nil
+		}
+		hasDatabase, err = statement.Next()
+		if err != nil {
+			zap.L().Error("get hasDatabase", zap.Error(err))
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		if !hasDatabase {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		count = statement.GetInt32("count")
+		if count < 1 {
+			session.ExecuteStatement("create database root.run_status_device")
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		break
+	}
+
 	// 创建设备数据采集模板
 	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (value DOUBLE)", iotdb2.NOVA_DEVICE_TEMPLATE))
 	// 创建设备运行时间统计模板
