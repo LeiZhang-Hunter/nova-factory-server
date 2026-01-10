@@ -32,3 +32,10 @@ func (b *FloorServiceImpl) Remove(c *gin.Context, ids []string) error {
 func (b *FloorServiceImpl) CheckUniqueFloor(c *gin.Context, id int64, buildingId int64, level int8) (int64, error) {
 	return b.dao.CheckUniqueFloor(c, id, buildingId, level)
 }
+func (b *FloorServiceImpl) SaveLayout(c *gin.Context, id int64, layout *buildingModels.FloorLayout) error {
+	return b.dao.SaveLayout(c, id, layout)
+}
+
+func (b *FloorServiceImpl) Info(c *gin.Context, id int64) (*buildingModels.SysFloor, error) {
+	return b.dao.Info(c, id)
+}

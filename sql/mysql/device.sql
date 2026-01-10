@@ -281,6 +281,7 @@ CREATE TABLE IF NOT EXISTS `sys_floor` (
     `building_id` bigint(20) NULL DEFAULT 0 COMMENT '建筑物id',
     `floor_name` varchar(32) NOT NULL COMMENT '名称',
     `level` tinyint(1) NOT NULL DEFAULT '1' COMMENT '楼层',
+    `layout` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '布局',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',

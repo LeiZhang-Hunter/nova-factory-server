@@ -24,6 +24,8 @@ func (b *Floor) PrivateRoutes(router *gin.RouterGroup) {
 	building.GET("/list", middlewares.HasPermission("asset:floor:list"), b.List)
 	building.POST("/set", middlewares.HasPermission("asset:floor:set"), b.Set)
 	building.DELETE("/remove/:ids", middlewares.HasPermission("asset:floor:remove"), b.Remove)
+	building.POST("/layout/save", middlewares.HasPermission("asset:floor:layout:save"), b.SaveLayout)
+	building.GET("/layout/info", middlewares.HasPermission("asset:floor:layout:info"), b.InfoLayout)
 }
 
 // Set 保存楼层
@@ -101,4 +103,48 @@ func (b *Floor) List(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, list)
+}
+
+// SaveLayout 保存楼层布局
+// @Summary 保存楼层布局
+// @Description 保存楼层布局
+// @Tags 资产管理/楼层管理
+// @Param  object query buildingModels.SetSysFloorListReq true "楼层列表参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /asset/floor/layout/save [get]
+func (b *Floor) SaveLayout(c *gin.Context) {
+	req := new(buildingModels.FloorLayout)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	err = b.service.SaveLayout(c, req.FloorId, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
+}
+
+// InfoLayout 读取楼层布局
+// @Summary 读取楼层布局
+// @Description 读取楼层布局
+// @Tags 资产管理/楼层管理
+// @Param  object query buildingModels.SetSysFloorListReq true "楼层列表参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /asset/floor/layout/info [get]
+func (b *Floor) InfoLayout(c *gin.Context) {
+	req := new(buildingModels.FloorLayoutInfoRequest)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	info, err := b.service.Info(c, req.FloorId)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, info)
 }

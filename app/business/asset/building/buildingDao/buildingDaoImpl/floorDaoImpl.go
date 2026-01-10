@@ -1,6 +1,8 @@
 package buildingDaoImpl
 
 import (
+	"encoding/json"
+	"errors"
 	"nova-factory-server/app/business/asset/building/buildingDao"
 	"nova-factory-server/app/business/asset/building/buildingModels"
 	"nova-factory-server/app/constant/commonStatus"
@@ -89,7 +91,7 @@ func (b *FloorDaoImpl) List(c *gin.Context, req *buildingModels.SetSysFloorListR
 }
 
 func (b *FloorDaoImpl) Remove(c *gin.Context, ids []string) error {
-	ret := b.db.Table(b.table).Where("id = ?", ids).Update("state", commonStatus.DELETE)
+	ret := b.db.Table(b.table).Where("id = ?", ids).Delete(&buildingModels.SysFloor{})
 	return ret.Error
 }
 
@@ -110,4 +112,31 @@ func (b *FloorDaoImpl) CheckUniqueFloor(c *gin.Context, id int64, buildingId int
 	}
 	ret := check.Count(&count)
 	return count, ret.Error
+}
+
+func (b *FloorDaoImpl) SaveLayout(c *gin.Context, id int64, layout *buildingModels.FloorLayout) error {
+	if layout == nil {
+		return errors.New("layout == nil")
+	}
+	content, err := json.Marshal(layout)
+	if err != nil {
+		return err
+	}
+	ret := b.db.Table(b.table).Where("id = ?", id).Update("layout", content)
+	return ret.Error
+}
+
+func (b *FloorDaoImpl) Info(c *gin.Context, id int64) (*buildingModels.SysFloor, error) {
+	var info buildingModels.SysFloor
+	ret := b.db.Table(b.table).Where("id = ?", id).Where("state = ?", commonStatus.NORMAL).First(&info)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	var layout buildingModels.FloorLayout
+	err := json.Unmarshal([]byte(info.Layout), &layout)
+	if err != nil {
+		return nil, err
+	}
+	info.LayoutData = &layout
+	return &info, nil
 }
