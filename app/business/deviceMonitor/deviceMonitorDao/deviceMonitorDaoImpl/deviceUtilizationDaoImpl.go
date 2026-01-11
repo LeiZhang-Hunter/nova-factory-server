@@ -84,7 +84,7 @@ func (d *DeviceUtilizationDaoImpl) statDeviceStat(c *gin.Context, startTime stri
 }
 
 // statDeviceProcess 统计设备运行过程
-func (d *DeviceUtilizationDaoImpl) statDeviceProcess(c *gin.Context, startTime string, endTime string,
+func (d *DeviceUtilizationDaoImpl) statDeviceProcess(c *gin.Context, startTime string, endTime string, interval string,
 	status device.RUN_STATUS) (*deviceMonitorModel.DeviceProcessList, error) {
 	var processList deviceMonitorModel.DeviceProcessList
 	processList.List = make(map[string][]deviceMonitorModel.DeviceStatus)
@@ -97,8 +97,8 @@ func (d *DeviceUtilizationDaoImpl) statDeviceProcess(c *gin.Context, startTime s
 
 	var timeout int64 = 5000
 
-	sql := fmt.Sprintf("select sum(duration) as value from root.run_status_device.** where status = %d group by ([%s, %s), 2h)  align by device",
-		status, startTime, endTime)
+	sql := fmt.Sprintf("select sum(duration) as value from root.run_status_device.** where status = %d group by ([%s, %s), %s)  align by device",
+		status, startTime, endTime, interval)
 
 	statement, err := session.ExecuteQueryStatement(sql, &timeout)
 	if err != nil {
@@ -557,12 +557,12 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 	}
 
 	// 查询具体 设备运行情况，两个小时一个步长
-	processWaitList, err := d.statDeviceProcess(c, startTime, endTime, device.WAITING)
+	processWaitList, err := d.statDeviceProcess(c, startTime, endTime, "2h", device.WAITING)
 	if err != nil {
 		return nil, err
 	}
 
-	processRunningList, err := d.statDeviceProcess(c, startTime, endTime, device.RUNNING)
+	processRunningList, err := d.statDeviceProcess(c, startTime, endTime, "2h", device.RUNNING)
 	if err != nil {
 		return nil, err
 	}
@@ -726,22 +726,44 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 	// 计算时间趋势
 	end := systime.Now().UnixMilli()
 	start := end - 7*86400*1000
-	var level int = 1
-	query, err := d.metricDao.Query(c, &metricModels.MetricDataQueryReq{
-		Type:       "line",
-		Name:       "root.run_status_device.**",
-		Start:      uint64(start),
-		Field:      " ",
-		End:        uint64(end),
-		Step:       0,
-		Interval:   1440,
-		Level:      &level,
-		Expression: "Sum(duration)  as value",
-		Having:     fmt.Sprintf("last_value(status) = %d", device.WAITING),
-	})
-	if err != nil {
-		return deviceUtilizationList, err
+	query := &metricModels.MetricQueryData{
+		Values: make([]metricModels.MetricQueryValue, 0),
 	}
+	startTime = timeUtil.FormatDateFromSecond(start)
+	endTime = timeUtil.FormatDateFromSecond(end)
+
+	// 查询近一个周的运行情况
+	processRunningList, err = d.statDeviceProcess(c, startTime, endTime, "1d", device.RUNNING)
+	if err != nil {
+		return nil, err
+	}
+
+	var processRunningListMap map[int64]float64 = make(map[int64]float64)
+	if processRunningList != nil && len(processRunningList.List) > 0 {
+		for _, v := range processRunningList.List {
+			for _, runValue := range v {
+				_, ok := processRunningListMap[runValue.Time]
+				if !ok {
+					processRunningListMap[runValue.Time] = 0
+				}
+				processRunningListMap[runValue.Time] += runValue.Value
+			}
+		}
+	}
+
+	// 1. 获取所有键并排序
+	for k, v := range processRunningListMap {
+		query.Values = append(query.Values, metricModels.MetricQueryValue{
+			Time:  k,
+			Value: v,
+		})
+	}
+
+	// 按键升序排序
+	sort.Slice(query.Values, func(i, j int) bool {
+		return query.Values[i].Time < query.Values[j].Time
+	})
+
 	deviceUtilizationList.Data = query
 	sort.Sort(sort.Reverse(runSortUtilization(deviceUtilizationList.List)))
 	return deviceUtilizationList, nil

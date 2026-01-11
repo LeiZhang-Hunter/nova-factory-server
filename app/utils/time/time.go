@@ -146,3 +146,12 @@ func SecondsToHMS(seconds int64) string {
 
 	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, secondsRemaining)
 }
+
+func FormatDateFromSecond(second int64) string {
+	// 将毫秒时间戳转换为 time.Time
+	t := time.UnixMilli(second)
+
+	// 或者包含日期
+	dateTimeStr := t.Format("2006-01-02 15:04:05")
+	return dateTimeStr
+}
