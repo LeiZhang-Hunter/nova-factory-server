@@ -169,49 +169,6 @@ func (d *DeviceUtilizationDaoImpl) Stat(c *gin.Context, req *deviceMonitorModel.
 		return deviceUtilizationList, errors.New("参数错误")
 	}
 
-	// 查询所有班次，用来计算工作时间的稼动率
-	shift, err := d.shiftDao.GetEnableShift(c)
-	if err != nil {
-		zap.L().Error("读取班次错误", zap.Error(err))
-		return deviceUtilizationList, errors.New("读取班次错误")
-	}
-	if shift == nil {
-		zap.L().Error("读取班次错误")
-		return deviceUtilizationList, errors.New("读取班次错误")
-	}
-
-	shiftTime := 0
-	for _, config := range shift {
-		endTime := config.EndTime
-		if endTime > 86400 {
-			endTime = 86400
-		}
-		interval := endTime - config.BeginTime
-		if interval <= 0 {
-			zap.L().Error("班次时间设置错误")
-			return deviceUtilizationList, errors.New("班次时间设置错误")
-		}
-
-		shiftTime += int(interval)
-
-		// 添加超出当天时间的值
-		if config.EndTime > 86400 {
-			v := int(config.EndTime) - 86400
-			if v < 0 {
-				continue
-			}
-			shiftTime += v
-		}
-	}
-
-	if shiftTime > 86400 {
-		shiftTime = 86400
-	}
-
-	if shiftTime == 0 {
-		return deviceUtilizationList, nil
-	}
-
 	var startTime string
 	if req.Start > 0 {
 		startTime = timeUtil.GetStartTime(req.Start, 200)
@@ -220,6 +177,28 @@ func (d *DeviceUtilizationDaoImpl) Stat(c *gin.Context, req *deviceMonitorModel.
 		startTime = timeUtil.GetStartTime(uint64(start), 200)
 	}
 	endTime := timeUtil.GetEndTimeUseNow(req.End, true)
+
+	// 查询所有班次，用来计算工作时间的稼动率
+	// 使用Parse函数解析字符串为time.Time类型
+	endTimeUnix, err := systime.Parse("2006-01-02 15:04:05", endTime)
+	if err != nil {
+		fmt.Println("Error parsing time:", err)
+		return deviceUtilizationList, err
+	}
+
+	startTimeUnix, err := systime.Parse("2006-01-02 15:04:05", startTime)
+	if err != nil {
+		fmt.Println("Error parsing time:", err)
+		return deviceUtilizationList, err
+	}
+
+	shiftTime := 0
+
+	shiftTime = int(endTimeUnix.Unix() - startTimeUnix.Unix())
+
+	if shiftTime <= 0 {
+		shiftTime = 86400
+	}
 
 	runList, err := d.statDeviceStat(c, startTime, endTime, device.RUNNING)
 	if err != nil {
@@ -395,36 +374,6 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 	}
 
 	shiftTime := 0
-	for _, config := range shift {
-		endTime := config.EndTime
-		if endTime > 86400 {
-			endTime = 86400
-		}
-		interval := endTime - config.BeginTime
-		if interval <= 0 {
-			zap.L().Error("班次时间设置错误")
-			return deviceUtilizationList, errors.New("班次时间设置错误")
-		}
-
-		shiftTime += int(interval)
-
-		// 添加超出当天时间的值
-		if config.EndTime > 86400 {
-			v := int(config.EndTime) - 86400
-			if v < 0 {
-				continue
-			}
-			shiftTime += v
-		}
-	}
-
-	if shiftTime > 86400 {
-		shiftTime = 86400
-	}
-
-	if shiftTime == 0 {
-		return deviceUtilizationList, nil
-	}
 
 	var startTime string
 	if req.Start > 0 {
@@ -437,6 +386,26 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 		startTime = timeUtil.GetStartTime(uint64(start), 200)
 	}
 	endTime := timeUtil.GetEndTimeUseNow(req.End, true)
+
+	// 查询所有班次，用来计算工作时间的稼动率
+	// 使用Parse函数解析字符串为time.Time类型
+	endTimeUnix, err := systime.Parse("2006-01-02 15:04:05", endTime)
+	if err != nil {
+		fmt.Println("Error parsing time:", err)
+		return deviceUtilizationList, err
+	}
+
+	startTimeUnix, err := systime.Parse("2006-01-02 15:04:05", startTime)
+	if err != nil {
+		fmt.Println("Error parsing time:", err)
+		return deviceUtilizationList, err
+	}
+
+	shiftTime = int(endTimeUnix.Unix() - startTimeUnix.Unix())
+
+	if shiftTime <= 0 {
+		shiftTime = 86400
+	}
 
 	runList, err := d.statDeviceStat(c, startTime, endTime, device.RUNNING)
 	if err != nil {
@@ -757,6 +726,7 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 	// 计算时间趋势
 	end := systime.Now().UnixMilli()
 	start := end - 7*86400*1000
+	var level int = 1
 	query, err := d.metricDao.Query(c, &metricModels.MetricDataQueryReq{
 		Type:       "line",
 		Name:       "root.run_status_device.**",
@@ -765,6 +735,7 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 		End:        uint64(end),
 		Step:       0,
 		Interval:   1440,
+		Level:      &level,
 		Expression: "Sum(duration)  as value",
 		Having:     fmt.Sprintf("last_value(status) = %d", device.WAITING),
 	})

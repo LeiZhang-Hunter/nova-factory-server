@@ -531,16 +531,22 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricModels.MetricDataQueryReq
 		having = " having " + req.Having
 	}
 
+	var level string
+	if req.Level != nil {
+		levelValue := *req.Level
+		level = fmt.Sprintf(",level=%d", levelValue)
+	}
+
 	var timeout int64 = 5000
 	var data *metricModels.MetricQueryData = metricModels.NewMetricQueryData()
 	var sql string
 	if req.Type == "bar" || req.Type == "line" || req.Type == "area" || req.Type == "toplist" {
 		if req.Step != 0 {
 			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm, %dm)%s",
-				req.Expression, req.Field, req.Name, startTime, endTime, interval, req.Step, having)
+				req.Expression, req.Field, req.Name, startTime, endTime, interval, req.Step, level, having)
 		} else {
-			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm)%s",
-				req.Expression, req.Field, req.Name, startTime, endTime, interval, having)
+			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm)%s %s",
+				req.Expression, req.Field, req.Name, startTime, endTime, interval, level, having)
 		}
 	} else {
 		sql = fmt.Sprintf("select %s %s from %s where time > %s and time < %s",
