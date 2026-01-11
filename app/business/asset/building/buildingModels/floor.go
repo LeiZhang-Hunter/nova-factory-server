@@ -43,22 +43,22 @@ type SetSysFloorList struct {
 	Rows  []*SysFloor `json:"rows"`
 	Total int64       `json:"total"`
 }
-
+type Zone struct {
+	Name    string `json:"name"`
+	X       int    `json:"x"`
+	Y       int    `json:"y"`
+	Width   int    `json:"width"`
+	Height  int    `json:"height"`
+	Devices []struct {
+		DeviceId   int64  `json:"deviceId,string"`
+		DeviceName string `json:"deviceName"`
+		X          int    `json:"x"`
+		Y          int    `json:"y"`
+	} `json:"devices"`
+}
 type FloorLayout struct {
-	FloorId int64 `json:"floorId,string"`
-	Zones   []struct {
-		Name    string `json:"name"`
-		X       int    `json:"x"`
-		Y       int    `json:"y"`
-		Width   int    `json:"width"`
-		Height  int    `json:"height"`
-		Devices []struct {
-			DeviceId   int64  `json:"deviceId,string"`
-			DeviceName string `json:"deviceName"`
-			X          int    `json:"x"`
-			Y          int    `json:"y"`
-		} `json:"devices"`
-	} `json:"zones"`
+	FloorId int64  `json:"floorId,string"`
+	Zones   []Zone `json:"zones"`
 }
 
 type FloorLayoutInfoRequest struct {

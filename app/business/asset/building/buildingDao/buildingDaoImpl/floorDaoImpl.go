@@ -132,11 +132,19 @@ func (b *FloorDaoImpl) Info(c *gin.Context, id int64) (*buildingModels.SysFloor,
 	if ret.Error != nil {
 		return nil, ret.Error
 	}
-	var layout buildingModels.FloorLayout
-	err := json.Unmarshal([]byte(info.Layout), &layout)
-	if err != nil {
-		return nil, err
+	if len(info.Layout) > 0 {
+		var layout buildingModels.FloorLayout
+		err := json.Unmarshal([]byte(info.Layout), &layout)
+		if err != nil {
+			return nil, err
+		}
+		info.LayoutData = &layout
+	} else {
+		info.LayoutData = &buildingModels.FloorLayout{
+			FloorId: 0,
+			Zones:   make([]buildingModels.Zone, 0),
+		}
 	}
-	info.LayoutData = &layout
+
 	return &info, nil
 }
