@@ -64,7 +64,7 @@ type DeviceRunProcess struct {
 type DeviceProcessStatus struct {
 	Time     int64           `json:"time"`
 	DeviceId int64           `json:"deviceId"`
-	Value    map[int]float64 `json:"value"`
+	Value    map[int]float64 `json:"value"` //某一个状态的运行时间统计
 }
 
 // DeviceUtilizationPublicDataList 稼动率报表

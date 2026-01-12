@@ -15,7 +15,7 @@ func newDeviceStatusSort(status int, runSortUtilization *[]*deviceMonitorModel.D
 }
 
 func (p deviceStatusSort) Less(i, j int) bool {
-	return (*p.runSortUtilization)[i].StatusMap[p.status].Time < (*p.runSortUtilization)[i].StatusMap[p.status].Time
+	return (*p.runSortUtilization)[i].StatusMap[p.status].Time < (*p.runSortUtilization)[j].StatusMap[p.status].Time
 	// 返回 p[i] > p[j] // 降序排序
 }
 
