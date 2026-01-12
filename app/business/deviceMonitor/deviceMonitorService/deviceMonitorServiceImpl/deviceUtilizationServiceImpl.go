@@ -31,3 +31,7 @@ func (d *DeviceUtilizationServiceImpl) Search(c *gin.Context,
 	req *deviceMonitorModel.DeviceUtilizationReq) (*deviceMonitorModel.DeviceUtilizationPublicDataList, error) {
 	return d.deviceUtilizationDao.Search(c, req)
 }
+
+func (d *DeviceUtilizationServiceImpl) SearchV2(c *gin.Context, req *deviceMonitorModel.DeviceUtilizationReq) (*deviceMonitorModel.DeviceUtilizationPublicDataListV2, error) {
+	return d.deviceUtilizationDao.SearchV2(c, req)
+}

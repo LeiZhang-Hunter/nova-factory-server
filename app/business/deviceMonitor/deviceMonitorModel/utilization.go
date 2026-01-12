@@ -2,7 +2,6 @@ package deviceMonitorModel
 
 import (
 	"nova-factory-server/app/business/metric/device/metricModels"
-	"nova-factory-server/app/constant/device"
 )
 
 // DeviceUtilizationReq 稼动率请求
@@ -13,10 +12,10 @@ type DeviceUtilizationReq struct {
 
 // DeviceStatus 计算设备在某种状态的运行时间
 type DeviceStatus struct {
-	Time     int64             `json:"time"`
-	DeviceId int64             `json:"deviceId"`
-	Value    float64           `json:"value"`
-	Status   device.RUN_STATUS `json:"status"`
+	Time     int64   `json:"time"`
+	DeviceId int64   `json:"deviceId"`
+	Value    float64 `json:"value"`
+	Status   int     `json:"status"`
 }
 
 type DeviceStatusList struct {
@@ -29,6 +28,7 @@ func NewDeviceStatusList() *DeviceStatusList {
 	}
 }
 
+// DeviceUtilizationData 稼动率数据
 type DeviceUtilizationData struct {
 	DeviceId           int64   `json:"device_id"`            //设备id
 	Building           string  `json:"building"`             //建筑物渲染
@@ -53,17 +53,18 @@ type DeviceUtilizationDataList struct {
 }
 
 type DeviceRunProcess struct {
-	List            []DeviceProcessStatus `json:"list"`
-	DeviceName      string                `json:"deviceName"`
-	UtilizationRate float64               `json:"utilization_rate"` //稼动率
-	WaitRate        float64               `json:"wait_rate"`        //待机率
-	BuildingName    string                `json:"buildingName"`
+	List            []DeviceProcessStatus    `json:"list"`
+	DeviceName      string                   `json:"deviceName"`
+	UtilizationRate float64                  `json:"utilization_rate"` //稼动率
+	WaitRate        float64                  `json:"wait_rate"`        //待机率
+	BuildingName    string                   `json:"buildingName"`
+	StatusMap       map[int]DeviceStatusData `json:"statusMap"`
 }
 
 type DeviceProcessStatus struct {
-	Time     int64                         `json:"time"`
-	DeviceId int64                         `json:"deviceId"`
-	Value    map[device.RUN_STATUS]float64 `json:"value"`
+	Time     int64           `json:"time"`
+	DeviceId int64           `json:"deviceId"`
+	Value    map[int]float64 `json:"value"`
 }
 
 // DeviceUtilizationPublicDataList 稼动率报表
@@ -82,9 +83,9 @@ type DeviceUtilizationPublicDataList struct {
 
 // DeviceRunStat 设备运行状态
 type DeviceRunStat struct {
-	Time   int64             `json:"time"`
-	Dev    string            `json:"deviceId"`
-	Status device.RUN_STATUS `json:"value"`
+	Time   int64  `json:"time"`
+	Dev    string `json:"deviceId"`
+	Status int    `json:"value"`
 }
 
 // DeviceProcessList 设备运行进度
@@ -94,8 +95,37 @@ type DeviceProcessList struct {
 
 // DeviceRadio 设备比率
 type DeviceRadio struct {
-	Time    int64             `json:"time"`
-	Dev     string            `json:"deviceId"`
-	Status  device.RUN_STATUS `json:"status"`
-	Percent float64           `json:"percent"`
+	Time    int64   `json:"time"`
+	Dev     string  `json:"deviceId"`
+	Status  int     `json:"status"`
+	Percent float64 `json:"percent"`
+}
+
+type DeviceStatusData struct {
+	Time    uint64  `json:"time"`     //运行时间
+	TimeStr string  `json:"time_str"` //运行时间
+	Rate    float64 `json:"rate"`     //稼动率
+	RateStr string  `json:"rate_str"` //稼动率
+}
+
+// DeviceUtilizationDataV2 稼动率数据,第二版本通用版本
+type DeviceUtilizationDataV2 struct {
+	DeviceId   int64  `json:"device_id"`   //设备id
+	Building   string `json:"building"`    //建筑物渲染
+	DeviceName string `json:"device_name"` //设备名字
+
+	StatusMap map[int]DeviceStatusData `json:"status_map"`
+}
+
+// DeviceUtilizationPublicDataListV2 稼动率报表数据
+type DeviceUtilizationPublicDataListV2 struct {
+	List  []*DeviceUtilizationDataV2 `json:"list"`
+	Total uint64                     `json:"total"`
+
+	ProcessList map[string][]DeviceRunProcess      `json:"processList"` // 进度列表 key 是建筑物 => 进度
+	Top5        map[int][]*DeviceUtilizationDataV2 `json:"runTop5"`     // 运行TOP5
+	Radio       map[string][]DeviceRadio           `json:"radio"`       // 建筑物 => 比率
+	Data        *metricModels.MetricQueryData      `json:"data"`
+
+	StatusCount map[int]uint64 `json:"statusCount"`
 }

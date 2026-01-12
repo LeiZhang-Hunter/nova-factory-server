@@ -19,6 +19,7 @@ import (
 	"nova-factory-server/app/utils/math"
 	timeUtil "nova-factory-server/app/utils/time"
 	"sort"
+	"strconv"
 	systime "time"
 )
 
@@ -28,24 +29,27 @@ type DeviceUtilizationDaoImpl struct {
 	deviceBuildDao buildingDao.BuildingDao
 	shiftDao       systemDao.ISysShiftDao
 	metricDao      metricDao.IMetricDao
+	dictDataDao    systemDao.IDictDataDao
 }
 
 func NewDeviceUtilizationDaoImpl(iotDb *iotdb.IotDb, shiftDao systemDao.ISysShiftDao,
 	deviceDao deviceDao.IDeviceDao,
 	deviceBuildDao buildingDao.BuildingDao,
-	metricDao metricDao.IMetricDao) deviceMonitorDao.DeviceUtilizationDao {
+	metricDao metricDao.IMetricDao,
+	dictDataDao systemDao.IDictDataDao) deviceMonitorDao.DeviceUtilizationDao {
 	return &DeviceUtilizationDaoImpl{
 		iotDb:          iotDb,
 		shiftDao:       shiftDao,
 		deviceDao:      deviceDao,
 		deviceBuildDao: deviceBuildDao,
 		metricDao:      metricDao,
+		dictDataDao:    dictDataDao,
 	}
 }
 
 // statRun 统计运行时设备
 func (d *DeviceUtilizationDaoImpl) statDeviceStat(c *gin.Context, startTime string, endTime string,
-	status device.RUN_STATUS) (*deviceMonitorModel.DeviceStatusList, error) {
+	status int) (*deviceMonitorModel.DeviceStatusList, error) {
 	session, err := d.iotDb.GetSession()
 	if err != nil {
 		zap.L().Error("读取session失败", zap.Error(err))
@@ -85,7 +89,7 @@ func (d *DeviceUtilizationDaoImpl) statDeviceStat(c *gin.Context, startTime stri
 
 // statDeviceProcess 统计设备运行过程
 func (d *DeviceUtilizationDaoImpl) statDeviceProcess(c *gin.Context, startTime string, endTime string, interval string,
-	status device.RUN_STATUS) (*deviceMonitorModel.DeviceProcessList, error) {
+	status int) (*deviceMonitorModel.DeviceProcessList, error) {
 	var processList deviceMonitorModel.DeviceProcessList
 	processList.List = make(map[string][]deviceMonitorModel.DeviceStatus)
 	session, err := d.iotDb.GetSession()
@@ -151,7 +155,7 @@ func (d *DeviceUtilizationDaoImpl) statDeviceRunStat(c *gin.Context, startTime s
 		status := statement.GetInt64(statement.GetColumnName(1))
 		var stat deviceMonitorModel.DeviceRunStat = deviceMonitorModel.DeviceRunStat{
 			Time:   timestamp,
-			Status: device.RUN_STATUS(status),
+			Status: int((status)),
 			Dev:    deviceName,
 		}
 		runStatList = append(runStatList, stat)
@@ -200,11 +204,11 @@ func (d *DeviceUtilizationDaoImpl) Stat(c *gin.Context, req *deviceMonitorModel.
 		shiftTime = 86400
 	}
 
-	runList, err := d.statDeviceStat(c, startTime, endTime, device.RUNNING)
+	runList, err := d.statDeviceStat(c, startTime, endTime, int(device.RUNNING))
 	if err != nil {
 		return deviceUtilizationList, err
 	}
-	waitingList, err := d.statDeviceStat(c, startTime, endTime, device.WAITING)
+	waitingList, err := d.statDeviceStat(c, startTime, endTime, int(device.WAITING))
 	if err != nil {
 		return deviceUtilizationList, err
 	}
@@ -351,11 +355,16 @@ func (d *DeviceUtilizationDaoImpl) Stat(c *gin.Context, req *deviceMonitorModel.
 // Search 统计稼动率
 func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 	req *deviceMonitorModel.DeviceUtilizationReq) (*deviceMonitorModel.DeviceUtilizationPublicDataList, error) {
-	var deviceUtilizationList *deviceMonitorModel.DeviceUtilizationPublicDataList = &deviceMonitorModel.DeviceUtilizationPublicDataList{
-		List:        make([]*deviceMonitorModel.DeviceUtilizationData, 0),
+	return &deviceMonitorModel.DeviceUtilizationPublicDataList{}, nil
+}
+
+// SearchV2 统计稼动率
+func (d *DeviceUtilizationDaoImpl) SearchV2(c *gin.Context,
+	req *deviceMonitorModel.DeviceUtilizationReq) (*deviceMonitorModel.DeviceUtilizationPublicDataListV2, error) {
+	var deviceUtilizationList *deviceMonitorModel.DeviceUtilizationPublicDataListV2 = &deviceMonitorModel.DeviceUtilizationPublicDataListV2{
+		List:        make([]*deviceMonitorModel.DeviceUtilizationDataV2, 0),
 		ProcessList: make(map[string][]deviceMonitorModel.DeviceRunProcess, 0),
-		WaitTop5:    make([]*deviceMonitorModel.DeviceUtilizationData, 0),
-		RunTop5:     make([]*deviceMonitorModel.DeviceUtilizationData, 0),
+		Top5:        make(map[int][]*deviceMonitorModel.DeviceUtilizationDataV2),
 	}
 
 	if req == nil {
@@ -407,33 +416,47 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 		shiftTime = 86400
 	}
 
-	runList, err := d.statDeviceStat(c, startTime, endTime, device.RUNNING)
-	if err != nil {
-		return deviceUtilizationList, err
-	}
-	waitingList, err := d.statDeviceStat(c, startTime, endTime, device.WAITING)
-	if err != nil {
-		return deviceUtilizationList, err
-	}
+	// 从字典里读取全部状态
+	runStatuses := d.dictDataDao.SelectDictDataByType(c, "device_run_status")
 
 	// 批量读取设备id
-	var deviceRunMap map[int64]*deviceMonitorModel.DeviceStatus = make(map[int64]*deviceMonitorModel.DeviceStatus)
-	var deviceWaitMap map[int64]*deviceMonitorModel.DeviceStatus = make(map[int64]*deviceMonitorModel.DeviceStatus)
+	var deviceStatusMap map[int]map[int64]*deviceMonitorModel.DeviceStatus = make(map[int]map[int64]*deviceMonitorModel.DeviceStatus)
 	var deviceMap map[int64]*deviceModels.DeviceVO = make(map[int64]*deviceModels.DeviceVO)
-	for _, v := range runList.List {
-		if v.DeviceId == 0 {
-			continue
-		}
-		deviceMap[v.DeviceId] = nil
-		deviceRunMap[v.DeviceId] = &v
-	}
 
-	for _, v := range waitingList.List {
-		if v.DeviceId == 0 {
+	//runList, err := d.statDeviceStat(c, startTime, endTime, int(device.RUNNING))
+	//if err != nil {
+	//	return deviceUtilizationList, err
+	//}
+	//waitingList, err := d.statDeviceStat(c, startTime, endTime, int(device.WAITING))
+	//if err != nil {
+	//	return deviceUtilizationList, err
+	//}
+
+	for _, v := range runStatuses {
+		statusValue, err := strconv.Atoi(v.DictValue)
+		if err != nil {
+			zap.L().Error("strconv.Atoi error", zap.Error(err))
 			continue
 		}
-		deviceMap[v.DeviceId] = nil
-		deviceWaitMap[v.DeviceId] = &v
+		statusList, err := d.statDeviceStat(c, startTime, endTime, statusValue)
+		if err != nil {
+			zap.L().Error("statDeviceStat error", zap.Error(err))
+			continue
+		}
+
+		if statusList == nil {
+			continue
+		}
+
+		for _, statusV := range statusList.List {
+			if statusV.DeviceId == 0 {
+				continue
+			}
+			deviceMap[statusV.DeviceId] = nil
+			deviceStatusMap[statusValue] = make(map[int64]*deviceMonitorModel.DeviceStatus)
+			deviceStatusMap[statusValue][statusV.DeviceId] = &statusV
+		}
+
 	}
 
 	// 设备id集合
@@ -477,7 +500,7 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 		buildingNameMap[v.ID] = v.Name
 	}
 
-	var deviceRunRateMap map[uint64]*deviceMonitorModel.DeviceUtilizationData = make(map[uint64]*deviceMonitorModel.DeviceUtilizationData)
+	var deviceRunRateMap map[uint64]*deviceMonitorModel.DeviceUtilizationDataV2 = make(map[uint64]*deviceMonitorModel.DeviceUtilizationDataV2)
 
 	// 渲染设备列表
 	for _, v := range devices {
@@ -489,82 +512,60 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 			deviceName = *v.Name
 		}
 
-		// 运行时间统计
-		runTime := 0
-		runTimeStr := "00"
-		runRate := 0.0
-		runInfo, ok := deviceRunMap[dId]
-		if ok {
-			runTime = int(runInfo.Value)
-			if runTime > 0 {
-				runTimeStr = timeUtil.SecondsToHMS(int64(runTime))
-				runRate = math.RoundFloat(float64(float64(runInfo.Value)/float64(shiftTime))*100, 2)
-			}
+		data := &deviceMonitorModel.DeviceUtilizationDataV2{
+			DeviceId:   dId,
+			DeviceName: deviceName,
+			StatusMap:  make(map[int]deviceMonitorModel.DeviceStatusData),
+			Building:   "",
 		}
 
-		// 待机时间统计
-		waitTime := 0
-		waitTimeStr := "00"
-		waitRate := 0.0
-		waitInfo, ok := deviceWaitMap[dId]
-		if ok {
-			waitTime = int(waitInfo.Value)
-			if waitTime > 0 {
-				waitTimeStr = timeUtil.SecondsToHMS(int64(waitTime))
-				waitRate = math.RoundFloat(float64(float64(waitInfo.Value)/float64(shiftTime))*100, 2)
+		for status, statusValueMap := range deviceStatusMap {
+			// 运行时间统计
+			time := 0
+			timeStr := "00"
+			rate := 0.0
+			runInfo, ok := statusValueMap[dId]
+			if ok {
+				time = int(runInfo.Value)
+				if time > 0 {
+					timeStr = timeUtil.SecondsToHMS(int64(time))
+					rate = math.RoundFloat(float64(float64(runInfo.Value)/float64(shiftTime))*100, 2)
+				}
 			}
-		}
-
-		// 停机时间统计
-		stopTime := 0
-		stopTimeStr := "00"
-		stopRate := 0.0
-		if ok {
-			stopTime = shiftTime - runTime - waitTime
-			if stopTime < 0 {
-				stopTime = 0
-			}
-			if stopTime > 0 {
-				stopTimeStr = timeUtil.SecondsToHMS(int64(stopTime))
-				stopRate = 100 - runRate - waitRate
+			data.StatusMap[status] = deviceMonitorModel.DeviceStatusData{
+				Time:    uint64(time),
+				TimeStr: timeStr,
+				Rate:    rate,
+				RateStr: fmt.Sprintf("%.2f", rate) + "%",
 			}
 		}
 
 		buildId := v.DeviceBuildingId
 		buildName := ""
-		buildName, ok = buildingNameMap[int64(buildId)]
-		data := &deviceMonitorModel.DeviceUtilizationData{
-			DeviceId:           dId,
-			DeviceName:         deviceName,
-			RunTime:            uint64(runTime),
-			RunTimeStr:         runTimeStr,
-			UtilizationRate:    runRate,
-			UtilizationRateStr: fmt.Sprintf("%.2f", runRate) + "%",
+		buildName, _ = buildingNameMap[int64(buildId)]
 
-			WaitTime:    uint64(waitTime),
-			WaitTimeStr: waitTimeStr,
-			WaitRate:    waitRate,
-			WaitRateStr: fmt.Sprintf("%.2f", waitRate) + "%",
-
-			StopTime:    uint64(stopTime),
-			StopTimeStr: stopTimeStr,
-			StopRate:    stopRate,
-			StopRateStr: fmt.Sprintf("%.2f", stopRate) + "%",
-			Building:    buildName,
-		}
+		data.Building = buildName
 		deviceUtilizationList.List = append(deviceUtilizationList.List, data)
 		deviceRunRateMap[uint64(dId)] = data
 	}
 
-	// 查询具体 设备运行情况，两个小时一个步长
-	processWaitList, err := d.statDeviceProcess(c, startTime, endTime, "2h", device.WAITING)
-	if err != nil {
-		return nil, err
-	}
+	// processMapList 进度列表 status => DeviceProcessList
+	processMapList := make(map[int]*deviceMonitorModel.DeviceProcessList)
+	// 计算设备运行状态，间隔2小时一次]
+	for _, status := range runStatuses {
+		statusValue, err := strconv.Atoi(status.DictValue)
+		if err != nil {
+			zap.L().Error("strconv.Atoi error", zap.Error(err))
+			continue
+		}
 
-	processRunningList, err := d.statDeviceProcess(c, startTime, endTime, "2h", device.RUNNING)
-	if err != nil {
-		return nil, err
+		// 查询具体 设备运行情况，两个小时一个步长
+		processList, err := d.statDeviceProcess(c, startTime, endTime, "2h", statusValue)
+		if err != nil {
+			zap.L().Error("statDeviceProcess error", zap.Error(err))
+			continue
+		}
+		processMapList[statusValue] = processList
 	}
 
 	// 计算设备履历
@@ -579,18 +580,10 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 			deviceUtilizationList.ProcessList[build] = make([]deviceMonitorModel.DeviceRunProcess, 0)
 		}
 
-		if processWaitList == nil {
+		if len(processMapList) == 0 {
 			continue
 		}
 
-		if processRunningList == nil {
-			continue
-		}
-
-		processWaitValue, ok := processWaitList.List[deviceKey]
-		if !ok {
-			continue
-		}
 		var runProcess deviceMonitorModel.DeviceRunProcess
 		if deviceValue.Name == nil {
 			runProcess.DeviceName = ""
@@ -598,37 +591,29 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 			runProcess.DeviceName = *deviceValue.Name
 		}
 		runProcess.BuildingName = build
+
 		deviceRunRateValue, ok := deviceRunRateMap[deviceValue.DeviceId]
 		if ok {
-			runProcess.UtilizationRate = deviceRunRateValue.UtilizationRate
-			runProcess.WaitRate = deviceRunRateValue.WaitRate
+			runProcess.StatusMap = deviceRunRateValue.StatusMap
 		}
 
-		for _, v := range processWaitValue {
-			statusValue := deviceMonitorModel.DeviceProcessStatus{
-				Time:     v.Time,
-				DeviceId: deviceId,
-				Value:    make(map[device.RUN_STATUS]float64),
-			}
-			statusValue.Value[device.WAITING] = v.Value
-			runProcess.List = append(runProcess.List, statusValue)
-		}
-
-		processRunningValue, ok := processRunningList.List[deviceKey]
-		if !ok {
-			continue
-		}
-		for k, v := range processRunningValue {
-			if k > len(runProcess.List) {
+		for status, v := range processMapList {
+			processValue, ok := v.List[deviceKey]
+			if !ok {
 				continue
 			}
-			runProcess.List[k].Time = v.Time
-			runProcess.List[k].DeviceId = deviceId
-			runProcess.List[k].Value[device.RUNNING] = v.Value
 
-			stopProcessTime := 7200 - runProcess.List[k].Value[device.RUNNING] - runProcess.List[k].Value[device.WAITING]
-			runProcess.List[k].Value[device.STOPPING] = stopProcessTime
+			for _, value := range processValue {
+				statusValue := deviceMonitorModel.DeviceProcessStatus{
+					Time:     value.Time,
+					DeviceId: deviceId,
+					Value:    make(map[int]float64),
+				}
+				statusValue.Value[status] = value.Value
+				runProcess.List = append(runProcess.List, statusValue)
+			}
 		}
+
 		deviceUtilizationList.ProcessList[build] = append(deviceUtilizationList.ProcessList[build], runProcess)
 	}
 
@@ -638,64 +623,46 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 		return nil, err
 	}
 	deviceUtilizationList.Total = uint64(len(statList))
+
+	deviceUtilizationList.StatusCount = make(map[int]uint64)
+	// 统计各个状态的分值
 	for _, stat := range statList {
-		if stat.Status == device.RUNNING {
-			deviceUtilizationList.Running++
-		} else if stat.Status == device.WAITING {
-			deviceUtilizationList.WaitTing++
-		} else {
-			deviceUtilizationList.Stopped++
-		}
+		deviceUtilizationList.StatusCount[stat.Status]++
 	}
 
-	// 计算运行时间top5
-	sort.Sort(sort.Reverse(runSortUtilization(deviceUtilizationList.List)))
-	for k, v := range deviceUtilizationList.List {
-		if k >= 5 {
-			break
+	// 计算所有车间设备状态的top5
+	for _, v := range runStatuses {
+		statusValue, err := strconv.Atoi(v.DictValue)
+		if err != nil {
+			zap.L().Error("strconv.Atoi error", zap.Error(err))
+			continue
 		}
-		deviceUtilizationList.RunTop5 = append(deviceUtilizationList.RunTop5, v)
-	}
-
-	// 计算待机率top5
-	sort.Sort(sort.Reverse(waitSortUtilization(deviceUtilizationList.List)))
-	for k, v := range deviceUtilizationList.List {
-		if k >= 5 {
-			break
+		statusSort := newDeviceStatusSort(statusValue, &deviceUtilizationList.List)
+		sort.Sort(sort.Reverse(statusSort))
+		for k, v := range deviceUtilizationList.List {
+			if k >= 5 {
+				break
+			}
+			deviceUtilizationList.Top5[statusValue] = append(deviceUtilizationList.Top5[statusValue], v)
 		}
-		deviceUtilizationList.WaitTop5 = append(deviceUtilizationList.WaitTop5, v)
 	}
 
 	// 计算车间概括
 	var totalTime map[string]uint64 = make(map[string]uint64)
-	var runTime map[string]uint64 = make(map[string]uint64)
-	var stopTime map[string]uint64 = make(map[string]uint64)
-	var waitTime map[string]uint64 = make(map[string]uint64)
+	var statusCountTime map[string]map[int]uint64 = make(map[string]map[int]uint64)
 	for _, v := range deviceUtilizationList.List {
 		_, ok := totalTime[v.Building]
 		if !ok {
 			totalTime[v.Building] = 0
 		}
+		statusCountTime[v.Building] = make(map[int]uint64)
 
-		_, ok = runTime[v.Building]
-		if !ok {
-			runTime[v.Building] = 0
+		for status, count := range v.StatusMap {
+			totalTime[v.Building] += count.Time
+			statusCountTime[v.Building][status] += count.Time
 		}
-
-		_, ok = stopTime[v.Building]
-		if !ok {
-			stopTime[v.Building] = 0
-		}
-
-		_, ok = waitTime[v.Building]
-		if !ok {
-			waitTime[v.Building] = 0
-		}
-		runTime[v.Building] += v.RunTime
-		stopTime[v.Building] += v.StopTime
-		waitTime[v.Building] += v.WaitTime
-		totalTime[v.Building] += v.WaitTime + v.StopTime + v.RunTime
 	}
+	// 计算饼图占比
 	// math.RoundFloat(float64(float64(waitInfo.Value)/float64(shiftTime))*100, 2)
 	deviceUtilizationList.Radio = make(map[string][]deviceMonitorModel.DeviceRadio)
 	for buildName, v := range totalTime {
@@ -704,22 +671,34 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 			deviceUtilizationList.Radio[buildName] = make([]deviceMonitorModel.DeviceRadio, 0)
 		}
 
-		runValue, ok := runTime[buildName]
-		stopValue, ok := stopTime[buildName]
-		waitValue, ok := waitTime[buildName]
-		deviceUtilizationList.Radio[buildName] = []deviceMonitorModel.DeviceRadio{
-			{
-				Status:  device.RUNNING,
-				Percent: math.RoundFloat(float64(float64(runValue)/float64(v))*100, 2),
-			},
-			{
-				Status:  device.WAITING,
-				Percent: math.RoundFloat(float64(float64(waitValue)/float64(v))*100, 2),
-			},
-			{
-				Status:  device.STOPPING,
-				Percent: math.RoundFloat(float64(float64(stopValue)/float64(v))*100, 2),
-			},
+		deviceUtilizationList.Radio[buildName] = make([]deviceMonitorModel.DeviceRadio, 0)
+		_, ok = statusCountTime[buildName]
+		if !ok {
+			continue
+		}
+		index := 0
+		for status, count := range statusCountTime[buildName] {
+			index++
+			if index != len(statusCountTime[buildName]) {
+				deviceUtilizationList.Radio[buildName] = append(deviceUtilizationList.Radio[buildName], deviceMonitorModel.DeviceRadio{
+					Status:  status,
+					Percent: math.RoundFloat(float64(float64(count)/float64(v))*100, 2),
+				})
+				continue
+			}
+
+			var radio float64 = 0
+			for _, p := range deviceUtilizationList.Radio[buildName] {
+				radio = 1 - p.Percent
+				if radio <= 0 {
+					break
+				}
+			}
+			deviceUtilizationList.Radio[buildName] = append(deviceUtilizationList.Radio[buildName], deviceMonitorModel.DeviceRadio{
+				Status:  status,
+				Percent: math.RoundFloat(radio, 2),
+			})
+			continue
 		}
 	}
 
@@ -733,7 +712,7 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 	endTime = timeUtil.FormatDateFromSecond(end)
 
 	// 查询近一个周的运行情况
-	processRunningList, err = d.statDeviceProcess(c, startTime, endTime, "1d", device.RUNNING)
+	processRunningList, err := d.statDeviceProcess(c, startTime, endTime, "1d", int(device.RUNNING))
 	if err != nil {
 		return nil, err
 	}
@@ -765,6 +744,5 @@ func (d *DeviceUtilizationDaoImpl) Search(c *gin.Context,
 	})
 
 	deviceUtilizationList.Data = query
-	sort.Sort(sort.Reverse(runSortUtilization(deviceUtilizationList.List)))
 	return deviceUtilizationList, nil
 }

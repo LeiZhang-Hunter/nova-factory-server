@@ -27,6 +27,7 @@ func (d *DeviceUtilization) PrivateRoutes(router *gin.RouterGroup) {
 func (d *DeviceUtilization) PublicRoutes(router *gin.RouterGroup) {
 	ele := router.Group("/api/v1/system/monitor")
 	ele.GET("/utilization/search", d.Search)
+	ele.GET("/utilization/searchv2", d.SearchV2)
 }
 
 // Stat 稼动率统计
@@ -63,6 +64,24 @@ func (d *DeviceUtilization) Stat(c *gin.Context) {
 func (d *DeviceUtilization) Search(c *gin.Context) {
 	req := new(deviceMonitorModel.DeviceUtilizationReq)
 	stat, err := d.service.Search(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, stat)
+}
+
+// SearchV2 能源大屏V2
+// @Summary 能源大屏V2
+// @Description 能源大屏V2
+// @Tags 设备监控/设备监控
+// @Param  object body metricModels.MetricQueryReq true "能源大屏"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设备监控"
+// @Router /api/v1/system/electric/searchv2 [post]
+func (d *DeviceUtilization) SearchV2(c *gin.Context) {
+	req := new(deviceMonitorModel.DeviceUtilizationReq)
+	stat, err := d.service.SearchV2(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
