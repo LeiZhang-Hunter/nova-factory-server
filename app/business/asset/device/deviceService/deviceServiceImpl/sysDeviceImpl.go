@@ -367,3 +367,42 @@ func (d *DeviceService) GetMetricByTag(c *gin.Context, req *deviceModels.DeviceT
 		Total: list.Total,
 	}, nil
 }
+
+func (d *DeviceService) GetDeviceInfoByIds(c *gin.Context, ids []int64) ([]*deviceModels.DeviceVO, error) {
+	if len(ids) == 0 {
+		return make([]*deviceModels.DeviceVO, 0), nil
+	}
+	deviceList, err := d.iDeviceDao.GetByIds(c, ids)
+	if err != nil {
+		zap.L().Error("Get device error", zap.Error(err))
+	}
+
+	var keys []string = make([]string, 0)
+	for _, v := range ids {
+		keys = append(keys, device.MakeDeviceKey(uint64(v)))
+	}
+
+	slice := d.cache.MGet(c, keys)
+	for k, v := range slice.Val() {
+		str, ok := v.(string)
+		if !ok {
+			continue
+		}
+		if str == "" {
+			continue
+		}
+		deviceMetrics := make(map[uint64]map[uint64]*metricModels.DeviceMetricData) // template_id => data_id
+		err := json.Unmarshal([]byte(str), &deviceMetrics)
+		if err != nil {
+			zap.L().Error("json Unmarshal error", zap.Error(err))
+			continue
+		}
+		if deviceMetrics == nil {
+			deviceList[k].Active = false
+		} else {
+			deviceList[k].Active = true
+		}
+	}
+
+	return deviceList, err
+}

@@ -84,6 +84,7 @@ type DeviceVO struct {
 	ExtensionInfo     *ExtensionInfo                                       `json:"extension_info,omitempty" gorm:"-" db:"control_type"`
 	TemplateList      map[uint64]map[uint64]*metricModels.DeviceMetricData `json:"template_list" gorm:"-" db:"template_list"`
 	Active            bool                                                 `json:"active" gorm:"-" db:"active"`
+	Exception         bool                                                 `json:"exception" gorm:"-"`
 	baize.BaseEntity
 }
 

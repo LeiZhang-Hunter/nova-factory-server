@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceModels"
+	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
 	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/middlewares"
@@ -33,6 +34,7 @@ func (d *DeviceMonitor) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1")
 	group.GET("/metric/predict", d.MetricPredict)
 	group.POST("/metric/predict/query", d.MetricPredictQuery)
+	group.GET("/device/layout", d.DeviceLayout)
 }
 
 func (d *DeviceMonitor) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
@@ -166,4 +168,30 @@ func (d *DeviceMonitor) MetricPredictQuery(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, data)
+}
+
+// DeviceLayout 设备布局
+// @Summary 设备布局
+// @Description 设备布局
+// @Tags 设备监控/设备监控
+// @Param object body metricModels.GatewayMetricDataQueryReq true "指标预测查询参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /api/v1/device/layout [get]
+func (d *DeviceMonitor) DeviceLayout(c *gin.Context) {
+	req := new(deviceMonitorModel.DeviceLayoutRequest)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		zap.L().Error("param error", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	layout, err := d.service.DeviceLayout(c, req.FloorId)
+	if err != nil {
+		zap.L().Error("device layout error", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+
+	baizeContext.SuccessData(c, layout)
 }
