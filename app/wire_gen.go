@@ -343,7 +343,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		AlertAiReason: alertAiReason,
 		Runner:        runner,
 	}
-	buildingService := buildingServiceImpl.NewBuildingServiceImpl(buildingDao)
+	buildingService := buildingServiceImpl.NewBuildingServiceImpl(buildingDao, floorDao)
 	building := buildingController.NewBuilding(buildingService)
 	floorService := buildingServiceImpl.NewFloorServiceImpl(floorDao)
 	floor := buildingController.NewFloor(floorService)

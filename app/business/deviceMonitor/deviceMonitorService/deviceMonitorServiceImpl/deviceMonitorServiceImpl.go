@@ -251,6 +251,8 @@ func (d *DeviceMonitorServiceImpl) DeviceLayout(c *gin.Context, floorId int64) (
 	data.DeviceMap = make(map[string]*deviceModels.DeviceVO)
 	for _, deviceInfo := range list {
 		idStr := strconv.FormatUint(deviceInfo.DeviceId, 10)
+		deviceInfo.ExtensionInfo = nil
+		deviceInfo.Extension = ""
 		data.DeviceMap[idStr] = deviceInfo
 	}
 	return data, nil

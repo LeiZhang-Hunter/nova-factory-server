@@ -148,3 +148,15 @@ func (b *FloorDaoImpl) Info(c *gin.Context, id int64) (*buildingModels.SysFloor,
 
 	return &info, nil
 }
+
+func (b *FloorDaoImpl) All(c *gin.Context) ([]*buildingModels.SysFloor, error) {
+	var list []*buildingModels.SysFloor
+	ret := b.db.Table(b.table).Find(&list)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return list, nil
+		}
+		return nil, ret.Error
+	}
+	return list, nil
+}

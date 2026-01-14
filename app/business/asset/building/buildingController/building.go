@@ -2,6 +2,7 @@ package buildingController
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/building/buildingModels"
 	"nova-factory-server/app/business/asset/building/buildingService"
 	"nova-factory-server/app/middlewares"
@@ -23,6 +24,11 @@ func (b *Building) PrivateRoutes(router *gin.RouterGroup) {
 	building.GET("/list", middlewares.HasPermission("asset:building:list"), b.List)               // 设备列表
 	building.POST("/set", middlewares.HasPermission("asset:building:set"), b.Set)                 // 设置设备信息
 	building.DELETE("/remove/:ids", middlewares.HasPermission("asset:building:remove"), b.Remove) //删除设备分组列表
+}
+
+func (b *Building) PublicRoutes(router *gin.RouterGroup) {
+	apiV1 := router.Group("/api/v1")
+	apiV1.GET("/building/list", b.BuildDetailList)
 }
 
 // Set 保存建筑物
@@ -85,6 +91,22 @@ func (b *Building) List(c *gin.Context) {
 	}
 	list, err := b.service.List(c, req)
 	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
+}
+
+// BuildDetailList 读取建筑物以及楼层详情列表
+// @Summary 读取建筑物以及楼层详情列表
+// @Description 读取建筑物以及楼层详情列表
+// @Tags 资产管理/建筑物管理
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /api/v1/building/list [get]
+func (b *Building) BuildDetailList(c *gin.Context) {
+	list, err := b.service.AllDetail(c)
+	if err != nil {
+		zap.L().Error("get build list error", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}

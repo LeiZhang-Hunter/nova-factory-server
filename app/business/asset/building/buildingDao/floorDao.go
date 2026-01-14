@@ -14,4 +14,5 @@ type FloorDao interface {
 	CheckUniqueFloor(c *gin.Context, id int64, buildingId int64, level int8) (int64, error)
 	SaveLayout(c *gin.Context, id int64, layout *buildingModels.FloorLayout) error
 	Info(c *gin.Context, id int64) (*buildingModels.SysFloor, error)
+	All(c *gin.Context) ([]*buildingModels.SysFloor, error)
 }

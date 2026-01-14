@@ -10,4 +10,5 @@ type BuildingDao interface {
 	List(c *gin.Context, req *buildingModels.SetSysBuildingListReq) (*buildingModels.SetSysBuildingList, error)
 	Remove(c *gin.Context, ids []string) error
 	GetByIds(c *gin.Context, ids []uint64) ([]*buildingModels.SysBuilding, error)
+	All(c *gin.Context) ([]*buildingModels.SysBuilding, error)
 }

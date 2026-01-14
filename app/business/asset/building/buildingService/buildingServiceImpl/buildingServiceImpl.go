@@ -8,12 +8,14 @@ import (
 )
 
 type BuildingServiceImpl struct {
-	dao buildingDao.BuildingDao
+	dao      buildingDao.BuildingDao
+	floorDao buildingDao.FloorDao
 }
 
-func NewBuildingServiceImpl(dao buildingDao.BuildingDao) buildingService.BuildingService {
+func NewBuildingServiceImpl(dao buildingDao.BuildingDao, floorDao buildingDao.FloorDao) buildingService.BuildingService {
 	return &BuildingServiceImpl{
-		dao: dao,
+		dao:      dao,
+		floorDao: floorDao,
 	}
 }
 
@@ -26,4 +28,35 @@ func (b *BuildingServiceImpl) List(c *gin.Context, req *buildingModels.SetSysBui
 }
 func (b *BuildingServiceImpl) Remove(c *gin.Context, ids []string) error {
 	return b.dao.Remove(c, ids)
+}
+
+func (b *BuildingServiceImpl) AllDetail(c *gin.Context) ([]*buildingModels.SysBuilding, error) {
+	allBuild, err := b.dao.All(c)
+	if err != nil {
+		return nil, err
+	}
+
+	allFloor, err := b.floorDao.All(c)
+	if err != nil {
+		return nil, err
+	}
+
+	var floorMap = make(map[int64][]*buildingModels.SysFloor)
+	for _, floor := range allFloor {
+		_, ok := floorMap[floor.BuildingID]
+		if !ok {
+			floorMap[floor.BuildingID] = make([]*buildingModels.SysFloor, 0)
+		}
+		floorMap[floor.BuildingID] = append(floorMap[floor.BuildingID], floor)
+	}
+
+	for k, build := range allBuild {
+		floorList, ok := floorMap[build.ID]
+		if !ok {
+			continue
+		}
+		allBuild[k].Floor = floorList
+	}
+
+	return allBuild, nil
 }

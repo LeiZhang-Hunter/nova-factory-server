@@ -101,3 +101,12 @@ func (b *BuildingDaoImpl) GetByIds(c *gin.Context, ids []uint64) ([]*buildingMod
 	}
 	return list, nil
 }
+
+func (b *BuildingDaoImpl) All(c *gin.Context) ([]*buildingModels.SysBuilding, error) {
+	var list []*buildingModels.SysBuilding
+	ret := b.db.Table(b.table).Where("state", commonStatus.NORMAL).Find(&list)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	return list, nil
+}
