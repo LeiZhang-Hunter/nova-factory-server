@@ -198,6 +198,7 @@ func (d *DeviceService) SelectDeviceList(c *gin.Context, req *deviceModels.Devic
 			ControlType:       v.ControlType,
 			CreateUserName:    createUserName,
 			Status:            v.Status,
+			Enable:            v.Enable,
 			UpdateUserName:    updateUserName,
 			BaseEntity: baize.BaseEntity{
 				CreateTime: v.CreateTime,
@@ -405,4 +406,47 @@ func (d *DeviceService) GetDeviceInfoByIds(c *gin.Context, ids []int64) ([]*devi
 	}
 
 	return deviceList, err
+}
+
+// StatCount 统计设备，在线、不在线、异常
+func (d *DeviceService) StatCount(c *gin.Context) (*deviceModels.DeviceStatData, error) {
+	var data deviceModels.DeviceStatData
+	list, err := d.iDeviceDao.All(c)
+	if err != nil {
+		return &data, nil
+	}
+
+	data.Total = int64(len(list))
+	var keys []string = make([]string, 0)
+	for _, v := range list {
+		if v.Status == device.EXCEPTION {
+			data.Exception++
+		} else if v.Status == device.MAINTENANCE {
+			data.Maintenance++
+		}
+		keys = append(keys, device.MakeDeviceKey(v.DeviceId))
+	}
+
+	slice := d.cache.MGet(c, keys)
+	for _, v := range slice.Val() {
+		str, ok := v.(string)
+		if !ok {
+			continue
+		}
+		if str == "" {
+			continue
+		}
+		deviceMetrics := make(map[uint64]map[uint64]*metricModels.DeviceMetricData) // template_id => data_id
+		err := json.Unmarshal([]byte(str), &deviceMetrics)
+		if err != nil {
+			zap.L().Error("json Unmarshal error", zap.Error(err))
+			continue
+		}
+		if deviceMetrics == nil {
+			data.OffLine++
+		} else {
+			data.Online++
+		}
+	}
+	return &data, nil
 }

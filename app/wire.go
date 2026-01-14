@@ -4,8 +4,6 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
 	"nova-factory-server/app/business/ai/aiDataSetService/aiDataSetServiceImpl"
@@ -36,6 +34,8 @@ import (
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService/deviceMonitorServiceImpl"
+	homeController "nova-factory-server/app/business/home/controller"
+	homeServiceImpl "nova-factory-server/app/business/home/homeService/homeServiceImpl"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
 	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
@@ -53,6 +53,9 @@ import (
 	"nova-factory-server/app/business/tool/toolService/toolServiceImpl"
 	"nova-factory-server/app/datasource"
 	"nova-factory-server/app/routes"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
 )
 
 func wireApp() (*gin.Engine, func(), error) {
@@ -116,6 +119,9 @@ func wireApp() (*gin.Engine, func(), error) {
 		resourceController.ProviderSet,
 		resourceServiceImpl.ProviderSet,
 		resourceDaoImpl.ProviderSet,
+
+		homeServiceImpl.ProviderSet,
+		homeController.ProviderSet,
 
 		datasource.ProviderSet,
 		routes.ProviderSet,

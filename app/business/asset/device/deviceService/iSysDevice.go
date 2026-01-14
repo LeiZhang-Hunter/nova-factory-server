@@ -14,4 +14,6 @@ type IDeviceService interface {
 	GetMetricByTag(c *gin.Context, req *deviceModels.DeviceTagListReq) (*deviceModels.DeviceMetricInfoListValue, error)
 	// GetDeviceInfoByIds 通过id 列表读取设备状态，包含设备在线状态以及异常状态
 	GetDeviceInfoByIds(c *gin.Context, ids []int64) ([]*deviceModels.DeviceVO, error)
+	// StatCount 统计设备，在线、不在线、异常
+	StatCount(c *gin.Context) (*deviceModels.DeviceStatData, error)
 }

@@ -26,11 +26,13 @@ CREATE TABLE `sys_device`  (
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
-    `status` int(11) NULL DEFAULT 0 COMMENT '操作状态（0正常 1异常）',
+    `enable` tinyint(1) NULL DEFAULT 0 COMMENT '启用状态（0正常 1异常）',
+    `status` int(11) NULL DEFAULT 0 COMMENT '设备状态',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`device_id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '设备管理' ROW_FORMAT = Dynamic;
 
+-- alter table sys_device add column `enable` tinyint(1) NULL DEFAULT 0 COMMENT '启用状态（0正常 1异常）';
 
 CREATE TABLE `sys_device_group` (
     `group_id` bigint(20) NOT NULL COMMENT '设备主键',

@@ -1,8 +1,9 @@
 package deviceDao
 
 import (
-	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/asset/device/deviceModels"
+
+	"github.com/gin-gonic/gin"
 )
 
 type IDeviceDao interface {
@@ -19,4 +20,8 @@ type IDeviceDao interface {
 	GetByTag(c *gin.Context, number string) (*deviceModels.DeviceVO, error)
 	// SelectPublicDeviceList 非登录情况下请求的接口
 	SelectPublicDeviceList(c *gin.Context, req *deviceModels.DeviceListReq) (*deviceModels.DeviceInfoListData, error)
+	// All 读取全部信息
+	All(c *gin.Context) ([]*deviceModels.DeviceVO, error)
+	// Count 设备数量统计
+	Count(c *gin.Context) (int64, error)
 }

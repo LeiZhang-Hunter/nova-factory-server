@@ -3,9 +3,6 @@ package deviceDaoImpl
 import (
 	"encoding/json"
 	"errors"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/constant/commonStatus"
@@ -13,6 +10,10 @@ import (
 	"nova-factory-server/app/constant/protocols"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type sysDeviceDataDao struct {
@@ -147,7 +148,7 @@ func (s *sysDeviceDataDao) DeleteByDeviceIds(c *gin.Context, ids []int64) error 
 
 func (s *sysDeviceDataDao) GetLocalByGateWayId(c *gin.Context, id int64) ([]*deviceModels.DeviceVO, error) {
 	var dto []*deviceModels.DeviceVO
-	ret := s.ms.Table(s.tableName).Where("device_gateway_id in (?)", id).Where("status = ?", true).Where("communication_type = ?", protocols.LOCAL).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+	ret := s.ms.Table(s.tableName).Where("device_gateway_id in (?)", id).Where("enable = ?", true).Where("communication_type = ?", protocols.LOCAL).Where("state = ?", commonStatus.NORMAL).Find(&dto)
 
 	var res []*deviceModels.DeviceVO = make([]*deviceModels.DeviceVO, 0)
 	for k, v := range dto {
@@ -259,4 +260,23 @@ func (s *sysDeviceDataDao) SelectPublicDeviceList(c *gin.Context, req *deviceMod
 		Rows:  dto,
 		Total: total,
 	}, nil
+}
+
+func (s *sysDeviceDataDao) All(c *gin.Context) ([]*deviceModels.DeviceVO, error) {
+	var list []*deviceModels.DeviceVO
+	ret := s.ms.Table(s.tableName).Where("state", commonStatus.NORMAL).Find(&list)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	return list, nil
+}
+
+// Count 统计设备数量
+func (s *sysDeviceDataDao) Count(c *gin.Context) (int64, error) {
+	var count int64
+	ret := s.ms.Table(s.tableName).Where("state", commonStatus.NORMAL).Count(&count)
+	if ret.Error != nil {
+		return count, ret.Error
+	}
+	return count, nil
 }

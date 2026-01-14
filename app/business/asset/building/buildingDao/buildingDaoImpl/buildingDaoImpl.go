@@ -110,3 +110,12 @@ func (b *BuildingDaoImpl) All(c *gin.Context) ([]*buildingModels.SysBuilding, er
 	}
 	return list, nil
 }
+
+func (b *BuildingDaoImpl) Count(c *gin.Context) (int64, error) {
+	var count int64
+	ret := b.db.Table(b.table).Where("state", commonStatus.NORMAL).Count(&count)
+	if ret.Error != nil {
+		return 0, ret.Error
+	}
+	return count, nil
+}

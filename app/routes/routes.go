@@ -1,9 +1,6 @@
 package routes
 
 import (
-	"github.com/spf13/viper"
-	swaggerFiles "github.com/swaggo/files"
-	gs "github.com/swaggo/gin-swagger"
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/alert/alertController"
 	"nova-factory-server/app/business/asset/building/buildingController"
@@ -14,6 +11,7 @@ import (
 	"nova-factory-server/app/business/daemonize/daemonizeController"
 	"nova-factory-server/app/business/dashboard/dashboardController"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
+	homeController "nova-factory-server/app/business/home/controller"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/product/productController"
@@ -27,12 +25,17 @@ import (
 	"nova-factory-server/app/utils/logger"
 	"time"
 
-	"github.com/gin-contrib/cors"
-	"github.com/google/wire"
+	"github.com/spf13/viper"
+	swaggerFiles "github.com/swaggo/files"
+	gs "github.com/swaggo/gin-swagger"
+
 	"net/http"
 	"nova-factory-server/app/docs"
 	"nova-factory-server/app/setting"
 	"strings"
+
+	"github.com/gin-contrib/cors"
+	"github.com/google/wire"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,6 +59,7 @@ func NewGinEngine(
 	dashboard dashboardController.Controller,
 	product *productController.Product,
 	resource *resourceController.ResourceController,
+	home *homeController.Home,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -166,6 +170,8 @@ func NewGinEngine(
 
 		dashboard.Dashboard.PrivateRoutes(group)
 		dashboard.Data.PrivateRoutes(group)
+
+		home.PrivateRoutes(group)
 
 		// 生产管理
 		product.Laboratory.PrivateRoutes(group)

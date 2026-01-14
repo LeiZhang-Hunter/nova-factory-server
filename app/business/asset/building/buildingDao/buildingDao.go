@@ -11,4 +11,5 @@ type BuildingDao interface {
 	Remove(c *gin.Context, ids []string) error
 	GetByIds(c *gin.Context, ids []uint64) ([]*buildingModels.SysBuilding, error)
 	All(c *gin.Context) ([]*buildingModels.SysBuilding, error)
+	Count(c *gin.Context) (int64, error)
 }

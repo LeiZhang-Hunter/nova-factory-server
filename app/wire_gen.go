@@ -38,6 +38,8 @@ import (
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService/deviceMonitorServiceImpl"
+	"nova-factory-server/app/business/home/controller"
+	"nova-factory-server/app/business/home/homeService/homeServiceImpl"
 	"nova-factory-server/app/business/metric/device/metricController"
 	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
 	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
@@ -335,7 +337,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	runnerService := alertServiceImpl.NewRunnerServiceImpl(iChartService)
 	alertLogDao := alertDaoImpl.NewAlertLogDaoImpl(db)
 	runner := alertController.NewRunner(alertRuleService, runnerService, iChartService, iDeviceDao, alertLogDao)
-	controller := &alertController.Controller{
+	alertControllerController := &alertController.Controller{
 		Alert:         alert,
 		AlertTemplate: alertTemplate,
 		AlertLog:      alertLog,
@@ -373,7 +375,9 @@ func wireApp() (*gin.Engine, func(), error) {
 	resourceControllerResourceController := &resourceController.ResourceController{
 		ResourceFile: resourceFile,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, controller, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController)
+	homeService := homeServiceImpl.NewHomeServiceImpl(buildingDao, iDeviceService, cacheCache)
+	home := controller.NewHome(homeService)
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home)
 	return engine, func() {
 		cleanup()
 	}, nil
