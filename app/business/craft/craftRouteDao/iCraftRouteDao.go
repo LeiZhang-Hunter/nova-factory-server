@@ -16,4 +16,6 @@ type ICraftRouteDao interface {
 	SelectCraftRoute(c *gin.Context, req *craftRouteModels.SysCraftRouteListReq) (*craftRouteModels.SysCraftRouteListData, error)
 	GetById(c *gin.Context, id int64) (*craftRouteModels.SysCraftRoute, error)
 	GetByIds(c *gin.Context, ids []int64) ([]*craftRouteModels.SysCraftRoute, error)
+	// Count 统计调度任务数量
+	Count(c *gin.Context) (int64, error)
 }

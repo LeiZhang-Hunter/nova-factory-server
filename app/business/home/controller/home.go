@@ -2,6 +2,7 @@ package controller
 
 import (
 	"nova-factory-server/app/business/home/homeService"
+	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
@@ -20,10 +21,17 @@ func NewHome(iHomeService homeService.HomeService) *Home {
 func (h *Home) PrivateRoutes(r *gin.RouterGroup) {
 	group := r.Group("/home")
 	{
-		group.GET("/stats", h.GetHomeStats)
+		group.GET("/stats", middlewares.HasPermission("home:stats"), h.GetHomeStats)
 	}
 }
 
+// GetHomeStats 首页统计
+// @Summary 首页统计
+// @Description 首页统计
+// @Tags 首页
+// @Security BearerAuth
+// @Produce application/json
+// @Router /home/stats [get]
 func (h *Home) GetHomeStats(c *gin.Context) {
 	stats, err := h.iHomeService.GetHomeStats(c)
 	if err != nil {

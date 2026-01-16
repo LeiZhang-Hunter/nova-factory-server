@@ -2,6 +2,7 @@ package alertModels
 
 import (
 	"encoding/json"
+	"github.com/gogf/gf/os/gtime"
 	"go.uber.org/zap"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
@@ -75,18 +76,19 @@ func FromSysAlertToSetData(data *SysAlert) *SetSysAlert {
 }
 
 type SetSysAlert struct {
-	ID          int64                   `gorm:"column:id;primaryKey;autoIncrement:true;comment:自增标识" json:"id,string"` // 自增标识
-	GatewayID   int64                   `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id,string"`      // 网关id
-	TemplateID  int64                   `gorm:"column:template_id;not null;comment:模板id" json:"template_id,string"`    // 模板id
-	ActionId    int64                   `gorm:"column:action_id;not null;comment:处理id" json:"action_id,string"`        // 处理id
-	ReasonId    int64                   `gorm:"column:reason_id;not null;comment:推理id" json:"reason_id,string"`        // 推理id
-	Name        string                  `gorm:"column:name;not null;comment:告警策略名称" json:"name"`                       // 告警策略名称
-	Additions   map[string]string       `gorm:"column:additions;comment:注解" json:"additions"`                          // 注解
-	Advanced    *logalert.Advanced      `gorm:"column:advanced;comment:告警规则" json:"advanced"`                          // 告警规则
-	Ignore      []logalert.DeviceMetric `gorm:"column:ignore;comment:忽略规则" json:"ignore"`
-	Matcher     *logalert.Matcher       `gorm:"column:matcher;comment:匹配规则" json:"matcher"`
-	Description string                  `gorm:"column:description;not null;comment:描述"  json:"description"` // 配置版本
-	Status      bool                    `json:"status"`
+	ID            int64                   `gorm:"column:id;primaryKey;autoIncrement:true;comment:自增标识" json:"id,string"` // 自增标识
+	GatewayID     int64                   `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id,string"`      // 网关id
+	TemplateID    int64                   `gorm:"column:template_id;not null;comment:模板id" json:"template_id,string"`    // 模板id
+	ActionId      int64                   `gorm:"column:action_id;not null;comment:处理id" json:"action_id,string"`        // 处理id
+	ReasonId      int64                   `gorm:"column:reason_id;not null;comment:推理id" json:"reason_id,string"`        // 推理id
+	Name          string                  `gorm:"column:name;not null;comment:告警策略名称" json:"name"`                       // 告警策略名称
+	Additions     map[string]string       `gorm:"column:additions;comment:注解" json:"additions"`                          // 注解
+	Advanced      *logalert.Advanced      `gorm:"column:advanced;comment:告警规则" json:"advanced"`                          // 告警规则
+	Ignore        []logalert.DeviceMetric `gorm:"column:ignore;comment:忽略规则" json:"ignore"`
+	Matcher       *logalert.Matcher       `gorm:"column:matcher;comment:匹配规则" json:"matcher"`
+	Description   string                  `gorm:"column:description;not null;comment:描述"  json:"description"` // 配置版本
+	Status        bool                    `json:"status"`
+	StartTimeUnix *gtime.Time             `json:"start_time_unix" gorm:"column:start_time_unix;comment:创建时间" db:"start_time_unix"` //创建时间
 }
 
 func ToSysAlert(data *SetSysAlert) *SysAlert {

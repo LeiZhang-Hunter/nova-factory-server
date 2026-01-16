@@ -12,4 +12,6 @@ type ICraftRouteService interface {
 	SelectCraftRoute(c *gin.Context, req *craftRouteModels.SysCraftRouteListReq) (*craftRouteModels.SysCraftRouteListData, error)
 	DetailCraftRoute(c *gin.Context, req *craftRouteModels.SysCraftRouteDetailRequest) (*craftRouteModels.SysCraftRouteConfig, error)
 	SaveCraftRoute(c *gin.Context, topo *craftRouteModels.ProcessTopo) (*craftRouteModels.SysCraftRouteConfig, error)
+	// Count 统计调度任务数量
+	Count(c *gin.Context) (int64, error)
 }

@@ -431,14 +431,17 @@ func (d *DeviceService) StatCount(c *gin.Context) (*deviceModels.DeviceStatData,
 	for _, v := range slice.Val() {
 		str, ok := v.(string)
 		if !ok {
+			data.OffLine++
 			continue
 		}
 		if str == "" {
+			data.OffLine++
 			continue
 		}
 		deviceMetrics := make(map[uint64]map[uint64]*metricModels.DeviceMetricData) // template_id => data_id
 		err := json.Unmarshal([]byte(str), &deviceMetrics)
 		if err != nil {
+			data.Exception++
 			zap.L().Error("json Unmarshal error", zap.Error(err))
 			continue
 		}

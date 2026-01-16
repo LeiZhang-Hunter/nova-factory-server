@@ -54,5 +54,53 @@ func (log *AlertLogServiceImpl) Export(c *gin.Context, data alertModels.AlertLog
 }
 
 func (log *AlertLogServiceImpl) List(c *gin.Context, req *alertModels.SysAlertLogListReq) (*alertModels.NovaAlertLogList, error) {
-	return log.dao.List(c, req)
+	list, err := log.dao.List(c, req)
+	if err != nil {
+		return &alertModels.NovaAlertLogList{
+			Rows: make([]*alertModels.NovaAlertLog, 0),
+		}, err
+	}
+
+	if list == nil {
+		return &alertModels.NovaAlertLogList{
+			Rows: make([]*alertModels.NovaAlertLog, 0),
+		}, nil
+	}
+
+	var ruleIdMap map[uint64]bool = make(map[uint64]bool)
+	for _, v := range list.Rows {
+		ruleIdMap[v.AlertID] = true
+	}
+
+	var ruleIds []uint64 = make([]uint64, 0)
+	for k, _ := range ruleIdMap {
+		ruleIds = append(ruleIds, k)
+	}
+
+	rules, err := log.ruleDao.GetByIds(c, ruleIds)
+	if err != nil {
+		return &alertModels.NovaAlertLogList{
+			Rows: make([]*alertModels.NovaAlertLog, 0),
+		}, err
+	}
+
+	var rulesMap map[uint64]*alertModels.SysAlert
+	for _, v := range rules {
+		rulesMap[uint64(v.ID)] = v
+	}
+
+	for k, v := range list.Rows {
+		rule, ok := rulesMap[v.AlertID]
+		if !ok {
+			list.Rows[k].RuleName = "系统告警"
+			continue
+		}
+		list.Rows[k].RuleName = rule.Name
+	}
+	return list, nil
+}
+
+// Count 统计clickhouse数据库
+func (log *AlertLogServiceImpl) Count(c *gin.Context) (int64, error) {
+	return log.dao.Count(c)
 }

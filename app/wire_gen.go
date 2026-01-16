@@ -375,7 +375,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	resourceControllerResourceController := &resourceController.ResourceController{
 		ResourceFile: resourceFile,
 	}
-	homeService := homeServiceImpl.NewHomeServiceImpl(buildingDao, iDeviceService, cacheCache)
+	deviceMonitorCalcDao := deviceMonitorDaoImpl.NewDeviceMonitorCalcDaoImpl(iotDb, iDevMapService)
+	homeService := homeServiceImpl.NewHomeServiceImpl(buildingDao, iDeviceService, iCraftRouteService, alertLogService, deviceMonitorCalcDao, cacheCache)
 	home := controller.NewHome(homeService)
 	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home)
 	return engine, func() {

@@ -124,3 +124,12 @@ func (dao *CraftRouteDaoImpl) GetByIds(c *gin.Context, ids []int64) ([]*craftRou
 	ret := dao.db.Table(dao.tableName).Where("route_id in (?)", ids).Where("state = ?", commonStatus.NORMAL).First(&data)
 	return data, ret.Error
 }
+
+func (i *CraftRouteDaoImpl) Count(c *gin.Context) (int64, error) {
+	var count int64
+	ret := i.db.Table(i.tableName).Where("state = ?", commonStatus.NORMAL).Count(&count)
+	if ret.Error != nil {
+		zap.L().Error("count info error", zap.Error(ret.Error))
+	}
+	return count, ret.Error
+}

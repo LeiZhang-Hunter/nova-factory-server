@@ -506,3 +506,10 @@ func (craft *CraftRouteServiceImpl) loadV1ProcessTopo(c *gin.Context,
 	}
 	return content, nil
 }
+
+// Count 调度统计
+func (craft *CraftRouteServiceImpl) Count(c *gin.Context) (int64, error) {
+	// 读取详情
+	info, err := craft.dao.Count(c)
+	return info, err
+}

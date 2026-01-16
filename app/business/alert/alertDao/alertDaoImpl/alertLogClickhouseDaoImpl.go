@@ -77,3 +77,12 @@ func (log *AlertLogClickhouseDaoImpl) List(c *gin.Context, req *alertModels.SysA
 		Total: total,
 	}, nil
 }
+
+func (log *AlertLogClickhouseDaoImpl) Count(c *gin.Context) (int64, error) {
+	var count int64
+	ret := log.clickhouse.DB().Table(log.table).Count(&count)
+	if ret.Error != nil {
+		return 0, ret.Error
+	}
+	return count, nil
+}

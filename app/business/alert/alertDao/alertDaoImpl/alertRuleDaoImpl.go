@@ -133,3 +133,18 @@ func (ac *AlertRuleDaoImpl) FindOpen(c *gin.Context, gatewayId int64) (*alertMod
 	}
 	return dto, ret.Error
 }
+
+func (ac *AlertRuleDaoImpl) Count(c *gin.Context) (int64, error) {
+	var count int64
+	ret := ac.db.Table(ac.table).Where("state = ?", commonStatus.NORMAL).Count(&count)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return count, nil
+	}
+	return count, ret.Error
+}
+
+func (ac *AlertRuleDaoImpl) GetByIds(c *gin.Context, ids []uint64) ([]*alertModels.SysAlert, error) {
+	var dto []*alertModels.SysAlert = make([]*alertModels.SysAlert, 0)
+	ret := ac.db.Table(ac.table).Where("id in (?)", ids).Where("state = ?", commonStatus.NORMAL).Find(&dto)
+	return dto, ret.Error
+}
