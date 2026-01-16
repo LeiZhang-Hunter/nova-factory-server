@@ -114,7 +114,7 @@ func (h *HomeServiceImpl) GetHomeStats(c *gin.Context) (*homeModels.HomeStats, e
 	stats.DeviceCounter = deviceCounter
 
 	endRankTime := time.Now().UnixMilli()
-	startRankTime := end - 86400*1000*30
+	startRankTime := end - 86400*1000
 	// 读取最近10台的设备统计
 	deviceRankCounter, err := h.deviceMonitorCalcDao.CounterByDevice(c, startRankTime, endRankTime, 10)
 	if err != nil {
