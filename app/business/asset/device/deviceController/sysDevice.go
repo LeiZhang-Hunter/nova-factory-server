@@ -67,6 +67,7 @@ func (di *DeviceInfo) SetDevice(c *gin.Context) {
 	info := new(deviceModels.DeviceInfo)
 	err := c.ShouldBindJSON(info)
 	if err != nil {
+		zap.L().Error("set device param error", zap.Error(err))
 		baizeContext.ParameterError(c)
 		return
 	}

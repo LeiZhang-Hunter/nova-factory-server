@@ -37,7 +37,6 @@ type DeviceInfo struct {
 	Type              *string   `json:"Type" db:"type"`
 	Action            []*string `json:"Action" db:"action"`
 	Extension         *string   `json:"Extension" db:"extension"`
-	Status            *bool     `json:"status" gorm:"column:status;comment:是否启用 0 禁用 1 启用" `
 	Enable            *bool     `json:"enable"`
 	ControlType       int       `json:"ControlType" db:"control_type"`
 }
