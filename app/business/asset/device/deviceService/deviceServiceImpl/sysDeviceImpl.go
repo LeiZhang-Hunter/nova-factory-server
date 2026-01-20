@@ -379,8 +379,8 @@ func (d *DeviceService) GetDeviceInfoByIds(c *gin.Context, ids []int64) ([]*devi
 	}
 
 	var keys []string = make([]string, 0)
-	for _, v := range ids {
-		keys = append(keys, device.MakeDeviceKey(uint64(v)))
+	for _, v := range deviceList {
+		keys = append(keys, device.MakeDeviceKey(uint64(v.DeviceId)))
 	}
 
 	slice := d.cache.MGet(c, keys)

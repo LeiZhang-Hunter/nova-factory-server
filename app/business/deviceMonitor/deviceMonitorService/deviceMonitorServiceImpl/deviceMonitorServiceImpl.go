@@ -3,7 +3,6 @@ package deviceMonitorServiceImpl
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/building/buildingDao"
@@ -246,7 +245,6 @@ func (d *DeviceMonitorServiceImpl) DeviceLayout(c *gin.Context, floorId int64) (
 	}
 
 	data := &deviceMonitorModel.DeviceLayoutData{}
-	fmt.Println(len(list))
 	data.Layout = info
 	data.DeviceMap = make(map[string]*deviceModels.DeviceVO)
 	for _, deviceInfo := range list {
