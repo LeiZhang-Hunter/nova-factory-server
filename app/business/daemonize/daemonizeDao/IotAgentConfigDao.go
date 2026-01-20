@@ -15,4 +15,5 @@ type IotAgentConfigDao interface {
 	Create(ctx context.Context, config *daemonizeModels.SysIotAgentConfig) (*daemonizeModels.SysIotAgentConfig, error)
 	Update(ctx context.Context, config *daemonizeModels.SysIotAgentConfig) (*daemonizeModels.SysIotAgentConfig, error)
 	List(c *gin.Context, req *daemonizeModels.SysIotAgentConfigListReq) (*daemonizeModels.SysIotAgentConfigListData, error)
+	Remove(ctx context.Context, ids []string) error
 }

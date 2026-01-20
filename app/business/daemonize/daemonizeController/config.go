@@ -29,9 +29,10 @@ func NewConfig(service daemonizeService.IGatewayConfigService,
 
 func (c *Config) PrivateRoutes(router *gin.RouterGroup) {
 	routers := router.Group("/gateway/agent/config")
-	routers.GET("/generate", middlewares.HasPermission("gateway:agent:config:generate"), c.Generate) // 生成配置
-	routers.GET("/list", middlewares.HasPermission("gateway:agent:config:list"), c.List)             // 配置列表
-	routers.POST("/set", middlewares.HasPermission("gateway:agent:config:set"), c.Set)               // 保存配置
+	routers.GET("/generate", middlewares.HasPermission("gateway:agent:config:generate"), c.Generate)   // 生成配置
+	routers.GET("/list", middlewares.HasPermission("gateway:agent:config:list"), c.List)               // 配置列表
+	routers.POST("/set", middlewares.HasPermission("gateway:agent:config:set"), c.Set)                 // 保存配置
+	routers.DELETE("/remove/:ids", middlewares.HasPermission("gateway:agent:config:remove"), c.Remove) // 删除配置
 }
 
 func (c *Config) PublicRoutes(router *gin.RouterGroup) {
@@ -223,5 +224,28 @@ func (c *Config) Bind(ctx *gin.Context) {
 		baizeContext.Waring(ctx, "绑定配置失败")
 		return
 	}
+	baizeContext.Success(ctx)
+}
+
+// Remove 移除配置
+// @Summary 移除配置
+// @Description 移除配置
+// @Tags 网关管理/Agent管理
+// @Param  ids path string true "ids"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "成功"
+// @Router /gateway/agent/config/remove/{ids} [delete]
+func (c *Config) Remove(ctx *gin.Context) {
+	ids := baizeContext.ParamStringArray(ctx, "ids")
+	if len(ids) == 0 {
+		baizeContext.Waring(ctx, "请选择删除选项")
+		return
+	}
+	err := c.configService.Remove(ctx, ids)
+	if err != nil {
+		baizeContext.Waring(ctx, "删除失败")
+		return
+	}
+
 	baizeContext.Success(ctx)
 }

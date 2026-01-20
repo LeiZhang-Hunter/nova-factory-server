@@ -41,3 +41,7 @@ func (i *IotAgentConfigServiceImpl) List(c *gin.Context, req *daemonizeModels.Sy
 func (i *IotAgentConfigServiceImpl) GetLastedConfig(ctx context.Context, agentId uint64) (*daemonizeModels.SysIotAgentConfig, error) {
 	return i.dao.GetLastedConfig(ctx, agentId)
 }
+
+func (i *IotAgentConfigServiceImpl) Remove(ctx context.Context, ids []string) error {
+	return i.dao.Remove(ctx, ids)
+}

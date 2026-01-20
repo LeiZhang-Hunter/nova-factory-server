@@ -158,3 +158,8 @@ func (i *IotAgentConfigDaoImpl) List(c *gin.Context, req *daemonizeModels.SysIot
 		Total: total,
 	}, nil
 }
+
+func (i *IotAgentConfigDaoImpl) Remove(ctx context.Context, ids []string) error {
+	ret := i.db.Table(i.tableName).Where("id in (?)", ids).Delete(&daemonizeModels.SysIotAgentConfig{})
+	return ret.Error
+}
