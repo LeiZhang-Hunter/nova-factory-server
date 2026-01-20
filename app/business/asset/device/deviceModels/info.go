@@ -80,7 +80,7 @@ type DeviceVO struct {
 	Type              *string                                              `json:"Type" db:"type"`
 	Action            string                                               `json:"Action" db:"action"`
 	Enable            *bool                                                `json:"enable" gorm:"column:enable;comment:是否启用 0 禁用 1 启用"`
-	Status            device.RUN_STATUS                                    `json:"status" gorm:"column:status;comment:是否启用 0 禁用 1 启用" `
+	Status            device.WORK_STATUS                                   `json:"status" gorm:"column:status;comment:是否启用 0 禁用 1 启用" `
 	Extension         string                                               `json:"Extension" db:"extension"`
 	ControlType       int                                                  `json:"ControlType" db:"control_type"`
 	ExtensionInfo     *ExtensionInfo                                       `json:"extension_info,omitempty" gorm:"-" db:"control_type"`
@@ -104,25 +104,25 @@ func NewDeviceVO(device *DeviceInfo) *DeviceVO {
 }
 
 type DeviceValue struct {
-	DeviceId          uint64            `json:"deviceId,string"`
-	DeviceGroupId     uint64            `json:"deviceGroupId,string"`
-	DeviceClassId     uint64            `json:"deviceClassId,string"`
-	DeviceProtocolId  uint64            `json:"deviceProtocolId,string"`
-	DeviceBuildingId  uint64            `json:"deviceBuildingId,string"`
-	Name              string            `json:"name"`
-	CommunicationType string            `gorm:"column:communication_type;comment:通信方式" json:"communication_type"`               // 通信方式
-	ProtocolType      string            `gorm:"column:protocol_type;comment:协议类型" json:"protocol_type"`                         // 协议
-	DeviceGatewayID   int64             `gorm:"column:device_gateway_id;not null;comment:网关id" json:"device_gateway_id,string"` // 网关id
-	DeviceGroupName   string            `json:"deviceGroupName"`
-	Number            string            `json:"number"`
-	Type              string            `json:"type"`
-	Action            []string          `json:"action"`
-	Extension         string            `json:"extension"`
-	ControlType       int               `json:"controlType"`
-	Enable            *bool             `json:"enable" gorm:"column:enable;comment:是否启用 0 禁用 1 启用"`
-	Status            device.RUN_STATUS `json:"status"`
-	CreateUserName    string            `json:"createUserName"`
-	UpdateUserName    string            `json:"updateUserName"`
+	DeviceId          uint64             `json:"deviceId,string"`
+	DeviceGroupId     uint64             `json:"deviceGroupId,string"`
+	DeviceClassId     uint64             `json:"deviceClassId,string"`
+	DeviceProtocolId  uint64             `json:"deviceProtocolId,string"`
+	DeviceBuildingId  uint64             `json:"deviceBuildingId,string"`
+	Name              string             `json:"name"`
+	CommunicationType string             `gorm:"column:communication_type;comment:通信方式" json:"communication_type"`               // 通信方式
+	ProtocolType      string             `gorm:"column:protocol_type;comment:协议类型" json:"protocol_type"`                         // 协议
+	DeviceGatewayID   int64              `gorm:"column:device_gateway_id;not null;comment:网关id" json:"device_gateway_id,string"` // 网关id
+	DeviceGroupName   string             `json:"deviceGroupName"`
+	Number            string             `json:"number"`
+	Type              string             `json:"type"`
+	Action            []string           `json:"action"`
+	Extension         string             `json:"extension"`
+	ControlType       int                `json:"controlType"`
+	Enable            *bool              `json:"enable" gorm:"column:enable;comment:是否启用 0 禁用 1 启用"`
+	Status            device.WORK_STATUS `json:"status"`
+	CreateUserName    string             `json:"createUserName"`
+	UpdateUserName    string             `json:"updateUserName"`
 	baize.BaseEntity
 }
 

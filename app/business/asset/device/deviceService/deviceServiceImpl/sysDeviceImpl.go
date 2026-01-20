@@ -419,9 +419,9 @@ func (d *DeviceService) StatCount(c *gin.Context) (*deviceModels.DeviceStatData,
 	data.Total = int64(len(list))
 	var keys []string = make([]string, 0)
 	for _, v := range list {
-		if v.Status == device.EXCEPTION {
+		if v.Status == device.WORK_EXCEPTION {
 			data.Exception++
-		} else if v.Status == device.MAINTENANCE {
+		} else if v.Status == device.WORK_MAINTENANCE {
 			data.Maintenance++
 		}
 		keys = append(keys, device.MakeDeviceKey(v.DeviceId))

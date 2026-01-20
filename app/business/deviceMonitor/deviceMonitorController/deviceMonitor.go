@@ -35,6 +35,7 @@ func (d *DeviceMonitor) PublicRoutes(router *gin.RouterGroup) {
 	group.GET("/metric/predict", d.MetricPredict)
 	group.POST("/metric/predict/query", d.MetricPredictQuery)
 	group.GET("/device/layout", d.DeviceLayout)
+	group.GET("/device/building", d.DeviceByBuilding)
 }
 
 func (d *DeviceMonitor) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
@@ -178,6 +179,32 @@ func (d *DeviceMonitor) MetricPredictQuery(c *gin.Context) {
 // @Success 200 {object}  response.ResponseData "获取成功"
 // @Router /api/v1/device/layout [get]
 func (d *DeviceMonitor) DeviceLayout(c *gin.Context) {
+	req := new(deviceMonitorModel.DeviceLayoutRequest)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		zap.L().Error("param error", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	layout, err := d.service.DeviceLayout(c, req.FloorId)
+	if err != nil {
+		zap.L().Error("device layout error", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+
+	baizeContext.SuccessData(c, layout)
+}
+
+// DeviceByBuilding 通过建筑物读取设备
+// @Summary 通过建筑物读取设备
+// @Description 通过建筑物读取设备
+// @Tags 设备监控/通过建筑物读取设备
+// @Param object body metricModels.GatewayMetricDataQueryReq true "指标预测查询参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /api/v1/device/building [get]
+func (d *DeviceMonitor) DeviceByBuilding(c *gin.Context) {
 	req := new(deviceMonitorModel.DeviceLayoutRequest)
 	err := c.ShouldBindQuery(req)
 	if err != nil {
