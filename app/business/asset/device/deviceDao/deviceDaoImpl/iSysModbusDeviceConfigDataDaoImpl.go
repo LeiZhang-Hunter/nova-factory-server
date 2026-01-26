@@ -28,7 +28,7 @@ func (i *ISysModbusDeviceConfigDataDaoImpl) Add(c *gin.Context, data *deviceMode
 }
 
 func (i *ISysModbusDeviceConfigDataDaoImpl) Update(c *gin.Context, data *deviceModels.SysModbusDeviceConfigData) (*deviceModels.SysModbusDeviceConfigData, error) {
-	ret := i.db.Table(i.tableName).Where("device_config_id = ?", data.DeviceConfigID).Updates(data)
+	ret := i.db.Table(i.tableName).Debug().Where("device_config_id = ?", data.DeviceConfigID).UpdateColumns(data)
 	return data, ret.Error
 }
 

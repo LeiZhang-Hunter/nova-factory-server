@@ -14,7 +14,7 @@ type SysModbusDeviceConfigData struct {
 	Type                  string `gorm:"column:type;comment:数据类型" json:"type"`                                           // 数据类型
 	DataType              string `gorm:"column:data_type;comment:设备节点类型，到底是开关还是数值" json:"data_type"`                     // 设备节点类型，到底是开关还是数值
 	Slave                 string `gorm:"column:slave;comment:从设备地址" json:"slave"`                                        // 从设备地址
-	Register              int64  `gorm:"column:register;not null;comment:寄存器/偏移量" json:"register,string"`                // 寄存器/偏移量
+	Register              *int64 `gorm:"column:register;not null;comment:寄存器/偏移量" json:"register,string"`                // 寄存器/偏移量
 	StorageType           string `gorm:"column:storage_type;comment:存储策略" json:"storage_type"`                           // 存储策略
 	PredictEnable         *bool  `gorm:"column:predict_enable;comment:是否开启预测" json:"predict_enable"`                     // 是否开启预测
 	PerturbationVariables string `gorm:"column:perturbation_variables;comment:扰动变量" json:"perturbation_variables"`       // 扰动变量
@@ -96,7 +96,7 @@ type SetSysModbusDeviceConfigDataReq struct {
 	Type                  string                     `gorm:"column:type;comment:数据类型" binding:"required" json:"type"`                               // 数据类型
 	DataType              string                     `gorm:"column:data_type;comment:设备节点类型，到底是开关还是数值" json:"data_type"`                            // 设备节点类型，到底是开关还是数值
 	Slave                 string                     `gorm:"column:slave;comment:从设备地址"  json:"slave"`                                              // 从设备地址
-	Register              int64                      `gorm:"column:register;not null;comment:寄存器/偏移量" json:"register,string"`                       // 寄存器/偏移量
+	Register              *int64                     `gorm:"column:register;not null;comment:寄存器/偏移量" json:"register,string"`                       // 寄存器/偏移量
 	AggFunction           string                     `gorm:"column:agg_function;comment:聚合函数" json:"agg_function"`                                  // 聚合函数
 	StorageType           string                     `gorm:"column:storage_type;comment:存储策略" json:"storage_type"`                                  // 存储策略
 	Unit                  string                     `gorm:"column:unit;comment:单位" json:"unit"`                                                    // 单位

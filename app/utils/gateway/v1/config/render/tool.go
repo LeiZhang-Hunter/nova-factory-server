@@ -22,6 +22,10 @@ func OfBhps7Device(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDevi
 	}
 	device.Template = make([]bhps7.DataTypeConfig, 0)
 	for _, v := range data {
+		register := 0
+		if v.Register != nil {
+			register = int(*v.Register)
+		}
 		device.Template = append(device.Template, bhps7.DataTypeConfig{
 			Name:         v.Name,
 			Protocol:     "",
@@ -30,7 +34,7 @@ func OfBhps7Device(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDevi
 			DataFormat:   api.DataValueType(v.DataFormat),
 			Unit:         v.Unit,
 			TemplateId:   uint64(v.TemplateID),
-			Position:     uint16(v.Register),
+			Position:     uint16(register),
 			FunctionCode: uint16(v.FunctionCode),
 			Sort:         api.ByteOrder(v.Sort),
 			Expression:   v.Expression,
