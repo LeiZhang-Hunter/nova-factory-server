@@ -42,7 +42,7 @@ type DeviceInfo struct {
 }
 
 type LocalInfo struct {
-	Slave    int    `json:"slave,omitempty"`
+	Slave    int    `json:"slave"`
 	Address  string `json:"address"`
 	Quantity uint16 `json:"quantity"`
 }
