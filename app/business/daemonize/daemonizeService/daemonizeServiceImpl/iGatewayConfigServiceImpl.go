@@ -188,9 +188,7 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 
 			var config bhps7.Config
 			config.Address = addr
-			if len(devicesData) > 0 && len(devicesData[0].ExtensionInfo.LocalInfo) > 0 {
-				config.Quantity = devicesData[0].ExtensionInfo.LocalInfo[0].Quantity
-			}
+
 			config.Devices = make([]bhps7.Device, 0)
 
 			for _, d := range devicesData {
@@ -202,6 +200,8 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 				if bhps7Device == nil {
 					continue
 				}
+				bhps7Device.SlaveId = byte(d.ExtensionInfo.LocalInfo[0].Slave)
+				bhps7Device.Quantity = d.ExtensionInfo.LocalInfo[0].Quantity
 				config.Devices = append(config.Devices, *bhps7Device)
 			}
 			pack, err := cfg.Pack(config)

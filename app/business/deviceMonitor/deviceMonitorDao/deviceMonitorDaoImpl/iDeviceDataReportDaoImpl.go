@@ -82,7 +82,7 @@ func (i *IDeviceDataReportDaoImpl) Save(c *gin.Context, data *deviceMonitorModel
 }
 
 func (i *IDeviceDataReportDaoImpl) Remove(c *gin.Context, dev string) error {
-	ret := i.db.Table(i.tableName).Where("device = ?", dev).Update("state", commonStatus.DELETE)
+	ret := i.db.Table(i.tableName).Where("device = ?", dev).Delete(&deviceMonitorModel.SysIotDbDevMap{})
 	return ret.Error
 }
 

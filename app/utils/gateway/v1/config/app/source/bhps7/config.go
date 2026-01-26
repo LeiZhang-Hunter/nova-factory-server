@@ -23,14 +23,14 @@ type DataTypeConfig struct {
 type Device struct {
 	DeviceId string           `yaml:"deviceId"`
 	Name     string           `yaml:"name"`
+	SlaveId  byte             `yaml:"slaveId,omitempty"`
+	Quantity uint16           `yaml:"quantity"`
 	Template []DataTypeConfig `yaml:"template,omitempty"`
 }
 
 type Config struct {
 	Enabled     *bool         `yaml:"enabled,omitempty"`
 	Address     string        `yaml:"address,omitempty"`
-	Quantity    uint16        `yaml:"quantity"`
-	SlaveId     byte          `yaml:"slaveId,omitempty"`
 	CollectTime time.Duration `yaml:"collectTime,omitempty" default:"5s"` // default 2 * read.timeout
 	Devices     []Device      `yaml:"devices,omitempty"`
 	Length      uint16        `yaml:"length,omitempty"`
