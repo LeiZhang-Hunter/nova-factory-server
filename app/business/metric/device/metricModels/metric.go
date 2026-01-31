@@ -23,6 +23,9 @@ type DeviceMetricData struct {
 	Name          string            `json:"name" gorm:"-"`
 	Unit          string            `json:"unit" gorm:"-"`
 	PredictEnable bool              `json:"predict_enable" gorm:"-"`
+	Mode          *int              `gorm:"column:mode;comment:功能码" json:"mode,string"`                 // 功能码
+	Type          string            `gorm:"column:type;comment:数据类型" json:"type"`                       // 数据类型
+	DataType      string            `gorm:"column:data_type;comment:设备节点类型，到底是开关还是数值" json:"data_type"` // 设备节点类型，到底是开关还是数值
 	DataId        uint64            `json:"data_id,string" gorm:"-"`
 	GraphEnable   bool              `json:"graph_enable" gorm:"-"`
 	TimeUnix      *gtime.Time       `json:"time_unix"       gorm:"column:time_unix"      description:"当前时间"` //

@@ -25,7 +25,7 @@ type SysModbusDeviceConfigData struct {
 	Precision             int64  `gorm:"column:precision;not null;comment:数据精度" json:"precision,string"`                 // 数据精度
 	FunctionCode          int    `gorm:"column:function_code;comment:功能码" json:"function_code,string"`                   // 功能码
 	Expression            string `gorm:"column:expression;comment:表达式" json:"expression"`                                // 表达式
-	Mode                  int    `gorm:"column:mode;comment:功能码" json:"mode,string"`                                     // 功能码
+	Mode                  *int   `gorm:"column:mode;comment:功能码" json:"mode,string"`                                     // 功能码
 	DataFormat            string `gorm:"column:data_format;comment:读写方式" json:"data_format"`                             // 读写方式
 	Sort                  string `gorm:"column:sort;comment:数据排序" json:"sort"`                                           // 数据排序
 	DeptID                int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                     // 部门ID
@@ -106,7 +106,7 @@ type SetSysModbusDeviceConfigDataReq struct {
 	Annotations           []Annotation               `gorm:"column:annotations;comment:注解" json:"annotation"`                                       // 扰动变量
 	GraphEnable           *bool                      `gorm:"column:graph_enable;comment:是否开启图表" json:"graph_enable"`                                // 是否开启图表
 	FunctionCode          int                        `gorm:"column:function_code;comment:功能码" json:"function_code,string"`                          // 功能码
-	Mode                  int                        `gorm:"column:mode;comment:功能码" json:"mode,string"`                                            // 功能码
+	Mode                  *int                       `gorm:"column:mode;comment:功能码" json:"mode,string"`                                            // 功能码
 	DataFormat            string                     `gorm:"column:data_format;comment:读写方式" json:"data_format"`                                    // 读写方式
 	Expression            string                     `gorm:"column:expression;comment:表达式" json:"expression"`                                       // 读写方式
 	Sort                  string                     `gorm:"column:sort;comment:数据排序" binding:"required" json:"sort"`                               // 数据排序
