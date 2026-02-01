@@ -11,6 +11,8 @@ var RUNNING RUN_STATUS = 2
 var (
 	DEVICE_KEY = "DEVICE_KEY_%d"
 
+	DEVICE_CONTROL_KEY = "DEVICE_CONTROL_KEY_%d_%d" // device_id data_id
+
 	MODBUS_TCP = "modbus-tcp"
 	MODBUS_RTU = "modbus-rtu"
 	MLINK_TCP  = "mlink-tcp"

@@ -50,6 +50,7 @@ require (
 	golang.org/x/text v0.26.0
 	google.golang.org/genai v1.11.1
 	google.golang.org/grpc v1.72.2
+	google.golang.org/protobuf v1.36.6
 	gopkg.in/errgo.v2 v2.1.0
 	gorm.io/driver/clickhouse v0.7.0
 	gorm.io/driver/mysql v1.5.7
@@ -124,7 +125,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/sync v0.15.0 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
 )
 
 require (
@@ -174,7 +174,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
-	github.com/novawatcher-io/nova-factory-payload v0.1.0
+	github.com/novawatcher-io/nova-factory-payload v0.1.7
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect

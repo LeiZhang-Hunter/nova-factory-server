@@ -22,6 +22,7 @@ import (
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/metric_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/time_data_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/bhps7"
+	"nova-factory-server/app/utils/gateway/v1/config/app/source/control"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/mqtt"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/prediction"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/running_statistics"
@@ -82,6 +83,16 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		return nil, errors.New("网关数据写入地址不能是空")
 	}
 	sink_address := addresses[0].DictValue
+
+	grpc_control_server_addresses := i.dictDataDao.SelectDictDataByType(c, gateway.GRPC_CONTROL_SERVER_HOST)
+	if len(grpc_control_server_addresses) == 0 {
+		return nil, errors.New("控制服务器数据写入地址不能是空")
+	}
+	grpcControlServerAddress := grpc_control_server_addresses[0].DictValue
+	if grpcControlServerAddress == "" {
+		grpcControlServerAddress = "localhost:10050"
+	}
+
 	serverHostInfo := i.dictDataDao.SelectDictDataByType(c, gateway.SERVER_HOST)
 	if len(serverHostInfo) == 0 {
 		return nil, errors.New("网关数据写入地址不能是空")
@@ -508,5 +519,19 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		piplines.Pipelines = append(piplines.Pipelines, *predictionPipeline)
 
 	}
+
+	controlPipelineSource := source2.Config{
+		Enabled: &scheduleEnabled,
+		Name:    "control",
+		Type:    "control",
+	}
+	controlPipeConfig := pipeline.NewConfig()
+	controlPipeConfig.Name = "control"
+	var controlConfig control.Config
+	controlConfig.Addr = grpcControlServerAddress
+	pack, err = cfg.Pack(&controlConfig)
+	controlPipelineSource.Properties = pack
+	controlPipeConfig.Sources = append(controlPipeConfig.Sources, &controlPipelineSource)
+	piplines.Pipelines = append(piplines.Pipelines, *controlPipeConfig)
 	return piplines, nil
 }

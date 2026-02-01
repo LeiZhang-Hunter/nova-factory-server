@@ -348,8 +348,8 @@ github.com/natefinch/lumberjack v2.0.0+incompatible/go.mod h1:Wi9p2TTF5DG5oU+6Yf
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/nikolalohinski/gonja v1.5.3 h1:GsA+EEaZDZPGJ8JtpeGN78jidhOlxeJROpqMT9fTj9c=
 github.com/nikolalohinski/gonja v1.5.3/go.mod h1:RmjwxNiXAEqcq1HeK5SSMmqFJvKOfTfXhkJv6YBtPa4=
-github.com/novawatcher-io/nova-factory-payload v0.1.0 h1:xO6RAq5bXBk1vRBeF31k2WAH47/aLc02m0lXoXKcAB4=
-github.com/novawatcher-io/nova-factory-payload v0.1.0/go.mod h1:tKxhVkXuPZaGEJ0ocldHGNSOFq3Q6rA/GcbHyBR4Voc=
+github.com/novawatcher-io/nova-factory-payload v0.1.7 h1:shlIGh6hMGA/gk14BoNxx8XdwlPJEWUjTEfBfikAI3Y=
+github.com/novawatcher-io/nova-factory-payload v0.1.7/go.mod h1:tKxhVkXuPZaGEJ0ocldHGNSOFq3Q6rA/GcbHyBR4Voc=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
 github.com/ollama/ollama v0.5.12 h1:qM+k/ozyHLJzEQoAEPrUQ0qXqsgDEEdpIVwuwScrd2U=

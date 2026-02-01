@@ -4,7 +4,7 @@ import (
 	"github.com/google/wire"
 )
 
-var ProviderSet = wire.NewSet(NewDeviceMonitor, NewDeviceReport, NewDeviceUtilization, NewControlLog,
+var ProviderSet = wire.NewSet(NewDeviceMonitor, NewDeviceReport, NewDeviceUtilization, NewControlLog, NewDeviceControl,
 	wire.Struct(new(DeviceMonitorController), "*"))
 
 type DeviceMonitorController struct {
@@ -12,4 +12,5 @@ type DeviceMonitorController struct {
 	DeviceReport      *DeviceReport
 	DeviceUtilization *DeviceUtilization
 	ControlLog        *ControlLog
+	DeviceControl     *DeviceControl
 }

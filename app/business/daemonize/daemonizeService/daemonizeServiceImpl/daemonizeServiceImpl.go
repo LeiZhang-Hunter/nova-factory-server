@@ -19,7 +19,6 @@ import (
 	"nova-factory-server/app/constant/agent"
 	"strconv"
 	"sync"
-	"time"
 )
 
 type DaemonizeServiceImpl struct {
@@ -157,13 +156,13 @@ func (d *DaemonizeServiceImpl) AgentOperate(ctx context.Context, req *v1.AgentOp
 			return nil
 		}
 
-		err = stream.Context().Err()
-		if errors.Is(err, context.Canceled) {
-			return nil
-		} else if err != nil {
-			return
+		select {
+		case <-stream.Context().Done():
+			{
+				return nil
+			}
 		}
-		time.Sleep(time.Second)
+
 	}
 }
 
