@@ -1,11 +1,13 @@
 package deviceMonitorModel
 
+import "nova-factory-server/app/utils/value"
+
 // ControlReq 控制请求
 type ControlReq struct {
-	DeviceId uint64      `json:"device_id,string"`
-	DataId   uint64      `json:"data_id,string"`
-	AgentId  uint64      `json:"agent_id,string"`
-	Value    interface{} `json:"value"`
+	DeviceId uint64     `json:"device_id,string"`
+	DataId   uint64     `json:"data_id,string"`
+	AgentId  uint64     `json:"agent_id,string"`
+	Value    value.Data `json:"value"`
 }
 
 // ControlRes 控制结果
