@@ -1,10 +1,12 @@
 package deviceMonitorService
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/metric/device/metricModels"
+
+	"github.com/gin-gonic/gin"
 )
 
 type DeviceMonitorService interface {
@@ -14,4 +16,6 @@ type DeviceMonitorService interface {
 	PredictQuery(c *gin.Context, req *metricModels.MetricDataQueryReq) (*metricModels.MetricQueryData, error)
 	// DeviceLayout 设备布局
 	DeviceLayout(c *gin.Context, floorId int64) (*deviceMonitorModel.DeviceLayoutData, error)
+	// ControlStatus 查询控制下发状态
+	ControlStatus(c context.Context, req *deviceMonitorModel.ControlStatusReq) (*deviceMonitorModel.ControlStatusRes, error)
 }

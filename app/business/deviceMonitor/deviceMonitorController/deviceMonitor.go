@@ -1,8 +1,6 @@
 package deviceMonitorController
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/asset/device/deviceModels"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
@@ -10,6 +8,9 @@ import (
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/gin_mcp"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type DeviceMonitor struct {
@@ -26,7 +27,8 @@ func (d *DeviceMonitor) PrivateRoutes(router *gin.RouterGroup) {
 	monitor := router.Group("/device/monitor")
 	monitor.GET("/list", middlewares.HasPermission("device:monitor:list"), d.List)
 	monitor.POST("/metric", middlewares.HasPermission("device:monitor:metric"), d.Metric)
-	monitor.POST("/predict", middlewares.HasPermission("device:monitor:metric"), d.Predict)
+	monitor.POST("/predict", middlewares.HasPermission("device:monitor:predict"), d.Predict)
+	monitor.POST("/control/status", middlewares.HasPermission("device:monitor:control:status"), d.ControlStatus)
 
 }
 
@@ -221,4 +223,26 @@ func (d *DeviceMonitor) DeviceByBuilding(c *gin.Context) {
 	}
 
 	baizeContext.SuccessData(c, layout)
+}
+
+// ControlStatus 查询控制下发状态
+// @Summary 查询控制下发状态
+// @Description 查询控制下发状态
+// @Tags 设备监控/设备监控
+// @Param object body deviceMonitorModel.ControlStatusReq true "查询参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /device/monitor/control/status [post]
+func (d *DeviceMonitor) ControlStatus(c *gin.Context) {
+	req := new(deviceMonitorModel.ControlStatusReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := d.service.ControlStatus(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
 }

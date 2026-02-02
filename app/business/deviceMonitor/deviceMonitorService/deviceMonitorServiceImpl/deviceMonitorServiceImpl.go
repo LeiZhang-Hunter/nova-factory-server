@@ -1,10 +1,10 @@
 package deviceMonitorServiceImpl
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
+	"fmt"
 	"nova-factory-server/app/business/asset/building/buildingDao"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
@@ -17,6 +17,9 @@ import (
 	"nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type DeviceMonitorServiceImpl struct {
@@ -257,4 +260,39 @@ func (d *DeviceMonitorServiceImpl) DeviceLayout(c *gin.Context, floorId int64) (
 		data.DeviceMap[idStr] = deviceInfo
 	}
 	return data, nil
+}
+
+func (d *DeviceMonitorServiceImpl) ControlStatus(c context.Context, req *deviceMonitorModel.ControlStatusReq) (*deviceMonitorModel.ControlStatusRes, error) {
+	if len(req.Items) == 0 {
+		return &deviceMonitorModel.ControlStatusRes{Items: []deviceMonitorModel.ControlStatusItemRes{}}, nil
+	}
+
+	keys := make([]string, 0, len(req.Items))
+	for _, item := range req.Items {
+		keys = append(keys, fmt.Sprintf(device.DEVICE_CONTROL_KEY, item.DeviceId, item.DataId))
+	}
+
+	sliceCmd := d.cache.MGet(c, keys)
+	vals, err := sliceCmd.Result()
+	if err != nil {
+		zap.L().Error("MGet error", zap.Error(err))
+		return nil, err
+	}
+
+	resItems := make([]deviceMonitorModel.ControlStatusItemRes, 0, len(req.Items))
+	for i, val := range vals {
+		status := 0
+		if val != nil {
+			status = 1 // in progress
+		}
+		resItems = append(resItems, deviceMonitorModel.ControlStatusItemRes{
+			DeviceId: req.Items[i].DeviceId,
+			DataId:   req.Items[i].DataId,
+			Status:   status,
+		})
+	}
+
+	return &deviceMonitorModel.ControlStatusRes{
+		Items: resItems,
+	}, nil
 }
