@@ -57,3 +57,6 @@ iotdb:
   port: 6667
   username: "root"
   password: "root"
+mcp:
+  path: /home/zhanglei/project/zhanglei/nova-factory-server/config/mcp.json
+  operationsPath: /home/zhanglei/project/zhanglei/nova-factory-server/config/operations.json

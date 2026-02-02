@@ -37,6 +37,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/google/wire"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
@@ -198,9 +199,21 @@ func NewGinEngine(
 	dc.Info.PrivateMcpRoutes(mpcServer) //资产管理---设备模块
 	deviceMonitor.DeviceMonitor.PrivateMcpRoutes(mpcServer)
 	product.Laboratory.PrivateMcpRoutes(mpcServer)
+	pprof.Register(r)
+
+	type McpConfig struct {
+		Path           string `mapstructure:"path"`
+		OperationsPath string `mapstructure:"operationsPath"`
+	}
+	// 把读取到的配置信息反序列化到 Conf 变量中
+	var mcpConfig McpConfig
+	if err := viper.UnmarshalKey("mcp", &mcpConfig); err != nil {
+		panic(err)
+	}
+
 	// 4. Mount the MCP server endpoint
-	mpcServer.Mount("/home/zhanglei/project/zhanglei/nova-factory-server/config/mcp.json",
-		"/home/zhanglei/project/zhanglei/nova-factory-server/config/operations.json") // MCP clients will connect here
+	mpcServer.Mount(mcpConfig.Path,
+		mcpConfig.OperationsPath) // MCP clients will connect here
 	return r
 
 }
