@@ -31,7 +31,10 @@ func CompanyValidate(ctx context.Context, req interface{}, info *grpc.UnaryServe
 
 	gateway_id, ok := md["gateway_id"]
 	if !ok {
-		return nil, errors.New("grpc request CodeNotAuthorized")
+		gateway_id, ok = md["gatewayid"]
+		if !ok {
+			return nil, errors.New("grpc request CodeNotAuthorized")
+		}
 	}
 	fmt.Println(username, pasword, gateway_id)
 

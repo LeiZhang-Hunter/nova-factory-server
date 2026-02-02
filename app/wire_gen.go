@@ -304,7 +304,8 @@ func wireApp() (*gin.Engine, func(), error) {
 		Config:    daemonizeControllerConfig,
 	}
 	floorDao := buildingDaoImpl.NewFloorDaoImpl(db)
-	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao, floorDao, iDeviceService)
+	deviceControlService := deviceMonitorServiceImpl.NewDeviceControlServiceImpl(iotAgentDao, cacheCache)
+	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao, floorDao, iDeviceService, deviceControlService)
 	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
 	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao, iDeviceDao)
@@ -315,11 +316,13 @@ func wireApp() (*gin.Engine, func(), error) {
 	deviceUtilization := deviceMonitorController.NewDeviceUtilization(deviceUtilizationService)
 	controlLogService := deviceMonitorServiceImpl.NewControlLogServiceImpl(iControlLogDao, iDeviceDao, iSysModbusDeviceConfigDataDao)
 	controlLog := deviceMonitorController.NewControlLog(controlLogService)
+	deviceControl := deviceMonitorController.NewDeviceControl(deviceControlService)
 	deviceMonitorControllerDeviceMonitorController := &deviceMonitorController.DeviceMonitorController{
 		DeviceMonitor:     deviceMonitor,
 		DeviceReport:      deviceReport,
 		DeviceUtilization: deviceUtilization,
 		ControlLog:        controlLog,
+		DeviceControl:     deviceControl,
 	}
 	alertActionDao := alertDaoImpl.NewAlertActionDaoImpl(db)
 	alertAiReasonDao := alertDaoImpl.NewAlertAiReasonDaoImpl(db)

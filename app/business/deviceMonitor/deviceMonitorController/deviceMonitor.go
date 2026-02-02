@@ -29,6 +29,7 @@ func (d *DeviceMonitor) PrivateRoutes(router *gin.RouterGroup) {
 	monitor.POST("/metric", middlewares.HasPermission("device:monitor:metric"), d.Metric)
 	monitor.POST("/predict", middlewares.HasPermission("device:monitor:predict"), d.Predict)
 	monitor.POST("/control/status", middlewares.HasPermission("device:monitor:control:status"), d.ControlStatus)
+	monitor.POST("/control", middlewares.HasPermission("device:monitor:control"), d.Control)
 
 }
 
@@ -242,6 +243,36 @@ func (d *DeviceMonitor) ControlStatus(c *gin.Context) {
 	data, err := d.service.ControlStatus(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// Control 设备控制
+// @Summary 设备控制
+// @Description 设备控制
+// @Tags 设备监控/设备监控
+// @Param object body deviceMonitorModel.ControlReq true "控制参数"
+// @Success 200 {object}  response.ResponseData "请求成功"
+// @Router /device/monitor/control [post]
+func (d *DeviceMonitor) Control(c *gin.Context) {
+	req := new(deviceMonitorModel.ControlReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := d.service.Control(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	if data.Code == 404 {
+		baizeContext.Waring(c, "设备网关未上线")
+		return
+	}
+	if data.Code != 0 {
+		baizeContext.Waring(c, data.Msg)
 		return
 	}
 	baizeContext.SuccessData(c, data)

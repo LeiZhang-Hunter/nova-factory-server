@@ -13,6 +13,7 @@ import (
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/datasource/cache"
+	"sync"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type DeviceControlServiceImpl struct {
 	manager  *ControlManagerServiceImpl
 	agentDao daemonizeDao.IotAgentDao
 	cache    cache.Cache
+	waitMap  sync.Map
 }
 
 func NewDeviceControlServiceImpl(agentDao daemonizeDao.IotAgentDao, cache cache.Cache) deviceMonitorService.DeviceControlService {
@@ -37,6 +39,17 @@ func (d *DeviceControlServiceImpl) Control(ctx context.Context, request *control
 
 	key := fmt.Sprintf(device.DEVICE_CONTROL_KEY, request.DeviceId, request.DataId)
 	d.cache.Del(context.Background(), key)
+
+	waitChan, ok := d.waitMap.Load(request.RequestId)
+	if !ok {
+		return nil, nil
+	}
+
+	reqChan, ok := waitChan.(chan *controlService.ControlRequest)
+	if !ok {
+		return nil, nil
+	}
+	reqChan <- request
 	return nil, nil
 }
 
@@ -89,14 +102,14 @@ func (d *DeviceControlServiceImpl) BroadcastControl(ctx context.Context, req *co
 	}
 
 	// redis 变成发送中
-	key := fmt.Sprintf(device.DEVICE_CONTROL_KEY, req.DeviceId, req.DataId)
-	res := d.cache.SetNX(ctx, key, 1, 60*time.Second)
-	if !res {
-		return &controlService.ControlResponse{
-			RequestId: req.RequestId,
-			Code:      201,
-		}, nil
-	}
+	//key := fmt.Sprintf(device.DEVICE_CONTROL_KEY, req.DeviceId, req.DataId)
+	//res := d.cache.SetNX(ctx, key, 1, 15*time.Second)
+	//if !res {
+	//	return &controlService.ControlResponse{
+	//		RequestId: req.RequestId,
+	//		Code:      201,
+	//	}, nil
+	//}
 
 	err := streamClient.Send(&controlService.OperateRes{
 		Request: &controlService.ControlRequest{
@@ -113,8 +126,35 @@ func (d *DeviceControlServiceImpl) BroadcastControl(ctx context.Context, req *co
 		return nil, err
 	}
 
-	return &controlService.ControlResponse{
-		RequestId: req.RequestId,
-		Code:      0,
-	}, nil
+	// 等待下游返回结果
+	var waitChan chan *controlService.ControlRequest = make(chan *controlService.ControlRequest)
+	d.waitMap.Store(req.RequestId, waitChan)
+	select {
+	case request := <-waitChan:
+		{
+			d.waitMap.Delete(req.RequestId)
+			if request.GetValue().GetStringValue() == "" {
+				return &controlService.ControlResponse{
+					RequestId: request.RequestId,
+					Code:      0,
+				}, nil
+			} else {
+				return &controlService.ControlResponse{
+					RequestId: request.RequestId,
+					Message:   request.GetValue().GetStringValue(),
+					Code:      500,
+				}, nil
+			}
+		}
+	case <-time.After(5 * time.Second):
+		{
+			d.waitMap.Delete(req.RequestId)
+			return &controlService.ControlResponse{
+				RequestId: req.RequestId,
+				Code:      503,
+				Message:   "控制指令下发超时",
+			}, nil
+		}
+
+	}
 }

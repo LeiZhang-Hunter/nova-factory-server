@@ -5,6 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	controlService "github.com/novawatcher-io/nova-factory-payload/control/v1"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"nova-factory-server/app/business/asset/building/buildingDao"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
@@ -17,9 +22,6 @@ import (
 	"nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 type DeviceMonitorServiceImpl struct {
@@ -29,12 +31,14 @@ type DeviceMonitorServiceImpl struct {
 	deviceConfigDataDao deviceDao.ISysModbusDeviceConfigDataDao
 	floorDao            buildingDao.FloorDao
 	deviceService       deviceService.IDeviceService
+	deviceControl       deviceMonitorService.DeviceControlService
 }
 
 func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache,
 	metricDao metricDao.IMetricDao,
 	deviceConfigDataDao deviceDao.ISysModbusDeviceConfigDataDao,
-	floorDao buildingDao.FloorDao, deviceService deviceService.IDeviceService) deviceMonitorService.DeviceMonitorService {
+	floorDao buildingDao.FloorDao, deviceService deviceService.IDeviceService,
+	deviceControl deviceMonitorService.DeviceControlService) deviceMonitorService.DeviceMonitorService {
 	return &DeviceMonitorServiceImpl{
 		dao:                 dao,
 		cache:               cache,
@@ -42,6 +46,7 @@ func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache,
 		deviceConfigDataDao: deviceConfigDataDao,
 		floorDao:            floorDao,
 		deviceService:       deviceService,
+		deviceControl:       deviceControl,
 	}
 }
 
@@ -294,5 +299,43 @@ func (d *DeviceMonitorServiceImpl) ControlStatus(c context.Context, req *deviceM
 
 	return &deviceMonitorModel.ControlStatusRes{
 		Items: resItems,
+	}, nil
+}
+
+func (d *DeviceMonitorServiceImpl) Control(c context.Context, req *deviceMonitorModel.ControlReq) (*deviceMonitorModel.ControlRes, error) {
+	requestId := uuid.New().String()
+	res, err := d.deviceControl.BroadcastControl(c, &controlService.ControlRequest{
+		RequestId: requestId,
+		DeviceId:  req.DeviceId,
+		AgentId:   req.AgentId,
+		DataId:    req.DataId,
+		Value: &controlService.Value{
+			Type: controlService.ValueType_VALUE_TYPE_STRING,
+			//Value: &controlService.Value_StringValue{StringValue: req.Value},
+		},
+		Timestamp: timestamppb.Now(),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if res.Code == 201 {
+		return &deviceMonitorModel.ControlRes{
+			Code: 0,
+			Msg:  "success",
+		}, nil
+	}
+
+	if res.Code != 0 {
+		return &deviceMonitorModel.ControlRes{
+			Code: int(res.Code),
+			Msg:  res.Message,
+		}, nil
+	}
+
+	return &deviceMonitorModel.ControlRes{
+		Code: 0,
+		Msg:  "success",
 	}, nil
 }
