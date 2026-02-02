@@ -5,11 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	controlService "github.com/novawatcher-io/nova-factory-payload/control/v1"
-	"go.uber.org/zap"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"nova-factory-server/app/business/asset/building/buildingDao"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
@@ -22,6 +17,12 @@ import (
 	"nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	controlService "github.com/novawatcher-io/nova-factory-payload/control/v1"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type DeviceMonitorServiceImpl struct {
@@ -304,19 +305,22 @@ func (d *DeviceMonitorServiceImpl) ControlStatus(c context.Context, req *deviceM
 
 func (d *DeviceMonitorServiceImpl) Control(c context.Context, req *deviceMonitorModel.ControlReq) (*deviceMonitorModel.ControlRes, error) {
 	requestId := uuid.New().String()
+	value, err := req.Value.ToValue()
+	if err != nil {
+		zap.L().Error("ToValue error", zap.Error(err))
+		return nil, err
+	}
 	res, err := d.deviceControl.BroadcastControl(c, &controlService.ControlRequest{
 		RequestId: requestId,
 		DeviceId:  req.DeviceId,
 		AgentId:   req.AgentId,
 		DataId:    req.DataId,
-		Value: &controlService.Value{
-			Type: controlService.ValueType_VALUE_TYPE_STRING,
-			//Value: &controlService.Value_StringValue{StringValue: req.Value},
-		},
+		Value:     value,
 		Timestamp: timestamppb.Now(),
 	})
 
 	if err != nil {
+		zap.L().Error("BroadcastControl error", zap.Error(err))
 		return nil, err
 	}
 
