@@ -2,15 +2,22 @@ package deviceMonitorServiceImpl
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/gogf/gf/errors/gcode"
+	"github.com/gogf/gf/os/gtime"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	controlService "github.com/novawatcher-io/nova-factory-payload/control/v1"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/daemonize/daemonizeDao"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
+	"nova-factory-server/app/business/metric/device/metricDao"
+	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/datasource/cache"
 	"sync"
@@ -18,17 +25,26 @@ import (
 )
 
 type DeviceControlServiceImpl struct {
-	manager  *ControlManagerServiceImpl
-	agentDao daemonizeDao.IotAgentDao
-	cache    cache.Cache
-	waitMap  sync.Map
+	manager         *ControlManagerServiceImpl
+	agentDao        daemonizeDao.IotAgentDao
+	controlLogDao   metricDao.IControlLogDao
+	cache           cache.Cache
+	waitMap         sync.Map
+	dao             deviceDao.IDeviceDao
+	deviceConfigDao deviceDao.ISysModbusDeviceConfigDataDao
 }
 
-func NewDeviceControlServiceImpl(agentDao daemonizeDao.IotAgentDao, cache cache.Cache) deviceMonitorService.DeviceControlService {
+func NewDeviceControlServiceImpl(agentDao daemonizeDao.IotAgentDao, cache cache.Cache,
+	controlLogDao metricDao.IControlLogDao,
+	dao deviceDao.IDeviceDao,
+	deviceConfigDao deviceDao.ISysModbusDeviceConfigDataDao) deviceMonitorService.DeviceControlService {
 	return &DeviceControlServiceImpl{
-		manager:  NewControlManagerServiceImpl(),
-		agentDao: agentDao,
-		cache:    cache,
+		manager:         NewControlManagerServiceImpl(),
+		agentDao:        agentDao,
+		cache:           cache,
+		controlLogDao:   controlLogDao,
+		dao:             dao,
+		deviceConfigDao: deviceConfigDao,
 	}
 }
 
@@ -50,6 +66,59 @@ func (d *DeviceControlServiceImpl) Control(ctx context.Context, request *control
 		return nil, nil
 	}
 	reqChan <- request
+	gctx := &gin.Context{}
+	// 读取设备信息
+	deviceInfo, err := d.dao.GetById(gctx, int64(request.DeviceId))
+	if err != nil {
+		zap.L().Error("get device error", zap.Error(err))
+		return nil, errors.New("读取设备信息错误")
+	}
+	if deviceInfo == nil {
+		return nil, errors.New("设备不存在")
+	}
+
+	var deviceName string
+	if deviceInfo.Name != nil {
+		deviceName = *deviceInfo.Name
+	}
+
+	dataInfo, err := d.deviceConfigDao.GetById(gctx, request.DataId)
+	if err != nil {
+		zap.L().Error("get device data error", zap.Error(err))
+		return nil, errors.New("读取设备模板错误")
+	}
+
+	if dataInfo == nil {
+		zap.L().Error("get device data error", zap.Error(err))
+		return nil, errors.New("设备模板信息不存在")
+	}
+
+	content, err := json.Marshal(request)
+	if err != nil {
+		return nil, errors.New("下发内容编码失败")
+	}
+
+	serieId := time.Now().UnixNano()
+	var now *gtime.Time = gtime.Now()
+	err = d.controlLogDao.Export(context.Background(), []*metricModels.NovaControlLog{
+		{
+			DeviceId:   request.DeviceId,
+			DeviceName: deviceName,
+			DataId:     request.DataId,
+			DataName:   dataInfo.Name,
+			Message: fmt.Sprintf("控制<%s><%s>指令 value %s 下发回执;返回错误信息:%s", deviceName, dataInfo.Name,
+				string(content), request.Value.GetStringValue()),
+			Type:          "manual",
+			SeriesId:      uint64(serieId),
+			Attributes:    make(map[string]string),
+			StartTimeUnix: now,
+			TimeUnix:      now,
+		},
+	})
+	if err != nil {
+		zap.L().Error("Export error", zap.Error(err))
+		return nil, err
+	}
 	return nil, nil
 }
 

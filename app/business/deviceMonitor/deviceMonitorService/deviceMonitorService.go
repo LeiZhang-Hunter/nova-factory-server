@@ -19,5 +19,5 @@ type DeviceMonitorService interface {
 	// ControlStatus 查询控制下发状态
 	ControlStatus(c context.Context, req *deviceMonitorModel.ControlStatusReq) (*deviceMonitorModel.ControlStatusRes, error)
 	// Control 设备控制
-	Control(c context.Context, req *deviceMonitorModel.ControlReq) (*deviceMonitorModel.ControlRes, error)
+	Control(c *gin.Context, req *deviceMonitorModel.ControlReq) (*deviceMonitorModel.ControlRes, error)
 }

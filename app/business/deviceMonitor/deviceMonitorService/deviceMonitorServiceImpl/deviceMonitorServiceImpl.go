@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gogf/gf/os/gtime"
 	"nova-factory-server/app/business/asset/building/buildingDao"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
@@ -17,6 +18,7 @@ import (
 	"nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -33,13 +35,15 @@ type DeviceMonitorServiceImpl struct {
 	floorDao            buildingDao.FloorDao
 	deviceService       deviceService.IDeviceService
 	deviceControl       deviceMonitorService.DeviceControlService
+	controlLogDao       metricDao.IControlLogDao
 }
 
 func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache,
 	metricDao metricDao.IMetricDao,
 	deviceConfigDataDao deviceDao.ISysModbusDeviceConfigDataDao,
 	floorDao buildingDao.FloorDao, deviceService deviceService.IDeviceService,
-	deviceControl deviceMonitorService.DeviceControlService) deviceMonitorService.DeviceMonitorService {
+	deviceControl deviceMonitorService.DeviceControlService,
+	controlLogDao metricDao.IControlLogDao) deviceMonitorService.DeviceMonitorService {
 	return &DeviceMonitorServiceImpl{
 		dao:                 dao,
 		cache:               cache,
@@ -48,6 +52,7 @@ func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache,
 		floorDao:            floorDao,
 		deviceService:       deviceService,
 		deviceControl:       deviceControl,
+		controlLogDao:       controlLogDao,
 	}
 }
 
@@ -131,6 +136,7 @@ func (d *DeviceMonitorServiceImpl) List(c *gin.Context, req *deviceModels.Device
 				}
 				list.Rows[k].TemplateList[templateId][dataId].Name = dataValue.Name
 				list.Rows[k].TemplateList[templateId][dataId].Unit = dataValue.Unit
+				list.Rows[k].TemplateList[templateId][dataId].DataFormat = dataValue.DataFormat
 				list.Rows[k].TemplateList[templateId][dataId].GraphEnable = *dataValue.GraphEnable
 				list.Rows[k].TemplateList[templateId][dataId].PredictEnable = *dataValue.PredictEnable
 				list.Rows[k].TemplateList[templateId][dataId].Mode = dataValue.Mode
@@ -303,11 +309,63 @@ func (d *DeviceMonitorServiceImpl) ControlStatus(c context.Context, req *deviceM
 	}, nil
 }
 
-func (d *DeviceMonitorServiceImpl) Control(c context.Context, req *deviceMonitorModel.ControlReq) (*deviceMonitorModel.ControlRes, error) {
+func (d *DeviceMonitorServiceImpl) Control(c *gin.Context, req *deviceMonitorModel.ControlReq) (*deviceMonitorModel.ControlRes, error) {
 	requestId := uuid.New().String()
 	value, err := req.Value.ToValue()
 	if err != nil {
 		zap.L().Error("ToValue error", zap.Error(err))
+		return nil, err
+	}
+
+	// 读取设备信息
+	deviceInfo, err := d.dao.GetById(c, int64(req.DeviceId))
+	if err != nil {
+		zap.L().Error("get device error", zap.Error(err))
+		return nil, errors.New("读取设备信息错误")
+	}
+	if deviceInfo == nil {
+		return nil, errors.New("设备不存在")
+	}
+
+	var deviceName string
+	if deviceInfo.Name != nil {
+		deviceName = *deviceInfo.Name
+	}
+
+	dataInfo, err := d.deviceConfigDataDao.GetById(c, req.DataId)
+	if err != nil {
+		zap.L().Error("get device data error", zap.Error(err))
+		return nil, errors.New("读取设备模板错误")
+	}
+
+	if dataInfo == nil {
+		zap.L().Error("get device data error", zap.Error(err))
+		return nil, errors.New("设备模板信息不存在")
+	}
+
+	content, err := json.Marshal(req)
+	if err != nil {
+		return nil, errors.New("下发内容编码失败")
+	}
+
+	serieId := time.Now().UnixNano()
+	var now *gtime.Time = gtime.Now()
+	err = d.controlLogDao.Export(context.Background(), []*metricModels.NovaControlLog{
+		{
+			DeviceId:      req.DeviceId,
+			DeviceName:    deviceName,
+			DataId:        req.DataId,
+			DataName:      dataInfo.Name,
+			Message:       fmt.Sprintf("控制<%s><%s>指令 value %s 下发中", deviceName, dataInfo.Name, string(content)),
+			Type:          "manual",
+			SeriesId:      uint64(serieId),
+			Attributes:    make(map[string]string),
+			StartTimeUnix: now,
+			TimeUnix:      now,
+		},
+	})
+	if err != nil {
+		zap.L().Error("Export error", zap.Error(err))
 		return nil, err
 	}
 	res, err := d.deviceControl.BroadcastControl(c, &controlService.ControlRequest{

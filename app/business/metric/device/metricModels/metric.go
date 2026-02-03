@@ -29,6 +29,7 @@ type DeviceMetricData struct {
 	DataId        uint64            `json:"data_id,string" gorm:"-"`
 	GraphEnable   bool              `json:"graph_enable" gorm:"-"`
 	TimeUnix      *gtime.Time       `json:"time_unix"       gorm:"column:time_unix"      description:"当前时间"` //
+	DataFormat    string            `gorm:"column:data_format;comment:读写方式" json:"data_format"`              // 读写方式
 	Value         float64           `json:"value"           gorm:"column:value"         description:"统计值"`   //
 }
 

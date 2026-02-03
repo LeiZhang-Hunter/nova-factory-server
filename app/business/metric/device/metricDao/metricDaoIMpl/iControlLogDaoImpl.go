@@ -49,6 +49,9 @@ func (i *IControlLogDaoImpl) List(c *gin.Context, req *deviceMonitorModel.Contro
 	if req != nil && req.DataId != 0 {
 		db = db.Where("data_id = ?", req.DataId)
 	}
+	if req != nil && req.Type != "" {
+		db = db.Where("type = ?", req.Type)
+	}
 
 	var startTime string
 	if req.Start > 0 {

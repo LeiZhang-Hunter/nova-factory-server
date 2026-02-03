@@ -304,8 +304,8 @@ func wireApp() (*gin.Engine, func(), error) {
 		Config:    daemonizeControllerConfig,
 	}
 	floorDao := buildingDaoImpl.NewFloorDaoImpl(db)
-	deviceControlService := deviceMonitorServiceImpl.NewDeviceControlServiceImpl(iotAgentDao, cacheCache)
-	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao, floorDao, iDeviceService, deviceControlService)
+	deviceControlService := deviceMonitorServiceImpl.NewDeviceControlServiceImpl(iotAgentDao, cacheCache, iControlLogDao, iDeviceDao, iSysModbusDeviceConfigDataDao)
+	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao, floorDao, iDeviceService, deviceControlService, iControlLogDao)
 	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
 	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao, iDeviceDao)
