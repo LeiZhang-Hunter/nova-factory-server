@@ -356,7 +356,7 @@ func (d *DeviceMonitorServiceImpl) Control(c *gin.Context, req *deviceMonitorMod
 			DeviceName:    deviceName,
 			DataId:        req.DataId,
 			DataName:      dataInfo.Name,
-			Message:       fmt.Sprintf("控制<%s><%s>指令 value %s 下发中", deviceName, dataInfo.Name, string(content)),
+			Message:       fmt.Sprintf("[下发中]:控制<%s><%s>指令 value %s 下发中", deviceName, dataInfo.Name, string(content)),
 			Type:          "manual",
 			SeriesId:      uint64(serieId),
 			Attributes:    make(map[string]string),

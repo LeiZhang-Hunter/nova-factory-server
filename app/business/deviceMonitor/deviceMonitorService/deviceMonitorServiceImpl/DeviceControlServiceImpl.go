@@ -100,17 +100,23 @@ func (d *DeviceControlServiceImpl) Control(ctx context.Context, request *control
 
 	serieId := time.Now().UnixNano()
 	var now *gtime.Time = gtime.Now()
+	attributes := make(map[string]string)
+	if request.Value.GetStringValue() == "" {
+		attributes["status"] = "success"
+	} else {
+		attributes["status"] = "error"
+	}
 	err = d.controlLogDao.Export(context.Background(), []*metricModels.NovaControlLog{
 		{
 			DeviceId:   request.DeviceId,
 			DeviceName: deviceName,
 			DataId:     request.DataId,
 			DataName:   dataInfo.Name,
-			Message: fmt.Sprintf("控制<%s><%s>指令 value %s 下发回执;返回错误信息:%s", deviceName, dataInfo.Name,
+			Message: fmt.Sprintf("[下发回执]:控制<%s><%s>指令 value %s 下发回执;返回错误信息:%s", deviceName, dataInfo.Name,
 				string(content), request.Value.GetStringValue()),
 			Type:          "manual",
 			SeriesId:      uint64(serieId),
-			Attributes:    make(map[string]string),
+			Attributes:    attributes,
 			StartTimeUnix: now,
 			TimeUnix:      now,
 		},
@@ -171,14 +177,14 @@ func (d *DeviceControlServiceImpl) BroadcastControl(ctx context.Context, req *co
 	}
 
 	// redis 变成发送中
-	//key := fmt.Sprintf(device.DEVICE_CONTROL_KEY, req.DeviceId, req.DataId)
-	//res := d.cache.SetNX(ctx, key, 1, 15*time.Second)
-	//if !res {
-	//	return &controlService.ControlResponse{
-	//		RequestId: req.RequestId,
-	//		Code:      201,
-	//	}, nil
-	//}
+	key := fmt.Sprintf(device.DEVICE_CONTROL_KEY, req.DeviceId, req.DataId)
+	res := d.cache.SetNX(ctx, key, 1, 15*time.Second)
+	if !res {
+		return &controlService.ControlResponse{
+			RequestId: req.RequestId,
+			Code:      201,
+		}, nil
+	}
 
 	err := streamClient.Send(&controlService.OperateRes{
 		Request: &controlService.ControlRequest{
