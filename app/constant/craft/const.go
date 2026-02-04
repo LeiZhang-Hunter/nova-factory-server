@@ -18,10 +18,14 @@ var EdgeMap EdgeMapType = map[string]FLOW_TYPE{
 const (
 	START_NAME        = "start-node"
 	NODE_PROCESS_TYPE = "process"
+	NODE_INIT_TYPE    = "init"
+	NODE_FINISH_TYPE  = "finish"
 )
 
 var NodeMap NodeType = map[string]FLOW_TYPE{
 	"process": "process",
 	"product": "product",
 	"default": "default",
+	"init":    "init",
+	"finish":  "finish",
 }

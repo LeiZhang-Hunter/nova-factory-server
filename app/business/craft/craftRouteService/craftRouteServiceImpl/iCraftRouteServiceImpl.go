@@ -127,7 +127,7 @@ func (craft *CraftRouteServiceImpl) SaveCraftRoute(c *gin.Context, topo *craftRo
 			startCount++
 		}
 
-		if node.Type == craft2.NODE_PROCESS_TYPE {
+		if node.Type == craft2.NODE_PROCESS_TYPE || node.Type == craft2.NODE_INIT_TYPE || node.Type == craft2.NODE_FINISH_TYPE {
 			var data craftRouteModels.ProcessData
 			err := mapstructure.Decode(node.Data.Config, &data)
 			if err != nil {
