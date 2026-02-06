@@ -360,6 +360,18 @@ func (d *DeviceService) GetMetricByTag(c *gin.Context, req *deviceModels.DeviceT
 				list.Rows[k].TemplateList[templateId][dataId].PredictEnable = *dataValue.PredictEnable
 				list.Rows[k].TemplateList[templateId][dataId].DataId = uint64(dataValue.DeviceConfigID)
 				list.Rows[k].TemplateList[templateId][dataId].Value = math.RoundFloat(list.Rows[k].TemplateList[templateId][dataId].Value, 2)
+				if dataValue.Annotation != "" {
+					annotations := make([]deviceModels.Annotation, 0)
+					err := json.Unmarshal([]byte(dataValue.Annotation), &annotations)
+					if err != nil {
+						zap.L().Error("json Unmarshal error", zap.Error(err))
+						continue
+					}
+					for _, annotationValue := range annotations {
+						list.Rows[k].TemplateList[templateId][dataId].Attributes[annotationValue.Key] = annotationValue.Value
+					}
+				}
+
 			}
 		}
 	}

@@ -107,14 +107,25 @@ func (i *IotDb) GetSession() (client.Session, error) {
 		return client.Session{}, errors.New("<UNK>")
 	}
 	session, err := i.pool.GetSession()
+	if err == nil {
+		return session, nil
+	}
+
+	if err.Error() == "get session timeout" {
+		zap.L().Error("get session error", zap.Error(err))
+		return client.Session{}, errors.New("sessionPool has closed")
+	}
 	if err != nil {
+		zap.L().Error("get session error", zap.Error(err))
+		i.pool.PutBack(session)
 		zap.L().Error("get session", zap.Error(err))
-		if err.Error() == "sessionPool has closed" || err.Error() == "get session timeout" {
+		if err.Error() == "sessionPool has closed" {
 			return session, nil
 
 		}
+		return client.Session{}, err
 	}
-	return session, err
+	return session, nil
 }
 
 func (i *IotDb) PutSession(session client.Session) {

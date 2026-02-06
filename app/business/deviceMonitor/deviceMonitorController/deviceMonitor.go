@@ -153,6 +153,11 @@ func (d *DeviceMonitor) MetricPredictQuery(c *gin.Context) {
 		return
 	}
 
+	if len(req.QueryMetric) == 0 {
+		baizeContext.Success(c)
+		return
+	}
+
 	data, err := d.service.PredictQuery(c, &metricModels.MetricDataQueryReq{
 		Type:        req.Type,
 		Name:        req.Name,
