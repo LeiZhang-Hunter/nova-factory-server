@@ -5,6 +5,7 @@ import (
 	"github.com/baizeplus/sqly"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"nova-factory-server/app/utils/logger"
@@ -39,10 +40,18 @@ func NewData() (sqly.SqlyContext, func(), error) {
 		panic(err)
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", d.User, d.Password, d.Host, d.Port, d.DB) + "?parseTime=true&loc=Asia%2FShanghai"
-	db, err := sqly.Connect("mysql", dsn)
-	if err != nil {
-		panic(err)
+	var db *sqly.DB
+	var err error
+	for {
+		db, err = sqly.Connect("mysql", dsn)
+		if err != nil {
+			zap.L().Error("connect mysql failed", zap.Error(err))
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		break
 	}
+
 	db.SetMaxOpenConns(d.MaxOpenConns)
 	db.SetMaxIdleConns(d.MaxIdleConns)
 	db.SetConnMaxLifetime(time.Minute * 5)
