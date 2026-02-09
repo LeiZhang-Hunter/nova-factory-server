@@ -26,6 +26,9 @@ import (
 	"nova-factory-server/app/business/asset/resource/resourceController"
 	"nova-factory-server/app/business/asset/resource/resourceDao/resourceDaoImpl"
 	"nova-factory-server/app/business/asset/resource/resourceService/resourceServiceImpl"
+	"nova-factory-server/app/business/configuration/configurationController"
+	"nova-factory-server/app/business/configuration/configurationDao/configurationDaoImpl"
+	"nova-factory-server/app/business/configuration/configurationService/configurationServiceImpl"
 	"nova-factory-server/app/business/craft/craftRouteController"
 	"nova-factory-server/app/business/craft/craftRouteDao/craftRouteDaoImpl"
 	"nova-factory-server/app/business/craft/craftRouteService/craftRouteServiceImpl"
@@ -381,7 +384,13 @@ func wireApp() (*gin.Engine, func(), error) {
 	deviceMonitorCalcDao := deviceMonitorDaoImpl.NewDeviceMonitorCalcDaoImpl(iotDb, iDevMapService)
 	homeService := homeServiceImpl.NewHomeServiceImpl(buildingDao, iDeviceService, iCraftRouteService, alertLogService, deviceMonitorCalcDao, cacheCache)
 	home := controller.NewHome(homeService)
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home)
+	configurationDao := configurationDaoImpl.NewConfigurationDaoImpl(db)
+	configurationService := configurationServiceImpl.NewConfigurationServiceImpl(configurationDao)
+	configuration := configurationController.NewConfiguration(configurationService)
+	configurationControllerController := &configurationController.Controller{
+		Configuration: configuration,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home, configurationControllerController)
 	return engine, func() {
 		cleanup()
 	}, nil

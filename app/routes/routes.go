@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/asset/device/deviceController"
 	"nova-factory-server/app/business/asset/material/materialController"
 	"nova-factory-server/app/business/asset/resource/resourceController"
+	"nova-factory-server/app/business/configuration/configurationController"
 	"nova-factory-server/app/business/craft/craftRouteController"
 	"nova-factory-server/app/business/daemonize/daemonizeController"
 	"nova-factory-server/app/business/dashboard/dashboardController"
@@ -61,6 +62,7 @@ func NewGinEngine(
 	product *productController.Product,
 	resource *resourceController.ResourceController,
 	home *homeController.Home,
+	configuration *configurationController.Controller,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -176,6 +178,9 @@ func NewGinEngine(
 
 		// 生产管理
 		product.Laboratory.PrivateRoutes(group)
+
+		// 组态管理
+		configuration.Configuration.PrivateRoutes(group)
 
 		alert.Runner.Run()
 	}

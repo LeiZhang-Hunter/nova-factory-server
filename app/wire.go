@@ -22,6 +22,9 @@ import (
 	"nova-factory-server/app/business/asset/resource/resourceController"
 	"nova-factory-server/app/business/asset/resource/resourceDao/resourceDaoImpl"
 	"nova-factory-server/app/business/asset/resource/resourceService/resourceServiceImpl"
+	"nova-factory-server/app/business/configuration/configurationController"
+	"nova-factory-server/app/business/configuration/configurationDao/configurationDaoImpl"
+	"nova-factory-server/app/business/configuration/configurationService/configurationServiceImpl"
 	"nova-factory-server/app/business/craft/craftRouteController"
 	"nova-factory-server/app/business/craft/craftRouteDao/craftRouteDaoImpl"
 	"nova-factory-server/app/business/craft/craftRouteService/craftRouteServiceImpl"
@@ -122,6 +125,10 @@ func wireApp() (*gin.Engine, func(), error) {
 
 		homeServiceImpl.ProviderSet,
 		homeController.ProviderSet,
+
+		configurationController.ProviderSet,
+		configurationServiceImpl.ProviderSet,
+		configurationDaoImpl.ProviderSet,
 
 		datasource.ProviderSet,
 		routes.ProviderSet,
