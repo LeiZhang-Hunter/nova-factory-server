@@ -199,6 +199,7 @@ func (d *DeviceService) SelectDeviceList(c *gin.Context, req *deviceModels.Devic
 			CreateUserName:    createUserName,
 			Status:            v.Status,
 			Enable:            v.Enable,
+			ModelURL:          v.ModelURL,
 			UpdateUserName:    updateUserName,
 			BaseEntity: baize.BaseEntity{
 				CreateTime: v.CreateTime,

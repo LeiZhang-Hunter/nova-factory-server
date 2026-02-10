@@ -21,6 +21,7 @@ CREATE TABLE `sys_device`  (
     `action` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL  COMMENT '行为字段',
     `extension` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL  COMMENT '扩展字段',
     `control_type` int(11) NULL DEFAULT 0 COMMENT '控制模式 0 是手动 1是自动',
+    `mode_url` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '模型图片',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
@@ -33,6 +34,7 @@ CREATE TABLE `sys_device`  (
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '设备管理' ROW_FORMAT = Dynamic;
 
 -- alter table sys_device add column `enable` tinyint(1) NULL DEFAULT 0 COMMENT '启用状态（0正常 1异常）';
+-- alter table sys_device add column `model_url` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '模型图片';
 
 CREATE TABLE `sys_device_group` (
     `group_id` bigint(20) NOT NULL COMMENT '设备主键',

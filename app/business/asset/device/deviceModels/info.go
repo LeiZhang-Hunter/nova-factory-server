@@ -39,6 +39,7 @@ type DeviceInfo struct {
 	Extension         *string   `json:"Extension" db:"extension"`
 	Enable            *bool     `json:"enable"`
 	ControlType       int       `json:"ControlType" db:"control_type"`
+	ModelURL          string    `gorm:"column:model_url;comment:模型图片" json:"model_url"` // 模型图片
 }
 
 type LocalInfo struct {
@@ -83,6 +84,7 @@ type DeviceVO struct {
 	Status            device.WORK_STATUS                                   `json:"status" gorm:"column:status;comment:是否启用 0 禁用 1 启用" `
 	Extension         string                                               `json:"Extension" db:"extension"`
 	ControlType       int                                                  `json:"ControlType" db:"control_type"`
+	ModelURL          string                                               `gorm:"column:model_url;comment:模型图片" json:"model_url"` // 模型图片
 	ExtensionInfo     *ExtensionInfo                                       `json:"extension_info,omitempty" gorm:"-" db:"control_type"`
 	TemplateList      map[uint64]map[uint64]*metricModels.DeviceMetricData `json:"template_list" gorm:"-" db:"template_list"`
 	Active            bool                                                 `json:"active" gorm:"-" db:"active"`
@@ -121,6 +123,7 @@ type DeviceValue struct {
 	ControlType       int                `json:"controlType"`
 	Enable            *bool              `json:"enable" gorm:"column:enable;comment:是否启用 0 禁用 1 启用"`
 	Status            device.WORK_STATUS `json:"status"`
+	ModelURL          string             `gorm:"column:model_url;comment:模型图片" json:"model_url"` // 模型图片
 	CreateUserName    string             `json:"createUserName"`
 	UpdateUserName    string             `json:"updateUserName"`
 	baize.BaseEntity
