@@ -27,6 +27,7 @@ type SysModbusDeviceConfigData struct {
 	Expression            string `gorm:"column:expression;comment:表达式" json:"expression"`                                // 表达式
 	Mode                  *int   `gorm:"column:mode;comment:功能码" json:"mode,string"`                                     // 功能码
 	DataFormat            string `gorm:"column:data_format;comment:读写方式" json:"data_format"`                             // 读写方式
+	ConfigurationEnable   *bool  `gorm:"column:configuration_enable;comment:组态属性" json:"configuration_enable"`           // 组态属性
 	Sort                  string `gorm:"column:sort;comment:数据排序" json:"sort"`                                           // 数据排序
 	DeptID                int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                     // 部门ID
 	State                 bool   `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"`                               // 操作状态（0正常 -1删除）
@@ -67,6 +68,7 @@ func OfSysModbusDeviceConfigData(req *SetSysModbusDeviceConfigDataReq) *SysModbu
 		Mode:                  req.Mode,
 		DataFormat:            req.DataFormat,
 		AggFunction:           req.AggFunction,
+		ConfigurationEnable:   req.ConfigurationEnable,
 		Sort:                  req.Sort,
 		DataType:              req.DataType,
 		PredictEnable:         req.PredictEnable,
@@ -105,6 +107,7 @@ type SetSysModbusDeviceConfigDataReq struct {
 	PerturbationVariables []PerturbationVariableData `gorm:"column:perturbation_variables;comment:扰动变量" json:"perturbation_variables"`              // 扰动变量
 	Annotations           []Annotation               `gorm:"column:annotations;comment:注解" json:"annotation"`                                       // 扰动变量
 	GraphEnable           *bool                      `gorm:"column:graph_enable;comment:是否开启图表" json:"graph_enable"`                                // 是否开启图表
+	ConfigurationEnable   *bool                      `gorm:"column:configuration_enable;comment:组态属性" json:"configuration_enable"`                  // 组态属性
 	FunctionCode          int                        `gorm:"column:function_code;comment:功能码" json:"function_code,string"`                          // 功能码
 	Mode                  *int                       `gorm:"column:mode;comment:功能码" json:"mode,string"`                                            // 功能码
 	DataFormat            string                     `gorm:"column:data_format;comment:读写方式" json:"data_format"`                                    // 读写方式
@@ -149,6 +152,7 @@ func ToSetSysModbusDeviceConfigDataReq(req *SysModbusDeviceConfigData) *SetSysMo
 		DataType:              req.DataType,
 		PredictEnable:         req.PredictEnable,
 		PerturbationVariables: perturbationVariables,
+		ConfigurationEnable:   req.ConfigurationEnable,
 		Annotations:           annotations,
 		GraphEnable:           req.GraphEnable,
 	}

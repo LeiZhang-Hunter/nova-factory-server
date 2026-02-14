@@ -146,12 +146,14 @@ CREATE TABLE `sys_modbus_device_config_data` (
     `perturbation_variables` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '扰动变量',
     `graph_enable` tinyint(1) DEFAULT '0' COMMENT '是否开启图表',
     `predict_enable` tinyint(1) DEFAULT '0' COMMENT '是否开启趋势预测',
+    `configuration_enable` tinyint(1) DEFAULT '0' COMMENT '组态属性',
     `annotation` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '注解',
     `expression` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '转换表达式',
     PRIMARY KEY (`device_config_id`) USING BTREE,
     KEY `template_id` (`template_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='modbus数据配置';
 -- alter table sys_modbus_device_config_data add column `expression` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '转换表达式';
+-- alter table sys_modbus_device_config_data add column `configuration_enable` tinyint(1) DEFAULT '0' COMMENT '组态属性';
 
 
 
