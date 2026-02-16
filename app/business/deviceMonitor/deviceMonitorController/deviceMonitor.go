@@ -8,6 +8,7 @@ import (
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/gin_mcp"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -39,6 +40,7 @@ func (d *DeviceMonitor) PublicRoutes(router *gin.RouterGroup) {
 	group.POST("/metric/predict/query", d.MetricPredictQuery)
 	group.GET("/device/layout", d.DeviceLayout)
 	group.GET("/device/building", d.DeviceByBuilding)
+	group.GET("/device/info/:id", middlewares.HasPermission("device:monitor:info"), d.Info)
 }
 
 func (d *DeviceMonitor) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
@@ -278,6 +280,33 @@ func (d *DeviceMonitor) Control(c *gin.Context) {
 	}
 	if data.Code != 0 {
 		baizeContext.Waring(c, data.Msg)
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// Info 设备监控详情
+// @Summary 设备监控详情
+// @Description 根据设备id读取设备实时信息
+// @Tags 设备监控/设备监控
+// @Param  id path string true "设备id"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设备监控详情"
+// @Router /device/monitor/info/{id} [get]
+func (d *DeviceMonitor) Info(c *gin.Context) {
+	idStr := c.Param("id")
+	if idStr == "" {
+		baizeContext.ParameterError(c)
+		return
+	}
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := d.service.GetRealTimeInfo(c, id)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
 		return
 	}
 	baizeContext.SuccessData(c, data)

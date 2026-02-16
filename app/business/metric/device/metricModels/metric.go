@@ -17,20 +17,21 @@ type NovaMetricsDevice struct {
 }
 
 type DeviceMetricData struct {
-	SeriesId      uint64            `json:"series_id,string"          gorm:"column:series_id"          description:"序列id"` //
-	Attributes    map[string]string `json:"attributes"      gorm:"column:attributes"    description:"属性"`                  //
-	StartTimeUnix *gtime.Time       `json:"start_time_unix" gorm:"column:start_time_unix" description:"开始时间"`              //
-	Name          string            `json:"name" gorm:"-"`
-	Unit          string            `json:"unit" gorm:"-"`
-	PredictEnable bool              `json:"predict_enable" gorm:"-"`
-	Mode          *int              `gorm:"column:mode;comment:功能码" json:"mode,string"`                 // 功能码
-	Type          string            `gorm:"column:type;comment:数据类型" json:"type"`                       // 数据类型
-	DataType      string            `gorm:"column:data_type;comment:设备节点类型，到底是开关还是数值" json:"data_type"` // 设备节点类型，到底是开关还是数值
-	DataId        uint64            `json:"data_id,string" gorm:"-"`
-	GraphEnable   bool              `json:"graph_enable" gorm:"-"`
-	TimeUnix      *gtime.Time       `json:"time_unix"       gorm:"column:time_unix"      description:"当前时间"` //
-	DataFormat    string            `gorm:"column:data_format;comment:读写方式" json:"data_format"`              // 读写方式
-	Value         float64           `json:"value"           gorm:"column:value"         description:"统计值"`   //
+	SeriesId            uint64            `json:"series_id,string"          gorm:"column:series_id"          description:"序列id"` //
+	Attributes          map[string]string `json:"attributes"      gorm:"column:attributes"    description:"属性"`                  //
+	StartTimeUnix       *gtime.Time       `json:"start_time_unix" gorm:"column:start_time_unix" description:"开始时间"`              //
+	Name                string            `json:"name" gorm:"-"`
+	Unit                string            `json:"unit" gorm:"-"`
+	PredictEnable       bool              `json:"predict_enable" gorm:"-"`
+	Mode                *int              `gorm:"column:mode;comment:功能码" json:"mode,string"`                 // 功能码
+	Type                string            `gorm:"column:type;comment:数据类型" json:"type"`                       // 数据类型
+	DataType            string            `gorm:"column:data_type;comment:设备节点类型，到底是开关还是数值" json:"data_type"` // 设备节点类型，到底是开关还是数值
+	DataId              uint64            `json:"data_id,string" gorm:"-"`
+	GraphEnable         bool              `json:"graph_enable" gorm:"-"`
+	TimeUnix            *gtime.Time       `json:"time_unix"       gorm:"column:time_unix"      description:"当前时间"`      //
+	DataFormat          string            `gorm:"column:data_format;comment:读写方式" json:"data_format"`                   // 读写方式
+	Value               float64           `json:"value"           gorm:"column:value"         description:"统计值"`        //
+	ConfigurationEnable *bool             `gorm:"column:configuration_enable;comment:组态属性" json:"configuration_enable"` // 组态属性
 }
 
 type MetricMap struct {

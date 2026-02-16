@@ -20,4 +20,6 @@ type DeviceMonitorService interface {
 	ControlStatus(c context.Context, req *deviceMonitorModel.ControlStatusReq) (*deviceMonitorModel.ControlStatusRes, error)
 	// Control 设备控制
 	Control(c *gin.Context, req *deviceMonitorModel.ControlReq) (*deviceMonitorModel.ControlRes, error)
+	// GetRealTimeInfo 获取设备实时信息
+	GetRealTimeInfo(c *gin.Context, deviceId uint64) (*deviceModels.DeviceVO, error)
 }

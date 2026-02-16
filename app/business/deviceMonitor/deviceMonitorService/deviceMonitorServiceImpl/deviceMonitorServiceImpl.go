@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gogf/gf/os/gtime"
 	"nova-factory-server/app/business/asset/building/buildingDao"
 	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/asset/device/deviceModels"
@@ -19,6 +18,8 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"strconv"
 	"time"
+
+	"github.com/gogf/gf/os/gtime"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -143,6 +144,7 @@ func (d *DeviceMonitorServiceImpl) List(c *gin.Context, req *deviceModels.Device
 				list.Rows[k].TemplateList[templateId][dataId].DataType = dataValue.DataType
 				list.Rows[k].TemplateList[templateId][dataId].Type = dataValue.Type
 				list.Rows[k].TemplateList[templateId][dataId].DataId = uint64(dataValue.DeviceConfigID)
+				list.Rows[k].TemplateList[templateId][dataId].ConfigurationEnable = dataValue.ConfigurationEnable
 			}
 		}
 	}
@@ -400,4 +402,81 @@ func (d *DeviceMonitorServiceImpl) Control(c *gin.Context, req *deviceMonitorMod
 		Code: 0,
 		Msg:  "success",
 	}, nil
+}
+func (d *DeviceMonitorServiceImpl) GetRealTimeInfo(c *gin.Context, deviceId uint64) (*deviceModels.DeviceVO, error) {
+	// 1. 读取设备信息
+	deviceInfo, err := d.dao.GetById(c, int64(deviceId))
+	if err != nil {
+		zap.L().Error("get device error", zap.Error(err))
+		return nil, errors.New("读取设备信息错误")
+	}
+	if deviceInfo == nil {
+		return nil, errors.New("设备不存在")
+	}
+
+	vo := deviceInfo
+
+	// 2. 从缓存读取实时指标
+	key := device.MakeDeviceKey(deviceId)
+	val, err := d.cache.Get(c, key)
+	if err != nil {
+		// 缓存没有数据，不报错，只将 Active 设为 false
+		vo.Active = false
+		return vo, nil
+	}
+
+	if val != "" {
+		deviceMetrics := make(map[uint64]map[uint64]*metricModels.DeviceMetricData)
+		err = json.Unmarshal([]byte(val), &deviceMetrics)
+		if err != nil {
+			zap.L().Error("json Unmarshal error", zap.Error(err))
+		} else {
+			vo.TemplateList = deviceMetrics
+			vo.Active = (deviceMetrics != nil)
+		}
+	}
+
+	//// 3. 补全指标元数据
+	//if vo.TemplateList != nil {
+	//	var dataIds []uint64 = make([]uint64, 0)
+	//	for _, templateValue := range vo.TemplateList {
+	//		for dataId := range templateValue {
+	//			dataIds = append(dataIds, dataId)
+	//		}
+	//	}
+	//
+	//	if len(dataIds) > 0 {
+	//		datas, err := d.deviceConfigDataDao.GetByIds(c, dataIds)
+	//		if err != nil {
+	//			zap.L().Error("get device config data error", zap.Error(err))
+	//			return vo, nil // 返回基本信息，忽略指标补全错误
+	//		}
+	//
+	//		var dataMap = make(map[uint64]*deviceModels.SysModbusDeviceConfigData)
+	//		for _, dataValue := range datas {
+	//			dataMap[uint64(dataValue.DeviceConfigID)] = dataValue
+	//		}
+	//
+	//		for templateId, templateValue := range vo.TemplateList {
+	//			for dataId := range templateValue {
+	//				dataValue, ok := dataMap[dataId]
+	//				if !ok {
+	//					continue
+	//				}
+	//				vo.TemplateList[templateId][dataId].Name = dataValue.Name
+	//				vo.TemplateList[templateId][dataId].Unit = dataValue.Unit
+	//				vo.TemplateList[templateId][dataId].DataFormat = dataValue.DataFormat
+	//				vo.TemplateList[templateId][dataId].GraphEnable = *dataValue.GraphEnable
+	//				vo.TemplateList[templateId][dataId].PredictEnable = *dataValue.PredictEnable
+	//				vo.TemplateList[templateId][dataId].Mode = dataValue.Mode
+	//				vo.TemplateList[templateId][dataId].DataType = dataValue.DataType
+	//				vo.TemplateList[templateId][dataId].Type = dataValue.Type
+	//				vo.TemplateList[templateId][dataId].DataId = uint64(dataValue.DeviceConfigID)
+	//				vo.TemplateList[templateId][dataId].ConfigurationEnable = dataValue.ConfigurationEnable
+	//			}
+	//		}
+	//	}
+	//}
+
+	return vo, nil
 }
