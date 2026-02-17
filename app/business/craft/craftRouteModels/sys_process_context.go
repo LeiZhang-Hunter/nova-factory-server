@@ -2,6 +2,7 @@ package craftRouteModels
 
 import (
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/utils/value"
 )
 
 // SysProProcessContent 生产工序内容表
@@ -52,14 +53,14 @@ type DeviceRuleInfo struct {
 }
 
 type ControllerAction struct {
-	DeviceId    string `json:"device_id"`
-	TemplateId  string `json:"template_id"`
-	DataId      string `json:"data_id"`
-	Value       string `json:"value"`
-	ControlMode string `json:"control_mode"`
-	Condition   string `json:"condition"`
-	Interval    string `json:"interval"`
-	DataFormat  string `json:"dataFormat"`
+	DeviceId    string      `json:"device_id"`
+	TemplateId  string      `json:"template_id"`
+	DataId      string      `json:"data_id"`
+	Value       *value.Data `json:"value"`
+	ControlMode string      `json:"control_mode"`
+	Condition   string      `json:"condition"`
+	Interval    string      `json:"interval"`
+	DataFormat  string      `json:"dataFormat"`
 }
 
 type TriggerCase struct {
@@ -78,7 +79,7 @@ type TriggerCase struct {
 
 type TriggerRules struct {
 	Name         string             `json:"name"`
-	Actions      []ControllerAction `json:"actions"`
+	Actions      []ControllerAction `json:"actions" binding:"required"`
 	CombinedRule string             `json:"combined_rule"`
 	DataIds      []DeviceRuleInfo   `json:"dataIds"`
 	Cases        []TriggerCase      `json:"cases"`
