@@ -40,7 +40,7 @@ func (d *DeviceMonitor) PublicRoutes(router *gin.RouterGroup) {
 	group.POST("/metric/predict/query", d.MetricPredictQuery)
 	group.GET("/device/layout", d.DeviceLayout)
 	group.GET("/device/building", d.DeviceByBuilding)
-	group.GET("/device/info/:id", middlewares.HasPermission("device:monitor:info"), d.Info)
+	group.GET("/device/monitor/info/:id", d.Info)
 }
 
 func (d *DeviceMonitor) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
