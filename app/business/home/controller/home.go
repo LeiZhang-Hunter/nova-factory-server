@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"go.uber.org/zap"
+	"nova-factory-server/app/business/home/homeModels"
 	"nova-factory-server/app/business/home/homeService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -22,6 +24,7 @@ func (h *Home) PrivateRoutes(r *gin.RouterGroup) {
 	group := r.Group("/home")
 	{
 		group.GET("/stats", middlewares.HasPermission("home:stats"), h.GetHomeStats)
+		group.GET("/app/stats", middlewares.HasPermission("home:app:stats"), h.GetHomeStats)
 	}
 }
 
@@ -33,7 +36,18 @@ func (h *Home) PrivateRoutes(r *gin.RouterGroup) {
 // @Produce application/json
 // @Router /home/stats [get]
 func (h *Home) GetHomeStats(c *gin.Context) {
-	stats, err := h.iHomeService.GetHomeStats(c)
+	req := new(homeModels.HomeRequest)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		zap.L().Error("读取首页统计参数错误", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+	isApp := false
+	if req.Platform == "h5" {
+		isApp = true
+	}
+	stats, err := h.iHomeService.GetHomeStats(c, isApp)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

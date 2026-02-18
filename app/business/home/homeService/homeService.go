@@ -7,5 +7,5 @@ import (
 )
 
 type HomeService interface {
-	GetHomeStats(c *gin.Context) (*homeModels.HomeStats, error)
+	GetHomeStats(c *gin.Context, isMobile bool) (*homeModels.HomeStats, error)
 }

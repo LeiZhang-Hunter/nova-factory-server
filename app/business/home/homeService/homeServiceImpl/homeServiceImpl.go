@@ -42,7 +42,7 @@ func NewHomeServiceImpl(buildingDao buildingDao.BuildingDao, deviceService devic
 	}
 }
 
-func (h *HomeServiceImpl) GetHomeStats(c *gin.Context) (*homeModels.HomeStats, error) {
+func (h *HomeServiceImpl) GetHomeStats(c *gin.Context, isMobile bool) (*homeModels.HomeStats, error) {
 	stats := &homeModels.HomeStats{}
 
 	// 1. Get building count
@@ -99,12 +99,25 @@ func (h *HomeServiceImpl) GetHomeStats(c *gin.Context) (*homeModels.HomeStats, e
 		stats.Alerts = alertList.Rows
 	}
 
-	// 读取主机性能
-	monitorServer := monitorModels.NewServer()
-	stats.Monitor = monitorServer
-
 	end := time.Now().UnixMilli()
 	start := end - 86400*1000*6
+
+	if !isMobile {
+		// 读取主机性能
+		monitorServer := monitorModels.NewServer()
+		stats.Monitor = monitorServer
+
+		endRankTime := time.Now().UnixMilli()
+		startRankTime := end - 86400*1000
+		// 读取最近10台的设备统计
+		deviceRankCounter, err := h.deviceMonitorCalcDao.CounterByDevice(c, startRankTime, endRankTime, 10)
+		if err != nil {
+			zap.L().Error("device counter error align by device", zap.Error(err))
+			return nil, err
+		}
+		stats.DeviceCounterRank = deviceRankCounter
+	}
+
 	// 读取每个小时的发送统计
 	deviceCounter, err := h.deviceMonitorCalcDao.CounterByTimeRange(start, end, "1d")
 	if err != nil {
@@ -112,15 +125,5 @@ func (h *HomeServiceImpl) GetHomeStats(c *gin.Context) (*homeModels.HomeStats, e
 		return nil, err
 	}
 	stats.DeviceCounter = deviceCounter
-
-	endRankTime := time.Now().UnixMilli()
-	startRankTime := end - 86400*1000
-	// 读取最近10台的设备统计
-	deviceRankCounter, err := h.deviceMonitorCalcDao.CounterByDevice(c, startRankTime, endRankTime, 10)
-	if err != nil {
-		zap.L().Error("device counter error align by device", zap.Error(err))
-		return nil, err
-	}
-	stats.DeviceCounterRank = deviceRankCounter
 	return stats, nil
 }
