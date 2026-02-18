@@ -74,7 +74,7 @@ create table sys_pro_process_content (
     update_time                    datetime                                   comment '更新时间',
     primary key (content_id)
 ) engine=innodb auto_increment=0 comment = '生产工序内容表';
-
+alter table sys_pro_process_content add column control_type                   varchar(255)                               comment '控制方式';
 
 
 -- ----------------------------
@@ -280,7 +280,6 @@ CREATE TABLE `sys_craft_route_config` (
 
 CREATE TABLE `sys_product_schedule` (
    `id` bigint(20) NOT NULL COMMENT '调度id',
-   `color` varchar(32) NOT NULL COMMENT '颜色值',
    `gateway_id` bigint(20) NOT NULL  COMMENT '网关id',
    `schedule_name` varchar(255) NOT NULL COMMENT '计划名称',
    `time` varchar(64) NOT NULL COMMENT '时间序列化格式,普通日程,1,2,3,4,5;特殊日程:2025-04-04 ~ 2025-04-04',
@@ -318,7 +317,7 @@ CREATE TABLE `sys_product_schedule_map` (
     KEY `schedule_id` (`schedule_id`) USING BTREE,
     KEY `begin_time` (`begin_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=39797 DEFAULT CHARSET=utf8;
-
+-- alter table sys_product_schedule_map add column   `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '操作状态（0正常 1启动）';
 -- ----------------------------
 -- 班次设置
 -- ----------------------------

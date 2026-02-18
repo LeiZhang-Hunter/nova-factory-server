@@ -1,5 +1,9 @@
 package v1
 
+import (
+	"nova-factory-server/app/utils/value"
+)
+
 type DeviceInfo struct {
 	Address string `json:"address"`
 }
@@ -8,7 +12,7 @@ type DeviceAction struct {
 	Address     string      `json:"address"`
 	DeviceId    string      `json:"deviceId"`
 	DataId      string      `json:"dataId"`
-	Value       interface{} `json:"value"`
+	Value       *value.Data `json:"value"`
 	DataFormat  string      `json:"dataFormat"`
 	ControlMode string      `json:"control_mode"`
 	Condition   string      `json:"condition"`

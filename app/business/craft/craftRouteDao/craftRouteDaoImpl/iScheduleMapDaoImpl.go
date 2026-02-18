@@ -288,7 +288,12 @@ func (i *IScheduleMapDaoImpl) GetByScheduleId(c *gin.Context, id int64) ([]*craf
 func (i *IScheduleMapDaoImpl) GetSpecialScheduleByNow(c *gin.Context, gatewayId int64, gatewayInfo *daemonizeModels.SysIotAgent) ([]*craftRouteModels.SysProductScheduleMap, error) {
 	timeNow := time.Now().Unix()
 	var list []*craftRouteModels.SysProductScheduleMap
-	db := i.db.Table(i.table).Where("gateway_id = ?", gatewayId).
+	db := i.db.Table(i.table).
+		Select("ANY_VALUE(id)").
+		Select("ANY_VALUE(schedule_id)").
+		Select("ANY_VALUE(gateway_id)").
+		Select("craft_route_id").
+		Where("gateway_id = ?", gatewayId).
 		Where("begin_time <= ?", timeNow).
 		Where("end_time > ?", timeNow).
 		Where("schedule_type = ?", craftRouteModels.SPECIAL).
@@ -314,7 +319,12 @@ func (i *IScheduleMapDaoImpl) GetNormalByTime(c *gin.Context, gatewayId int64) (
 	if weekday == 0 {
 		weekday = 7
 	}
-	db := i.db.Table(i.table).Where("gateway_id = ?", gatewayId).
+	db := i.db.Table(i.table).
+		Select("ANY_VALUE(id)").
+		Select("ANY_VALUE(schedule_id)").
+		Select("ANY_VALUE(gateway_id)").
+		Select("craft_route_id").
+		Where("gateway_id = ?", gatewayId).
 		Where("begin_time <= ?", interval).
 		Where("end_time > ?", interval).
 		Where("schedule_type = ?", craftRouteModels.DAILY).
