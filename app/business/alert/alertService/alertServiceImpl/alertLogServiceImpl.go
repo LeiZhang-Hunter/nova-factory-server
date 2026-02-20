@@ -2,25 +2,29 @@ package alertServiceImpl
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/alert/alertDao"
 	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/alert/alertService"
+	"nova-factory-server/app/business/asset/device/deviceDao"
 	"nova-factory-server/app/business/daemonize/daemonizeDao"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type AlertLogServiceImpl struct {
-	dao      alertDao.AlertLogClickhouseDao
-	ruleDao  alertDao.AlertRuleDao
-	agentDao daemonizeDao.IotAgentDao
+	dao       alertDao.AlertLogClickhouseDao
+	ruleDao   alertDao.AlertRuleDao
+	agentDao  daemonizeDao.IotAgentDao
+	deviceDao deviceDao.IDeviceDao
 }
 
-func NewAlertLogServiceImpl(dao alertDao.AlertLogClickhouseDao, ruleDao alertDao.AlertRuleDao, agentDao daemonizeDao.IotAgentDao) alertService.AlertLogService {
+func NewAlertLogServiceImpl(dao alertDao.AlertLogClickhouseDao, ruleDao alertDao.AlertRuleDao, agentDao daemonizeDao.IotAgentDao, deviceDao deviceDao.IDeviceDao) alertService.AlertLogService {
 	return &AlertLogServiceImpl{
-		dao:      dao,
-		ruleDao:  ruleDao,
-		agentDao: agentDao,
+		dao:       dao,
+		ruleDao:   ruleDao,
+		agentDao:  agentDao,
+		deviceDao: deviceDao,
 	}
 }
 
@@ -98,6 +102,37 @@ func (log *AlertLogServiceImpl) List(c *gin.Context, req *alertModels.SysAlertLo
 		list.Rows[k].RuleName = rule.Name
 	}
 	return list, nil
+}
+
+func (log *AlertLogServiceImpl) Info(c *gin.Context, objectId uint64) (*alertModels.NovaAlertLog, error) {
+	info, err := log.dao.GetByObjectId(c, objectId)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, nil
+	}
+	rule, err := log.ruleDao.GetById(c, info.AlertID)
+	if err != nil {
+		info.RuleName = "系统告警"
+		return info, nil
+	}
+	if rule == nil {
+		info.RuleName = "系统告警"
+		return info, nil
+	}
+	info.RuleName = rule.Name
+	// 增加设备名称
+	deviceInfo, err := log.deviceDao.GetById(c, int64(info.DeviceId))
+	if err == nil && deviceInfo != nil {
+		info.DeviceName = *deviceInfo.Name
+	}
+
+	if err != nil {
+		zap.L().Error("get device info error", zap.Error(err))
+	}
+
+	return info, nil
 }
 
 // Count 统计clickhouse数据库

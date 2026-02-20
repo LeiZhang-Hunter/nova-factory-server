@@ -1,9 +1,10 @@
 package baizeContext
 
 import (
-	"github.com/gin-gonic/gin"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func ParamInt64(c *gin.Context, key string) int64 {
@@ -48,4 +49,12 @@ func QueryInt64Array(c *gin.Context, key string) []int64 {
 	}
 	return is
 
+}
+
+func QueryUint64(c *gin.Context, key string) uint64 {
+	i, err := strconv.ParseUint(c.Query(key), 10, 64)
+	if err != nil {
+		return 0
+	}
+	return i
 }

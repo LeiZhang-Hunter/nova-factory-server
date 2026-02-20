@@ -2,16 +2,18 @@ package alertModels
 
 import (
 	"encoding/json"
-	"github.com/gogf/gf/os/gtime"
-	"go.uber.org/zap"
 	"nova-factory-server/app/utils/snowflake"
 	"strconv"
+
+	"github.com/gogf/gf/os/gtime"
+	"go.uber.org/zap"
 )
 
 // NovaAlertLog 控制日志
 type NovaAlertLog struct {
 	ObjectId         uint64      `json:"object_id,string" gorm:"column:object_id"`
 	RuleName         string      `json:"rule_name" gorm:"-"`
+	DeviceName       string      `json:"device_name" gorm:"-"`
 	GatewayID        int64       `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id"`                     // 网关id
 	DeviceId         uint64      `json:"device_id,string"       gorm:"column:device_id"      description:"设备id"`        //
 	DeviceTemplateID uint64      `gorm:"column:device_template_id;not null;comment:设备模板id" json:"device_template_id"`   // 设备模板id

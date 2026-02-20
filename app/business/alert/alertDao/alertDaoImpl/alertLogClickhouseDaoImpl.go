@@ -1,11 +1,12 @@
 package alertDaoImpl
 
 import (
-	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/alert/alertDao"
 	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/daemonize/daemonizeDao"
 	"nova-factory-server/app/datasource/clickhouse"
+
+	"github.com/gin-gonic/gin"
 )
 
 type AlertLogClickhouseDaoImpl struct {
@@ -76,6 +77,15 @@ func (log *AlertLogClickhouseDaoImpl) List(c *gin.Context, req *alertModels.SysA
 		Rows:  dto,
 		Total: total,
 	}, nil
+}
+
+func (log *AlertLogClickhouseDaoImpl) GetByObjectId(c *gin.Context, objectId uint64) (*alertModels.NovaAlertLog, error) {
+	var dto alertModels.NovaAlertLog
+	ret := log.clickhouse.DB().Table(log.table).Where("object_id = ?", objectId).First(&dto)
+	if ret.Error != nil {
+		return nil, ret.Error
+	}
+	return &dto, nil
 }
 
 func (log *AlertLogClickhouseDaoImpl) Count(c *gin.Context) (int64, error) {

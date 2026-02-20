@@ -1,12 +1,13 @@
 package alertController
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/alert/alertModels"
 	"nova-factory-server/app/business/alert/alertService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type AlertLog struct {
@@ -27,6 +28,7 @@ func (log *AlertLog) PrivateRoutes(router *gin.RouterGroup) {
 func (log *AlertLog) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/alert/log/v1")
 	group.POST("/export", log.Export)
+	group.GET("/info", log.Info)
 }
 
 // Export 导入告警数据
@@ -73,4 +75,25 @@ func (log *AlertLog) List(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, list)
+}
+
+// Info 告警数据详情
+// @Summary 告警数据详情
+// @Description 告警数据详情
+// @Tags 告警管理/告警数据管理
+// @Param object query uint64 true "objectId"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /alert/log/info [get]
+func (log *AlertLog) Info(c *gin.Context) {
+	objectId := baizeContext.QueryUint64(c, "objectId")
+	if objectId == 0 {
+		baizeContext.ParameterError(c)
+		return
+	}
+	info, err := log.service.Info(c, objectId)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, info)
 }

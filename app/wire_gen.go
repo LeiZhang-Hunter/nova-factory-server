@@ -334,7 +334,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	alertTemplateService := alertServiceImpl.NewAlertTemplateServiceImpl(alertSinkTemplateDao)
 	alertTemplate := alertController.NewAlertTemplate(alertTemplateService)
 	alertLogClickhouseDao := alertDaoImpl.NewAlertLogClickhouseDaoImpl(clickHouse, iotAgentDao)
-	alertLogService := alertServiceImpl.NewAlertLogServiceImpl(alertLogClickhouseDao, alertRuleDao, iotAgentDao)
+	alertLogService := alertServiceImpl.NewAlertLogServiceImpl(alertLogClickhouseDao, alertRuleDao, iotAgentDao, iDeviceDao)
 	alertLog := alertController.NewAlertLog(alertLogService)
 	alertActionService := alertServiceImpl.NewAlertActionServiceImpl(alertActionDao)
 	alertAction := alertController.NewAlertAction(alertActionService, iDictDataService)
