@@ -37,6 +37,7 @@ type DeviceMonitorServiceImpl struct {
 	deviceService       deviceService.IDeviceService
 	deviceControl       deviceMonitorService.DeviceControlService
 	controlLogDao       metricDao.IControlLogDao
+	buildingDao         buildingDao.BuildingDao
 }
 
 func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache,
@@ -44,7 +45,8 @@ func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache,
 	deviceConfigDataDao deviceDao.ISysModbusDeviceConfigDataDao,
 	floorDao buildingDao.FloorDao, deviceService deviceService.IDeviceService,
 	deviceControl deviceMonitorService.DeviceControlService,
-	controlLogDao metricDao.IControlLogDao) deviceMonitorService.DeviceMonitorService {
+	controlLogDao metricDao.IControlLogDao,
+	buildingDao buildingDao.BuildingDao) deviceMonitorService.DeviceMonitorService {
 	return &DeviceMonitorServiceImpl{
 		dao:                 dao,
 		cache:               cache,
@@ -54,6 +56,7 @@ func NewDeviceMonitorServiceImpl(dao deviceDao.IDeviceDao, cache cache.Cache,
 		deviceService:       deviceService,
 		deviceControl:       deviceControl,
 		controlLogDao:       controlLogDao,
+		buildingDao:         buildingDao,
 	}
 }
 
@@ -148,6 +151,33 @@ func (d *DeviceMonitorServiceImpl) List(c *gin.Context, req *deviceModels.Device
 			}
 		}
 	}
+	// 补全建筑物名称
+	buildingIds := make([]uint64, 0)
+	buildingIdMap := make(map[uint64]bool)
+	for _, row := range list.Rows {
+		if row.DeviceBuildingId > 0 && !buildingIdMap[row.DeviceBuildingId] {
+			buildingIds = append(buildingIds, row.DeviceBuildingId)
+			buildingIdMap[row.DeviceBuildingId] = true
+		}
+	}
+
+	if len(buildingIds) > 0 {
+		buildings, err := d.buildingDao.GetByIds(c, buildingIds)
+		if err != nil {
+			zap.L().Error("get buildings error", zap.Error(err))
+		} else {
+			buildingNameMap := make(map[uint64]string)
+			for _, b := range buildings {
+				buildingNameMap[uint64(b.ID)] = b.Name
+			}
+			for i, row := range list.Rows {
+				if name, ok := buildingNameMap[row.DeviceBuildingId]; ok {
+					list.Rows[i].BuildingName = name
+				}
+			}
+		}
+	}
+
 	return list, nil
 }
 

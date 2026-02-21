@@ -2,10 +2,11 @@ package deviceModels
 
 import (
 	"encoding/json"
-	"github.com/gogf/gf/util/gconv"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/metric/device/metricModels"
 	"nova-factory-server/app/constant/device"
+
+	"github.com/gogf/gf/util/gconv"
 )
 
 type DeviceListReq struct {
@@ -87,6 +88,7 @@ type DeviceVO struct {
 	ModelURL          string                                               `gorm:"column:model_url;comment:模型图片" json:"model_url"` // 模型图片
 	ExtensionInfo     *ExtensionInfo                                       `json:"extension_info,omitempty" gorm:"-" db:"control_type"`
 	TemplateList      map[uint64]map[uint64]*metricModels.DeviceMetricData `json:"template_list" gorm:"-" db:"template_list"`
+	BuildingName      string                                               `json:"buildingName" gorm:"-"`
 	Active            bool                                                 `json:"active" gorm:"-" db:"active"`
 	Exception         bool                                                 `json:"exception" gorm:"-"`
 	baize.BaseEntity
