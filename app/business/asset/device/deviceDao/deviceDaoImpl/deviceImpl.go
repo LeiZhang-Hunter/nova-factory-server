@@ -103,6 +103,9 @@ func (s *sysDeviceDataDao) SelectDeviceList(c *gin.Context, req *deviceModels.De
 	if req != nil && req.Type != nil && *req.Type != "" {
 		db = db.Where("type = ?", *req.Type)
 	}
+	if req != nil && req.Status != nil {
+		db = db.Where("status = ?", *req.Status)
+	}
 	size := 0
 	if req == nil || req.Size <= 0 {
 		size = 20
