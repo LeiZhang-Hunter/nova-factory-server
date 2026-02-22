@@ -466,47 +466,57 @@ func (d *DeviceMonitorServiceImpl) GetRealTimeInfo(c *gin.Context, deviceId uint
 		}
 	}
 
-	//// 3. 补全指标元数据
-	//if vo.TemplateList != nil {
-	//	var dataIds []uint64 = make([]uint64, 0)
-	//	for _, templateValue := range vo.TemplateList {
-	//		for dataId := range templateValue {
-	//			dataIds = append(dataIds, dataId)
-	//		}
-	//	}
-	//
-	//	if len(dataIds) > 0 {
-	//		datas, err := d.deviceConfigDataDao.GetByIds(c, dataIds)
-	//		if err != nil {
-	//			zap.L().Error("get device config data error", zap.Error(err))
-	//			return vo, nil // 返回基本信息，忽略指标补全错误
-	//		}
-	//
-	//		var dataMap = make(map[uint64]*deviceModels.SysModbusDeviceConfigData)
-	//		for _, dataValue := range datas {
-	//			dataMap[uint64(dataValue.DeviceConfigID)] = dataValue
-	//		}
-	//
-	//		for templateId, templateValue := range vo.TemplateList {
-	//			for dataId := range templateValue {
-	//				dataValue, ok := dataMap[dataId]
-	//				if !ok {
-	//					continue
-	//				}
-	//				vo.TemplateList[templateId][dataId].Name = dataValue.Name
-	//				vo.TemplateList[templateId][dataId].Unit = dataValue.Unit
-	//				vo.TemplateList[templateId][dataId].DataFormat = dataValue.DataFormat
-	//				vo.TemplateList[templateId][dataId].GraphEnable = *dataValue.GraphEnable
-	//				vo.TemplateList[templateId][dataId].PredictEnable = *dataValue.PredictEnable
-	//				vo.TemplateList[templateId][dataId].Mode = dataValue.Mode
-	//				vo.TemplateList[templateId][dataId].DataType = dataValue.DataType
-	//				vo.TemplateList[templateId][dataId].Type = dataValue.Type
-	//				vo.TemplateList[templateId][dataId].DataId = uint64(dataValue.DeviceConfigID)
-	//				vo.TemplateList[templateId][dataId].ConfigurationEnable = dataValue.ConfigurationEnable
-	//			}
-	//		}
-	//	}
-	//}
+	// 3. 补全建筑物名称
+	if vo.DeviceBuildingId > 0 {
+		buildings, err := d.buildingDao.GetByIds(c, []uint64{vo.DeviceBuildingId})
+		if err != nil {
+			zap.L().Error("get building error", zap.Error(err))
+		} else if len(buildings) > 0 {
+			vo.BuildingName = buildings[0].Name
+		}
+	}
+
+	// 3. 补全指标元数据
+	if vo.TemplateList != nil {
+		var dataIds []uint64 = make([]uint64, 0)
+		for _, templateValue := range vo.TemplateList {
+			for dataId := range templateValue {
+				dataIds = append(dataIds, dataId)
+			}
+		}
+
+		if len(dataIds) > 0 {
+			datas, err := d.deviceConfigDataDao.GetByIds(c, dataIds)
+			if err != nil {
+				zap.L().Error("get device config data error", zap.Error(err))
+				return vo, nil // 返回基本信息，忽略指标补全错误
+			}
+
+			var dataMap = make(map[uint64]*deviceModels.SysModbusDeviceConfigData)
+			for _, dataValue := range datas {
+				dataMap[uint64(dataValue.DeviceConfigID)] = dataValue
+			}
+
+			for templateId, templateValue := range vo.TemplateList {
+				for dataId := range templateValue {
+					dataValue, ok := dataMap[dataId]
+					if !ok {
+						continue
+					}
+					vo.TemplateList[templateId][dataId].Name = dataValue.Name
+					vo.TemplateList[templateId][dataId].Unit = dataValue.Unit
+					vo.TemplateList[templateId][dataId].DataFormat = dataValue.DataFormat
+					vo.TemplateList[templateId][dataId].GraphEnable = *dataValue.GraphEnable
+					vo.TemplateList[templateId][dataId].PredictEnable = *dataValue.PredictEnable
+					vo.TemplateList[templateId][dataId].Mode = dataValue.Mode
+					vo.TemplateList[templateId][dataId].DataType = dataValue.DataType
+					vo.TemplateList[templateId][dataId].Type = dataValue.Type
+					vo.TemplateList[templateId][dataId].DataId = uint64(dataValue.DeviceConfigID)
+					vo.TemplateList[templateId][dataId].ConfigurationEnable = dataValue.ConfigurationEnable
+				}
+			}
+		}
+	}
 
 	return vo, nil
 }
