@@ -120,8 +120,9 @@ func FromDataToSysAlertLog(data *AlertLogData, deptId uint64, c *gin.Context) ([
 }
 
 type SysAlertLogListReq struct {
-	GatewayID int64  `json:"gateway_id"` // 网关id
-	AlertID   int64  `json:"alert_id"`   // 告警id
+	GatewayID int64  `json:"gateway_id,string" form:"gateway_id"` // 网关id
+	AlertID   int64  `json:"alert_id,string" form:"alert_id"`     // 告警id
+	DeviceId  int64  `json:"device_id,string" form:"device_id"`   // 设备id
 	Message   string `json:"message"`
 	baize.BaseEntityDQL
 }

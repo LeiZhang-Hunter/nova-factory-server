@@ -41,6 +41,9 @@ func (log *AlertLogClickhouseDaoImpl) List(c *gin.Context, req *alertModels.SysA
 	if req != nil && req.GatewayID != 0 {
 		db = db.Where("gateway_id = ?", req.GatewayID)
 	}
+	if req != nil && req.DeviceId != 0 {
+		db = db.Where("device_id = ?", req.DeviceId)
+	}
 
 	size := 0
 	if req == nil || req.Size <= 0 {
