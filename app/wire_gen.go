@@ -7,7 +7,6 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
 	"nova-factory-server/app/business/ai/aiDataSetService/aiDataSetServiceImpl"
@@ -64,6 +63,8 @@ import (
 	"nova-factory-server/app/datasource/mysql"
 	"nova-factory-server/app/datasource/objectFile"
 	"nova-factory-server/app/routes"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Injectors from wire.go:
@@ -334,7 +335,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	alertTemplateService := alertServiceImpl.NewAlertTemplateServiceImpl(alertSinkTemplateDao)
 	alertTemplate := alertController.NewAlertTemplate(alertTemplateService)
 	alertLogClickhouseDao := alertDaoImpl.NewAlertLogClickhouseDaoImpl(clickHouse, iotAgentDao)
-	alertLogService := alertServiceImpl.NewAlertLogServiceImpl(alertLogClickhouseDao, alertRuleDao, iotAgentDao, iDeviceDao)
+	alertLogService := alertServiceImpl.NewAlertLogServiceImpl(alertLogClickhouseDao, alertRuleDao, iotAgentDao, iDeviceDao, buildingDao, iSysModbusDeviceConfigDataDao)
 	alertLog := alertController.NewAlertLog(alertLogService)
 	alertActionService := alertServiceImpl.NewAlertActionServiceImpl(alertActionDao)
 	alertAction := alertController.NewAlertAction(alertActionService, iDictDataService)
