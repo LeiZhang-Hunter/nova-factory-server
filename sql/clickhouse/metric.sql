@@ -41,8 +41,7 @@ CREATE TABLE IF NOT EXISTS nova_alert_log
     `device_id` UInt64 COMMENT '设备id',
     `device_template_id` UInt64 COMMENT '设备id',
     `device_data_id` UInt64 COMMENT '设备id',
-    `alert_id` UInt64 COMMENT '设alter table nova_alert_log add INDEX idx_device_id device_id TYPE minmax GRANULARITY 5;
-备id',
+    `alert_id` UInt64 COMMENT '设备id',
     `series_id` UInt64 COMMENT '序列id',
     `context` Nullable(String),
     `reason` Nullable(String),
