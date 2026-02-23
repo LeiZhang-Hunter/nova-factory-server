@@ -20,7 +20,7 @@ func NewControlLog(service deviceMonitorService.ControlLogService) *ControlLog {
 
 func (that *ControlLog) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/device/monitor/control/log")
-	group.GET("/list", middlewares.HasPermission("metric:monitor:control:log:list"), that.List)
+	group.GET("/list", middlewares.HasPermission("device:monitor:control:log:list"), that.List)
 }
 
 // List 控制记录列表
