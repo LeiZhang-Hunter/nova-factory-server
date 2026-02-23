@@ -2,12 +2,13 @@ package alertModels
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/snowflake"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type AlertValue struct {
@@ -124,6 +125,8 @@ type SysAlertLogListReq struct {
 	AlertID   int64  `json:"alert_id,string" form:"alert_id"`     // 告警id
 	DeviceId  int64  `json:"device_id,string" form:"device_id"`   // 设备id
 	Message   string `json:"message"`
+	StartTime string `json:"startTime" form:"startTime"`
+	EndTime   string `json:"endTime" form:"endTime"`
 	baize.BaseEntityDQL
 }
 

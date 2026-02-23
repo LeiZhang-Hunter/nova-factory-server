@@ -44,6 +44,12 @@ func (log *AlertLogClickhouseDaoImpl) List(c *gin.Context, req *alertModels.SysA
 	if req != nil && req.DeviceId != 0 {
 		db = db.Where("device_id = ?", req.DeviceId)
 	}
+	if req != nil && req.StartTime != "" {
+		db = db.Where("start_time_unix >= ?", req.StartTime)
+	}
+	if req != nil && req.EndTime != "" {
+		db = db.Where("start_time_unix < ?", req.EndTime)
+	}
 
 	size := 0
 	if req == nil || req.Size <= 0 {
