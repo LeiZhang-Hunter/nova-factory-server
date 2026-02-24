@@ -22,8 +22,6 @@ type CraftRouteServiceImpl struct {
 	processDao      craftRouteDao.IProcessDao
 	routeProcessDao craftRouteDao.IRouteProcessDao
 	contextDao      craftRouteDao.IProcessContextDao
-	bomDao          craftRouteDao.ISysProRouteProductBomDao
-	productDao      craftRouteDao.ISysProRouteProductDao
 	routeConfigDao  craftRouteDao.ISysCraftRouteConfigDao
 }
 
@@ -31,16 +29,12 @@ func NewCraftRouteServiceImpl(dao craftRouteDao.ICraftRouteDao,
 	processDao craftRouteDao.IProcessDao,
 	routeProcessDao craftRouteDao.IRouteProcessDao,
 	contextDao craftRouteDao.IProcessContextDao,
-	bomDao craftRouteDao.ISysProRouteProductBomDao,
-	productDao craftRouteDao.ISysProRouteProductDao,
 	routeConfigDao craftRouteDao.ISysCraftRouteConfigDao) craftRouteService.ICraftRouteService {
 	return &CraftRouteServiceImpl{
 		dao:             dao,
 		processDao:      processDao,
 		routeProcessDao: routeProcessDao,
 		contextDao:      contextDao,
-		bomDao:          bomDao,
-		productDao:      productDao,
 		routeConfigDao:  routeConfigDao,
 	}
 }

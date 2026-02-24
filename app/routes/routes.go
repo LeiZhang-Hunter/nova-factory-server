@@ -147,10 +147,6 @@ func NewGinEngine(
 		craft.Process.PrivateRoutes(group)        //工序设置
 		craft.ProcessContext.PrivateRoutes(group) //工序内容
 		craft.RouteProcess.PrivateRoutes(group)   //工艺组成
-		craft.RouteProduct.PrivateRoutes(group)
-		craft.RouteProductBom.PrivateRoutes(group)
-		craft.WorkOrder.PrivateRoutes(group) //生产工单
-		craft.Task.PrivateRoutes(group)      //工单任务
 		craft.Schedule.PrivateRoutes(group)
 
 		metric.Metric.PrivateRoutes(group) //设备指标

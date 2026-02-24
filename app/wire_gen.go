@@ -7,6 +7,7 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
 	"nova-factory-server/app/business/ai/aiDataSetService/aiDataSetServiceImpl"
@@ -63,8 +64,6 @@ import (
 	"nova-factory-server/app/datasource/mysql"
 	"nova-factory-server/app/datasource/objectFile"
 	"nova-factory-server/app/routes"
-
-	"github.com/gin-gonic/gin"
 )
 
 // Injectors from wire.go:
@@ -247,10 +246,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	iProcessDao := craftRouteDaoImpl.NewIProcessDaoImpl(db)
 	iRouteProcessDao := craftRouteDaoImpl.NewIProcessRouteDaoImpl(db)
 	iProcessContextDao := craftRouteDaoImpl.NewProcessContextDaoImpl(db)
-	iSysProRouteProductBomDao := craftRouteDaoImpl.NewSysProRouteProductBomDaoImpl(db)
-	iSysProRouteProductDao := craftRouteDaoImpl.NewISysProRouteProductDaoImpl(db)
 	iSysCraftRouteConfigDao := craftRouteDaoImpl.NewISysCraftRouteConfigDaoImpl(db)
-	iCraftRouteService := craftRouteServiceImpl.NewCraftRouteServiceImpl(iCraftRouteDao, iProcessDao, iRouteProcessDao, iProcessContextDao, iSysProRouteProductBomDao, iSysProRouteProductDao, iSysCraftRouteConfigDao)
+	iCraftRouteService := craftRouteServiceImpl.NewCraftRouteServiceImpl(iCraftRouteDao, iProcessDao, iRouteProcessDao, iProcessContextDao, iSysCraftRouteConfigDao)
 	craft := craftRouteController.NewCraft(iCraftRouteService)
 	iCraftProcessService := craftRouteServiceImpl.NewICraftProcessServiceImpl(iProcessDao, iUserDao)
 	process := craftRouteController.NewProcess(iCraftProcessService)
@@ -258,33 +255,19 @@ func wireApp() (*gin.Engine, func(), error) {
 	processContext := craftRouteController.NewProcessContext(iCraftProcessContextService)
 	iProcessRouteService := craftRouteServiceImpl.NewIProcessRouteServiceImpl(iRouteProcessDao, iProcessDao, iCraftRouteDao)
 	routeProcess := craftRouteController.NewSysProRouteProcess(iProcessRouteService)
-	iSysProRouteProductService := craftRouteServiceImpl.NewSysProRouteProductServiceImpl(iSysProRouteProductDao)
-	routeProduct := craftRouteController.NewRouteProduct(iSysProRouteProductService)
-	iSysProRouteProductBomService := craftRouteServiceImpl.NewISysProRouteProductBomServiceImpl(iSysProRouteProductBomDao)
-	routeProductBom := craftRouteController.NewRouteProductBom(iSysProRouteProductBomService)
-	iSysProWorkorderDao := craftRouteDaoImpl.NewWorkOrderDaoImpl(db)
-	iSysProWorkorderService := craftRouteServiceImpl.NewISysProWorkorderServiceImpl(iSysProWorkorderDao)
-	workOrder := craftRouteController.NewWorkOrder(iSysProWorkorderService)
-	iSysProTaskDao := craftRouteDaoImpl.NewISysProTaskDaoImpl(db)
-	iSysProTaskService := craftRouteServiceImpl.NewISysProTaskServiceImpl(iSysProWorkorderDao, iSysProTaskDao)
-	iotAgentDao := daemonizeDaoImpl.NewIotAgentDaoImpl(db, cacheCache)
-	iotAgentProcess := daemonizeDaoImpl.NewIotAgentProcessDaoImpl(cacheCache)
-	iotAgentService := daemonizeServiceImpl.NewIotAgentServiceImpl(iotAgentDao, iotAgentProcess)
-	task := craftRouteController.NewTask(iSysProTaskService, iotAgentService)
 	iScheduleDao := craftRouteDaoImpl.NewIScheduleDaoImpl(db)
 	iScheduleMapDao := craftRouteDaoImpl.NewIScheduleMapDaoImpl(db)
 	iScheduleService := craftRouteServiceImpl.NewIScheduleServiceImpl(iScheduleDao, db, iScheduleMapDao, iCraftRouteDao, iSysCraftRouteConfigDao)
+	iotAgentDao := daemonizeDaoImpl.NewIotAgentDaoImpl(db, cacheCache)
+	iotAgentProcess := daemonizeDaoImpl.NewIotAgentProcessDaoImpl(cacheCache)
+	iotAgentService := daemonizeServiceImpl.NewIotAgentServiceImpl(iotAgentDao, iotAgentProcess)
 	schedule := craftRouteController.NewSchedule(iScheduleService, iotAgentService)
 	craftRoute := &craftRouteController.CraftRoute{
-		CraftRoute:      craft,
-		Process:         process,
-		ProcessContext:  processContext,
-		RouteProcess:    routeProcess,
-		RouteProduct:    routeProduct,
-		RouteProductBom: routeProductBom,
-		WorkOrder:       workOrder,
-		Task:            task,
-		Schedule:        schedule,
+		CraftRoute:     craft,
+		Process:        process,
+		ProcessContext: processContext,
+		RouteProcess:   routeProcess,
+		Schedule:       schedule,
 	}
 	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
 	iControlLogDao := metricDaoIMpl.NewIControlLogDaoImpl(clickHouse)
