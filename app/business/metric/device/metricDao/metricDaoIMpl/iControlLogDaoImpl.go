@@ -61,7 +61,7 @@ func (i *IControlLogDaoImpl) List(c *gin.Context, req *deviceMonitorModel.Contro
 		startTime = time.GetStartTime(uint64(start), 200)
 	}
 	endTime := time.GetEndTimeUseNow(req.End, true)
-	if req.DeviceID != 0 && req.DataId != 0 && startTime != "" && endTime != "" {
+	if startTime != "" && endTime != "" {
 		db = db.Where("time_unix > ?", startTime)
 		db = db.Where("time_unix <= ?", endTime)
 	}

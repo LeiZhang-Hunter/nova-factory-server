@@ -25,7 +25,7 @@ func MillToTime(mill int64) time.Time {
 // GetStartTime start采用毫秒
 func GetStartTime(start uint64, minutes int64) string {
 	if start != 0 {
-		t := time.Unix(0, int64(start)*1e6)
+		t := time.UnixMilli(int64(start))
 		return t.Format("2006-01-02 15:04:05")
 	}
 
@@ -36,7 +36,7 @@ func GetStartTime(start uint64, minutes int64) string {
 // GetEndTime end采用毫秒
 func GetEndTime(end uint64, minutes int64) string {
 	if end != 0 {
-		t := time.Unix(0, int64(end)*1e6)
+		t := time.UnixMilli(int64(end))
 		return t.Format("2006-01-02 15:04:05")
 	}
 	tenMinutesAgo := time.Unix(0, int64(end)*1e6).Add(-time.Minute * time.Duration(minutes))
