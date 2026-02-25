@@ -41,6 +41,9 @@ func (i *IotAgentConfigDaoImpl) GetLastedConfig(ctx context.Context, agentId uin
 	var config *daemonizeModels.SysIotAgentConfig
 	ret := i.db.Table(i.tableName).Where("agent_object_id = ?", agentId).Order("create_time desc").Where("state = ?", commonStatus.NORMAL).First(&config)
 	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, ret.Error
 	}
 

@@ -185,6 +185,10 @@ func (c *Config) Info(ctx *gin.Context) {
 		baizeContext.Waring(ctx, err.Error())
 		return
 	}
+	if list == nil {
+		baizeContext.Success(ctx)
+		return
+	}
 	baizeContext.SuccessData(ctx, list)
 }
 
