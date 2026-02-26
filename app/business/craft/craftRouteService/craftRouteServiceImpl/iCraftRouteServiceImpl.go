@@ -61,6 +61,11 @@ func (craft *CraftRouteServiceImpl) DetailCraftRoute(c *gin.Context, req *craftR
 	if err != nil {
 		return nil, err
 	}
+	scheduleInfo, err := craft.dao.GetById(c, req.RouteID)
+	if err != nil {
+		return nil, err
+	}
+	info.Info = scheduleInfo
 	return info, nil
 }
 

@@ -56,7 +56,8 @@ type ScheduleStatusData struct {
 }
 
 type SysProductScheduleListReq struct {
-	Name string `form:"name" json:"name"`
+	Name   string `form:"name" json:"name"`
+	Status *bool  `form:"status" json:"status"`
 	baize.BaseEntityDQL
 }
 

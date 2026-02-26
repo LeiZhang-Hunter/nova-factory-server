@@ -41,6 +41,9 @@ func (i *IScheduleDaoImpl) List(c *gin.Context, req *craftRouteModels.SysProduct
 	if req != nil && req.Name != "" {
 		db = db.Where("schedule_name like ?", "%"+req.Name+"%")
 	}
+	if req != nil && req.Status != nil {
+		db = db.Where("status = ?", *req.Status)
+	}
 	size := 0
 	if req == nil || req.Size <= 0 {
 		size = 20
