@@ -48,124 +48,6 @@ func NewDeviceUtilizationDaoImpl(iotDb *iotdb.IotDb, shiftDao systemDao.ISysShif
 	}
 }
 
-// statRun 统计运行时设备
-func (d *DeviceUtilizationDaoImpl) statDeviceStat(c *gin.Context, startTime string, endTime string,
-	status int) (*deviceMonitorModel.DeviceStatusList, error) {
-	session, err := d.iotDb.GetSession()
-	if err != nil {
-		zap.L().Error("读取session失败", zap.Error(err))
-		return nil, err
-	}
-	defer d.iotDb.PutSession(session)
-
-	var timeout int64 = 5000
-
-	sql := fmt.Sprintf("select sum(duration) as value from root.run_status_device.** where time > %s and time < %s and status = %d align by device",
-		startTime, endTime, status)
-
-	statement, err := session.ExecuteQueryStatement(sql, &timeout)
-	if err != nil {
-		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
-		return nil, err
-	}
-	data := deviceMonitorModel.NewDeviceStatusList()
-	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
-		v := statement.GetDouble("value")
-		deviceName := statement.GetText("Device")
-		var deviceId int64
-		_, err := fmt.Sscanf(deviceName, "root.run_status_device.dev%d", &deviceId)
-		if err != nil {
-			zap.L().Error("fmt Sscanf error", zap.Error(err))
-			continue
-		}
-		data.List = append(data.List, deviceMonitorModel.DeviceStatus{
-			DeviceId: deviceId,
-			Value:    v,
-			Status:   status,
-		})
-	}
-
-	return data, nil
-}
-
-// statDeviceProcess 统计设备运行过程
-func (d *DeviceUtilizationDaoImpl) statDeviceProcess(c *gin.Context, startTime string, endTime string, interval string,
-	status int) (*deviceMonitorModel.DeviceProcessList, error) {
-	var processList deviceMonitorModel.DeviceProcessList
-	processList.List = make(map[string][]deviceMonitorModel.DeviceStatus)
-	session, err := d.iotDb.GetSession()
-	if err != nil {
-		zap.L().Error("读取session失败", zap.Error(err))
-		return nil, err
-	}
-	defer d.iotDb.PutSession(session)
-
-	var timeout int64 = 5000
-
-	sql := fmt.Sprintf("select sum(duration) as value from root.run_status_device.** where status = %d group by ([%s, %s), %s)  align by device",
-		status, startTime, endTime, interval)
-
-	statement, err := session.ExecuteQueryStatement(sql, &timeout)
-	if err != nil {
-		zap.L().Error("读取设备运行过程失败:", zap.Error(err))
-		return nil, err
-	}
-	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
-		timestamp := statement.GetTimestamp()
-		deviceName := statement.GetText(statement.GetColumnName(0))
-		duration := statement.GetDouble(statement.GetColumnName(1))
-		_, ok := processList.List[deviceName]
-		if !ok {
-			processList.List[deviceName] = make([]deviceMonitorModel.DeviceStatus, 0)
-		}
-		processList.List[deviceName] = append(processList.List[deviceName], deviceMonitorModel.DeviceStatus{
-			Value:  duration,
-			Status: status,
-			Time:   timestamp,
-		})
-		continue
-	}
-
-	return &processList, nil
-}
-
-// statDeviceProcess 统计设备运行过程
-func (d *DeviceUtilizationDaoImpl) statDeviceRunStat(c *gin.Context, startTime string,
-	endTime string) ([]deviceMonitorModel.DeviceRunStat, error) {
-	var runStatList []deviceMonitorModel.DeviceRunStat = make([]deviceMonitorModel.DeviceRunStat, 0)
-	session, err := d.iotDb.GetSession()
-	if err != nil {
-		zap.L().Error("读取session失败", zap.Error(err))
-		return nil, err
-	}
-	defer d.iotDb.PutSession(session)
-
-	var timeout int64 = 5000
-
-	sql := fmt.Sprintf("select last_value(status) from root.run_status_device.** where time>=%s and time < %s  align by device;",
-		startTime, endTime)
-
-	statement, err := session.ExecuteQueryStatement(sql, &timeout)
-	if err != nil {
-		zap.L().Error("读取设备运行过程失败:", zap.Error(err))
-		return nil, err
-	}
-	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
-		timestamp := statement.GetTimestamp()
-		deviceName := statement.GetText(statement.GetColumnName(0))
-		status := statement.GetInt64(statement.GetColumnName(1))
-		var stat deviceMonitorModel.DeviceRunStat = deviceMonitorModel.DeviceRunStat{
-			Time:   timestamp,
-			Status: int((status)),
-			Dev:    deviceName,
-		}
-		runStatList = append(runStatList, stat)
-		continue
-	}
-
-	return runStatList, nil
-}
-
 // Stat 统计稼动率
 func (d *DeviceUtilizationDaoImpl) Stat(c *gin.Context, req *deviceMonitorModel.DeviceUtilizationReq) ([]*deviceMonitorModel.DeviceUtilizationData, error) {
 	var deviceUtilizationList []*deviceMonitorModel.DeviceUtilizationData = make([]*deviceMonitorModel.DeviceUtilizationData, 0)
@@ -751,4 +633,130 @@ func (d *DeviceUtilizationDaoImpl) SearchV2(c *gin.Context,
 	statusSort := newDeviceStatusSort(int(device.RUNNING), &deviceUtilizationList.List)
 	sort.Sort(sort.Reverse(statusSort))
 	return deviceUtilizationList, nil
+}
+
+func (d *DeviceUtilizationDaoImpl) GetDeviceUtilization(c *gin.Context, req *deviceMonitorModel.DeviceUtilizationReq) (*deviceMonitorModel.DeviceRunProcess, error) {
+	if req == nil || req.DeviceId == 0 {
+		return nil, errors.New("参数错误")
+	}
+
+	var startTime string
+	if req.Start > 0 {
+		startTime = timeUtil.GetStartTime(req.Start, 200)
+	} else {
+		now := systime.Now()
+		midnight := systime.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		millDiff := now.Sub(midnight).Milliseconds()
+		start := systime.Now().UnixMilli() - millDiff
+		startTime = timeUtil.GetStartTime(uint64(start), 200)
+	}
+	endTime := timeUtil.GetEndTimeUseNow(req.End, true)
+
+	shiftTime := 86400
+
+	// 获取设备详情
+	deviceDetail, err := d.deviceDao.GetById(c, req.DeviceId)
+	if err != nil {
+		zap.L().Error("读取设备详情失败", zap.Error(err))
+		return nil, errors.New("读取设备详情失败")
+	}
+
+	// 获取建筑物信息
+	buildingName := ""
+	if deviceDetail.DeviceBuildingId > 0 {
+		builds, err := d.deviceBuildDao.GetByIds(c, []uint64{deviceDetail.DeviceBuildingId})
+		if err == nil && len(builds) > 0 {
+			buildingName = builds[0].Name
+		}
+	}
+
+	// 从字典里读取全部状态
+	runStatuses := d.dictDataDao.SelectDictDataByType(c, "device_run_status")
+
+	statusMap := make(map[int]deviceMonitorModel.DeviceStatusData)
+	processMapList := make(map[int]*deviceMonitorModel.DeviceProcessList)
+
+	for _, v := range runStatuses {
+		statusValue, err := strconv.Atoi(v.DictValue)
+		if err != nil {
+			continue
+		}
+
+		// 统计状态时间
+		statusList, err := d.statDeviceStatByDeviceId(c, startTime, endTime, req.DeviceId, statusValue)
+		if err == nil && statusList != nil {
+			for _, statusV := range statusList.List {
+				if statusV.DeviceId == req.DeviceId {
+					time := int(statusV.Value)
+					rate := 0.0
+					if time > 0 {
+						rate = math.RoundFloat(float64(float64(statusV.Value)/float64(shiftTime))*100, 2)
+					}
+					statusMap[statusValue] = deviceMonitorModel.DeviceStatusData{
+						Time:    uint64(time),
+						TimeStr: timeUtil.SecondsToHMS(int64(time)),
+						Rate:    rate,
+						RateStr: fmt.Sprintf("%.2f", rate) + "%",
+					}
+					break
+				}
+			}
+		}
+		if _, ok := statusMap[statusValue]; !ok {
+			statusMap[statusValue] = deviceMonitorModel.DeviceStatusData{
+				Time:    0,
+				TimeStr: "00:00:00",
+				Rate:    0,
+				RateStr: "0.00%",
+			}
+		}
+
+		// 查询具体 设备运行情况，两个小时一个步长
+		processList, err := d.statDeviceProcessByDeviceId(c, startTime, endTime, req.DeviceId, "2h", statusValue)
+		if err == nil && processList != nil {
+			processMapList[statusValue] = processList
+		}
+	}
+
+	res := &deviceMonitorModel.DeviceRunProcess{
+		DeviceName:   "",
+		BuildingName: buildingName,
+		StatusMap:    statusMap,
+		List:         make([]deviceMonitorModel.DeviceProcessStatus, 0),
+	}
+	if deviceDetail.Name != nil {
+		res.DeviceName = *deviceDetail.Name
+	}
+
+	if runData, ok := statusMap[int(device.RUNNING)]; ok {
+		res.UtilizationRate = runData.Rate
+	}
+	if waitData, ok := statusMap[int(device.WAITING)]; ok {
+		res.WaitRate = waitData.Rate
+	}
+
+	// 计算列表
+	deviceKey := iotdb2.MakeRunDeviceTemplateName(req.DeviceId)
+	for status, v := range processMapList {
+		processValue, ok := v.List[deviceKey]
+		if !ok {
+			continue
+		}
+
+		for k, value := range processValue {
+			if k >= len(res.List) {
+				statusValue := deviceMonitorModel.DeviceProcessStatus{
+					Time:     value.Time,
+					DeviceId: req.DeviceId,
+					Value:    make(map[int]float64),
+				}
+				statusValue.Value[status] = value.Value
+				res.List = append(res.List, statusValue)
+			} else {
+				res.List[k].Value[status] = value.Value
+			}
+		}
+	}
+
+	return res, nil
 }

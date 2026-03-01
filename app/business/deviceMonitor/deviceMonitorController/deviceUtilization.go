@@ -1,11 +1,12 @@
 package deviceMonitorController
 
 import (
-	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+
+	"github.com/gin-gonic/gin"
 )
 
 // DeviceUtilization 计算设备稼动率
@@ -22,6 +23,7 @@ func NewDeviceUtilization(service deviceMonitorService.DeviceUtilizationService)
 func (d *DeviceUtilization) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/device/monitor/utilization")
 	group.POST("/stat", middlewares.HasPermission("device:monitor:utilization:stat"), d.Stat)
+	group.GET("/info", middlewares.HasPermission("device:monitor:utilization:info"), d.Info)
 }
 
 func (d *DeviceUtilization) PublicRoutes(router *gin.RouterGroup) {
@@ -82,6 +84,31 @@ func (d *DeviceUtilization) Search(c *gin.Context) {
 func (d *DeviceUtilization) SearchV2(c *gin.Context) {
 	req := new(deviceMonitorModel.DeviceUtilizationReq)
 	stat, err := d.service.SearchV2(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, stat)
+}
+
+// Info 设备稼动率详情
+// @Summary 设备稼动率详情
+// @Description 设备稼动率详情
+// @Tags 设备监控/设备监控
+// @Param DeviceId query int true "设备id"
+// @Param Start query int false "开始时间"
+// @Param End query int false "结束时间"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "设备监控"
+// @Router /device/monitor/utilization/info [get]
+func (d *DeviceUtilization) Info(c *gin.Context) {
+	req := new(deviceMonitorModel.DeviceUtilizationReq)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	stat, err := d.service.GetDeviceUtilization(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

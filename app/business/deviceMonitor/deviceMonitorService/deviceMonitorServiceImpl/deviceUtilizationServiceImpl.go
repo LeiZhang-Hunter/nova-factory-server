@@ -1,10 +1,11 @@
 package deviceMonitorServiceImpl
 
 import (
-	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService"
+
+	"github.com/gin-gonic/gin"
 )
 
 type DeviceUtilizationServiceImpl struct {
@@ -34,4 +35,8 @@ func (d *DeviceUtilizationServiceImpl) Search(c *gin.Context,
 
 func (d *DeviceUtilizationServiceImpl) SearchV2(c *gin.Context, req *deviceMonitorModel.DeviceUtilizationReq) (*deviceMonitorModel.DeviceUtilizationPublicDataListV2, error) {
 	return d.deviceUtilizationDao.SearchV2(c, req)
+}
+
+func (d *DeviceUtilizationServiceImpl) GetDeviceUtilization(c *gin.Context, req *deviceMonitorModel.DeviceUtilizationReq) (*deviceMonitorModel.DeviceRunProcess, error) {
+	return d.deviceUtilizationDao.GetDeviceUtilization(c, req)
 }

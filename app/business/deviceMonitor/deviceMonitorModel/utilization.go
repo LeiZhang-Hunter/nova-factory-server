@@ -6,8 +6,9 @@ import (
 
 // DeviceUtilizationReq 稼动率请求
 type DeviceUtilizationReq struct {
-	Start uint64 `json:"start" form:"start"`
-	End   uint64 `json:"end" form:"end"`
+	Start    uint64 `json:"start" form:"start"`
+	End      uint64 `json:"end" form:"end"`
+	DeviceId int64  `json:"deviceId" form:"deviceId"`
 }
 
 // DeviceStatus 计算设备在某种状态的运行时间
