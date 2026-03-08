@@ -1,9 +1,10 @@
 package routes
 
 import (
+	"nova-factory-server/app/business/iot/metric/device/metricController"
+
 	"github.com/google/wire"
 	"google.golang.org/grpc"
-	"nova-factory-server/app/business/metric/device/metricController"
 )
 
 var GrpcProviderSet = wire.NewSet(NewGrpcEngine)

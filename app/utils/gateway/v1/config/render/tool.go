@@ -2,17 +2,18 @@ package render
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
-	"nova-factory-server/app/business/asset/device/deviceModels"
+	deviceModels2 "nova-factory-server/app/business/iot/asset/device/deviceModels"
 	"nova-factory-server/app/constant/gateway"
 	"nova-factory-server/app/utils/gateway/v1/api"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/bhps7"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/mqtt"
 	"strconv"
+
+	"go.uber.org/zap"
 )
 
 // OfBhps7Device modbus tcp 设备数据
-func OfBhps7Device(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDeviceConfigData) *bhps7.Device {
+func OfBhps7Device(vo *deviceModels2.DeviceVO, data []*deviceModels2.SysModbusDeviceConfigData) *bhps7.Device {
 	var device bhps7.Device
 	device.DeviceId = strconv.FormatUint(vo.DeviceId, 10)
 	if vo.Name != nil {
@@ -45,7 +46,7 @@ func OfBhps7Device(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDevi
 }
 
 // OfMqttDevice mqtt tcp 设备数据
-func OfMqttDevice(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDeviceConfigData) *mqtt.Device {
+func OfMqttDevice(vo *deviceModels2.DeviceVO, data []*deviceModels2.SysModbusDeviceConfigData) *mqtt.Device {
 	var device mqtt.Device
 	device.DeviceId = strconv.FormatUint(vo.DeviceId, 10)
 	if vo.Name != nil {
@@ -55,7 +56,7 @@ func OfMqttDevice(vo *deviceModels.DeviceVO, data []*deviceModels.SysModbusDevic
 	}
 	device.Template = make([]mqtt.DataTypeConfig, 0)
 	for _, v := range data {
-		annotations := make([]deviceModels.Annotation, 0)
+		annotations := make([]deviceModels2.Annotation, 0)
 		err := json.Unmarshal([]byte(v.Annotation), &annotations)
 		if err != nil {
 			zap.L().Error("unmarshal annotations error", zap.Error(err))

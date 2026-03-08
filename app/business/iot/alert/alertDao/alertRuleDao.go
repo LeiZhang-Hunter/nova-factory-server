@@ -1,0 +1,23 @@
+package alertDao
+
+import (
+	"nova-factory-server/app/business/iot/alert/alertModels"
+
+	"github.com/gin-gonic/gin"
+)
+
+type AlertRuleDao interface {
+	Create(c *gin.Context, data *alertModels.SetSysAlert) (*alertModels.SysAlert, error)
+	Update(c *gin.Context, data *alertModels.SetSysAlert) (*alertModels.SysAlert, error)
+	List(c *gin.Context, req *alertModels.SysAlertListReq) (*alertModels.SysAlertList, error)
+	Remove(c *gin.Context, ids []string) error
+	GetByGatewayId(c *gin.Context, gatewayId uint64) (*alertModels.SysAlert, error)
+	Change(c *gin.Context, data *alertModels.ChangeSysAlert) error
+	GetOnlineByGatewayId(c *gin.Context, gatewayId uint64) (*alertModels.SysAlert, error)
+	GetById(c *gin.Context, id uint64) (*alertModels.SysAlert, error)
+	FindOpen(c *gin.Context, gatewayId int64) (*alertModels.SysAlert, error)
+	// Count 调度策略统计
+	Count(c *gin.Context) (int64, error)
+	// GetByIds 调度策略统计
+	GetByIds(c *gin.Context, ids []uint64) ([]*alertModels.SysAlert, error)
+}

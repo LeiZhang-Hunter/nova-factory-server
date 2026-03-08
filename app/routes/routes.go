@@ -2,18 +2,19 @@ package routes
 
 import (
 	"nova-factory-server/app/business/ai/aiDataSetController"
-	"nova-factory-server/app/business/alert/alertController"
-	"nova-factory-server/app/business/asset/building/buildingController"
-	"nova-factory-server/app/business/asset/device/deviceController"
-	"nova-factory-server/app/business/asset/material/materialController"
-	"nova-factory-server/app/business/asset/resource/resourceController"
-	"nova-factory-server/app/business/configuration/configurationController"
-	"nova-factory-server/app/business/craft/craftRouteController"
-	"nova-factory-server/app/business/daemonize/daemonizeController"
-	"nova-factory-server/app/business/dashboard/dashboardController"
-	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
-	homeController "nova-factory-server/app/business/home/controller"
-	"nova-factory-server/app/business/metric/device/metricController"
+	"nova-factory-server/app/business/iot/alert/alertController"
+	"nova-factory-server/app/business/iot/asset/building/buildingController"
+	"nova-factory-server/app/business/iot/asset/device/deviceController"
+	"nova-factory-server/app/business/iot/asset/material/materialController"
+	"nova-factory-server/app/business/iot/asset/resource/resourceController"
+	"nova-factory-server/app/business/iot/configuration/configurationController"
+	"nova-factory-server/app/business/iot/craft/craftRouteController"
+	"nova-factory-server/app/business/iot/daemonize/daemonizeController"
+	"nova-factory-server/app/business/iot/dashboard/dashboardController"
+	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorController"
+	homeController "nova-factory-server/app/business/iot/home/controller"
+	"nova-factory-server/app/business/iot/metric/device/metricController"
+	iotSystemControllerImpl "nova-factory-server/app/business/iot/system/controller"
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/product/productController"
 	"nova-factory-server/app/business/system/systemController"
@@ -63,6 +64,7 @@ func NewGinEngine(
 	resource *resourceController.ResourceController,
 	home *homeController.Home,
 	configuration *configurationController.Controller,
+	iotSystem iotSystemControllerImpl.System,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -117,7 +119,7 @@ func NewGinEngine(
 		sc.File.PrivateRoutes(group)       //文件
 		sc.Notice.PrivateRoutes(group)     //消息
 		sc.SelectBox.PrivateRoutes(group)
-		sc.Electric.PrivateRoutes(group)
+		iotSystem.Electric.PrivateRoutes(group)
 		sc.Shift.PrivateRoutes(group)
 		mc.Server.PrivateRoutes(group)     //服务器详情
 		mc.Oper.PrivateRoutes(group)       //操作日志

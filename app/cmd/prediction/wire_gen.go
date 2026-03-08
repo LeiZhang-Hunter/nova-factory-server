@@ -8,8 +8,8 @@ package main
 
 import (
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
-	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
-	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
+	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
+	"nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
 	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/datasource/mysql"

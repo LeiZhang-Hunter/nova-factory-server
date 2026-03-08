@@ -11,41 +11,44 @@ import (
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
 	"nova-factory-server/app/business/ai/aiDataSetService/aiDataSetServiceImpl"
-	"nova-factory-server/app/business/alert/alertController"
-	"nova-factory-server/app/business/alert/alertDao/alertDaoImpl"
-	"nova-factory-server/app/business/alert/alertService/alertServiceImpl"
-	"nova-factory-server/app/business/asset/building/buildingController"
-	"nova-factory-server/app/business/asset/building/buildingDao/buildingDaoImpl"
-	"nova-factory-server/app/business/asset/building/buildingService/buildingServiceImpl"
-	"nova-factory-server/app/business/asset/device/deviceController"
-	"nova-factory-server/app/business/asset/device/deviceDao/deviceDaoImpl"
-	"nova-factory-server/app/business/asset/device/deviceService/deviceServiceImpl"
-	"nova-factory-server/app/business/asset/material/materialController"
-	"nova-factory-server/app/business/asset/material/materialDao/materialDaoImpl"
-	"nova-factory-server/app/business/asset/material/materialService/materialServiceImpl"
-	"nova-factory-server/app/business/asset/resource/resourceController"
-	"nova-factory-server/app/business/asset/resource/resourceDao/resourceDaoImpl"
-	"nova-factory-server/app/business/asset/resource/resourceService/resourceServiceImpl"
-	"nova-factory-server/app/business/configuration/configurationController"
-	"nova-factory-server/app/business/configuration/configurationDao/configurationDaoImpl"
-	"nova-factory-server/app/business/configuration/configurationService/configurationServiceImpl"
-	"nova-factory-server/app/business/craft/craftRouteController"
-	"nova-factory-server/app/business/craft/craftRouteDao/craftRouteDaoImpl"
-	"nova-factory-server/app/business/craft/craftRouteService/craftRouteServiceImpl"
-	"nova-factory-server/app/business/daemonize/daemonizeController"
-	"nova-factory-server/app/business/daemonize/daemonizeDao/daemonizeDaoImpl"
-	"nova-factory-server/app/business/daemonize/daemonizeService/daemonizeServiceImpl"
-	"nova-factory-server/app/business/dashboard/dashboardController"
-	"nova-factory-server/app/business/dashboard/dashboardDao/dashboardDaoImpl"
-	"nova-factory-server/app/business/dashboard/dashboardService/dashboardServiceImpl"
-	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
-	"nova-factory-server/app/business/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
-	"nova-factory-server/app/business/deviceMonitor/deviceMonitorService/deviceMonitorServiceImpl"
-	"nova-factory-server/app/business/home/controller"
-	"nova-factory-server/app/business/home/homeService/homeServiceImpl"
-	"nova-factory-server/app/business/metric/device/metricController"
-	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
-	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
+	"nova-factory-server/app/business/iot/alert/alertController"
+	"nova-factory-server/app/business/iot/alert/alertDao/alertDaoImpl"
+	"nova-factory-server/app/business/iot/alert/alertService/alertServiceImpl"
+	"nova-factory-server/app/business/iot/asset/building/buildingController"
+	"nova-factory-server/app/business/iot/asset/building/buildingDao/buildingDaoImpl"
+	"nova-factory-server/app/business/iot/asset/building/buildingService/buildingServiceImpl"
+	"nova-factory-server/app/business/iot/asset/device/deviceController"
+	"nova-factory-server/app/business/iot/asset/device/deviceDao/deviceDaoImpl"
+	"nova-factory-server/app/business/iot/asset/device/deviceService/deviceServiceImpl"
+	"nova-factory-server/app/business/iot/asset/material/materialController"
+	"nova-factory-server/app/business/iot/asset/material/materialDao/materialDaoImpl"
+	"nova-factory-server/app/business/iot/asset/material/materialService/materialServiceImpl"
+	"nova-factory-server/app/business/iot/asset/resource/resourceController"
+	"nova-factory-server/app/business/iot/asset/resource/resourceDao/resourceDaoImpl"
+	"nova-factory-server/app/business/iot/asset/resource/resourceService/resourceServiceImpl"
+	"nova-factory-server/app/business/iot/configuration/configurationController"
+	"nova-factory-server/app/business/iot/configuration/configurationDao/configurationDaoImpl"
+	"nova-factory-server/app/business/iot/configuration/configurationService/configurationServiceImpl"
+	"nova-factory-server/app/business/iot/craft/craftRouteController"
+	"nova-factory-server/app/business/iot/craft/craftRouteDao/craftRouteDaoImpl"
+	"nova-factory-server/app/business/iot/craft/craftRouteService/craftRouteServiceImpl"
+	"nova-factory-server/app/business/iot/daemonize/daemonizeController"
+	"nova-factory-server/app/business/iot/daemonize/daemonizeDao/daemonizeDaoImpl"
+	"nova-factory-server/app/business/iot/daemonize/daemonizeService/daemonizeServiceImpl"
+	"nova-factory-server/app/business/iot/dashboard/dashboardController"
+	"nova-factory-server/app/business/iot/dashboard/dashboardDao/dashboardDaoImpl"
+	"nova-factory-server/app/business/iot/dashboard/dashboardService/dashboardServiceImpl"
+	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorController"
+	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
+	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorService/deviceMonitorServiceImpl"
+	"nova-factory-server/app/business/iot/home/controller"
+	"nova-factory-server/app/business/iot/home/homeService/homeServiceImpl"
+	"nova-factory-server/app/business/iot/metric/device/metricController"
+	"nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
+	"nova-factory-server/app/business/iot/metric/device/metricService/metricServiceImpl"
+	controller2 "nova-factory-server/app/business/iot/system/controller"
+	systemDaoImpl2 "nova-factory-server/app/business/iot/system/dao/systemDaoImpl"
+	systemServiceImpl2 "nova-factory-server/app/business/iot/system/service/systemServiceImpl"
 	"nova-factory-server/app/business/monitor/monitorController"
 	"nova-factory-server/app/business/monitor/monitorDao/monitorDaoImpl"
 	"nova-factory-server/app/business/monitor/monitorService/monitorServiceImpl"
@@ -118,21 +121,6 @@ func wireApp() (*gin.Engine, func(), error) {
 	iSelectBoxService := systemServiceImpl.NewSelectService(iPermissionDao, iDeptDao)
 	selectBox := systemController.NewSelectBox(iSelectBoxService)
 	db := mysql.NewDB()
-	iDeviceElectricDao := systemDaoImpl.NewIDeviceElectricDaoImpl(db)
-	iDeviceDao := deviceDaoImpl.NewSysDeviceDaoImpl(db)
-	clickHouse, err := clickhouse.NewClickHouse()
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	iotDb := iotdb.NewIotDb()
-	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
-	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
-	iDeviceElectricService := systemServiceImpl.NewIDeviceElectricServiceImpl(iDeviceElectricDao, iDeviceDao, iMetricDao, iDeviceDataReportDao)
-	iDeviceGroupDao := deviceDaoImpl.NewSysDeviceGroupDaoImpl(db)
-	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
-	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao, cacheCache)
-	electric := systemController.NewElectric(iDeviceElectricService, iDeviceService)
 	iSysShiftDao := systemDaoImpl.NewISysShiftDaoImpl(db)
 	iSysShiftService := systemServiceImpl.NewISysShiftServiceImpl(iSysShiftDao)
 	shift := systemController.NewShift(iSysShiftService)
@@ -151,7 +139,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		Notice:     notice,
 		Permission: permission,
 		SelectBox:  selectBox,
-		Electric:   electric,
 		Shift:      shift,
 	}
 	infoServer := monitorController.NewInfoServer()
@@ -178,6 +165,18 @@ func wireApp() (*gin.Engine, func(), error) {
 	tool := &toolController.Tool{
 		GenTable: genTable,
 	}
+	iDeviceDao := deviceDaoImpl.NewSysDeviceDaoImpl(db)
+	iDeviceGroupDao := deviceDaoImpl.NewSysDeviceGroupDaoImpl(db)
+	clickHouse, err := clickhouse.NewClickHouse()
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	iotDb := iotdb.NewIotDb()
+	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
+	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
+	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
+	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao, cacheCache)
 	deviceInfo := deviceController.NewDeviceInfo(iDeviceService)
 	iDeviceGroupService := deviceServiceImpl.NewDeviceGroupService(iDeviceGroupDao, iUserDao)
 	deviceGroup := deviceController.NewDeviceGroup(iDeviceGroupService)
@@ -282,6 +281,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	iotAgent := daemonizeController.NewIotAgentController(iotAgentService, daemonizeService)
 	alertRuleDao := alertDaoImpl.NewAlertRuleDaoImpl(db)
 	alertSinkTemplateDao := alertDaoImpl.NewAlertSinkTemplateDaoImpl(db)
+	iDeviceElectricDao := systemDaoImpl2.NewIDeviceElectricDaoImpl(db)
 	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao, alertRuleDao, alertSinkTemplateDao, iDeviceElectricDao, iDictDataDao, iAiPredictionControlDao)
 	iotAgentConfigService := daemonizeServiceImpl.NewIotAgentConfigServiceImpl(iotAgentConfigDao)
 	daemonizeControllerConfig := daemonizeController.NewConfig(iGatewayConfigService, iotAgentConfigService, iotAgentService)
@@ -374,7 +374,12 @@ func wireApp() (*gin.Engine, func(), error) {
 	configurationControllerController := &configurationController.Controller{
 		Configuration: configuration,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home, configurationControllerController)
+	iDeviceElectricService := systemServiceImpl2.NewIDeviceElectricServiceImpl(iDeviceElectricDao, iDeviceDao, iMetricDao, iDeviceDataReportDao)
+	electric := controller2.NewElectric(iDeviceElectricService, iDeviceService)
+	controllerSystem := controller2.System{
+		Electric: electric,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home, configurationControllerController, controllerSystem)
 	return engine, func() {
 		cleanup()
 	}, nil

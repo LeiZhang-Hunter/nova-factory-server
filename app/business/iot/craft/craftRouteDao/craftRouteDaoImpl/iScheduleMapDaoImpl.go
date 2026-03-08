@@ -1,0 +1,341 @@
+package craftRouteDaoImpl
+
+import (
+	"errors"
+	"fmt"
+	"nova-factory-server/app/business/iot/craft/craftRouteDao"
+	craftRouteModels2 "nova-factory-server/app/business/iot/craft/craftRouteModels"
+	"nova-factory-server/app/business/iot/daemonize/daemonizeModels"
+	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+)
+
+type IScheduleMapDaoImpl struct {
+	db    *gorm.DB
+	table string
+}
+
+func NewIScheduleMapDaoImpl(db *gorm.DB) craftRouteDao.IScheduleMapDao {
+	return &IScheduleMapDaoImpl{
+		db:    db,
+		table: "sys_product_schedule_map",
+	}
+}
+
+func (i *IScheduleMapDaoImpl) GetByScheduleIds(c *gin.Context, ids []int64) ([]*craftRouteModels2.SysProductScheduleMap, error) {
+	var list []*craftRouteModels2.SysProductScheduleMap
+	ret := i.db.Table(i.table).Where("schedule_id in (?)", ids).Where("state = ?", commonStatus.NORMAL).Find(&list)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return list, nil
+	}
+	return list, ret.Error
+}
+
+func (i *IScheduleMapDaoImpl) GetSpecialSchedule(c *gin.Context, beginTime int64) ([]*craftRouteModels2.SysProductScheduleMap, error) {
+	var list []*craftRouteModels2.SysProductScheduleMap
+	db := i.db.Table(i.table).Where("begin_time >= ?", beginTime).Where("schedule_type = ?", craftRouteModels2.SPECIAL).
+		Where("state = ?", commonStatus.NORMAL)
+	db = baizeContext.GetGormDataScope(c, db)
+	ret := db.Find(&list)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return list, ret.Error
+}
+
+// dealDaily 处理循环日程
+func (i *IScheduleMapDaoImpl) dealDaily(c *gin.Context, tx *gorm.DB, data *craftRouteModels2.SetSysProductSchedule) error {
+	weeks := strings.Split(data.Time, ",")
+	if len(weeks) == 0 {
+		return errors.New("循环日期格式错误")
+	}
+
+	// 校验数据
+	var checkWeeks map[string]int = map[string]int{
+		"1": 0,
+		"2": 0,
+		"3": 0,
+		"4": 0,
+		"5": 0,
+		"6": 0,
+		"7": 0,
+	}
+
+	for k, week := range weeks {
+		value, ok := checkWeeks[week]
+		if !ok {
+			return errors.New("执行日期格式错误，只能是周一到周日")
+		}
+		if value != 0 {
+			return errors.New(fmt.Sprintf("执行日期格式错误，存在重复日期:%d", k))
+		}
+		checkWeeks[week]++
+	}
+
+	// 保存唯一日期，过滤防止重复
+
+	for _, v := range data.TimeManager {
+		beginArr := strings.Split(v.BeginTime, ":")
+		if len(beginArr) != 2 {
+			return errors.New(fmt.Sprintf("日程安排错误:%s", v.BeginTime))
+		}
+		endArr := strings.Split(v.EndTime, ":")
+		if len(endArr) != 2 {
+			return errors.New(fmt.Sprintf("日程安排错误:%s", v.EndTime))
+		}
+
+		beginHour, err := strconv.ParseInt(beginArr[0], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		beginMinute, err := strconv.ParseInt(beginArr[1], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		beginUnix := beginHour*3600 + beginMinute*60
+
+		endHour, err := strconv.ParseInt(endArr[0], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		endMinute, err := strconv.ParseInt(endArr[1], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		endUnix := endHour*3600 + endMinute*60
+		var mapList []*craftRouteModels2.SysProductScheduleMap = make([]*craftRouteModels2.SysProductScheduleMap, len(weeks))
+		for dayKey, dayValue := range weeks {
+			date, err := strconv.ParseInt(dayValue, 10, 10)
+			if err != nil {
+				zap.L().Error("dealDaily error", zap.Error(err))
+				return err
+			}
+			mapList[dayKey] = &craftRouteModels2.SysProductScheduleMap{
+				ID:           snowflake.GenID(),
+				GatewayID:    data.GatewayID,
+				ScheduleID:   data.Id,
+				BeginTime:    beginUnix,
+				EndTime:      endUnix,
+				CraftRouteID: v.RoueId,
+				Status:       data.Status,
+				ScheduleType: craftRouteModels2.DAILY,
+				Date:         int(date),
+			}
+			mapList[dayKey].SetCreateBy(baizeContext.GetUserId(c))
+			mapList[dayKey].DeptID = baizeContext.GetDeptId(c)
+		}
+		ret := tx.Table(i.table).Create(mapList)
+		if ret.Error != nil {
+			return ret.Error
+		}
+	}
+
+	return nil
+}
+
+// dealSpecial 处理特殊日程
+func (i *IScheduleMapDaoImpl) dealSpecial(c *gin.Context, tx *gorm.DB, data *craftRouteModels2.SetSysProductSchedule) error {
+	if data.Time == "" {
+		return errors.New("执行日期格式错误")
+	}
+
+	if len(data.TimeManager) == 0 {
+		return errors.New("日程安排格式错误")
+	}
+
+	times := strings.Split(data.Time, "~")
+	if len(times) != 2 {
+		return errors.New("执行日期格式错误")
+	}
+
+	beginTIme := times[0]
+	endTIme := times[1]
+	beginTImeValue, err := time.ParseInLocation(time.DateOnly, beginTIme, time.Local)
+	if err != nil {
+		return err
+	}
+	endTImeValue, err := time.ParseInLocation(time.DateOnly, endTIme, time.Local)
+	if err != nil {
+		return err
+	}
+	beginTimeUnix := beginTImeValue.Unix()
+	endTimeUnix := endTImeValue.Unix()
+	//if endTimeUnix != 0 {
+	//	endTimeUnix += 86400
+	//}
+	if beginTimeUnix == endTimeUnix {
+		return errors.New("执行日期开始和结束不能相同")
+	}
+	if beginTimeUnix+24*3600 > endTimeUnix {
+		return errors.New("日期错误")
+	}
+
+	dayCount := 0
+	day := ((endTimeUnix - beginTimeUnix) / 86400) + 1
+	dayList := make([]int64, 0)
+	for ; dayCount < int(day); dayCount++ {
+		var v int64 = beginTimeUnix + int64(dayCount)*86400
+		dayList = append(dayList, v)
+	}
+
+	for _, v := range data.TimeManager {
+		beginArr := strings.Split(v.BeginTime, ":")
+		if len(beginArr) != 2 {
+			return errors.New(fmt.Sprintf("日程安排错误:%s", v.BeginTime))
+		}
+		endArr := strings.Split(v.EndTime, ":")
+		if len(endArr) != 2 {
+			return errors.New(fmt.Sprintf("日程安排错误:%s", v.EndTime))
+		}
+
+		beginHour, err := strconv.ParseInt(beginArr[0], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		beginMinute, err := strconv.ParseInt(beginArr[1], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		beginUnix := beginHour*3600 + beginMinute*60
+
+		endHour, err := strconv.ParseInt(endArr[0], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		endMinute, err := strconv.ParseInt(endArr[1], 10, 64)
+		if err != nil {
+			zap.L().Error("dealDaily error", zap.Error(err))
+			return err
+		}
+
+		endUnix := endHour*3600 + endMinute*60
+		var mapList []*craftRouteModels2.SysProductScheduleMap = make([]*craftRouteModels2.SysProductScheduleMap, len(dayList))
+		for dayKey, dayValue := range dayList {
+			mapList[dayKey] = &craftRouteModels2.SysProductScheduleMap{
+				ID:           snowflake.GenID(),
+				GatewayID:    data.GatewayID,
+				ScheduleID:   data.Id,
+				BeginTime:    dayValue + beginUnix,
+				EndTime:      dayValue + endUnix,
+				Status:       data.Status,
+				CraftRouteID: v.RoueId,
+				ScheduleType: craftRouteModels2.SPECIAL,
+			}
+			mapList[dayKey].SetCreateBy(baizeContext.GetUserId(c))
+			mapList[dayKey].DeptID = baizeContext.GetDeptId(c)
+		}
+		ret := tx.Table(i.table).Create(mapList)
+		if ret.Error != nil {
+			zap.L().Error("create error", zap.Error(ret.Error))
+			return ret.Error
+		}
+	}
+	return nil
+}
+
+func (i *IScheduleMapDaoImpl) Set(c *gin.Context, tx *gorm.DB, data *craftRouteModels2.SetSysProductSchedule) error {
+	ret := tx.Table(i.table).Where("schedule_id = ?", data.Id).Delete(&craftRouteModels2.SysProductScheduleMap{})
+	if ret.Error != nil {
+		zap.L().Error("delete error", zap.Error(ret.Error))
+		return ret.Error
+	}
+	if data.Type == craftRouteModels2.SPECIAL {
+		err := i.dealSpecial(c, tx, data)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := i.dealDaily(c, tx, data)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (i *IScheduleMapDaoImpl) Remove(c *gin.Context, ids []string) error {
+	ret := i.db.Table(i.table).Where("schedule_id in (?)", ids).Delete(&craftRouteModels2.SysProductScheduleMap{})
+	return ret.Error
+}
+
+func (i *IScheduleMapDaoImpl) GetByScheduleId(c *gin.Context, id int64) ([]*craftRouteModels2.SysProductScheduleMap, error) {
+	var dto []*craftRouteModels2.SysProductScheduleMap
+	ret := i.db.Table(i.table).Where("schedule_id = ?", id).Find(&dto)
+	return dto, ret.Error
+}
+
+func (i *IScheduleMapDaoImpl) GetSpecialScheduleByNow(c *gin.Context, gatewayId int64, gatewayInfo *daemonizeModels.SysIotAgent) ([]*craftRouteModels2.SysProductScheduleMap, error) {
+	timeNow := time.Now().Unix()
+	var list []*craftRouteModels2.SysProductScheduleMap
+	db := i.db.Table(i.table).
+		Select("ANY_VALUE(id)").
+		Select("ANY_VALUE(schedule_id)").
+		Select("ANY_VALUE(gateway_id)").
+		Select("craft_route_id").
+		Where("gateway_id = ?", gatewayId).
+		Where("begin_time <= ?", timeNow).
+		Where("end_time > ?", timeNow).
+		Where("schedule_type = ?", craftRouteModels2.SPECIAL).
+		Where("status = ?", true).
+		Where("state = ?", commonStatus.NORMAL).Group("craft_route_id").Find(&list)
+	//db = baizeContext.GetGormDataScopeById(c, db, gatewayInfo.CreateBy, gatewayInfo.DeptID)
+	ret := db.Find(&list)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return list, ret.Error
+}
+
+func (i *IScheduleMapDaoImpl) GetNormalByTime(c *gin.Context, gatewayId int64) ([]*craftRouteModels2.SysProductScheduleMap, error) {
+	var list []*craftRouteModels2.SysProductScheduleMap
+	// 获取今天是周几，返回的是一个int，其中0表示周日，1表示周一，以此类推，直到6表示周六
+	timeNow := time.Now()
+	year, month, day := timeNow.Date()
+	// 创建一个新的时间，设置为当天的00:00:00
+	startOfDay := time.Date(year, month, day, 0, 0, 0, 0, timeNow.Location())
+	interval := timeNow.Unix() - startOfDay.Unix()
+	weekday := int(timeNow.Weekday())
+	if weekday == 0 {
+		weekday = 7
+	}
+	db := i.db.Table(i.table).
+		Select("ANY_VALUE(id)").
+		Select("ANY_VALUE(schedule_id)").
+		Select("ANY_VALUE(gateway_id)").
+		Select("craft_route_id").
+		Where("gateway_id = ?", gatewayId).
+		Where("begin_time <= ?", interval).
+		Where("end_time > ?", interval).
+		Where("schedule_type = ?", craftRouteModels2.DAILY).
+		Where("date = ?", weekday).
+		Where("status = ?", true).
+		Where("state = ?", commonStatus.NORMAL).Group("craft_route_id").Find(&list)
+	//db = baizeContext.GetGormDataScope(c, db)
+	ret := db.Find(&list)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return list, ret.Error
+}

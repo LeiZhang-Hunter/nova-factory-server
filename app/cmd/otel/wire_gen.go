@@ -7,14 +7,15 @@
 package main
 
 import (
-	"google.golang.org/grpc"
-	"nova-factory-server/app/business/metric/device/metricController"
-	"nova-factory-server/app/business/metric/device/metricDao/metricDaoIMpl"
-	"nova-factory-server/app/business/metric/device/metricService/metricServiceImpl"
+	metricController2 "nova-factory-server/app/business/iot/metric/device/metricController"
+	metricDaoIMpl2 "nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
+	metricServiceImpl2 "nova-factory-server/app/business/iot/metric/device/metricService/metricServiceImpl"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/routes"
+
+	"google.golang.org/grpc"
 )
 
 // Injectors from wire.go:
@@ -25,13 +26,13 @@ func wireApp() (*grpc.Server, func(), error) {
 		return nil, nil, err
 	}
 	iotDb := iotdb.NewIotDb()
-	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
+	iMetricDao := metricDaoIMpl2.NewMetricDaoImpl(clickHouse, iotDb)
 	cacheCache := cache.NewCache()
-	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
-	iControlLogDao := metricDaoIMpl.NewIControlLogDaoImpl(clickHouse)
-	iControlLogService := metricServiceImpl.NewIControlLogServiceImpl(iControlLogDao)
-	metric := metricController.NewMetric(iMetricService, iControlLogService)
-	metricServer := &metricController.MetricServer{
+	iMetricService := metricServiceImpl2.NewIMetricServiceImpl(iMetricDao, cacheCache)
+	iControlLogDao := metricDaoIMpl2.NewIControlLogDaoImpl(clickHouse)
+	iControlLogService := metricServiceImpl2.NewIControlLogServiceImpl(iControlLogDao)
+	metric := metricController2.NewMetric(iMetricService, iControlLogService)
+	metricServer := &metricController2.MetricServer{
 		Metric: metric,
 	}
 	server := routes.NewGrpcEngine(metricServer)
