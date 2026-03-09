@@ -328,7 +328,6 @@ create table iot_camera (
     port                        int(11)         not null                   comment '端口',
     username                    varchar(128)    not null                   comment '用户名',
     password                    varchar(128)    not null                   comment '密码',
-    rtsp_url                    varchar(512)    not null                   comment 'RTSP流地址',
     status                      int(11)         default 0                  comment '状态',
     dept_id                     bigint(20)      default null               comment '部门ID',
     create_by                   bigint(20)      default null               comment '创建者',

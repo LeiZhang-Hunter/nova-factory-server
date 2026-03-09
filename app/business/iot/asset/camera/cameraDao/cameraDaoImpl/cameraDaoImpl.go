@@ -3,7 +3,10 @@ package cameraDaoImpl
 import (
 	"nova-factory-server/app/business/iot/asset/camera/cameraDao"
 	"nova-factory-server/app/business/iot/asset/camera/cameraModels"
+	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -22,12 +25,16 @@ func NewCameraDao(db *gorm.DB) cameraDao.ICameraDao {
 }
 
 // Create 创建摄像头
-func (c *CameraDaoImpl) Create(camera *cameraModels.IotCamera) error {
+func (c *CameraDaoImpl) Create(ctx *gin.Context, camera *cameraModels.IotCamera) error {
+	camera.Id = snowflake.GenID()
+	camera.SetCreateBy(baizeContext.GetUserId(ctx))
+	camera.DeptId = baizeContext.GetUserId(ctx)
 	return c.db.Table(c.table).Create(camera).Error
 }
 
 // Update 更新摄像头
-func (c *CameraDaoImpl) Update(camera *cameraModels.IotCamera) error {
+func (c *CameraDaoImpl) Update(ctx *gin.Context, camera *cameraModels.IotCamera) error {
+	camera.SetUpdateBy(baizeContext.GetUserId(ctx))
 	return c.db.Table(c.table).Save(camera).Error
 }
 
@@ -59,7 +66,7 @@ func (c *CameraDaoImpl) List(req *cameraModels.IotCameraListReq) ([]*cameraModel
 			query = query.Where("ip_address LIKE ?", "%"+req.IpAddress+"%")
 		}
 		if req.Brand != "" {
-			query = query.Where("brand LIKE ?", "%"+req.Brand+"%")
+			query = query.Where("brand = ?", req.Brand)
 		}
 	}
 

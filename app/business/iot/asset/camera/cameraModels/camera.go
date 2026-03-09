@@ -14,17 +14,16 @@ type IotCamera struct {
 	Port      int    `gorm:"column:port" json:"port"`
 	Username  string `gorm:"column:username" json:"username"`
 	Password  string `gorm:"column:password" json:"password"`
-	RtspUrl   string `gorm:"column:rtsp_url" json:"rtsp_url"`
-	Status    int    `gorm:"column:status" json:"status"`
+	Status    *bool  `gorm:"column:status" json:"status"`
 	DeptId    int64  `gorm:"column:dept_id" json:"dept_id"`
 	baize.BaseEntity
 	State int `gorm:"column:state" json:"state"`
 }
 
 type IotCameraListReq struct {
-	Name      string `gorm:"column:name" json:"name"`
-	IpAddress string `gorm:"column:ip_address" json:"ip_address"`
-	Brand     string `gorm:"column:brand" json:"brand"`
+	Name      string `gorm:"column:name" form:"name"`
+	IpAddress string `gorm:"column:ip_address" form:"ip_address"`
+	Brand     string `gorm:"column:brand" form:"brand"`
 }
 
 type IotCameraList struct {

@@ -4,6 +4,8 @@ import (
 	"nova-factory-server/app/business/iot/asset/camera/cameraDao"
 	"nova-factory-server/app/business/iot/asset/camera/cameraModels"
 	"nova-factory-server/app/business/iot/asset/camera/cameraService"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CameraServiceImpl 摄像头服务实现
@@ -17,13 +19,13 @@ func NewCameraService(cameraDao cameraDao.ICameraDao) cameraService.ICameraServi
 }
 
 // Create 创建摄像头
-func (s *CameraServiceImpl) Create(camera *cameraModels.IotCamera) error {
-	return s.cameraDao.Create(camera)
+func (s *CameraServiceImpl) Create(ctx *gin.Context, camera *cameraModels.IotCamera) error {
+	return s.cameraDao.Create(ctx, camera)
 }
 
 // Update 更新摄像头
-func (s *CameraServiceImpl) Update(camera *cameraModels.IotCamera) error {
-	return s.cameraDao.Update(camera)
+func (s *CameraServiceImpl) Update(ctx *gin.Context, camera *cameraModels.IotCamera) error {
+	return s.cameraDao.Update(ctx, camera)
 }
 
 // Delete 删除摄像头

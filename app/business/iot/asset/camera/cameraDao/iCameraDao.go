@@ -2,14 +2,16 @@ package cameraDao
 
 import (
 	"nova-factory-server/app/business/iot/asset/camera/cameraModels"
+
+	"github.com/gin-gonic/gin"
 )
 
 // ICameraDao 摄像头数据访问接口
 type ICameraDao interface {
 	// Create 创建摄像头
-	Create(camera *cameraModels.IotCamera) error
+	Create(ctx *gin.Context, camera *cameraModels.IotCamera) error
 	// Update 更新摄像头
-	Update(camera *cameraModels.IotCamera) error
+	Update(ctx *gin.Context, camera *cameraModels.IotCamera) error
 	// Delete 删除摄像头
 	Delete(ids []string) error
 	// GetById 根据ID获取摄像头

@@ -27,7 +27,7 @@ func NewCameraController(cameraService cameraService.ICameraService) *Camera {
 func (c *Camera) PrivateRoutes(router *gin.RouterGroup) {
 	cameraGroup := router.Group("/iot/asset/camera")
 	cameraGroup.POST("/set", middlewares.HasPermission("iot:asset:camera:set"), c.Set)
-	cameraGroup.DELETE("/remove/:id", middlewares.HasPermission("iot:asset:camera:remove"), c.Delete)
+	cameraGroup.DELETE("/remove/:ids", middlewares.HasPermission("iot:asset:camera:remove"), c.Delete)
 	cameraGroup.GET("/info/:id", middlewares.HasPermission("iot:asset:camera:info"), c.GetById)
 	cameraGroup.GET("/list", middlewares.HasPermission("iot:asset:camera:list"), c.List)
 }
@@ -42,7 +42,7 @@ func (c *Camera) Set(ctx *gin.Context) {
 	}
 
 	if camera.Id > 0 {
-		if err := c.cameraService.Update(&camera); err != nil {
+		if err := c.cameraService.Update(ctx, &camera); err != nil {
 			zap.L().Error("cameraService create error", zap.Error(err))
 			baizeContext.Waring(ctx, "设置摄像头失败")
 			return
@@ -51,7 +51,7 @@ func (c *Camera) Set(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.cameraService.Create(&camera); err != nil {
+	if err := c.cameraService.Create(ctx, &camera); err != nil {
 		zap.L().Error("cameraService create error", zap.Error(err))
 		baizeContext.Waring(ctx, "设置摄像头失败")
 		return
