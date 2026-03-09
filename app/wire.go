@@ -13,6 +13,9 @@ import (
 	"nova-factory-server/app/business/iot/asset/building/buildingController"
 	"nova-factory-server/app/business/iot/asset/building/buildingDao/buildingDaoImpl"
 	"nova-factory-server/app/business/iot/asset/building/buildingService/buildingServiceImpl"
+	"nova-factory-server/app/business/iot/asset/camera/cameraController"
+	"nova-factory-server/app/business/iot/asset/camera/cameraDao/cameraDaoImpl"
+	"nova-factory-server/app/business/iot/asset/camera/cameraService/cameraServiceImpl"
 	"nova-factory-server/app/business/iot/asset/device/deviceController"
 	"nova-factory-server/app/business/iot/asset/device/deviceDao/deviceDaoImpl"
 	"nova-factory-server/app/business/iot/asset/device/deviceService/deviceServiceImpl"
@@ -136,6 +139,10 @@ func wireApp() (*gin.Engine, func(), error) {
 		iotSystemControllerImpl.ProviderSet,
 		iotSystemServiceImpl.ProviderSet,
 		iotSystemDaoImpl.ProviderSet,
+
+		cameraController.ProviderSet,
+		cameraServiceImpl.ProviderSet,
+		cameraDaoImpl.ProviderSet,
 
 		datasource.ProviderSet,
 		routes.ProviderSet,

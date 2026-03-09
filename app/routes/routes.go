@@ -4,6 +4,7 @@ import (
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/iot/alert/alertController"
 	"nova-factory-server/app/business/iot/asset/building/buildingController"
+	"nova-factory-server/app/business/iot/asset/camera/cameraController"
 	"nova-factory-server/app/business/iot/asset/device/deviceController"
 	"nova-factory-server/app/business/iot/asset/material/materialController"
 	"nova-factory-server/app/business/iot/asset/resource/resourceController"
@@ -65,6 +66,7 @@ func NewGinEngine(
 	home *homeController.Home,
 	configuration *configurationController.Controller,
 	iotSystem iotSystemControllerImpl.System,
+	camera cameraController.Controller,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
@@ -176,6 +178,7 @@ func NewGinEngine(
 
 		// 生产管理
 		product.Laboratory.PrivateRoutes(group)
+		camera.Camera.PrivateRoutes(group)
 
 		// 组态管理
 		configuration.Configuration.PrivateRoutes(group)

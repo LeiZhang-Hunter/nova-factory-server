@@ -17,6 +17,9 @@ import (
 	"nova-factory-server/app/business/iot/asset/building/buildingController"
 	"nova-factory-server/app/business/iot/asset/building/buildingDao/buildingDaoImpl"
 	"nova-factory-server/app/business/iot/asset/building/buildingService/buildingServiceImpl"
+	"nova-factory-server/app/business/iot/asset/camera/cameraController"
+	"nova-factory-server/app/business/iot/asset/camera/cameraDao/cameraDaoImpl"
+	"nova-factory-server/app/business/iot/asset/camera/cameraService/cameraServiceImpl"
 	"nova-factory-server/app/business/iot/asset/device/deviceController"
 	"nova-factory-server/app/business/iot/asset/device/deviceDao/deviceDaoImpl"
 	"nova-factory-server/app/business/iot/asset/device/deviceService/deviceServiceImpl"
@@ -379,7 +382,13 @@ func wireApp() (*gin.Engine, func(), error) {
 	controllerSystem := controller2.System{
 		Electric: electric,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home, configurationControllerController, controllerSystem)
+	iCameraDao := cameraDaoImpl.NewCameraDao(db)
+	iCameraService := cameraServiceImpl.NewCameraService(iCameraDao)
+	cameraControllerCameraController := cameraController.NewCameraController(iCameraService)
+	cameraControllerController := cameraController.Controller{
+		Camera: cameraControllerCameraController,
+	}
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home, configurationControllerController, controllerSystem, cameraControllerController)
 	return engine, func() {
 		cleanup()
 	}, nil
