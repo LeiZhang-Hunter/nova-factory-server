@@ -384,11 +384,11 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	iCameraDao := cameraDaoImpl.NewCameraDao(db)
 	iCameraService := cameraServiceImpl.NewCameraService(iCameraDao)
-	cameraControllerCameraController := cameraController.NewCameraController(iCameraService)
-	cameraControllerController := cameraController.Controller{
-		Camera: cameraControllerCameraController,
+	camera := cameraController.NewCameraController(iCameraService)
+	cameraControllerCameraController := cameraController.CameraController{
+		Camera: camera,
 	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home, configurationControllerController, controllerSystem, cameraControllerController)
+	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home, configurationControllerController, controllerSystem, cameraControllerCameraController)
 	return engine, func() {
 		cleanup()
 	}, nil

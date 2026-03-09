@@ -27,8 +27,8 @@ func (s *CameraServiceImpl) Update(camera *cameraModels.IotCamera) error {
 }
 
 // Delete 删除摄像头
-func (s *CameraServiceImpl) Delete(id int64) error {
-	return s.cameraDao.Delete(id)
+func (s *CameraServiceImpl) Delete(idList []string) error {
+	return s.cameraDao.Delete(idList)
 }
 
 // GetById 根据ID获取摄像头
@@ -37,6 +37,19 @@ func (s *CameraServiceImpl) GetById(id int64) (*cameraModels.IotCamera, error) {
 }
 
 // List 获取摄像头列表
-func (s *CameraServiceImpl) List() ([]*cameraModels.IotCamera, error) {
-	return s.cameraDao.List()
+func (s *CameraServiceImpl) List(req *cameraModels.IotCameraListReq) (*cameraModels.IotCameraList, error) {
+	cameras, err := s.cameraDao.List(req)
+	if err != nil {
+		return nil, err
+	}
+
+	total, err := s.cameraDao.Count(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cameraModels.IotCameraList{
+		Rows:  cameras,
+		Total: total,
+	}, nil
 }

@@ -9,33 +9,37 @@ import (
 
 // CameraDaoImpl 摄像头数据访问实现
 type CameraDaoImpl struct {
-	db *gorm.DB
+	db    *gorm.DB
+	table string
 }
 
 // NewCameraDao 创建摄像头数据访问实例
 func NewCameraDao(db *gorm.DB) cameraDao.ICameraDao {
-	return &CameraDaoImpl{db: db}
+	return &CameraDaoImpl{
+		db:    db,
+		table: "iot_camera",
+	}
 }
 
 // Create 创建摄像头
 func (c *CameraDaoImpl) Create(camera *cameraModels.IotCamera) error {
-	return c.db.Create(camera).Error
+	return c.db.Table(c.table).Create(camera).Error
 }
 
 // Update 更新摄像头
 func (c *CameraDaoImpl) Update(camera *cameraModels.IotCamera) error {
-	return c.db.Save(camera).Error
+	return c.db.Table(c.table).Save(camera).Error
 }
 
 // Delete 删除摄像头
-func (c *CameraDaoImpl) Delete(id int64) error {
-	return c.db.Delete(&cameraModels.IotCamera{}, id).Error
+func (c *CameraDaoImpl) Delete(ids []string) error {
+	return c.db.Table(c.table).Where("id in (?)", ids).Delete(&cameraModels.IotCamera{}).Error
 }
 
 // GetById 根据ID获取摄像头
 func (c *CameraDaoImpl) GetById(id int64) (*cameraModels.IotCamera, error) {
 	var camera cameraModels.IotCamera
-	err := c.db.First(&camera, id).Error
+	err := c.db.Table(c.table).First(&camera, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -43,11 +47,49 @@ func (c *CameraDaoImpl) GetById(id int64) (*cameraModels.IotCamera, error) {
 }
 
 // List 获取摄像头列表
-func (c *CameraDaoImpl) List() ([]*cameraModels.IotCamera, error) {
+func (c *CameraDaoImpl) List(req *cameraModels.IotCameraListReq) ([]*cameraModels.IotCamera, error) {
 	var cameras []*cameraModels.IotCamera
-	err := c.db.Find(&cameras).Error
+	query := c.db.Table(c.table).Model(&cameraModels.IotCamera{})
+
+	if req != nil {
+		if req.Name != "" {
+			query = query.Where("name LIKE ?", "%"+req.Name+"%")
+		}
+		if req.IpAddress != "" {
+			query = query.Where("ip_address LIKE ?", "%"+req.IpAddress+"%")
+		}
+		if req.Brand != "" {
+			query = query.Where("brand LIKE ?", "%"+req.Brand+"%")
+		}
+	}
+
+	err := query.Find(&cameras).Error
 	if err != nil {
 		return nil, err
 	}
 	return cameras, nil
+}
+
+// Count 获取摄像头总数
+func (c *CameraDaoImpl) Count(req *cameraModels.IotCameraListReq) (int64, error) {
+	var count int64
+	query := c.db.Table(c.table).Model(&cameraModels.IotCamera{})
+
+	if req != nil {
+		if req.Name != "" {
+			query = query.Where("name LIKE ?", "%"+req.Name+"%")
+		}
+		if req.IpAddress != "" {
+			query = query.Where("ip_address LIKE ?", "%"+req.IpAddress+"%")
+		}
+		if req.Brand != "" {
+			query = query.Where("brand LIKE ?", "%"+req.Brand+"%")
+		}
+	}
+
+	err := query.Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

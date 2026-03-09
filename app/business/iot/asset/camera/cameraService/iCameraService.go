@@ -11,9 +11,9 @@ type ICameraService interface {
 	// Update 更新摄像头
 	Update(camera *cameraModels.IotCamera) error
 	// Delete 删除摄像头
-	Delete(id int64) error
+	Delete(id []string) error
 	// GetById 根据ID获取摄像头
 	GetById(id int64) (*cameraModels.IotCamera, error)
 	// List 获取摄像头列表
-	List() ([]*cameraModels.IotCamera, error)
+	List(req *cameraModels.IotCameraListReq) (*cameraModels.IotCameraList, error)
 }

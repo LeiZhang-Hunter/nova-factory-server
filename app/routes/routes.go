@@ -66,7 +66,7 @@ func NewGinEngine(
 	home *homeController.Home,
 	configuration *configurationController.Controller,
 	iotSystem iotSystemControllerImpl.System,
-	camera cameraController.Controller,
+	camera cameraController.CameraController,
 ) *gin.Engine {
 
 	if setting.Conf.Mode != "dev" {
