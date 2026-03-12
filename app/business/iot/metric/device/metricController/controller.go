@@ -4,8 +4,9 @@ import (
 	"github.com/google/wire"
 )
 
-var ProviderSet = wire.NewSet(NewMetric, wire.Struct(new(MetricServer), "*"))
+var ProviderSet = wire.NewSet(NewMetric, NewCamera, wire.Struct(new(MetricServer), "*"))
 
 type MetricServer struct {
-	Metric *Metric
+	Metric     *Metric
+	CameraGrpc *CameraGrpc
 }
