@@ -14,6 +14,7 @@ type IotCamera struct {
 	Port      int    `gorm:"column:port" json:"port"`
 	Username  string `gorm:"column:username" json:"username"`
 	Password  string `gorm:"column:password" json:"password"`
+	Enable    *bool  `gorm:"column:enable" json:"enable"`
 	Status    *bool  `gorm:"column:status" json:"status"`
 	DeptId    int64  `gorm:"column:dept_id" json:"dept_id"`
 	baize.BaseEntity

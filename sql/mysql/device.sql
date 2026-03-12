@@ -328,7 +328,8 @@ create table iot_camera (
     port                        int(11)         not null                   comment '端口',
     username                    varchar(128)    not null                   comment '用户名',
     password                    varchar(128)    not null                   comment '密码',
-    status                      int(11)         default 0                  comment '状态',
+    `status` tinyint(1) NULL DEFAULT 0 COMMENT '启用状态（0正常 1异常）',
+    `enable` tinyint(1) NULL DEFAULT 0 COMMENT '启用状态（0正常 1异常）',
     dept_id                     bigint(20)      default null               comment '部门ID',
     create_by                   bigint(20)      default null               comment '创建者',
     create_time                 datetime(0)     default null               comment '创建时间',
@@ -337,3 +338,4 @@ create table iot_camera (
     state                       tinyint(1)      default 0                  comment '操作状态（0正常 -1删除）',
     primary key (id)
 ) engine=innodb auto_increment=200 comment = '监控摄像头列表';
+-- alter table iot_camera add column `enable` tinyint(1) NULL DEFAULT 0 COMMENT '启用状态（0关闭 1启用）';

@@ -4,6 +4,7 @@
 package main
 
 import (
+	"nova-factory-server/app/business/iot/asset/camera/cameraDao/cameraDaoImpl"
 	"nova-factory-server/app/business/iot/metric/device/metricController"
 	"nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
 	"nova-factory-server/app/business/iot/metric/device/metricService/metricServiceImpl"
@@ -21,5 +22,6 @@ func wireApp() (*grpc.Server, func(), error) {
 		metricServiceImpl.ProviderSet,
 		metricController.ProviderSet,
 		datasource.ProviderSet,
+		cameraDaoImpl.ProviderSet,
 		routes.GrpcProviderSet))
 }

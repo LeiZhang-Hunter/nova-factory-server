@@ -1,6 +1,7 @@
 package cameraDaoImpl
 
 import (
+	"context"
 	"nova-factory-server/app/business/iot/asset/camera/cameraDao"
 	"nova-factory-server/app/business/iot/asset/camera/cameraModels"
 	"nova-factory-server/app/utils/baizeContext"
@@ -53,6 +54,16 @@ func (c *CameraDaoImpl) GetById(id int64) (*cameraModels.IotCamera, error) {
 	return &camera, nil
 }
 
+// GetByIds 根据多个ID批量获取摄像头
+func (c *CameraDaoImpl) GetByIds(ids []int64) ([]*cameraModels.IotCamera, error) {
+	var cameras []*cameraModels.IotCamera
+	err := c.db.Table(c.table).Where("id IN ?", ids).Find(&cameras).Error
+	if err != nil {
+		return nil, err
+	}
+	return cameras, nil
+}
+
 // List 获取摄像头列表
 func (c *CameraDaoImpl) List(req *cameraModels.IotCameraListReq) ([]*cameraModels.IotCamera, error) {
 	var cameras []*cameraModels.IotCamera
@@ -99,4 +110,9 @@ func (c *CameraDaoImpl) Count(req *cameraModels.IotCameraListReq) (int64, error)
 		return 0, err
 	}
 	return count, nil
+}
+
+// UpdateStatus 更新摄像头状态
+func (c *CameraDaoImpl) UpdateStatus(ctx context.Context, id int64, status bool) error {
+	return c.db.Table(c.table).Where("id = ?", id).Update("status", status).Error
 }
