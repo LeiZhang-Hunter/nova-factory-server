@@ -195,6 +195,7 @@ func NewGinEngine(
 	s := daemonize.CreateGRpcServer()
 	controller.Daemonize.PrivateRoutes(s)
 	deviceMonitor.DeviceControl.PrivateRoutes(s)
+	deviceMonitor.CameraGrpc.PrivateRoutes(s)
 	s.Start()
 	// --- Configure MCP Server ---
 	mpcServer := gin_mcp.New(r, &gin_mcp.Config{

@@ -275,8 +275,12 @@ func wireApp() (*gin.Engine, func(), error) {
 	iControlLogDao := metricDaoIMpl.NewIControlLogDaoImpl(clickHouse)
 	iControlLogService := metricServiceImpl.NewIControlLogServiceImpl(iControlLogDao)
 	metric := metricController.NewMetric(iMetricService, iControlLogService)
+	iCameraDao := cameraDaoImpl.NewCameraDao(db)
+	iCameraService := metricServiceImpl.NewICameraServiceImpl(cacheCache, iCameraDao)
+	cameraGrpc := metricController.NewCamera(iCameraService)
 	metricServer := &metricController.MetricServer{
-		Metric: metric,
+		Metric:     metric,
+		CameraGrpc: cameraGrpc,
 	}
 	iotAgentConfigDao := daemonizeDaoImpl.NewIotAgentConfigDaoImpl(db)
 	daemonizeService := daemonizeServiceImpl.NewDaemonizeServiceImpl(iotAgentDao, iotAgentProcess, iotAgentConfigDao)
@@ -297,7 +301,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	deviceControlService := deviceMonitorServiceImpl.NewDeviceControlServiceImpl(iotAgentDao, cacheCache, iControlLogDao, iDeviceDao, iSysModbusDeviceConfigDataDao)
 	buildingDao := buildingDaoImpl.NewBuildingDaoImpl(db)
 	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao, floorDao, iDeviceService, deviceControlService, iControlLogDao, buildingDao)
-	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService)
+	deviceMonitorControllerCameraGrpc := deviceMonitorController.NewCameraGrpc()
+	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService, deviceMonitorControllerCameraGrpc)
 	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	deviceReport := deviceMonitorController.NewDeviceReport(iMetricService, iDeviceDataReportService, iDevMapService)
@@ -313,6 +318,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		DeviceUtilization: deviceUtilization,
 		ControlLog:        controlLog,
 		DeviceControl:     deviceControl,
+		CameraGrpc:        deviceMonitorControllerCameraGrpc,
 	}
 	alertActionDao := alertDaoImpl.NewAlertActionDaoImpl(db)
 	alertAiReasonDao := alertDaoImpl.NewAlertAiReasonDaoImpl(db)
@@ -382,9 +388,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	controllerSystem := controller2.System{
 		Electric: electric,
 	}
-	iCameraDao := cameraDaoImpl.NewCameraDao(db)
-	iCameraService := cameraServiceImpl.NewCameraService(iCameraDao)
-	camera := cameraController.NewCameraController(iCameraService)
+	cameraServiceICameraService := cameraServiceImpl.NewCameraService(iCameraDao)
+	camera := cameraController.NewCameraController(cameraServiceICameraService)
 	cameraControllerCameraController := cameraController.CameraController{
 		Camera: camera,
 	}

@@ -15,12 +15,14 @@ import (
 )
 
 type DeviceMonitor struct {
-	service deviceMonitorService.DeviceMonitorService
+	service    deviceMonitorService.DeviceMonitorService
+	cameraGrpc *CameraGrpc
 }
 
-func NewDeviceMonitor(service deviceMonitorService.DeviceMonitorService) *DeviceMonitor {
+func NewDeviceMonitor(service deviceMonitorService.DeviceMonitorService, cameraGrpc *CameraGrpc) *DeviceMonitor {
 	return &DeviceMonitor{
-		service: service,
+		service:    service,
+		cameraGrpc: cameraGrpc,
 	}
 }
 
@@ -31,7 +33,7 @@ func (d *DeviceMonitor) PrivateRoutes(router *gin.RouterGroup) {
 	monitor.POST("/predict", middlewares.HasPermission("device:monitor:predict"), d.Predict)
 	monitor.POST("/control/status", middlewares.HasPermission("device:monitor:control:status"), d.ControlStatus)
 	monitor.POST("/control", middlewares.HasPermission("device:monitor:control"), d.Control)
-
+	d.privateCameraOfferRoutes(monitor)
 }
 
 func (d *DeviceMonitor) PublicRoutes(router *gin.RouterGroup) {
