@@ -301,7 +301,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	deviceControlService := deviceMonitorServiceImpl.NewDeviceControlServiceImpl(iotAgentDao, cacheCache, iControlLogDao, iDeviceDao, iSysModbusDeviceConfigDataDao)
 	buildingDao := buildingDaoImpl.NewBuildingDaoImpl(db)
 	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao, floorDao, iDeviceService, deviceControlService, iControlLogDao, buildingDao)
-	deviceMonitorControllerCameraGrpc := deviceMonitorController.NewCameraGrpc()
+	deviceMonitorControllerCameraGrpc := deviceMonitorController.NewCameraGrpc(iotAgentService)
 	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService, deviceMonitorControllerCameraGrpc)
 	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao, iDeviceDao)
 	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao, iDeviceDao)

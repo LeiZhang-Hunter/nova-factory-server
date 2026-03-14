@@ -98,6 +98,10 @@ func (c *CameraGrpc) WebrtcSendToken(_ context.Context, ack *client.TokenAck) (*
 	defer func() {
 		ch.(chan *client.TokenAck) <- ack
 	}()
+	if ack.Code != 0 {
+		return &client.SendTokenReply{}, errors.New(ack.Errmsg)
+	}
+
 	if ack == nil {
 		return &client.SendTokenReply{}, errors.New("ack is nil")
 	}
@@ -134,6 +138,9 @@ func (c *CameraGrpc) WebrtcBroadcast(_ context.Context, req *client.WebrtcBroadc
 		return &client.WebrtcBroadcastReply{Code: -1, Msg: err.Error()}, nil
 	}
 	ack := <-waitChan
+	if ack.Code != 0 {
+		return &client.WebrtcBroadcastReply{Code: -1, Msg: ack.Errmsg}, errors.New(ack.Errmsg)
+	}
 	return &client.WebrtcBroadcastReply{
 		Code:           0,
 		Msg:            "ok",
@@ -201,21 +208,23 @@ func (c *CameraGrpc) broadcastByGrpcClient(req *client.WebrtcBroadcastRequest) (
 	var wg sync.WaitGroup
 	wg.Add(len(addressList))
 	var mu sync.Mutex
+	var replayErr error
 	var successReply *client.WebrtcBroadcastReply
 	for _, address := range addressList {
 		targetAddress := address
 		go func() {
 			defer wg.Done()
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			grpcCtx := metadata.AppendToOutgoingContext(ctx,
 				agent.USERNAME, info.Username,
 				agent.PASSWORD, info.Password,
 				agent.GATEWAYID, strconv.FormatUint(info.ObjectID, 10),
 			)
+			var reply *client.WebrtcBroadcastReply
 			rpcClient := client.NewCameraServiceClient(grpcx.Client.MustNewGrpcClientConn(targetAddress))
-			reply, err := rpcClient.WebrtcBroadcast(grpcCtx, req)
-			if err != nil {
+			reply, replayErr = rpcClient.WebrtcBroadcast(grpcCtx, req)
+			if replayErr != nil {
 				zap.L().Error("广播失败", zap.Error(err))
 				return
 			}
@@ -232,6 +241,9 @@ func (c *CameraGrpc) broadcastByGrpcClient(req *client.WebrtcBroadcastRequest) (
 	wg.Wait()
 	if successReply != nil {
 		return successReply, nil
+	}
+	if replayErr != nil {
+		return nil, replayErr
 	}
 	return nil, errors.New("broadcast to camera subscribers failed")
 }
