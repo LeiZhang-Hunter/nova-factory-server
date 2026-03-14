@@ -7,6 +7,7 @@ import (
 // IotCamera 监控摄像头模型
 type IotCamera struct {
 	Id        int64  `gorm:"primaryKey;column:id" json:"id,string"`
+	GatewayID int64  `gorm:"column:gateway_id;not null;comment:网关id" json:"gateway_id,string"` // 网关id
 	Name      string `gorm:"column:name" json:"name"`
 	Number    string `gorm:"column:number" json:"number"`
 	IpAddress string `gorm:"column:ip_address" json:"ip_address"`

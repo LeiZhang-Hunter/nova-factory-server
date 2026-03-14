@@ -321,6 +321,7 @@ CREATE TABLE `sys_device_electric_setting`  (
 drop table if exists iot_camera;
 create table iot_camera (
     id                   bigint(20)      not null     comment '摄像头ID',
+    `gateway_id` bigint unsigned NOT NULL COMMENT 'sys_iot_agent gateway id',
     name                        varchar(255)    not null                   comment '摄像头名称',
     number                      varchar(64)     not null                   comment '摄像头编号',
     ip_address                  varchar(128)    not null                   comment 'IP地址',
@@ -339,3 +340,4 @@ create table iot_camera (
     primary key (id)
 ) engine=innodb auto_increment=200 comment = '监控摄像头列表';
 -- alter table iot_camera add column `enable` tinyint(1) NULL DEFAULT 0 COMMENT '启用状态（0关闭 1启用）';
+-- alter table iot_camera add column  `gateway_id` bigint unsigned NOT NULL COMMENT 'sys_iot_agent gateway id';

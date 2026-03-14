@@ -19,11 +19,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gogf/gf/contrib/rpc/grpcx/v2"
 	"github.com/gogf/gf/os/gtime"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	controlService "github.com/novawatcher-io/nova-factory-payload/control/v1"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -400,14 +402,7 @@ func (d *DeviceMonitorServiceImpl) Control(c *gin.Context, req *deviceMonitorMod
 		zap.L().Error("Export error", zap.Error(err))
 		return nil, err
 	}
-	res, err := d.deviceControl.BroadcastControl(c, &controlService.ControlRequest{
-		RequestId: requestId,
-		DeviceId:  req.DeviceId,
-		AgentId:   req.AgentId,
-		DataId:    req.DataId,
-		Value:     value,
-		Timestamp: timestamppb.Now(),
-	})
+	res, err := d.broadcastControlToServers(c, d.newControlBroadcastRequest(requestId, req, value))
 
 	if err != nil {
 		zap.L().Error("BroadcastControl error", zap.Error(err))
@@ -431,6 +426,40 @@ func (d *DeviceMonitorServiceImpl) Control(c *gin.Context, req *deviceMonitorMod
 	return &deviceMonitorModel2.ControlRes{
 		Code: 0,
 		Msg:  "success",
+	}, nil
+}
+
+func (d *DeviceMonitorServiceImpl) newControlBroadcastRequest(requestId string, req *deviceMonitorModel2.ControlReq, value *controlService.Value) *controlService.ControlRequest {
+	return &controlService.ControlRequest{
+		RequestId: requestId,
+		DeviceId:  req.DeviceId,
+		AgentId:   req.AgentId,
+		DataId:    req.DataId,
+		Value:     value,
+		Timestamp: timestamppb.Now(),
+	}
+}
+
+func (d *DeviceMonitorServiceImpl) broadcastControlToServers(ctx context.Context, req *controlService.ControlRequest) (*controlService.ControlResponse, error) {
+	addressList := viper.GetStringSlice("daemonize.server_list")
+	if len(addressList) == 0 {
+		return &controlService.ControlResponse{
+			Code:    -1,
+			Message: "地址没有配置",
+		}, nil
+	}
+	for _, address := range addressList {
+		client := controlService.NewControlServiceClient(grpcx.Client.MustNewGrpcClientConn(address))
+		remoteRes, remoteErr := client.BroadcastControl(ctx, req)
+		if remoteErr != nil {
+			zap.L().Warn("remote broadcast control error", zap.String("address", address), zap.Error(remoteErr))
+			continue
+		}
+		return remoteRes, nil
+	}
+	return &controlService.ControlResponse{
+		Code:    0,
+		Message: "成功",
 	}, nil
 }
 func (d *DeviceMonitorServiceImpl) GetRealTimeInfo(c *gin.Context, deviceId uint64) (*deviceModels2.DeviceVO, error) {

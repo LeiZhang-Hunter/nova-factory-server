@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"nova-factory-server/app/business/iot/asset/camera/cameraModels"
 	"nova-factory-server/app/business/iot/asset/camera/cameraService"
+	daemonizeService "nova-factory-server/app/business/iot/daemonize/daemonizeService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"strconv"
@@ -15,12 +16,14 @@ import (
 // Camera 摄像头控制器
 type Camera struct {
 	cameraService cameraService.ICameraService
+	agentService  daemonizeService.IotAgentService
 }
 
 // NewCameraController 创建摄像头控制器实例
-func NewCameraController(cameraService cameraService.ICameraService) *Camera {
+func NewCameraController(cameraService cameraService.ICameraService, agentService daemonizeService.IotAgentService) *Camera {
 	return &Camera{
 		cameraService: cameraService,
+		agentService:  agentService,
 	}
 }
 
@@ -39,6 +42,20 @@ func (c *Camera) Set(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&camera); err != nil {
 		zap.L().Error("参数错误:", zap.Error(err))
 		baizeContext.Waring(ctx, "参数错误")
+		return
+	}
+	if camera.GatewayID <= 0 {
+		baizeContext.Waring(ctx, "网关不能为空")
+		return
+	}
+	gatewayInfo, err := c.agentService.GetByObjectId(ctx, uint64(camera.GatewayID))
+	if err != nil {
+		zap.L().Error("get gateway info error", zap.Error(err), zap.Int64("gateway_id", camera.GatewayID))
+		baizeContext.Waring(ctx, "校验网关失败")
+		return
+	}
+	if gatewayInfo == nil {
+		baizeContext.Waring(ctx, "网关不存在")
 		return
 	}
 

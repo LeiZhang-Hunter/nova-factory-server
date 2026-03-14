@@ -205,10 +205,11 @@ func (d *DeviceControlServiceImpl) BroadcastControl(ctx context.Context, req *co
 	// 等待下游返回结果
 	var waitChan chan *controlService.ControlRequest = make(chan *controlService.ControlRequest)
 	d.waitMap.Store(req.RequestId, waitChan)
+	defer d.waitMap.Delete(req.RequestId)
+
 	select {
 	case request := <-waitChan:
 		{
-			d.waitMap.Delete(req.RequestId)
 			if request.GetValue().GetStringValue() == "" {
 				return &controlService.ControlResponse{
 					RequestId: request.RequestId,
@@ -224,7 +225,6 @@ func (d *DeviceControlServiceImpl) BroadcastControl(ctx context.Context, req *co
 		}
 	case <-time.After(5 * time.Second):
 		{
-			d.waitMap.Delete(req.RequestId)
 			return &controlService.ControlResponse{
 				RequestId: req.RequestId,
 				Code:      503,

@@ -4,9 +4,11 @@ import (
 	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	client "github.com/novawatcher-io/nova-factory-payload/camera/v1"
 )
 
 func (d *DeviceMonitor) privateCameraOfferRoutes(monitor *gin.RouterGroup) {
@@ -34,20 +36,24 @@ func (d *DeviceMonitor) CameraOffer(c *gin.Context) {
 		timeout = time.Duration(req.TimeoutMS) * time.Millisecond
 	}
 
-	ack, err := d.cameraGrpc.PublishStart(req.Node, subscribeMessage{
+	ack, err := d.cameraGrpc.PublishStartByBroadcast(req.Node, &client.SubscribeMessage{
 		DeviceId:  req.DeviceId,
 		ChannelId: req.ChannelId,
-		SDP64:     req.SDP64,
+		Sdp64:     req.SDP64,
 	}, timeout)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
+	if strings.HasPrefix(ack.Token, "error:") {
+		baizeContext.Waring(c, strings.TrimPrefix(ack.Token, "error:"))
+		return
+	}
 
 	baizeContext.SuccessData(c, &deviceMonitorModel.CameraOfferRes{
 		Token:   ack.Token,
-		PlayURL: ack.PlayURL,
-		WhepURL: ack.WhepURL,
-		SDP64:   ack.SDP64,
+		PlayURL: ack.PlayUrl,
+		WhepURL: ack.WhepUrl,
+		SDP64:   ack.Sdp64,
 	})
 }

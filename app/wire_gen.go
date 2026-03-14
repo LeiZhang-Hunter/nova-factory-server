@@ -389,7 +389,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Electric: electric,
 	}
 	cameraServiceICameraService := cameraServiceImpl.NewCameraService(iCameraDao)
-	camera := cameraController.NewCameraController(cameraServiceICameraService)
+	camera := cameraController.NewCameraController(cameraServiceICameraService, iotAgentService)
 	cameraControllerCameraController := cameraController.CameraController{
 		Camera: camera,
 	}

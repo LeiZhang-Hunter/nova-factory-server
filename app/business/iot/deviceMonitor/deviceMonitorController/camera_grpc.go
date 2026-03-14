@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"nova-factory-server/app/utils/uuid"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/gogf/gf/contrib/rpc/grpcx/v2"
-	"google.golang.org/grpc"
+	client "github.com/novawatcher-io/nova-factory-payload/camera/v1"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc/encoding"
 )
 
@@ -31,157 +32,188 @@ func (cameraJsonCodec) Unmarshal(data []byte, v interface{}) error {
 
 var cameraCodecRegisterOnce sync.Once
 
-type subscribeRequest struct {
-	Node string `json:"node"`
-}
-
-type subscribeMessage struct {
-	DeviceId  string `json:"device_id"`
-	ChannelId string `json:"channel_id"`
-	SDP64     string `json:"sdp64"`
-}
-
-type tokenAck struct {
-	DeviceId  string `json:"device_id"`
-	ChannelId string `json:"channel_id"`
-	Token     string `json:"token"`
-	PlayURL   string `json:"play_url"`
-	WhepURL   string `json:"whep_url"`
-	SDP64     string `json:"sdp64"`
-}
-
-type cameraAckResponse struct {
-	Code    int32  `json:"code"`
-	Message string `json:"message"`
-}
-
-type webRTCSubscribeServer interface {
-	Send(*subscribeMessage) error
-	grpc.ServerStream
-}
-
-type webRTCServiceServer interface {
-	Subscribe(*subscribeRequest, webRTCSubscribeServer) error
-	SendToken(context.Context, *tokenAck) (*cameraAckResponse, error)
-}
-
-type webRTCSubscribeServerWrapper struct {
-	grpc.ServerStream
-}
-
-func (x *webRTCSubscribeServerWrapper) Send(m *subscribeMessage) error {
-	return x.ServerStream.SendMsg(m)
-}
-
+// CameraGrpc 提供摄像头信令订阅、广播与令牌回传能力。
 type CameraGrpc struct {
-	subscriberSeq uint64
-	mu            sync.RWMutex
-	subscribers   map[string]map[uint64]chan subscribeMessage
-	tokenWaiters  map[string]chan tokenAck
-	lastAck       map[string]tokenAck
+	client.UnimplementedCameraServiceServer
+	mu           sync.RWMutex
+	manager      *CameraSubscribeManager
+	waitMap      sync.Map
+	tokenWaiters map[string]chan client.TokenAck
+	lastAck      map[string]client.TokenAck
 }
 
+// NewCameraGrpc 创建 CameraGrpc 实例。
 func NewCameraGrpc() *CameraGrpc {
 	return &CameraGrpc{
-		subscribers:  make(map[string]map[uint64]chan subscribeMessage),
-		tokenWaiters: make(map[string]chan tokenAck),
-		lastAck:      make(map[string]tokenAck),
+		manager:      NewCameraSubscribeManager(),
+		tokenWaiters: make(map[string]chan client.TokenAck),
+		lastAck:      make(map[string]client.TokenAck),
 	}
 }
 
+// PrivateRoutes 注册 CameraService gRPC 服务。
 func (c *CameraGrpc) PrivateRoutes(router *grpcx.GrpcServer) {
 	cameraCodecRegisterOnce.Do(func() {
 		encoding.RegisterCodec(cameraJsonCodec{})
 	})
-	router.Server.RegisterService(&_WebRTCService_serviceDesc, c)
+	client.RegisterCameraServiceServer(router.Server, c)
 	info := router.Server.GetServiceInfo()
 	fmt.Println(info)
 	return
 }
 
-func (c *CameraGrpc) Subscribe(req *subscribeRequest, stream webRTCSubscribeServer) error {
+// Report 兼容上报接口，当前返回成功占位。
+func (c *CameraGrpc) Report(_ context.Context, _ *client.CameraData) (*client.CameraResponse, error) {
+	return &client.CameraResponse{Code: 0}, nil
+}
+
+// WebrtcSubscribe 建立下游订阅连接并注册到订阅管理器。
+func (c *CameraGrpc) WebrtcSubscribe(req *client.SubscribeRequest, stream client.CameraService_WebrtcSubscribeServer) error {
 	node := strings.TrimSpace(req.Node)
 	if node == "" {
 		node = "default"
 	}
-	ch := make(chan subscribeMessage, 16)
-	subID := atomic.AddUint64(&c.subscriberSeq, 1)
-	c.addSubscriber(node, subID, ch)
-	defer c.removeSubscriber(node, subID)
-
-	for {
-		select {
-		case <-stream.Context().Done():
-			return nil
-		case msg := <-ch:
-			if err := stream.Send(&msg); err != nil {
-				return err
-			}
-		}
-	}
+	c.manager.AddClient(node, stream)
+	defer c.manager.DeleteClient(node, stream)
+	<-stream.Context().Done()
+	return nil
 }
 
-func (c *CameraGrpc) SendToken(_ context.Context, ack *tokenAck) (*cameraAckResponse, error) {
+// WebrtcSendToken 接收下游回传令牌并唤醒等待中的请求。
+func (c *CameraGrpc) WebrtcSendToken(_ context.Context, ack *client.TokenAck) (*client.SendTokenReply, error) {
 	if ack == nil {
-		return &cameraAckResponse{Code: -1, Message: "ack is nil"}, nil
+		return &client.SendTokenReply{}, errors.New("ack is nil")
 	}
 	if ack.DeviceId == "" {
-		return &cameraAckResponse{Code: -1, Message: "device_id is required"}, nil
+		return &client.SendTokenReply{}, errors.New("ack.DeviceId is empty")
 	}
-	key := c.sessionKey(ack.DeviceId, ack.ChannelId)
-	c.mu.Lock()
-	c.lastAck[key] = *ack
-	waiter, ok := c.tokenWaiters[key]
-	if ok {
-		delete(c.tokenWaiters, key)
+
+	ch, ok := c.waitMap.Load(ack.RequestId)
+	if !ok {
+		return &client.SendTokenReply{}, errors.New("waitMap load fail")
 	}
-	c.mu.Unlock()
-	if ok {
-		select {
-		case waiter <- *ack:
-		default:
-		}
+	if ch == nil {
+		return &client.SendTokenReply{}, errors.New("waitMap load fail")
 	}
-	return &cameraAckResponse{Code: 0, Message: "ok"}, nil
+	ch.(chan client.TokenAck) <- *ack
+	return &client.SendTokenReply{}, nil
 }
 
-func (c *CameraGrpc) PublishStart(node string, message subscribeMessage, timeout time.Duration) (*tokenAck, error) {
+// WebrtcBroadcast 将协商请求投递到目标节点订阅流。
+func (c *CameraGrpc) WebrtcBroadcast(_ context.Context, req *client.WebrtcBroadcastRequest) (*client.WebrtcBroadcastReply, error) {
+	if req == nil {
+		return &client.WebrtcBroadcastReply{Code: -1, Msg: "request is nil"}, nil
+	}
+	message := client.SubscribeMessage{
+		RequestId: req.GetRequestId(),
+		DeviceId:  req.GetDeviceId(),
+		ChannelId: req.GetChannelId(),
+		Sdp64:     req.GetSdp64(),
+	}
+	targetNode := strings.TrimSpace(req.GetTargetNode())
+	if targetNode == "" {
+		return &client.WebrtcBroadcastReply{
+			Code: -1,
+			Msg:  "请选择",
+		}, nil
+	}
+	var waitChan chan *client.TokenAck = make(chan *client.TokenAck)
+	c.waitMap.Store(message.RequestId, waitChan)
+	defer c.waitMap.Delete(message.RequestId)
+	delivered, err := c.manager.PublishToNode(targetNode, &message)
+	if err != nil {
+		return &client.WebrtcBroadcastReply{Code: -1, Msg: err.Error()}, nil
+	}
+	ack := <-waitChan
+	return &client.WebrtcBroadcastReply{
+		Code:           0,
+		Msg:            "ok",
+		DeliveredCount: delivered,
+		DeliveredNodes: []string{targetNode},
+		Sdp64:          ack.Sdp64,
+	}, nil
+}
+
+// PublishStart 对外保持兼容，内部统一走广播协商流程。
+func (c *CameraGrpc) PublishStart(node string, message *client.SubscribeMessage, timeout time.Duration) (*client.TokenAck, error) {
+	return c.PublishStartByBroadcast(node, message, timeout)
+}
+
+// PublishStartByBroadcast 广播 offer 并等待下游 token 回传。
+func (c *CameraGrpc) PublishStartByBroadcast(node string, message *client.SubscribeMessage, timeout time.Duration) (*client.TokenAck, error) {
 	if message.DeviceId == "" {
 		return nil, errors.New("device_id is required")
 	}
 	node = strings.TrimSpace(node)
-	if node == "" {
-		node = "default"
+	requestId := uuid.MakeUuid()
+	broadcastReq := &client.WebrtcBroadcastRequest{
+		RequestId:  requestId,
+		Source:     "http_camera_offer",
+		TargetNode: node,
+		DeviceId:   message.DeviceId,
+		ChannelId:  message.ChannelId,
+		Sdp64:      message.Sdp64,
 	}
-	sessionKey := c.sessionKey(message.DeviceId, message.ChannelId)
-	waiter := make(chan tokenAck, 1)
-	c.mu.Lock()
-	c.tokenWaiters[sessionKey] = waiter
-	c.mu.Unlock()
-
-	if err := c.publish(node, message); err != nil {
-		c.mu.Lock()
-		delete(c.tokenWaiters, sessionKey)
-		c.mu.Unlock()
+	broadcastReply, err := c.broadcastByGrpcClient(broadcastReq)
+	if err != nil {
 		return nil, err
 	}
-
-	if timeout <= 0 {
-		timeout = 10 * time.Second
+	if broadcastReply == nil || broadcastReply.GetCode() != 0 || broadcastReply.GetDeliveredCount() == 0 {
+		return nil, errors.New("broadcast to camera subscribers failed")
 	}
 
-	select {
-	case ack := <-waiter:
-		return &ack, nil
-	case <-time.After(timeout):
-		c.mu.Lock()
-		delete(c.tokenWaiters, sessionKey)
-		c.mu.Unlock()
-		return nil, errors.New("wait token timeout")
-	}
+	return &client.TokenAck{
+		ChannelId: message.ChannelId,
+		DeviceId:  message.DeviceId,
+		Sdp64:     broadcastReply.Sdp64,
+	}, nil
 }
 
-func (c *CameraGrpc) GetLastToken(deviceID, channelID string) (*tokenAck, bool) {
+// broadcastByGrpcClient 通过集群地址列表并发调用广播接口。
+func (c *CameraGrpc) broadcastByGrpcClient(req *client.WebrtcBroadcastRequest) (*client.WebrtcBroadcastReply, error) {
+	addressList := viper.GetStringSlice("daemonize.server_list")
+	if len(addressList) == 0 {
+		return nil, errors.New("daemonize.server_list is empty")
+	}
+	var wg sync.WaitGroup
+	wg.Add(len(addressList))
+	var mu sync.Mutex
+	var successReply *client.WebrtcBroadcastReply
+	for _, address := range addressList {
+		targetAddress := address
+		go func() {
+			defer wg.Done()
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			//grpcCtx := metadata.AppendToOutgoingContext(context.Background(),
+			//	agent.USERNAME, info.Username,
+			//	agent.PASSWORD, info.Password,
+			//	agent.GATEWAYID, strconv.FormatUint(info.ObjectID, 10),
+			//)
+			rpcClient := client.NewCameraServiceClient(grpcx.Client.MustNewGrpcClientConn(targetAddress))
+			reply, err := rpcClient.WebrtcBroadcast(ctx, req)
+			if err != nil {
+				return
+			}
+			if reply == nil || reply.GetCode() != 0 || reply.GetDeliveredCount() == 0 {
+				return
+			}
+			mu.Lock()
+			if successReply == nil {
+				successReply = reply
+			}
+			mu.Unlock()
+		}()
+	}
+	wg.Wait()
+	if successReply != nil {
+		return successReply, nil
+	}
+	return nil, errors.New("broadcast to camera subscribers failed")
+}
+
+// GetLastToken 读取最近一次会话回传的 token 数据。
+func (c *CameraGrpc) GetLastToken(deviceID, channelID string) (*client.TokenAck, bool) {
 	key := c.sessionKey(deviceID, channelID)
 	c.mu.RLock()
 	ack, ok := c.lastAck[key]
@@ -192,96 +224,7 @@ func (c *CameraGrpc) GetLastToken(deviceID, channelID string) (*tokenAck, bool) 
 	return &ack, true
 }
 
-func (c *CameraGrpc) addSubscriber(node string, subID uint64, ch chan subscribeMessage) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	nodeSubscribers, ok := c.subscribers[node]
-	if !ok {
-		nodeSubscribers = make(map[uint64]chan subscribeMessage)
-		c.subscribers[node] = nodeSubscribers
-	}
-	nodeSubscribers[subID] = ch
-}
-
-func (c *CameraGrpc) removeSubscriber(node string, subID uint64) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	nodeSubscribers, ok := c.subscribers[node]
-	if !ok {
-		return
-	}
-	delete(nodeSubscribers, subID)
-	if len(nodeSubscribers) == 0 {
-		delete(c.subscribers, node)
-	}
-}
-
-func (c *CameraGrpc) publish(node string, message subscribeMessage) error {
-	c.mu.RLock()
-	nodeSubscribers, ok := c.subscribers[node]
-	if !ok || len(nodeSubscribers) == 0 {
-		c.mu.RUnlock()
-		return errors.New("camera subscriber not found")
-	}
-	channels := make([]chan subscribeMessage, 0, len(nodeSubscribers))
-	for _, ch := range nodeSubscribers {
-		channels = append(channels, ch)
-	}
-	c.mu.RUnlock()
-	for _, ch := range channels {
-		select {
-		case ch <- message:
-		default:
-		}
-	}
-	return nil
-}
-
+// sessionKey 生成设备与通道维度的会话键。
 func (c *CameraGrpc) sessionKey(deviceID, channelID string) string {
 	return deviceID + ":" + channelID
-}
-
-func _WebRTCService_Subscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(subscribeRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(*CameraGrpc).Subscribe(m, &webRTCSubscribeServerWrapper{stream})
-}
-
-func _WebRTCService_SendToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(tokenAck)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(*CameraGrpc).SendToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/gateway.camera.WebRTCService/SendToken",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(*CameraGrpc).SendToken(ctx, req.(*tokenAck))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _WebRTCService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "gateway.camera.WebRTCService",
-	HandlerType: (*webRTCServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "SendToken",
-			Handler:    _WebRTCService_SendToken_Handler,
-		},
-	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Subscribe",
-			Handler:       _WebRTCService_Subscribe_Handler,
-			ServerStreams: true,
-		},
-	},
-	Metadata: "camera_grpc",
 }
