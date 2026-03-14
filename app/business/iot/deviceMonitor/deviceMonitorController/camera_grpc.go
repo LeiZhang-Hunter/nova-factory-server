@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	daemonizeService "nova-factory-server/app/business/iot/daemonize/daemonizeService"
+	"nova-factory-server/app/constant/agent"
 	"nova-factory-server/app/utils/uuid"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -13,7 +16,9 @@ import (
 	"github.com/gogf/gf/contrib/rpc/grpcx/v2"
 	client "github.com/novawatcher-io/nova-factory-payload/camera/v1"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/encoding"
+	"google.golang.org/grpc/metadata"
 )
 
 type cameraJsonCodec struct{}
@@ -36,6 +41,7 @@ var cameraCodecRegisterOnce sync.Once
 type CameraGrpc struct {
 	client.UnimplementedCameraServiceServer
 	mu           sync.RWMutex
+	agentService daemonizeService.IotAgentService
 	manager      *CameraSubscribeManager
 	waitMap      sync.Map
 	tokenWaiters map[string]chan client.TokenAck
@@ -43,8 +49,9 @@ type CameraGrpc struct {
 }
 
 // NewCameraGrpc 创建 CameraGrpc 实例。
-func NewCameraGrpc() *CameraGrpc {
+func NewCameraGrpc(agentService daemonizeService.IotAgentService) *CameraGrpc {
 	return &CameraGrpc{
+		agentService: agentService,
 		manager:      NewCameraSubscribeManager(),
 		tokenWaiters: make(map[string]chan client.TokenAck),
 		lastAck:      make(map[string]client.TokenAck),
@@ -81,13 +88,6 @@ func (c *CameraGrpc) WebrtcSubscribe(req *client.SubscribeRequest, stream client
 
 // WebrtcSendToken 接收下游回传令牌并唤醒等待中的请求。
 func (c *CameraGrpc) WebrtcSendToken(_ context.Context, ack *client.TokenAck) (*client.SendTokenReply, error) {
-	if ack == nil {
-		return &client.SendTokenReply{}, errors.New("ack is nil")
-	}
-	if ack.DeviceId == "" {
-		return &client.SendTokenReply{}, errors.New("ack.DeviceId is empty")
-	}
-
 	ch, ok := c.waitMap.Load(ack.RequestId)
 	if !ok {
 		return &client.SendTokenReply{}, errors.New("waitMap load fail")
@@ -95,7 +95,16 @@ func (c *CameraGrpc) WebrtcSendToken(_ context.Context, ack *client.TokenAck) (*
 	if ch == nil {
 		return &client.SendTokenReply{}, errors.New("waitMap load fail")
 	}
-	ch.(chan client.TokenAck) <- *ack
+	defer func() {
+		ch.(chan *client.TokenAck) <- ack
+	}()
+	if ack == nil {
+		return &client.SendTokenReply{}, errors.New("ack is nil")
+	}
+	if ack.DeviceId == "" {
+		return &client.SendTokenReply{}, errors.New("ack.DeviceId is empty")
+	}
+
 	return &client.SendTokenReply{}, nil
 }
 
@@ -175,6 +184,20 @@ func (c *CameraGrpc) broadcastByGrpcClient(req *client.WebrtcBroadcastRequest) (
 	if len(addressList) == 0 {
 		return nil, errors.New("daemonize.server_list is empty")
 	}
+	if c.agentService == nil {
+		return nil, errors.New("agent service is nil")
+	}
+	objectID, err := strconv.ParseUint(strings.TrimSpace(req.GetTargetNode()), 10, 64)
+	if err != nil || objectID == 0 {
+		return nil, errors.New("target node invalid")
+	}
+	info, err := c.agentService.GetByObjectId(context.Background(), objectID)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, errors.New("agent not found")
+	}
 	var wg sync.WaitGroup
 	wg.Add(len(addressList))
 	var mu sync.Mutex
@@ -185,14 +208,15 @@ func (c *CameraGrpc) broadcastByGrpcClient(req *client.WebrtcBroadcastRequest) (
 			defer wg.Done()
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
-			//grpcCtx := metadata.AppendToOutgoingContext(context.Background(),
-			//	agent.USERNAME, info.Username,
-			//	agent.PASSWORD, info.Password,
-			//	agent.GATEWAYID, strconv.FormatUint(info.ObjectID, 10),
-			//)
+			grpcCtx := metadata.AppendToOutgoingContext(ctx,
+				agent.USERNAME, info.Username,
+				agent.PASSWORD, info.Password,
+				agent.GATEWAYID, strconv.FormatUint(info.ObjectID, 10),
+			)
 			rpcClient := client.NewCameraServiceClient(grpcx.Client.MustNewGrpcClientConn(targetAddress))
-			reply, err := rpcClient.WebrtcBroadcast(ctx, req)
+			reply, err := rpcClient.WebrtcBroadcast(grpcCtx, req)
 			if err != nil {
+				zap.L().Error("广播失败", zap.Error(err))
 				return
 			}
 			if reply == nil || reply.GetCode() != 0 || reply.GetDeliveredCount() == 0 {
