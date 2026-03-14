@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -93,6 +94,9 @@ func (c *CameraGrpc) PrivateRoutes(router *grpcx.GrpcServer) {
 		encoding.RegisterCodec(cameraJsonCodec{})
 	})
 	router.Server.RegisterService(&_WebRTCService_serviceDesc, c)
+	info := router.Server.GetServiceInfo()
+	fmt.Println(info)
+	return
 }
 
 func (c *CameraGrpc) Subscribe(req *subscribeRequest, stream webRTCSubscribeServer) error {

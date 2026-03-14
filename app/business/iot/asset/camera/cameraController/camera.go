@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/iot/asset/camera/cameraService"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -78,19 +79,23 @@ func (c *Camera) Delete(ctx *gin.Context) {
 
 // GetById 根据ID获取摄像头
 func (c *Camera) GetById(ctx *gin.Context) {
-	id := ctx.Param("id")
-	if id == "" {
+	idStr := ctx.Param("id")
+	if idStr == "" {
 		baizeContext.Waring(ctx, "ID不能为空")
 		return
 	}
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		baizeContext.Waring(ctx, "ID参数错误")
+		return
+	}
 
-	camera, err := c.cameraService.GetById(ParseInt64(id))
+	camera, err := c.cameraService.GetDetailById(ctx, id)
 	if err != nil {
 		zap.L().Error("cameraService get error", zap.Error(err))
 		baizeContext.Waring(ctx, err.Error())
 		return
 	}
-
 	baizeContext.SuccessData(ctx, camera)
 }
 

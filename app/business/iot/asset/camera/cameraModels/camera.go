@@ -31,3 +31,8 @@ type IotCameraList struct {
 	Rows  []*IotCamera `json:"rows"`
 	Total int64        `json:"total"`
 }
+
+type IotCameraDetail struct {
+	IotCamera
+	GatewayRealtime map[string]interface{} `json:"gateway_realtime,omitempty"`
+}

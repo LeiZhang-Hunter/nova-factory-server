@@ -13,6 +13,14 @@ func (d *DeviceMonitor) privateCameraOfferRoutes(monitor *gin.RouterGroup) {
 	monitor.POST("/camera/offer", middlewares.HasPermission("device:monitor:control"), d.CameraOffer)
 }
 
+// CameraOffer 摄像头 WebRTC SDP 协商
+// @Summary 摄像头 WebRTC SDP 协商
+// @Description 提交前端 Offer，返回播放地址与 Answer
+// @Tags 设备监控/摄像头
+// @Param object body deviceMonitorModel.CameraOfferReq true "摄像头协商参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "协商成功"
+// @Router /device/monitor/camera/offer [post]
 func (d *DeviceMonitor) CameraOffer(c *gin.Context) {
 	req := new(deviceMonitorModel.CameraOfferReq)
 	err := c.ShouldBindJSON(req)
