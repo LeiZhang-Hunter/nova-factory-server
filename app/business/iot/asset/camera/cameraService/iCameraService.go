@@ -19,5 +19,5 @@ type ICameraService interface {
 	// GetDetailById 根据ID获取摄像头并合并实时信息
 	GetDetailById(ctx *gin.Context, id int64) (*cameraModels.IotCameraDetail, error)
 	// List 获取摄像头列表
-	List(req *cameraModels.IotCameraListReq) (*cameraModels.IotCameraList, error)
+	List(c *gin.Context, req *cameraModels.IotCameraListReq) (*cameraModels.IotCameraList, error)
 }

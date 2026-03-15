@@ -131,7 +131,7 @@ func (c *Camera) List(ctx *gin.Context) {
 		return
 	}
 
-	cameraList, err := c.cameraService.List(req)
+	cameraList, err := c.cameraService.List(ctx, req)
 	if err != nil {
 		zap.L().Error("get camera list error", zap.Error(err))
 		baizeContext.Waring(ctx, err.Error())
