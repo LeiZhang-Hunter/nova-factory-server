@@ -18,3 +18,7 @@ type TypeDeviceCounterRankValue struct {
 type TypeDeviceCounterRank struct {
 	Rows []*TypeDeviceCounterRankValue `json:"rows"`
 }
+
+type DeviceIdsReq struct {
+	DeviceIds []string `json:"deviceIds" binding:"required"`
+}

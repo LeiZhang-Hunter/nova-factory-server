@@ -43,6 +43,7 @@ func (d *DeviceMonitor) PublicRoutes(router *gin.RouterGroup) {
 	group.GET("/device/layout", d.DeviceLayout)
 	group.GET("/device/building", d.DeviceByBuilding)
 	group.GET("/device/monitor/info/:id", d.Info)
+	group.POST("/device/monitor/info/list", d.InfoList)
 }
 
 func (d *DeviceMonitor) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
@@ -307,6 +308,29 @@ func (d *DeviceMonitor) Info(c *gin.Context) {
 		return
 	}
 	data, err := d.service.GetRealTimeInfo(c, id)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// InfoList 批量设备监控详情
+// @Summary 批量设备监控详情
+// @Description 根据设备id列表批量读取设备实时信息
+// @Tags 设备监控/设备监控
+// @Param object body deviceMonitorModel.DeviceIdsReq true "查询参数"
+// @Produce application/json
+// @Success 200 {object}  response.ResponseData "批量设备监控详情"
+// @Router /api/v1/device/monitor/info/list [post]
+func (d *DeviceMonitor) InfoList(c *gin.Context) {
+	req := new(deviceMonitorModel2.DeviceIdsReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := d.service.GetRealTimeInfoList(c, req.DeviceIds)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

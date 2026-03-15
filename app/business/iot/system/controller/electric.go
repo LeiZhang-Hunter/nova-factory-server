@@ -35,7 +35,7 @@ func (e *Electric) PrivateRoutes(router *gin.RouterGroup) {
 // @Summary 设置设备电流配置
 // @Description 设置设备电流配置
 // @Tags 系统管理/设备配置
-// @Param  object body systemModels.SysDeviceElectricSettingVO true "设备电流配置参数"
+// @Param  object body models.SysDeviceElectricSettingVO true "设备电流配置参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
 // @Router /system/electric/set [post]
 func (e *Electric) Set(c *gin.Context) {
@@ -98,7 +98,7 @@ func (e *Electric) Set(c *gin.Context) {
 // @Summary 设备电流配置列表
 // @Description 设备电流配置列表
 // @Tags 系统管理/设备配置
-// @Param  object query systemModels.SysDeviceElectricSettingDQL true "助理列表参数"
+// @Param  object query models.SysDeviceElectricSettingDQL true "助理列表参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
 // @Router /system/electric/list [get]
 func (e *Electric) List(c *gin.Context) {

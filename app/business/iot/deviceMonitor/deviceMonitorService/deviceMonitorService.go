@@ -22,4 +22,6 @@ type DeviceMonitorService interface {
 	Control(c *gin.Context, req *deviceMonitorModel2.ControlReq) (*deviceMonitorModel2.ControlRes, error)
 	// GetRealTimeInfo 获取设备实时信息
 	GetRealTimeInfo(c *gin.Context, deviceId uint64) (*deviceModels.DeviceVO, error)
+	// GetRealTimeInfoList 批量获取设备实时信息
+	GetRealTimeInfoList(c *gin.Context, deviceIds []string) ([]*deviceModels.DeviceVO, error)
 }

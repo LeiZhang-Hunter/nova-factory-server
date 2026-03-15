@@ -549,3 +549,140 @@ func (d *DeviceMonitorServiceImpl) GetRealTimeInfo(c *gin.Context, deviceId uint
 
 	return vo, nil
 }
+
+func (d *DeviceMonitorServiceImpl) GetRealTimeInfoList(c *gin.Context, deviceIds []string) ([]*deviceModels2.DeviceVO, error) {
+	if len(deviceIds) == 0 {
+		return make([]*deviceModels2.DeviceVO, 0), nil
+	}
+
+	var ids []int64
+	for _, id := range deviceIds {
+		v, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			zap.L().Error("strconv.ParseInt error", zap.Error(err))
+		}
+		ids = append(ids, int64(v))
+	}
+
+	// 1. 读取设备信息
+	deviceInfos, err := d.dao.GetByIds(c, ids)
+	if err != nil {
+		zap.L().Error("get devices error", zap.Error(err))
+		return nil, errors.New("批量读取设备信息错误")
+	}
+
+	var voList []*deviceModels2.DeviceVO
+	var keys []string
+	var buildingIds []uint64
+	buildingIdMap := make(map[uint64]bool)
+
+	for _, deviceInfo := range deviceInfos {
+		voList = append(voList, deviceInfo)
+		keys = append(keys, device.MakeDeviceKey(deviceInfo.DeviceId))
+
+		if deviceInfo.DeviceBuildingId > 0 && !buildingIdMap[deviceInfo.DeviceBuildingId] {
+			buildingIds = append(buildingIds, deviceInfo.DeviceBuildingId)
+			buildingIdMap[deviceInfo.DeviceBuildingId] = true
+		}
+	}
+
+	// 2. 从缓存读取实时指标
+	sliceCmd := d.cache.MGet(c, keys)
+	vals, err := sliceCmd.Result()
+	if err != nil {
+		zap.L().Error("mget cache error", zap.Error(err))
+		for _, vo := range voList {
+			vo.Active = false
+		}
+	} else {
+		for i, val := range vals {
+			vo := voList[i]
+			str, ok := val.(string)
+			if ok && str != "" {
+				deviceMetrics := make(map[uint64]map[uint64]*metricModels2.DeviceMetricData)
+				err = json.Unmarshal([]byte(str), &deviceMetrics)
+				if err != nil {
+					zap.L().Error("json Unmarshal error", zap.Error(err))
+					vo.Active = false
+				} else {
+					vo.TemplateList = deviceMetrics
+					vo.Active = (deviceMetrics != nil)
+				}
+			} else {
+				vo.Active = false
+			}
+		}
+	}
+
+	// 3. 补全建筑物名称
+	if len(buildingIds) > 0 {
+		buildings, err := d.buildingDao.GetByIds(c, buildingIds)
+		if err != nil {
+			zap.L().Error("get buildings error", zap.Error(err))
+		} else {
+			buildingNameMap := make(map[uint64]string)
+			for _, b := range buildings {
+				buildingNameMap[uint64(b.ID)] = b.Name
+			}
+			for _, vo := range voList {
+				if name, ok := buildingNameMap[vo.DeviceBuildingId]; ok {
+					vo.BuildingName = name
+				}
+			}
+		}
+	}
+
+	// 4. 补全指标元数据
+	var allDataIds []uint64
+	dataIdMap := make(map[uint64]bool)
+	for _, vo := range voList {
+		if vo.TemplateList != nil {
+			for _, templateValue := range vo.TemplateList {
+				for dataId := range templateValue {
+					if !dataIdMap[dataId] {
+						allDataIds = append(allDataIds, dataId)
+						dataIdMap[dataId] = true
+					}
+				}
+			}
+		}
+	}
+
+	if len(allDataIds) > 0 {
+		datas, err := d.deviceConfigDataDao.GetByIds(c, allDataIds)
+		if err != nil {
+			zap.L().Error("get device config data error", zap.Error(err))
+			return voList, nil // 返回基本信息，忽略指标补全错误
+		}
+
+		var dataMap = make(map[uint64]*deviceModels2.SysModbusDeviceConfigData)
+		for _, dataValue := range datas {
+			dataMap[uint64(dataValue.DeviceConfigID)] = dataValue
+		}
+
+		for _, vo := range voList {
+			if vo.TemplateList != nil {
+				for templateId, templateValue := range vo.TemplateList {
+					for dataId := range templateValue {
+						dataValue, ok := dataMap[dataId]
+						if !ok {
+							continue
+						}
+						vo.TemplateList[templateId][dataId].Name = dataValue.Name
+						vo.TemplateList[templateId][dataId].Unit = dataValue.Unit
+						vo.TemplateList[templateId][dataId].DataFormat = dataValue.DataFormat
+						vo.TemplateList[templateId][dataId].GraphEnable = *dataValue.GraphEnable
+						vo.TemplateList[templateId][dataId].PredictEnable = *dataValue.PredictEnable
+						vo.TemplateList[templateId][dataId].Mode = dataValue.Mode
+						vo.TemplateList[templateId][dataId].DataType = dataValue.DataType
+						vo.TemplateList[templateId][dataId].Type = dataValue.Type
+						vo.TemplateList[templateId][dataId].DataId = uint64(dataValue.DeviceConfigID)
+						vo.TemplateList[templateId][dataId].ConfigurationEnable = dataValue.ConfigurationEnable
+					}
+				}
+			}
+		}
+	}
+
+	return voList, nil
+}
