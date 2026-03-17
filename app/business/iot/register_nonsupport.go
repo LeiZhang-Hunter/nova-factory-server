@@ -15,4 +15,6 @@ func NewGinEngine(
 	return &Iot{}
 }
 
-var ProviderSet = wire.NewSet(NewGinEngine)
+var GinProviderSet = wire.NewSet(NewGinEngine)
+
+var ProviderSet = wire.NewSet(GinProviderSet)

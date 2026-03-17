@@ -19,8 +19,8 @@ import (
 	"nova-factory-server/app/business/iot/metric/device/metricController"
 	iotSystemControllerImpl "nova-factory-server/app/business/iot/system/controller"
 	"nova-factory-server/app/daemonize"
+	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/routes"
-	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/google/wire"
 )
@@ -29,7 +29,7 @@ var GinProviderSet = wire.NewSet(NewGinEngine)
 
 func NewGinEngine(
 	app *routes.App,
-	mpcServer *gin_mcp.GinMCP,
+	cache cache.Cache,
 	materialC *materialController.Material,
 	craft *craftRouteController.CraftRoute,
 	metric *metricController.MetricServer,
@@ -115,8 +115,8 @@ func NewGinEngine(
 
 	// mpc
 	{
-		dc.Info.PrivateMcpRoutes(mpcServer) //资产管理---设备模块
-		deviceMonitor.DeviceMonitor.PrivateMcpRoutes(mpcServer)
+		dc.Info.PrivateMcpRoutes(app.McpServer) //资产管理---设备模块
+		deviceMonitor.DeviceMonitor.PrivateMcpRoutes(app.McpServer)
 	}
 
 	//grpc

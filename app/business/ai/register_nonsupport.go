@@ -3,14 +3,18 @@
 package ai
 
 import (
+	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/routes"
 
 	"github.com/google/wire"
 )
 
 func NewGinEngine(
-	app *routes.App) *AI {
+	app *routes.App,
+	cache cache.Cache) *AI {
 	return &AI{}
 }
 
-var ProviderSet = wire.NewSet(NewGinEngine)
+var GinProviderSet = wire.NewSet(NewGinEngine)
+
+var ProviderSet = wire.NewSet(GinProviderSet)

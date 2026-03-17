@@ -134,7 +134,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	adminAdmin := admin.NewGinEngine(app, cacheCache, system, monitor, tool, product)
 	iotIot := iot.NewGinEngine(app, cacheCache)
-	aiAI := ai.NewGinEngine(app)
+	aiAI := ai.NewGinEngine(app, cacheCache)
 	engine := finalEngine(app, adminAdmin, iotIot, aiAI)
 	return engine, func() {
 		cleanup()

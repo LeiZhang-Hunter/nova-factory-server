@@ -15,4 +15,5 @@ var ProviderSet = wire.NewSet(
 	aiDataSetDaoImpl.ProviderSet,
 	aiDataSetServiceImpl.ProviderSet,
 	aiDataSetController.ProviderSet,
+	GinProviderSet,
 )

@@ -4,6 +4,7 @@ package ai
 
 import (
 	"nova-factory-server/app/business/ai/aiDataSetController"
+	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/routes"
 
 	"github.com/google/wire"
@@ -15,6 +16,7 @@ type Ai struct{}
 
 func NewGinEngine(
 	app *routes.App,
+	cache cache.Cache,
 	ai *aiDataSetController.AiDataSet) *Ai {
 
 	group := app.Engine.Group("")
