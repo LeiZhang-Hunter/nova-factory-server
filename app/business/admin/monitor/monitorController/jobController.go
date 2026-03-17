@@ -3,7 +3,6 @@ package monitorController
 import (
 	"nova-factory-server/app/business/admin/monitor/monitorModels"
 	"nova-factory-server/app/business/admin/monitor/monitorService"
-	"nova-factory-server/app/core/modules"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -14,7 +13,7 @@ type Job struct {
 	ls monitorService.IJobService
 }
 
-func NewJob(ls monitorService.IJobService) modules.Controller {
+func NewJob(ls monitorService.IJobService) *Job {
 	return &Job{ls: ls}
 }
 func (j *Job) PrivateRoutes(router *gin.RouterGroup) {
