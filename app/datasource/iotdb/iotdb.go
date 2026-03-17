@@ -2,19 +2,24 @@ package iotdb
 
 import (
 	"errors"
-	"fmt"
+	"sync"
+
 	"github.com/apache/iotdb-client-go/client"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	iotdb2 "nova-factory-server/app/constant/iotdb"
-	"time"
 )
 
 type IotDb struct {
-	pool client.SessionPool
+	pool *client.SessionPool
+	mtx  sync.Mutex
 }
 
 func NewIotDb() *IotDb {
+	return &IotDb{}
+}
+
+// connect 连接数据库
+func (i *IotDb) connect() *IotDb {
 	type IotDbConfig struct {
 		Host     string `mapstructure:"host"`
 		Port     string `mapstructure:"port"`
@@ -32,79 +37,33 @@ func NewIotDb() *IotDb {
 		UserName: d.UserName,
 		Password: d.Password,
 	}
-	db := &IotDb{}
+
 	pool := client.NewSessionPool(config, 3, 60000, 60000, false)
 	//defer sessionPool.Close()
-	db.pool = pool
+	i.pool = &pool
 	session, err := pool.GetSession()
 	if err != nil {
 		zap.L().Error("get session", zap.Error(err))
 		if err.Error() != "sessionPool has closed" && err.Error() != "get session timeout" {
-			return db
+			return i
 		}
 	}
 
 	defer pool.PutBack(session)
 
-	for {
-		statement, err := session.ExecuteStatement("count databases root.device")
-		if err != nil {
-			zap.L().Error("execute statement", zap.Error(err))
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		hasDatabase, err := statement.Next()
-		if err != nil {
-			zap.L().Error("get hasDatabase", zap.Error(err))
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
-		count := statement.GetInt32("count")
-		if count < 1 {
-			session.ExecuteStatement("create database root.device")
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
-		statement, err = session.ExecuteStatement("count databases root.run_status_device")
-		if err != nil {
-			time.Sleep(1 * time.Second)
-			return nil
-		}
-		hasDatabase, err = statement.Next()
-		if err != nil {
-			zap.L().Error("get hasDatabase", zap.Error(err))
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
-		if !hasDatabase {
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
-		count = statement.GetInt32("count")
-		if count < 1 {
-			session.ExecuteStatement("create database root.run_status_device")
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
-		break
-	}
-
-	// 创建设备数据采集模板
-	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (value DOUBLE)", iotdb2.NOVA_DEVICE_TEMPLATE))
-	// 创建设备运行时间统计模板
-	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (duration INT64, status INT64)", iotdb2.NOVA_DEVICE_RUN_TEMPLATE))
-
-	return db
+	return i
 }
 
 func (i *IotDb) GetSession() (client.Session, error) {
 	if i == nil {
 		return client.Session{}, errors.New("<UNK>")
+	}
+	if i.pool == nil {
+		i.mtx.Lock()
+		if i.pool == nil {
+			i.connect()
+		}
+		i.mtx.Unlock()
 	}
 	session, err := i.pool.GetSession()
 	if err == nil {

@@ -4,6 +4,7 @@
 package iot
 
 import (
+	"fmt"
 	"nova-factory-server/app/business/iot/alert/alertController"
 	"nova-factory-server/app/business/iot/asset/building/buildingController"
 	"nova-factory-server/app/business/iot/asset/camera/cameraController"
@@ -18,11 +19,15 @@ import (
 	homeController "nova-factory-server/app/business/iot/home/controller"
 	"nova-factory-server/app/business/iot/metric/device/metricController"
 	iotSystemControllerImpl "nova-factory-server/app/business/iot/system/controller"
+	iotdb2 "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/daemonize"
 	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/routes"
+	"time"
 
 	"github.com/google/wire"
+	"go.uber.org/zap"
 )
 
 var GinProviderSet = wire.NewSet(NewGinEngine)
@@ -30,6 +35,7 @@ var GinProviderSet = wire.NewSet(NewGinEngine)
 func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
+	iotdb *iotdb.IotDb,
 	materialC *materialController.Material,
 	craft *craftRouteController.CraftRoute,
 	metric *metricController.MetricServer,
@@ -125,5 +131,65 @@ func NewGinEngine(
 	deviceMonitor.DeviceControl.PrivateRoutes(s)
 	deviceMonitor.CameraGrpc.PrivateRoutes(s)
 	s.Start()
+
+	session, err := iotdb.GetSession()
+	if err != nil {
+		zap.L().Error("iotdb.GetSession()", zap.Error(err))
+		panic(err)
+	}
+	defer iotdb.PutSession(session)
+	for {
+		statement, err := session.ExecuteStatement("count databases root.device")
+		if err != nil {
+			zap.L().Error("execute statement", zap.Error(err))
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		hasDatabase, err := statement.Next()
+		if err != nil {
+			zap.L().Error("get hasDatabase", zap.Error(err))
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		count := statement.GetInt32("count")
+		if count < 1 {
+			session.ExecuteStatement("create database root.device")
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		statement, err = session.ExecuteStatement("count databases root.run_status_device")
+		if err != nil {
+			time.Sleep(1 * time.Second)
+			return nil
+		}
+		hasDatabase, err = statement.Next()
+		if err != nil {
+			zap.L().Error("get hasDatabase", zap.Error(err))
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		if !hasDatabase {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		count = statement.GetInt32("count")
+		if count < 1 {
+			session.ExecuteStatement("create database root.run_status_device")
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		break
+	}
+
+	// 创建设备数据采集模板
+	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (value DOUBLE)", iotdb2.NOVA_DEVICE_TEMPLATE))
+	// 创建设备运行时间统计模板
+	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (duration INT64, status INT64)", iotdb2.NOVA_DEVICE_RUN_TEMPLATE))
+
 	return &Iot{}
 }
