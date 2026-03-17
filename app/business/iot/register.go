@@ -104,4 +104,6 @@ var ProviderSet = wire.NewSet(
 	cameraController.ProviderSet,
 	cameraServiceImpl.ProviderSet,
 	cameraDaoImpl.ProviderSet,
+
+	NewGinEngine,
 )

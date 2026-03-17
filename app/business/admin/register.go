@@ -33,4 +33,5 @@ var ProviderSet = wire.NewSet(
 	productDaoImpl.ProviderSet,
 	productServiceImpl.ProviderSet,
 	productController.ProviderSet,
+	GinProviderSet,
 )
