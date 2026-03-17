@@ -179,6 +179,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Laboratory: laboratory,
 	}
 	adminAdmin := admin.NewGinEngine(app, cacheCache, system, monitor, tool, product)
+	iotDb := iotdb.NewIotDb()
 	iMaterialDao := materialDaoImpl.NewMaterialDaoImpl(db)
 	iMaterialService := materialServiceImpl.NewMaterialService(iMaterialDao, iUserDao)
 	materialInfo := materialController.NewMaterialInfo(iMaterialService)
@@ -217,7 +218,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	iotDb := iotdb.NewIotDb()
 	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
 	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
 	iControlLogDao := metricDaoIMpl.NewIControlLogDaoImpl(clickHouse)
@@ -377,7 +377,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		DeviceCheckMachinery: deviceCheckMachinery,
 		DeviceCheckSubject:   deviceCheckSubject,
 	}
-	iotIot := iot.NewGinEngine(app, cacheCache, material, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, resourceControllerResourceController, home, configurationControllerController, controllerSystem, cameraControllerCameraController, device)
+	iotIot := iot.NewGinEngine(app, cacheCache, iotDb, material, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, resourceControllerResourceController, home, configurationControllerController, controllerSystem, cameraControllerCameraController, device)
 	iDataSetDao := aiDataSetDaoImpl.NewDataSetDaoImpl(db)
 	iDataSetService := aiDataSetServiceImpl.NewIDataSetServiceImpl(iDataSetDao, iDeptDao, iUserDao, client)
 	iDataSetDocumentDao := aiDataSetDaoImpl.NewIDataSetDocumentDaoImpl(db)
