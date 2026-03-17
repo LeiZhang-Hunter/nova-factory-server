@@ -3,6 +3,7 @@ package monitorController
 import (
 	"nova-factory-server/app/business/admin/monitor/monitorModels"
 	"nova-factory-server/app/business/admin/monitor/monitorService"
+	"nova-factory-server/app/core/modules"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -13,7 +14,7 @@ type Job struct {
 	ls monitorService.IJobService
 }
 
-func NewJob(ls monitorService.IJobService) *Job {
+func NewJob(ls monitorService.IJobService) modules.Controller {
 	return &Job{ls: ls}
 }
 func (j *Job) PrivateRoutes(router *gin.RouterGroup) {
@@ -29,6 +30,10 @@ func (j *Job) PrivateRoutes(router *gin.RouterGroup) {
 	job.GET("/log/list", j.JobLogList)
 	job.GET("/log/:logId", j.JobLogGetInfo)
 	job.GET("/jobIdAndName", j.JobIdAndNameAll)
+}
+
+func (j *Job) PublicRoutes(router *gin.RouterGroup) {
+
 }
 
 // JobList 查询定时任务列表
