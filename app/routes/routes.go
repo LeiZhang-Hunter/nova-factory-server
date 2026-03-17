@@ -19,12 +19,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var ProviderSet = wire.NewSet(NewGinEngine)
+type App struct {
+	Engine *gin.Engine
+}
 
-func NewGinEngine() *gin.Engine {
+var ProviderSet = wire.NewSet(NewGinApp)
+
+func NewGinApp() *App {
 
 	if setting.Conf.Mode != "dev" {
-		gin.SetMode(gin.ReleaseMode) // gin设置成发布模式
+		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.New()
 	r.Use(logger.NewLoggerMiddlewareBuilder().
@@ -44,13 +48,14 @@ func NewGinEngine() *gin.Engine {
 		})
 	})
 
-	// pprof
 	pprof.Register(r)
+	return &App{
+		Engine: r,
+	}
+}
 
-	//product.Laboratory.PrivateMcpRoutes(mpcServer)
-
-	return r
-
+func NewGinEngine(app *App) *gin.Engine {
+	return app.Engine
 }
 
 func newCors() gin.HandlerFunc {

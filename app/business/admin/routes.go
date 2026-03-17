@@ -8,26 +8,26 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/objectFile/localhostObject"
 	"nova-factory-server/app/middlewares"
-	"nova-factory-server/app/utils/gin_mcp"
+	"nova-factory-server/app/routes"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 )
 
 var GinProviderSet = wire.NewSet(NewGinEngine)
 
-func NewGinEngine(r *gin.Engine,
+type Admin struct{}
+
+func NewGinEngine(app *routes.App,
 	cache cache.Cache,
-	mpcServer *gin_mcp.GinMCP,
 	sc *systemController.System,
 	mc *monitorController.Monitor,
 	gc *toolController.Tool,
-	product *productController.Product) {
+	product *productController.Product) *Admin {
+	r := app.Engine
 	group := r.Group("")
 	//不做鉴权的
 	{
-
 		if viper.GetString("upload_file.type") == "local" {
 			group.Static(localhostObject.ResourcePrefix, viper.GetString("upload_file.localhost.public_path"))
 		}
@@ -40,7 +40,6 @@ func NewGinEngine(r *gin.Engine,
 	//做鉴权的
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
 	{
-
 		sc.Profile.PrivateRoutes(group)    //个人资料
 		sc.Login.PrivateRoutes(group)      //登录
 		sc.User.PrivateRoutes(group)       //用户
@@ -63,4 +62,6 @@ func NewGinEngine(r *gin.Engine,
 		gc.GenTable.PrivateRoutes(group)   //代码生成
 		product.Laboratory.PrivateRoutes(group)
 	}
+
+	return &Admin{}
 }

@@ -7,128 +7,83 @@
 package main
 
 import (
-	monitorController2 "nova-factory-server/app/business/admin/monitor/monitorController"
-	monitorDaoImpl2 "nova-factory-server/app/business/admin/monitor/monitorDao/monitorDaoImpl"
-	monitorServiceImpl2 "nova-factory-server/app/business/admin/monitor/monitorService/monitorServiceImpl"
-	productController2 "nova-factory-server/app/business/admin/product/productController"
+	"github.com/gin-gonic/gin"
+	"nova-factory-server/app/business/admin"
+	"nova-factory-server/app/business/admin/monitor/monitorController"
+	"nova-factory-server/app/business/admin/monitor/monitorDao/monitorDaoImpl"
+	"nova-factory-server/app/business/admin/monitor/monitorService/monitorServiceImpl"
+	"nova-factory-server/app/business/admin/product/productController"
 	"nova-factory-server/app/business/admin/product/productDao/productDaoImpl"
 	"nova-factory-server/app/business/admin/product/productService/productServiceImpl"
-	systemController2 "nova-factory-server/app/business/admin/system/systemController"
-	systemDaoImpl3 "nova-factory-server/app/business/admin/system/systemDao/systemDaoImpl"
-	systemServiceImpl3 "nova-factory-server/app/business/admin/system/systemService/systemServiceImpl"
-	toolController2 "nova-factory-server/app/business/admin/tool/toolController"
-	toolDaoImpl2 "nova-factory-server/app/business/admin/tool/toolDao/toolDaoImpl"
+	"nova-factory-server/app/business/admin/system/systemController"
+	"nova-factory-server/app/business/admin/system/systemDao/systemDaoImpl"
+	"nova-factory-server/app/business/admin/system/systemService/systemServiceImpl"
+	"nova-factory-server/app/business/admin/tool/toolController"
+	"nova-factory-server/app/business/admin/tool/toolDao/toolDaoImpl"
 	"nova-factory-server/app/business/admin/tool/toolService/toolServiceImpl"
-	"nova-factory-server/app/business/ai/aiDataSetController"
-	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
-	"nova-factory-server/app/business/ai/aiDataSetService/aiDataSetServiceImpl"
-	"nova-factory-server/app/business/iot/alert/alertController"
-	"nova-factory-server/app/business/iot/alert/alertDao/alertDaoImpl"
-	"nova-factory-server/app/business/iot/alert/alertService/alertServiceImpl"
-	"nova-factory-server/app/business/iot/asset/building/buildingController"
-	"nova-factory-server/app/business/iot/asset/building/buildingDao/buildingDaoImpl"
-	"nova-factory-server/app/business/iot/asset/building/buildingService/buildingServiceImpl"
-	"nova-factory-server/app/business/iot/asset/camera/cameraController"
-	"nova-factory-server/app/business/iot/asset/camera/cameraDao/cameraDaoImpl"
-	"nova-factory-server/app/business/iot/asset/camera/cameraService/cameraServiceImpl"
-	"nova-factory-server/app/business/iot/asset/device/deviceController"
-	"nova-factory-server/app/business/iot/asset/device/deviceDao/deviceDaoImpl"
-	"nova-factory-server/app/business/iot/asset/device/deviceService/deviceServiceImpl"
-	"nova-factory-server/app/business/iot/asset/material/materialController"
-	"nova-factory-server/app/business/iot/asset/material/materialDao/materialDaoImpl"
-	"nova-factory-server/app/business/iot/asset/material/materialService/materialServiceImpl"
-	"nova-factory-server/app/business/iot/asset/resource/resourceController"
-	"nova-factory-server/app/business/iot/asset/resource/resourceDao/resourceDaoImpl"
-	"nova-factory-server/app/business/iot/asset/resource/resourceService/resourceServiceImpl"
-	"nova-factory-server/app/business/iot/configuration/configurationController"
-	"nova-factory-server/app/business/iot/configuration/configurationDao/configurationDaoImpl"
-	"nova-factory-server/app/business/iot/configuration/configurationService/configurationServiceImpl"
-	"nova-factory-server/app/business/iot/craft/craftRouteController"
-	"nova-factory-server/app/business/iot/craft/craftRouteDao/craftRouteDaoImpl"
-	"nova-factory-server/app/business/iot/craft/craftRouteService/craftRouteServiceImpl"
-	"nova-factory-server/app/business/iot/daemonize/daemonizeController"
-	"nova-factory-server/app/business/iot/daemonize/daemonizeDao/daemonizeDaoImpl"
-	"nova-factory-server/app/business/iot/daemonize/daemonizeService/daemonizeServiceImpl"
-	"nova-factory-server/app/business/iot/dashboard/dashboardController"
-	"nova-factory-server/app/business/iot/dashboard/dashboardDao/dashboardDaoImpl"
-	"nova-factory-server/app/business/iot/dashboard/dashboardService/dashboardServiceImpl"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorController"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorService/deviceMonitorServiceImpl"
-	"nova-factory-server/app/business/iot/home/controller"
-	"nova-factory-server/app/business/iot/home/homeService/homeServiceImpl"
-	"nova-factory-server/app/business/iot/metric/device/metricController"
-	"nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
-	"nova-factory-server/app/business/iot/metric/device/metricService/metricServiceImpl"
-	controller2 "nova-factory-server/app/business/iot/system/controller"
-	systemDaoImpl2 "nova-factory-server/app/business/iot/system/dao/systemDaoImpl"
-	systemServiceImpl2 "nova-factory-server/app/business/iot/system/service/systemServiceImpl"
 	"nova-factory-server/app/datasource/cache"
-	"nova-factory-server/app/datasource/clickhouse"
-	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/datasource/mysql"
 	"nova-factory-server/app/datasource/objectFile"
 	"nova-factory-server/app/routes"
-
-	"github.com/gin-gonic/gin"
 )
 
 // Injectors from wire.go:
 
 func wireApp() (*gin.Engine, func(), error) {
+	app := routes.NewGinApp()
 	cacheCache := cache.NewCache()
 	sqlyContext, cleanup, err := mysql.NewData()
 	if err != nil {
 		return nil, nil, err
 	}
-	iUserDao := systemDaoImpl3.NewSysUserDao(sqlyContext)
-	iPermissionDao := systemDaoImpl3.NewSysPermissionDao(sqlyContext)
-	iRoleDao := systemDaoImpl3.NewSysRoleDao(sqlyContext)
-	iLogininforDao := monitorDaoImpl2.NewLogininforDao(sqlyContext)
-	iConfigDao := systemDaoImpl3.NewSysConfigDao(sqlyContext)
-	iConfigService := systemServiceImpl3.NewConfigService(iConfigDao, cacheCache)
-	iLoginService := systemServiceImpl3.NewLoginService(cacheCache, iUserDao, iPermissionDao, iRoleDao, iLogininforDao, iConfigService)
-	iUserPostDao := systemDaoImpl3.NewSysUserPostDao(sqlyContext)
-	iUserRoleDao := systemDaoImpl3.NewSysUserRoleDao(sqlyContext)
+	iUserDao := systemDaoImpl.NewSysUserDao(sqlyContext)
+	iPermissionDao := systemDaoImpl.NewSysPermissionDao(sqlyContext)
+	iRoleDao := systemDaoImpl.NewSysRoleDao(sqlyContext)
+	iLogininforDao := monitorDaoImpl.NewLogininforDao(sqlyContext)
+	iConfigDao := systemDaoImpl.NewSysConfigDao(sqlyContext)
+	iConfigService := systemServiceImpl.NewConfigService(iConfigDao, cacheCache)
+	iLoginService := systemServiceImpl.NewLoginService(cacheCache, iUserDao, iPermissionDao, iRoleDao, iLogininforDao, iConfigService)
+	iUserPostDao := systemDaoImpl.NewSysUserPostDao(sqlyContext)
+	iUserRoleDao := systemDaoImpl.NewSysUserRoleDao(sqlyContext)
 	objectFileObjectFile := objectFile.NewConfig()
-	iDeptDao := systemDaoImpl3.NewSysDeptDao(sqlyContext)
-	iPostDao := systemDaoImpl3.NewSysPostDao(sqlyContext)
-	iUserDeptScopeDao := systemDaoImpl3.NewSysUserDeptScopeDao(sqlyContext)
-	iUserService := systemServiceImpl3.NewUserService(sqlyContext, iUserDao, iUserPostDao, iUserRoleDao, objectFileObjectFile, iDeptDao, iRoleDao, iPostDao, iUserDeptScopeDao, iConfigService)
-	iLogininforService := monitorServiceImpl2.NewLogininforService(iLogininforDao)
-	login := systemController2.NewLogin(iLoginService, iUserService, iConfigService, iLogininforService)
-	iPostService := systemServiceImpl3.NewPostService(iPostDao)
-	iRolePermissionDao := systemDaoImpl3.NewSysRolePermissionDao(sqlyContext)
-	iRoleService := systemServiceImpl3.NewRoleService(sqlyContext, iRoleDao, iRolePermissionDao, iUserRoleDao)
-	user := systemController2.NewUser(iUserService, iPostService, iRoleService)
-	iDeptService := systemServiceImpl3.NewDeptService(iDeptDao, iRoleDao)
-	dept := systemController2.NewDept(iDeptService)
-	iDictTypeDao := systemDaoImpl3.NewSysDictTypeDao(sqlyContext)
-	iDictTypeService := systemServiceImpl3.NewDictTypeService(iDictTypeDao, cacheCache)
-	iDictDataDao := systemDaoImpl3.NewSysDictDataDao(sqlyContext)
-	iDictDataService := systemServiceImpl3.NewDictDataService(iDictDataDao, cacheCache)
-	dictType := systemController2.NewDictType(iDictTypeService, iDictDataService)
-	dictData := systemController2.NewDictData(iDictDataService)
-	role := systemController2.NewRole(iRoleService)
-	post := systemController2.NewPost(iPostService)
-	profile := systemController2.NewProfile(iUserService)
-	config := systemController2.NewConfig(iConfigService)
-	iFileService := systemServiceImpl3.NewFileService(objectFileObjectFile)
-	file := systemController2.NewFile(iFileService)
-	iSseService := systemServiceImpl3.NewSseService(cacheCache)
-	sse := systemController2.NewSse(iSseService)
-	iSysNoticeDao := systemDaoImpl3.NewSysNoticeDao(sqlyContext)
-	iSysNoticeService := systemServiceImpl3.NewNoticeService(iSysNoticeDao, iUserDao, iSseService)
-	notice := systemController2.NewNotice(iSysNoticeService)
-	iSysPermissionService := systemServiceImpl3.NewPermissionService(iPermissionDao)
-	permission := systemController2.NewPermission(iSysPermissionService)
-	iSelectBoxService := systemServiceImpl3.NewSelectService(iPermissionDao, iDeptDao)
-	selectBox := systemController2.NewSelectBox(iSelectBoxService)
+	iDeptDao := systemDaoImpl.NewSysDeptDao(sqlyContext)
+	iPostDao := systemDaoImpl.NewSysPostDao(sqlyContext)
+	iUserDeptScopeDao := systemDaoImpl.NewSysUserDeptScopeDao(sqlyContext)
+	iUserService := systemServiceImpl.NewUserService(sqlyContext, iUserDao, iUserPostDao, iUserRoleDao, objectFileObjectFile, iDeptDao, iRoleDao, iPostDao, iUserDeptScopeDao, iConfigService)
+	iLogininforService := monitorServiceImpl.NewLogininforService(iLogininforDao)
+	login := systemController.NewLogin(iLoginService, iUserService, iConfigService, iLogininforService)
+	iPostService := systemServiceImpl.NewPostService(iPostDao)
+	iRolePermissionDao := systemDaoImpl.NewSysRolePermissionDao(sqlyContext)
+	iRoleService := systemServiceImpl.NewRoleService(sqlyContext, iRoleDao, iRolePermissionDao, iUserRoleDao)
+	user := systemController.NewUser(iUserService, iPostService, iRoleService)
+	iDeptService := systemServiceImpl.NewDeptService(iDeptDao, iRoleDao)
+	dept := systemController.NewDept(iDeptService)
+	iDictTypeDao := systemDaoImpl.NewSysDictTypeDao(sqlyContext)
+	iDictTypeService := systemServiceImpl.NewDictTypeService(iDictTypeDao, cacheCache)
+	iDictDataDao := systemDaoImpl.NewSysDictDataDao(sqlyContext)
+	iDictDataService := systemServiceImpl.NewDictDataService(iDictDataDao, cacheCache)
+	dictType := systemController.NewDictType(iDictTypeService, iDictDataService)
+	dictData := systemController.NewDictData(iDictDataService)
+	role := systemController.NewRole(iRoleService)
+	post := systemController.NewPost(iPostService)
+	profile := systemController.NewProfile(iUserService)
+	config := systemController.NewConfig(iConfigService)
+	iFileService := systemServiceImpl.NewFileService(objectFileObjectFile)
+	file := systemController.NewFile(iFileService)
+	iSseService := systemServiceImpl.NewSseService(cacheCache)
+	sse := systemController.NewSse(iSseService)
+	iSysNoticeDao := systemDaoImpl.NewSysNoticeDao(sqlyContext)
+	iSysNoticeService := systemServiceImpl.NewNoticeService(iSysNoticeDao, iUserDao, iSseService)
+	notice := systemController.NewNotice(iSysNoticeService)
+	iSysPermissionService := systemServiceImpl.NewPermissionService(iPermissionDao)
+	permission := systemController.NewPermission(iSysPermissionService)
+	iSelectBoxService := systemServiceImpl.NewSelectService(iPermissionDao, iDeptDao)
+	selectBox := systemController.NewSelectBox(iSelectBoxService)
 	db := mysql.NewDB()
-	iSysShiftDao := systemDaoImpl3.NewISysShiftDaoImpl(db)
-	iSysShiftService := systemServiceImpl3.NewISysShiftServiceImpl(iSysShiftDao)
-	shift := systemController2.NewShift(iSysShiftService)
-	system := &systemController2.System{
+	iSysShiftDao := systemDaoImpl.NewISysShiftDaoImpl(db)
+	iSysShiftService := systemServiceImpl.NewISysShiftServiceImpl(iSysShiftDao)
+	shift := systemController.NewShift(iSysShiftService)
+	system := &systemController.System{
 		Login:      login,
 		User:       user,
 		Dept:       dept,
@@ -145,257 +100,45 @@ func wireApp() (*gin.Engine, func(), error) {
 		SelectBox:  selectBox,
 		Shift:      shift,
 	}
-	infoServer := monitorController2.NewInfoServer()
-	iUserOnlineService := monitorServiceImpl2.NewUserOnlineService(cacheCache)
-	userOnline := monitorController2.NewUserOnline(iUserOnlineService)
-	logininfor := monitorController2.NewLogininfor(iLogininforService)
-	iOperLog := monitorDaoImpl2.NewOperLog(sqlyContext)
-	iSysOperLogService := monitorServiceImpl2.NewOperLog(iOperLog)
-	operLog := monitorController2.NewOperLog(iSysOperLogService)
-	iJobDao := monitorDaoImpl2.NewJobDao(sqlyContext)
-	iJobService := monitorServiceImpl2.NewJobService(cacheCache, iJobDao)
-	job := monitorController2.NewJob(iJobService)
-	monitor := &monitorController2.Monitor{
+	infoServer := monitorController.NewInfoServer()
+	iUserOnlineService := monitorServiceImpl.NewUserOnlineService(cacheCache)
+	userOnline := monitorController.NewUserOnline(iUserOnlineService)
+	logininfor := monitorController.NewLogininfor(iLogininforService)
+	iOperLog := monitorDaoImpl.NewOperLog(sqlyContext)
+	iSysOperLogService := monitorServiceImpl.NewOperLog(iOperLog)
+	operLog := monitorController.NewOperLog(iSysOperLogService)
+	iJobDao := monitorDaoImpl.NewJobDao(sqlyContext)
+	iJobService := monitorServiceImpl.NewJobService(cacheCache, iJobDao)
+	job := monitorController.NewJob(iJobService)
+	monitor := &monitorController.Monitor{
 		Server:     infoServer,
 		UserOnline: userOnline,
 		Logfor:     logininfor,
 		Oper:       operLog,
 		Job:        job,
 	}
-	iGenTableColumn := toolDaoImpl2.NewGenTableColumnDao(sqlyContext)
-	iGenTable := toolDaoImpl2.GetGenTableDao(sqlyContext)
+	iGenTableColumn := toolDaoImpl.NewGenTableColumnDao(sqlyContext)
+	iGenTable := toolDaoImpl.GetGenTableDao(sqlyContext)
 	iGenTableService := toolServiceImpl.NewGenTabletService(iGenTableColumn, iGenTable)
-	genTable := toolController2.NewGenTable(iGenTableService)
-	tool := &toolController2.Tool{
+	genTable := toolController.NewGenTable(iGenTableService)
+	tool := &toolController.Tool{
 		GenTable: genTable,
-	}
-	iDeviceDao := deviceDaoImpl.NewSysDeviceDaoImpl(db)
-	iDeviceGroupDao := deviceDaoImpl.NewSysDeviceGroupDaoImpl(db)
-	clickHouse, err := clickhouse.NewClickHouse()
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	iotDb := iotdb.NewIotDb()
-	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
-	iSysModbusDeviceConfigDataDao := deviceDaoImpl.NewISysModbusDeviceConfigDataDaoImp(db)
-	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
-	iDeviceService := deviceServiceImpl.NewDeviceService(iDeviceDao, iDeviceGroupDao, iUserDao, iMetricDao, iSysModbusDeviceConfigDataDao, iDeviceDataReportDao, cacheCache)
-	deviceInfo := deviceController.NewDeviceInfo(iDeviceService)
-	iDeviceGroupService := deviceServiceImpl.NewDeviceGroupService(iDeviceGroupDao, iUserDao)
-	deviceGroup := deviceController.NewDeviceGroup(iDeviceGroupService)
-	iDeviceTemplateDao := deviceDaoImpl.NewIDeviceTemplateDaoImpl(db)
-	iDeviceTemplateService := deviceServiceImpl.NewDeviceTemplateServiceImpl(iDeviceTemplateDao, iSysModbusDeviceConfigDataDao)
-	template, err := deviceController.NewTemplate(iDeviceTemplateService)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	iSysModbusDeviceConfigDataService := deviceServiceImpl.NewISysModbusDeviceConfigDataServiceImpl(iSysModbusDeviceConfigDataDao)
-	templateData := deviceController.NewTemplateData(iSysModbusDeviceConfigDataService, iDeviceTemplateService, iDeviceService)
-	iDeviceSubjectDao := deviceDaoImpl.NewIDeviceSubjectDaoImpl(db)
-	iDeviceSubjectService := deviceServiceImpl.NewIDeviceSubjectServiceImpl(iDeviceSubjectDao)
-	deviceSubject := deviceController.NewDeviceSubject(iDeviceSubjectService)
-	iDeviceCheckPlanDao := deviceDaoImpl.NewIDeviceCheckPlanDaoImpl(db)
-	iDeviceCheckPlanService := deviceServiceImpl.NewIDeviceCheckPlanServiceImpl(iDeviceCheckPlanDao)
-	deviceCheckPlan := deviceController.NewDeviceCheckPlan(iDeviceCheckPlanService)
-	iDeviceCheckMachineryDao := deviceDaoImpl.NewIDeviceCheckMachineryDaoImpl(db)
-	iDeviceCheckMachineryService := deviceServiceImpl.NewIDeviceCheckMachineryServiceImpl(iDeviceCheckMachineryDao)
-	deviceCheckMachinery := deviceController.NewDeviceCheckMachinery(iDeviceCheckMachineryService)
-	iDeviceCheckSubjectDao := deviceDaoImpl.NewIDeviceCheckSubjectDaoImpl(db)
-	iDeviceCheckSubjectService := deviceServiceImpl.NewIDeviceCheckSubjectServiceImpl(iDeviceCheckSubjectDao)
-	deviceCheckSubject := deviceController.NewDeviceCheckSubject(iDeviceCheckSubjectService)
-	device := &deviceController.Device{
-		Info:                 deviceInfo,
-		Group:                deviceGroup,
-		Template:             template,
-		TemplateData:         templateData,
-		DeviceSubject:        deviceSubject,
-		DeviceCheckPlan:      deviceCheckPlan,
-		DeviceCheckMachinery: deviceCheckMachinery,
-		DeviceCheckSubject:   deviceCheckSubject,
-	}
-	iMaterialDao := materialDaoImpl.NewMaterialDaoImpl(db)
-	iMaterialService := materialServiceImpl.NewMaterialService(iMaterialDao, iUserDao)
-	materialInfo := materialController.NewMaterialInfo(iMaterialService)
-	material := &materialController.Material{
-		Material: materialInfo,
-	}
-	iDataSetDao := aiDataSetDaoImpl.NewDataSetDaoImpl(db)
-	client := aiDataSetServiceImpl.NewHttpClient()
-	iDataSetService := aiDataSetServiceImpl.NewIDataSetServiceImpl(iDataSetDao, iDeptDao, iUserDao, client)
-	iDataSetDocumentDao := aiDataSetDaoImpl.NewIDataSetDocumentDaoImpl(db)
-	iDataSetDocumentService := aiDataSetServiceImpl.NewIDataSetDocumentServiceImpl(client, iDataSetDao, iDataSetDocumentDao)
-	iChunkService := aiDataSetServiceImpl.NewIChunkServiceImpl(client)
-	iAssistantService := aiDataSetServiceImpl.NewIAssistantServiceImpl(client)
-	iChartService := aiDataSetServiceImpl.NewIChartServiceImpl(client)
-	dataset := aiDataSetController.NewDataset(iDataSetService, iDataSetDocumentService, iChunkService, iAssistantService, iChartService)
-	iAiPredictionExceptionDao := aiDataSetDaoImpl.NewIAiPredictionExceptionDaoImpl(db)
-	iAiPredictionExceptionService := aiDataSetServiceImpl.NewIAiPredictionExceptionServiceImpl(iAiPredictionExceptionDao)
-	exception := aiDataSetController.NewException(iAiPredictionExceptionService)
-	iAiPredictionListDao := aiDataSetDaoImpl.NewIAiPredictionListDaoImpl(db)
-	iAiPredictionService := aiDataSetServiceImpl.NewIAiPredictionServiceImpl(iAiPredictionListDao)
-	prediction := aiDataSetController.NewPrediction(iAiPredictionService)
-	iAiPredictionControlDao := aiDataSetDaoImpl.NewIAiPredictionControlDaoImpl(db)
-	iAiPredictionControlService := aiDataSetServiceImpl.NewIAiPredictionControlServiceImpl(iAiPredictionControlDao)
-	control := aiDataSetController.NewControl(iAiPredictionControlService)
-	aiDataSet := &aiDataSetController.AiDataSet{
-		Dataset:    dataset,
-		Exception:  exception,
-		Prediction: prediction,
-		Control:    control,
-	}
-	iCraftRouteDao := craftRouteDaoImpl.NewCraftRouteDaoImpl(db)
-	iProcessDao := craftRouteDaoImpl.NewIProcessDaoImpl(db)
-	iRouteProcessDao := craftRouteDaoImpl.NewIProcessRouteDaoImpl(db)
-	iProcessContextDao := craftRouteDaoImpl.NewProcessContextDaoImpl(db)
-	iSysCraftRouteConfigDao := craftRouteDaoImpl.NewISysCraftRouteConfigDaoImpl(db)
-	iCraftRouteService := craftRouteServiceImpl.NewCraftRouteServiceImpl(iCraftRouteDao, iProcessDao, iRouteProcessDao, iProcessContextDao, iSysCraftRouteConfigDao)
-	craft := craftRouteController.NewCraft(iCraftRouteService)
-	iCraftProcessService := craftRouteServiceImpl.NewICraftProcessServiceImpl(iProcessDao, iUserDao)
-	process := craftRouteController.NewProcess(iCraftProcessService)
-	iCraftProcessContextService := craftRouteServiceImpl.NewICraftProcessContextServiceImpl(iProcessContextDao, iUserDao)
-	processContext := craftRouteController.NewProcessContext(iCraftProcessContextService)
-	iProcessRouteService := craftRouteServiceImpl.NewIProcessRouteServiceImpl(iRouteProcessDao, iProcessDao, iCraftRouteDao)
-	routeProcess := craftRouteController.NewSysProRouteProcess(iProcessRouteService)
-	iScheduleDao := craftRouteDaoImpl.NewIScheduleDaoImpl(db)
-	iScheduleMapDao := craftRouteDaoImpl.NewIScheduleMapDaoImpl(db)
-	iScheduleService := craftRouteServiceImpl.NewIScheduleServiceImpl(iScheduleDao, db, iScheduleMapDao, iCraftRouteDao, iSysCraftRouteConfigDao)
-	iotAgentDao := daemonizeDaoImpl.NewIotAgentDaoImpl(db, cacheCache)
-	iotAgentProcess := daemonizeDaoImpl.NewIotAgentProcessDaoImpl(cacheCache)
-	iotAgentService := daemonizeServiceImpl.NewIotAgentServiceImpl(iotAgentDao, iotAgentProcess)
-	schedule := craftRouteController.NewSchedule(iScheduleService, iotAgentService)
-	craftRoute := &craftRouteController.CraftRoute{
-		CraftRoute:     craft,
-		Process:        process,
-		ProcessContext: processContext,
-		RouteProcess:   routeProcess,
-		Schedule:       schedule,
-	}
-	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
-	iControlLogDao := metricDaoIMpl.NewIControlLogDaoImpl(clickHouse)
-	iControlLogService := metricServiceImpl.NewIControlLogServiceImpl(iControlLogDao)
-	metric := metricController.NewMetric(iMetricService, iControlLogService)
-	iCameraDao := cameraDaoImpl.NewCameraDao(db)
-	iCameraService := metricServiceImpl.NewICameraServiceImpl(cacheCache, iCameraDao)
-	cameraGrpc := metricController.NewCamera(iCameraService)
-	metricServer := &metricController.MetricServer{
-		Metric:     metric,
-		CameraGrpc: cameraGrpc,
-	}
-	iotAgentConfigDao := daemonizeDaoImpl.NewIotAgentConfigDaoImpl(db)
-	daemonizeService := daemonizeServiceImpl.NewDaemonizeServiceImpl(iotAgentDao, iotAgentProcess, iotAgentConfigDao)
-	daemonize := daemonizeController.NewDaemonize(daemonizeService)
-	iotAgent := daemonizeController.NewIotAgentController(iotAgentService, daemonizeService)
-	alertRuleDao := alertDaoImpl.NewAlertRuleDaoImpl(db)
-	alertSinkTemplateDao := alertDaoImpl.NewAlertSinkTemplateDaoImpl(db)
-	iDeviceElectricDao := systemDaoImpl2.NewIDeviceElectricDaoImpl(db)
-	iGatewayConfigService := daemonizeServiceImpl.NewIGatewayConfigServiceImpl(iDeviceDao, iDeviceTemplateDao, iSysModbusDeviceConfigDataDao, alertRuleDao, alertSinkTemplateDao, iDeviceElectricDao, iDictDataDao, iAiPredictionControlDao)
-	iotAgentConfigService := daemonizeServiceImpl.NewIotAgentConfigServiceImpl(iotAgentConfigDao)
-	daemonizeControllerConfig := daemonizeController.NewConfig(iGatewayConfigService, iotAgentConfigService, iotAgentService)
-	daemonizeServer := &daemonizeController.DaemonizeServer{
-		Daemonize: daemonize,
-		IotAgent:  iotAgent,
-		Config:    daemonizeControllerConfig,
-	}
-	floorDao := buildingDaoImpl.NewFloorDaoImpl(db)
-	deviceControlService := deviceMonitorServiceImpl.NewDeviceControlServiceImpl(iotAgentDao, cacheCache, iControlLogDao, iDeviceDao, iSysModbusDeviceConfigDataDao)
-	buildingDao := buildingDaoImpl.NewBuildingDaoImpl(db)
-	deviceMonitorService := deviceMonitorServiceImpl.NewDeviceMonitorServiceImpl(iDeviceDao, cacheCache, iMetricDao, iSysModbusDeviceConfigDataDao, floorDao, iDeviceService, deviceControlService, iControlLogDao, buildingDao)
-	deviceMonitorControllerCameraGrpc := deviceMonitorController.NewCameraGrpc(iotAgentService)
-	deviceMonitor := deviceMonitorController.NewDeviceMonitor(deviceMonitorService, deviceMonitorControllerCameraGrpc)
-	iDeviceDataReportService := deviceMonitorServiceImpl.NewIDeviceDataReportServiceImpl(iDeviceDataReportDao, iDeviceDao)
-	iDevMapService := metricServiceImpl.NewIDevMapServiceImpl(iDeviceDataReportDao, iDeviceDao)
-	deviceReport := deviceMonitorController.NewDeviceReport(iMetricService, iDeviceDataReportService, iDevMapService)
-	deviceUtilizationDao := deviceMonitorDaoImpl.NewDeviceUtilizationDaoImpl(iotDb, iSysShiftDao, iDeviceDao, buildingDao, iMetricDao, iDictDataDao)
-	deviceUtilizationService := deviceMonitorServiceImpl.NewDeviceUtilizationServiceImpl(deviceUtilizationDao)
-	deviceUtilization := deviceMonitorController.NewDeviceUtilization(deviceUtilizationService)
-	controlLogService := deviceMonitorServiceImpl.NewControlLogServiceImpl(iControlLogDao, iDeviceDao, iSysModbusDeviceConfigDataDao)
-	controlLog := deviceMonitorController.NewControlLog(controlLogService)
-	deviceControl := deviceMonitorController.NewDeviceControl(deviceControlService)
-	deviceMonitorControllerDeviceMonitorController := &deviceMonitorController.DeviceMonitorController{
-		DeviceMonitor:     deviceMonitor,
-		DeviceReport:      deviceReport,
-		DeviceUtilization: deviceUtilization,
-		ControlLog:        controlLog,
-		DeviceControl:     deviceControl,
-		CameraGrpc:        deviceMonitorControllerCameraGrpc,
-	}
-	alertActionDao := alertDaoImpl.NewAlertActionDaoImpl(db)
-	alertAiReasonDao := alertDaoImpl.NewAlertAiReasonDaoImpl(db)
-	alertRuleService := alertServiceImpl.NewAlertRuleServiceImpl(alertRuleDao, iotAgentDao, alertSinkTemplateDao, alertActionDao, alertAiReasonDao)
-	alert := alertController.NewAlert(alertRuleService)
-	alertTemplateService := alertServiceImpl.NewAlertTemplateServiceImpl(alertSinkTemplateDao)
-	alertTemplate := alertController.NewAlertTemplate(alertTemplateService)
-	alertLogClickhouseDao := alertDaoImpl.NewAlertLogClickhouseDaoImpl(clickHouse, iotAgentDao)
-	alertLogService := alertServiceImpl.NewAlertLogServiceImpl(alertLogClickhouseDao, alertRuleDao, iotAgentDao, iDeviceDao, buildingDao, iSysModbusDeviceConfigDataDao)
-	alertLog := alertController.NewAlertLog(alertLogService)
-	alertActionService := alertServiceImpl.NewAlertActionServiceImpl(alertActionDao)
-	alertAction := alertController.NewAlertAction(alertActionService, iDictDataService)
-	alertAiReasonService := alertServiceImpl.NewAlertAiReasonServiceImpl(alertAiReasonDao)
-	alertAiReason := alertController.NewAlertAiReason(alertAiReasonService)
-	runnerService := alertServiceImpl.NewRunnerServiceImpl(iChartService)
-	alertLogDao := alertDaoImpl.NewAlertLogDaoImpl(db)
-	runner := alertController.NewRunner(alertRuleService, runnerService, iChartService, iDeviceDao, alertLogDao)
-	alertControllerController := &alertController.Controller{
-		Alert:         alert,
-		AlertTemplate: alertTemplate,
-		AlertLog:      alertLog,
-		AlertAction:   alertAction,
-		AlertAiReason: alertAiReason,
-		Runner:        runner,
-	}
-	buildingService := buildingServiceImpl.NewBuildingServiceImpl(buildingDao, floorDao)
-	building := buildingController.NewBuilding(buildingService)
-	floorService := buildingServiceImpl.NewFloorServiceImpl(floorDao)
-	floor := buildingController.NewFloor(floorService)
-	buildingControllerController := buildingController.Controller{
-		Building: building,
-		Floor:    floor,
-	}
-	dashboardDao := dashboardDaoImpl.NewDashboardDaoImpl(db)
-	dashboardService := dashboardServiceImpl.NewDashboardServiceImpl(dashboardDao, iMetricDao)
-	dashboard := dashboardController.NewDashboard(dashboardService)
-	dashboardDataDao := dashboardDaoImpl.NewDashboardDataDaoImpl(db)
-	dashboardDataService := dashboardServiceImpl.NewDashboardDataServiceImpl(dashboardDataDao)
-	data := dashboardController.NewData(dashboardDataService)
-	dashboardControllerController := dashboardController.Controller{
-		Dashboard: dashboard,
-		Data:      data,
 	}
 	iSysProductLaboratoryDao := productDaoImpl.NewSysProductLaboratoryDao(db)
 	iSysProductLaboratoryService := productServiceImpl.NewSysProductLaboratoryService(iSysProductLaboratoryDao, iUserDao)
-	laboratory := productController2.NewLaboratory(iSysProductLaboratoryService, iDictDataService)
-	product := &productController2.Product{
+	laboratory := productController.NewLaboratory(iSysProductLaboratoryService, iDictDataService)
+	product := &productController.Product{
 		Laboratory: laboratory,
 	}
-	iResourceFileDao := resourceDaoImpl.NewSysResourceFileDao(db)
-	iResourceFileService := resourceServiceImpl.NewSysResourceFileService(iResourceFileDao)
-	resourceFile := resourceController.NewResourceFile(iResourceFileService)
-	resourceControllerResourceController := &resourceController.ResourceController{
-		ResourceFile: resourceFile,
-	}
-	deviceMonitorCalcDao := deviceMonitorDaoImpl.NewDeviceMonitorCalcDaoImpl(iotDb, iDevMapService)
-	homeService := homeServiceImpl.NewHomeServiceImpl(buildingDao, iDeviceService, iCraftRouteService, alertLogService, deviceMonitorCalcDao, cacheCache)
-	home := controller.NewHome(homeService)
-	configurationDao := configurationDaoImpl.NewConfigurationDaoImpl(db)
-	configurationService := configurationServiceImpl.NewConfigurationServiceImpl(configurationDao)
-	configuration := configurationController.NewConfiguration(configurationService)
-	configurationControllerController := &configurationController.Controller{
-		Configuration: configuration,
-	}
-	iDeviceElectricService := systemServiceImpl2.NewIDeviceElectricServiceImpl(iDeviceElectricDao, iDeviceDao, iMetricDao, iDeviceDataReportDao)
-	electric := controller2.NewElectric(iDeviceElectricService, iDeviceService)
-	controllerSystem := controller2.System{
-		Electric: electric,
-	}
-	cameraServiceICameraService := cameraServiceImpl.NewCameraService(iCameraDao, cacheCache)
-	camera := cameraController.NewCameraController(cameraServiceICameraService, iotAgentService)
-	cameraControllerCameraController := cameraController.CameraController{
-		Camera: camera,
-	}
-	engine := routes.NewGinEngine(cacheCache, system, monitor, tool, device, material, aiDataSet, craftRoute, metricServer, daemonizeServer, deviceMonitorControllerDeviceMonitorController, alertControllerController, buildingControllerController, dashboardControllerController, product, resourceControllerResourceController, home, configurationControllerController, controllerSystem, cameraControllerCameraController)
+	adminAdmin := admin.NewGinEngine(app, cacheCache, system, monitor, tool, product)
+	engine := finalEngine(app, adminAdmin)
 	return engine, func() {
 		cleanup()
 	}, nil
+}
+
+// wire.go:
+
+func finalEngine(app *routes.App, _ *admin.Admin) *gin.Engine {
+	return app.Engine
 }
