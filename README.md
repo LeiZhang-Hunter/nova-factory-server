@@ -158,6 +158,7 @@ http://localhost:8080/swagger/doc.json
 
  - ai 智能体模块
  - iot 物联网模块
+ - shop 商城模块
 ```
 wire gen -tags="ai iot"
 go build -tags="ai iot"
