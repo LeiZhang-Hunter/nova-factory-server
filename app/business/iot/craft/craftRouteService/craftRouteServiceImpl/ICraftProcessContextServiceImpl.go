@@ -1,11 +1,11 @@
 package craftRouteServiceImpl
 
 import (
+	"nova-factory-server/app/business/admin/system/systemDao"
+	"nova-factory-server/app/business/admin/system/systemModels"
 	"nova-factory-server/app/business/iot/craft/craftRouteDao"
 	"nova-factory-server/app/business/iot/craft/craftRouteModels"
 	"nova-factory-server/app/business/iot/craft/craftRouteService"
-	"nova-factory-server/app/business/system/systemDao"
-	"nova-factory-server/app/business/system/systemModels"
 
 	"github.com/gin-gonic/gin"
 )

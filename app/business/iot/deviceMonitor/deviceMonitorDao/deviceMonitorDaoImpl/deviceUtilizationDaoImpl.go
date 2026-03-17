@@ -3,6 +3,7 @@ package deviceMonitorDaoImpl
 import (
 	"errors"
 	"fmt"
+	systemDao2 "nova-factory-server/app/business/admin/system/systemDao"
 	"nova-factory-server/app/business/iot/asset/building/buildingDao"
 	"nova-factory-server/app/business/iot/asset/device/deviceDao"
 	"nova-factory-server/app/business/iot/asset/device/deviceModels"
@@ -10,7 +11,6 @@ import (
 	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/iot/metric/device/metricDao"
 	"nova-factory-server/app/business/iot/metric/device/metricModels"
-	"nova-factory-server/app/business/system/systemDao"
 	"nova-factory-server/app/constant/device"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/iotdb"
@@ -28,16 +28,16 @@ type DeviceUtilizationDaoImpl struct {
 	iotDb          *iotdb.IotDb
 	deviceDao      deviceDao.IDeviceDao
 	deviceBuildDao buildingDao.BuildingDao
-	shiftDao       systemDao.ISysShiftDao
+	shiftDao       systemDao2.ISysShiftDao
 	metricDao      metricDao.IMetricDao
-	dictDataDao    systemDao.IDictDataDao
+	dictDataDao    systemDao2.IDictDataDao
 }
 
-func NewDeviceUtilizationDaoImpl(iotDb *iotdb.IotDb, shiftDao systemDao.ISysShiftDao,
+func NewDeviceUtilizationDaoImpl(iotDb *iotdb.IotDb, shiftDao systemDao2.ISysShiftDao,
 	deviceDao deviceDao.IDeviceDao,
 	deviceBuildDao buildingDao.BuildingDao,
 	metricDao metricDao.IMetricDao,
-	dictDataDao systemDao.IDictDataDao) deviceMonitorDao.DeviceUtilizationDao {
+	dictDataDao systemDao2.IDictDataDao) deviceMonitorDao.DeviceUtilizationDao {
 	return &DeviceUtilizationDaoImpl{
 		iotDb:          iotDb,
 		shiftDao:       shiftDao,

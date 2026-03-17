@@ -3,6 +3,8 @@ package deviceServiceImpl
 import (
 	"encoding/json"
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/business/admin/system/systemDao"
+	"nova-factory-server/app/business/admin/system/systemModels"
 	deviceDao2 "nova-factory-server/app/business/iot/asset/device/deviceDao"
 	deviceModels2 "nova-factory-server/app/business/iot/asset/device/deviceModels"
 	"nova-factory-server/app/business/iot/asset/device/deviceService"
@@ -10,8 +12,6 @@ import (
 	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/iot/metric/device/metricDao"
 	"nova-factory-server/app/business/iot/metric/device/metricModels"
-	"nova-factory-server/app/business/system/systemDao"
-	"nova-factory-server/app/business/system/systemModels"
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"

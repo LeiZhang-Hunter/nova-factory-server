@@ -5,29 +5,30 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/url"
+	systemDao2 "nova-factory-server/app/business/admin/system/systemDao"
+	"nova-factory-server/app/business/admin/system/systemModels"
 	"nova-factory-server/app/business/ai/aiDataSetDao"
 	"nova-factory-server/app/business/ai/aiDataSetModels"
 	"nova-factory-server/app/business/ai/aiDataSetService"
-	"nova-factory-server/app/business/system/systemDao"
-	"nova-factory-server/app/business/system/systemModels"
 	"nova-factory-server/app/utils/baizeContext"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 type IDataSetServiceImpl struct {
 	config      RagFlowConfig
 	client      *http.Client
 	iDataSetDao aiDataSetDao.IDataSetDao
-	iDeptDao    systemDao.IDeptDao
-	iUserDao    systemDao.IUserDao
+	iDeptDao    systemDao2.IDeptDao
+	iUserDao    systemDao2.IUserDao
 }
 
-func NewIDataSetServiceImpl(iDataSetDao aiDataSetDao.IDataSetDao, iDeptDao systemDao.IDeptDao, iUserDao systemDao.IUserDao, client *http.Client) aiDataSetService.IDataSetService {
+func NewIDataSetServiceImpl(iDataSetDao aiDataSetDao.IDataSetDao, iDeptDao systemDao2.IDeptDao, iUserDao systemDao2.IUserDao, client *http.Client) aiDataSetService.IDataSetService {
 	var config RagFlowConfig
 	err := viper.UnmarshalKey("dataSet", &config)
 	if err != nil {

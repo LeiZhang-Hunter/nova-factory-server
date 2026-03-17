@@ -1,6 +1,10 @@
 package routes
 
 import (
+	"nova-factory-server/app/business/admin/monitor/monitorController"
+	"nova-factory-server/app/business/admin/product/productController"
+	"nova-factory-server/app/business/admin/system/systemController"
+	"nova-factory-server/app/business/admin/tool/toolController"
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/iot/alert/alertController"
 	"nova-factory-server/app/business/iot/asset/building/buildingController"
@@ -16,10 +20,6 @@ import (
 	homeController "nova-factory-server/app/business/iot/home/controller"
 	"nova-factory-server/app/business/iot/metric/device/metricController"
 	iotSystemControllerImpl "nova-factory-server/app/business/iot/system/controller"
-	"nova-factory-server/app/business/monitor/monitorController"
-	"nova-factory-server/app/business/product/productController"
-	"nova-factory-server/app/business/system/systemController"
-	"nova-factory-server/app/business/tool/toolController"
 	"nova-factory-server/app/daemonize"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/objectFile/localhostObject"

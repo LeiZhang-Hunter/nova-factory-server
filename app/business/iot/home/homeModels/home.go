@@ -1,10 +1,10 @@
 package homeModels
 
 import (
+	"nova-factory-server/app/business/admin/monitor/monitorModels"
 	"nova-factory-server/app/business/iot/alert/alertModels"
 	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorModel"
 	"nova-factory-server/app/business/iot/metric/device/metricModels"
-	"nova-factory-server/app/business/monitor/monitorModels"
 )
 
 type DeviceStats struct {

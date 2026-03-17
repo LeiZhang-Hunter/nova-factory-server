@@ -7,7 +7,18 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	monitorController2 "nova-factory-server/app/business/admin/monitor/monitorController"
+	monitorDaoImpl2 "nova-factory-server/app/business/admin/monitor/monitorDao/monitorDaoImpl"
+	monitorServiceImpl2 "nova-factory-server/app/business/admin/monitor/monitorService/monitorServiceImpl"
+	productController2 "nova-factory-server/app/business/admin/product/productController"
+	"nova-factory-server/app/business/admin/product/productDao/productDaoImpl"
+	"nova-factory-server/app/business/admin/product/productService/productServiceImpl"
+	systemController2 "nova-factory-server/app/business/admin/system/systemController"
+	systemDaoImpl3 "nova-factory-server/app/business/admin/system/systemDao/systemDaoImpl"
+	systemServiceImpl3 "nova-factory-server/app/business/admin/system/systemService/systemServiceImpl"
+	toolController2 "nova-factory-server/app/business/admin/tool/toolController"
+	toolDaoImpl2 "nova-factory-server/app/business/admin/tool/toolDao/toolDaoImpl"
+	"nova-factory-server/app/business/admin/tool/toolService/toolServiceImpl"
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
 	"nova-factory-server/app/business/ai/aiDataSetService/aiDataSetServiceImpl"
@@ -52,24 +63,14 @@ import (
 	controller2 "nova-factory-server/app/business/iot/system/controller"
 	systemDaoImpl2 "nova-factory-server/app/business/iot/system/dao/systemDaoImpl"
 	systemServiceImpl2 "nova-factory-server/app/business/iot/system/service/systemServiceImpl"
-	"nova-factory-server/app/business/monitor/monitorController"
-	"nova-factory-server/app/business/monitor/monitorDao/monitorDaoImpl"
-	"nova-factory-server/app/business/monitor/monitorService/monitorServiceImpl"
-	"nova-factory-server/app/business/product/productController"
-	"nova-factory-server/app/business/product/productDao/productDaoImpl"
-	"nova-factory-server/app/business/product/productService/productServiceImpl"
-	"nova-factory-server/app/business/system/systemController"
-	"nova-factory-server/app/business/system/systemDao/systemDaoImpl"
-	"nova-factory-server/app/business/system/systemService/systemServiceImpl"
-	"nova-factory-server/app/business/tool/toolController"
-	"nova-factory-server/app/business/tool/toolDao/toolDaoImpl"
-	"nova-factory-server/app/business/tool/toolService/toolServiceImpl"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/datasource/mysql"
 	"nova-factory-server/app/datasource/objectFile"
 	"nova-factory-server/app/routes"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Injectors from wire.go:
@@ -80,54 +81,54 @@ func wireApp() (*gin.Engine, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	iUserDao := systemDaoImpl.NewSysUserDao(sqlyContext)
-	iPermissionDao := systemDaoImpl.NewSysPermissionDao(sqlyContext)
-	iRoleDao := systemDaoImpl.NewSysRoleDao(sqlyContext)
-	iLogininforDao := monitorDaoImpl.NewLogininforDao(sqlyContext)
-	iConfigDao := systemDaoImpl.NewSysConfigDao(sqlyContext)
-	iConfigService := systemServiceImpl.NewConfigService(iConfigDao, cacheCache)
-	iLoginService := systemServiceImpl.NewLoginService(cacheCache, iUserDao, iPermissionDao, iRoleDao, iLogininforDao, iConfigService)
-	iUserPostDao := systemDaoImpl.NewSysUserPostDao(sqlyContext)
-	iUserRoleDao := systemDaoImpl.NewSysUserRoleDao(sqlyContext)
+	iUserDao := systemDaoImpl3.NewSysUserDao(sqlyContext)
+	iPermissionDao := systemDaoImpl3.NewSysPermissionDao(sqlyContext)
+	iRoleDao := systemDaoImpl3.NewSysRoleDao(sqlyContext)
+	iLogininforDao := monitorDaoImpl2.NewLogininforDao(sqlyContext)
+	iConfigDao := systemDaoImpl3.NewSysConfigDao(sqlyContext)
+	iConfigService := systemServiceImpl3.NewConfigService(iConfigDao, cacheCache)
+	iLoginService := systemServiceImpl3.NewLoginService(cacheCache, iUserDao, iPermissionDao, iRoleDao, iLogininforDao, iConfigService)
+	iUserPostDao := systemDaoImpl3.NewSysUserPostDao(sqlyContext)
+	iUserRoleDao := systemDaoImpl3.NewSysUserRoleDao(sqlyContext)
 	objectFileObjectFile := objectFile.NewConfig()
-	iDeptDao := systemDaoImpl.NewSysDeptDao(sqlyContext)
-	iPostDao := systemDaoImpl.NewSysPostDao(sqlyContext)
-	iUserDeptScopeDao := systemDaoImpl.NewSysUserDeptScopeDao(sqlyContext)
-	iUserService := systemServiceImpl.NewUserService(sqlyContext, iUserDao, iUserPostDao, iUserRoleDao, objectFileObjectFile, iDeptDao, iRoleDao, iPostDao, iUserDeptScopeDao, iConfigService)
-	iLogininforService := monitorServiceImpl.NewLogininforService(iLogininforDao)
-	login := systemController.NewLogin(iLoginService, iUserService, iConfigService, iLogininforService)
-	iPostService := systemServiceImpl.NewPostService(iPostDao)
-	iRolePermissionDao := systemDaoImpl.NewSysRolePermissionDao(sqlyContext)
-	iRoleService := systemServiceImpl.NewRoleService(sqlyContext, iRoleDao, iRolePermissionDao, iUserRoleDao)
-	user := systemController.NewUser(iUserService, iPostService, iRoleService)
-	iDeptService := systemServiceImpl.NewDeptService(iDeptDao, iRoleDao)
-	dept := systemController.NewDept(iDeptService)
-	iDictTypeDao := systemDaoImpl.NewSysDictTypeDao(sqlyContext)
-	iDictTypeService := systemServiceImpl.NewDictTypeService(iDictTypeDao, cacheCache)
-	iDictDataDao := systemDaoImpl.NewSysDictDataDao(sqlyContext)
-	iDictDataService := systemServiceImpl.NewDictDataService(iDictDataDao, cacheCache)
-	dictType := systemController.NewDictType(iDictTypeService, iDictDataService)
-	dictData := systemController.NewDictData(iDictDataService)
-	role := systemController.NewRole(iRoleService)
-	post := systemController.NewPost(iPostService)
-	profile := systemController.NewProfile(iUserService)
-	config := systemController.NewConfig(iConfigService)
-	iFileService := systemServiceImpl.NewFileService(objectFileObjectFile)
-	file := systemController.NewFile(iFileService)
-	iSseService := systemServiceImpl.NewSseService(cacheCache)
-	sse := systemController.NewSse(iSseService)
-	iSysNoticeDao := systemDaoImpl.NewSysNoticeDao(sqlyContext)
-	iSysNoticeService := systemServiceImpl.NewNoticeService(iSysNoticeDao, iUserDao, iSseService)
-	notice := systemController.NewNotice(iSysNoticeService)
-	iSysPermissionService := systemServiceImpl.NewPermissionService(iPermissionDao)
-	permission := systemController.NewPermission(iSysPermissionService)
-	iSelectBoxService := systemServiceImpl.NewSelectService(iPermissionDao, iDeptDao)
-	selectBox := systemController.NewSelectBox(iSelectBoxService)
+	iDeptDao := systemDaoImpl3.NewSysDeptDao(sqlyContext)
+	iPostDao := systemDaoImpl3.NewSysPostDao(sqlyContext)
+	iUserDeptScopeDao := systemDaoImpl3.NewSysUserDeptScopeDao(sqlyContext)
+	iUserService := systemServiceImpl3.NewUserService(sqlyContext, iUserDao, iUserPostDao, iUserRoleDao, objectFileObjectFile, iDeptDao, iRoleDao, iPostDao, iUserDeptScopeDao, iConfigService)
+	iLogininforService := monitorServiceImpl2.NewLogininforService(iLogininforDao)
+	login := systemController2.NewLogin(iLoginService, iUserService, iConfigService, iLogininforService)
+	iPostService := systemServiceImpl3.NewPostService(iPostDao)
+	iRolePermissionDao := systemDaoImpl3.NewSysRolePermissionDao(sqlyContext)
+	iRoleService := systemServiceImpl3.NewRoleService(sqlyContext, iRoleDao, iRolePermissionDao, iUserRoleDao)
+	user := systemController2.NewUser(iUserService, iPostService, iRoleService)
+	iDeptService := systemServiceImpl3.NewDeptService(iDeptDao, iRoleDao)
+	dept := systemController2.NewDept(iDeptService)
+	iDictTypeDao := systemDaoImpl3.NewSysDictTypeDao(sqlyContext)
+	iDictTypeService := systemServiceImpl3.NewDictTypeService(iDictTypeDao, cacheCache)
+	iDictDataDao := systemDaoImpl3.NewSysDictDataDao(sqlyContext)
+	iDictDataService := systemServiceImpl3.NewDictDataService(iDictDataDao, cacheCache)
+	dictType := systemController2.NewDictType(iDictTypeService, iDictDataService)
+	dictData := systemController2.NewDictData(iDictDataService)
+	role := systemController2.NewRole(iRoleService)
+	post := systemController2.NewPost(iPostService)
+	profile := systemController2.NewProfile(iUserService)
+	config := systemController2.NewConfig(iConfigService)
+	iFileService := systemServiceImpl3.NewFileService(objectFileObjectFile)
+	file := systemController2.NewFile(iFileService)
+	iSseService := systemServiceImpl3.NewSseService(cacheCache)
+	sse := systemController2.NewSse(iSseService)
+	iSysNoticeDao := systemDaoImpl3.NewSysNoticeDao(sqlyContext)
+	iSysNoticeService := systemServiceImpl3.NewNoticeService(iSysNoticeDao, iUserDao, iSseService)
+	notice := systemController2.NewNotice(iSysNoticeService)
+	iSysPermissionService := systemServiceImpl3.NewPermissionService(iPermissionDao)
+	permission := systemController2.NewPermission(iSysPermissionService)
+	iSelectBoxService := systemServiceImpl3.NewSelectService(iPermissionDao, iDeptDao)
+	selectBox := systemController2.NewSelectBox(iSelectBoxService)
 	db := mysql.NewDB()
-	iSysShiftDao := systemDaoImpl.NewISysShiftDaoImpl(db)
-	iSysShiftService := systemServiceImpl.NewISysShiftServiceImpl(iSysShiftDao)
-	shift := systemController.NewShift(iSysShiftService)
-	system := &systemController.System{
+	iSysShiftDao := systemDaoImpl3.NewISysShiftDaoImpl(db)
+	iSysShiftService := systemServiceImpl3.NewISysShiftServiceImpl(iSysShiftDao)
+	shift := systemController2.NewShift(iSysShiftService)
+	system := &systemController2.System{
 		Login:      login,
 		User:       user,
 		Dept:       dept,
@@ -144,28 +145,28 @@ func wireApp() (*gin.Engine, func(), error) {
 		SelectBox:  selectBox,
 		Shift:      shift,
 	}
-	infoServer := monitorController.NewInfoServer()
-	iUserOnlineService := monitorServiceImpl.NewUserOnlineService(cacheCache)
-	userOnline := monitorController.NewUserOnline(iUserOnlineService)
-	logininfor := monitorController.NewLogininfor(iLogininforService)
-	iOperLog := monitorDaoImpl.NewOperLog(sqlyContext)
-	iSysOperLogService := monitorServiceImpl.NewOperLog(iOperLog)
-	operLog := monitorController.NewOperLog(iSysOperLogService)
-	iJobDao := monitorDaoImpl.NewJobDao(sqlyContext)
-	iJobService := monitorServiceImpl.NewJobService(cacheCache, iJobDao)
-	job := monitorController.NewJob(iJobService)
-	monitor := &monitorController.Monitor{
+	infoServer := monitorController2.NewInfoServer()
+	iUserOnlineService := monitorServiceImpl2.NewUserOnlineService(cacheCache)
+	userOnline := monitorController2.NewUserOnline(iUserOnlineService)
+	logininfor := monitorController2.NewLogininfor(iLogininforService)
+	iOperLog := monitorDaoImpl2.NewOperLog(sqlyContext)
+	iSysOperLogService := monitorServiceImpl2.NewOperLog(iOperLog)
+	operLog := monitorController2.NewOperLog(iSysOperLogService)
+	iJobDao := monitorDaoImpl2.NewJobDao(sqlyContext)
+	iJobService := monitorServiceImpl2.NewJobService(cacheCache, iJobDao)
+	job := monitorController2.NewJob(iJobService)
+	monitor := &monitorController2.Monitor{
 		Server:     infoServer,
 		UserOnline: userOnline,
 		Logfor:     logininfor,
 		Oper:       operLog,
 		Job:        job,
 	}
-	iGenTableColumn := toolDaoImpl.NewGenTableColumnDao(sqlyContext)
-	iGenTable := toolDaoImpl.GetGenTableDao(sqlyContext)
+	iGenTableColumn := toolDaoImpl2.NewGenTableColumnDao(sqlyContext)
+	iGenTable := toolDaoImpl2.GetGenTableDao(sqlyContext)
 	iGenTableService := toolServiceImpl.NewGenTabletService(iGenTableColumn, iGenTable)
-	genTable := toolController.NewGenTable(iGenTableService)
-	tool := &toolController.Tool{
+	genTable := toolController2.NewGenTable(iGenTableService)
+	tool := &toolController2.Tool{
 		GenTable: genTable,
 	}
 	iDeviceDao := deviceDaoImpl.NewSysDeviceDaoImpl(db)
@@ -364,8 +365,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	iSysProductLaboratoryDao := productDaoImpl.NewSysProductLaboratoryDao(db)
 	iSysProductLaboratoryService := productServiceImpl.NewSysProductLaboratoryService(iSysProductLaboratoryDao, iUserDao)
-	laboratory := productController.NewLaboratory(iSysProductLaboratoryService, iDictDataService)
-	product := &productController.Product{
+	laboratory := productController2.NewLaboratory(iSysProductLaboratoryService, iDictDataService)
+	product := &productController2.Product{
 		Laboratory: laboratory,
 	}
 	iResourceFileDao := resourceDaoImpl.NewSysResourceFileDao(db)

@@ -2,11 +2,11 @@ package deviceServiceImpl
 
 import (
 	"errors"
+	"nova-factory-server/app/business/admin/system/systemDao"
+	"nova-factory-server/app/business/admin/system/systemModels"
 	"nova-factory-server/app/business/iot/asset/device/deviceDao"
 	"nova-factory-server/app/business/iot/asset/device/deviceModels"
 	"nova-factory-server/app/business/iot/asset/device/deviceService"
-	"nova-factory-server/app/business/system/systemDao"
-	"nova-factory-server/app/business/system/systemModels"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
