@@ -12,12 +12,10 @@ import (
 
 var GinProviderSet = wire.NewSet(NewGinEngine)
 
-type Ai struct{}
-
 func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
-	ai *aiDataSetController.AiDataSet) *Ai {
+	ai *aiDataSetController.AiDataSet) *AI {
 
 	group := app.Engine.Group("")
 	ai.Dataset.PublicRoutes(group)
@@ -25,5 +23,5 @@ func NewGinEngine(
 	ai.Prediction.PrivateRoutes(group) // 工业智能体
 	ai.Exception.PrivateRoutes(group)  // 工业智能体
 	ai.Control.PrivateRoutes(group)
-	return &Ai{}
+	return &AI{}
 }
