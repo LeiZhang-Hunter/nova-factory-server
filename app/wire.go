@@ -22,6 +22,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	panic(wire.Build(
 		routes.ProviderSet,
 		iot.ProviderSet,
+		ai.ProviderSet,
 		admin.ProviderSet,
 		datasource.ProviderSet,
 		finalEngine,

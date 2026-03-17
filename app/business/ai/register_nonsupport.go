@@ -13,4 +13,4 @@ func NewGinEngine(
 	return &AI{}
 }
 
-var ProviderSet = wire.NewSet()
+var ProviderSet = wire.NewSet(NewGinEngine)

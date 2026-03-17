@@ -21,6 +21,7 @@ import (
 	"nova-factory-server/app/business/admin/tool/toolController"
 	"nova-factory-server/app/business/admin/tool/toolDao/toolDaoImpl"
 	"nova-factory-server/app/business/admin/tool/toolService/toolServiceImpl"
+	"nova-factory-server/app/business/ai"
 	"nova-factory-server/app/business/iot"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/mysql"
@@ -133,7 +134,8 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	adminAdmin := admin.NewGinEngine(app, cacheCache, system, monitor, tool, product)
 	iotIot := iot.NewGinEngine(app, cacheCache)
-	engine := finalEngine(app, adminAdmin, iotIot)
+	aiAI := ai.NewGinEngine(app)
+	engine := finalEngine(app, adminAdmin, iotIot, aiAI)
 	return engine, func() {
 		cleanup()
 	}, nil
@@ -141,6 +143,6 @@ func wireApp() (*gin.Engine, func(), error) {
 
 // wire.go:
 
-func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot) *gin.Engine {
+func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI) *gin.Engine {
 	return app.Engine
 }
