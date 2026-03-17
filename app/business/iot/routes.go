@@ -1,3 +1,6 @@
+//go:build iot
+// +build iot
+
 package iot
 
 import (
@@ -16,16 +19,16 @@ import (
 	"nova-factory-server/app/business/iot/metric/device/metricController"
 	iotSystemControllerImpl "nova-factory-server/app/business/iot/system/controller"
 	"nova-factory-server/app/daemonize"
+	"nova-factory-server/app/routes"
 	"nova-factory-server/app/utils/gin_mcp"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 )
 
 var GinProviderSet = wire.NewSet(NewGinEngine)
 
 func NewGinEngine(
-	r *gin.Engine,
+	app *routes.App,
 	mpcServer *gin_mcp.GinMCP,
 	materialC *materialController.Material,
 	craft *craftRouteController.CraftRoute,
@@ -41,7 +44,8 @@ func NewGinEngine(
 	iotSystem iotSystemControllerImpl.System,
 	camera cameraController.CameraController,
 	dc *deviceController.Device,
-) {
+) *Iot {
+	r := app.Engine
 	group := r.Group("")
 	//不做鉴权的
 	{
@@ -121,4 +125,5 @@ func NewGinEngine(
 	deviceMonitor.DeviceControl.PrivateRoutes(s)
 	deviceMonitor.CameraGrpc.PrivateRoutes(s)
 	s.Start()
+	return &Iot{}
 }

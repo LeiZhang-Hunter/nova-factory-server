@@ -2,6 +2,17 @@
 
 package iot
 
-import "github.com/google/wire"
+import (
+	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/routes"
 
-var ProviderSet = wire.NewSet()
+	"github.com/google/wire"
+)
+
+func NewGinEngine(
+	app *routes.App,
+	cache cache.Cache) *Iot {
+	return &Iot{}
+}
+
+var ProviderSet = wire.NewSet(NewGinEngine)

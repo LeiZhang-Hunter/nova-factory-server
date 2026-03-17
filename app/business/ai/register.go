@@ -1,5 +1,5 @@
-//go:build shop
-// +build shop
+//go:build ai
+// +build ai
 
 package ai
 
