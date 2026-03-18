@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/admin"
 	"nova-factory-server/app/business/ai"
 	"nova-factory-server/app/business/iot"
+	"nova-factory-server/app/business/shop"
 	"nova-factory-server/app/datasource"
 	"nova-factory-server/app/routes"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/google/wire"
 )
 
-func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI) *gin.Engine {
+func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.Shop) *gin.Engine {
 	return app.Engine
 }
 
@@ -23,6 +24,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		routes.ProviderSet,
 		iot.ProviderSet,
 		ai.ProviderSet,
+		shop.ProviderSet,
 		admin.ProviderSet,
 		datasource.ProviderSet,
 		finalEngine,
