@@ -5,10 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
-	"github.com/tmaxmax/go-sse"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/url"
@@ -16,6 +12,11 @@ import (
 	"nova-factory-server/app/business/ai/aiDataSetService"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"github.com/tmaxmax/go-sse"
+	"go.uber.org/zap"
 )
 
 type IChartServiceImpl struct {
@@ -402,6 +403,7 @@ func (i *IChartServiceImpl) AgentList(c *gin.Context, req *aiDataSetModels.ListA
 	var response aiDataSetModels.ListAgentResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
+		zap.L().Error("读取会话列表失败", zap.Error(err))
 		return &aiDataSetModels.ListAgentResponse{}, errors.New("读取会话列表失败")
 	}
 	if response.Code != 0 {
