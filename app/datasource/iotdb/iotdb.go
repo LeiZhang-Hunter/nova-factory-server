@@ -3,6 +3,7 @@ package iotdb
 import (
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/apache/iotdb-client-go/client"
 	"github.com/spf13/viper"
@@ -41,15 +42,29 @@ func (i *IotDb) connect() *IotDb {
 	pool := client.NewSessionPool(config, 3, 60000, 60000, false)
 	//defer sessionPool.Close()
 	i.pool = &pool
-	session, err := pool.GetSession()
-	if err != nil {
-		zap.L().Error("get session", zap.Error(err))
-		if err.Error() != "sessionPool has closed" && err.Error() != "get session timeout" {
+	var session client.Session
+	var err error
+	for {
+		session, err = pool.GetSession()
+		if err == nil {
+			//defer pool.PutBack(session)
 			return i
 		}
+		if err.Error() == "get session timeout" {
+			zap.L().Error("get session error", zap.Error(err))
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		if err != nil {
+			zap.L().Error("get session error", zap.Error(err))
+			i.pool.PutBack(session)
+			if err.Error() == "sessionPool has closed" {
+				return i
+			}
+			time.Sleep(5 * time.Second)
+			continue
+		}
 	}
-
-	defer pool.PutBack(session)
 
 	return i
 }
