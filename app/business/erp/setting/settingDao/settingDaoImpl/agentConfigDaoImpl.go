@@ -83,7 +83,7 @@ func (a *AgentConfigDaoImpl) List(c *gin.Context, req *settingModels.AgentConfig
 	if req.AgentID != "" {
 		db = db.Where("agent_id = ?", req.AgentID)
 	}
-	if req.Status == 0 || req.Status == 1 {
+	if req.Status != nil {
 		db = db.Where("status = ?", req.Status)
 	}
 	if req.Page <= 0 {

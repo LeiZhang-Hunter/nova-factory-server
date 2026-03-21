@@ -317,21 +317,67 @@ type AgentsCompletionsApiRequest struct {
 	CustomHeader map[string]string `json:"custom_header"`
 }
 
+// AgentsCompletionsApiResponse Agent 会话补全响应
 type AgentsCompletionsApiResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    struct {
-		SessionId string                `json:"session_id"`
-		Answer    string                `json:"answer"`
-		Reference *CompletionsReference `json:"reference,omitempty"`
-		Param     []struct {
-			Key      string `json:"key"`
-			Name     string `json:"name"`
-			Optional bool   `json:"optional"`
-			Type     string `json:"type"`
-			Value    string `json:"value,omitempty"`
-		} `json:"param"`
-	} `json:"data"`
+	Code    int                               `json:"code"`
+	Message string                            `json:"message,omitempty"`
+	Data    *AgentsCompletionsApiResponseData `json:"data"`
+}
+
+// AgentsCompletionsApiResponseData Agent 补全事件主体
+type AgentsCompletionsApiResponseData struct {
+	CreatedAt int                         `json:"created_at"`
+	Data      *AgentsCompletionsEventData `json:"data"`
+	Event     string                      `json:"event"`
+	MessageId string                      `json:"message_id"`
+	SessionId string                      `json:"session_id"`
+	TaskId    string                      `json:"task_id"`
+}
+
+// AgentsCompletionsEventData Agent 事件详情
+type AgentsCompletionsEventData struct {
+	Content     string                      `json:"content"`
+	CreatedAt   float64                     `json:"created_at"`
+	ElapsedTime float64                     `json:"elapsed_time"`
+	Inputs      map[string]any              `json:"inputs"`
+	Outputs     *AgentsCompletionsOutputs   `json:"outputs"`
+	Reference   *AgentsCompletionsReference `json:"reference"`
+}
+
+// AgentsCompletionsOutputs Agent 输出详情
+type AgentsCompletionsOutputs struct {
+	CreatedTime float64 `json:"_created_time"`
+	ElapsedTime float64 `json:"_elapsed_time"`
+	Content     string  `json:"content"`
+}
+
+// AgentsCompletionsReference 检索引用信息
+type AgentsCompletionsReference struct {
+	Chunks  map[string]*AgentsCompletionsReferenceChunk `json:"chunks"`
+	DocAggs map[string]*AgentsCompletionsDocAgg         `json:"doc_aggs"`
+}
+
+// AgentsCompletionsReferenceChunk 检索切片信息
+type AgentsCompletionsReferenceChunk struct {
+	Id               string      `json:"id"`
+	Content          string      `json:"content"`
+	DocumentId       string      `json:"document_id"`
+	DocumentName     string      `json:"document_name"`
+	DatasetId        string      `json:"dataset_id"`
+	ImageId          string      `json:"image_id"`
+	Positions        [][]int     `json:"positions"`
+	Url              interface{} `json:"url"`
+	Similarity       float64     `json:"similarity"`
+	VectorSimilarity float64     `json:"vector_similarity"`
+	TermSimilarity   float64     `json:"term_similarity"`
+	DocType          string      `json:"doc_type"`
+}
+
+// AgentsCompletionsDocAgg 文档聚合信息
+type AgentsCompletionsDocAgg struct {
+	DocName string `json:"doc_name"`
+	DocId   string `json:"doc_id"`
+	Count   int    `json:"count"`
 }
 
 // AskRequest 智能提问

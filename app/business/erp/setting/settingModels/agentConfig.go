@@ -26,7 +26,7 @@ type AgentConfigUpsert struct {
 type AgentConfigQuery struct {
 	Name    string `form:"name"`
 	AgentID string `form:"agentId"`
-	Status  int32  `form:"status"`
+	Status  *bool  `form:"status"`
 	Page    int64  `form:"page"`
 	Size    int64  `form:"size"`
 }

@@ -1,9 +1,10 @@
 package aiDataSetController
 
 import (
-	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/ai/aiDataSetModels"
 	"nova-factory-server/app/utils/baizeContext"
+
+	"github.com/gin-gonic/gin"
 )
 
 // SessionCreate 创建助理会话
@@ -181,7 +182,7 @@ func (d *Dataset) AgentCompletions(c *gin.Context) {
 		return
 	}
 	if !req.Stream {
-		baizeContext.SuccessData(c, response)
+		baizeContext.SuccessData(c, response.Data)
 	}
 }
 
