@@ -17,6 +17,8 @@ var GinProviderSet = wire.NewSet(NewGinEngine)
 func NewGinEngine(app *routes.App, cache cache.Cache, controller *settingController.Controller) *Erp {
 	group := app.Engine.Group("")
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
-	controller.AgentConfig.PrivateRoutes(group)
+	{
+		controller.AgentConfig.PrivateRoutes(group)
+	}
 	return &Erp{}
 }

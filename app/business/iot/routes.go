@@ -23,6 +23,7 @@ import (
 	"nova-factory-server/app/daemonize"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/iotdb"
+	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
 	"time"
 
@@ -67,6 +68,7 @@ func NewGinEngine(
 	}
 
 	// 做鉴权的
+	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
 	{
 		iotSystem.Electric.PrivateRoutes(group)
 		dc.Info.PrivateRoutes(group)  //资产管理---设备模块

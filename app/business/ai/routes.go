@@ -5,6 +5,7 @@ package ai
 import (
 	"nova-factory-server/app/business/ai/aiDataSetController"
 	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
 
 	"github.com/google/wire"
@@ -19,9 +20,12 @@ func NewGinEngine(
 
 	group := app.Engine.Group("")
 	ai.Dataset.PublicRoutes(group)
-	ai.Dataset.PrivateRoutes(group)    // 工业智能体
-	ai.Prediction.PrivateRoutes(group) // 工业智能体
-	ai.Exception.PrivateRoutes(group)  // 工业智能体
-	ai.Control.PrivateRoutes(group)
+	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
+	{
+		ai.Dataset.PrivateRoutes(group)    // 工业智能体
+		ai.Prediction.PrivateRoutes(group) // 工业智能体
+		ai.Exception.PrivateRoutes(group)  // 工业智能体
+		ai.Control.PrivateRoutes(group)
+	}
 	return &AI{}
 }
