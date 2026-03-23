@@ -26,6 +26,7 @@ func NewGinEngine(
 		ai.Prediction.PrivateRoutes(group) // 工业智能体
 		ai.Exception.PrivateRoutes(group)  // 工业智能体
 		ai.Control.PrivateRoutes(group)
+		ai.Model.PrivateRoutes(group)
 	}
 	return &AI{}
 }

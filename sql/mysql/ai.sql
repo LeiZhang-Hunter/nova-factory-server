@@ -117,3 +117,45 @@ CREATE TABLE `sys_ai_prediction_control`  (
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '趋势控制' ROW_FORMAT = Dynamic;
+
+
+CREATE TABLE `ai_model_provider` (
+    `id` bigint(20) NOT NULL COMMENT '主键ID',
+    `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '供应商名称',
+    `logo` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '图标地址',
+    `tags` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '能力标签，逗号分隔',
+    `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
+    `rank` int(11) NOT NULL DEFAULT 0 COMMENT '排序值，越大越靠前',
+    `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+    `create_time_db` datetime(0) DEFAULT NULL COMMENT '创建时间(系统)',
+    `update_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+    `update_time_db` datetime(0) DEFAULT NULL COMMENT '更新时间(系统)',
+    `state` tinyint(1) DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uk_provider_name_state` (`name`,`state`) USING BTREE,
+    KEY `idx_status` (`status`) USING BTREE,
+    KEY `idx_rank` (`rank`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'AI模型供应商配置' ROW_FORMAT = Dynamic;
+
+CREATE TABLE `ai_llm` (
+    `llm_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模型名称',
+    `model_type` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模型类型',
+    `fid` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模型唯一标识',
+    `max_tokens` int(11) NOT NULL COMMENT '最大Token',
+    `tags` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模型标签',
+    `is_tools` tinyint(1) NOT NULL COMMENT '是否支持工具调用：0否1是',
+    `status` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '状态',
+    `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+    `create_time_db` datetime(0) DEFAULT NULL COMMENT '创建时间(系统)',
+    `update_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+    `update_time_db` datetime(0) DEFAULT NULL COMMENT '更新时间(系统)',
+    `state` tinyint(1) DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`fid`, `llm_name`) USING BTREE,
+    KEY `idx_llm_name` (`llm_name`) USING BTREE,
+    KEY `idx_llm_model_type` (`model_type`) USING BTREE,
+    KEY `idx_llm_fid` (`fid`) USING BTREE,
+    KEY `idx_llm_tags` (`tags`) USING BTREE,
+    KEY `idx_llm_status` (`status`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'LLM模型配置' ROW_FORMAT = Dynamic;

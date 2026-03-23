@@ -23,7 +23,7 @@ import (
 	"charm.land/fantasy/providers/openrouter"
 	"charm.land/fantasy/providers/vercel"
 
-	"nova-factory-server/app/utils/ai/auth"
+	"nova-factory-server/app/utils/llm/auth"
 )
 
 const (

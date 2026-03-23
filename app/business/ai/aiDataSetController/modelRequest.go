@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"nova-factory-server/app/business/ai/aiDataSetModels"
-	models2 "nova-factory-server/app/utils/ai/models"
 	"nova-factory-server/app/utils/baizeContext"
+	models2 "nova-factory-server/app/utils/llm/models"
 
 	"charm.land/fantasy"
 	"github.com/gin-gonic/gin"
