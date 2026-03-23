@@ -85,6 +85,7 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 	ai.POST("/session/conversation/related_questions", middlewares.HasPermission("ai:dataset:session:conversation:related_questions"), d.ConversationRelatedQuestions)
 	// 智能问答
 	ai.POST("/session/ask", middlewares.HasPermission("ai:dataset:session:ask"), d.Ask)
+	ai.POST("/model/request", middlewares.HasPermission("ai:dataset:model:request"), d.ModelRequest)
 
 }
 
