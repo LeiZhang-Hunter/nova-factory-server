@@ -1,6 +1,7 @@
 package settingDaoImpl
 
 import (
+	"errors"
 	"time"
 
 	"nova-factory-server/app/business/erp/setting/settingDao"
@@ -70,6 +71,10 @@ func (a *AgentConfigDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 func (a *AgentConfigDaoImpl) GetByID(c *gin.Context, id int64) (*settingModels.AgentConfig, error) {
 	var item settingModels.AgentConfig
 	if err := a.db.WithContext(c).Table(a.table).Where("id = ?", id).Where("state = 0").First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 	return &item, nil
