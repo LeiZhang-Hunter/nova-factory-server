@@ -19,9 +19,16 @@ func NewGinEngine(
 	cache cache.Cache,
 	ai *aiDataSetController.AiDataSet,
 	bootstrap *FactoryBootstrap) *AI {
-	if err := bootstrap.Init(); err != nil {
-		zap.L().Warn("init llm factories failed", zap.Error(err))
-	}
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				zap.L().Warn("async init llm factories panic", zap.Any("panic", r))
+			}
+		}()
+		if err := bootstrap.Init(); err != nil {
+			zap.L().Warn("init llm factories failed", zap.Error(err))
+		}
+	}()
 
 	group := app.Engine.Group("")
 	ai.Dataset.PublicRoutes(group)

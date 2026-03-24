@@ -412,7 +412,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Control:    control,
 		Model:      model,
 	}
-	factoryBootstrap := ai.NewFactoryBootstrap(db)
+	factoryBootstrap := ai.NewFactoryBootstrap(db, iAiModelProviderDao, iAiLLMDao)
 	aiAI := ai.NewGinEngine(app, cacheCache, aiDataSet, factoryBootstrap)
 	iShopCategoryDao := shopDaoImpl.NewShopCategoryDao(db)
 	iShopCategoryService := shopServiceImpl.NewShopCategoryService(iShopCategoryDao)
