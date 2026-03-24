@@ -3,20 +3,25 @@
 package ai
 
 import (
-	"nova-factory-server/app/business/ai/aiDataSetController"
+	"nova-factory-server/app/business/ai/agent/aiDataSetController"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
 
 	"github.com/google/wire"
+	"go.uber.org/zap"
 )
 
-var GinProviderSet = wire.NewSet(NewGinEngine)
+var GinProviderSet = wire.NewSet(NewFactoryBootstrap, NewGinEngine)
 
 func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
-	ai *aiDataSetController.AiDataSet) *AI {
+	ai *aiDataSetController.AiDataSet,
+	bootstrap *FactoryBootstrap) *AI {
+	if err := bootstrap.Init(); err != nil {
+		zap.L().Warn("init llm factories failed", zap.Error(err))
+	}
 
 	group := app.Engine.Group("")
 	ai.Dataset.PublicRoutes(group)

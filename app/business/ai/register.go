@@ -4,9 +4,9 @@
 package ai
 
 import (
-	"nova-factory-server/app/business/ai/aiDataSetController"
-	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
-	"nova-factory-server/app/business/ai/aiDataSetService/aiDataSetServiceImpl"
+	"nova-factory-server/app/business/ai/agent/aiDataSetController"
+	"nova-factory-server/app/business/ai/agent/aiDataSetDao/aiDataSetDaoImpl"
+	"nova-factory-server/app/business/ai/agent/aiDataSetService/aiDataSetServiceImpl"
 
 	"github.com/google/wire"
 )

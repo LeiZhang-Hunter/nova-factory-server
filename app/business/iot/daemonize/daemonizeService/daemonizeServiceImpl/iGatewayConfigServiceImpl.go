@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"nova-factory-server/app/business/admin/system/systemDao"
-	"nova-factory-server/app/business/ai/aiDataSetDao"
+	"nova-factory-server/app/business/ai/agent/aiDataSetDao"
 	alertDao2 "nova-factory-server/app/business/iot/alert/alertDao"
 	deviceDao2 "nova-factory-server/app/business/iot/asset/device/deviceDao"
 	deviceModels2 "nova-factory-server/app/business/iot/asset/device/deviceModels"

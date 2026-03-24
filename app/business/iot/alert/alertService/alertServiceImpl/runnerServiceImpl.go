@@ -2,8 +2,8 @@ package alertServiceImpl
 
 import (
 	"errors"
-	"nova-factory-server/app/business/ai/aiDataSetModels"
-	"nova-factory-server/app/business/ai/aiDataSetService"
+	"nova-factory-server/app/business/ai/agent/aiDataSetModels"
+	"nova-factory-server/app/business/ai/agent/aiDataSetService"
 	"nova-factory-server/app/business/iot/alert/alertService"
 	"sync"
 

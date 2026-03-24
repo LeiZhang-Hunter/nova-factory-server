@@ -1,7 +1,7 @@
 package alertController
 
 import (
-	"nova-factory-server/app/business/ai/aiDataSetService"
+	"nova-factory-server/app/business/ai/agent/aiDataSetService"
 	"nova-factory-server/app/business/iot/alert/alertDao"
 	"nova-factory-server/app/business/iot/alert/alertModels"
 	alertService2 "nova-factory-server/app/business/iot/alert/alertService"

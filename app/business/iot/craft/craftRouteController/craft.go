@@ -2,7 +2,7 @@ package craftRouteController
 
 import (
 	"errors"
-	"nova-factory-server/app/business/ai/aiDataSetModels"
+	"nova-factory-server/app/business/ai/agent/aiDataSetModels"
 	"nova-factory-server/app/business/iot/craft/craftRouteModels"
 	"nova-factory-server/app/business/iot/craft/craftRouteService"
 	"nova-factory-server/app/middlewares"
