@@ -36,6 +36,18 @@ func (a *AiLLMDaoImpl) ListByFIDs(c *gin.Context, fids []string) ([]*aiDataSetMo
 	return llms, nil
 }
 
+func (a *AiLLMDaoImpl) ListByFactory(c *gin.Context, factory string) ([]*aiDataSetModels.AiLLMEntity, error) {
+	rows := make([]*aiDataSetModels.AiLLMEntity, 0)
+	if factory == "" {
+		return rows, nil
+	}
+	if err := a.db.WithContext(c).Table(a.tableName).Where("state = ?", commonStatus.NORMAL).
+		Where("fid = ?", factory).Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func (a *AiLLMDaoImpl) UpsertFactoryLLMs(tx *gorm.DB, providerName string, llms []*aiDataSetModels.FactoryLLMUpsert, status string, now time.Time) error {
 	for _, llm := range llms {
 		if llm == nil || llm.LLMName == "" {
@@ -90,4 +102,23 @@ func (a *AiLLMDaoImpl) UpsertFactoryLLMs(tx *gorm.DB, providerName string, llms 
 		}
 	}
 	return nil
+}
+
+func (a *AiLLMDaoImpl) ListExistingLLMNames(c *gin.Context, llmNames []string) ([]string, error) {
+	if len(llmNames) == 0 {
+		return make([]string, 0), nil
+	}
+	type row struct {
+		LlmName string `gorm:"column:llm_name"`
+	}
+	rows := make([]*row, 0)
+	if err := a.db.WithContext(c).Table(a.tableName).Where("state = ?", commonStatus.NORMAL).
+		Where("llm_name IN ?", llmNames).Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	ret := make([]string, 0, len(rows))
+	for _, r := range rows {
+		ret = append(ret, r.LlmName)
+	}
+	return ret, nil
 }

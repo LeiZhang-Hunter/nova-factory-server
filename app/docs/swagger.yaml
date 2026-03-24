@@ -340,6 +340,34 @@ definitions:
         additionalProperties: true
         type: object
     type: object
+  aiDataSetModels.SetSysAiLLMSetting:
+    properties:
+      asr_id:
+        type: string
+      credit:
+        type: integer
+      embd_id:
+        type: string
+      id:
+        example: "0"
+        type: string
+      img2txt_id:
+        type: string
+      llm_id:
+        type: string
+      name:
+        type: string
+      parser_ids:
+        type: string
+      public_key:
+        type: string
+      rerank_id:
+        type: string
+      status:
+        type: string
+      tts_id:
+        type: string
+    type: object
   aiDataSetModels.SetSysAiPrediction:
     properties:
       action_id:
@@ -2585,6 +2613,7 @@ definitions:
     - 412
     - 500
     - 600
+    format: int64
     type: integer
     x-enum-comments:
       Error: 系统异常
@@ -2593,6 +2622,13 @@ definitions:
       Success: 成功
       Unauthorized: token失效
       Waring: 详情看msg
+    x-enum-descriptions:
+    - 成功
+    - token失效
+    - 没有权限
+    - 参数错误
+    - 系统异常
+    - 详情看msg
     x-enum-varnames:
     - Success
     - Unauthorized
@@ -3685,6 +3721,7 @@ paths:
       description: 下载文档
       parameters:
       - description: document_id
+        format: int64
         in: path
         name: document_id
         required: true
@@ -3804,6 +3841,7 @@ paths:
       description: 移除数据集
       parameters:
       - description: dataset_id
+        format: int64
         in: path
         name: dataset_id
         required: true
@@ -4174,6 +4212,7 @@ paths:
       description: 更新文档
       parameters:
       - description: document_id
+        format: int64
         in: path
         name: document_id
         required: true
@@ -4203,6 +4242,7 @@ paths:
       description: 上传文档
       parameters:
       - description: datasetId
+        format: int64
         in: path
         name: datasetId
         required: true
@@ -4313,6 +4353,70 @@ paths:
       summary: 设置异常预警
       tags:
       - 工业智能体/异常预警
+  /ai/model/provider/list:
+    get:
+      description: 读取模型供应商及其下级LLM列表
+      parameters:
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 模型供应商列表
+      tags:
+      - 工业智能体/模型配置
+  /ai/model/provider/setting/get:
+    get:
+      description: 根据id读取模型配置，未传id时读取当前部门最近更新配置
+      parameters:
+      - example: "0"
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 读取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 读取模型配置
+      tags:
+      - 工业智能体/模型配置
+  /ai/model/provider/setting/set:
+    post:
+      description: 新增或修改模型配置
+      parameters:
+      - description: 模型配置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.SetSysAiLLMSetting'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置模型配置
+      tags:
+      - 工业智能体/模型配置
   /ai/prediction/list:
     get:
       description: 智能预警列表
@@ -4464,6 +4568,7 @@ paths:
       description: 告警数据详情
       parameters:
       - description: objectId
+        format: int64
         in: query
         name: object
         required: true
@@ -6947,6 +7052,7 @@ paths:
       description: 移除工艺
       parameters:
       - description: craft_route_id
+        format: int64
         in: path
         name: craft_route_id
         required: true
@@ -8805,6 +8911,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:
@@ -9274,6 +9381,7 @@ paths:
         description: dictCodes
         in: path
         items:
+          format: int64
           type: integer
         name: dictCodes
         required: true
@@ -10043,6 +10151,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:
@@ -10668,6 +10777,7 @@ paths:
         description: userIds
         in: path
         items:
+          format: int64
           type: integer
         name: userIds
         required: true
@@ -10689,6 +10799,7 @@ paths:
       description: 根据用户ID获取用户信息
       parameters:
       - description: userId
+        format: int64
         in: path
         name: id
         required: true
@@ -10814,6 +10925,7 @@ paths:
       description: 查询用户数据权限
       parameters:
       - description: userId
+        format: int64
         in: path
         name: id
         required: true
@@ -10883,6 +10995,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:
@@ -10923,6 +11036,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:

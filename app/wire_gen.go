@@ -404,7 +404,11 @@ func wireApp() (*gin.Engine, func(), error) {
 	iAiLLMDao := aiDataSetDaoImpl.NewAiLLMDaoImpl(db)
 	iAiModelProviderDao := aiDataSetDaoImpl.NewIAiModelProviderDaoImpl(db, iAiLLMDao)
 	iAiModelProviderService := aiDataSetServiceImpl.NewIAiModelProviderServiceImpl(iAiModelProviderDao)
-	model := aiDataSetController.NewModel(iAiModelProviderService)
+	iAiLLMSettingDao := aiDataSetDaoImpl.NewIAiLLMSettingDaoImpl(db)
+	iAiLLMSettingService := aiDataSetServiceImpl.NewIAiLLMSettingServiceImpl(iAiLLMSettingDao, iAiLLMDao)
+	iAiUserLLMDao := aiDataSetDaoImpl.NewIAiUserLLMDaoImpl(db, iAiLLMDao)
+	iAiUserLLMService := aiDataSetServiceImpl.NewIAiUserLLMServiceImpl(iAiUserLLMDao)
+	model := aiDataSetController.NewModel(iAiModelProviderService, iAiLLMSettingService, iAiUserLLMService)
 	aiDataSet := &aiDataSetController.AiDataSet{
 		Dataset:    dataset,
 		Exception:  exception,

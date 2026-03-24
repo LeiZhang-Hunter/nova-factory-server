@@ -546,6 +546,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -727,6 +728,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "dataset_id",
                         "name": "dataset_id",
                         "in": "path",
@@ -1271,6 +1273,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -1355,6 +1358,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "datasetId",
                         "name": "datasetId",
                         "in": "path",
@@ -1507,6 +1511,107 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/model/provider/list": {
+            "get": {
+                "description": "读取模型供应商及其下级LLM列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "模型供应商列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/model/provider/setting/get": {
+            "get": {
+                "description": "根据id读取模型配置，未传id时读取当前部门最近更新配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "读取模型配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "读取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/model/provider/setting/set": {
+            "post": {
+                "description": "新增或修改模型配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "设置模型配置",
+                "parameters": [
+                    {
+                        "description": "模型配置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aiDataSetModels.SetSysAiLLMSetting"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -1750,6 +1855,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "objectId",
                         "name": "object",
                         "in": "query",
@@ -5621,6 +5727,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "craft_route_id",
                         "name": "craft_route_id",
                         "in": "path",
@@ -8559,7 +8666,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer"
+                                "type": "integer",
+                                "format": "int32"
                             }
                         }
                     }
@@ -9506,7 +9614,8 @@ const docTemplate = `{
                     {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "format": "int64"
                         },
                         "collectionFormat": "csv",
                         "description": "dictCodes",
@@ -10603,7 +10712,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer"
+                                "type": "integer",
+                                "format": "int32"
                             }
                         }
                     }
@@ -11732,7 +11842,8 @@ const docTemplate = `{
                     {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "format": "int64"
                         },
                         "collectionFormat": "csv",
                         "description": "userIds",
@@ -11936,6 +12047,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "userId",
                         "name": "id",
                         "in": "path",
@@ -12037,7 +12149,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer"
+                                "type": "integer",
+                                "format": "int32"
                             }
                         }
                     }
@@ -12102,7 +12215,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer"
+                                "type": "integer",
+                                "format": "int32"
                             }
                         }
                     }
@@ -12428,6 +12542,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "userId",
                         "name": "id",
                         "in": "path",
@@ -12975,6 +13090,48 @@ const docTemplate = `{
                 "data": {
                     "type": "object",
                     "additionalProperties": true
+                }
+            }
+        },
+        "aiDataSetModels.SetSysAiLLMSetting": {
+            "type": "object",
+            "properties": {
+                "asr_id": {
+                    "type": "string"
+                },
+                "credit": {
+                    "type": "integer"
+                },
+                "embd_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "img2txt_id": {
+                    "type": "string"
+                },
+                "llm_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parser_ids": {
+                    "type": "string"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "rerank_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tts_id": {
+                    "type": "string"
                 }
             }
         },
@@ -16176,6 +16333,7 @@ const docTemplate = `{
         },
         "response.ResCode": {
             "type": "integer",
+            "format": "int64",
             "enum": [
                 200,
                 401,
@@ -16192,6 +16350,14 @@ const docTemplate = `{
                 "Unauthorized": "token失效",
                 "Waring": "详情看msg"
             },
+            "x-enum-descriptions": [
+                "成功",
+                "token失效",
+                "没有权限",
+                "参数错误",
+                "系统异常",
+                "详情看msg"
+            ],
             "x-enum-varnames": [
                 "Success",
                 "Unauthorized",
