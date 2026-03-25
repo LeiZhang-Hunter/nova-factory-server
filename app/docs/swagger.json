@@ -1510,6 +1510,64 @@
                 }
             }
         },
+        "/ai/model/provider/global/get": {
+            "get": {
+                "description": "读取SetGlobalModel保存的用户模型配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "读取用户模型",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "llm_factory",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "读取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/model/provider/global/set": {
+            "post": {
+                "description": "新增或修改用户模型配置，user_id为0表示全局设置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "设置用户模型",
+                "parameters": [
+                    {
+                        "description": "全局模型配置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aiDataSetModels.SetSysUserLLM"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/model/provider/list": {
             "get": {
                 "description": "读取模型供应商及其下级LLM列表",
@@ -1604,6 +1662,55 @@
                 "responses": {
                     "200": {
                         "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/ocr/predict": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "上传文件并调用OCR服务进行文字提取",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/OCR"
+                ],
+                "summary": "OCR识别",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "上传文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "起始页码",
+                        "name": "start_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "最多返回词数",
+                        "name": "number_words",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "识别成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -13227,6 +13334,20 @@
                 "threshold": {
                     "description": "threshold",
                     "type": "integer"
+                }
+            }
+        },
+        "aiDataSetModels.SetSysUserLLM": {
+            "type": "object",
+            "properties": {
+                "api_base": {
+                    "type": "string"
+                },
+                "api_key": {
+                    "type": "string"
+                },
+                "llm_factory": {
+                    "type": "string"
                 }
             }
         },

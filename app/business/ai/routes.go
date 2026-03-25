@@ -32,6 +32,7 @@ func NewGinEngine(
 
 	group := app.Engine.Group("")
 	ai.Dataset.PublicRoutes(group)
+
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
 	{
 		ai.Dataset.PrivateRoutes(group)    // 工业智能体
@@ -39,6 +40,8 @@ func NewGinEngine(
 		ai.Exception.PrivateRoutes(group)  // 工业智能体
 		ai.Control.PrivateRoutes(group)
 		ai.Model.PrivateRoutes(group)
+		ai.OCR.PrivateRoutes(group)
 	}
+
 	return &AI{}
 }

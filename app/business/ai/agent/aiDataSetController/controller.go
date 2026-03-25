@@ -4,7 +4,8 @@ import (
 	"github.com/google/wire"
 )
 
-var ProviderSet = wire.NewSet(NewDataset, NewException, NewPrediction, NewControl, NewModel, wire.Struct(new(AiDataSet), "*"))
+var ProviderSet = wire.NewSet(NewDataset, NewException, NewPrediction, NewControl, NewModel,
+	NewOCR, wire.Struct(new(AiDataSet), "*"))
 
 type AiDataSet struct {
 	Dataset    *Dataset
@@ -12,4 +13,5 @@ type AiDataSet struct {
 	Prediction *Prediction
 	Control    *Control
 	Model      *Model
+	OCR        *OCR
 }

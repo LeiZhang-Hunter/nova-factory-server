@@ -443,6 +443,15 @@ definitions:
         description: threshold
         type: integer
     type: object
+  aiDataSetModels.SetSysUserLLM:
+    properties:
+      api_base:
+        type: string
+      api_key:
+        type: string
+      llm_factory:
+        type: string
+    type: object
   aiDataSetModels.UpdateAssistantRequest:
     properties:
       avatar:
@@ -4353,6 +4362,43 @@ paths:
       summary: 设置异常预警
       tags:
       - 工业智能体/异常预警
+  /ai/model/provider/global/get:
+    get:
+      description: 读取SetGlobalModel保存的用户模型配置
+      parameters:
+      - in: query
+        name: llm_factory
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 读取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 读取用户模型
+      tags:
+      - 工业智能体/模型配置
+  /ai/model/provider/global/set:
+    post:
+      description: 新增或修改用户模型配置，user_id为0表示全局设置
+      parameters:
+      - description: 全局模型配置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aiDataSetModels.SetSysUserLLM'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 设置用户模型
+      tags:
+      - 工业智能体/模型配置
   /ai/model/provider/list:
     get:
       description: 读取模型供应商及其下级LLM列表
@@ -4417,6 +4463,37 @@ paths:
       summary: 设置模型配置
       tags:
       - 工业智能体/模型配置
+  /ai/ocr/predict:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传文件并调用OCR服务进行文字提取
+      parameters:
+      - description: 上传文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: 起始页码
+        in: query
+        name: start_page
+        type: integer
+      - description: 最多返回词数
+        in: query
+        name: number_words
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 识别成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: OCR识别
+      tags:
+      - 工业智能体/OCR
   /ai/prediction/list:
     get:
       description: 智能预警列表
