@@ -2,4 +2,4 @@ package settingServiceImpl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewAgentConfigService)
+var ProviderSet = wire.NewSet(NewAgentConfigService, NewIntegrationConfigService)

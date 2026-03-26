@@ -442,8 +442,12 @@ func wireApp() (*gin.Engine, func(), error) {
 	iAgentConfigDao := settingDaoImpl.NewAgentConfigDao(db)
 	iAgentConfigService := settingServiceImpl.NewAgentConfigService(iAgentConfigDao)
 	agentConfig := settingController.NewAgentConfig(iAgentConfigService)
+	iIntegrationConfigDao := settingDaoImpl.NewIntegrationConfigDao(db)
+	iIntegrationConfigService := settingServiceImpl.NewIntegrationConfigService(iIntegrationConfigDao)
+	integrationConfig := settingController.NewIntegrationConfig(iIntegrationConfigService)
 	settingControllerController := &settingController.Controller{
-		AgentConfig: agentConfig,
+		AgentConfig:       agentConfig,
+		IntegrationConfig: integrationConfig,
 	}
 	erpErp := erp.NewGinEngine(app, cacheCache, settingControllerController)
 	engine := finalEngine(app, adminAdmin, iotIot, aiAI, shopShop, erpErp)

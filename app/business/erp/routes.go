@@ -19,6 +19,7 @@ func NewGinEngine(app *routes.App, cache cache.Cache, controller *settingControl
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
 	{
 		controller.AgentConfig.PrivateRoutes(group)
+		controller.IntegrationConfig.PrivateRoutes(group)
 	}
 	return &Erp{}
 }
