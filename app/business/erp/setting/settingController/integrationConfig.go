@@ -27,6 +27,18 @@ func (i *IntegrationConfig) PrivateRoutes(router *gin.RouterGroup) {
 		middlewares.HasPermission("erp:setting:integrationConfig:set"), i.Set)
 }
 
+// List 集成配置列表
+// @Summary 集成配置列表
+// @Description 按条件分页查询ERP集成配置
+// @Tags ERP/系统配置
+// @Security BearerAuth
+// @Param type query string false "接入类型"
+// @Param status query bool false "状态"
+// @Param page query int false "页码"
+// @Param size query int false "每页条数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "查询成功"
+// @Router /erp/setting/integration-config/list [get]
 func (i *IntegrationConfig) List(c *gin.Context) {
 	req := new(settingModels.IntegrationConfigQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
@@ -41,6 +53,16 @@ func (i *IntegrationConfig) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
+// Set 集成配置设置
+// @Summary 集成配置设置
+// @Description 新增或修改ERP集成配置，仅允许存在一条启用配置
+// @Tags ERP/系统配置
+// @Security BearerAuth
+// @Accept application/json
+// @Param body body settingModels.IntegrationConfigSet true "集成配置参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "设置成功"
+// @Router /erp/setting/integration-config/set [post]
 func (i *IntegrationConfig) Set(c *gin.Context) {
 	req := new(settingModels.IntegrationConfigSet)
 	if err := c.ShouldBindJSON(req); err != nil {
