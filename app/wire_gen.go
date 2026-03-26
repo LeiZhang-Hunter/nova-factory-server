@@ -26,6 +26,9 @@ import (
 	"nova-factory-server/app/business/ai/agent/aiDataSetDao/aiDataSetDaoImpl"
 	"nova-factory-server/app/business/ai/agent/aiDataSetService/aiDataSetServiceImpl"
 	"nova-factory-server/app/business/erp"
+	"nova-factory-server/app/business/erp/order/orderController"
+	"nova-factory-server/app/business/erp/order/orderDao/orderDaoImpl"
+	"nova-factory-server/app/business/erp/order/orderService/orderServiceImpl"
 	"nova-factory-server/app/business/erp/setting/settingController"
 	"nova-factory-server/app/business/erp/setting/settingDao/settingDaoImpl"
 	"nova-factory-server/app/business/erp/setting/settingService/settingServiceImpl"
@@ -449,7 +452,13 @@ func wireApp() (*gin.Engine, func(), error) {
 		AgentConfig:       agentConfig,
 		IntegrationConfig: integrationConfig,
 	}
-	erpErp := erp.NewGinEngine(app, cacheCache, settingControllerController)
+	iOrderDao := orderDaoImpl.NewOrderDao(db)
+	iOrderService := orderServiceImpl.NewOrderService(iOrderDao)
+	order := orderController.NewOrder(iOrderService)
+	orderControllerController := &orderController.Controller{
+		Order: order,
+	}
+	erpErp := erp.NewGinEngine(app, cacheCache, settingControllerController, orderControllerController)
 	engine := finalEngine(app, adminAdmin, iotIot, aiAI, shopShop, erpErp)
 	return engine, func() {
 		cleanup()

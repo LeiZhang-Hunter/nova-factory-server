@@ -100,3 +100,20 @@ func (i *IntegrationConfigDaoImpl) List(c *gin.Context, req *settingModels.Integ
 		Total: total,
 	}, nil
 }
+
+func (i *IntegrationConfigDaoImpl) GetEnabledByType(c *gin.Context, tp string) (*settingModels.IntegrationConfig, error) {
+	var item settingModels.IntegrationConfig
+	err := i.db.WithContext(c).Table(i.table).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("status = ?", true).
+		Where("type = ?", tp).
+		Order("id DESC").
+		First(&item).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
+}

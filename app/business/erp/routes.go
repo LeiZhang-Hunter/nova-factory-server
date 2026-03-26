@@ -4,6 +4,7 @@
 package erp
 
 import (
+	"nova-factory-server/app/business/erp/order/orderController"
 	"nova-factory-server/app/business/erp/setting/settingController"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
@@ -14,12 +15,16 @@ import (
 
 var GinProviderSet = wire.NewSet(NewGinEngine)
 
-func NewGinEngine(app *routes.App, cache cache.Cache, controller *settingController.Controller) *Erp {
+func NewGinEngine(app *routes.App, cache cache.Cache, setting *settingController.Controller, order *orderController.Controller) *Erp {
 	group := app.Engine.Group("")
+	{
+		setting.IntegrationConfig.PublicRoutes(group)
+	}
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
 	{
-		controller.AgentConfig.PrivateRoutes(group)
-		controller.IntegrationConfig.PrivateRoutes(group)
+		setting.AgentConfig.PrivateRoutes(group)
+		setting.IntegrationConfig.PrivateRoutes(group)
+		order.Order.PrivateRoutes(group)
 	}
 	return &Erp{}
 }

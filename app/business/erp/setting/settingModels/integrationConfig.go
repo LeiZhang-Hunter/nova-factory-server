@@ -29,3 +29,19 @@ type IntegrationConfigListData struct {
 	Rows  []*IntegrationConfig `json:"rows"`
 	Total int64                `json:"total"`
 }
+
+type IntegrationConfigCheckLoginReq struct {
+	Type        string `form:"type" binding:"required"`
+	CheckURL    string `form:"checkUrl"`
+	RedirectURL string `form:"redirectUrl"`
+}
+
+type IntegrationOAuthCallbackReq struct {
+	Code  string `form:"code" binding:"required"`
+	State string `form:"state"`
+}
+
+type IntegrationOAuthCallbackData struct {
+	Code  string `json:"code"`
+	State string `json:"state"`
+}

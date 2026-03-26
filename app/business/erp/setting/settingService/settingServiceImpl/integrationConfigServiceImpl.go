@@ -1,6 +1,9 @@
 package settingServiceImpl
 
 import (
+	"errors"
+	"nova-factory-server/app/business/erp/core/integration"
+	"nova-factory-server/app/business/erp/core/integration/api"
 	"nova-factory-server/app/business/erp/setting/settingDao"
 	"nova-factory-server/app/business/erp/setting/settingModels"
 	"nova-factory-server/app/business/erp/setting/settingService"
@@ -22,4 +25,19 @@ func (i *IntegrationConfigServiceImpl) Set(c *gin.Context, req *settingModels.In
 
 func (i *IntegrationConfigServiceImpl) List(c *gin.Context, req *settingModels.IntegrationConfigQuery) (*settingModels.IntegrationConfigListData, error) {
 	return i.dao.List(c, req)
+}
+
+func (i *IntegrationConfigServiceImpl) CheckLoginState(c *gin.Context, req *settingModels.IntegrationConfigCheckLoginReq) (*api.LoginState, error) {
+	cfg, err := i.dao.GetEnabledByType(c, req.Type)
+	if err != nil {
+		return nil, err
+	}
+	if cfg == nil {
+		return nil, errors.New("未找到启用的集成配置")
+	}
+	client, err := integration.CreateByType(cfg.Type)
+	if err != nil {
+		return nil, err
+	}
+	return client.CheckLoginState(c, cfg, req.CheckURL, req.RedirectURL)
 }
