@@ -31,7 +31,6 @@ type IntegrationConfigListData struct {
 }
 
 type IntegrationConfigCheckLoginReq struct {
-	Type        string `form:"type" binding:"required"`
 	CheckURL    string `form:"checkUrl"`
 	RedirectURL string `form:"redirectUrl"`
 }
@@ -39,9 +38,17 @@ type IntegrationConfigCheckLoginReq struct {
 type IntegrationOAuthCallbackReq struct {
 	Code  string `form:"code" binding:"required"`
 	State string `form:"state"`
+	Type  string `form:"type"`
 }
 
 type IntegrationOAuthCallbackData struct {
-	Code  string `json:"code"`
-	State string `json:"state"`
+	Code       string `json:"code"`
+	State      string `json:"state"`
+	Token      string `json:"token"`
+	ExpireDate string `json:"expireDate"`
+	IssueDate  string `json:"issueDate"`
+	AppKey     string `json:"appKey"`
+	AppSecret  string `json:"appSecret"`
+	Message    string `json:"message"`
+	ApiCode    int64  `json:"apiCode"`
 }

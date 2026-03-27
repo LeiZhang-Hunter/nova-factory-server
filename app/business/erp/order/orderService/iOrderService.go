@@ -1,6 +1,7 @@
 package orderService
 
 import (
+	"nova-factory-server/app/business/erp/core/integration/grasp"
 	"nova-factory-server/app/business/erp/order/orderModels"
 
 	"github.com/gin-gonic/gin"
@@ -8,4 +9,5 @@ import (
 
 type IOrderService interface {
 	CheckLoginState(c *gin.Context, req *orderModels.CheckLoginStateReq) (*orderModels.CheckLoginStateResp, error)
+	SynchronizeSalesOrders(c *gin.Context, req *grasp.OrderSyncRequest) (*grasp.OrderSyncResponse, error)
 }

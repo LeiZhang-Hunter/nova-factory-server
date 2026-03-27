@@ -7,5 +7,4 @@ import (
 )
 
 type IOrderDao interface {
-	GetEnabledGJPCfg(c *gin.Context) (*settingModels.IntegrationConfig, error)
 }

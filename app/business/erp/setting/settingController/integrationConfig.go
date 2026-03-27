@@ -1,8 +1,11 @@
 package settingController
 
 import (
+	"nova-factory-server/app/business/erp/core/integration/api"
+	"nova-factory-server/app/business/erp/core/integration/grasp"
 	"nova-factory-server/app/business/erp/setting/settingModels"
 	"nova-factory-server/app/business/erp/setting/settingService"
+	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -12,17 +15,33 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type integrationLoginPayload struct {
+	Type       string `json:"type"`
+	State      string `json:"state"`
+	Code       string `json:"code"`
+	Token      string `json:"token"`
+	ExpireDate string `json:"expireDate"`
+	IssueDate  string `json:"issueDate"`
+	AppKey     string `json:"appKey"`
+	AppSecret  string `json:"appSecret"`
+	ApiCode    int64  `json:"apiCode"`
+	Message    string `json:"message"`
+	UpdatedAt  string `json:"updatedAt"`
+}
+
 type IntegrationConfig struct {
 	service settingService.IIntegrationConfigService
+	cache   cache.Cache
 	host    string
 }
 
-func NewIntegrationConfig(service settingService.IIntegrationConfigService) *IntegrationConfig {
+func NewIntegrationConfig(service settingService.IIntegrationConfigService, cache cache.Cache) *IntegrationConfig {
 	host := viper.GetString("host")
 
 	return &IntegrationConfig{
 		service: service,
 		host:    host,
+		cache:   cache,
 	}
 }
 
@@ -145,6 +164,21 @@ func (i *IntegrationConfig) CheckLoginState(c *gin.Context) {
 	if req.RedirectURL == "" {
 		req.RedirectURL = i.host + "/erp/setting/integration-config/oauth/callback"
 	}
+	enableInfo, err := i.service.GetEnabled(c)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	loginInfo, cacheErr := grasp.New().GetLoginTokenFromCache(c, i.cache)
+	if cacheErr == nil && loginInfo != nil && loginInfo.Token != "" {
+		baizeContext.SuccessData(c, &api.LoginState{
+			Online:   true,
+			Message:  "已授权",
+			Type:     enableInfo.Type,
+			CheckURL: "",
+		})
+		return
+	}
 	data, err := i.service.CheckLoginState(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
@@ -168,8 +202,37 @@ func (i *IntegrationConfig) OAuthCallback(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+
+	enableInfo, err := i.service.GetEnabled(c)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+
+	tokenData, err := grasp.New().ExchangeTokenByOAuthCode(c, enableInfo, req.Code)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+
+	if tokenData.Code != 0 {
+		baizeContext.Waring(c, tokenData.Message)
+		return
+	}
+
+	if cacheErr := grasp.New().SaveLoginTokenToCache(c, i.cache, tokenData, 0); cacheErr != nil {
+		baizeContext.Waring(c, cacheErr.Error())
+		return
+	}
 	baizeContext.SuccessData(c, &settingModels.IntegrationOAuthCallbackData{
-		Code:  req.Code,
-		State: req.State,
+		Code:       req.Code,
+		State:      req.State,
+		Token:      tokenData.Token,
+		ExpireDate: tokenData.ExpireDate,
+		IssueDate:  tokenData.IssueDate,
+		AppKey:     tokenData.AppKey,
+		AppSecret:  tokenData.AppSecret,
+		Message:    tokenData.Message,
+		ApiCode:    tokenData.Code,
 	})
 }

@@ -101,12 +101,11 @@ func (i *IntegrationConfigDaoImpl) List(c *gin.Context, req *settingModels.Integ
 	}, nil
 }
 
-func (i *IntegrationConfigDaoImpl) GetEnabledByType(c *gin.Context, tp string) (*settingModels.IntegrationConfig, error) {
+func (i *IntegrationConfigDaoImpl) GetEnabled(c *gin.Context) (*settingModels.IntegrationConfig, error) {
 	var item settingModels.IntegrationConfig
 	err := i.db.WithContext(c).Table(i.table).
 		Where("state = ?", commonStatus.NORMAL).
 		Where("status = ?", true).
-		Where("type = ?", tp).
 		Order("id DESC").
 		First(&item).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {

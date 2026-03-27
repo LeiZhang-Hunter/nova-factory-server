@@ -28,7 +28,7 @@ func (i *IntegrationConfigServiceImpl) List(c *gin.Context, req *settingModels.I
 }
 
 func (i *IntegrationConfigServiceImpl) CheckLoginState(c *gin.Context, req *settingModels.IntegrationConfigCheckLoginReq) (*api.LoginState, error) {
-	cfg, err := i.dao.GetEnabledByType(c, req.Type)
+	cfg, err := i.dao.GetEnabled(c)
 	if err != nil {
 		return nil, err
 	}
@@ -40,4 +40,15 @@ func (i *IntegrationConfigServiceImpl) CheckLoginState(c *gin.Context, req *sett
 		return nil, err
 	}
 	return client.CheckLoginState(c, cfg, req.CheckURL, req.RedirectURL)
+}
+
+func (i *IntegrationConfigServiceImpl) GetEnabled(c *gin.Context) (*settingModels.IntegrationConfig, error) {
+	cfg, err := i.dao.GetEnabled(c)
+	if err != nil {
+		return nil, err
+	}
+	if cfg == nil {
+		return nil, errors.New("未找到启用的集成配置")
+	}
+	return cfg, nil
 }

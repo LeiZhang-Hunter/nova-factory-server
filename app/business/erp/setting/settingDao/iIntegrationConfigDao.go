@@ -9,5 +9,5 @@ import (
 type IIntegrationConfigDao interface {
 	Set(c *gin.Context, req *settingModels.IntegrationConfigSet) (*settingModels.IntegrationConfig, error)
 	List(c *gin.Context, req *settingModels.IntegrationConfigQuery) (*settingModels.IntegrationConfigListData, error)
-	GetEnabledByType(c *gin.Context, tp string) (*settingModels.IntegrationConfig, error)
+	GetEnabled(c *gin.Context) (*settingModels.IntegrationConfig, error)
 }
