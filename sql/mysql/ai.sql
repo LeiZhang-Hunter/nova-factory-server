@@ -1,5 +1,5 @@
 
-Create TABLE `sys_dataset` (
+CREATE TABLE IF NOT EXISTS `sys_dataset` (
     `dataset_id` bigint NOT NULL COMMENT '出库id',
     `dataset_avatar` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT 'base64 编码的头像。',
     `dataset_chunk_method` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '要创建的数据集的分块方法',
@@ -31,7 +31,7 @@ Create TABLE `sys_dataset` (
     UNIQUE KEY `dataset_name` (`dataset_name`,`state`) USING BTREE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='物料出库管理';
 
-CREATE TABLE `sys_dataset_document`  (
+CREATE TABLE IF NOT EXISTS `sys_dataset_document`  (
      `document_id` bigint(20) NOT NULL COMMENT '文档id',
      `dataset_id` bigint(20) NOT NULL COMMENT '数据集id',
      `dataset_chunk_method` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '要创建的数据集的分块方法',
@@ -56,7 +56,7 @@ CREATE TABLE `sys_dataset_document`  (
      PRIMARY KEY (`document_id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '文档管理' ROW_FORMAT = Dynamic;
 
-CREATE TABLE `sys_ai_prediction_list`  (
+CREATE TABLE IF NOT EXISTS `sys_ai_prediction_list`  (
      `id` bigint(20) NOT NULL COMMENT 'id',
      `reason_id` bigint(20) NOT NULL COMMENT '模型推理id',
      `action_id` bigint(20) NOT NULL COMMENT '处理通知id',
@@ -79,7 +79,7 @@ CREATE TABLE `sys_ai_prediction_list`  (
      PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '预测列表' ROW_FORMAT = Dynamic;
 
-CREATE TABLE `sys_ai_prediction_exception`  (
+CREATE TABLE IF NOT EXISTS `sys_ai_prediction_exception`  (
     `id` bigint(20) NOT NULL COMMENT 'id',
     `reason_id` bigint(20) NOT NULL COMMENT '模型推理id',
     `action_id` bigint(20) NOT NULL COMMENT '处理通知id',
@@ -99,7 +99,7 @@ CREATE TABLE `sys_ai_prediction_exception`  (
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '异常预警' ROW_FORMAT = Dynamic;
 
-CREATE TABLE `sys_ai_prediction_control`  (
+CREATE TABLE IF NOT EXISTS `sys_ai_prediction_control`  (
     `id` bigint(20) NOT NULL COMMENT 'id',
     `device_gateway_id` bigint(20) NOT NULL  COMMENT '网关id',
     `name` varchar(255) not null comment '智能预警名称',
@@ -117,3 +117,99 @@ CREATE TABLE `sys_ai_prediction_control`  (
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '趋势控制' ROW_FORMAT = Dynamic;
+
+
+CREATE TABLE IF NOT EXISTS `ai_model_provider` (
+    `id` bigint(20) NOT NULL COMMENT '主键ID',
+    `name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '供应商名称',
+    `logo` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '图标地址',
+    `tags` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '能力标签，逗号分隔',
+    `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
+    `rank` int(11) NOT NULL DEFAULT 0 COMMENT '排序值，越大越靠前',
+    `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) DEFAULT NULL COMMENT '创建时间(系统)',
+    `update_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) DEFAULT NULL COMMENT '更新时间(系统)',
+    `state` tinyint(1) DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uk_provider_name_state` (`name`,`state`) USING BTREE,
+    KEY `idx_status` (`status`) USING BTREE,
+    KEY `idx_rank` (`rank`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'AI模型供应商配置' ROW_FORMAT = Dynamic;
+
+CREATE TABLE IF NOT EXISTS `ai_llm` (
+    `llm_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模型名称',
+    `model_type` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模型类型',
+    `fid` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模型唯一标识',
+    `max_tokens` int(11) NOT NULL COMMENT '最大Token',
+    `tags` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '模型标签',
+    `is_tools` tinyint(1) NOT NULL COMMENT '是否支持工具调用：0否1是',
+    `status` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '状态',
+    `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) DEFAULT NULL COMMENT '创建时间(系统)',
+    `update_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) DEFAULT NULL COMMENT '更新时间(系统)',
+    `state` tinyint(1) DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`fid`, `llm_name`) USING BTREE,
+    KEY `idx_llm_name` (`llm_name`) USING BTREE,
+    KEY `idx_llm_model_type` (`model_type`) USING BTREE,
+    KEY `idx_llm_fid` (`fid`) USING BTREE,
+    KEY `idx_llm_tags` (`tags`) USING BTREE,
+    KEY `idx_llm_status` (`status`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'LLM模型' ROW_FORMAT = Dynamic;
+
+
+ CREATE TABLE IF NOT EXISTS `ai_llm_setting` (
+     `id` bigint(20) NOT NULL COMMENT '主键ID',
+    `name` varchar(100) DEFAULT NULL,
+    `public_key` varchar(255) DEFAULT NULL,
+    `llm_id` varchar(128) NOT NULL,
+    `embd_id` varchar(128) NOT NULL,
+    `asr_id` varchar(128) NOT NULL,
+    `img2txt_id` varchar(128) NOT NULL,
+    `rerank_id` varchar(128) NOT NULL,
+    `tts_id` varchar(256) DEFAULT NULL,
+    `parser_ids` varchar(256) NOT NULL,
+    `credit` int NOT NULL,
+    `status` varchar(1) DEFAULT NULL,
+    `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) DEFAULT NULL COMMENT '创建时间(系统)',
+    `update_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) DEFAULT NULL COMMENT '更新时间(系统)',
+    `state` tinyint(1) DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    KEY `tenant_name` (`name`),
+    KEY `tenant_public_key` (`public_key`),
+    KEY `tenant_llm_id` (`llm_id`),
+    KEY `tenant_embd_id` (`embd_id`),
+    KEY `tenant_asr_id` (`asr_id`),
+    KEY `tenant_img2txt_id` (`img2txt_id`),
+    KEY `tenant_rerank_id` (`rerank_id`),
+    KEY `tenant_tts_id` (`tts_id`),
+    KEY `tenant_parser_ids` (`parser_ids`),
+    KEY `tenant_credit` (`credit`),
+    KEY `tenant_status` (`status`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = 'LLM模型配置' ROW_FORMAT = Dynamic;;
+
+CREATE TABLE IF NOT EXISTS `ai_user_llm` (
+    `user_id` bigint(20) NOT NULL COMMENT '用户id',
+    `llm_factory` varchar(128) NOT NULL,
+    `model_type` varchar(128) DEFAULT NULL,
+    `llm_name` varchar(128) NOT NULL,
+    `api_key` text,
+    `api_base` varchar(255) DEFAULT NULL,
+    `max_tokens` int NOT NULL,
+    `used_tokens` int NOT NULL,
+    `status` varchar(1) NOT NULL,
+    PRIMARY KEY (`user_id`,`llm_factory`,`llm_name`),
+    KEY `tenantllm_user_id` (`user_id`),
+    KEY `tenantllm_llm_factory` (`llm_factory`),
+    KEY `tenantllm_model_type` (`model_type`),
+    KEY `tenantllm_llm_name` (`llm_name`),
+    KEY `tenantllm_max_tokens` (`max_tokens`),
+    KEY `tenantllm_used_tokens` (`used_tokens`),
+    KEY `tenant_llm_status` (`status`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '用户选择的模型厂商' ROW_FORMAT = Dynamic;

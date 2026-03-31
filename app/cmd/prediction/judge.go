@@ -1,11 +1,12 @@
 package main
 
 import (
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/ai/aiDataSetModels"
-	"nova-factory-server/app/business/metric/device/metricModels"
+	"nova-factory-server/app/business/iot/metric/device/metricModels"
 	"nova-factory-server/app/cmd/prediction/condition"
 	"nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
+
+	"go.uber.org/zap"
 )
 
 type judge struct {

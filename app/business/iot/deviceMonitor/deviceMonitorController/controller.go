@@ -1,0 +1,17 @@
+package deviceMonitorController
+
+import (
+	"github.com/google/wire"
+)
+
+var ProviderSet = wire.NewSet(NewDeviceMonitor, NewDeviceReport, NewDeviceUtilization, NewControlLog, NewDeviceControl, NewCameraGrpc,
+	wire.Struct(new(DeviceMonitorController), "*"))
+
+type DeviceMonitorController struct {
+	DeviceMonitor     *DeviceMonitor
+	DeviceReport      *DeviceReport
+	DeviceUtilization *DeviceUtilization
+	ControlLog        *ControlLog
+	DeviceControl     *DeviceControl
+	CameraGrpc        *CameraGrpc
+}

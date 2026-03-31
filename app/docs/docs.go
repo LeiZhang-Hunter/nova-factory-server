@@ -546,6 +546,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -727,6 +728,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "dataset_id",
                         "name": "dataset_id",
                         "in": "path",
@@ -1271,6 +1273,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -1355,6 +1358,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "datasetId",
                         "name": "datasetId",
                         "in": "path",
@@ -1507,6 +1511,214 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/model/provider/global/get": {
+            "get": {
+                "description": "读取SetGlobalModel保存的用户模型配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "读取用户模型",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "llm_factory",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "读取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/model/provider/global/set": {
+            "post": {
+                "description": "新增或修改用户模型配置，user_id为0表示全局设置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "设置用户模型",
+                "parameters": [
+                    {
+                        "description": "全局模型配置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aiDataSetModels.SetSysUserLLM"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/model/provider/list": {
+            "get": {
+                "description": "读取模型供应商及其下级LLM列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "模型供应商列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/model/provider/setting/get": {
+            "get": {
+                "description": "根据id读取模型配置，未传id时读取当前部门最近更新配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "读取模型配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "0",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "读取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/model/provider/setting/set": {
+            "post": {
+                "description": "新增或修改模型配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "设置模型配置",
+                "parameters": [
+                    {
+                        "description": "模型配置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aiDataSetModels.SetSysAiLLMSetting"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/ocr/predict": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "上传文件并调用OCR服务进行文字提取",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/OCR"
+                ],
+                "summary": "OCR识别",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "上传文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "起始页码",
+                        "name": "start_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "最多返回词数",
+                        "name": "number_words",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "识别成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -1728,6 +1940,33 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/alertModels.SetAlertAction"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/alert/log/info": {
+            "get": {
+                "description": "告警数据详情",
+                "tags": [
+                    "告警管理/告警数据管理"
+                ],
+                "summary": "告警数据详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "objectId",
+                        "name": "object",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2305,6 +2544,79 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/building/list": {
+            "get": {
+                "description": "读取建筑物以及楼层详情列表",
+                "tags": [
+                    "资产管理/建筑物管理"
+                ],
+                "summary": "读取建筑物以及楼层详情列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/device/building": {
+            "get": {
+                "description": "通过建筑物读取设备",
+                "tags": [
+                    "设备监控/通过建筑物读取设备"
+                ],
+                "summary": "通过建筑物读取设备",
+                "parameters": [
+                    {
+                        "description": "指标预测查询参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metricModels.GatewayMetricDataQueryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/device/layout": {
+            "get": {
+                "description": "设备布局",
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "设备布局",
+                "parameters": [
+                    {
+                        "description": "指标预测查询参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metricModels.GatewayMetricDataQueryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/device/metric/tag": {
             "get": {
                 "description": "获取设备数据通过标签",
@@ -2398,6 +2710,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "name": "type",
                         "in": "query"
@@ -2413,7 +2730,38 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/predict/metric": {
+        "/api/v1/device/monitor/info/list": {
+            "post": {
+                "description": "根据设备id列表批量读取设备实时信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "批量设备监控详情",
+                "parameters": [
+                    {
+                        "description": "查询参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceMonitorModel.DeviceIdsReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "批量设备监控详情",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/metric/predict": {
             "post": {
                 "description": "导入告警数据",
                 "tags": [
@@ -2441,7 +2789,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/predict/metric/query": {
+        "/api/v1/metric/predict/query": {
             "post": {
                 "description": "指标预测查询",
                 "tags": [
@@ -2450,7 +2798,7 @@ const docTemplate = `{
                 "summary": "指标预测查询",
                 "parameters": [
                     {
-                        "description": "助理列表参数",
+                        "description": "指标预测查询参数",
                         "name": "object",
                         "in": "body",
                         "required": true,
@@ -2462,6 +2810,513 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/laboratory/dict": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "配料物料列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "化验单管理"
+                ],
+                "summary": "配料物料列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "dictLabel",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "dictType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.ListData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "rows": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/laboratory/first": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "最近一份的采样化验单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "化验单管理"
+                ],
+                "summary": "最新化验单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "contact",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "material",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "state",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.ListData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "rows": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/laboratory/first/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "最新化验单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "化验单管理"
+                ],
+                "summary": "最新化验单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "contact",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "material",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "number",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "state",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/response.ListData"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "rows": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/resource/list": {
+            "get": {
+                "description": "资料管理列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资料管理"
+                ],
+                "summary": "资料管理列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "开始时间",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "分类",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "文件扩展名",
+                        "name": "extension",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "是否公开",
+                        "name": "isPublic",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "原始文件名",
+                        "name": "originalName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "所有者ID",
+                        "name": "ownerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "所有者类型",
+                        "name": "ownerType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "父级ID",
+                        "name": "parent_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "类型：FILE-文件，FOLDER-文件夹",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/system/electric/search": {
+            "post": {
+                "description": "能源大屏",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "能源大屏",
+                "parameters": [
+                    {
+                        "description": "能源大屏",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备监控",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/system/electric/searchv2": {
+            "post": {
+                "description": "能源大屏V2",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "能源大屏V2",
+                "parameters": [
+                    {
+                        "description": "能源大屏",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备监控",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -2579,6 +3434,40 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/buildingModels.SetSysBuilding"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/camera/list": {
+            "get": {
+                "description": "读取摄像头列表",
+                "tags": [
+                    "资产管理/摄像头管理"
+                ],
+                "summary": "读取摄像头列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "brand",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "ip_address",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2933,7 +3822,7 @@ const docTemplate = `{
         },
         "/asset/device/list": {
             "get": {
-                "description": "获取设备列表\n返回物联网管理系统的设备列表",
+                "description": "获取设备列表",
                 "produces": [
                     "application/json"
                 ],
@@ -3021,6 +3910,11 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
                         "in": "query"
                     },
                     {
@@ -3590,6 +4484,233 @@ const docTemplate = `{
                 }
             }
         },
+        "/asset/floor/layout/info": {
+            "get": {
+                "description": "读取楼层布局",
+                "tags": [
+                    "资产管理/楼层管理"
+                ],
+                "summary": "读取楼层布局",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "building_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "floor_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/floor/layout/save": {
+            "get": {
+                "description": "保存楼层布局",
+                "tags": [
+                    "资产管理/楼层管理"
+                ],
+                "summary": "保存楼层布局",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "building_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "floor_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/floor/list": {
+            "get": {
+                "description": "读取楼层列表",
+                "tags": [
+                    "资产管理/楼层管理"
+                ],
+                "summary": "读取楼层列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "building_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "floor_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/floor/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除楼层",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资产管理/楼层管理"
+                ],
+                "summary": "删除楼层",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/floor/set": {
+            "post": {
+                "description": "保存楼层",
+                "tags": [
+                    "资产管理/楼层管理"
+                ],
+                "summary": "保存楼层",
+                "parameters": [
+                    {
+                        "description": "楼层参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/buildingModels.SetSysFloor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/asset/material/inbound/add": {
             "post": {
                 "description": "登记物料入库",
@@ -3919,6 +5040,191 @@ const docTemplate = `{
                 }
             }
         },
+        "/asset/resource/list": {
+            "get": {
+                "description": "资料管理列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资料管理"
+                ],
+                "summary": "资料管理列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "开始时间",
+                        "name": "beginTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "分类",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "文件扩展名",
+                        "name": "extension",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "是否公开",
+                        "name": "isPublic",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "资源名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "原始文件名",
+                        "name": "originalName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "所有者ID",
+                        "name": "ownerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "所有者类型",
+                        "name": "ownerType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "父级ID",
+                        "name": "parent_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "类型：FILE-文件，FOLDER-文件夹",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/resource/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除资料",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资料管理"
+                ],
+                "summary": "删除资料",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/asset/resource/set": {
+            "post": {
+                "description": "登记资料",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资料管理"
+                ],
+                "summary": "登记资料",
+                "parameters": [
+                    {
+                        "description": "资料参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/resourceModels.SysResourceFileDML"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/captchaImage": {
             "get": {
                 "description": "获取验证码",
@@ -3932,6 +5238,124 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/configuration/manager/list": {
+            "get": {
+                "description": "组态列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组态/组态管理"
+                ],
+                "summary": "组态列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "tag",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "组态列表成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/configuration/manager/remove": {
+            "delete": {
+                "description": "删除组态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组态/组态管理"
+                ],
+                "summary": "删除组态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除组态成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/configuration/manager/set": {
+            "post": {
+                "description": "保存组态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "组态/组态管理"
+                ],
+                "summary": "保存组态",
+                "parameters": [
+                    {
+                        "description": "设置组态参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/configurationModels.SetSysConfiguration"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置组态成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -4397,222 +5821,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/craft/route/product/bom/list": {
-            "get": {
-                "description": "产品制程物料BOM物料BOM列表",
-                "tags": [
-                    "工艺管理/产品制程物料BOM物料BOM管理"
-                ],
-                "summary": "产品制程物料BOM物料BOM列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/product/bom/remove/{record_ids}": {
-            "delete": {
-                "description": "删除产品制程物料BOM",
-                "tags": [
-                    "工艺管理/产品制程物料BOM管理"
-                ],
-                "summary": "删除产品制程物料BOM",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "record_ids",
-                        "name": "record_ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/product/bom/set": {
-            "post": {
-                "description": "设置产品制程物料BOM",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "工艺管理/产品制程物料BOM管理"
-                ],
-                "summary": "设置产品制程物料BOM",
-                "parameters": [
-                    {
-                        "description": "设置产品制程物料BOM参数",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysSetProRouteProductBom"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/product/list": {
-            "get": {
-                "description": "产品制程列表",
-                "tags": [
-                    "工艺管理/产品制程管理"
-                ],
-                "summary": "产品制程列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "产品物料编码",
-                        "name": "item_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "产品物料名称",
-                        "name": "item_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/product/remove/{record_ids}": {
-            "delete": {
-                "description": "删除产品制程",
-                "tags": [
-                    "工艺管理/产品制程管理"
-                ],
-                "summary": "删除产品制程",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "record_ids",
-                        "name": "record_ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/product/set": {
-            "post": {
-                "description": "设置产品制程",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "工艺管理/产品制程管理"
-                ],
-                "summary": "设置产品制程",
-                "parameters": [
-                    {
-                        "description": "设置产品制程参数",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProRouteSetProduct"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
         "/craft/route/remove/{craft_route_id}": {
             "delete": {
                 "description": "移除工艺",
@@ -4626,6 +5834,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "craft_route_id",
                         "name": "craft_route_id",
                         "in": "path",
@@ -4711,6 +5920,11 @@ const docTemplate = `{
                         "default": 10000,
                         "description": "数量",
                         "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "status",
                         "in": "query"
                     }
                 ],
@@ -4836,270 +6050,6 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/craftRouteModels.SysCraftRouteRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/task/list": {
-            "get": {
-                "description": "生产任务列表",
-                "tags": [
-                    "工艺管理/生产任务管理"
-                ],
-                "summary": "生产任务列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "生产工单ID",
-                        "name": "workorder_id",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/task/remove/{ids}": {
-            "delete": {
-                "description": "移除生产任务",
-                "tags": [
-                    "工艺管理/生产工单管理"
-                ],
-                "summary": "移除生产任务",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ids",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/task/set": {
-            "post": {
-                "description": "设置生产任务",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "工艺管理/生产任务管理"
-                ],
-                "summary": "设置生产任务",
-                "parameters": [
-                    {
-                        "description": "设置生生产任务",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysSetProTask"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/work_order/list": {
-            "get": {
-                "description": "生产工单列表",
-                "tags": [
-                    "工艺管理/生产工单管理"
-                ],
-                "summary": "生产工单列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "客户编码",
-                        "name": "client_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "客户名称",
-                        "name": "client_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "产品编号",
-                        "name": "product_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "产品名称",
-                        "name": "product_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "需求日期",
-                        "name": "request_date",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "来源单据",
-                        "name": "source_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "工单编码",
-                        "name": "workorder_code",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "工单名称",
-                        "name": "workorder_name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "工单类型",
-                        "name": "workorder_type",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/work_order/remove/{ids}": {
-            "delete": {
-                "description": "移除生产工单",
-                "tags": [
-                    "工艺管理/生产工单管理"
-                ],
-                "summary": "移除生产工单",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ids",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/craft/route/work_order/set": {
-            "post": {
-                "description": "设置生产工单",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "工艺管理/生产工单管理"
-                ],
-                "summary": "设置生产工单",
-                "parameters": [
-                    {
-                        "description": "设置生产工单参数",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysSetProWorkorder"
                         }
                     }
                 ],
@@ -5548,6 +6498,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/device/monitor/camera/offer": {
+            "post": {
+                "description": "提交前端 Offer，返回播放地址与 Answer",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/摄像头"
+                ],
+                "summary": "摄像头 WebRTC SDP 协商",
+                "parameters": [
+                    {
+                        "description": "摄像头协商参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceMonitorModel.CameraOfferReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "协商成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/monitor/control": {
+            "post": {
+                "description": "设备控制",
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "设备控制",
+                "parameters": [
+                    {
+                        "description": "控制参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceMonitorModel.ControlReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/device/monitor/control/log/list": {
             "get": {
                 "description": "控制记录列表",
@@ -5603,6 +6612,40 @@ const docTemplate = `{
                         "type": "integer",
                         "name": "start",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "设备id",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/monitor/control/status": {
+            "post": {
+                "description": "查询控制下发状态",
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "查询控制下发状态",
+                "parameters": [
+                    {
+                        "description": "查询参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/deviceMonitorModel.ControlStatusReq"
+                        }
                     }
                 ],
                 "responses": {
@@ -5681,6 +6724,35 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/monitor/info/{id}": {
+            "get": {
+                "description": "根据设备id读取设备实时信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "设备监控详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "设备id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备监控详情",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -5781,6 +6853,11 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "name": "type",
                         "in": "query"
@@ -5846,6 +6923,47 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/metricModels.MetricQueryReq"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设备监控",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/device/monitor/utilization/info": {
+            "get": {
+                "description": "设备稼动率详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "设备监控/设备监控"
+                ],
+                "summary": "设备稼动率详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "设备id",
+                        "name": "DeviceId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "开始时间",
+                        "name": "Start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "结束时间",
+                        "name": "End",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6150,6 +7268,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/gateway/agent/config/remove/{ids}": {
+            "delete": {
+                "description": "移除配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关管理/Agent管理"
+                ],
+                "summary": "移除配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ids",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/gateway/agent/config/set": {
             "post": {
                 "description": "设置Agent配置",
@@ -6174,150 +7321,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "设置分组成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/gateway/protocol/list": {
-            "get": {
-                "description": "网关协议列表",
-                "tags": [
-                    "网关管理/协议管理"
-                ],
-                "summary": "网关协议列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "设备名称",
-                        "name": "name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "协议类型",
-                        "name": "protocol_type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "操作状态（0正常 1异常）",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "获取成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/gateway/protocol/remove": {
-            "delete": {
-                "description": "删除网关协议",
-                "tags": [
-                    "网关管理/协议管理"
-                ],
-                "summary": "删除网关协议",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "ids",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "获取成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/gateway/protocol/set": {
-            "post": {
-                "description": "设置网关协议",
-                "tags": [
-                    "网关管理/协议管理"
-                ],
-                "summary": "设置网关协议",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "配置",
-                        "name": "config",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "设备主键",
-                        "name": "gateway_config_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "设备名称",
-                        "name": "name",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "协议类型",
-                        "name": "protocol_type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "操作状态（0正常 -1删除）",
-                        "name": "state",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "操作状态（0正常 1异常）",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -6360,6 +7363,24 @@ const docTemplate = `{
                         }
                     }
                 }
+            }
+        },
+        "/home/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "首页统计",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "首页"
+                ],
+                "summary": "首页统计",
+                "responses": {}
             }
         },
         "/login": {
@@ -6515,6 +7536,11 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
                         "in": "query"
                     },
                     {
@@ -7205,226 +8231,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/product/laboratory/first": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "最新的化验单",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "化验单管理"
-                ],
-                "summary": "最新的化验单",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "beginTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "contact",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "endTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "material",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "number",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "state",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.ResponseData"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.ListData"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "rows": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/product/laboratory/first/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "最新化验单列表",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "化验单管理"
-                ],
-                "summary": "最新化验单列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "beginTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "contact",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "endTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "material",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "number",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "state",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.ResponseData"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.ListData"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "rows": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
         "/product/laboratory/info/{id}": {
             "get": {
                 "security": [
@@ -7542,6 +8348,11 @@ const docTemplate = `{
                         "type": "string",
                         "name": "state",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "type",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -7651,6 +8462,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "state",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "type",
                         "in": "query"
                     }
                 ],
@@ -7957,7 +8773,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer"
+                                "type": "integer",
+                                "format": "int32"
                             }
                         }
                     }
@@ -8904,7 +9721,8 @@ const docTemplate = `{
                     {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "format": "int64"
                         },
                         "collectionFormat": "csv",
                         "description": "dictCodes",
@@ -9407,7 +10225,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDeviceElectricSettingVO"
+                            "$ref": "#/definitions/models.SysDeviceElectricSettingVO"
                         }
                     }
                 ],
@@ -10001,7 +10819,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer"
+                                "type": "integer",
+                                "format": "int32"
                             }
                         }
                     }
@@ -11130,7 +11949,8 @@ const docTemplate = `{
                     {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "format": "int64"
                         },
                         "collectionFormat": "csv",
                         "description": "userIds",
@@ -11334,6 +12154,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "userId",
                         "name": "id",
                         "in": "path",
@@ -11435,7 +12256,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer"
+                                "type": "integer",
+                                "format": "int32"
                             }
                         }
                     }
@@ -11500,7 +12322,8 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer"
+                                "type": "integer",
+                                "format": "int32"
                             }
                         }
                     }
@@ -11826,6 +12649,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "userId",
                         "name": "id",
                         "in": "path",
@@ -12376,6 +13200,48 @@ const docTemplate = `{
                 }
             }
         },
+        "aiDataSetModels.SetSysAiLLMSetting": {
+            "type": "object",
+            "properties": {
+                "asr_id": {
+                    "type": "string"
+                },
+                "credit": {
+                    "type": "integer"
+                },
+                "embd_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "img2txt_id": {
+                    "type": "string"
+                },
+                "llm_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parser_ids": {
+                    "type": "string"
+                },
+                "public_key": {
+                    "type": "string"
+                },
+                "rerank_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tts_id": {
+                    "type": "string"
+                }
+            }
+        },
         "aiDataSetModels.SetSysAiPrediction": {
             "type": "object",
             "properties": {
@@ -12476,6 +13342,20 @@ const docTemplate = `{
                 "threshold": {
                     "description": "threshold",
                     "type": "integer"
+                }
+            }
+        },
+        "aiDataSetModels.SetSysUserLLM": {
+            "type": "object",
+            "properties": {
+                "api_base": {
+                    "type": "string"
+                },
+                "api_key": {
+                    "type": "string"
+                },
+                "llm_factory": {
+                    "type": "string"
                 }
             }
         },
@@ -12844,6 +13724,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0"
                 },
+                "start_time_unix": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
                 "status": {
                     "type": "boolean"
                 },
@@ -12905,11 +13789,21 @@ const docTemplate = `{
             "properties": {
                 "alert_id": {
                     "description": "告警id",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
+                },
+                "device_id": {
+                    "description": "设备id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "endTime": {
+                    "type": "string"
                 },
                 "gateway_id": {
                     "description": "网关id",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "isAsc": {
                     "description": "排序规则  降序desc   asc升序",
@@ -12931,6 +13825,9 @@ const docTemplate = `{
                     "description": "数量",
                     "type": "integer",
                     "default": 10000
+                },
+                "startTime": {
+                    "type": "string"
                 }
             }
         },
@@ -13041,6 +13938,62 @@ const docTemplate = `{
                 }
             }
         },
+        "buildingModels.SetSysFloor": {
+            "type": "object",
+            "properties": {
+                "building_id": {
+                    "description": "建筑物id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "floor_name": {
+                    "description": "名称",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "楼层id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "level": {
+                    "description": "楼层",
+                    "type": "integer"
+                }
+            }
+        },
+        "configurationModels.SetSysConfiguration": {
+            "type": "object",
+            "required": [
+                "name",
+                "tag"
+            ],
+            "properties": {
+                "annotation": {
+                    "description": "注解",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/deviceModels.Annotation"
+                    }
+                },
+                "description": {
+                    "description": "描述",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "组态id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "description": "组态名称",
+                    "type": "string"
+                },
+                "tag": {
+                    "description": "标签",
+                    "type": "string"
+                }
+            }
+        },
         "craftRouteModels.CaptureData": {
             "type": "object",
             "properties": {
@@ -13114,7 +14067,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "value": {
-                    "type": "string"
+                    "$ref": "#/definitions/value.Data"
                 }
             }
         },
@@ -13998,398 +14951,6 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SysSetProRouteProductBom": {
-            "type": "object",
-            "properties": {
-                "attr1": {
-                    "description": "预留字段1",
-                    "type": "string"
-                },
-                "attr2": {
-                    "description": "预留字段2",
-                    "type": "string"
-                },
-                "attr3": {
-                    "description": "预留字段3",
-                    "type": "integer"
-                },
-                "attr4": {
-                    "description": "预留字段4",
-                    "type": "integer"
-                },
-                "item_code": {
-                    "description": "产品物料编码",
-                    "type": "string"
-                },
-                "item_id": {
-                    "description": "产品物料ID",
-                    "type": "integer"
-                },
-                "item_name": {
-                    "description": "产品物料名称",
-                    "type": "string"
-                },
-                "process_id": {
-                    "description": "工序ID",
-                    "type": "integer"
-                },
-                "product_id": {
-                    "description": "产品BOM中的唯一ID",
-                    "type": "integer"
-                },
-                "quantity": {
-                    "description": "用料比例",
-                    "type": "number"
-                },
-                "record_id": {
-                    "description": "记录ID",
-                    "type": "integer"
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string"
-                },
-                "route_id": {
-                    "description": "工艺路线ID",
-                    "type": "integer"
-                },
-                "specification": {
-                    "description": "规格型号",
-                    "type": "string"
-                },
-                "unit_name": {
-                    "description": "单位名称",
-                    "type": "string"
-                },
-                "unit_of_measure": {
-                    "description": "单位",
-                    "type": "string"
-                }
-            }
-        },
-        "craftRouteModels.SysSetProTask": {
-            "type": "object",
-            "required": [
-                "route_code",
-                "route_id",
-                "task_code",
-                "task_name",
-                "workorder_code",
-                "workorder_id",
-                "workorder_name"
-            ],
-            "properties": {
-                "attr1": {
-                    "description": "预留字段1",
-                    "type": "string"
-                },
-                "attr2": {
-                    "description": "预留字段2",
-                    "type": "string"
-                },
-                "attr3": {
-                    "description": "预留字段3",
-                    "type": "integer"
-                },
-                "attr4": {
-                    "description": "预留字段4",
-                    "type": "integer"
-                },
-                "client_code": {
-                    "description": "客户编码",
-                    "type": "string"
-                },
-                "client_id": {
-                    "description": "客户ID",
-                    "type": "integer"
-                },
-                "client_name": {
-                    "description": "客户名称",
-                    "type": "string"
-                },
-                "client_nick": {
-                    "description": "客户简称",
-                    "type": "string"
-                },
-                "color_code": {
-                    "description": "甘特图显示颜色",
-                    "type": "string"
-                },
-                "duration": {
-                    "description": "生产时长",
-                    "type": "integer"
-                },
-                "end_time": {
-                    "description": "完成生产时间",
-                    "type": "string"
-                },
-                "gateway_id": {
-                    "description": "任务ID",
-                    "type": "integer"
-                },
-                "item_code": {
-                    "description": "产品物料编码",
-                    "type": "string"
-                },
-                "item_id": {
-                    "description": "产品物料ID",
-                    "type": "integer"
-                },
-                "item_name": {
-                    "description": "产品物料名称",
-                    "type": "string"
-                },
-                "process_code": {
-                    "description": "工序编码",
-                    "type": "string"
-                },
-                "process_id": {
-                    "description": "工序ID",
-                    "type": "integer"
-                },
-                "process_name": {
-                    "description": "工序名称",
-                    "type": "string"
-                },
-                "quantity": {
-                    "description": "排产数量",
-                    "type": "number"
-                },
-                "quantity_changed": {
-                    "description": "调整数量",
-                    "type": "number"
-                },
-                "quantity_produced": {
-                    "description": "已生产数量",
-                    "type": "number"
-                },
-                "quantity_quanlify": {
-                    "description": "合格品数量",
-                    "type": "number"
-                },
-                "quantity_unquanlify": {
-                    "description": "不良品数量",
-                    "type": "number"
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string"
-                },
-                "request_date": {
-                    "description": "需求日期",
-                    "type": "string"
-                },
-                "route_code": {
-                    "description": "工艺编号",
-                    "type": "string"
-                },
-                "route_id": {
-                    "description": "工艺ID",
-                    "type": "integer"
-                },
-                "specification": {
-                    "description": "规格型号",
-                    "type": "string"
-                },
-                "start_time": {
-                    "description": "开始生产时间",
-                    "type": "string"
-                },
-                "status": {
-                    "description": "生产状态",
-                    "type": "integer"
-                },
-                "task_code": {
-                    "description": "任务编号",
-                    "type": "string"
-                },
-                "task_id": {
-                    "description": "任务ID",
-                    "type": "integer"
-                },
-                "task_name": {
-                    "description": "任务名称",
-                    "type": "string"
-                },
-                "unit_name": {
-                    "description": "单位名称",
-                    "type": "string"
-                },
-                "unit_of_measure": {
-                    "description": "单位",
-                    "type": "string"
-                },
-                "workorder_code": {
-                    "description": "生产工单编号",
-                    "type": "string"
-                },
-                "workorder_id": {
-                    "description": "生产工单ID",
-                    "type": "integer"
-                },
-                "workorder_name": {
-                    "description": "工单名称",
-                    "type": "string"
-                },
-                "workstation_code": {
-                    "description": "工作站编号",
-                    "type": "string"
-                },
-                "workstation_id": {
-                    "description": "工作站ID",
-                    "type": "integer"
-                },
-                "workstation_name": {
-                    "description": "工作站名称",
-                    "type": "string"
-                }
-            }
-        },
-        "craftRouteModels.SysSetProWorkorder": {
-            "type": "object",
-            "properties": {
-                "ancestors": {
-                    "description": "所有父节点ID",
-                    "type": "string"
-                },
-                "attr1": {
-                    "description": "预留字段1",
-                    "type": "string"
-                },
-                "attr2": {
-                    "description": "预留字段2",
-                    "type": "string"
-                },
-                "attr3": {
-                    "description": "预留字段3",
-                    "type": "integer"
-                },
-                "attr4": {
-                    "description": "预留字段4",
-                    "type": "integer"
-                },
-                "batch_code": {
-                    "description": "批次号",
-                    "type": "string"
-                },
-                "client_code": {
-                    "description": "客户编码",
-                    "type": "string"
-                },
-                "client_id": {
-                    "description": "客户ID",
-                    "type": "integer"
-                },
-                "client_name": {
-                    "description": "客户名称",
-                    "type": "string"
-                },
-                "dept_id": {
-                    "description": "部门ID",
-                    "type": "integer"
-                },
-                "finish_date": {
-                    "description": "完成时间",
-                    "type": "string"
-                },
-                "order_source": {
-                    "description": "来源类型",
-                    "type": "string"
-                },
-                "parent_id": {
-                    "description": "父工单",
-                    "type": "integer"
-                },
-                "product_code": {
-                    "description": "产品编号",
-                    "type": "string"
-                },
-                "product_id": {
-                    "description": "产品ID",
-                    "type": "integer"
-                },
-                "product_name": {
-                    "description": "产品名称",
-                    "type": "string"
-                },
-                "product_spc": {
-                    "description": "规格型号",
-                    "type": "string"
-                },
-                "quantity": {
-                    "description": "生产数量",
-                    "type": "number"
-                },
-                "quantity_changed": {
-                    "description": "调整数量",
-                    "type": "number"
-                },
-                "quantity_produced": {
-                    "description": "已生产数量",
-                    "type": "number"
-                },
-                "quantity_scheduled": {
-                    "description": "已排产数量",
-                    "type": "number"
-                },
-                "remark": {
-                    "description": "备注",
-                    "type": "string"
-                },
-                "request_date": {
-                    "description": "需求日期",
-                    "type": "string"
-                },
-                "router_id": {
-                    "description": "工艺路线id",
-                    "type": "integer"
-                },
-                "source_code": {
-                    "description": "来源单据",
-                    "type": "string"
-                },
-                "state": {
-                    "description": "操作状态（0正常 -1删除）",
-                    "type": "boolean"
-                },
-                "status": {
-                    "description": "单据状态",
-                    "type": "string"
-                },
-                "unit_of_measure": {
-                    "description": "单位",
-                    "type": "string"
-                },
-                "vendor_code": {
-                    "description": "供应商编号",
-                    "type": "string"
-                },
-                "vendor_id": {
-                    "description": "供应商ID",
-                    "type": "integer"
-                },
-                "vendor_name": {
-                    "description": "供应商名称",
-                    "type": "string"
-                },
-                "workorder_code": {
-                    "description": "工单编码",
-                    "type": "string"
-                },
-                "workorder_id": {
-                    "description": "工单ID",
-                    "type": "integer"
-                },
-                "workorder_name": {
-                    "description": "工单名称",
-                    "type": "string"
-                },
-                "workorder_type": {
-                    "description": "工单类型",
-                    "type": "string"
-                }
-            }
-        },
         "craftRouteModels.TimeManagerData": {
             "type": "object",
             "properties": {
@@ -14447,6 +15008,9 @@ const docTemplate = `{
         },
         "craftRouteModels.TriggerRules": {
             "type": "object",
+            "required": [
+                "actions"
+            ],
             "properties": {
                 "actions": {
                     "type": "array",
@@ -14699,6 +15263,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "0"
                 },
+                "enable": {
+                    "type": "boolean"
+                },
+                "model_url": {
+                    "description": "模型图片",
+                    "type": "string"
+                },
                 "protocol_type": {
                     "description": "协议类型",
                     "type": "string"
@@ -14741,6 +15312,10 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/deviceModels.Annotation"
                     }
+                },
+                "configuration_enable": {
+                    "description": "组态属性",
+                    "type": "boolean"
                 },
                 "data_format": {
                     "description": "读写方式",
@@ -15031,6 +15606,74 @@ const docTemplate = `{
                 }
             }
         },
+        "deviceMonitorModel.CameraOfferReq": {
+            "type": "object",
+            "required": [
+                "device_id",
+                "sdp64"
+            ],
+            "properties": {
+                "channel_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "node": {
+                    "type": "string"
+                },
+                "sdp64": {
+                    "type": "string"
+                },
+                "timeout_ms": {
+                    "type": "integer"
+                }
+            }
+        },
+        "deviceMonitorModel.ControlReq": {
+            "type": "object",
+            "properties": {
+                "agent_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "data_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "device_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "value": {
+                    "$ref": "#/definitions/value.Data"
+                }
+            }
+        },
+        "deviceMonitorModel.ControlStatusItem": {
+            "type": "object",
+            "properties": {
+                "data_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "device_id": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "deviceMonitorModel.ControlStatusReq": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/deviceMonitorModel.ControlStatusItem"
+                    }
+                }
+            }
+        },
         "deviceMonitorModel.DevDataReq": {
             "type": "object",
             "properties": {
@@ -15063,6 +15706,20 @@ const docTemplate = `{
                 },
                 "start": {
                     "type": "integer"
+                }
+            }
+        },
+        "deviceMonitorModel.DeviceIdsReq": {
+            "type": "object",
+            "required": [
+                "deviceIds"
+            ],
+            "properties": {
+                "deviceIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -15418,6 +16075,82 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Expression": {
+            "type": "object",
+            "properties": {
+                "rules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Rule"
+                    }
+                }
+            }
+        },
+        "models.Group": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "operator": {
+                    "type": "string"
+                },
+                "operatorName": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Rule": {
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Group"
+                    }
+                },
+                "matchType": {
+                    "type": "string"
+                },
+                "run_status": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "models.SysDeviceElectricSettingVO": {
+            "type": "object",
+            "properties": {
+                "device_id": {
+                    "description": "device_id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "expression": {
+                    "description": "表达式",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Expression"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "id",
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "description": "智能预警名称",
+                    "type": "string"
+                }
+            }
+        },
         "monitorModels.JobDML": {
             "type": "object",
             "properties": {
@@ -15616,6 +16349,9 @@ const docTemplate = `{
                 "sulphur": {
                     "type": "number"
                 },
+                "type": {
+                    "type": "integer"
+                },
                 "volatility": {
                     "type": "number"
                 },
@@ -15624,6 +16360,86 @@ const docTemplate = `{
                 },
                 "weight": {
                     "type": "number"
+                }
+            }
+        },
+        "resourceModels.SysResourceFileDML": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "description": "分类：IMAGE, DOCUMENT, VIDEO, AUDIO等",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "描述",
+                    "type": "string"
+                },
+                "extension": {
+                    "description": "文件扩展名（仅文件有）",
+                    "type": "string"
+                },
+                "file_size": {
+                    "description": "文件大小（字节）",
+                    "type": "integer"
+                },
+                "level": {
+                    "description": "层级深度",
+                    "type": "integer"
+                },
+                "lineage": {
+                    "description": "层级路径，格式：/父ID/祖父ID/...",
+                    "type": "string"
+                },
+                "md5_hash": {
+                    "description": "文件MD5哈希值",
+                    "type": "string"
+                },
+                "mime_type": {
+                    "description": "MIME类型（仅文件有）",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "资源名称",
+                    "type": "string"
+                },
+                "original_name": {
+                    "description": "原始文件名（仅文件有）",
+                    "type": "string"
+                },
+                "parent_id": {
+                    "description": "父级ID（0表示根目录）",
+                    "type": "string",
+                    "example": "0"
+                },
+                "path": {
+                    "description": "完整路径（不含域名）",
+                    "type": "string"
+                },
+                "permission_mask": {
+                    "description": "权限掩码",
+                    "type": "string",
+                    "example": "0"
+                },
+                "resource_id": {
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "status": {
+                    "description": "状态：0-删除，1-正常，2-隐藏",
+                    "type": "integer"
+                },
+                "storage_key": {
+                    "description": "存储服务中的唯一标识",
+                    "type": "string"
+                },
+                "storage_type": {
+                    "description": "存储类型",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "类型：FILE-文件，FOLDER-文件夹",
+                    "type": "string"
                 }
             }
         },
@@ -15638,6 +16454,7 @@ const docTemplate = `{
         },
         "response.ResCode": {
             "type": "integer",
+            "format": "int64",
             "enum": [
                 200,
                 401,
@@ -15654,6 +16471,14 @@ const docTemplate = `{
                 "Unauthorized": "token失效",
                 "Waring": "详情看msg"
             },
+            "x-enum-descriptions": [
+                "成功",
+                "token失效",
+                "没有权限",
+                "参数错误",
+                "系统异常",
+                "详情看msg"
+            ],
             "x-enum-varnames": [
                 "Success",
                 "Unauthorized",
@@ -15771,17 +16596,6 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.Expression": {
-            "type": "object",
-            "properties": {
-                "rules": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/systemModels.Rule"
-                    }
-                }
-            }
-        },
         "systemModels.GetInfo": {
             "type": "object",
             "properties": {
@@ -15799,26 +16613,6 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/systemModels.User"
-                }
-            }
-        },
-        "systemModels.Group": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "operator": {
-                    "type": "string"
-                },
-                "operatorName": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
                 }
             }
         },
@@ -15881,24 +16675,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/systemModels.SysDeptVo"
                     }
-                }
-            }
-        },
-        "systemModels.Rule": {
-            "type": "object",
-            "properties": {
-                "groups": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/systemModels.Group"
-                    }
-                },
-                "matchType": {
-                    "type": "string"
-                },
-                "run_status": {
-                    "type": "string",
-                    "example": "0"
                 }
             }
         },
@@ -16023,33 +16799,6 @@ const docTemplate = `{
                 },
                 "updateTime": {
                     "description": "修改时间",
-                    "type": "string"
-                }
-            }
-        },
-        "systemModels.SysDeviceElectricSettingVO": {
-            "type": "object",
-            "properties": {
-                "device_id": {
-                    "description": "device_id",
-                    "type": "string",
-                    "example": "0"
-                },
-                "expression": {
-                    "description": "表达式",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/systemModels.Expression"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "id",
-                    "type": "string",
-                    "example": "0"
-                },
-                "name": {
-                    "description": "智能预警名称",
                     "type": "string"
                 }
             }
@@ -16744,6 +17493,43 @@ const docTemplate = `{
                             "$ref": "#/definitions/systemModels.SysUserVo"
                         }
                     ]
+                }
+            }
+        },
+        "value.Data": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "value": {
+                    "$ref": "#/definitions/value.Value"
+                }
+            }
+        },
+        "value.Value": {
+            "type": "object",
+            "properties": {
+                "boolValue": {
+                    "type": "boolean"
+                },
+                "byteValue": {
+                    "type": "boolean"
+                },
+                "doubleValue": {
+                    "type": "number"
+                },
+                "floatValue": {
+                    "type": "number"
+                },
+                "intValue": {
+                    "type": "integer"
+                },
+                "stringValue": {
+                    "type": "string"
+                },
+                "uintValue": {
+                    "type": "integer"
                 }
             }
         }

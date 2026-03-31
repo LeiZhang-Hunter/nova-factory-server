@@ -6,7 +6,7 @@ start_time: "2022-08-08"  #此日期用于雪花算法
 cluster: true   #如果集群部署 cache必须使用redis
 task_number: 4
 task_channel_number: 10
-host: http://192.168.2.100:8080
+host: http://192.168.2.194:8080
 log:
   level: trace
 #  filename: /Volumes/disk01/baizelog/baizelog.log  #默认./log
@@ -40,9 +40,10 @@ upload_file:
     public_path: ./public/
     private_path: ./private/
 dataset:
-  api_key: ragflow-JmNmIyYjk0MjY1NzExZjBiNmVlMDI0Mm
-  host: http://192.168.2.100
-  image_url: http://192.168.2.100
+#  api_key: ragflow-z2m5jeVtHYfr4ZtghLyONGVm-H1JDkeYjyzNRYh57yQ
+  api_key: ragflow-_-Plvw-ADnmXeCON23H6MLH6o56-FZeGJB580iTag08
+  host: http://192.168.2.100:80
+  image_url: http://192.168.2.100:80
 metric:
   datasource: iotdb
   #  datasource: clickhouse

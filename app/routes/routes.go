@@ -1,32 +1,11 @@
 package routes
 
 import (
-	"nova-factory-server/app/business/ai/aiDataSetController"
-	"nova-factory-server/app/business/alert/alertController"
-	"nova-factory-server/app/business/asset/building/buildingController"
-	"nova-factory-server/app/business/asset/device/deviceController"
-	"nova-factory-server/app/business/asset/material/materialController"
-	"nova-factory-server/app/business/asset/resource/resourceController"
-	"nova-factory-server/app/business/configuration/configurationController"
-	"nova-factory-server/app/business/craft/craftRouteController"
-	"nova-factory-server/app/business/daemonize/daemonizeController"
-	"nova-factory-server/app/business/dashboard/dashboardController"
-	"nova-factory-server/app/business/deviceMonitor/deviceMonitorController"
-	homeController "nova-factory-server/app/business/home/controller"
-	"nova-factory-server/app/business/metric/device/metricController"
-	"nova-factory-server/app/business/monitor/monitorController"
-	"nova-factory-server/app/business/product/productController"
-	"nova-factory-server/app/business/system/systemController"
-	"nova-factory-server/app/business/tool/toolController"
-	"nova-factory-server/app/daemonize"
-	"nova-factory-server/app/datasource/cache"
-	"nova-factory-server/app/datasource/objectFile/localhostObject"
-	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/logger"
 	"time"
 
-	"github.com/spf13/viper"
+	"github.com/gin-contrib/pprof"
 	swaggerFiles "github.com/swaggo/files"
 	gs "github.com/swaggo/gin-swagger"
 
@@ -38,35 +17,20 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/google/wire"
 
-	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
-var ProviderSet = wire.NewSet(NewGinEngine)
+type App struct {
+	Engine    *gin.Engine
+	McpServer *gin_mcp.GinMCP
+}
 
-func NewGinEngine(
-	cache cache.Cache,
-	sc *systemController.System,
-	mc *monitorController.Monitor,
-	gc *toolController.Tool,
-	dc *deviceController.Device,
-	materialC *materialController.Material,
-	ai *aiDataSetController.AiDataSet,
-	craft *craftRouteController.CraftRoute,
-	metric *metricController.MetricServer,
-	controller *daemonizeController.DaemonizeServer,
-	deviceMonitor *deviceMonitorController.DeviceMonitorController,
-	alert *alertController.Controller,
-	building buildingController.Controller,
-	dashboard dashboardController.Controller,
-	product *productController.Product,
-	resource *resourceController.ResourceController,
-	home *homeController.Home,
-	configuration *configurationController.Controller,
-) *gin.Engine {
+var ProviderSet = wire.NewSet(NewGinApp)
+
+func NewGinApp() *App {
 
 	if setting.Conf.Mode != "dev" {
-		gin.SetMode(gin.ReleaseMode) // gin设置成发布模式
+		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.New()
 	r.Use(logger.NewLoggerMiddlewareBuilder().
@@ -80,143 +44,41 @@ func NewGinEngine(
 		group.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))
 	}
 
-	//不做鉴权的
-	{
-
-		if viper.GetString("upload_file.type") == "local" {
-			group.Static(localhostObject.ResourcePrefix, viper.GetString("upload_file.localhost.public_path"))
-		}
-		sc.Login.PublicRoutes(group)          //登录
-		sc.Sse.PublicRoutes(group)            //SSE链接
-		controller.Config.PublicRoutes(group) //注册Agent公共配置接口
-		alert.AlertLog.PublicRoutes(group)
-		metric.Metric.PublicRoutes(group)
-		ai.Dataset.PublicRoutes(group)
-		craft.Schedule.PublicRoutes(group)
-		deviceMonitor.DeviceMonitor.PublicRoutes(group)
-		product.Laboratory.PublicRoutes(group)
-		dc.Info.PublicRoutes(group)
-		deviceMonitor.DeviceUtilization.PublicRoutes(group)
-		resource.ResourceFile.PublicRoutes(group) //资产管理---资料管理
-		building.Building.PublicRoutes(group)
-	}
-	//做鉴权的
-	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
-	{
-
-		sc.Profile.PrivateRoutes(group)    //个人资料
-		sc.Login.PrivateRoutes(group)      //登录
-		sc.User.PrivateRoutes(group)       //用户
-		sc.Dept.PrivateRoutes(group)       //部门
-		sc.DictType.PrivateRoutes(group)   //字典类型
-		sc.DictData.PrivateRoutes(group)   //地点数据
-		sc.Role.PrivateRoutes(group)       //角色
-		sc.Post.PrivateRoutes(group)       //岗位
-		sc.Permission.PrivateRoutes(group) //岗位
-		sc.Config.PrivateRoutes(group)     //配置
-		sc.File.PrivateRoutes(group)       //文件
-		sc.Notice.PrivateRoutes(group)     //消息
-		sc.SelectBox.PrivateRoutes(group)
-		sc.Electric.PrivateRoutes(group)
-		sc.Shift.PrivateRoutes(group)
-		mc.Server.PrivateRoutes(group)     //服务器详情
-		mc.Oper.PrivateRoutes(group)       //操作日志
-		mc.UserOnline.PrivateRoutes(group) //在线用户
-		mc.Logfor.PrivateRoutes(group)     //登录日志
-		mc.Job.PrivateRoutes(group)        //定时任务
-		gc.GenTable.PrivateRoutes(group)   //代码生成
-
-		dc.Info.PrivateRoutes(group)  //资产管理---设备模块
-		dc.Group.PrivateRoutes(group) //资产管理---设备分组
-		dc.Template.PrivateRoutes(group)
-		dc.TemplateData.PrivateRoutes(group)
-		dc.DeviceSubject.PrivateRoutes(group)
-		dc.DeviceCheckPlan.PrivateRoutes(group)
-		dc.DeviceCheckMachinery.PrivateRoutes(group)
-		dc.DeviceCheckSubject.PrivateRoutes(group)
-
-		materialC.Material.PrivateRoutes(group)    //资产管理---物料管理
-		resource.ResourceFile.PrivateRoutes(group) //资产管理---资料管理
-
-		ai.Dataset.PrivateRoutes(group)    // 工业智能体
-		ai.Prediction.PrivateRoutes(group) // 工业智能体
-		ai.Exception.PrivateRoutes(group)  // 工业智能体
-		ai.Control.PrivateRoutes(group)
-
-		craft.CraftRoute.PrivateRoutes(group)     //工艺路线
-		craft.Process.PrivateRoutes(group)        //工序设置
-		craft.ProcessContext.PrivateRoutes(group) //工序内容
-		craft.RouteProcess.PrivateRoutes(group)   //工艺组成
-		craft.Schedule.PrivateRoutes(group)
-
-		metric.Metric.PrivateRoutes(group) //设备指标
-		controller.IotAgent.PrivateRoutes(group)
-		controller.Config.PrivateRoutes(group)
-
-		deviceMonitor.DeviceMonitor.PrivateRoutes(group)
-		deviceMonitor.DeviceReport.PrivateRoutes(group)
-		deviceMonitor.DeviceUtilization.PrivateRoutes(group)
-		deviceMonitor.ControlLog.PrivateRoutes(group)
-
-		alert.AlertTemplate.PrivateRoutes(group)
-		alert.Alert.PrivateRoutes(group)
-		alert.AlertLog.PrivateRoutes(group)
-		alert.AlertAction.PrivateRoutes(group)
-		alert.AlertAiReason.PrivateRoutes(group)
-
-		building.Building.PrivateRoutes(group)
-		building.Floor.PrivateRoutes(group)
-
-		dashboard.Dashboard.PrivateRoutes(group)
-		dashboard.Data.PrivateRoutes(group)
-
-		home.PrivateRoutes(group)
-
-		// 生产管理
-		product.Laboratory.PrivateRoutes(group)
-
-		// 组态管理
-		configuration.Configuration.PrivateRoutes(group)
-
-		alert.Runner.Run()
-	}
-
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "404",
 		})
 	})
 
-	s := daemonize.CreateGRpcServer()
-	controller.Daemonize.PrivateRoutes(s)
-	deviceMonitor.DeviceControl.PrivateRoutes(s)
-	s.Start()
 	// --- Configure MCP Server ---
 	mpcServer := gin_mcp.New(r, &gin_mcp.Config{
 		Name:        "Product API",
 		Description: "API for managing products.",
 		BaseURL:     "http://localhost:8080",
 	})
-	dc.Info.PrivateMcpRoutes(mpcServer) //资产管理---设备模块
-	deviceMonitor.DeviceMonitor.PrivateMcpRoutes(mpcServer)
-	product.Laboratory.PrivateMcpRoutes(mpcServer)
+	//type McpConfig struct {
+	//	Path           string `mapstructure:"path"`
+	//	OperationsPath string `mapstructure:"operationsPath"`
+	//}
+	//// 把读取到的配置信息反序列化到 Conf 变量中
+	//var mcpConfig McpConfig
+	//if err := viper.UnmarshalKey("mcp", &mcpConfig); err != nil {
+	//	panic(err)
+	//}
+	//
+	//// 4. Mount the MCP server endpoint
+	//mpcServer.Mount(mcpConfig.Path,
+	//	mcpConfig.OperationsPath) // MCP clients will connect here
+
 	pprof.Register(r)
-
-	type McpConfig struct {
-		Path           string `mapstructure:"path"`
-		OperationsPath string `mapstructure:"operationsPath"`
+	return &App{
+		Engine:    r,
+		McpServer: mpcServer,
 	}
-	// 把读取到的配置信息反序列化到 Conf 变量中
-	var mcpConfig McpConfig
-	if err := viper.UnmarshalKey("mcp", &mcpConfig); err != nil {
-		panic(err)
-	}
+}
 
-	// 4. Mount the MCP server endpoint
-	mpcServer.Mount(mcpConfig.Path,
-		mcpConfig.OperationsPath) // MCP clients will connect here
-	return r
-
+func NewGinEngine(app *App) *gin.Engine {
+	return app.Engine
 }
 
 func newCors() gin.HandlerFunc {

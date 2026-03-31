@@ -153,9 +153,13 @@ swag 地址:
 http://localhost:8080/swagger/doc.json
 ```
 
+## 生成指定模块
+-tags 指定模块
 
-## 白泽管理系统交流群
-
-
-QQ群： [![加入QQ群](https://img.shields.io/badge/83064682-blue.svg)](https://qm.qq.com/cgi-bin/qm/qr?k=rAIw_VQ_blbSQu0J6fApnm5RbAc2CHbp&jump_from=webapi) 点击按钮入群。
-##欢迎加入
+ - ai 智能体模块
+ - iot 物联网模块
+ - shop 商城模块
+```
+wire gen -tags="ai iot"
+go build -tags="ai iot"
+```
