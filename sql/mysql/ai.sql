@@ -213,3 +213,22 @@ CREATE TABLE IF NOT EXISTS `ai_user_llm` (
     KEY `tenantllm_used_tokens` (`used_tokens`),
     KEY `tenant_llm_status` (`status`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '用户选择的模型厂商' ROW_FORMAT = Dynamic;
+
+CREATE TABLE IF NOT EXISTS ai_gateway (
+    id               bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    name             VARCHAR(128)    NOT NULL COMMENT '网关名称',
+    base_url         VARCHAR(512)    NOT NULL COMMENT 'API服务器地址',
+    api_key          VARCHAR(512)    NOT NULL COMMENT 'API Key',
+    enabled   TINYINT(1)      NOT NULL DEFAULT 1 COMMENT '启用状态:1启用,0停用',
+    active    TINYINT(1)      NOT NULL DEFAULT 0 COMMENT '在线状态:1在线,0离线',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (id)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_general_ci
+    COMMENT = '智能体网关配置表';
