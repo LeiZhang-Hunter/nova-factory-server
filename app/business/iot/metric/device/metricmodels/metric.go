@@ -1,0 +1,125 @@
+package metricmodels
+
+import (
+	"github.com/gogf/gf/os/gtime"
+)
+
+// NovaMetricsDevice is the golang structure for table nova_metrics_device.
+type NovaMetricsDevice struct {
+	DeviceId      uint64            `json:"device_id,string"       gorm:"column:device_id"      description:"设备id"`   //
+	TemplateId    uint64            `json:"template_id,string"     gorm:"column:template_id"    description:"设备模板id"` //
+	DataId        uint64            `json:"data_id,string" gorm:"column:data_id"`
+	SeriesId      uint64            `json:"series_id,string"          gorm:"column:series_id"          description:"序列id"` //
+	Attributes    map[string]string `json:"attributes"      gorm:"column:attributes;type:JSONB"    description:"属性"`       //
+	StartTimeUnix *gtime.Time       `json:"start_time_unix" gorm:"column:start_time_unix" description:"开始时间"`              //
+	TimeUnix      *gtime.Time       `json:"time_unix"       gorm:"column:time_unix"      description:"当前时间"`               //
+	Value         float64           `json:"value"           gorm:"column:value"         description:"统计值"`                 //
+}
+
+type DeviceMetricData struct {
+	SeriesId            uint64            `json:"series_id,string"          gorm:"column:series_id"          description:"序列id"` //
+	Attributes          map[string]string `json:"attributes"      gorm:"column:attributes"    description:"属性"`                  //
+	StartTimeUnix       *gtime.Time       `json:"start_time_unix" gorm:"column:start_time_unix" description:"开始时间"`              //
+	Name                string            `json:"name" gorm:"-"`
+	Unit                string            `json:"unit" gorm:"-"`
+	PredictEnable       bool              `json:"predict_enable" gorm:"-"`
+	Mode                *int              `gorm:"column:mode;comment:功能码" json:"mode,string"`                 // 功能码
+	Type                string            `gorm:"column:type;comment:数据类型" json:"type"`                       // 数据类型
+	DataType            string            `gorm:"column:data_type;comment:设备节点类型，到底是开关还是数值" json:"data_type"` // 设备节点类型，到底是开关还是数值
+	DataId              uint64            `json:"data_id,string" gorm:"-"`
+	GraphEnable         bool              `json:"graph_enable" gorm:"-"`
+	TimeUnix            *gtime.Time       `json:"time_unix"       gorm:"column:time_unix"      description:"当前时间"`      //
+	DataFormat          string            `gorm:"column:data_format;comment:读写方式" json:"data_format"`                   // 读写方式
+	Value               float64           `json:"value"           gorm:"column:value"         description:"统计值"`        //
+	ConfigurationEnable *bool             `gorm:"column:configuration_enable;comment:组态属性" json:"configuration_enable"` // 组态属性
+}
+
+type MetricMap struct {
+	Data map[uint64]map[uint64]map[uint64]*DeviceMetricData // device_id =>? template_id => data_id
+}
+
+func NewMetricMap() *MetricMap {
+	return &MetricMap{
+		Data: make(map[uint64]map[uint64]map[uint64]*DeviceMetricData),
+	}
+}
+
+// 指标
+
+type MetricQueryValue struct {
+	Time  int64   `json:"time"`
+	Value float64 `json:"value"`
+}
+
+type MetricQueryData struct {
+	Labels      map[string]string `json:"label"`
+	Values      []MetricQueryValue
+	MultiValues [][]MetricQueryValue `json:"multi_values,omitempty"`
+	Id          string
+}
+
+func NewMetricQueryData() *MetricQueryData {
+	return &MetricQueryData{
+		Labels: make(map[string]string),
+		Values: make([]MetricQueryValue, 0),
+	}
+}
+
+type MetricQueryReq struct {
+	DeviceId    uint64 `json:"device_id,string"       gorm:"column:device_id"      description:"设备id"`   //
+	TemplateId  uint64 `json:"template_id,string"     gorm:"column:template_id"    description:"设备模板id"` //
+	DataId      uint64 `json:"data_id,string"`
+	Query       string `json:"query"`
+	Start       uint64 `json:"start"`
+	End         uint64 `json:"end"`
+	Step        int    `json:"step"`
+	ServiceName string `json:"service_name"`
+	Expression  string `json:"expression"`
+	Limit       int    `json:"limit"`
+}
+
+type Predict struct {
+	Enable bool   `json:"enable"`
+	Model  string `json:"model"`
+	Param  string `json:"param"`
+}
+
+type MetricDataQueryReq struct {
+	Type        string                  `json:"type"`
+	Name        string                  `json:"name"`
+	Start       uint64                  `json:"start"`
+	End         uint64                  `json:"end"`
+	Step        int                     `json:"step"`
+	Interval    int                     `json:"interval"`
+	Level       *int                    `json:"level"`
+	Expression  string                  `json:"expression"`
+	Field       string                  `json:"field"`
+	Having      string                  `json:"having"`
+	QueryMetric []*MetricQueryCondition `json:"query_metric"`
+	Predict     Predict                 `json:"predict"`
+}
+
+type MetricQueryCondition struct {
+	DeviceId   int64 `yaml:"deviceId" json:"deviceId,string"`
+	TemplateId int64 `yaml:"templateId" json:"templateId,string"`
+	DataId     int64 `yaml:"dataId" json:"dataId,string"`
+}
+
+// GatewayMetricDataQueryReq 网关预测参数
+type GatewayMetricDataQueryReq struct {
+	GatewayId   int64                   `json:"gatewayId,string"`
+	Username    string                  `json:"username"`
+	Password    string                  `json:"password"`
+	Type        string                  `json:"type"`
+	Name        string                  `json:"name"`
+	Start       uint64                  `json:"start"`
+	End         uint64                  `json:"end"`
+	Step        int                     `json:"step"`
+	Interval    int                     `json:"interval"`
+	Level       *int                    `json:"level"`
+	QueryMetric []*MetricQueryCondition `json:"query_metric"`
+	Expression  string                  `json:"expression"`
+	Field       string                  `json:"field"`
+	Having      string                  `json:"having"`
+	Predict     Predict                 `json:"predict"`
+}

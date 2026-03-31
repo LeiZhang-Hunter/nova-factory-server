@@ -1,0 +1,7 @@
+package buildingdaoimpl
+
+import "github.com/google/wire"
+
+var ProviderSet = wire.NewSet(
+	NewBuildingDaoImpl,
+	NewFloorDaoImpl)

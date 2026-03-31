@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"nova-factory-server/app/business/iot/metric/device/metricController"
+	"nova-factory-server/app/business/iot/metric/device/metriccontroller"
 
 	"github.com/google/wire"
 	"google.golang.org/grpc"
@@ -9,7 +9,7 @@ import (
 
 var GrpcProviderSet = wire.NewSet(NewGrpcEngine)
 
-func NewGrpcEngine(server *metricController.MetricServer) *grpc.Server {
+func NewGrpcEngine(server *metriccontroller.MetricServer) *grpc.Server {
 	// 创建grpc服务
 	s := grpc.NewServer()
 	server.Metric.PrivateGrpcRoutes(s)

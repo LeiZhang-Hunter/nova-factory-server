@@ -2,8 +2,8 @@ package main
 
 import (
 	"nova-factory-server/app/business/ai/aiDataSetDao"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorDao"
-	"nova-factory-server/app/business/iot/metric/device/metricDao"
+	"nova-factory-server/app/business/iot/devicemonitor/devicemonitordao"
+	"nova-factory-server/app/business/iot/metric/device/metricdao"
 	"sync"
 	"time"
 
@@ -17,7 +17,7 @@ type Runner struct {
 	predictionDao aiDataSetDao.IAiPredictionListDao
 	// predictionDao 预测异常策略数据源
 	predictionExceptionDao aiDataSetDao.IAiPredictionExceptionDao
-	metricCDao             metricDao.IMetricDao
+	metricCDao             metricdao.IMetricDao
 	pool                   *ants.Pool
 	alert                  *alert
 	exception              *exception
@@ -26,7 +26,7 @@ type Runner struct {
 }
 
 func NewRunner(predictionDao aiDataSetDao.IAiPredictionListDao, predictionExceptionDao aiDataSetDao.IAiPredictionExceptionDao,
-	metricCDao metricDao.IMetricDao, deviceMapDao deviceMonitorDao.IDeviceDataReportDao) *Runner {
+	metricCDao metricdao.IMetricDao, deviceMapDao devicemonitordao.IDeviceDataReportDao) *Runner {
 	pool, err := ants.NewPool(10)
 	if err != nil {
 		panic(err)

@@ -1,0 +1,99 @@
+package alertcontroller
+
+import (
+	"nova-factory-server/app/business/iot/alert/alertmodels"
+	"nova-factory-server/app/business/iot/alert/alertservice"
+	"nova-factory-server/app/middlewares"
+	"nova-factory-server/app/utils/baizeContext"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+)
+
+type AlertLog struct {
+	service alertservice.AlertLogService
+}
+
+func NewAlertLog(service alertservice.AlertLogService) *AlertLog {
+	return &AlertLog{
+		service: service,
+	}
+}
+
+func (log *AlertLog) PrivateRoutes(router *gin.RouterGroup) {
+	group := router.Group("/alert/log")
+	group.GET("/list", middlewares.HasPermission("alert:log:list"), log.List)
+}
+
+func (log *AlertLog) PublicRoutes(router *gin.RouterGroup) {
+	group := router.Group("/api/alert/log/v1")
+	group.POST("/export", log.Export)
+	group.GET("/info", log.Info)
+}
+
+// Export 导入告警数据
+// @Summary 导入告警数据
+// @Description 导入告警数据
+// @Tags 告警管理/告警数据管理
+// @Param object body alertmodels.AlertLogData true "助理列表参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /api/alert/log/v1/export [post]
+func (log *AlertLog) Export(c *gin.Context) {
+	data := new(alertmodels.AlertLogData)
+	err := c.ShouldBindJSON(data)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	err = log.service.Export(c, *data)
+	if err != nil {
+		zap.L().Error("export alert error", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
+}
+
+// List 告警数据列表
+// @Summary 告警数据列表
+// @Description 告警数据列表
+// @Tags 告警管理/告警数据管理
+// @Param object body alertmodels.SysAlertLogListReq true "助理列表参数"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /alert/log/list [get]
+func (log *AlertLog) List(c *gin.Context) {
+	req := new(alertmodels.SysAlertLogListReq)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	list, err := log.service.List(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
+}
+
+// Info 告警数据详情
+// @Summary 告警数据详情
+// @Description 告警数据详情
+// @Tags 告警管理/告警数据管理
+// @Param object query uint64 true "objectId"
+// @Success 200 {object}  response.ResponseData "获取成功"
+// @Router /alert/log/info [get]
+func (log *AlertLog) Info(c *gin.Context) {
+	objectId := baizeContext.QueryUint64(c, "objectId")
+	if objectId == 0 {
+		baizeContext.ParameterError(c)
+		return
+	}
+	info, err := log.service.Info(c, objectId)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, info)
+}

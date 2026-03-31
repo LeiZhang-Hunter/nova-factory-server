@@ -1,10 +1,10 @@
 package admin
 
 import (
-	"nova-factory-server/app/business/admin/monitor/monitorController"
-	"nova-factory-server/app/business/admin/product/productController"
-	"nova-factory-server/app/business/admin/system/systemController"
-	"nova-factory-server/app/business/admin/tool/toolController"
+	"nova-factory-server/app/business/admin/monitor/monitorcontroller"
+	"nova-factory-server/app/business/admin/product/productcontroller"
+	"nova-factory-server/app/business/admin/system/systemcontroller"
+	"nova-factory-server/app/business/admin/tool/toolcontroller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/objectFile/localhostObject"
 	"nova-factory-server/app/middlewares"
@@ -20,10 +20,10 @@ type Admin struct{}
 
 func NewGinEngine(app *routes.App,
 	cache cache.Cache,
-	sc *systemController.System,
-	mc *monitorController.Monitor,
-	gc *toolController.Tool,
-	product *productController.Product) *Admin {
+	sc *systemcontroller.System,
+	mc *monitorcontroller.Monitor,
+	gc *toolcontroller.Tool,
+	product *productcontroller.Product) *Admin {
 	r := app.Engine
 	group := r.Group("")
 	//不做鉴权的

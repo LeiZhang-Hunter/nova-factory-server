@@ -3,7 +3,7 @@
 package ai
 
 import (
-	"nova-factory-server/app/business/ai/agent/aiDataSetController"
+	"nova-factory-server/app/business/ai/agent/aidatasetcontroller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
@@ -17,7 +17,7 @@ var GinProviderSet = wire.NewSet(NewFactoryBootstrap, NewGinEngine)
 func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
-	ai *aiDataSetController.AiDataSet,
+	ai *aidatasetcontroller.AiDataSet,
 	bootstrap *FactoryBootstrap) *AI {
 	go func() {
 		defer func() {

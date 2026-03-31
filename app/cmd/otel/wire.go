@@ -4,10 +4,10 @@
 package main
 
 import (
-	"nova-factory-server/app/business/iot/asset/camera/cameraDao/cameraDaoImpl"
-	"nova-factory-server/app/business/iot/metric/device/metricController"
-	"nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
-	"nova-factory-server/app/business/iot/metric/device/metricService/metricServiceImpl"
+	"nova-factory-server/app/business/iot/asset/camera/cameradao/cameraDaoImpl"
+	"nova-factory-server/app/business/iot/metric/device/metriccontroller"
+	"nova-factory-server/app/business/iot/metric/device/metricdao/metricdaoimpl"
+	"nova-factory-server/app/business/iot/metric/device/metricservice/metricserviceimpl"
 	"nova-factory-server/app/datasource"
 	"nova-factory-server/app/routes"
 
@@ -18,9 +18,9 @@ import (
 func wireApp() (*grpc.Server, func(), error) {
 	panic(wire.Build(
 
-		metricDaoIMpl.ProviderSet,
-		metricServiceImpl.ProviderSet,
-		metricController.ProviderSet,
+		metricdaoimpl.ProviderSet,
+		metricserviceimpl.ProviderSet,
+		metriccontroller.ProviderSet,
 		datasource.ProviderSet,
 		cameraDaoImpl.ProviderSet,
 		routes.GrpcProviderSet))

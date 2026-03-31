@@ -2,7 +2,7 @@ package render
 
 import (
 	"encoding/json"
-	deviceModels2 "nova-factory-server/app/business/iot/asset/device/deviceModels"
+	deviceModels2 "nova-factory-server/app/business/iot/asset/device/devicemodels"
 	"nova-factory-server/app/constant/gateway"
 	"nova-factory-server/app/utils/gateway/v1/api"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/bhps7"

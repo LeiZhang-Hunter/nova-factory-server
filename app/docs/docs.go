@@ -150,7 +150,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.CreateAssistantRequest"
+                            "$ref": "#/definitions/aidatasetmodels.CreateAssistantRequest"
                         }
                     }
                 ],
@@ -269,7 +269,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.UpdateAssistantRequest"
+                            "$ref": "#/definitions/aidatasetmodels.UpdateAssistantRequest"
                         }
                     }
                 ],
@@ -300,7 +300,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.AddChunkReq"
+                            "$ref": "#/definitions/aidatasetmodels.AddChunkReq"
                         }
                     }
                 ],
@@ -401,7 +401,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.RemoveChunkReq"
+                            "$ref": "#/definitions/aidatasetmodels.RemoveChunkReq"
                         }
                     }
                 ],
@@ -432,7 +432,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.RetrievalListReq"
+                            "$ref": "#/definitions/aidatasetmodels.RetrievalListReq"
                         }
                     }
                 ],
@@ -463,7 +463,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.UpdateChunkReq"
+                            "$ref": "#/definitions/aidatasetmodels.UpdateChunkReq"
                         }
                     }
                 ],
@@ -514,7 +514,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.DataSetRequest"
+                            "$ref": "#/definitions/aidatasetmodels.DataSetRequest"
                         }
                     }
                 ],
@@ -764,7 +764,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.DeleteDocumentRequest"
+                            "$ref": "#/definitions/aidatasetmodels.DeleteDocumentRequest"
                         }
                     }
                 ],
@@ -795,7 +795,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.AgentsCompletionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.AgentsCompletionsRequest"
                         }
                     }
                 ],
@@ -826,7 +826,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.SessionAgentCreate"
+                            "$ref": "#/definitions/aidatasetmodels.SessionAgentCreate"
                         }
                     }
                 ],
@@ -857,7 +857,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.RemoveAgentSessionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.RemoveAgentSessionsRequest"
                         }
                     }
                 ],
@@ -952,7 +952,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.AskRequest"
+                            "$ref": "#/definitions/aidatasetmodels.AskRequest"
                         }
                     }
                 ],
@@ -983,7 +983,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.ChatsCompletionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.ChatsCompletionsRequest"
                         }
                     }
                 ],
@@ -1014,7 +1014,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.ConversationRelatedQuestionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.ConversationRelatedQuestionsRequest"
                         }
                     }
                 ],
@@ -1045,7 +1045,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.CreateSessionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.CreateSessionsRequest"
                         }
                     }
                 ],
@@ -1144,7 +1144,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.DeleteSessionRequest"
+                            "$ref": "#/definitions/aidatasetmodels.DeleteSessionRequest"
                         }
                     }
                 ],
@@ -1175,7 +1175,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.UpdateSessionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.UpdateSessionsRequest"
                         }
                     }
                 ],
@@ -1208,7 +1208,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.ParseDocumentApiRequest"
+                            "$ref": "#/definitions/aidatasetmodels.ParseDocumentApiRequest"
                         }
                     }
                 ],
@@ -1241,7 +1241,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.ParseDocumentApiRequest"
+                            "$ref": "#/definitions/aidatasetmodels.ParseDocumentApiRequest"
                         }
                     }
                 ],
@@ -1285,7 +1285,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.PutDocumentRequest"
+                            "$ref": "#/definitions/aidatasetmodels.PutDocumentRequest"
                         }
                     }
                 ],
@@ -1323,7 +1323,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.UpdateDataSetRequest"
+                            "$ref": "#/definitions/aidatasetmodels.UpdateDataSetRequest"
                         }
                     }
                 ],
@@ -1562,7 +1562,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.SetSysUserLLM"
+                            "$ref": "#/definitions/aidatasetmodels.SetSysUserLLM"
                         }
                     }
                 ],
@@ -1663,7 +1663,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.SetSysAiLLMSetting"
+                            "$ref": "#/definitions/aidatasetmodels.SetSysAiLLMSetting"
                         }
                     }
                 ],
@@ -1825,7 +1825,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.SetSysAiPrediction"
+                            "$ref": "#/definitions/aidatasetmodels.SetSysAiPrediction"
                         }
                     }
                 ],
@@ -1938,7 +1938,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SetAlertAction"
+                            "$ref": "#/definitions/alertmodels.SetAlertAction"
                         }
                     }
                 ],
@@ -1993,7 +1993,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SysAlertLogListReq"
+                            "$ref": "#/definitions/alertmodels.SysAlertLogListReq"
                         }
                     }
                 ],
@@ -2115,7 +2115,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SetAlertAiReason"
+                            "$ref": "#/definitions/alertmodels.SetAlertAiReason"
                         }
                     }
                 ],
@@ -2151,7 +2151,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.ChangeSysAlert"
+                            "$ref": "#/definitions/alertmodels.ChangeSysAlert"
                         }
                     }
                 ],
@@ -2281,7 +2281,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SetSysAlert"
+                            "$ref": "#/definitions/alertmodels.SetSysAlert"
                         }
                     }
                 ],
@@ -2405,7 +2405,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SetSysAlertSinkTemplate"
+                            "$ref": "#/definitions/alertmodels.SetSysAlertSinkTemplate"
                         }
                     }
                 ],
@@ -2433,7 +2433,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.AlertLogData"
+                            "$ref": "#/definitions/alertmodels.AlertLogData"
                         }
                     }
                 ],
@@ -2464,7 +2464,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.BindGatewayConfigReq"
+                            "$ref": "#/definitions/daemonizemodels.BindGatewayConfigReq"
                         }
                     }
                 ],
@@ -2530,7 +2530,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.ScheduleReq"
+                            "$ref": "#/definitions/craftroutemodels.ScheduleReq"
                         }
                     }
                 ],
@@ -2575,7 +2575,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.GatewayMetricDataQueryReq"
+                            "$ref": "#/definitions/metricmodels.GatewayMetricDataQueryReq"
                         }
                     }
                 ],
@@ -2603,7 +2603,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.GatewayMetricDataQueryReq"
+                            "$ref": "#/definitions/metricmodels.GatewayMetricDataQueryReq"
                         }
                     }
                 ],
@@ -2747,7 +2747,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.DeviceIdsReq"
+                            "$ref": "#/definitions/devicemonitormodel.DeviceIdsReq"
                         }
                     }
                 ],
@@ -2775,7 +2775,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.AlertLogData"
+                            "$ref": "#/definitions/alertmodels.AlertLogData"
                         }
                     }
                 ],
@@ -2803,7 +2803,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.GatewayMetricDataQueryReq"
+                            "$ref": "#/definitions/metricmodels.GatewayMetricDataQueryReq"
                         }
                     }
                 ],
@@ -2897,7 +2897,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -3012,7 +3012,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -3127,7 +3127,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -3279,7 +3279,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
@@ -3310,7 +3310,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
@@ -3432,7 +3432,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/buildingModels.SetSysBuilding"
+                            "$ref": "#/definitions/buildingmodels.SetSysBuilding"
                         }
                     }
                 ],
@@ -3580,7 +3580,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceCheckPlanVO"
+                            "$ref": "#/definitions/devicemodels.SysDeviceCheckPlanVO"
                         }
                     }
                 ],
@@ -3694,7 +3694,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceCheckSubjectVO"
+                            "$ref": "#/definitions/devicemodels.SysDeviceCheckSubjectVO"
                         }
                     }
                 ],
@@ -3806,7 +3806,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceCheckPlanVO"
+                            "$ref": "#/definitions/devicemodels.SysDeviceCheckPlanVO"
                         }
                     }
                 ],
@@ -3950,7 +3950,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.DeviceInfo"
+                            "$ref": "#/definitions/devicemodels.DeviceInfo"
                         }
                     }
                 ],
@@ -4062,7 +4062,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceSubjectVO"
+                            "$ref": "#/definitions/devicemodels.SysDeviceSubjectVO"
                         }
                     }
                 ],
@@ -4180,7 +4180,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SetSysModbusDeviceConfigDataReq"
+                            "$ref": "#/definitions/devicemodels.SetSysModbusDeviceConfigDataReq"
                         }
                     }
                 ],
@@ -4318,7 +4318,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceTemplateSetReq"
+                            "$ref": "#/definitions/devicemodels.SysDeviceTemplateSetReq"
                         }
                     }
                 ],
@@ -4436,7 +4436,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.DeviceGroup"
+                            "$ref": "#/definitions/devicemodels.DeviceGroup"
                         }
                     }
                 ],
@@ -4697,7 +4697,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/buildingModels.SetSysFloor"
+                            "$ref": "#/definitions/buildingmodels.SetSysFloor"
                         }
                     }
                 ],
@@ -4728,7 +4728,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/materialModels.InboundInfo"
+                            "$ref": "#/definitions/materialmodels.InboundInfo"
                         }
                     }
                 ],
@@ -4902,7 +4902,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/materialModels.OutboundInfo"
+                            "$ref": "#/definitions/materialmodels.OutboundInfo"
                         }
                     }
                 ],
@@ -4992,7 +4992,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/materialModels.MaterialInfo"
+                            "$ref": "#/definitions/materialmodels.MaterialInfo"
                         }
                     }
                 ],
@@ -5211,7 +5211,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/resourceModels.SysResourceFileDML"
+                            "$ref": "#/definitions/resourcemodels.SysResourceFileDML"
                         }
                     }
                 ],
@@ -5349,7 +5349,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/configurationModels.SetSysConfiguration"
+                            "$ref": "#/definitions/configurationmodels.SetSysConfiguration"
                         }
                     }
                 ],
@@ -5464,7 +5464,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProSetProcessContent"
+                            "$ref": "#/definitions/craftroutemodels.SysProSetProcessContent"
                         }
                     }
                 ],
@@ -5590,7 +5590,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProProcess"
+                            "$ref": "#/definitions/craftroutemodels.SysProProcess"
                         }
                     }
                 ],
@@ -5621,7 +5621,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.ProcessTopo"
+                            "$ref": "#/definitions/craftroutemodels.ProcessTopo"
                         }
                     }
                 ],
@@ -5747,7 +5747,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProRouteProcessListReq"
+                            "$ref": "#/definitions/craftroutemodels.SysProRouteProcessListReq"
                         }
                     }
                 ],
@@ -5807,7 +5807,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProRouteProcessSetRequest"
+                            "$ref": "#/definitions/craftroutemodels.SysProRouteProcessSetRequest"
                         }
                     }
                 ],
@@ -6018,7 +6018,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SetSysProductSchedule"
+                            "$ref": "#/definitions/craftroutemodels.SetSysProductSchedule"
                         }
                     }
                 ],
@@ -6049,7 +6049,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysCraftRouteRequest"
+                            "$ref": "#/definitions/craftroutemodels.SysCraftRouteRequest"
                         }
                     }
                 ],
@@ -6156,7 +6156,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.StartProcessReq"
+                            "$ref": "#/definitions/daemonizemodels.StartProcessReq"
                         }
                     }
                 ],
@@ -6187,7 +6187,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.StartProcessReq"
+                            "$ref": "#/definitions/daemonizemodels.StartProcessReq"
                         }
                     }
                 ],
@@ -6247,7 +6247,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.SysIotAgentSetReq"
+                            "$ref": "#/definitions/daemonizemodels.SysIotAgentSetReq"
                         }
                     }
                 ],
@@ -6335,7 +6335,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dashboardModels.SetSysDashboardData"
+                            "$ref": "#/definitions/dashboardmodels.SetSysDashboardData"
                         }
                     }
                 ],
@@ -6424,7 +6424,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricDataQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricDataQueryReq"
                         }
                     }
                 ],
@@ -6484,7 +6484,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dashboardModels.SetSysDashboard"
+                            "$ref": "#/definitions/dashboardmodels.SetSysDashboard"
                         }
                     }
                 ],
@@ -6515,7 +6515,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.CameraOfferReq"
+                            "$ref": "#/definitions/devicemonitormodel.CameraOfferReq"
                         }
                     }
                 ],
@@ -6543,7 +6543,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.ControlReq"
+                            "$ref": "#/definitions/devicemonitormodel.ControlReq"
                         }
                     }
                 ],
@@ -6644,7 +6644,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.ControlStatusReq"
+                            "$ref": "#/definitions/devicemonitormodel.ControlStatusReq"
                         }
                     }
                 ],
@@ -6689,7 +6689,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.DevDataReq"
+                            "$ref": "#/definitions/devicemonitormodel.DevDataReq"
                         }
                     }
                 ],
@@ -6717,7 +6717,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.DevDataReq"
+                            "$ref": "#/definitions/devicemonitormodel.DevDataReq"
                         }
                     }
                 ],
@@ -6890,7 +6890,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
@@ -6921,7 +6921,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
@@ -6993,7 +6993,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
@@ -7314,7 +7314,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.SysIotAgentConfigSetReq"
+                            "$ref": "#/definitions/daemonizemodels.SysIotAgentConfigSetReq"
                         }
                     }
                 ],
@@ -7355,7 +7355,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.GetInfo"
+                                            "$ref": "#/definitions/systemmodels.GetInfo"
                                         }
                                     }
                                 }
@@ -7397,7 +7397,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.LoginBody"
+                            "$ref": "#/definitions/systemmodels.LoginBody"
                         }
                     }
                 ],
@@ -7573,7 +7573,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.RemoveDevMapInfo"
+                            "$ref": "#/definitions/devicemonitormodel.RemoveDevMapInfo"
                         }
                     }
                 ],
@@ -7601,7 +7601,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.SetDevMapInfo"
+                            "$ref": "#/definitions/devicemonitormodel.SetDevMapInfo"
                         }
                     }
                 ],
@@ -7637,7 +7637,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/monitorModels.JobDML"
+                            "$ref": "#/definitions/monitormodels.JobDML"
                         }
                     }
                 ],
@@ -7671,7 +7671,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/monitorModels.JobDML"
+                            "$ref": "#/definitions/monitormodels.JobDML"
                         }
                     }
                 ],
@@ -7707,7 +7707,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/monitorModels.JobDML"
+                            "$ref": "#/definitions/monitormodels.JobDML"
                         }
                     }
                 ],
@@ -7775,7 +7775,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/monitorModels.JobIdAndName"
+                                                "$ref": "#/definitions/monitormodels.JobIdAndName"
                                             }
                                         }
                                     }
@@ -7866,7 +7866,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/monitorModels.JobVo"
+                                                                "$ref": "#/definitions/monitormodels.JobVo"
                                                             }
                                                         }
                                                     }
@@ -7956,7 +7956,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/monitorModels.JobLog"
+                                                                "$ref": "#/definitions/monitormodels.JobLog"
                                                             }
                                                         }
                                                     }
@@ -8007,7 +8007,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/monitorModels.JobLog"
+                                            "$ref": "#/definitions/monitormodels.JobLog"
                                         }
                                     }
                                 }
@@ -8039,7 +8039,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/monitorModels.JobVo"
+                            "$ref": "#/definitions/monitormodels.JobVo"
                         }
                     }
                 ],
@@ -8123,7 +8123,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/monitorModels.JobVo"
+                                            "$ref": "#/definitions/monitormodels.JobVo"
                                         }
                                     }
                                 }
@@ -8182,7 +8182,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/monitorModels.SysUserOnline"
+                                                                "$ref": "#/definitions/monitormodels.SysUserOnline"
                                                             }
                                                         }
                                                     }
@@ -8267,7 +8267,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                            "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                         }
                                     }
                                 }
@@ -8377,7 +8377,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -8492,7 +8492,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -8563,7 +8563,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                            "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                         }
                     }
                 ],
@@ -8591,7 +8591,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.LoginBody"
+                            "$ref": "#/definitions/systemmodels.LoginBody"
                         }
                     }
                 ],
@@ -8627,7 +8627,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysConfigVo"
+                            "$ref": "#/definitions/systemmodels.SysConfigVo"
                         }
                     }
                 ],
@@ -8661,7 +8661,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysConfigVo"
+                            "$ref": "#/definitions/systemmodels.SysConfigVo"
                         }
                     }
                 ],
@@ -8864,7 +8864,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysConfigVo"
+                                                                "$ref": "#/definitions/systemmodels.SysConfigVo"
                                                             }
                                                         }
                                                     }
@@ -8915,7 +8915,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysConfigVo"
+                                            "$ref": "#/definitions/systemmodels.SysConfigVo"
                                         }
                                     }
                                 }
@@ -9125,7 +9125,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.ConsumptionNoticeVo"
+                                                                "$ref": "#/definitions/systemmodels.ConsumptionNoticeVo"
                                                             }
                                                         }
                                                     }
@@ -9176,7 +9176,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.ConsumptionNoticeVo"
+                                            "$ref": "#/definitions/systemmodels.ConsumptionNoticeVo"
                                         }
                                     }
                                 }
@@ -9269,7 +9269,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysDeptVo"
+                                                                "$ref": "#/definitions/systemmodels.SysDeptVo"
                                                             }
                                                         }
                                                     }
@@ -9304,7 +9304,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDeptVo"
+                            "$ref": "#/definitions/systemmodels.SysDeptVo"
                         }
                     }
                 ],
@@ -9338,7 +9338,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDeptVo"
+                            "$ref": "#/definitions/systemmodels.SysDeptVo"
                         }
                     }
                 ],
@@ -9388,7 +9388,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.RoleDeptTree"
+                                            "$ref": "#/definitions/systemmodels.RoleDeptTree"
                                         }
                                     }
                                 }
@@ -9434,7 +9434,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDeptVo"
+                                            "$ref": "#/definitions/systemmodels.SysDeptVo"
                                         }
                                     }
                                 }
@@ -9498,7 +9498,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                         }
                     }
                 ],
@@ -9532,7 +9532,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                         }
                     }
                 ],
@@ -9626,7 +9626,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                                                "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                                             }
                                                         }
                                                     }
@@ -9687,7 +9687,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                                                "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                                             }
                                                         }
                                                     }
@@ -9743,7 +9743,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                         }
                                     }
                                 }
@@ -9789,7 +9789,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                         }
                                     }
                                 }
@@ -9821,7 +9821,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                         }
                     }
                 ],
@@ -9855,7 +9855,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                         }
                     }
                 ],
@@ -9986,7 +9986,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                                                "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                                             }
                                                         }
                                                     }
@@ -10028,7 +10028,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                         }
                                     }
                                 }
@@ -10113,7 +10113,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                         }
                                     }
                                 }
@@ -10261,7 +10261,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysNoticeVo"
+                            "$ref": "#/definitions/systemmodels.SysNoticeVo"
                         }
                     }
                 ],
@@ -10355,7 +10355,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysNoticeVo"
+                                                                "$ref": "#/definitions/systemmodels.SysNoticeVo"
                                                             }
                                                         }
                                                     }
@@ -10406,7 +10406,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysNoticeVo"
+                                            "$ref": "#/definitions/systemmodels.SysNoticeVo"
                                         }
                                     }
                                 }
@@ -10438,7 +10438,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysPermissionEdit"
+                            "$ref": "#/definitions/systemmodels.SysPermissionEdit"
                         }
                     }
                 ],
@@ -10472,7 +10472,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysPermissionAdd"
+                            "$ref": "#/definitions/systemmodels.SysPermissionAdd"
                         }
                     }
                 ],
@@ -10524,7 +10524,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/systemModels.SysPermissionVo"
+                                                "$ref": "#/definitions/systemmodels.SysPermissionVo"
                                             }
                                         }
                                     }
@@ -10596,7 +10596,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/systemModels.SysPermissionVo"
+                                                "$ref": "#/definitions/systemmodels.SysPermissionVo"
                                             }
                                         }
                                     }
@@ -10643,7 +10643,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysPermissionVo"
+                                            "$ref": "#/definitions/systemmodels.SysPermissionVo"
                                         }
                                     }
                                 }
@@ -10707,7 +10707,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysPostVo"
+                            "$ref": "#/definitions/systemmodels.SysPostVo"
                         }
                     }
                 ],
@@ -10741,7 +10741,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysPostVo"
+                            "$ref": "#/definitions/systemmodels.SysPostVo"
                         }
                     }
                 ],
@@ -10907,7 +10907,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysPostVo"
+                                                                "$ref": "#/definitions/systemmodels.SysPostVo"
                                                             }
                                                         }
                                                     }
@@ -10996,7 +10996,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysPostVo"
+                                            "$ref": "#/definitions/systemmodels.SysPostVo"
                                         }
                                     }
                                 }
@@ -11028,7 +11028,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysRoleDML"
+                            "$ref": "#/definitions/systemmodels.SysRoleDML"
                         }
                     }
                 ],
@@ -11062,7 +11062,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysRoleDML"
+                            "$ref": "#/definitions/systemmodels.SysRoleDML"
                         }
                     }
                 ],
@@ -11098,7 +11098,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserRole"
+                            "$ref": "#/definitions/systemmodels.SysUserRole"
                         }
                     }
                 ],
@@ -11283,7 +11283,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysUserVo"
+                                                                "$ref": "#/definitions/systemmodels.SysUserVo"
                                                             }
                                                         }
                                                     }
@@ -11379,7 +11379,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysUserVo"
+                                                                "$ref": "#/definitions/systemmodels.SysUserVo"
                                                             }
                                                         }
                                                     }
@@ -11414,7 +11414,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysRoleDML"
+                            "$ref": "#/definitions/systemmodels.SysRoleDML"
                         }
                     }
                 ],
@@ -11513,7 +11513,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysRoleVo"
+                                                                "$ref": "#/definitions/systemmodels.SysRoleVo"
                                                             }
                                                         }
                                                     }
@@ -11564,7 +11564,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysRoleVo"
+                                            "$ref": "#/definitions/systemmodels.SysRoleVo"
                                         }
                                     }
                                 }
@@ -11639,7 +11639,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SelectPermission"
+                                            "$ref": "#/definitions/systemmodels.SelectPermission"
                                         }
                                     }
                                 }
@@ -11676,7 +11676,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SelectPermission"
+                                            "$ref": "#/definitions/systemmodels.SelectPermission"
                                         }
                                     }
                                 }
@@ -11785,7 +11785,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysWorkShiftSettingVO"
+                            "$ref": "#/definitions/systemmodels.SysWorkShiftSettingVO"
                         }
                     }
                 ],
@@ -11845,7 +11845,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserDML"
+                            "$ref": "#/definitions/systemmodels.SysUserDML"
                         }
                     }
                 ],
@@ -11879,7 +11879,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserDML"
+                            "$ref": "#/definitions/systemmodels.SysUserDML"
                         }
                     }
                 ],
@@ -11920,7 +11920,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.Accredit"
+                                            "$ref": "#/definitions/systemmodels.Accredit"
                                         }
                                     }
                                 }
@@ -12022,7 +12022,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysUserVo"
+                                                                "$ref": "#/definitions/systemmodels.SysUserVo"
                                                             }
                                                         }
                                                     }
@@ -12086,7 +12086,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.EditUserStatus"
+                            "$ref": "#/definitions/systemmodels.EditUserStatus"
                         }
                     }
                 ],
@@ -12122,7 +12122,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserDataScope"
+                            "$ref": "#/definitions/systemmodels.SysUserDataScope"
                         }
                     }
                 ],
@@ -12431,7 +12431,7 @@ const docTemplate = `{
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysUserVo"
+                                                                "$ref": "#/definitions/systemmodels.SysUserVo"
                                                             }
                                                         }
                                                     }
@@ -12473,7 +12473,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.UserProfile"
+                                            "$ref": "#/definitions/systemmodels.UserProfile"
                                         }
                                     }
                                 }
@@ -12503,7 +12503,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserDML"
+                            "$ref": "#/definitions/systemmodels.SysUserDML"
                         }
                     }
                 ],
@@ -12617,7 +12617,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.ResetPwd"
+                            "$ref": "#/definitions/systemmodels.ResetPwd"
                         }
                     }
                 ],
@@ -12668,7 +12668,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.UserAndAccredit"
+                                            "$ref": "#/definitions/systemmodels.UserAndAccredit"
                                         }
                                     }
                                 }
@@ -12680,7 +12680,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "aiDataSetModels.AddChunkReq": {
+        "aidatasetmodels.AddChunkReq": {
             "type": "object",
             "properties": {
                 "content": {
@@ -12706,7 +12706,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.AgentsCompletionsRequest": {
+        "aidatasetmodels.AgentsCompletionsRequest": {
             "type": "object",
             "properties": {
                 "agent_id": {
@@ -12729,7 +12729,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.AskRequest": {
+        "aidatasetmodels.AskRequest": {
             "type": "object",
             "properties": {
                 "dataset_ids": {
@@ -12743,7 +12743,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.ChatsCompletionsRequest": {
+        "aidatasetmodels.ChatsCompletionsRequest": {
             "type": "object",
             "required": [
                 "chat_id"
@@ -12766,7 +12766,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.ConversationRelatedQuestionsRequest": {
+        "aidatasetmodels.ConversationRelatedQuestionsRequest": {
             "type": "object",
             "properties": {
                 "question": {
@@ -12774,7 +12774,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.CreateAssistantRequest": {
+        "aidatasetmodels.CreateAssistantRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -12793,16 +12793,16 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "llm": {
-                    "$ref": "#/definitions/aiDataSetModels.Llm"
+                    "$ref": "#/definitions/aidatasetmodels.Llm"
                 },
                 "name": {
                     "type": "string"
                 },
                 "prompt": {
-                    "$ref": "#/definitions/aiDataSetModels.Prompt"
+                    "$ref": "#/definitions/aidatasetmodels.Prompt"
                 },
                 "prompt_config": {
-                    "$ref": "#/definitions/aiDataSetModels.PromptConfig"
+                    "$ref": "#/definitions/aidatasetmodels.PromptConfig"
                 },
                 "top_k": {
                     "type": "integer"
@@ -12812,7 +12812,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.CreateSessionsRequest": {
+        "aidatasetmodels.CreateSessionsRequest": {
             "type": "object",
             "required": [
                 "chat_id",
@@ -12830,7 +12830,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.DataSetRequest": {
+        "aidatasetmodels.DataSetRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -12855,14 +12855,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parser_config": {
-                    "$ref": "#/definitions/aiDataSetModels.ParserConfig"
+                    "$ref": "#/definitions/aidatasetmodels.ParserConfig"
                 },
                 "permission": {
                     "type": "string"
                 }
             }
         },
-        "aiDataSetModels.DeleteDocumentRequest": {
+        "aidatasetmodels.DeleteDocumentRequest": {
             "type": "object",
             "properties": {
                 "dataset_id": {
@@ -12877,7 +12877,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.DeleteSessionRequest": {
+        "aidatasetmodels.DeleteSessionRequest": {
             "type": "object",
             "required": [
                 "chat_id"
@@ -12894,7 +12894,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.Graphrag": {
+        "aidatasetmodels.Graphrag": {
             "type": "object",
             "properties": {
                 "community": {
@@ -12917,7 +12917,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.Llm": {
+        "aidatasetmodels.Llm": {
             "type": "object",
             "properties": {
                 "frequency_penalty": {
@@ -12937,7 +12937,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.ParseDocumentApiRequest": {
+        "aidatasetmodels.ParseDocumentApiRequest": {
             "type": "object",
             "properties": {
                 "dataset_id": {
@@ -12952,7 +12952,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.ParserConfig": {
+        "aidatasetmodels.ParserConfig": {
             "type": "object",
             "properties": {
                 "auto_keywords": {
@@ -12968,7 +12968,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "graphrag": {
-                    "$ref": "#/definitions/aiDataSetModels.Graphrag"
+                    "$ref": "#/definitions/aidatasetmodels.Graphrag"
                 },
                 "html4excel": {
                     "type": "boolean"
@@ -12977,7 +12977,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "raptor": {
-                    "$ref": "#/definitions/aiDataSetModels.Raptor"
+                    "$ref": "#/definitions/aidatasetmodels.Raptor"
                 },
                 "tag_kb_ids": {
                     "type": "integer"
@@ -12987,7 +12987,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.Prompt": {
+        "aidatasetmodels.Prompt": {
             "type": "object",
             "properties": {
                 "empty_response": {
@@ -13032,12 +13032,12 @@ const docTemplate = `{
                 "variables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/aiDataSetModels.Variables"
+                        "$ref": "#/definitions/aidatasetmodels.Variables"
                     }
                 }
             }
         },
-        "aiDataSetModels.PromptConfig": {
+        "aidatasetmodels.PromptConfig": {
             "type": "object",
             "properties": {
                 "empty_response": {
@@ -13063,7 +13063,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.PutDocumentRequest": {
+        "aidatasetmodels.PutDocumentRequest": {
             "type": "object",
             "properties": {
                 "chunk_method": {
@@ -13080,11 +13080,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parser_config": {
-                    "$ref": "#/definitions/aiDataSetModels.ParserConfig"
+                    "$ref": "#/definitions/aidatasetmodels.ParserConfig"
                 }
             }
         },
-        "aiDataSetModels.Raptor": {
+        "aidatasetmodels.Raptor": {
             "type": "object",
             "properties": {
                 "max_cluster": {
@@ -13107,7 +13107,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.RemoveAgentSessionsRequest": {
+        "aidatasetmodels.RemoveAgentSessionsRequest": {
             "type": "object",
             "required": [
                 "agent_id"
@@ -13124,7 +13124,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.RemoveChunkReq": {
+        "aidatasetmodels.RemoveChunkReq": {
             "type": "object",
             "properties": {
                 "chunk_ids": {
@@ -13141,7 +13141,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.RetrievalListReq": {
+        "aidatasetmodels.RetrievalListReq": {
             "type": "object",
             "properties": {
                 "dataset_uuids": {
@@ -13188,7 +13188,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.SessionAgentCreate": {
+        "aidatasetmodels.SessionAgentCreate": {
             "type": "object",
             "properties": {
                 "agent_id": {
@@ -13200,7 +13200,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.SetSysAiLLMSetting": {
+        "aidatasetmodels.SetSysAiLLMSetting": {
             "type": "object",
             "properties": {
                 "asr_id": {
@@ -13242,7 +13242,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.SetSysAiPrediction": {
+        "aidatasetmodels.SetSysAiPrediction": {
             "type": "object",
             "properties": {
                 "action_id": {
@@ -13301,7 +13301,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.SetSysAiPredictionControl": {
+        "aidatasetmodels.SetSysAiPredictionControl": {
             "type": "object",
             "properties": {
                 "agg_function": {
@@ -13345,7 +13345,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.SetSysUserLLM": {
+        "aidatasetmodels.SetSysUserLLM": {
             "type": "object",
             "properties": {
                 "api_base": {
@@ -13359,7 +13359,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.UpdateAssistantRequest": {
+        "aidatasetmodels.UpdateAssistantRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -13375,17 +13375,17 @@ const docTemplate = `{
                     }
                 },
                 "llm": {
-                    "$ref": "#/definitions/aiDataSetModels.Llm"
+                    "$ref": "#/definitions/aidatasetmodels.Llm"
                 },
                 "name": {
                     "type": "string"
                 },
                 "prompt": {
-                    "$ref": "#/definitions/aiDataSetModels.Prompt"
+                    "$ref": "#/definitions/aidatasetmodels.Prompt"
                 }
             }
         },
-        "aiDataSetModels.UpdateChunkReq": {
+        "aidatasetmodels.UpdateChunkReq": {
             "type": "object",
             "properties": {
                 "available": {
@@ -13417,7 +13417,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.UpdateDataSetRequest": {
+        "aidatasetmodels.UpdateDataSetRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -13439,11 +13439,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "parser_config": {
-                    "$ref": "#/definitions/aiDataSetModels.ParserConfig"
+                    "$ref": "#/definitions/aidatasetmodels.ParserConfig"
                 }
             }
         },
-        "aiDataSetModels.UpdateSessionsRequest": {
+        "aidatasetmodels.UpdateSessionsRequest": {
             "type": "object",
             "required": [
                 "chat_id",
@@ -13464,7 +13464,7 @@ const docTemplate = `{
                 }
             }
         },
-        "aiDataSetModels.Variables": {
+        "aidatasetmodels.Variables": {
             "type": "object",
             "properties": {
                 "key": {
@@ -13475,13 +13475,13 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.AlertLogData": {
+        "alertmodels.AlertLogData": {
             "type": "object",
             "properties": {
                 "alerts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/alertModels.AlertValue"
+                        "$ref": "#/definitions/alertmodels.AlertValue"
                     }
                 },
                 "commonLabels": {
@@ -13504,7 +13504,7 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.AlertValue": {
+        "alertmodels.AlertValue": {
             "type": "object",
             "properties": {
                 "annotations": {
@@ -13549,7 +13549,7 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.ApiNotify": {
+        "alertmodels.ApiNotify": {
             "type": "object",
             "properties": {
                 "period": {
@@ -13578,7 +13578,7 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.ChangeSysAlert": {
+        "alertmodels.ChangeSysAlert": {
             "type": "object",
             "properties": {
                 "id": {
@@ -13590,7 +13590,7 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.Receiver": {
+        "alertmodels.Receiver": {
             "type": "object",
             "required": [
                 "nickName",
@@ -13615,14 +13615,14 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.SetAlertAction": {
+        "alertmodels.SetAlertAction": {
             "type": "object",
             "properties": {
                 "api_notify": {
                     "description": "通知用户",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/alertModels.ApiNotify"
+                        "$ref": "#/definitions/alertmodels.ApiNotify"
                     }
                 },
                 "id": {
@@ -13638,12 +13638,12 @@ const docTemplate = `{
                     "description": "通知周期，逗号分隔",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/alertModels.UserNotify"
+                        "$ref": "#/definitions/alertmodels.UserNotify"
                     }
                 }
             }
         },
-        "alertModels.SetAlertAiReason": {
+        "alertmodels.SetAlertAiReason": {
             "type": "object",
             "properties": {
                 "agent_id": {
@@ -13669,7 +13669,7 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.SetSysAlert": {
+        "alertmodels.SetSysAlert": {
             "type": "object",
             "properties": {
                 "action_id": {
@@ -13738,7 +13738,7 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.SetSysAlertSinkTemplate": {
+        "alertmodels.SetSysAlertSinkTemplate": {
             "type": "object",
             "required": [
                 "addr",
@@ -13784,7 +13784,7 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.SysAlertLogListReq": {
+        "alertmodels.SysAlertLogListReq": {
             "type": "object",
             "properties": {
                 "alert_id": {
@@ -13831,7 +13831,7 @@ const docTemplate = `{
                 }
             }
         },
-        "alertModels.UserNotify": {
+        "alertmodels.UserNotify": {
             "type": "object",
             "properties": {
                 "channels": {
@@ -13849,7 +13849,7 @@ const docTemplate = `{
                 "receiver": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/alertModels.Receiver"
+                        "$ref": "#/definitions/alertmodels.Receiver"
                     }
                 },
                 "time_end": {
@@ -13880,7 +13880,7 @@ const docTemplate = `{
                 }
             }
         },
-        "buildingModels.SetSysBuilding": {
+        "buildingmodels.SetSysBuilding": {
             "type": "object",
             "properties": {
                 "address": {
@@ -13938,7 +13938,7 @@ const docTemplate = `{
                 }
             }
         },
-        "buildingModels.SetSysFloor": {
+        "buildingmodels.SetSysFloor": {
             "type": "object",
             "properties": {
                 "building_id": {
@@ -13961,7 +13961,7 @@ const docTemplate = `{
                 }
             }
         },
-        "configurationModels.SetSysConfiguration": {
+        "configurationmodels.SetSysConfiguration": {
             "type": "object",
             "required": [
                 "name",
@@ -13972,7 +13972,7 @@ const docTemplate = `{
                     "description": "注解",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/deviceModels.Annotation"
+                        "$ref": "#/definitions/devicemodels.Annotation"
                     }
                 },
                 "description": {
@@ -13994,7 +13994,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.CaptureData": {
+        "craftroutemodels.CaptureData": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -14008,7 +14008,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.ComputedPosition": {
+        "craftroutemodels.ComputedPosition": {
             "type": "object",
             "properties": {
                 "x": {
@@ -14022,27 +14022,27 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.ControlRule": {
+        "craftroutemodels.ControlRule": {
             "type": "object",
             "properties": {
                 "captures": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.CaptureData"
+                        "$ref": "#/definitions/craftroutemodels.CaptureData"
                     }
                 },
                 "pid_rules": {
-                    "$ref": "#/definitions/craftRouteModels.PidRules"
+                    "$ref": "#/definitions/craftroutemodels.PidRules"
                 },
                 "predict_rules": {
-                    "$ref": "#/definitions/craftRouteModels.PredictRules"
+                    "$ref": "#/definitions/craftroutemodels.PredictRules"
                 },
                 "trigger_rules": {
-                    "$ref": "#/definitions/craftRouteModels.TriggerRules"
+                    "$ref": "#/definitions/craftroutemodels.TriggerRules"
                 }
             }
         },
-        "craftRouteModels.ControllerAction": {
+        "craftroutemodels.ControllerAction": {
             "type": "object",
             "properties": {
                 "condition": {
@@ -14071,7 +14071,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.DeviceRuleInfo": {
+        "craftroutemodels.DeviceRuleInfo": {
             "type": "object",
             "properties": {
                 "dataId": {
@@ -14082,7 +14082,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.Dimensions": {
+        "craftroutemodels.Dimensions": {
             "type": "object",
             "properties": {
                 "height": {
@@ -14093,36 +14093,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.HandleBoundsSource": {
-            "type": "object",
-            "properties": {
-                "height": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "nodeId": {
-                    "type": "string"
-                },
-                "position": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "width": {
-                    "type": "integer"
-                },
-                "x": {
-                    "type": "number"
-                },
-                "y": {
-                    "type": "number"
-                }
-            }
-        },
-        "craftRouteModels.HandleBoundsTarget": {
+        "craftroutemodels.HandleBoundsSource": {
             "type": "object",
             "properties": {
                 "height": {
@@ -14151,13 +14122,42 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.PidRules": {
+        "craftroutemodels.HandleBoundsTarget": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "nodeId": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            }
+        },
+        "craftroutemodels.PidRules": {
             "type": "object",
             "properties": {
                 "actions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ControllerAction"
+                        "$ref": "#/definitions/craftroutemodels.ControllerAction"
                     }
                 },
                 "data_id": {
@@ -14189,7 +14189,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.PredictData": {
+        "craftroutemodels.PredictData": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -14203,13 +14203,13 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.PredictRules": {
+        "craftroutemodels.PredictRules": {
             "type": "object",
             "properties": {
                 "actions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ControllerAction"
+                        "$ref": "#/definitions/craftroutemodels.ControllerAction"
                     }
                 },
                 "agg_function": {
@@ -14219,7 +14219,7 @@ const docTemplate = `{
                 "cases": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.TriggerCase"
+                        "$ref": "#/definitions/craftroutemodels.TriggerCase"
                     }
                 },
                 "interval": {
@@ -14240,7 +14240,7 @@ const docTemplate = `{
                 "predicts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.PredictData"
+                        "$ref": "#/definitions/craftroutemodels.PredictData"
                     }
                 },
                 "step": {
@@ -14257,33 +14257,33 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.ProcessTopo": {
+        "craftroutemodels.ProcessTopo": {
             "type": "object",
             "properties": {
                 "edges": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ProcessTopoEdge"
+                        "$ref": "#/definitions/craftroutemodels.ProcessTopoEdge"
                     }
                 },
                 "nodes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ProcessTopoNode"
+                        "$ref": "#/definitions/craftroutemodels.ProcessTopoNode"
                     }
                 },
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.SysProRouteSetProduct"
+                        "$ref": "#/definitions/craftroutemodels.SysProRouteSetProduct"
                     }
                 },
                 "route": {
-                    "$ref": "#/definitions/craftRouteModels.SysCraftRoute"
+                    "$ref": "#/definitions/craftroutemodels.SysCraftRoute"
                 }
             }
         },
-        "craftRouteModels.ProcessTopoData": {
+        "craftroutemodels.ProcessTopoData": {
             "type": "object",
             "properties": {
                 "config": {},
@@ -14295,7 +14295,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.ProcessTopoEdge": {
+        "craftroutemodels.ProcessTopoEdge": {
             "type": "object",
             "properties": {
                 "animated": {
@@ -14379,17 +14379,17 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.ProcessTopoNode": {
+        "craftroutemodels.ProcessTopoNode": {
             "type": "object",
             "properties": {
                 "computedPosition": {
-                    "$ref": "#/definitions/craftRouteModels.ComputedPosition"
+                    "$ref": "#/definitions/craftroutemodels.ComputedPosition"
                 },
                 "data": {
-                    "$ref": "#/definitions/craftRouteModels.ProcessTopoData"
+                    "$ref": "#/definitions/craftroutemodels.ProcessTopoData"
                 },
                 "dimensions": {
-                    "$ref": "#/definitions/craftRouteModels.Dimensions"
+                    "$ref": "#/definitions/craftroutemodels.Dimensions"
                 },
                 "dragging": {
                     "type": "boolean"
@@ -14403,13 +14403,13 @@ const docTemplate = `{
                         "source": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/craftRouteModels.HandleBoundsSource"
+                                "$ref": "#/definitions/craftroutemodels.HandleBoundsSource"
                             }
                         },
                         "target": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/craftRouteModels.HandleBoundsTarget"
+                                "$ref": "#/definitions/craftroutemodels.HandleBoundsTarget"
                             }
                         }
                     }
@@ -14424,7 +14424,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "position": {
-                    "$ref": "#/definitions/craftRouteModels.ProcessTopoNodePosition"
+                    "$ref": "#/definitions/craftroutemodels.ProcessTopoNodePosition"
                 },
                 "resizing": {
                     "type": "boolean"
@@ -14437,7 +14437,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.ProcessTopoNodePosition": {
+        "craftroutemodels.ProcessTopoNodePosition": {
             "type": "object",
             "properties": {
                 "x": {
@@ -14448,7 +14448,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.ScheduleReq": {
+        "craftroutemodels.ScheduleReq": {
             "type": "object",
             "properties": {
                 "gateway_id": {
@@ -14468,7 +14468,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SetSysProductSchedule": {
+        "craftroutemodels.SetSysProductSchedule": {
             "type": "object",
             "required": [
                 "schedule_name",
@@ -14498,7 +14498,7 @@ const docTemplate = `{
                 "time_manager": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.TimeManagerData"
+                        "$ref": "#/definitions/craftroutemodels.TimeManagerData"
                     }
                 },
                 "type": {
@@ -14506,7 +14506,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SysCraftRoute": {
+        "craftroutemodels.SysCraftRoute": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -14587,7 +14587,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SysCraftRouteRequest": {
+        "craftroutemodels.SysCraftRouteRequest": {
             "type": "object",
             "required": [
                 "route_code",
@@ -14625,7 +14625,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SysProProcess": {
+        "craftroutemodels.SysProProcess": {
             "type": "object",
             "required": [
                 "process_code",
@@ -14701,7 +14701,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SysProRouteProcessListReq": {
+        "craftroutemodels.SysProRouteProcessListReq": {
             "type": "object",
             "properties": {
                 "isAsc": {
@@ -14724,7 +14724,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SysProRouteProcessSetRequest": {
+        "craftroutemodels.SysProRouteProcessSetRequest": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -14813,7 +14813,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SysProRouteSetProduct": {
+        "craftroutemodels.SysProRouteSetProduct": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -14882,7 +14882,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.SysProSetProcessContent": {
+        "craftroutemodels.SysProSetProcessContent": {
             "type": "object",
             "required": [
                 "content_text",
@@ -14919,7 +14919,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "control_rules": {
-                    "$ref": "#/definitions/craftRouteModels.ControlRule"
+                    "$ref": "#/definitions/craftroutemodels.ControlRule"
                 },
                 "control_type": {
                     "type": "string"
@@ -14951,7 +14951,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.TimeManagerData": {
+        "craftroutemodels.TimeManagerData": {
             "type": "object",
             "properties": {
                 "begin_time": {
@@ -14966,7 +14966,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.TriggerCase": {
+        "craftroutemodels.TriggerCase": {
             "type": "object",
             "properties": {
                 "conditions": {
@@ -15006,7 +15006,7 @@ const docTemplate = `{
                 }
             }
         },
-        "craftRouteModels.TriggerRules": {
+        "craftroutemodels.TriggerRules": {
             "type": "object",
             "required": [
                 "actions"
@@ -15015,13 +15015,13 @@ const docTemplate = `{
                 "actions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ControllerAction"
+                        "$ref": "#/definitions/craftroutemodels.ControllerAction"
                     }
                 },
                 "cases": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.TriggerCase"
+                        "$ref": "#/definitions/craftroutemodels.TriggerCase"
                     }
                 },
                 "combined_rule": {
@@ -15030,7 +15030,7 @@ const docTemplate = `{
                 "dataIds": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.DeviceRuleInfo"
+                        "$ref": "#/definitions/craftroutemodels.DeviceRuleInfo"
                     }
                 },
                 "name": {
@@ -15038,7 +15038,7 @@ const docTemplate = `{
                 }
             }
         },
-        "daemonizeModels.BindGatewayConfigReq": {
+        "daemonizemodels.BindGatewayConfigReq": {
             "type": "object",
             "properties": {
                 "config_id": {
@@ -15057,7 +15057,7 @@ const docTemplate = `{
                 }
             }
         },
-        "daemonizeModels.ProcessOperateInfo": {
+        "daemonizemodels.ProcessOperateInfo": {
             "type": "object",
             "properties": {
                 "AgentObjectId": {
@@ -15072,18 +15072,18 @@ const docTemplate = `{
                 }
             }
         },
-        "daemonizeModels.StartProcessReq": {
+        "daemonizemodels.StartProcessReq": {
             "type": "object",
             "properties": {
                 "processOperateInfoList": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/daemonizeModels.ProcessOperateInfo"
+                        "$ref": "#/definitions/daemonizemodels.ProcessOperateInfo"
                     }
                 }
             }
         },
-        "daemonizeModels.SysIotAgentConfigSetReq": {
+        "daemonizemodels.SysIotAgentConfigSetReq": {
             "type": "object",
             "required": [
                 "agent_object_id",
@@ -15111,7 +15111,7 @@ const docTemplate = `{
                 }
             }
         },
-        "daemonizeModels.SysIotAgentSetReq": {
+        "daemonizemodels.SysIotAgentSetReq": {
             "type": "object",
             "properties": {
                 "config_uuid": {
@@ -15141,7 +15141,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboardModels.SetSysDashboard": {
+        "dashboardmodels.SetSysDashboard": {
             "type": "object",
             "required": [
                 "name",
@@ -15165,7 +15165,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dashboardModels.SetSysDashboardData": {
+        "dashboardmodels.SetSysDashboardData": {
             "type": "object",
             "properties": {
                 "data": {
@@ -15184,7 +15184,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceModels.Annotation": {
+        "devicemodels.Annotation": {
             "type": "object",
             "properties": {
                 "key": {
@@ -15195,7 +15195,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceModels.DeviceGroup": {
+        "devicemodels.DeviceGroup": {
             "type": "object",
             "properties": {
                 "groupId": {
@@ -15210,7 +15210,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceModels.DeviceInfo": {
+        "devicemodels.DeviceInfo": {
             "type": "object",
             "properties": {
                 "Action": {
@@ -15276,7 +15276,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceModels.PerturbationVariableData": {
+        "devicemodels.PerturbationVariableData": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -15293,7 +15293,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceModels.SetSysModbusDeviceConfigDataReq": {
+        "devicemodels.SetSysModbusDeviceConfigDataReq": {
             "type": "object",
             "required": [
                 "name",
@@ -15310,7 +15310,7 @@ const docTemplate = `{
                     "description": "扰动变量",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/deviceModels.Annotation"
+                        "$ref": "#/definitions/devicemodels.Annotation"
                     }
                 },
                 "configuration_enable": {
@@ -15356,7 +15356,7 @@ const docTemplate = `{
                     "description": "扰动变量",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/deviceModels.PerturbationVariableData"
+                        "$ref": "#/definitions/devicemodels.PerturbationVariableData"
                     }
                 },
                 "precision": {
@@ -15400,7 +15400,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceModels.SysDeviceCheckPlanVO": {
+        "devicemodels.SysDeviceCheckPlanVO": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -15462,7 +15462,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceModels.SysDeviceCheckSubjectVO": {
+        "devicemodels.SysDeviceCheckSubjectVO": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -15521,7 +15521,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceModels.SysDeviceSubjectVO": {
+        "devicemodels.SysDeviceSubjectVO": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -15575,7 +15575,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceModels.SysDeviceTemplateSetReq": {
+        "devicemodels.SysDeviceTemplateSetReq": {
             "type": "object",
             "required": [
                 "name",
@@ -15606,7 +15606,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceMonitorModel.CameraOfferReq": {
+        "devicemonitormodel.CameraOfferReq": {
             "type": "object",
             "required": [
                 "device_id",
@@ -15630,7 +15630,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceMonitorModel.ControlReq": {
+        "devicemonitormodel.ControlReq": {
             "type": "object",
             "properties": {
                 "agent_id": {
@@ -15650,7 +15650,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceMonitorModel.ControlStatusItem": {
+        "devicemonitormodel.ControlStatusItem": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -15663,18 +15663,18 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceMonitorModel.ControlStatusReq": {
+        "devicemonitormodel.ControlStatusReq": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/deviceMonitorModel.ControlStatusItem"
+                        "$ref": "#/definitions/devicemonitormodel.ControlStatusItem"
                     }
                 }
             }
         },
-        "deviceMonitorModel.DevDataReq": {
+        "devicemonitormodel.DevDataReq": {
             "type": "object",
             "properties": {
                 "dev": {
@@ -15709,7 +15709,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceMonitorModel.DeviceIdsReq": {
+        "devicemonitormodel.DeviceIdsReq": {
             "type": "object",
             "required": [
                 "deviceIds"
@@ -15723,7 +15723,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceMonitorModel.RemoveDevMapInfo": {
+        "devicemonitormodel.RemoveDevMapInfo": {
             "type": "object",
             "properties": {
                 "device": {
@@ -15732,7 +15732,7 @@ const docTemplate = `{
                 }
             }
         },
-        "deviceMonitorModel.SetDevMapInfo": {
+        "devicemonitormodel.SetDevMapInfo": {
             "type": "object",
             "properties": {
                 "data_name": {
@@ -15839,7 +15839,7 @@ const docTemplate = `{
                 }
             }
         },
-        "materialModels.InboundInfo": {
+        "materialmodels.InboundInfo": {
             "type": "object",
             "properties": {
                 "materialId": {
@@ -15851,7 +15851,7 @@ const docTemplate = `{
                 }
             }
         },
-        "materialModels.MaterialInfo": {
+        "materialmodels.MaterialInfo": {
             "type": "object",
             "required": [
                 "address",
@@ -15893,7 +15893,7 @@ const docTemplate = `{
                 }
             }
         },
-        "materialModels.OutboundInfo": {
+        "materialmodels.OutboundInfo": {
             "type": "object",
             "properties": {
                 "materialId": {
@@ -15908,7 +15908,7 @@ const docTemplate = `{
                 }
             }
         },
-        "metricModels.GatewayMetricDataQueryReq": {
+        "metricmodels.GatewayMetricDataQueryReq": {
             "type": "object",
             "properties": {
                 "end": {
@@ -15940,12 +15940,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "predict": {
-                    "$ref": "#/definitions/metricModels.Predict"
+                    "$ref": "#/definitions/metricmodels.Predict"
                 },
                 "query_metric": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/metricModels.MetricQueryCondition"
+                        "$ref": "#/definitions/metricmodels.MetricQueryCondition"
                     }
                 },
                 "start": {
@@ -15962,7 +15962,7 @@ const docTemplate = `{
                 }
             }
         },
-        "metricModels.MetricDataQueryReq": {
+        "metricmodels.MetricDataQueryReq": {
             "type": "object",
             "properties": {
                 "end": {
@@ -15987,12 +15987,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "predict": {
-                    "$ref": "#/definitions/metricModels.Predict"
+                    "$ref": "#/definitions/metricmodels.Predict"
                 },
                 "query_metric": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/metricModels.MetricQueryCondition"
+                        "$ref": "#/definitions/metricmodels.MetricQueryCondition"
                     }
                 },
                 "start": {
@@ -16006,7 +16006,7 @@ const docTemplate = `{
                 }
             }
         },
-        "metricModels.MetricQueryCondition": {
+        "metricmodels.MetricQueryCondition": {
             "type": "object",
             "properties": {
                 "dataId": {
@@ -16023,7 +16023,7 @@ const docTemplate = `{
                 }
             }
         },
-        "metricModels.MetricQueryReq": {
+        "metricmodels.MetricQueryReq": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -16061,7 +16061,7 @@ const docTemplate = `{
                 }
             }
         },
-        "metricModels.Predict": {
+        "metricmodels.Predict": {
             "type": "object",
             "properties": {
                 "enable": {
@@ -16151,7 +16151,7 @@ const docTemplate = `{
                 }
             }
         },
-        "monitorModels.JobDML": {
+        "monitormodels.JobDML": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -16191,7 +16191,7 @@ const docTemplate = `{
                 }
             }
         },
-        "monitorModels.JobIdAndName": {
+        "monitormodels.JobIdAndName": {
             "type": "object",
             "properties": {
                 "jobId": {
@@ -16203,7 +16203,7 @@ const docTemplate = `{
                 }
             }
         },
-        "monitorModels.JobLog": {
+        "monitormodels.JobLog": {
             "type": "object",
             "properties": {
                 "costTime": {
@@ -16237,7 +16237,7 @@ const docTemplate = `{
                 }
             }
         },
-        "monitorModels.JobVo": {
+        "monitormodels.JobVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -16280,7 +16280,7 @@ const docTemplate = `{
                 }
             }
         },
-        "monitorModels.SysUserOnline": {
+        "monitormodels.SysUserOnline": {
             "type": "object",
             "properties": {
                 "browser": {
@@ -16306,7 +16306,7 @@ const docTemplate = `{
                 }
             }
         },
-        "productModels.SysProductLaboratoryVo": {
+        "productmodels.SysProductLaboratoryVo": {
             "type": "object",
             "required": [
                 "material",
@@ -16363,7 +16363,7 @@ const docTemplate = `{
                 }
             }
         },
-        "resourceModels.SysResourceFileDML": {
+        "resourcemodels.SysResourceFileDML": {
             "type": "object",
             "properties": {
                 "category": {
@@ -16508,26 +16508,26 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.Accredit": {
+        "systemmodels.Accredit": {
             "type": "object",
             "properties": {
                 "posts": {
                     "description": "岗位",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysPostVo"
+                        "$ref": "#/definitions/systemmodels.SysPostVo"
                     }
                 },
                 "roles": {
                     "description": "角色",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysRoleIdAndName"
+                        "$ref": "#/definitions/systemmodels.SysRoleIdAndName"
                     }
                 }
             }
         },
-        "systemModels.ConsumptionNoticeVo": {
+        "systemmodels.ConsumptionNoticeVo": {
             "type": "object",
             "required": [
                 "type"
@@ -16562,7 +16562,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.EditUserStatus": {
+        "systemmodels.EditUserStatus": {
             "type": "object",
             "required": [
                 "status",
@@ -16596,7 +16596,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.GetInfo": {
+        "systemmodels.GetInfo": {
             "type": "object",
             "properties": {
                 "permissions": {
@@ -16612,11 +16612,11 @@ const docTemplate = `{
                     }
                 },
                 "user": {
-                    "$ref": "#/definitions/systemModels.User"
+                    "$ref": "#/definitions/systemmodels.User"
                 }
             }
         },
-        "systemModels.LoginBody": {
+        "systemmodels.LoginBody": {
             "type": "object",
             "required": [
                 "password",
@@ -16641,7 +16641,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.ResetPwd": {
+        "systemmodels.ResetPwd": {
             "type": "object",
             "required": [
                 "password",
@@ -16659,7 +16659,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.RoleDeptTree": {
+        "systemmodels.RoleDeptTree": {
             "type": "object",
             "properties": {
                 "checkedKeys": {
@@ -16673,12 +16673,12 @@ const docTemplate = `{
                     "description": "部门",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysDeptVo"
+                        "$ref": "#/definitions/systemmodels.SysDeptVo"
                     }
                 }
             }
         },
-        "systemModels.SelectPermission": {
+        "systemmodels.SelectPermission": {
             "type": "object",
             "properties": {
                 "parentId": {
@@ -16694,7 +16694,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysConfigVo": {
+        "systemmodels.SysConfigVo": {
             "type": "object",
             "properties": {
                 "configId": {
@@ -16740,7 +16740,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysDeptVo": {
+        "systemmodels.SysDeptVo": {
             "type": "object",
             "properties": {
                 "ancestors": {
@@ -16803,7 +16803,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysDictDataVo": {
+        "systemmodels.SysDictDataVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -16855,7 +16855,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysNoticeVo": {
+        "systemmodels.SysNoticeVo": {
             "type": "object",
             "required": [
                 "title",
@@ -16910,7 +16910,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysPermissionAdd": {
+        "systemmodels.SysPermissionAdd": {
             "type": "object",
             "required": [
                 "permission"
@@ -16955,7 +16955,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysPermissionEdit": {
+        "systemmodels.SysPermissionEdit": {
             "type": "object",
             "required": [
                 "permissionId"
@@ -17005,7 +17005,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysPermissionVo": {
+        "systemmodels.SysPermissionVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -17052,7 +17052,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysPostVo": {
+        "systemmodels.SysPostVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -17092,7 +17092,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysRoleDML": {
+        "systemmodels.SysRoleDML": {
             "type": "object",
             "properties": {
                 "RoleId": {
@@ -17138,7 +17138,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysRoleIdAndName": {
+        "systemmodels.SysRoleIdAndName": {
             "type": "object",
             "properties": {
                 "roleId": {
@@ -17150,7 +17150,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysRoleVo": {
+        "systemmodels.SysRoleVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -17193,7 +17193,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysUserDML": {
+        "systemmodels.SysUserDML": {
             "type": "object",
             "required": [
                 "deptId",
@@ -17280,7 +17280,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysUserDataScope": {
+        "systemmodels.SysUserDataScope": {
             "type": "object",
             "required": [
                 "dataScope",
@@ -17305,7 +17305,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysUserRole": {
+        "systemmodels.SysUserRole": {
             "type": "object",
             "properties": {
                 "roleId": {
@@ -17318,7 +17318,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysUserVo": {
+        "systemmodels.SysUserVo": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -17383,7 +17383,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.SysWorkShiftSettingVO": {
+        "systemmodels.SysWorkShiftSettingVO": {
             "type": "object",
             "properties": {
                 "begin_time": {
@@ -17416,7 +17416,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.User": {
+        "systemmodels.User": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -17434,7 +17434,7 @@ const docTemplate = `{
                 }
             }
         },
-        "systemModels.UserAndAccredit": {
+        "systemmodels.UserAndAccredit": {
             "type": "object",
             "properties": {
                 "postIds": {
@@ -17448,7 +17448,7 @@ const docTemplate = `{
                     "description": "岗位",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysPostVo"
+                        "$ref": "#/definitions/systemmodels.SysPostVo"
                     }
                 },
                 "roleIds": {
@@ -17462,20 +17462,20 @@ const docTemplate = `{
                     "description": "角色",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysRoleIdAndName"
+                        "$ref": "#/definitions/systemmodels.SysRoleIdAndName"
                     }
                 },
                 "user": {
                     "description": "user",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/systemModels.SysUserVo"
+                            "$ref": "#/definitions/systemmodels.SysUserVo"
                         }
                     ]
                 }
             }
         },
-        "systemModels.UserProfile": {
+        "systemmodels.UserProfile": {
             "type": "object",
             "properties": {
                 "postGroup": {
@@ -17490,7 +17490,7 @@ const docTemplate = `{
                     "description": "user",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/systemModels.SysUserVo"
+                            "$ref": "#/definitions/systemmodels.SysUserVo"
                         }
                     ]
                 }

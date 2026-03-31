@@ -4,8 +4,8 @@
 package erp
 
 import (
-	"nova-factory-server/app/business/erp/order/orderController"
-	"nova-factory-server/app/business/erp/setting/settingController"
+	"nova-factory-server/app/business/erp/order/ordercontroller"
+	"nova-factory-server/app/business/erp/setting/settingcontroller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
@@ -15,7 +15,7 @@ import (
 
 var GinProviderSet = wire.NewSet(NewGinEngine)
 
-func NewGinEngine(app *routes.App, cache cache.Cache, setting *settingController.Controller, order *orderController.Controller) *Erp {
+func NewGinEngine(app *routes.App, cache cache.Cache, setting *settingcontroller.Controller, order *ordercontroller.Controller) *Erp {
 	group := app.Engine.Group("")
 	{
 		setting.IntegrationConfig.PublicRoutes(group)

@@ -10,12 +10,12 @@ import (
 	"net/url"
 	"strings"
 
-	"nova-factory-server/app/business/erp/setting/settingModels"
+	"nova-factory-server/app/business/erp/setting/settingmodels"
 	"nova-factory-server/app/datasource/cache"
 )
 
 // SynchronizeOrders 调用管家婆订单同步接口
-func (c *Client) SynchronizeOrders(ctx context.Context, cfg *settingModels.IntegrationConfig, req *OrderSyncRequest, cacheStore cache.Cache) (*OrderSyncResponse, error) {
+func (c *Client) SynchronizeOrders(ctx context.Context, cfg *settingmodels.IntegrationConfig, req *OrderSyncRequest, cacheStore cache.Cache) (*OrderSyncResponse, error) {
 	if req == nil || len(req.Orders) == 0 {
 		return nil, errors.New("orders不能为空")
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"nova-factory-server/app/business/erp/core/integration/api"
-	"nova-factory-server/app/business/erp/setting/settingModels"
+	"nova-factory-server/app/business/erp/setting/settingmodels"
 
 	"github.com/spf13/viper"
 )
@@ -45,7 +45,7 @@ func init() {
 }
 
 // CheckLoginState 返回授权地址，前端跳转后完成OAuth授权
-func (c *Client) CheckLoginState(ctx context.Context, cfg *settingModels.IntegrationConfig, overrideURL string, overrideRedirectURL string) (*api.LoginState, error) {
+func (c *Client) CheckLoginState(ctx context.Context, cfg *settingmodels.IntegrationConfig, overrideURL string, overrideRedirectURL string) (*api.LoginState, error) {
 	snapshot, err := ParseSnapshot(cfg)
 	if err != nil {
 		return nil, err

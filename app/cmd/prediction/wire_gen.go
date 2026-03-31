@@ -8,8 +8,8 @@ package main
 
 import (
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
-	"nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
+	"nova-factory-server/app/business/iot/devicemonitor/devicemonitordao/deviceMonitorDaoImpl"
+	"nova-factory-server/app/business/iot/metric/device/metricdao/metricdaoimpl"
 	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/datasource/mysql"
@@ -26,7 +26,7 @@ func wireApp() (*Runner, func(), error) {
 		return nil, nil, err
 	}
 	iotDb := iotdb.NewIotDb()
-	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
+	iMetricDao := metricdaoimpl.NewMetricDaoImpl(clickHouse, iotDb)
 	iDeviceDataReportDao := deviceMonitorDaoImpl.NewIDeviceDataReportDaoImpl(db)
 	runner := NewRunner(iAiPredictionListDao, iAiPredictionExceptionDao, iMetricDao, iDeviceDataReportDao)
 	return runner, func() {

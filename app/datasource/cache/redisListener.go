@@ -3,23 +3,23 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"nova-factory-server/app/business/admin/monitor/monitorModels"
-	"nova-factory-server/app/business/admin/monitor/monitorService"
-	"nova-factory-server/app/business/admin/system/systemModels"
-	"nova-factory-server/app/business/admin/system/systemService"
+	"nova-factory-server/app/business/admin/monitor/monitormodels"
+	"nova-factory-server/app/business/admin/monitor/monitorservice"
+	"nova-factory-server/app/business/admin/system/systemmodels"
+	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/setting"
 
 	"go.uber.org/zap"
 )
 
-func NewRedisSubscribe(cache Cache, ss systemService.ISseService, js monitorService.IJobService) *RedisSubscribe {
+func NewRedisSubscribe(cache Cache, ss systemservice.ISseService, js monitorservice.IJobService) *RedisSubscribe {
 	return &RedisSubscribe{cache: cache, ss: ss, js: js}
 }
 
 type RedisSubscribe struct {
 	cache Cache
-	ss    systemService.ISseService
-	js    monitorService.IJobService
+	ss    systemservice.ISseService
+	js    monitorservice.IJobService
 }
 
 func (r *RedisSubscribe) Run() {
@@ -36,7 +36,7 @@ func (r *RedisSubscribe) SubscribeNotification() {
 	defer subscribe.Close()
 	ch := subscribe.Channel()
 	for msg := range ch {
-		var sse systemModels.Sse
+		var sse systemmodels.Sse
 		err := json.Unmarshal([]byte(msg.Payload), &sse)
 		if err != nil {
 			zap.L().Error("sse unmarshal error", zap.Error(err))
@@ -53,7 +53,7 @@ func (r *RedisSubscribe) SubscribeJob() {
 	defer subscribe.Close()
 	ch := subscribe.Channel()
 	for msg := range ch {
-		var jb monitorModels.JobRedis
+		var jb monitormodels.JobRedis
 		err := json.Unmarshal([]byte(msg.Payload), &jb)
 		if err != nil {
 			zap.L().Error("sse unmarshal error", zap.Error(err))

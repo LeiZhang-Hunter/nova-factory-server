@@ -1,0 +1,72 @@
+package metriccontroller
+
+import (
+	"context"
+	metricService2 "nova-factory-server/app/business/iot/metric/device/metricservice"
+
+	"github.com/gin-gonic/gin"
+	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
+)
+
+type Metric struct {
+	service           metricService2.IMetricService
+	logControlService metricService2.IControlLogService
+	v1.UnimplementedDeviceReportServiceServer
+}
+
+func NewMetric(service metricService2.IMetricService, logControlService metricService2.IControlLogService) *Metric {
+	return &Metric{
+		service:           service,
+		logControlService: logControlService,
+	}
+}
+
+func (m *Metric) PrivateGrpcRoutes(router *grpc.Server) {
+	v1.RegisterDeviceReportServiceServer(router, m)
+}
+
+func (m *Metric) PrivateRoutes(router *gin.RouterGroup) {
+}
+
+func (m *Metric) PublicRoutes(router *gin.RouterGroup) {
+}
+
+// ReportDeviceInfo 导入设备指标
+func (m *Metric) ReportDeviceInfo(c context.Context, request *v1.ExportMetricsServiceRequest) (*v1.NodeRes, error) {
+	err := m.service.Export(c, request)
+	if err != nil {
+		return &v1.NodeRes{
+			Code: -1,
+		}, err
+	}
+	return &v1.NodeRes{
+		Code: 0,
+	}, nil
+}
+
+// ReportTimeData 更新时序数据
+func (m *Metric) ReportTimeData(c context.Context, request *v1.ExportTimeDataRequest) (*v1.NodeRes, error) {
+	err := m.service.ExportTimeData(c, request)
+	if err != nil {
+		return &v1.NodeRes{
+			Code: -1,
+		}, err
+	}
+	return &v1.NodeRes{
+		Code: 0,
+	}, nil
+}
+
+// ReportScheduleLog 写入控制日志，写入clickhouse
+func (m *Metric) ReportScheduleLog(c context.Context, request *v1.ExportControlLogRequest) (*v1.NodeRes, error) {
+	err := m.logControlService.Export(c, request)
+	if err != nil {
+		zap.L().Error("Log Control Log Failed", zap.Error(err))
+		return nil, err
+	}
+	return &v1.NodeRes{
+		Code: 0,
+	}, nil
+}

@@ -1,0 +1,117 @@
+package devicedaoImpl
+
+import (
+	"errors"
+	"nova-factory-server/app/business/iot/asset/device/devicedao"
+	"nova-factory-server/app/business/iot/asset/device/devicemodels"
+	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+type IDeviceSubjectDaoImpl struct {
+	db    *gorm.DB
+	table string
+}
+
+func NewIDeviceSubjectDaoImpl(db *gorm.DB) devicedao.IDeviceSubjectDao {
+	return &IDeviceSubjectDaoImpl{
+		db:    db,
+		table: "sys_device_subject",
+	}
+}
+
+func (i *IDeviceSubjectDaoImpl) Set(c *gin.Context, data *devicemodels.SysDeviceSubjectVO) (*devicemodels.SysDeviceSubject, error) {
+	if data == nil {
+		return nil, errors.New("data should not be nil")
+	}
+	value := devicemodels.ToSysDeviceSubject(data)
+	if data.ID != 0 {
+		value.SetUpdateBy(baizeContext.GetUserId(c))
+		ret := i.db.Table(i.table).Where("id = ?", data.ID).UpdateColumns(value)
+		return value, ret.Error
+	} else {
+		value.ID = snowflake.GenID()
+		value.DeptID = baizeContext.GetDeptId(c)
+		value.SetCreateBy(baizeContext.GetUserId(c))
+		ret := i.db.Table(i.table).Create(value)
+		return value, ret.Error
+	}
+}
+
+func (i *IDeviceSubjectDaoImpl) List(c *gin.Context, req *devicemodels.SysDeviceSubjectReq) (*devicemodels.SysDeviceSubjectListData, error) {
+	db := i.db.Table(i.table)
+	if req == nil {
+		req = &devicemodels.SysDeviceSubjectReq{}
+	}
+	if req != nil && req.Name != "" {
+		db = db.Where("name LIKE ?", "%"+req.Name+"%")
+	}
+	size := 0
+	if req == nil || req.Size <= 0 {
+		size = 20
+	} else {
+		size = int(req.Size)
+	}
+	offset := 0
+	if req == nil || req.Page <= 0 {
+		req.Page = 1
+	} else {
+		offset = int((req.Page - 1) * req.Size)
+	}
+
+	db = baizeContext.GetGormDataScope(c, db)
+	db = db.Where("state = ?", 0)
+
+	var total int64
+	ret := db.Count(&total)
+	if ret.Error != nil {
+		return &devicemodels.SysDeviceSubjectListData{
+			Rows:  make([]*devicemodels.SysDeviceSubject, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	var dto []*devicemodels.SysDeviceSubject
+	ret = db.Offset(offset).Limit(size).Order("create_time desc").Find(&dto)
+	if ret.Error != nil {
+		return &devicemodels.SysDeviceSubjectListData{
+			Rows:  make([]*devicemodels.SysDeviceSubject, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	return &devicemodels.SysDeviceSubjectListData{
+		Rows:  dto,
+		Total: total,
+	}, nil
+}
+
+func (i *IDeviceSubjectDaoImpl) Remove(c *gin.Context, ids []string) error {
+	ret := i.db.Table(i.table).Where("id in (?)", ids).Delete(&devicemodels.SysDeviceSubject{})
+	return ret.Error
+}
+
+func (i *IDeviceSubjectDaoImpl) GetBySubjectCode(c *gin.Context, code string) (*devicemodels.SysDeviceSubject, error) {
+	var info *devicemodels.SysDeviceSubject
+	ret := i.db.Table(i.table).Where("subject_code = ?", code).First(&info)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+	return info, nil
+}
+
+func (i *IDeviceSubjectDaoImpl) GetBySubjectCodeByNotId(c *gin.Context, id int64, code string) (*devicemodels.SysDeviceSubject, error) {
+	var info *devicemodels.SysDeviceSubject
+	ret := i.db.Table(i.table).Where("id != ?", id).Where("subject_code = ?", code).First(&info)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+	return info, nil
+}

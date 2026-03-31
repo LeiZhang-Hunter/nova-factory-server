@@ -3,7 +3,7 @@ package grasp
 import (
 	"encoding/json"
 	"errors"
-	"nova-factory-server/app/business/erp/setting/settingModels"
+	"nova-factory-server/app/business/erp/setting/settingmodels"
 	"strings"
 )
 
@@ -28,7 +28,7 @@ type ConfigSnapshot struct {
 }
 
 // ParseSnapshot 解析集成配置JSON为配置快照
-func ParseSnapshot(cfg *settingModels.IntegrationConfig) (*ConfigSnapshot, error) {
+func ParseSnapshot(cfg *settingmodels.IntegrationConfig) (*ConfigSnapshot, error) {
 	if cfg == nil {
 		return nil, errors.New("integration config不能为空")
 	}

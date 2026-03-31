@@ -4,7 +4,7 @@
 package shop
 
 import (
-	"nova-factory-server/app/business/shop/shopController"
+	"nova-factory-server/app/business/shop/shopcontroller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
@@ -17,7 +17,7 @@ var GinProviderSet = wire.NewSet(NewGinEngine)
 func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
-	controller *shopController.Controller,
+	controller *shopcontroller.Controller,
 ) *Shop {
 	group := app.Engine.Group("")
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())

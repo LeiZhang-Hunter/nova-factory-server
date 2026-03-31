@@ -7,16 +7,16 @@ import (
 	"strconv"
 	"time"
 
-	"nova-factory-server/app/business/ai/agent/aiDataSetDao"
-	"nova-factory-server/app/business/ai/agent/aiDataSetModels"
+	"nova-factory-server/app/business/ai/agent/aidatasetdao"
+	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 
 	"gorm.io/gorm"
 )
 
 type FactoryBootstrap struct {
 	db          *gorm.DB
-	providerDao aiDataSetDao.IAiModelProviderDao
-	llmDao      aiDataSetDao.IAiLLMDao
+	providerDao aidatasetdao.IAiModelProviderDao
+	llmDao      aidatasetdao.IAiLLMDao
 }
 
 type factoryPayload struct {
@@ -40,7 +40,7 @@ type llmItem struct {
 	IsTools   bool   `json:"is_tools"`
 }
 
-func NewFactoryBootstrap(db *gorm.DB, providerDao aiDataSetDao.IAiModelProviderDao, llmDao aiDataSetDao.IAiLLMDao) *FactoryBootstrap {
+func NewFactoryBootstrap(db *gorm.DB, providerDao aidatasetdao.IAiModelProviderDao, llmDao aidatasetdao.IAiLLMDao) *FactoryBootstrap {
 	return &FactoryBootstrap{
 		db:          db,
 		providerDao: providerDao,
@@ -69,7 +69,7 @@ func (f *FactoryBootstrap) Init() error {
 			now := time.Now()
 			status, _ := strconv.Atoi(item.Status)
 			rank, _ := strconv.Atoi(item.Rank)
-			providerID, err := f.providerDao.UpsertFactoryProvider(tx, &aiDataSetModels.FactoryProviderUpsert{
+			providerID, err := f.providerDao.UpsertFactoryProvider(tx, &aidatasetmodels.FactoryProviderUpsert{
 				Name: item.Name,
 				Logo: item.Logo,
 				Tags: item.Tags,
@@ -78,12 +78,12 @@ func (f *FactoryBootstrap) Init() error {
 				return err
 			}
 			_ = providerID
-			seedLLMs := make([]*aiDataSetModels.FactoryLLMUpsert, 0, len(item.LLM))
+			seedLLMs := make([]*aidatasetmodels.FactoryLLMUpsert, 0, len(item.LLM))
 			for _, llm := range item.LLM {
 				if llm == nil {
 					continue
 				}
-				seedLLMs = append(seedLLMs, &aiDataSetModels.FactoryLLMUpsert{
+				seedLLMs = append(seedLLMs, &aidatasetmodels.FactoryLLMUpsert{
 					LLMName:   llm.LLMName,
 					Tags:      llm.Tags,
 					MaxTokens: llm.MaxTokens,

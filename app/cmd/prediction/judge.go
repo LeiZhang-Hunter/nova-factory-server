@@ -2,7 +2,7 @@ package main
 
 import (
 	"nova-factory-server/app/business/ai/aiDataSetModels"
-	"nova-factory-server/app/business/iot/metric/device/metricModels"
+	"nova-factory-server/app/business/iot/metric/device/metricmodels"
 	"nova-factory-server/app/cmd/prediction/condition"
 	"nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
 
@@ -17,7 +17,7 @@ func newJudge() *judge {
 }
 
 // judge 判断告警条件
-func (a *judge) judge(config *aiDataSetModels.SysAiPrediction, advanced *logalert.Advanced, values []metricModels.MetricQueryValue) bool {
+func (a *judge) judge(config *aiDataSetModels.SysAiPrediction, advanced *logalert.Advanced, values []metricmodels.MetricQueryValue) bool {
 
 	if len(values) < int(config.Threshold) {
 		return false
@@ -68,7 +68,7 @@ func (a *judge) judge(config *aiDataSetModels.SysAiPrediction, advanced *logaler
 	return ruleRet
 }
 
-func (a *judge) judgeException(config *aiDataSetModels.SysAiPredictionException, values []metricModels.MetricQueryValue) bool {
+func (a *judge) judgeException(config *aiDataSetModels.SysAiPredictionException, values []metricmodels.MetricQueryValue) bool {
 
 	if len(values) < int(config.Threshold) {
 		return false

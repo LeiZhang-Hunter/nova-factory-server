@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"nova-factory-server/app/business/erp/setting/settingModels"
+	"nova-factory-server/app/business/erp/setting/settingmodels"
 	"strings"
 )
 
@@ -23,7 +23,7 @@ type LoginState struct {
 
 type Client interface {
 	Kind() Kind
-	CheckLoginState(ctx context.Context, cfg *settingModels.IntegrationConfig, overrideURL string, overrideRedirectURL string) (*LoginState, error)
+	CheckLoginState(ctx context.Context, cfg *settingmodels.IntegrationConfig, overrideURL string, overrideRedirectURL string) (*LoginState, error)
 }
 
 type ConfigSnapshot struct {

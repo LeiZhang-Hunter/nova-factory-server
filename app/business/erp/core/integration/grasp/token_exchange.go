@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"nova-factory-server/app/business/erp/setting/settingModels"
+	"nova-factory-server/app/business/erp/setting/settingmodels"
 )
 
 // OAuthTokenResponse 管家婆oauthcode换取token的返回结果
@@ -25,7 +25,7 @@ type OAuthTokenResponse struct {
 }
 
 // ExchangeTokenByOAuthCode 使用oauthcode换取访问令牌
-func (c *Client) ExchangeTokenByOAuthCode(ctx context.Context, cfg *settingModels.IntegrationConfig, oauthCode string) (*OAuthTokenResponse, error) {
+func (c *Client) ExchangeTokenByOAuthCode(ctx context.Context, cfg *settingmodels.IntegrationConfig, oauthCode string) (*OAuthTokenResponse, error) {
 	snapshot, err := ParseSnapshot(cfg)
 	if err != nil {
 		return nil, err

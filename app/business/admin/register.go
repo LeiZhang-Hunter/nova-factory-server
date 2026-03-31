@@ -1,37 +1,37 @@
 package admin
 
 import (
-	"nova-factory-server/app/business/admin/monitor/monitorController"
-	"nova-factory-server/app/business/admin/monitor/monitorDao/monitorDaoImpl"
-	"nova-factory-server/app/business/admin/monitor/monitorService/monitorServiceImpl"
-	"nova-factory-server/app/business/admin/product/productController"
-	"nova-factory-server/app/business/admin/product/productDao/productDaoImpl"
-	"nova-factory-server/app/business/admin/product/productService/productServiceImpl"
-	"nova-factory-server/app/business/admin/system/systemController"
-	"nova-factory-server/app/business/admin/system/systemDao/systemDaoImpl"
-	"nova-factory-server/app/business/admin/system/systemService/systemServiceImpl"
-	"nova-factory-server/app/business/admin/tool/toolController"
-	"nova-factory-server/app/business/admin/tool/toolDao/toolDaoImpl"
-	"nova-factory-server/app/business/admin/tool/toolService/toolServiceImpl"
+	"nova-factory-server/app/business/admin/monitor/monitorcontroller"
+	"nova-factory-server/app/business/admin/monitor/monitordao/monitorDaoImpl"
+	"nova-factory-server/app/business/admin/monitor/monitorservice/monitorServiceImpl"
+	"nova-factory-server/app/business/admin/product/productcontroller"
+	"nova-factory-server/app/business/admin/product/productdao/productDaoImpl"
+	"nova-factory-server/app/business/admin/product/productservice/productServiceImpl"
+	"nova-factory-server/app/business/admin/system/systemcontroller"
+	"nova-factory-server/app/business/admin/system/systemdao/systemdaoimpl"
+	"nova-factory-server/app/business/admin/system/systemservice/systemServiceImpl"
+	"nova-factory-server/app/business/admin/tool/toolcontroller"
+	"nova-factory-server/app/business/admin/tool/tooldao/tooldaoimpl"
+	"nova-factory-server/app/business/admin/tool/toolservice/toolserviceimpl"
 
 	"github.com/google/wire"
 )
 
 var ProviderSet = wire.NewSet(
-	toolDaoImpl.ProviderSet,
-	toolServiceImpl.ProviderSet,
-	toolController.ProviderSet,
+	tooldaoimpl.ProviderSet,
+	toolserviceimpl.ProviderSet,
+	toolcontroller.ProviderSet,
 
-	systemDaoImpl.ProviderSet,
+	systemdaoimpl.ProviderSet,
 	systemServiceImpl.ProviderSet,
-	systemController.ProviderSet,
+	systemcontroller.ProviderSet,
 
 	monitorDaoImpl.ProviderSet,
 	monitorServiceImpl.ProviderSet,
-	monitorController.ProviderSet,
+	monitorcontroller.ProviderSet,
 
 	productDaoImpl.ProviderSet,
 	productServiceImpl.ProviderSet,
-	productController.ProviderSet,
+	productcontroller.ProviderSet,
 	GinProviderSet,
 )

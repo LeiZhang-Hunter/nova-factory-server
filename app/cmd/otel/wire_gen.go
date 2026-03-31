@@ -8,10 +8,10 @@ package main
 
 import (
 	"google.golang.org/grpc"
-	"nova-factory-server/app/business/iot/asset/camera/cameraDao/cameraDaoImpl"
-	"nova-factory-server/app/business/iot/metric/device/metricController"
-	"nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
-	"nova-factory-server/app/business/iot/metric/device/metricService/metricServiceImpl"
+	"nova-factory-server/app/business/iot/asset/camera/cameradao/cameraDaoImpl"
+	"nova-factory-server/app/business/iot/metric/device/metriccontroller"
+	"nova-factory-server/app/business/iot/metric/device/metricdao/metricdaoimpl"
+	"nova-factory-server/app/business/iot/metric/device/metricservice/metricserviceimpl"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/datasource/iotdb"
@@ -27,17 +27,17 @@ func wireApp() (*grpc.Server, func(), error) {
 		return nil, nil, err
 	}
 	iotDb := iotdb.NewIotDb()
-	iMetricDao := metricDaoIMpl.NewMetricDaoImpl(clickHouse, iotDb)
+	iMetricDao := metricdaoimpl.NewMetricDaoImpl(clickHouse, iotDb)
 	cacheCache := cache.NewCache()
-	iMetricService := metricServiceImpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
-	iControlLogDao := metricDaoIMpl.NewIControlLogDaoImpl(clickHouse)
-	iControlLogService := metricServiceImpl.NewIControlLogServiceImpl(iControlLogDao)
-	metric := metricController.NewMetric(iMetricService, iControlLogService)
+	iMetricService := metricserviceimpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
+	iControlLogDao := metricdaoimpl.NewIControlLogDaoImpl(clickHouse)
+	iControlLogService := metricserviceimpl.NewIControlLogServiceImpl(iControlLogDao)
+	metric := metriccontroller.NewMetric(iMetricService, iControlLogService)
 	db := mysql.NewDB()
 	iCameraDao := cameraDaoImpl.NewCameraDao(db)
-	iCameraService := metricServiceImpl.NewICameraServiceImpl(cacheCache, iCameraDao)
-	cameraGrpc := metricController.NewCamera(iCameraService)
-	metricServer := &metricController.MetricServer{
+	iCameraService := metricserviceimpl.NewICameraServiceImpl(cacheCache, iCameraDao)
+	cameraGrpc := metriccontroller.NewCamera(iCameraService)
+	metricServer := &metriccontroller.MetricServer{
 		Metric:     metric,
 		CameraGrpc: cameraGrpc,
 	}

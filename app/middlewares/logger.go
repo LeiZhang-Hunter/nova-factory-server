@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"nova-factory-server/app/business/admin/monitor/monitorModels"
+	"nova-factory-server/app/business/admin/monitor/monitormodels"
 	"nova-factory-server/app/constant/sessionStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"time"
@@ -47,7 +47,7 @@ func SetLog(title string, businessTy BusinessType) func(c *gin.Context) {
 		start := time.Now()
 		data, _ := c.GetRawData()
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(data))
-		ol := new(monitorModels.SysOperLog)
+		ol := new(monitormodels.SysOperLog)
 		ol.Title = title
 		ol.BusinessType = businessTy.Msg()
 		c.Next()

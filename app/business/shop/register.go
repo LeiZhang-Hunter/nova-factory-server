@@ -4,16 +4,16 @@
 package shop
 
 import (
-	"nova-factory-server/app/business/shop/shopController"
-	"nova-factory-server/app/business/shop/shopDao/shopDaoImpl"
-	"nova-factory-server/app/business/shop/shopService/shopServiceImpl"
+	"nova-factory-server/app/business/shop/shopcontroller"
+	"nova-factory-server/app/business/shop/shopdao/shopdaoimpl"
+	"nova-factory-server/app/business/shop/shopservice/shopserviceimpl"
 
 	"github.com/google/wire"
 )
 
 var ProviderSet = wire.NewSet(
-	shopDaoImpl.ProviderSet,
-	shopServiceImpl.ProviderSet,
-	shopController.ProviderSet,
+	shopdaoimpl.ProviderSet,
+	shopserviceimpl.ProviderSet,
+	shopcontroller.ProviderSet,
 	GinProviderSet,
 )

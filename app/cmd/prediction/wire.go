@@ -5,8 +5,8 @@ package main
 
 import (
 	"nova-factory-server/app/business/ai/aiDataSetDao/aiDataSetDaoImpl"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
-	"nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
+	"nova-factory-server/app/business/iot/devicemonitor/devicemonitordao/deviceMonitorDaoImpl"
+	"nova-factory-server/app/business/iot/metric/device/metricdao/metricdaoimpl"
 	"nova-factory-server/app/datasource"
 
 	"github.com/google/wire"
@@ -15,7 +15,7 @@ import (
 func wireApp() (*Runner, func(), error) {
 	panic(wire.Build(
 		deviceMonitorDaoImpl.ProviderSet,
-		metricDaoIMpl.ProviderSet,
+		metricdaoimpl.ProviderSet,
 		aiDataSetDaoImpl.ProviderSet,
 		datasource.ProviderSet,
 		ProviderSet,

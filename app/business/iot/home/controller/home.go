@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"nova-factory-server/app/business/iot/home/homeModels"
-	"nova-factory-server/app/business/iot/home/homeService"
+	"nova-factory-server/app/business/iot/home/homemodels"
+	"nova-factory-server/app/business/iot/home/homeservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -12,10 +12,10 @@ import (
 )
 
 type Home struct {
-	iHomeService homeService.HomeService
+	iHomeService homeservice.HomeService
 }
 
-func NewHome(iHomeService homeService.HomeService) *Home {
+func NewHome(iHomeService homeservice.HomeService) *Home {
 	return &Home{
 		iHomeService: iHomeService,
 	}
@@ -37,7 +37,7 @@ func (h *Home) PrivateRoutes(r *gin.RouterGroup) {
 // @Produce application/json
 // @Router /home/stats [get]
 func (h *Home) GetHomeStats(c *gin.Context) {
-	req := new(homeModels.HomeRequest)
+	req := new(homemodels.HomeRequest)
 	err := c.ShouldBindQuery(req)
 	if err != nil {
 		zap.L().Error("读取首页统计参数错误", zap.Error(err))

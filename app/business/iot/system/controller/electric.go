@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"nova-factory-server/app/business/iot/asset/device/deviceService"
+	"nova-factory-server/app/business/iot/asset/device/deviceservice"
 	"nova-factory-server/app/business/iot/system/models"
 	"nova-factory-server/app/business/iot/system/service"
 	"nova-factory-server/app/middlewares"
@@ -13,11 +13,11 @@ import (
 
 type Electric struct {
 	service       service.IDeviceElectricService
-	deviceService deviceService.IDeviceService
+	deviceService deviceservice.IDeviceService
 }
 
 // NewElectric  设备电流配置，通过电流判断设备到底是 运行负载中 还是停机 还是关闭
-func NewElectric(service service.IDeviceElectricService, deviceService deviceService.IDeviceService) *Electric {
+func NewElectric(service service.IDeviceElectricService, deviceService deviceservice.IDeviceService) *Electric {
 	return &Electric{
 		service:       service,
 		deviceService: deviceService,

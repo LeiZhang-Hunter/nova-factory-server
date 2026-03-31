@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"nova-factory-server/app/business/ai/aiDataSetModels"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorDao"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorModel"
-	"nova-factory-server/app/business/iot/metric/device/metricDao"
-	"nova-factory-server/app/business/iot/metric/device/metricModels"
+	"nova-factory-server/app/business/iot/devicemonitor/devicemonitordao"
+	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
+	"nova-factory-server/app/business/iot/metric/device/metricdao"
+	"nova-factory-server/app/business/iot/metric/device/metricmodels"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,12 +15,12 @@ import (
 )
 
 type exception struct {
-	metricCDao   metricDao.IMetricDao
-	deviceMapDao deviceMonitorDao.IDeviceDataReportDao
+	metricCDao   metricdao.IMetricDao
+	deviceMapDao devicemonitordao.IDeviceDataReportDao
 	judge        *judge
 }
 
-func newException(metricCDao metricDao.IMetricDao, deviceMapDao deviceMonitorDao.IDeviceDataReportDao) *exception {
+func newException(metricCDao metricdao.IMetricDao, deviceMapDao devicemonitordao.IDeviceDataReportDao) *exception {
 	return &exception{
 		metricCDao:   metricCDao,
 		deviceMapDao: deviceMapDao,
@@ -60,7 +60,7 @@ func (e *exception) predict(config *aiDataSetModels.SysAiPredictionException) {
 
 	var level int = 0
 	var ctx gin.Context
-	result, err := e.metricCDao.Query(&ctx, &metricModels.MetricDataQueryReq{
+	result, err := e.metricCDao.Query(&ctx, &metricmodels.MetricDataQueryReq{
 		Type:       "line",
 		Name:       name,
 		Start:      uint64(start),
@@ -70,7 +70,7 @@ func (e *exception) predict(config *aiDataSetModels.SysAiPredictionException) {
 		Field:      " ",
 		Level:      &level,
 		Expression: exceptionStr,
-		Predict: metricModels.Predict{
+		Predict: metricmodels.Predict{
 			Model:  config.Model,
 			Enable: true,
 		},
@@ -87,7 +87,7 @@ func (e *exception) predict(config *aiDataSetModels.SysAiPredictionException) {
 		return
 	}
 
-	var devMap map[string]deviceMonitorModel.SysIotDbDevMapData = make(map[string]deviceMonitorModel.SysIotDbDevMapData)
+	var devMap map[string]devicemonitormodel.SysIotDbDevMapData = make(map[string]devicemonitormodel.SysIotDbDevMapData)
 	for _, dev := range list {
 		devMap[dev.DevName] = dev
 	}

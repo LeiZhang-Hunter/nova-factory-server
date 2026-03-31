@@ -5,19 +5,19 @@ package iot
 
 import (
 	"fmt"
-	"nova-factory-server/app/business/iot/alert/alertController"
-	"nova-factory-server/app/business/iot/asset/building/buildingController"
-	"nova-factory-server/app/business/iot/asset/camera/cameraController"
-	"nova-factory-server/app/business/iot/asset/device/deviceController"
-	"nova-factory-server/app/business/iot/asset/material/materialController"
-	"nova-factory-server/app/business/iot/asset/resource/resourceController"
-	"nova-factory-server/app/business/iot/configuration/configurationController"
-	"nova-factory-server/app/business/iot/craft/craftRouteController"
-	"nova-factory-server/app/business/iot/daemonize/daemonizeController"
-	"nova-factory-server/app/business/iot/dashboard/dashboardController"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorController"
+	"nova-factory-server/app/business/iot/alert/alertcontroller"
+	"nova-factory-server/app/business/iot/asset/building/buildingcontroller"
+	"nova-factory-server/app/business/iot/asset/camera/cameracontroller"
+	"nova-factory-server/app/business/iot/asset/device/devicecontroller"
+	"nova-factory-server/app/business/iot/asset/material/materialcontroller"
+	"nova-factory-server/app/business/iot/asset/resource/resourcecontroller"
+	"nova-factory-server/app/business/iot/configuration/configurationcontroller"
+	"nova-factory-server/app/business/iot/craft/craftroutecontroller"
+	"nova-factory-server/app/business/iot/daemonize/daemonizecontroller"
+	"nova-factory-server/app/business/iot/dashboard/dashboardcontroller"
+	"nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller"
 	homeController "nova-factory-server/app/business/iot/home/controller"
-	"nova-factory-server/app/business/iot/metric/device/metricController"
+	"nova-factory-server/app/business/iot/metric/device/metriccontroller"
 	iotSystemControllerImpl "nova-factory-server/app/business/iot/system/controller"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/daemonize"
@@ -37,20 +37,20 @@ func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
 	iotdb *iotdb.IotDb,
-	materialC *materialController.Material,
-	craft *craftRouteController.CraftRoute,
-	metric *metricController.MetricServer,
-	controller *daemonizeController.DaemonizeServer,
-	deviceMonitor *deviceMonitorController.DeviceMonitorController,
-	alert *alertController.Controller,
-	building buildingController.Controller,
-	dashboard dashboardController.Controller,
-	resource *resourceController.ResourceController,
+	materialC *materialcontroller.Material,
+	craft *craftroutecontroller.CraftRoute,
+	metric *metriccontroller.MetricServer,
+	controller *daemonizecontroller.DaemonizeServer,
+	deviceMonitor *devicemonitorcontroller.DeviceMonitorController,
+	alert *alertcontroller.Controller,
+	building buildingcontroller.Controller,
+	dashboard dashboardcontroller.Controller,
+	resource *resourcecontroller.ResourceController,
 	home *homeController.Home,
-	configuration *configurationController.Controller,
+	configuration *configurationcontroller.Controller,
 	iotSystem iotSystemControllerImpl.System,
-	camera cameraController.CameraController,
-	dc *deviceController.Device,
+	camera cameracontroller.CameraController,
+	dc *devicecontroller.Device,
 ) *Iot {
 	r := app.Engine
 	group := r.Group("")

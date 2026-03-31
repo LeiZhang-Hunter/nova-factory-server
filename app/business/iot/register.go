@@ -4,96 +4,96 @@
 package iot
 
 import (
-	"nova-factory-server/app/business/iot/alert/alertController"
-	"nova-factory-server/app/business/iot/alert/alertDao/alertDaoImpl"
-	"nova-factory-server/app/business/iot/alert/alertService/alertServiceImpl"
-	"nova-factory-server/app/business/iot/asset/building/buildingController"
-	"nova-factory-server/app/business/iot/asset/building/buildingDao/buildingDaoImpl"
-	"nova-factory-server/app/business/iot/asset/building/buildingService/buildingServiceImpl"
-	"nova-factory-server/app/business/iot/asset/camera/cameraController"
-	"nova-factory-server/app/business/iot/asset/camera/cameraDao/cameraDaoImpl"
-	"nova-factory-server/app/business/iot/asset/camera/cameraService/cameraServiceImpl"
-	"nova-factory-server/app/business/iot/asset/device/deviceController"
-	"nova-factory-server/app/business/iot/asset/device/deviceDao/deviceDaoImpl"
-	"nova-factory-server/app/business/iot/asset/device/deviceService/deviceServiceImpl"
-	"nova-factory-server/app/business/iot/asset/material/materialController"
-	"nova-factory-server/app/business/iot/asset/material/materialDao/materialDaoImpl"
-	"nova-factory-server/app/business/iot/asset/material/materialService/materialServiceImpl"
-	"nova-factory-server/app/business/iot/asset/resource/resourceController"
-	"nova-factory-server/app/business/iot/asset/resource/resourceDao/resourceDaoImpl"
-	"nova-factory-server/app/business/iot/asset/resource/resourceService/resourceServiceImpl"
-	"nova-factory-server/app/business/iot/configuration/configurationController"
-	"nova-factory-server/app/business/iot/configuration/configurationDao/configurationDaoImpl"
-	"nova-factory-server/app/business/iot/configuration/configurationService/configurationServiceImpl"
-	"nova-factory-server/app/business/iot/craft/craftRouteController"
-	"nova-factory-server/app/business/iot/craft/craftRouteDao/craftRouteDaoImpl"
-	"nova-factory-server/app/business/iot/craft/craftRouteService/craftRouteServiceImpl"
-	"nova-factory-server/app/business/iot/daemonize/daemonizeController"
-	"nova-factory-server/app/business/iot/daemonize/daemonizeDao/daemonizeDaoImpl"
-	"nova-factory-server/app/business/iot/daemonize/daemonizeService/daemonizeServiceImpl"
-	"nova-factory-server/app/business/iot/dashboard/dashboardController"
-	"nova-factory-server/app/business/iot/dashboard/dashboardDao/dashboardDaoImpl"
-	"nova-factory-server/app/business/iot/dashboard/dashboardService/dashboardServiceImpl"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorController"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorDao/deviceMonitorDaoImpl"
-	"nova-factory-server/app/business/iot/deviceMonitor/deviceMonitorService/deviceMonitorServiceImpl"
+	"nova-factory-server/app/business/iot/alert/alertcontroller"
+	"nova-factory-server/app/business/iot/alert/alertdao/alertdaoimpl"
+	"nova-factory-server/app/business/iot/alert/alertservice/alertserviceimpl"
+	"nova-factory-server/app/business/iot/asset/building/buildingcontroller"
+	"nova-factory-server/app/business/iot/asset/building/buildingdao/buildingdaoimpl"
+	"nova-factory-server/app/business/iot/asset/building/buildingservice/buildingserviceimpl"
+	"nova-factory-server/app/business/iot/asset/camera/cameracontroller"
+	"nova-factory-server/app/business/iot/asset/camera/cameradao/cameraDaoImpl"
+	"nova-factory-server/app/business/iot/asset/camera/cameraservice/cameraServiceImpl"
+	"nova-factory-server/app/business/iot/asset/device/devicecontroller"
+	"nova-factory-server/app/business/iot/asset/device/devicedao/devicedaoImpl"
+	"nova-factory-server/app/business/iot/asset/device/deviceservice/deviceserviceimpl"
+	"nova-factory-server/app/business/iot/asset/material/materialcontroller"
+	"nova-factory-server/app/business/iot/asset/material/materialdao/materialdaoimpl"
+	"nova-factory-server/app/business/iot/asset/material/materialservice/materialserviceimpl"
+	"nova-factory-server/app/business/iot/asset/resource/resourcecontroller"
+	"nova-factory-server/app/business/iot/asset/resource/resourcedao/resourcedaoimpl"
+	"nova-factory-server/app/business/iot/asset/resource/resourceservice/resourceserviceimpl"
+	"nova-factory-server/app/business/iot/configuration/configurationcontroller"
+	"nova-factory-server/app/business/iot/configuration/configurationdao/configurationDaoImpl"
+	"nova-factory-server/app/business/iot/configuration/configurationservice/configurationServiceImpl"
+	"nova-factory-server/app/business/iot/craft/craftroutecontroller"
+	"nova-factory-server/app/business/iot/craft/craftroutedao/craftroutedaoimpl"
+	"nova-factory-server/app/business/iot/craft/craftrouteservice/craftrouteserviceimpl"
+	"nova-factory-server/app/business/iot/daemonize/daemonizecontroller"
+	"nova-factory-server/app/business/iot/daemonize/daemonizedao/daemonizedaoimpl"
+	"nova-factory-server/app/business/iot/daemonize/daemonizeservice/daemonizeserviceimpl"
+	"nova-factory-server/app/business/iot/dashboard/dashboardcontroller"
+	"nova-factory-server/app/business/iot/dashboard/dashboarddao/dashboarddaoimpl"
+	"nova-factory-server/app/business/iot/dashboard/dashboardservice/dashboardserviceimpl"
+	"nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller"
+	"nova-factory-server/app/business/iot/devicemonitor/devicemonitordao/deviceMonitorDaoImpl"
+	"nova-factory-server/app/business/iot/devicemonitor/devicemonitorservice/deviceMonitorServiceImpl"
 	homeController "nova-factory-server/app/business/iot/home/controller"
-	"nova-factory-server/app/business/iot/home/homeService/homeServiceImpl"
-	"nova-factory-server/app/business/iot/metric/device/metricController"
-	"nova-factory-server/app/business/iot/metric/device/metricDao/metricDaoIMpl"
-	"nova-factory-server/app/business/iot/metric/device/metricService/metricServiceImpl"
+	"nova-factory-server/app/business/iot/home/homeservice/homeserviceimpl"
+	"nova-factory-server/app/business/iot/metric/device/metriccontroller"
+	"nova-factory-server/app/business/iot/metric/device/metricdao/metricdaoimpl"
+	"nova-factory-server/app/business/iot/metric/device/metricservice/metricserviceimpl"
 	iotSystemControllerImpl "nova-factory-server/app/business/iot/system/controller"
-	iotSystemDaoImpl "nova-factory-server/app/business/iot/system/dao/systemDaoImpl"
-	iotSystemServiceImpl "nova-factory-server/app/business/iot/system/service/systemServiceImpl"
+	iotSystemDaoImpl "nova-factory-server/app/business/iot/system/dao/systemdaoimpl"
+	iotSystemServiceImpl "nova-factory-server/app/business/iot/system/service/systemserviceimpl"
 
 	"github.com/google/wire"
 )
 
 var ProviderSet = wire.NewSet(
-	deviceDaoImpl.ProviderSet,
-	deviceServiceImpl.ProviderSet,
-	deviceController.ProviderSet,
+	devicedaoImpl.ProviderSet,
+	deviceserviceimpl.ProviderSet,
+	devicecontroller.ProviderSet,
 
-	materialDaoImpl.ProviderSet,
-	materialServiceImpl.ProviderSet,
-	materialController.ProviderSet,
+	materialdaoimpl.ProviderSet,
+	materialserviceimpl.ProviderSet,
+	materialcontroller.ProviderSet,
 
-	craftRouteDaoImpl.ProviderSet,
-	craftRouteServiceImpl.ProviderSet,
-	craftRouteController.ProviderSet,
+	craftroutedaoimpl.ProviderSet,
+	craftrouteserviceimpl.ProviderSet,
+	craftroutecontroller.ProviderSet,
 
-	metricDaoIMpl.ProviderSet,
-	metricServiceImpl.ProviderSet,
-	metricController.ProviderSet,
+	metricdaoimpl.ProviderSet,
+	metricserviceimpl.ProviderSet,
+	metriccontroller.ProviderSet,
 
-	daemonizeDaoImpl.ProviderSet,
-	daemonizeServiceImpl.ProviderSet,
-	daemonizeController.ProviderSet,
+	daemonizedaoimpl.ProviderSet,
+	daemonizeserviceimpl.ProviderSet,
+	daemonizecontroller.ProviderSet,
 
 	deviceMonitorDaoImpl.ProviderSet,
 	deviceMonitorServiceImpl.ProviderSet,
-	deviceMonitorController.ProviderSet,
+	devicemonitorcontroller.ProviderSet,
 
-	alertDaoImpl.ProviderSet,
-	alertServiceImpl.ProviderSet,
-	alertController.ProviderSet,
+	alertdaoimpl.ProviderSet,
+	alertserviceimpl.ProviderSet,
+	alertcontroller.ProviderSet,
 
-	buildingDaoImpl.ProviderSet,
-	buildingServiceImpl.ProviderSet,
-	buildingController.ProviderSet,
+	buildingdaoimpl.ProviderSet,
+	buildingserviceimpl.ProviderSet,
+	buildingcontroller.ProviderSet,
 
-	dashboardDaoImpl.ProviderSet,
-	dashboardServiceImpl.ProviderSet,
-	dashboardController.ProviderSet,
+	dashboarddaoimpl.ProviderSet,
+	dashboardserviceimpl.ProviderSet,
+	dashboardcontroller.ProviderSet,
 
-	resourceController.ProviderSet,
-	resourceServiceImpl.ProviderSet,
-	resourceDaoImpl.ProviderSet,
+	resourcecontroller.ProviderSet,
+	resourceserviceimpl.ProviderSet,
+	resourcedaoimpl.ProviderSet,
 
-	homeServiceImpl.ProviderSet,
+	homeserviceimpl.ProviderSet,
 	homeController.ProviderSet,
 
-	configurationController.ProviderSet,
+	configurationcontroller.ProviderSet,
 	configurationServiceImpl.ProviderSet,
 	configurationDaoImpl.ProviderSet,
 
@@ -101,7 +101,7 @@ var ProviderSet = wire.NewSet(
 	iotSystemServiceImpl.ProviderSet,
 	iotSystemDaoImpl.ProviderSet,
 
-	cameraController.ProviderSet,
+	cameracontroller.ProviderSet,
 	cameraServiceImpl.ProviderSet,
 	cameraDaoImpl.ProviderSet,
 

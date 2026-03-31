@@ -1,0 +1,88 @@
+package dashboarddaoimpl
+
+import (
+	"nova-factory-server/app/business/iot/dashboard/dashboarddao"
+	"nova-factory-server/app/business/iot/dashboard/dashboardmodels"
+	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+type DashboardDaoImpl struct {
+	db    *gorm.DB
+	table string
+}
+
+func NewDashboardDaoImpl(db *gorm.DB) dashboarddao.DashboardDao {
+	return &DashboardDaoImpl{
+		db:    db,
+		table: "sys_dashboard",
+	}
+}
+
+func (i *DashboardDaoImpl) List(c *gin.Context, req *dashboardmodels.SysDashboardReq) (*dashboardmodels.SysDashboardList, error) {
+	db := i.db.Table(i.table)
+
+	if req != nil && req.Name != "" {
+		db = db.Where("name like ?", "%"+req.Name+"%")
+	}
+	if req != nil && req.Type != "" {
+		db = db.Where("type = ?", req.Type)
+	}
+	size := 0
+	if req == nil || req.Size <= 0 {
+		size = 20
+	} else {
+		size = int(req.Size)
+	}
+	offset := 0
+	if req == nil || req.Page <= 0 {
+		req.Page = 1
+	} else {
+		offset = int((req.Page - 1) * req.Size)
+	}
+	db = db.Where("state", commonStatus.NORMAL)
+	db = baizeContext.GetGormDataScope(c, db)
+	var dto []*dashboardmodels.SysDashboard
+
+	var total int64
+	ret := db.Count(&total)
+	if ret.Error != nil {
+		return &dashboardmodels.SysDashboardList{
+			Rows:  make([]*dashboardmodels.SysDashboard, 0),
+			Total: 0,
+		}, ret.Error
+	}
+
+	ret = db.Debug().Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
+	if ret.Error != nil {
+		return &dashboardmodels.SysDashboardList{
+			Rows:  make([]*dashboardmodels.SysDashboard, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	return &dashboardmodels.SysDashboardList{
+		Rows:  dto,
+		Total: total,
+	}, nil
+}
+func (i *DashboardDaoImpl) Set(c *gin.Context, data *dashboardmodels.SetSysDashboard) (*dashboardmodels.SysDashboard, error) {
+	value := dashboardmodels.ToSysDashboardReq(data)
+	if data.ID == 0 {
+		value.ID = snowflake.GenID()
+		value.DeptID = baizeContext.GetDeptId(c)
+		value.SetCreateBy(baizeContext.GetUserId(c))
+		ret := i.db.Table(i.table).Create(value)
+		return value, ret.Error
+	}
+	value.SetUpdateBy(baizeContext.GetUserId(c))
+	ret := i.db.Table(i.table).Where("id = ?", data.ID).Updates(value)
+	return value, ret.Error
+}
+func (i *DashboardDaoImpl) Remove(c *gin.Context, ids []string) error {
+	ret := i.db.Table(i.table).Where("id in (?)", ids).Delete(&dashboardmodels.SysDashboard{})
+	return ret.Error
+}

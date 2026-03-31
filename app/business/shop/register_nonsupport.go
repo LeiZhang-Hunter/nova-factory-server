@@ -3,7 +3,7 @@
 package shop
 
 import (
-	"nova-factory-server/app/business/shop/shopController"
+	"nova-factory-server/app/business/shop/shopcontroller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/routes"
 
@@ -13,12 +13,12 @@ import (
 func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
-	controller *shopController.Controller) *Shop {
+	controller *shopcontroller.Controller) *Shop {
 	return &Shop{}
 }
 
-func NewController() *shopController.Controller {
-	return &shopController.Controller{}
+func NewController() *shopcontroller.Controller {
+	return &shopcontroller.Controller{}
 }
 
 var GinProviderSet = wire.NewSet(NewController, NewGinEngine)

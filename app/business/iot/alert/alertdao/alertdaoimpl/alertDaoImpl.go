@@ -1,0 +1,6 @@
+package alertdaoimpl
+
+import "github.com/google/wire"
+
+var ProviderSet = wire.NewSet(NewAlertSinkTemplateDaoImpl, NewAlertRuleDaoImpl, NewAlertLogDaoImpl,
+	NewAlertActionDaoImpl, NewAlertAiReasonDaoImpl, NewAlertLogClickhouseDaoImpl)

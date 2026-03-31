@@ -1,0 +1,86 @@
+package craftroutedaoimpl
+
+import (
+	"nova-factory-server/app/business/iot/craft/craftroutedao"
+	"nova-factory-server/app/business/iot/craft/craftroutemodels"
+	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/utils/baizeContext"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+type IProcessRouteDaoImpl struct {
+	db        *gorm.DB
+	tableName string
+}
+
+func NewIProcessRouteDaoImpl(db *gorm.DB) craftroutedao.IRouteProcessDao {
+	return &IProcessRouteDaoImpl{
+		db:        db,
+		tableName: "sys_pro_route_process",
+	}
+}
+
+func (i *IProcessRouteDaoImpl) Add(c *gin.Context, data *craftroutemodels.SysProRouteProcess) (*craftroutemodels.SysProRouteProcess, error) {
+	ret := i.db.Table(i.tableName).Create(data)
+	return data, ret.Error
+}
+
+func (i *IProcessRouteDaoImpl) Update(c *gin.Context, data *craftroutemodels.SysProRouteProcess) (*craftroutemodels.SysProRouteProcess, error) {
+	ret := i.db.Table(i.tableName).Where("record_id = ?", data.RecordID).Updates(data)
+	return data, ret.Error
+
+}
+
+func (i *IProcessRouteDaoImpl) Remove(c *gin.Context, ids []string) error {
+	ret := i.db.Table(i.tableName).Where("record_id in (?)", ids).Update("state", -1)
+	return ret.Error
+}
+
+func (i *IProcessRouteDaoImpl) List(c *gin.Context, req *craftroutemodels.SysProRouteProcessListReq) (*craftroutemodels.SysProRouteProcessList, error) {
+	db := i.db.Table(i.tableName)
+
+	size := 0
+	if req == nil || req.Size <= 0 {
+		size = 20
+	} else {
+		size = int(req.Size)
+	}
+	offset := 0
+	if req == nil || req.Page <= 0 {
+		req.Page = 1
+	} else {
+		offset = int((req.Page - 1) * req.Size)
+	}
+	db = db.Where("state", commonStatus.NORMAL)
+	db = baizeContext.GetGormDataScope(c, db)
+	var dto []*craftroutemodels.SysProRouteProcess
+
+	var total int64
+	ret := db.Count(&total)
+	if ret.Error != nil {
+		return &craftroutemodels.SysProRouteProcessList{
+			Rows:  make([]*craftroutemodels.SysProRouteProcess, 0),
+			Total: 0,
+		}, ret.Error
+	}
+
+	ret = db.Offset(offset).Order("create_time desc").Limit(size).Find(&dto)
+	if ret.Error != nil {
+		return &craftroutemodels.SysProRouteProcessList{
+			Rows:  make([]*craftroutemodels.SysProRouteProcess, 0),
+			Total: 0,
+		}, ret.Error
+	}
+	return &craftroutemodels.SysProRouteProcessList{
+		Rows:  dto,
+		Total: total,
+	}, nil
+}
+
+func (i *IProcessRouteDaoImpl) GetByRouteId(c *gin.Context, routeId int64) ([]*craftroutemodels.SysProRouteProcess, error) {
+	var data []*craftroutemodels.SysProRouteProcess
+	ret := i.db.Table(i.tableName).Where("route_id = ?", routeId).Where("state = ?", commonStatus.NORMAL).Find(&data)
+	return data, ret.Error
+}
