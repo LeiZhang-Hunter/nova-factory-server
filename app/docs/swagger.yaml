@@ -1,5 +1,5 @@
 definitions:
-  aiDataSetModels.AddChunkReq:
+  aidatasetmodels.AddChunkReq:
     properties:
       content:
         type: string
@@ -16,7 +16,7 @@ definitions:
           type: string
         type: array
     type: object
-  aiDataSetModels.AgentsCompletionsRequest:
+  aidatasetmodels.AgentsCompletionsRequest:
     properties:
       agent_id:
         type: string
@@ -31,7 +31,7 @@ definitions:
       user_id:
         type: string
     type: object
-  aiDataSetModels.AskRequest:
+  aidatasetmodels.AskRequest:
     properties:
       dataset_ids:
         items:
@@ -40,7 +40,7 @@ definitions:
       question:
         type: string
     type: object
-  aiDataSetModels.ChatsCompletionsRequest:
+  aidatasetmodels.ChatsCompletionsRequest:
     properties:
       chat_id:
         type: string
@@ -55,12 +55,12 @@ definitions:
     required:
     - chat_id
     type: object
-  aiDataSetModels.ConversationRelatedQuestionsRequest:
+  aidatasetmodels.ConversationRelatedQuestionsRequest:
     properties:
       question:
         type: string
     type: object
-  aiDataSetModels.CreateAssistantRequest:
+  aidatasetmodels.CreateAssistantRequest:
     properties:
       avatar:
         type: string
@@ -73,19 +73,19 @@ definitions:
       icon:
         type: string
       llm:
-        $ref: '#/definitions/aiDataSetModels.Llm'
+        $ref: '#/definitions/aidatasetmodels.Llm'
       name:
         type: string
       prompt:
-        $ref: '#/definitions/aiDataSetModels.Prompt'
+        $ref: '#/definitions/aidatasetmodels.Prompt'
       prompt_config:
-        $ref: '#/definitions/aiDataSetModels.PromptConfig'
+        $ref: '#/definitions/aidatasetmodels.PromptConfig'
       top_k:
         type: integer
       top_n:
         type: integer
     type: object
-  aiDataSetModels.CreateSessionsRequest:
+  aidatasetmodels.CreateSessionsRequest:
     properties:
       chat_id:
         type: string
@@ -97,7 +97,7 @@ definitions:
     - chat_id
     - name
     type: object
-  aiDataSetModels.DataSetRequest:
+  aidatasetmodels.DataSetRequest:
     properties:
       avatar:
         type: string
@@ -112,13 +112,13 @@ definitions:
       pagerank:
         type: string
       parser_config:
-        $ref: '#/definitions/aiDataSetModels.ParserConfig'
+        $ref: '#/definitions/aidatasetmodels.ParserConfig'
       permission:
         type: string
     required:
     - name
     type: object
-  aiDataSetModels.DeleteDocumentRequest:
+  aidatasetmodels.DeleteDocumentRequest:
     properties:
       dataset_id:
         example: "0"
@@ -128,7 +128,7 @@ definitions:
           type: string
         type: array
     type: object
-  aiDataSetModels.DeleteSessionRequest:
+  aidatasetmodels.DeleteSessionRequest:
     properties:
       chat_id:
         type: string
@@ -139,7 +139,7 @@ definitions:
     required:
     - chat_id
     type: object
-  aiDataSetModels.Graphrag:
+  aidatasetmodels.Graphrag:
     properties:
       community:
         type: boolean
@@ -154,7 +154,7 @@ definitions:
       use_graphrag:
         type: boolean
     type: object
-  aiDataSetModels.Llm:
+  aidatasetmodels.Llm:
     properties:
       frequency_penalty:
         type: number
@@ -167,7 +167,7 @@ definitions:
       top_p:
         type: number
     type: object
-  aiDataSetModels.ParseDocumentApiRequest:
+  aidatasetmodels.ParseDocumentApiRequest:
     properties:
       dataset_id:
         example: "0"
@@ -177,7 +177,7 @@ definitions:
           type: string
         type: array
     type: object
-  aiDataSetModels.ParserConfig:
+  aidatasetmodels.ParserConfig:
     properties:
       auto_keywords:
         type: integer
@@ -188,19 +188,19 @@ definitions:
       delimiter:
         type: string
       graphrag:
-        $ref: '#/definitions/aiDataSetModels.Graphrag'
+        $ref: '#/definitions/aidatasetmodels.Graphrag'
       html4excel:
         type: boolean
       layout_recognize:
         type: string
       raptor:
-        $ref: '#/definitions/aiDataSetModels.Raptor'
+        $ref: '#/definitions/aidatasetmodels.Raptor'
       tag_kb_ids:
         type: integer
       task_page_size:
         type: integer
     type: object
-  aiDataSetModels.Prompt:
+  aidatasetmodels.Prompt:
     properties:
       empty_response:
         type: string
@@ -230,10 +230,10 @@ definitions:
         type: boolean
       variables:
         items:
-          $ref: '#/definitions/aiDataSetModels.Variables'
+          $ref: '#/definitions/aidatasetmodels.Variables'
         type: array
     type: object
-  aiDataSetModels.PromptConfig:
+  aidatasetmodels.PromptConfig:
     properties:
       empty_response:
         type: string
@@ -250,7 +250,7 @@ definitions:
       tts:
         type: boolean
     type: object
-  aiDataSetModels.PutDocumentRequest:
+  aidatasetmodels.PutDocumentRequest:
     properties:
       chunk_method:
         type: string
@@ -262,9 +262,9 @@ definitions:
       name:
         type: string
       parser_config:
-        $ref: '#/definitions/aiDataSetModels.ParserConfig'
+        $ref: '#/definitions/aidatasetmodels.ParserConfig'
     type: object
-  aiDataSetModels.Raptor:
+  aidatasetmodels.Raptor:
     properties:
       max_cluster:
         type: integer
@@ -279,7 +279,7 @@ definitions:
       use_raptor:
         type: boolean
     type: object
-  aiDataSetModels.RemoveAgentSessionsRequest:
+  aidatasetmodels.RemoveAgentSessionsRequest:
     properties:
       agent_id:
         type: string
@@ -290,7 +290,7 @@ definitions:
     required:
     - agent_id
     type: object
-  aiDataSetModels.RemoveChunkReq:
+  aidatasetmodels.RemoveChunkReq:
     properties:
       chunk_ids:
         items:
@@ -301,7 +301,7 @@ definitions:
       document_uuid:
         type: string
     type: object
-  aiDataSetModels.RetrievalListReq:
+  aidatasetmodels.RetrievalListReq:
     properties:
       dataset_uuids:
         items:
@@ -332,7 +332,16 @@ definitions:
       vector_similarity_weight:
         type: number
     type: object
-  aiDataSetModels.SessionAgentCreate:
+  aidatasetmodels.SendMessageInput:
+    properties:
+      content:
+        type: string
+      conversation_id:
+        type: integer
+      tab_id:
+        type: string
+    type: object
+  aidatasetmodels.SessionAgentCreate:
     properties:
       agent_id:
         type: string
@@ -340,7 +349,24 @@ definitions:
         additionalProperties: true
         type: object
     type: object
-  aiDataSetModels.SetSysAiLLMSetting:
+  aidatasetmodels.SetAiConversation:
+    properties:
+      chatMode:
+        type: string
+      enableThinking:
+        type: integer
+      llmModelId:
+        type: string
+      llmProviderId:
+        type: string
+      message:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  aidatasetmodels.SetSysAiLLMSetting:
     properties:
       asr_id:
         type: string
@@ -368,7 +394,7 @@ definitions:
       tts_id:
         type: string
     type: object
-  aiDataSetModels.SetSysAiPrediction:
+  aidatasetmodels.SetSysAiPrediction:
     properties:
       action_id:
         description: 处理通知id
@@ -410,7 +436,7 @@ definitions:
       threshold:
         type: integer
     type: object
-  aiDataSetModels.SetSysAiPredictionControl:
+  aidatasetmodels.SetSysAiPredictionControl:
     properties:
       agg_function:
         description: 聚合函数，用来计算图表
@@ -443,7 +469,7 @@ definitions:
         description: threshold
         type: integer
     type: object
-  aiDataSetModels.SetSysUserLLM:
+  aidatasetmodels.SetSysUserLLM:
     properties:
       api_base:
         type: string
@@ -452,7 +478,7 @@ definitions:
       llm_factory:
         type: string
     type: object
-  aiDataSetModels.UpdateAssistantRequest:
+  aidatasetmodels.UpdateAssistantRequest:
     properties:
       avatar:
         type: string
@@ -463,13 +489,13 @@ definitions:
           type: string
         type: array
       llm:
-        $ref: '#/definitions/aiDataSetModels.Llm'
+        $ref: '#/definitions/aidatasetmodels.Llm'
       name:
         type: string
       prompt:
-        $ref: '#/definitions/aiDataSetModels.Prompt'
+        $ref: '#/definitions/aidatasetmodels.Prompt'
     type: object
-  aiDataSetModels.UpdateChunkReq:
+  aidatasetmodels.UpdateChunkReq:
     properties:
       available:
         type: boolean
@@ -490,7 +516,7 @@ definitions:
           type: string
         type: array
     type: object
-  aiDataSetModels.UpdateDataSetRequest:
+  aidatasetmodels.UpdateDataSetRequest:
     properties:
       chunk_method:
         type: string
@@ -503,11 +529,11 @@ definitions:
       pagerank:
         type: integer
       parser_config:
-        $ref: '#/definitions/aiDataSetModels.ParserConfig'
+        $ref: '#/definitions/aidatasetmodels.ParserConfig'
     required:
     - name
     type: object
-  aiDataSetModels.UpdateSessionsRequest:
+  aidatasetmodels.UpdateSessionsRequest:
     properties:
       chat_id:
         type: string
@@ -521,18 +547,18 @@ definitions:
     - chat_id
     - session_id
     type: object
-  aiDataSetModels.Variables:
+  aidatasetmodels.Variables:
     properties:
       key:
         type: string
       optional:
         type: boolean
     type: object
-  alertModels.AlertLogData:
+  alertmodels.AlertLogData:
     properties:
       alerts:
         items:
-          $ref: '#/definitions/alertModels.AlertValue'
+          $ref: '#/definitions/alertmodels.AlertValue'
         type: array
       commonLabels:
         additionalProperties:
@@ -547,7 +573,7 @@ definitions:
       username:
         type: string
     type: object
-  alertModels.AlertValue:
+  alertmodels.AlertValue:
     properties:
       annotations:
         properties:
@@ -576,7 +602,7 @@ definitions:
       startsAt:
         type: string
     type: object
-  alertModels.ApiNotify:
+  alertmodels.ApiNotify:
     properties:
       period:
         items:
@@ -596,7 +622,7 @@ definitions:
       url:
         type: string
     type: object
-  alertModels.ChangeSysAlert:
+  alertmodels.ChangeSysAlert:
     properties:
       id:
         description: 自增标识
@@ -604,7 +630,7 @@ definitions:
       status:
         type: boolean
     type: object
-  alertModels.Receiver:
+  alertmodels.Receiver:
     properties:
       email:
         description: 邮箱
@@ -622,12 +648,12 @@ definitions:
     - nickName
     - userName
     type: object
-  alertModels.SetAlertAction:
+  alertmodels.SetAlertAction:
     properties:
       api_notify:
         description: 通知用户
         items:
-          $ref: '#/definitions/alertModels.ApiNotify'
+          $ref: '#/definitions/alertmodels.ApiNotify'
         type: array
       id:
         description: 主键
@@ -639,10 +665,10 @@ definitions:
       user_notify:
         description: 通知周期，逗号分隔
         items:
-          $ref: '#/definitions/alertModels.UserNotify'
+          $ref: '#/definitions/alertmodels.UserNotify'
         type: array
     type: object
-  alertModels.SetAlertAiReason:
+  alertmodels.SetAlertAiReason:
     properties:
       agent_id:
         description: 大模型专家id
@@ -661,7 +687,7 @@ definitions:
         description: 提示词设置
         type: string
     type: object
-  alertModels.SetSysAlert:
+  alertmodels.SetSysAlert:
     properties:
       action_id:
         description: 处理id
@@ -710,7 +736,7 @@ definitions:
         example: "0"
         type: string
     type: object
-  alertModels.SetSysAlertSinkTemplate:
+  alertmodels.SetSysAlertSinkTemplate:
     properties:
       addr:
         description: 发送alert的http地址，若为空，则不会发送
@@ -744,7 +770,7 @@ definitions:
     - name
     - template
     type: object
-  alertModels.SysAlertLogListReq:
+  alertmodels.SysAlertLogListReq:
     properties:
       alert_id:
         description: 告警id
@@ -779,7 +805,7 @@ definitions:
       startTime:
         type: string
     type: object
-  alertModels.UserNotify:
+  alertmodels.UserNotify:
     properties:
       channels:
         items:
@@ -791,7 +817,7 @@ definitions:
         type: array
       receiver:
         items:
-          $ref: '#/definitions/alertModels.Receiver'
+          $ref: '#/definitions/alertmodels.Receiver'
         type: array
       time_end:
         description: 通知结束时间
@@ -812,7 +838,7 @@ definitions:
           type: string
         type: array
     type: object
-  buildingModels.SetSysBuilding:
+  buildingmodels.SetSysBuilding:
     properties:
       address:
         description: 单位
@@ -855,7 +881,7 @@ definitions:
         description: 建造年份
         type: string
     type: object
-  buildingModels.SetSysFloor:
+  buildingmodels.SetSysFloor:
     properties:
       building_id:
         description: 建筑物id
@@ -872,12 +898,12 @@ definitions:
         description: 楼层
         type: integer
     type: object
-  configurationModels.SetSysConfiguration:
+  configurationmodels.SetSysConfiguration:
     properties:
       annotation:
         description: 注解
         items:
-          $ref: '#/definitions/deviceModels.Annotation'
+          $ref: '#/definitions/devicemodels.Annotation'
         type: array
       description:
         description: 描述
@@ -896,7 +922,7 @@ definitions:
     - name
     - tag
     type: object
-  craftRouteModels.CaptureData:
+  craftroutemodels.CaptureData:
     properties:
       data_id:
         type: string
@@ -905,7 +931,7 @@ definitions:
       template_id:
         type: string
     type: object
-  craftRouteModels.ComputedPosition:
+  craftroutemodels.ComputedPosition:
     properties:
       x:
         type: number
@@ -914,20 +940,20 @@ definitions:
       z:
         type: number
     type: object
-  craftRouteModels.ControlRule:
+  craftroutemodels.ControlRule:
     properties:
       captures:
         items:
-          $ref: '#/definitions/craftRouteModels.CaptureData'
+          $ref: '#/definitions/craftroutemodels.CaptureData'
         type: array
       pid_rules:
-        $ref: '#/definitions/craftRouteModels.PidRules'
+        $ref: '#/definitions/craftroutemodels.PidRules'
       predict_rules:
-        $ref: '#/definitions/craftRouteModels.PredictRules'
+        $ref: '#/definitions/craftroutemodels.PredictRules'
       trigger_rules:
-        $ref: '#/definitions/craftRouteModels.TriggerRules'
+        $ref: '#/definitions/craftroutemodels.TriggerRules'
     type: object
-  craftRouteModels.ControllerAction:
+  craftroutemodels.ControllerAction:
     properties:
       condition:
         type: string
@@ -946,40 +972,21 @@ definitions:
       value:
         $ref: '#/definitions/value.Data'
     type: object
-  craftRouteModels.DeviceRuleInfo:
+  craftroutemodels.DeviceRuleInfo:
     properties:
       dataId:
         type: string
       deviceId:
         type: string
     type: object
-  craftRouteModels.Dimensions:
+  craftroutemodels.Dimensions:
     properties:
       height:
         type: integer
       width:
         type: integer
     type: object
-  craftRouteModels.HandleBoundsSource:
-    properties:
-      height:
-        type: integer
-      id:
-        type: string
-      nodeId:
-        type: string
-      position:
-        type: string
-      type:
-        type: string
-      width:
-        type: integer
-      x:
-        type: number
-      "y":
-        type: number
-    type: object
-  craftRouteModels.HandleBoundsTarget:
+  craftroutemodels.HandleBoundsSource:
     properties:
       height:
         type: integer
@@ -998,11 +1005,30 @@ definitions:
       "y":
         type: number
     type: object
-  craftRouteModels.PidRules:
+  craftroutemodels.HandleBoundsTarget:
+    properties:
+      height:
+        type: integer
+      id:
+        type: string
+      nodeId:
+        type: string
+      position:
+        type: string
+      type:
+        type: string
+      width:
+        type: integer
+      x:
+        type: number
+      "y":
+        type: number
+    type: object
+  craftroutemodels.PidRules:
     properties:
       actions:
         items:
-          $ref: '#/definitions/craftRouteModels.ControllerAction'
+          $ref: '#/definitions/craftroutemodels.ControllerAction'
         type: array
       data_id:
         type: string
@@ -1023,7 +1049,7 @@ definitions:
       sampling_interval:
         type: integer
     type: object
-  craftRouteModels.PredictData:
+  craftroutemodels.PredictData:
     properties:
       data_id:
         type: string
@@ -1032,18 +1058,18 @@ definitions:
       template_id:
         type: string
     type: object
-  craftRouteModels.PredictRules:
+  craftroutemodels.PredictRules:
     properties:
       actions:
         items:
-          $ref: '#/definitions/craftRouteModels.ControllerAction'
+          $ref: '#/definitions/craftroutemodels.ControllerAction'
         type: array
       agg_function:
         description: 聚合函数，用来计算图表
         type: string
       cases:
         items:
-          $ref: '#/definitions/craftRouteModels.TriggerCase'
+          $ref: '#/definitions/craftroutemodels.TriggerCase'
         type: array
       interval:
         description: 预测时间段
@@ -1058,7 +1084,7 @@ definitions:
         type: integer
       predicts:
         items:
-          $ref: '#/definitions/craftRouteModels.PredictData'
+          $ref: '#/definitions/craftroutemodels.PredictData'
         type: array
       step:
         description: 聚合窗口的滑动步长（可选，默认与聚合窗口大小相同）
@@ -1070,24 +1096,24 @@ definitions:
         description: 聚合窗口的大小（必须为正数）
         type: integer
     type: object
-  craftRouteModels.ProcessTopo:
+  craftroutemodels.ProcessTopo:
     properties:
       edges:
         items:
-          $ref: '#/definitions/craftRouteModels.ProcessTopoEdge'
+          $ref: '#/definitions/craftroutemodels.ProcessTopoEdge'
         type: array
       nodes:
         items:
-          $ref: '#/definitions/craftRouteModels.ProcessTopoNode'
+          $ref: '#/definitions/craftroutemodels.ProcessTopoNode'
         type: array
       products:
         items:
-          $ref: '#/definitions/craftRouteModels.SysProRouteSetProduct'
+          $ref: '#/definitions/craftroutemodels.SysProRouteSetProduct'
         type: array
       route:
-        $ref: '#/definitions/craftRouteModels.SysCraftRoute'
+        $ref: '#/definitions/craftroutemodels.SysCraftRoute'
     type: object
-  craftRouteModels.ProcessTopoData:
+  craftroutemodels.ProcessTopoData:
     properties:
       config: {}
       description:
@@ -1095,7 +1121,7 @@ definitions:
       label:
         type: string
     type: object
-  craftRouteModels.ProcessTopoEdge:
+  craftroutemodels.ProcessTopoEdge:
     properties:
       animated:
         type: boolean
@@ -1150,14 +1176,14 @@ definitions:
       type:
         type: string
     type: object
-  craftRouteModels.ProcessTopoNode:
+  craftroutemodels.ProcessTopoNode:
     properties:
       computedPosition:
-        $ref: '#/definitions/craftRouteModels.ComputedPosition'
+        $ref: '#/definitions/craftroutemodels.ComputedPosition'
       data:
-        $ref: '#/definitions/craftRouteModels.ProcessTopoData'
+        $ref: '#/definitions/craftroutemodels.ProcessTopoData'
       dimensions:
-        $ref: '#/definitions/craftRouteModels.Dimensions'
+        $ref: '#/definitions/craftroutemodels.Dimensions'
       dragging:
         type: boolean
       events:
@@ -1166,11 +1192,11 @@ definitions:
         properties:
           source:
             items:
-              $ref: '#/definitions/craftRouteModels.HandleBoundsSource'
+              $ref: '#/definitions/craftroutemodels.HandleBoundsSource'
             type: array
           target:
             items:
-              $ref: '#/definitions/craftRouteModels.HandleBoundsTarget'
+              $ref: '#/definitions/craftroutemodels.HandleBoundsTarget'
             type: array
         type: object
       id:
@@ -1180,7 +1206,7 @@ definitions:
       isParent:
         type: boolean
       position:
-        $ref: '#/definitions/craftRouteModels.ProcessTopoNodePosition'
+        $ref: '#/definitions/craftroutemodels.ProcessTopoNodePosition'
       resizing:
         type: boolean
       selected:
@@ -1188,14 +1214,14 @@ definitions:
       type:
         type: string
     type: object
-  craftRouteModels.ProcessTopoNodePosition:
+  craftroutemodels.ProcessTopoNodePosition:
     properties:
       x:
         type: number
       "y":
         type: number
     type: object
-  craftRouteModels.ScheduleReq:
+  craftroutemodels.ScheduleReq:
     properties:
       gateway_id:
         example: "0"
@@ -1209,7 +1235,7 @@ definitions:
       user_name:
         type: string
     type: object
-  craftRouteModels.SetSysProductSchedule:
+  craftroutemodels.SetSysProductSchedule:
     properties:
       gateway_id:
         description: 网关id
@@ -1226,7 +1252,7 @@ definitions:
         type: string
       time_manager:
         items:
-          $ref: '#/definitions/craftRouteModels.TimeManagerData'
+          $ref: '#/definitions/craftroutemodels.TimeManagerData'
         type: array
       type:
         type: integer
@@ -1236,7 +1262,7 @@ definitions:
     - time_manager
     - type
     type: object
-  craftRouteModels.SysCraftRoute:
+  craftroutemodels.SysCraftRoute:
     properties:
       attr1:
         description: 预留字段1
@@ -1296,7 +1322,7 @@ definitions:
       updateUserName:
         type: string
     type: object
-  craftRouteModels.SysCraftRouteRequest:
+  craftroutemodels.SysCraftRouteRequest:
     properties:
       loop_time:
         description: 循环执行时间
@@ -1324,7 +1350,7 @@ definitions:
     - route_code
     - route_name
     type: object
-  craftRouteModels.SysProProcess:
+  craftroutemodels.SysProProcess:
     properties:
       attention:
         description: 工艺要求
@@ -1380,7 +1406,7 @@ definitions:
     - process_code
     - process_name
     type: object
-  craftRouteModels.SysProRouteProcessListReq:
+  craftroutemodels.SysProRouteProcessListReq:
     properties:
       isAsc:
         description: 排序规则  降序desc   asc升序
@@ -1397,7 +1423,7 @@ definitions:
         description: 数量
         type: integer
     type: object
-  craftRouteModels.SysProRouteProcessSetRequest:
+  craftroutemodels.SysProRouteProcessSetRequest:
     properties:
       attr1:
         description: 预留字段1
@@ -1463,7 +1489,7 @@ definitions:
         description: 工艺路线ID
         type: integer
     type: object
-  craftRouteModels.SysProRouteSetProduct:
+  craftroutemodels.SysProRouteSetProduct:
     properties:
       attr1:
         description: 预留字段1
@@ -1514,7 +1540,7 @@ definitions:
         description: 单位
         type: string
     type: object
-  craftRouteModels.SysProSetProcessContent:
+  craftroutemodels.SysProSetProcessContent:
     properties:
       attr1:
         description: 预留字段1
@@ -1539,7 +1565,7 @@ definitions:
         description: 内容说明
         type: string
       control_rules:
-        $ref: '#/definitions/craftRouteModels.ControlRule'
+        $ref: '#/definitions/craftroutemodels.ControlRule'
       control_type:
         type: string
       device:
@@ -1565,7 +1591,7 @@ definitions:
     - content_text
     - process_id
     type: object
-  craftRouteModels.TimeManagerData:
+  craftroutemodels.TimeManagerData:
     properties:
       begin_time:
         type: string
@@ -1575,7 +1601,7 @@ definitions:
         example: "0"
         type: string
     type: object
-  craftRouteModels.TriggerCase:
+  craftroutemodels.TriggerCase:
     properties:
       conditions:
         items:
@@ -1601,28 +1627,28 @@ definitions:
       next_step:
         type: string
     type: object
-  craftRouteModels.TriggerRules:
+  craftroutemodels.TriggerRules:
     properties:
       actions:
         items:
-          $ref: '#/definitions/craftRouteModels.ControllerAction'
+          $ref: '#/definitions/craftroutemodels.ControllerAction'
         type: array
       cases:
         items:
-          $ref: '#/definitions/craftRouteModels.TriggerCase'
+          $ref: '#/definitions/craftroutemodels.TriggerCase'
         type: array
       combined_rule:
         type: string
       dataIds:
         items:
-          $ref: '#/definitions/craftRouteModels.DeviceRuleInfo'
+          $ref: '#/definitions/craftroutemodels.DeviceRuleInfo'
         type: array
       name:
         type: string
     required:
     - actions
     type: object
-  daemonizeModels.BindGatewayConfigReq:
+  daemonizemodels.BindGatewayConfigReq:
     properties:
       config_id:
         description: 版本的配置id
@@ -1635,7 +1661,7 @@ definitions:
       username:
         type: string
     type: object
-  daemonizeModels.ProcessOperateInfo:
+  daemonizemodels.ProcessOperateInfo:
     properties:
       AgentObjectId:
         example: "0"
@@ -1645,14 +1671,14 @@ definitions:
           type: string
         type: array
     type: object
-  daemonizeModels.StartProcessReq:
+  daemonizemodels.StartProcessReq:
     properties:
       processOperateInfoList:
         items:
-          $ref: '#/definitions/daemonizeModels.ProcessOperateInfo'
+          $ref: '#/definitions/daemonizemodels.ProcessOperateInfo'
         type: array
     type: object
-  daemonizeModels.SysIotAgentConfigSetReq:
+  daemonizemodels.SysIotAgentConfigSetReq:
     properties:
       agent_object_id:
         description: agent id
@@ -1673,7 +1699,7 @@ definitions:
     - config_version
     - content
     type: object
-  daemonizeModels.SysIotAgentSetReq:
+  daemonizemodels.SysIotAgentSetReq:
     properties:
       config_uuid:
         description: 配置版本
@@ -1695,7 +1721,7 @@ definitions:
         description: agent版本
         type: string
     type: object
-  dashboardModels.SetSysDashboard:
+  dashboardmodels.SetSysDashboard:
     properties:
       description:
         description: 描述
@@ -1712,7 +1738,7 @@ definitions:
     - name
     - type
     type: object
-  dashboardModels.SetSysDashboardData:
+  dashboardmodels.SetSysDashboardData:
     properties:
       data:
         description: 数据
@@ -1726,14 +1752,14 @@ definitions:
         example: "0"
         type: string
     type: object
-  deviceModels.Annotation:
+  devicemodels.Annotation:
     properties:
       key:
         type: string
       value:
         type: string
     type: object
-  deviceModels.DeviceGroup:
+  devicemodels.DeviceGroup:
     properties:
       groupId:
         example: "0"
@@ -1743,7 +1769,7 @@ definitions:
       remark:
         type: string
     type: object
-  deviceModels.DeviceInfo:
+  devicemodels.DeviceInfo:
     properties:
       Action:
         items:
@@ -1790,7 +1816,7 @@ definitions:
         description: 协议类型
         type: string
     type: object
-  deviceModels.PerturbationVariableData:
+  devicemodels.PerturbationVariableData:
     properties:
       data_id:
         example: "0"
@@ -1802,7 +1828,7 @@ definitions:
         example: "0"
         type: string
     type: object
-  deviceModels.SetSysModbusDeviceConfigDataReq:
+  devicemodels.SetSysModbusDeviceConfigDataReq:
     properties:
       agg_function:
         description: 聚合函数
@@ -1810,7 +1836,7 @@ definitions:
       annotation:
         description: 扰动变量
         items:
-          $ref: '#/definitions/deviceModels.Annotation'
+          $ref: '#/definitions/devicemodels.Annotation'
         type: array
       configuration_enable:
         description: 组态属性
@@ -1845,7 +1871,7 @@ definitions:
       perturbation_variables:
         description: 扰动变量
         items:
-          $ref: '#/definitions/deviceModels.PerturbationVariableData'
+          $ref: '#/definitions/devicemodels.PerturbationVariableData'
         type: array
       precision:
         description: 数据精度
@@ -1883,7 +1909,7 @@ definitions:
     - template_id
     - type
     type: object
-  deviceModels.SysDeviceCheckPlanVO:
+  devicemodels.SysDeviceCheckPlanVO:
     properties:
       attr1:
         description: 预留字段1
@@ -1929,7 +1955,7 @@ definitions:
         description: 状态
         type: string
     type: object
-  deviceModels.SysDeviceCheckSubjectVO:
+  devicemodels.SysDeviceCheckSubjectVO:
     properties:
       attr1:
         description: 预留字段1
@@ -1973,7 +1999,7 @@ definitions:
         description: 项目类型
         type: string
     type: object
-  deviceModels.SysDeviceSubjectVO:
+  devicemodels.SysDeviceSubjectVO:
     properties:
       attr1:
         description: 预留字段1
@@ -2013,7 +2039,7 @@ definitions:
         description: 项目类型
         type: string
     type: object
-  deviceModels.SysDeviceTemplateSetReq:
+  devicemodels.SysDeviceTemplateSetReq:
     properties:
       name:
         description: 设备名称
@@ -2036,7 +2062,7 @@ definitions:
     - protocol
     - vendor
     type: object
-  deviceMonitorModel.CameraOfferReq:
+  devicemonitormodel.CameraOfferReq:
     properties:
       channel_id:
         type: string
@@ -2052,7 +2078,7 @@ definitions:
     - device_id
     - sdp64
     type: object
-  deviceMonitorModel.ControlReq:
+  devicemonitormodel.ControlReq:
     properties:
       agent_id:
         example: "0"
@@ -2066,7 +2092,7 @@ definitions:
       value:
         $ref: '#/definitions/value.Data'
     type: object
-  deviceMonitorModel.ControlStatusItem:
+  devicemonitormodel.ControlStatusItem:
     properties:
       data_id:
         example: "0"
@@ -2075,14 +2101,14 @@ definitions:
         example: "0"
         type: string
     type: object
-  deviceMonitorModel.ControlStatusReq:
+  devicemonitormodel.ControlStatusReq:
     properties:
       items:
         items:
-          $ref: '#/definitions/deviceMonitorModel.ControlStatusItem'
+          $ref: '#/definitions/devicemonitormodel.ControlStatusItem'
         type: array
     type: object
-  deviceMonitorModel.DevDataReq:
+  devicemonitormodel.DevDataReq:
     properties:
       dev:
         items:
@@ -2107,7 +2133,7 @@ definitions:
       start:
         type: integer
     type: object
-  deviceMonitorModel.DeviceIdsReq:
+  devicemonitormodel.DeviceIdsReq:
     properties:
       deviceIds:
         items:
@@ -2116,13 +2142,13 @@ definitions:
     required:
     - deviceIds
     type: object
-  deviceMonitorModel.RemoveDevMapInfo:
+  devicemonitormodel.RemoveDevMapInfo:
     properties:
       device:
         description: 设备名字
         type: string
     type: object
-  deviceMonitorModel.SetDevMapInfo:
+  devicemonitormodel.SetDevMapInfo:
     properties:
       data_name:
         description: 数据名字
@@ -2193,7 +2219,7 @@ definitions:
       matchType:
         type: string
     type: object
-  materialModels.InboundInfo:
+  materialmodels.InboundInfo:
     properties:
       materialId:
         example: "0"
@@ -2201,7 +2227,7 @@ definitions:
       number:
         type: integer
     type: object
-  materialModels.MaterialInfo:
+  materialmodels.MaterialInfo:
     properties:
       address:
         type: string
@@ -2231,7 +2257,7 @@ definitions:
     - type
     - unit
     type: object
-  materialModels.OutboundInfo:
+  materialmodels.OutboundInfo:
     properties:
       materialId:
         example: "0"
@@ -2241,7 +2267,7 @@ definitions:
       reason:
         type: string
     type: object
-  metricModels.GatewayMetricDataQueryReq:
+  metricmodels.GatewayMetricDataQueryReq:
     properties:
       end:
         type: integer
@@ -2263,10 +2289,10 @@ definitions:
       password:
         type: string
       predict:
-        $ref: '#/definitions/metricModels.Predict'
+        $ref: '#/definitions/metricmodels.Predict'
       query_metric:
         items:
-          $ref: '#/definitions/metricModels.MetricQueryCondition'
+          $ref: '#/definitions/metricmodels.MetricQueryCondition'
         type: array
       start:
         type: integer
@@ -2277,7 +2303,7 @@ definitions:
       username:
         type: string
     type: object
-  metricModels.MetricDataQueryReq:
+  metricmodels.MetricDataQueryReq:
     properties:
       end:
         type: integer
@@ -2294,10 +2320,10 @@ definitions:
       name:
         type: string
       predict:
-        $ref: '#/definitions/metricModels.Predict'
+        $ref: '#/definitions/metricmodels.Predict'
       query_metric:
         items:
-          $ref: '#/definitions/metricModels.MetricQueryCondition'
+          $ref: '#/definitions/metricmodels.MetricQueryCondition'
         type: array
       start:
         type: integer
@@ -2306,7 +2332,7 @@ definitions:
       type:
         type: string
     type: object
-  metricModels.MetricQueryCondition:
+  metricmodels.MetricQueryCondition:
     properties:
       dataId:
         example: "0"
@@ -2318,7 +2344,7 @@ definitions:
         example: "0"
         type: string
     type: object
-  metricModels.MetricQueryReq:
+  metricmodels.MetricQueryReq:
     properties:
       data_id:
         example: "0"
@@ -2344,7 +2370,7 @@ definitions:
         example: "0"
         type: string
     type: object
-  metricModels.Predict:
+  metricmodels.Predict:
     properties:
       enable:
         type: boolean
@@ -2403,7 +2429,7 @@ definitions:
         description: 智能预警名称
         type: string
     type: object
-  monitorModels.JobDML:
+  monitormodels.JobDML:
     properties:
       createBy:
         description: 创建人
@@ -2431,7 +2457,7 @@ definitions:
         description: 修改时间
         type: string
     type: object
-  monitorModels.JobIdAndName:
+  monitormodels.JobIdAndName:
     properties:
       jobId:
         example: "0"
@@ -2439,7 +2465,7 @@ definitions:
       jobName:
         type: string
     type: object
-  monitorModels.JobLog:
+  monitormodels.JobLog:
     properties:
       costTime:
         type: integer
@@ -2462,7 +2488,7 @@ definitions:
       status:
         type: string
     type: object
-  monitorModels.JobVo:
+  monitormodels.JobVo:
     properties:
       createBy:
         description: 创建人
@@ -2492,7 +2518,7 @@ definitions:
         description: 修改时间
         type: string
     type: object
-  monitorModels.SysUserOnline:
+  monitormodels.SysUserOnline:
     properties:
       browser:
         type: string
@@ -2509,7 +2535,7 @@ definitions:
       userName:
         type: string
     type: object
-  productModels.SysProductLaboratoryVo:
+  productmodels.SysProductLaboratoryVo:
     properties:
       address:
         type: string
@@ -2548,7 +2574,7 @@ definitions:
     - material
     - number
     type: object
-  resourceModels.SysResourceFileDML:
+  resourcemodels.SysResourceFileDML:
     properties:
       category:
         description: 分类：IMAGE, DOCUMENT, VIDEO, AUDIO等
@@ -2657,20 +2683,31 @@ definitions:
         description: 提示信息
         type: string
     type: object
-  systemModels.Accredit:
+  settingmodels.IntegrationConfigSet:
+    properties:
+      data:
+        type: string
+      status:
+        type: boolean
+      type:
+        type: string
+    required:
+    - type
+    type: object
+  systemmodels.Accredit:
     properties:
       posts:
         description: 岗位
         items:
-          $ref: '#/definitions/systemModels.SysPostVo'
+          $ref: '#/definitions/systemmodels.SysPostVo'
         type: array
       roles:
         description: 角色
         items:
-          $ref: '#/definitions/systemModels.SysRoleIdAndName'
+          $ref: '#/definitions/systemmodels.SysRoleIdAndName'
         type: array
     type: object
-  systemModels.ConsumptionNoticeVo:
+  systemmodels.ConsumptionNoticeVo:
     properties:
       createName:
         type: string
@@ -2695,7 +2732,7 @@ definitions:
     required:
     - type
     type: object
-  systemModels.EditUserStatus:
+  systemmodels.EditUserStatus:
     properties:
       createBy:
         description: 创建人
@@ -2720,7 +2757,7 @@ definitions:
     - status
     - userId
     type: object
-  systemModels.GetInfo:
+  systemmodels.GetInfo:
     properties:
       permissions:
         items:
@@ -2731,9 +2768,9 @@ definitions:
           type: string
         type: array
       user:
-        $ref: '#/definitions/systemModels.User'
+        $ref: '#/definitions/systemmodels.User'
     type: object
-  systemModels.LoginBody:
+  systemmodels.LoginBody:
     properties:
       code:
         description: 验证码
@@ -2751,7 +2788,7 @@ definitions:
     - password
     - username
     type: object
-  systemModels.ResetPwd:
+  systemmodels.ResetPwd:
     properties:
       password:
         description: 新密码
@@ -2764,7 +2801,7 @@ definitions:
     - password
     - userId
     type: object
-  systemModels.RoleDeptTree:
+  systemmodels.RoleDeptTree:
     properties:
       checkedKeys:
         description: keys
@@ -2774,10 +2811,10 @@ definitions:
       depts:
         description: 部门
         items:
-          $ref: '#/definitions/systemModels.SysDeptVo'
+          $ref: '#/definitions/systemmodels.SysDeptVo'
         type: array
     type: object
-  systemModels.SelectPermission:
+  systemmodels.SelectPermission:
     properties:
       parentId:
         example: "0"
@@ -2788,7 +2825,7 @@ definitions:
       permissionName:
         type: string
     type: object
-  systemModels.SysConfigVo:
+  systemmodels.SysConfigVo:
     properties:
       configId:
         description: 参数主键
@@ -2822,7 +2859,7 @@ definitions:
         description: 修改时间
         type: string
     type: object
-  systemModels.SysDeptVo:
+  systemmodels.SysDeptVo:
     properties:
       ancestors:
         description: 祖级列表
@@ -2869,7 +2906,7 @@ definitions:
         description: 修改时间
         type: string
     type: object
-  systemModels.SysDictDataVo:
+  systemmodels.SysDictDataVo:
     properties:
       createBy:
         description: 创建人
@@ -2905,7 +2942,7 @@ definitions:
         description: 修改时间
         type: string
     type: object
-  systemModels.SysNoticeVo:
+  systemmodels.SysNoticeVo:
     properties:
       createBy:
         description: 创建人
@@ -2944,7 +2981,7 @@ definitions:
     - txt
     - type
     type: object
-  systemModels.SysPermissionAdd:
+  systemmodels.SysPermissionAdd:
     properties:
       createBy:
         description: 创建人
@@ -2977,7 +3014,7 @@ definitions:
     required:
     - permission
     type: object
-  systemModels.SysPermissionEdit:
+  systemmodels.SysPermissionEdit:
     properties:
       createBy:
         description: 创建人
@@ -3014,7 +3051,7 @@ definitions:
     required:
     - permissionId
     type: object
-  systemModels.SysPermissionVo:
+  systemmodels.SysPermissionVo:
     properties:
       createBy:
         description: 创建人
@@ -3049,7 +3086,7 @@ definitions:
         description: 修改时间
         type: string
     type: object
-  systemModels.SysPostVo:
+  systemmodels.SysPostVo:
     properties:
       createBy:
         description: 创建人
@@ -3077,7 +3114,7 @@ definitions:
         description: 修改时间
         type: string
     type: object
-  systemModels.SysRoleDML:
+  systemmodels.SysRoleDML:
     properties:
       RoleId:
         example: "0"
@@ -3109,7 +3146,7 @@ definitions:
         description: 修改时间
         type: string
     type: object
-  systemModels.SysRoleIdAndName:
+  systemmodels.SysRoleIdAndName:
     properties:
       roleId:
         example: "0"
@@ -3117,7 +3154,7 @@ definitions:
       roleName:
         type: string
     type: object
-  systemModels.SysRoleVo:
+  systemmodels.SysRoleVo:
     properties:
       createBy:
         description: 创建人
@@ -3147,7 +3184,7 @@ definitions:
         description: 修改时间
         type: string
     type: object
-  systemModels.SysUserDML:
+  systemmodels.SysUserDML:
     properties:
       avatar:
         description: 头像
@@ -3212,7 +3249,7 @@ definitions:
     - sex
     - userName
     type: object
-  systemModels.SysUserDataScope:
+  systemmodels.SysUserDataScope:
     properties:
       dataScope:
         description: 数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限,无任何）权限
@@ -3230,7 +3267,7 @@ definitions:
     - dataScope
     - userId
     type: object
-  systemModels.SysUserRole:
+  systemmodels.SysUserRole:
     properties:
       roleId:
         example: "0"
@@ -3239,7 +3276,7 @@ definitions:
         example: "0"
         type: string
     type: object
-  systemModels.SysUserVo:
+  systemmodels.SysUserVo:
     properties:
       avatar:
         type: string
@@ -3284,7 +3321,7 @@ definitions:
       userName:
         type: string
     type: object
-  systemModels.SysWorkShiftSettingVO:
+  systemmodels.SysWorkShiftSettingVO:
     properties:
       begin_time:
         description: 开始时间
@@ -3308,7 +3345,7 @@ definitions:
         description: 是否启用班次设置
         type: boolean
     type: object
-  systemModels.User:
+  systemmodels.User:
     properties:
       avatar:
         type: string
@@ -3320,7 +3357,7 @@ definitions:
       userName:
         type: string
     type: object
-  systemModels.UserAndAccredit:
+  systemmodels.UserAndAccredit:
     properties:
       postIds:
         description: 选择的岗位Id
@@ -3330,7 +3367,7 @@ definitions:
       posts:
         description: 岗位
         items:
-          $ref: '#/definitions/systemModels.SysPostVo'
+          $ref: '#/definitions/systemmodels.SysPostVo'
         type: array
       roleIds:
         description: 选择的角色Id
@@ -3340,14 +3377,14 @@ definitions:
       roles:
         description: 角色
         items:
-          $ref: '#/definitions/systemModels.SysRoleIdAndName'
+          $ref: '#/definitions/systemmodels.SysRoleIdAndName'
         type: array
       user:
         allOf:
-        - $ref: '#/definitions/systemModels.SysUserVo'
+        - $ref: '#/definitions/systemmodels.SysUserVo'
         description: user
     type: object
-  systemModels.UserProfile:
+  systemmodels.UserProfile:
     properties:
       postGroup:
         description: 选择的角色Id
@@ -3357,7 +3394,7 @@ definitions:
         type: string
       user:
         allOf:
-        - $ref: '#/definitions/systemModels.SysUserVo'
+        - $ref: '#/definitions/systemmodels.SysUserVo'
         description: user
     type: object
   value.Data:
@@ -3392,6 +3429,100 @@ info:
   title: baize
   version: 2.0.x
 paths:
+  /ai/agent/conversations/chat:
+    post:
+      description: 会话聊天
+      parameters:
+      - description: 发送消息参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.SendMessageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发送成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 会话聊天
+      tags:
+      - 工业智能体/会话管理
+  /ai/agent/conversations/create:
+    post:
+      description: 创建会话
+      parameters:
+      - description: 创建会话参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.SetAiConversation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 创建会话
+      tags:
+      - 工业智能体/会话管理
+  /ai/agent/conversations/list:
+    get:
+      description: 查询会话列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 查询会话列表
+      tags:
+      - 工业智能体/会话管理
+  /ai/agent/conversations/remove/{ids}:
+    delete:
+      description: 删除会话（软删除）
+      parameters:
+      - description: 会话ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除会话
+      tags:
+      - 工业智能体/会话管理
   /ai/control/list:
     get:
       description: 预测控制列表
@@ -3477,7 +3608,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.CreateAssistantRequest'
+          $ref: '#/definitions/aidatasetmodels.CreateAssistantRequest'
       produces:
       - application/json
       responses:
@@ -3555,7 +3686,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.UpdateAssistantRequest'
+          $ref: '#/definitions/aidatasetmodels.UpdateAssistantRequest'
       produces:
       - application/json
       responses:
@@ -3575,7 +3706,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.AddChunkReq'
+          $ref: '#/definitions/aidatasetmodels.AddChunkReq'
       produces:
       - application/json
       responses:
@@ -3641,7 +3772,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.RemoveChunkReq'
+          $ref: '#/definitions/aidatasetmodels.RemoveChunkReq'
       produces:
       - application/json
       responses:
@@ -3661,7 +3792,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.RetrievalListReq'
+          $ref: '#/definitions/aidatasetmodels.RetrievalListReq'
       produces:
       - application/json
       responses:
@@ -3681,7 +3812,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.UpdateChunkReq'
+          $ref: '#/definitions/aidatasetmodels.UpdateChunkReq'
       produces:
       - application/json
       responses:
@@ -3714,7 +3845,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.DataSetRequest'
+          $ref: '#/definitions/aidatasetmodels.DataSetRequest'
       produces:
       - application/json
       responses:
@@ -3874,7 +4005,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.DeleteDocumentRequest'
+          $ref: '#/definitions/aidatasetmodels.DeleteDocumentRequest'
       responses:
         "200":
           description: 删除文档成功
@@ -3894,7 +4025,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.AgentsCompletionsRequest'
+          $ref: '#/definitions/aidatasetmodels.AgentsCompletionsRequest'
       produces:
       - application/json
       responses:
@@ -3914,7 +4045,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.SessionAgentCreate'
+          $ref: '#/definitions/aidatasetmodels.SessionAgentCreate'
       produces:
       - application/json
       responses:
@@ -3934,7 +4065,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.RemoveAgentSessionsRequest'
+          $ref: '#/definitions/aidatasetmodels.RemoveAgentSessionsRequest'
       produces:
       - application/json
       responses:
@@ -3996,7 +4127,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.AskRequest'
+          $ref: '#/definitions/aidatasetmodels.AskRequest'
       produces:
       - application/json
       responses:
@@ -4016,7 +4147,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.ChatsCompletionsRequest'
+          $ref: '#/definitions/aidatasetmodels.ChatsCompletionsRequest'
       produces:
       - application/json
       responses:
@@ -4036,7 +4167,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.ConversationRelatedQuestionsRequest'
+          $ref: '#/definitions/aidatasetmodels.ConversationRelatedQuestionsRequest'
       produces:
       - application/json
       responses:
@@ -4056,7 +4187,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.CreateSessionsRequest'
+          $ref: '#/definitions/aidatasetmodels.CreateSessionsRequest'
       produces:
       - application/json
       responses:
@@ -4120,7 +4251,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.DeleteSessionRequest'
+          $ref: '#/definitions/aidatasetmodels.DeleteSessionRequest'
       produces:
       - application/json
       responses:
@@ -4140,7 +4271,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.UpdateSessionsRequest'
+          $ref: '#/definitions/aidatasetmodels.UpdateSessionsRequest'
       produces:
       - application/json
       responses:
@@ -4160,7 +4291,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.ParseDocumentApiRequest'
+          $ref: '#/definitions/aidatasetmodels.ParseDocumentApiRequest'
       responses:
         "200":
           description: 解析文档成功
@@ -4180,7 +4311,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.ParseDocumentApiRequest'
+          $ref: '#/definitions/aidatasetmodels.ParseDocumentApiRequest'
       responses:
         "200":
           description: 停止解析文档成功
@@ -4205,7 +4336,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.UpdateDataSetRequest'
+          $ref: '#/definitions/aidatasetmodels.UpdateDataSetRequest'
       produces:
       - application/json
       responses:
@@ -4231,7 +4362,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.PutDocumentRequest'
+          $ref: '#/definitions/aidatasetmodels.PutDocumentRequest'
       produces:
       - application/json
       responses:
@@ -4388,7 +4519,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.SetSysUserLLM'
+          $ref: '#/definitions/aidatasetmodels.SetSysUserLLM'
       produces:
       - application/json
       responses:
@@ -4452,7 +4583,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.SetSysAiLLMSetting'
+          $ref: '#/definitions/aidatasetmodels.SetSysAiLLMSetting'
       produces:
       - application/json
       responses:
@@ -4558,7 +4689,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aiDataSetModels.SetSysAiPrediction'
+          $ref: '#/definitions/aidatasetmodels.SetSysAiPrediction'
       responses:
         "200":
           description: 获取成功
@@ -4631,7 +4762,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/alertModels.SetAlertAction'
+          $ref: '#/definitions/alertmodels.SetAlertAction'
       responses:
         "200":
           description: 获取成功
@@ -4667,7 +4798,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/alertModels.SysAlertLogListReq'
+          $ref: '#/definitions/alertmodels.SysAlertLogListReq'
       responses:
         "200":
           description: 获取成功
@@ -4745,7 +4876,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/alertModels.SetAlertAiReason'
+          $ref: '#/definitions/alertmodels.SetAlertAiReason'
       responses:
         "200":
           description: 获取成功
@@ -4763,7 +4894,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/alertModels.ChangeSysAlert'
+          $ref: '#/definitions/alertmodels.ChangeSysAlert'
       produces:
       - application/json
       responses:
@@ -4851,7 +4982,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/alertModels.SetSysAlert'
+          $ref: '#/definitions/alertmodels.SetSysAlert'
       responses:
         "200":
           description: 获取成功
@@ -4931,7 +5062,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/alertModels.SetSysAlertSinkTemplate'
+          $ref: '#/definitions/alertmodels.SetSysAlertSinkTemplate'
       responses:
         "200":
           description: 获取成功
@@ -4949,7 +5080,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/alertModels.AlertLogData'
+          $ref: '#/definitions/alertmodels.AlertLogData'
       responses:
         "200":
           description: 获取成功
@@ -4967,7 +5098,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/daemonizeModels.BindGatewayConfigReq'
+          $ref: '#/definitions/daemonizemodels.BindGatewayConfigReq'
       produces:
       - application/json
       responses:
@@ -5011,7 +5142,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/craftRouteModels.ScheduleReq'
+          $ref: '#/definitions/craftroutemodels.ScheduleReq'
       responses:
         "200":
           description: 设置分组成功
@@ -5040,7 +5171,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/metricModels.GatewayMetricDataQueryReq'
+          $ref: '#/definitions/metricmodels.GatewayMetricDataQueryReq'
       responses:
         "200":
           description: 获取成功
@@ -5058,7 +5189,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/metricModels.GatewayMetricDataQueryReq'
+          $ref: '#/definitions/metricmodels.GatewayMetricDataQueryReq'
       responses:
         "200":
           description: 获取成功
@@ -5149,7 +5280,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceMonitorModel.DeviceIdsReq'
+          $ref: '#/definitions/devicemonitormodel.DeviceIdsReq'
       produces:
       - application/json
       responses:
@@ -5169,7 +5300,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/alertModels.AlertLogData'
+          $ref: '#/definitions/alertmodels.AlertLogData'
       responses:
         "200":
           description: 获取成功
@@ -5187,7 +5318,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/metricModels.GatewayMetricDataQueryReq'
+          $ref: '#/definitions/metricmodels.GatewayMetricDataQueryReq'
       responses:
         "200":
           description: 获取成功
@@ -5242,7 +5373,7 @@ paths:
                   - properties:
                       rows:
                         items:
-                          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                          $ref: '#/definitions/productmodels.SysProductLaboratoryVo'
                         type: array
                     type: object
               type: object
@@ -5309,7 +5440,7 @@ paths:
                   - properties:
                       rows:
                         items:
-                          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                          $ref: '#/definitions/productmodels.SysProductLaboratoryVo'
                         type: array
                     type: object
               type: object
@@ -5376,7 +5507,7 @@ paths:
                   - properties:
                       rows:
                         items:
-                          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                          $ref: '#/definitions/productmodels.SysProductLaboratoryVo'
                         type: array
                     type: object
               type: object
@@ -5474,7 +5605,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/metricModels.MetricQueryReq'
+          $ref: '#/definitions/metricmodels.MetricQueryReq'
       produces:
       - application/json
       responses:
@@ -5494,7 +5625,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/metricModels.MetricQueryReq'
+          $ref: '#/definitions/metricmodels.MetricQueryReq'
       produces:
       - application/json
       responses:
@@ -5574,7 +5705,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/buildingModels.SetSysBuilding'
+          $ref: '#/definitions/buildingmodels.SetSysBuilding'
       responses:
         "200":
           description: 获取成功
@@ -5690,7 +5821,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceModels.SysDeviceCheckPlanVO'
+          $ref: '#/definitions/devicemodels.SysDeviceCheckPlanVO'
       responses:
         "200":
           description: 获取成功
@@ -5764,7 +5895,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceModels.SysDeviceCheckSubjectVO'
+          $ref: '#/definitions/devicemodels.SysDeviceCheckSubjectVO'
       responses:
         "200":
           description: 获取成功
@@ -5836,7 +5967,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceModels.SysDeviceCheckPlanVO'
+          $ref: '#/definitions/devicemodels.SysDeviceCheckPlanVO'
       responses:
         "200":
           description: 获取成功
@@ -5927,7 +6058,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceModels.DeviceInfo'
+          $ref: '#/definitions/devicemodels.DeviceInfo'
       produces:
       - application/json
       responses:
@@ -6001,7 +6132,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceModels.SysDeviceSubjectVO'
+          $ref: '#/definitions/devicemodels.SysDeviceSubjectVO'
       responses:
         "200":
           description: 获取成功
@@ -6076,7 +6207,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceModels.SetSysModbusDeviceConfigDataReq'
+          $ref: '#/definitions/devicemodels.SetSysModbusDeviceConfigDataReq'
       produces:
       - application/json
       responses:
@@ -6165,7 +6296,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceModels.SysDeviceTemplateSetReq'
+          $ref: '#/definitions/devicemodels.SysDeviceTemplateSetReq'
       produces:
       - application/json
       responses:
@@ -6241,7 +6372,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceModels.DeviceGroup'
+          $ref: '#/definitions/devicemodels.DeviceGroup'
       produces:
       - application/json
       responses:
@@ -6390,7 +6521,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/buildingModels.SetSysFloor'
+          $ref: '#/definitions/buildingmodels.SetSysFloor'
       responses:
         "200":
           description: 获取成功
@@ -6429,7 +6560,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/materialModels.InboundInfo'
+          $ref: '#/definitions/materialmodels.InboundInfo'
       produces:
       - application/json
       responses:
@@ -6543,7 +6674,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/materialModels.OutboundInfo'
+          $ref: '#/definitions/materialmodels.OutboundInfo'
       produces:
       - application/json
       responses:
@@ -6601,7 +6732,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/materialModels.MaterialInfo'
+          $ref: '#/definitions/materialmodels.MaterialInfo'
       produces:
       - application/json
       responses:
@@ -6722,7 +6853,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/resourceModels.SysResourceFileDML'
+          $ref: '#/definitions/resourcemodels.SysResourceFileDML'
       produces:
       - application/json
       responses:
@@ -6812,7 +6943,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/configurationModels.SetSysConfiguration'
+          $ref: '#/definitions/configurationmodels.SetSysConfiguration'
       produces:
       - application/json
       responses:
@@ -6888,7 +7019,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/craftRouteModels.SysProSetProcessContent'
+          $ref: '#/definitions/craftroutemodels.SysProSetProcessContent'
       produces:
       - application/json
       responses:
@@ -6971,7 +7102,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/craftRouteModels.SysProProcess'
+          $ref: '#/definitions/craftroutemodels.SysProProcess'
       produces:
       - application/json
       responses:
@@ -6991,7 +7122,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/craftRouteModels.ProcessTopo'
+          $ref: '#/definitions/craftroutemodels.ProcessTopo'
       produces:
       - application/json
       responses:
@@ -7074,7 +7205,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/craftRouteModels.SysProRouteProcessListReq'
+          $ref: '#/definitions/craftroutemodels.SysProRouteProcessListReq'
       produces:
       - application/json
       responses:
@@ -7113,7 +7244,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/craftRouteModels.SysProRouteProcessSetRequest'
+          $ref: '#/definitions/craftroutemodels.SysProRouteProcessSetRequest'
       produces:
       - application/json
       responses:
@@ -7251,7 +7382,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/craftRouteModels.SetSysProductSchedule'
+          $ref: '#/definitions/craftroutemodels.SetSysProductSchedule'
       produces:
       - application/json
       responses:
@@ -7271,7 +7402,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/craftRouteModels.SysCraftRouteRequest'
+          $ref: '#/definitions/craftroutemodels.SysCraftRouteRequest'
       produces:
       - application/json
       responses:
@@ -7341,7 +7472,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/daemonizeModels.StartProcessReq'
+          $ref: '#/definitions/daemonizemodels.StartProcessReq'
       produces:
       - application/json
       responses:
@@ -7361,7 +7492,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/daemonizeModels.StartProcessReq'
+          $ref: '#/definitions/daemonizemodels.StartProcessReq'
       produces:
       - application/json
       responses:
@@ -7400,7 +7531,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/daemonizeModels.SysIotAgentSetReq'
+          $ref: '#/definitions/daemonizemodels.SysIotAgentSetReq'
       produces:
       - application/json
       responses:
@@ -7457,7 +7588,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/dashboardModels.SetSysDashboardData'
+          $ref: '#/definitions/dashboardmodels.SetSysDashboardData'
       produces:
       - application/json
       responses:
@@ -7515,7 +7646,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/metricModels.MetricDataQueryReq'
+          $ref: '#/definitions/metricmodels.MetricDataQueryReq'
       produces:
       - application/json
       responses:
@@ -7554,7 +7685,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/dashboardModels.SetSysDashboard'
+          $ref: '#/definitions/dashboardmodels.SetSysDashboard'
       produces:
       - application/json
       responses:
@@ -7574,7 +7705,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceMonitorModel.CameraOfferReq'
+          $ref: '#/definitions/devicemonitormodel.CameraOfferReq'
       produces:
       - application/json
       responses:
@@ -7594,7 +7725,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceMonitorModel.ControlReq'
+          $ref: '#/definitions/devicemonitormodel.ControlReq'
       responses:
         "200":
           description: 请求成功
@@ -7660,7 +7791,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceMonitorModel.ControlStatusReq'
+          $ref: '#/definitions/devicemonitormodel.ControlStatusReq'
       responses:
         "200":
           description: 获取成功
@@ -7689,7 +7820,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceMonitorModel.DevDataReq'
+          $ref: '#/definitions/devicemonitormodel.DevDataReq'
       responses:
         "200":
           description: 获取成功
@@ -7707,7 +7838,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceMonitorModel.DevDataReq'
+          $ref: '#/definitions/devicemonitormodel.DevDataReq'
       responses:
         "200":
           description: 获取成功
@@ -7817,7 +7948,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/metricModels.MetricQueryReq'
+          $ref: '#/definitions/metricmodels.MetricQueryReq'
       produces:
       - application/json
       responses:
@@ -7837,7 +7968,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/metricModels.MetricQueryReq'
+          $ref: '#/definitions/metricmodels.MetricQueryReq'
       produces:
       - application/json
       responses:
@@ -7884,7 +8015,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/metricModels.MetricQueryReq'
+          $ref: '#/definitions/metricmodels.MetricQueryReq'
       produces:
       - application/json
       responses:
@@ -7895,6 +8026,114 @@ paths:
       summary: 稼动率统计
       tags:
       - 设备监控/设备监控
+  /erp/setting/integration-config/check-login-state:
+    get:
+      description: 按集成类型检查当前启用配置的登录态
+      parameters:
+      - description: 接入类型
+        in: query
+        name: type
+        required: true
+        type: string
+      - description: 检查地址，优先级高于配置
+        in: query
+        name: checkUrl
+        type: string
+      - description: 回调地址，优先级高于配置
+        in: query
+        name: redirectUrl
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 检查成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 检查集成系统登录态
+      tags:
+      - ERP/系统配置
+  /erp/setting/integration-config/list:
+    get:
+      description: 按条件分页查询ERP集成配置
+      parameters:
+      - description: 接入类型
+        in: query
+        name: type
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: boolean
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页条数
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 集成配置列表
+      tags:
+      - ERP/系统配置
+  /erp/setting/integration-config/oauth/callback:
+    get:
+      description: 接收管家婆OAuth回调的code和state
+      parameters:
+      - description: 授权码
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: 透传字段
+        in: query
+        name: state
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 接收成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 集成OAuth回调
+      tags:
+      - ERP/系统配置
+  /erp/setting/integration-config/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改ERP集成配置，仅允许存在一条启用配置
+      parameters:
+      - description: 集成配置参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/settingmodels.IntegrationConfigSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 集成配置设置
+      tags:
+      - ERP/系统配置
   /file/downloadPrivateFile:
     get:
       description: 租户下载私有文件
@@ -8088,7 +8327,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/daemonizeModels.SysIotAgentConfigSetReq'
+          $ref: '#/definitions/daemonizemodels.SysIotAgentConfigSetReq'
       produces:
       - application/json
       responses:
@@ -8112,7 +8351,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.GetInfo'
+                  $ref: '#/definitions/systemmodels.GetInfo'
               type: object
       security:
       - BearerAuth: []
@@ -8139,7 +8378,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.LoginBody'
+          $ref: '#/definitions/systemmodels.LoginBody'
       responses:
         "200":
           description: 登录成功
@@ -8253,7 +8492,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceMonitorModel.RemoveDevMapInfo'
+          $ref: '#/definitions/devicemonitormodel.RemoveDevMapInfo'
       responses:
         "200":
           description: 获取成功
@@ -8271,7 +8510,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/deviceMonitorModel.SetDevMapInfo'
+          $ref: '#/definitions/devicemonitormodel.SetDevMapInfo'
       responses:
         "200":
           description: 获取成功
@@ -8289,7 +8528,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/monitorModels.JobDML'
+          $ref: '#/definitions/monitormodels.JobDML'
       produces:
       - application/json
       responses:
@@ -8310,7 +8549,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/monitorModels.JobDML'
+          $ref: '#/definitions/monitormodels.JobDML'
       produces:
       - application/json
       responses:
@@ -8342,7 +8581,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/monitorModels.JobVo'
+                  $ref: '#/definitions/monitormodels.JobVo'
               type: object
       security:
       - BearerAuth: []
@@ -8379,7 +8618,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/monitorModels.JobDML'
+          $ref: '#/definitions/monitormodels.JobDML'
       produces:
       - application/json
       responses:
@@ -8421,7 +8660,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/monitorModels.JobIdAndName'
+                    $ref: '#/definitions/monitormodels.JobIdAndName'
                   type: array
               type: object
       security:
@@ -8475,7 +8714,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/monitorModels.JobVo'
+                          $ref: '#/definitions/monitormodels.JobVo'
                         type: array
                     type: object
               type: object
@@ -8503,7 +8742,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/monitorModels.JobLog'
+                  $ref: '#/definitions/monitormodels.JobLog'
               type: object
       security:
       - BearerAuth: []
@@ -8553,7 +8792,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/monitorModels.JobLog'
+                          $ref: '#/definitions/monitormodels.JobLog'
                         type: array
                     type: object
               type: object
@@ -8571,7 +8810,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/monitorModels.JobVo'
+          $ref: '#/definitions/monitormodels.JobVo'
       produces:
       - application/json
       responses:
@@ -8630,7 +8869,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/monitorModels.SysUserOnline'
+                          $ref: '#/definitions/monitormodels.SysUserOnline'
                         type: array
                     type: object
               type: object
@@ -8658,7 +8897,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                  $ref: '#/definitions/productmodels.SysProductLaboratoryVo'
               type: object
       security:
       - BearerAuth: []
@@ -8723,7 +8962,7 @@ paths:
                   - properties:
                       rows:
                         items:
-                          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                          $ref: '#/definitions/productmodels.SysProductLaboratoryVo'
                         type: array
                     type: object
               type: object
@@ -8790,7 +9029,7 @@ paths:
                   - properties:
                       rows:
                         items:
-                          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+                          $ref: '#/definitions/productmodels.SysProductLaboratoryVo'
                         type: array
                     type: object
               type: object
@@ -8829,7 +9068,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/productModels.SysProductLaboratoryVo'
+          $ref: '#/definitions/productmodels.SysProductLaboratoryVo'
       produces:
       - application/json
       responses:
@@ -8851,7 +9090,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.LoginBody'
+          $ref: '#/definitions/systemmodels.LoginBody'
       responses:
         "200":
           description: 注册成功
@@ -8869,7 +9108,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysConfigVo'
+          $ref: '#/definitions/systemmodels.SysConfigVo'
       produces:
       - application/json
       responses:
@@ -8890,7 +9129,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysConfigVo'
+          $ref: '#/definitions/systemmodels.SysConfigVo'
       produces:
       - application/json
       responses:
@@ -8943,7 +9182,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysConfigVo'
+                  $ref: '#/definitions/systemmodels.SysConfigVo'
               type: object
       security:
       - BearerAuth: []
@@ -9045,7 +9284,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysConfigVo'
+                          $ref: '#/definitions/systemmodels.SysConfigVo'
                         type: array
                     type: object
               type: object
@@ -9073,7 +9312,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.ConsumptionNoticeVo'
+                  $ref: '#/definitions/systemmodels.ConsumptionNoticeVo'
               type: object
       security:
       - BearerAuth: []
@@ -9200,7 +9439,7 @@ paths:
                   - properties:
                       rows:
                         items:
-                          $ref: '#/definitions/systemModels.ConsumptionNoticeVo'
+                          $ref: '#/definitions/systemmodels.ConsumptionNoticeVo'
                         type: array
                     type: object
               type: object
@@ -9258,7 +9497,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysDeptVo'
+                          $ref: '#/definitions/systemmodels.SysDeptVo'
                         type: array
                     type: object
               type: object
@@ -9275,7 +9514,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysDeptVo'
+          $ref: '#/definitions/systemmodels.SysDeptVo'
       produces:
       - application/json
       responses:
@@ -9296,7 +9535,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysDeptVo'
+          $ref: '#/definitions/systemmodels.SysDeptVo'
       produces:
       - application/json
       responses:
@@ -9348,7 +9587,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysDeptVo'
+                  $ref: '#/definitions/systemmodels.SysDeptVo'
               type: object
       security:
       - BearerAuth: []
@@ -9374,7 +9613,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.RoleDeptTree'
+                  $ref: '#/definitions/systemmodels.RoleDeptTree'
               type: object
       security:
       - BearerAuth: []
@@ -9390,7 +9629,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysDictDataVo'
+          $ref: '#/definitions/systemmodels.SysDictDataVo'
       produces:
       - application/json
       responses:
@@ -9411,7 +9650,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysDictDataVo'
+          $ref: '#/definitions/systemmodels.SysDictDataVo'
       produces:
       - application/json
       responses:
@@ -9443,7 +9682,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysDictDataVo'
+                  $ref: '#/definitions/systemmodels.SysDictDataVo'
               type: object
       security:
       - BearerAuth: []
@@ -9473,7 +9712,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysDictDataVo'
+                  $ref: '#/definitions/systemmodels.SysDictDataVo'
               type: object
       security:
       - BearerAuth: []
@@ -9526,7 +9765,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysDictDataVo'
+                          $ref: '#/definitions/systemmodels.SysDictDataVo'
                         type: array
                     type: object
               type: object
@@ -9559,7 +9798,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysDictDataVo'
+                          $ref: '#/definitions/systemmodels.SysDictDataVo'
                         type: array
                     type: object
               type: object
@@ -9600,7 +9839,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysDictDataVo'
+          $ref: '#/definitions/systemmodels.SysDictDataVo'
       produces:
       - application/json
       responses:
@@ -9621,7 +9860,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysDictDataVo'
+          $ref: '#/definitions/systemmodels.SysDictDataVo'
       produces:
       - application/json
       responses:
@@ -9653,7 +9892,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysDictDataVo'
+                  $ref: '#/definitions/systemmodels.SysDictDataVo'
               type: object
       security:
       - BearerAuth: []
@@ -9706,7 +9945,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysDictDataVo'
+                          $ref: '#/definitions/systemmodels.SysDictDataVo'
                         type: array
                     type: object
               type: object
@@ -9728,7 +9967,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysDictDataVo'
+                  $ref: '#/definitions/systemmodels.SysDictDataVo'
               type: object
       security:
       - BearerAuth: []
@@ -9843,7 +10082,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysNoticeVo'
+          $ref: '#/definitions/systemmodels.SysNoticeVo'
       produces:
       - application/json
       responses:
@@ -9875,7 +10114,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysNoticeVo'
+                  $ref: '#/definitions/systemmodels.SysNoticeVo'
               type: object
       security:
       - BearerAuth: []
@@ -9928,7 +10167,7 @@ paths:
                   - properties:
                       rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysNoticeVo'
+                          $ref: '#/definitions/systemmodels.SysNoticeVo'
                         type: array
                     type: object
               type: object
@@ -9946,7 +10185,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysPermissionAdd'
+          $ref: '#/definitions/systemmodels.SysPermissionAdd'
       produces:
       - application/json
       responses:
@@ -9967,7 +10206,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysPermissionEdit'
+          $ref: '#/definitions/systemmodels.SysPermissionEdit'
       produces:
       - application/json
       responses:
@@ -10019,7 +10258,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysPermissionVo'
+                  $ref: '#/definitions/systemmodels.SysPermissionVo'
               type: object
       security:
       - BearerAuth: []
@@ -10046,7 +10285,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/systemModels.SysPermissionVo'
+                    $ref: '#/definitions/systemmodels.SysPermissionVo'
                   type: array
               type: object
       security:
@@ -10089,7 +10328,7 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/systemModels.SysPermissionVo'
+                    $ref: '#/definitions/systemmodels.SysPermissionVo'
                   type: array
               type: object
       security:
@@ -10106,7 +10345,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysPostVo'
+          $ref: '#/definitions/systemmodels.SysPostVo'
       produces:
       - application/json
       responses:
@@ -10127,7 +10366,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysPostVo'
+          $ref: '#/definitions/systemmodels.SysPostVo'
       produces:
       - application/json
       responses:
@@ -10159,7 +10398,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysPostVo'
+                  $ref: '#/definitions/systemmodels.SysPostVo'
               type: object
       security:
       - BearerAuth: []
@@ -10282,7 +10521,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysPostVo'
+                          $ref: '#/definitions/systemmodels.SysPostVo'
                         type: array
                     type: object
               type: object
@@ -10300,7 +10539,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysRoleDML'
+          $ref: '#/definitions/systemmodels.SysRoleDML'
       produces:
       - application/json
       responses:
@@ -10321,7 +10560,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysRoleDML'
+          $ref: '#/definitions/systemmodels.SysRoleDML'
       produces:
       - application/json
       responses:
@@ -10353,7 +10592,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SysRoleVo'
+                  $ref: '#/definitions/systemmodels.SysRoleVo'
               type: object
       security:
       - BearerAuth: []
@@ -10393,7 +10632,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysUserRole'
+          $ref: '#/definitions/systemmodels.SysUserRole'
       produces:
       - application/json
       responses:
@@ -10511,7 +10750,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysUserVo'
+                          $ref: '#/definitions/systemmodels.SysUserVo'
                         type: array
                     type: object
               type: object
@@ -10567,7 +10806,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysUserVo'
+                          $ref: '#/definitions/systemmodels.SysUserVo'
                         type: array
                     type: object
               type: object
@@ -10584,7 +10823,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysRoleDML'
+          $ref: '#/definitions/systemmodels.SysRoleDML'
       produces:
       - application/json
       responses:
@@ -10646,7 +10885,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysRoleVo'
+                          $ref: '#/definitions/systemmodels.SysRoleVo'
                         type: array
                     type: object
               type: object
@@ -10668,7 +10907,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SelectPermission'
+                  $ref: '#/definitions/systemmodels.SelectPermission'
               type: object
       security:
       - BearerAuth: []
@@ -10688,7 +10927,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.SelectPermission'
+                  $ref: '#/definitions/systemmodels.SelectPermission'
               type: object
       security:
       - BearerAuth: []
@@ -10759,7 +10998,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysWorkShiftSettingVO'
+          $ref: '#/definitions/systemmodels.SysWorkShiftSettingVO'
       responses:
         "200":
           description: 获取成功
@@ -10792,7 +11031,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysUserDML'
+          $ref: '#/definitions/systemmodels.SysUserDML'
       produces:
       - application/json
       responses:
@@ -10813,7 +11052,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysUserDML'
+          $ref: '#/definitions/systemmodels.SysUserDML'
       produces:
       - application/json
       responses:
@@ -10839,7 +11078,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.Accredit'
+                  $ref: '#/definitions/systemmodels.Accredit'
               type: object
       security:
       - BearerAuth: []
@@ -10891,7 +11130,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.UserAndAccredit'
+                  $ref: '#/definitions/systemmodels.UserAndAccredit'
               type: object
       security:
       - BearerAuth: []
@@ -10927,7 +11166,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysUserVo'
+                          $ref: '#/definitions/systemmodels.SysUserVo'
                         type: array
                     type: object
               type: object
@@ -10962,7 +11201,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.EditUserStatus'
+          $ref: '#/definitions/systemmodels.EditUserStatus'
       produces:
       - application/json
       responses:
@@ -10984,7 +11223,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysUserDataScope'
+          $ref: '#/definitions/systemmodels.SysUserDataScope'
       produces:
       - application/json
       responses:
@@ -11182,7 +11421,7 @@ paths:
                   - properties:
                       Rows:
                         items:
-                          $ref: '#/definitions/systemModels.SysUserVo'
+                          $ref: '#/definitions/systemmodels.SysUserVo'
                         type: array
                     type: object
               type: object
@@ -11204,7 +11443,7 @@ paths:
             - $ref: '#/definitions/response.ResponseData'
             - properties:
                 data:
-                  $ref: '#/definitions/systemModels.UserProfile'
+                  $ref: '#/definitions/systemmodels.UserProfile'
               type: object
       security:
       - BearerAuth: []
@@ -11219,7 +11458,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.SysUserDML'
+          $ref: '#/definitions/systemmodels.SysUserDML'
       produces:
       - application/json
       responses:
@@ -11290,7 +11529,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/systemModels.ResetPwd'
+          $ref: '#/definitions/systemmodels.ResetPwd'
       produces:
       - application/json
       responses:

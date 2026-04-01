@@ -20,9 +20,9 @@ func NewAIGateway(service gatewayservice.IAIGatewayService) *AIGateway {
 func (a *AIGateway) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/ai/gateway")
 	group.GET("/list", middlewares.HasPermission("ai:gateway:list"), a.List)
-	group.GET("/:id", middlewares.HasPermission("ai:gateway:query"), a.GetByID)
+	group.GET("/query/:id", middlewares.HasPermission("ai:gateway:query"), a.GetByID)
 	group.POST("/set", middlewares.HasPermission("ai:gateway:set"), a.Set)
-	group.DELETE("/:ids", middlewares.HasPermission("ai:gateway:remove"), a.Delete)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:gateway:remove"), a.Delete)
 }
 
 func (a *AIGateway) List(c *gin.Context) {

@@ -415,6 +415,12 @@ func wireApp() (*gin.Engine, func(), error) {
 	iAiUserLLMDao := aiDataSetDaoImpl.NewIAiUserLLMDaoImpl(db, iAiLLMDao)
 	iAiUserLLMService := aidatasetserviceimpl.NewIAiUserLLMServiceImpl(iAiUserLLMDao)
 	model := aidatasetcontroller.NewModel(iAiModelProviderService, iAiLLMSettingService, iAiUserLLMService)
+	iAiConversationDao := aiDataSetDaoImpl.NewIAiConversationDaoImpl(db)
+	iAiConversationService := aidatasetserviceimpl.NewIAiConversationServiceImpl(iAiConversationDao)
+	iaiGatewayDao := gatewaydaoimpl.NewAIGatewayDao(db)
+	iaiGatewayService := gatewayserviceimpl.NewAIGatewayService(iaiGatewayDao)
+	aidatasetserviceIAIGatewayService := aidatasetserviceimpl.NewAIGatewayService(iaiGatewayService)
+	agent := aidatasetcontroller.NewAgent(iAiConversationService, aidatasetserviceIAIGatewayService)
 	ocr := aidatasetcontroller.NewOCR()
 	aiDataSet := &aidatasetcontroller.AiDataSet{
 		Dataset:    dataset,
@@ -422,10 +428,9 @@ func wireApp() (*gin.Engine, func(), error) {
 		Prediction: prediction,
 		Control:    control,
 		Model:      model,
+		Agent:      agent,
 		OCR:        ocr,
 	}
-	iaiGatewayDao := gatewaydaoimpl.NewAIGatewayDao(db)
-	iaiGatewayService := gatewayserviceimpl.NewAIGatewayService(iaiGatewayDao)
 	aiGateway := gatewaycontroller.NewAIGateway(iaiGatewayService)
 	gatewaycontrollerController := &gatewaycontroller.Controller{
 		AIGateway: aiGateway,

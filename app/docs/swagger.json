@@ -10,6 +10,150 @@
         "version": "2.0.x"
     },
     "paths": {
+        "/ai/agent/conversations/chat": {
+            "post": {
+                "description": "会话聊天",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "会话聊天",
+                "parameters": [
+                    {
+                        "description": "发送消息参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.SendMessageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "发送成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/conversations/create": {
+            "post": {
+                "description": "创建会话",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "创建会话",
+                "parameters": [
+                    {
+                        "description": "创建会话参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.SetAiConversation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/conversations/list": {
+            "get": {
+                "description": "查询会话列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "查询会话列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/conversations/remove/{ids}": {
+            "delete": {
+                "description": "删除会话（软删除）",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "删除会话",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "会话ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/control/list": {
             "get": {
                 "description": "预测控制列表",
@@ -142,7 +286,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.CreateAssistantRequest"
+                            "$ref": "#/definitions/aidatasetmodels.CreateAssistantRequest"
                         }
                     }
                 ],
@@ -261,7 +405,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.UpdateAssistantRequest"
+                            "$ref": "#/definitions/aidatasetmodels.UpdateAssistantRequest"
                         }
                     }
                 ],
@@ -292,7 +436,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.AddChunkReq"
+                            "$ref": "#/definitions/aidatasetmodels.AddChunkReq"
                         }
                     }
                 ],
@@ -393,7 +537,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.RemoveChunkReq"
+                            "$ref": "#/definitions/aidatasetmodels.RemoveChunkReq"
                         }
                     }
                 ],
@@ -424,7 +568,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.RetrievalListReq"
+                            "$ref": "#/definitions/aidatasetmodels.RetrievalListReq"
                         }
                     }
                 ],
@@ -455,7 +599,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.UpdateChunkReq"
+                            "$ref": "#/definitions/aidatasetmodels.UpdateChunkReq"
                         }
                     }
                 ],
@@ -506,7 +650,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.DataSetRequest"
+                            "$ref": "#/definitions/aidatasetmodels.DataSetRequest"
                         }
                     }
                 ],
@@ -756,7 +900,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.DeleteDocumentRequest"
+                            "$ref": "#/definitions/aidatasetmodels.DeleteDocumentRequest"
                         }
                     }
                 ],
@@ -787,7 +931,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.AgentsCompletionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.AgentsCompletionsRequest"
                         }
                     }
                 ],
@@ -818,7 +962,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.SessionAgentCreate"
+                            "$ref": "#/definitions/aidatasetmodels.SessionAgentCreate"
                         }
                     }
                 ],
@@ -849,7 +993,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.RemoveAgentSessionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.RemoveAgentSessionsRequest"
                         }
                     }
                 ],
@@ -944,7 +1088,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.AskRequest"
+                            "$ref": "#/definitions/aidatasetmodels.AskRequest"
                         }
                     }
                 ],
@@ -975,7 +1119,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.ChatsCompletionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.ChatsCompletionsRequest"
                         }
                     }
                 ],
@@ -1006,7 +1150,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.ConversationRelatedQuestionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.ConversationRelatedQuestionsRequest"
                         }
                     }
                 ],
@@ -1037,7 +1181,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.CreateSessionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.CreateSessionsRequest"
                         }
                     }
                 ],
@@ -1136,7 +1280,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.DeleteSessionRequest"
+                            "$ref": "#/definitions/aidatasetmodels.DeleteSessionRequest"
                         }
                     }
                 ],
@@ -1167,7 +1311,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.UpdateSessionsRequest"
+                            "$ref": "#/definitions/aidatasetmodels.UpdateSessionsRequest"
                         }
                     }
                 ],
@@ -1200,7 +1344,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.ParseDocumentApiRequest"
+                            "$ref": "#/definitions/aidatasetmodels.ParseDocumentApiRequest"
                         }
                     }
                 ],
@@ -1233,7 +1377,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.ParseDocumentApiRequest"
+                            "$ref": "#/definitions/aidatasetmodels.ParseDocumentApiRequest"
                         }
                     }
                 ],
@@ -1277,7 +1421,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.PutDocumentRequest"
+                            "$ref": "#/definitions/aidatasetmodels.PutDocumentRequest"
                         }
                     }
                 ],
@@ -1315,7 +1459,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.UpdateDataSetRequest"
+                            "$ref": "#/definitions/aidatasetmodels.UpdateDataSetRequest"
                         }
                     }
                 ],
@@ -1554,7 +1698,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.SetSysUserLLM"
+                            "$ref": "#/definitions/aidatasetmodels.SetSysUserLLM"
                         }
                     }
                 ],
@@ -1655,7 +1799,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.SetSysAiLLMSetting"
+                            "$ref": "#/definitions/aidatasetmodels.SetSysAiLLMSetting"
                         }
                     }
                 ],
@@ -1817,7 +1961,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aiDataSetModels.SetSysAiPrediction"
+                            "$ref": "#/definitions/aidatasetmodels.SetSysAiPrediction"
                         }
                     }
                 ],
@@ -1930,7 +2074,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SetAlertAction"
+                            "$ref": "#/definitions/alertmodels.SetAlertAction"
                         }
                     }
                 ],
@@ -1985,7 +2129,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SysAlertLogListReq"
+                            "$ref": "#/definitions/alertmodels.SysAlertLogListReq"
                         }
                     }
                 ],
@@ -2107,7 +2251,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SetAlertAiReason"
+                            "$ref": "#/definitions/alertmodels.SetAlertAiReason"
                         }
                     }
                 ],
@@ -2143,7 +2287,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.ChangeSysAlert"
+                            "$ref": "#/definitions/alertmodels.ChangeSysAlert"
                         }
                     }
                 ],
@@ -2273,7 +2417,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SetSysAlert"
+                            "$ref": "#/definitions/alertmodels.SetSysAlert"
                         }
                     }
                 ],
@@ -2397,7 +2541,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.SetSysAlertSinkTemplate"
+                            "$ref": "#/definitions/alertmodels.SetSysAlertSinkTemplate"
                         }
                     }
                 ],
@@ -2425,7 +2569,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.AlertLogData"
+                            "$ref": "#/definitions/alertmodels.AlertLogData"
                         }
                     }
                 ],
@@ -2456,7 +2600,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.BindGatewayConfigReq"
+                            "$ref": "#/definitions/daemonizemodels.BindGatewayConfigReq"
                         }
                     }
                 ],
@@ -2522,7 +2666,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.ScheduleReq"
+                            "$ref": "#/definitions/craftroutemodels.ScheduleReq"
                         }
                     }
                 ],
@@ -2567,7 +2711,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.GatewayMetricDataQueryReq"
+                            "$ref": "#/definitions/metricmodels.GatewayMetricDataQueryReq"
                         }
                     }
                 ],
@@ -2595,7 +2739,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.GatewayMetricDataQueryReq"
+                            "$ref": "#/definitions/metricmodels.GatewayMetricDataQueryReq"
                         }
                     }
                 ],
@@ -2739,7 +2883,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.DeviceIdsReq"
+                            "$ref": "#/definitions/devicemonitormodel.DeviceIdsReq"
                         }
                     }
                 ],
@@ -2767,7 +2911,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/alertModels.AlertLogData"
+                            "$ref": "#/definitions/alertmodels.AlertLogData"
                         }
                     }
                 ],
@@ -2795,7 +2939,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.GatewayMetricDataQueryReq"
+                            "$ref": "#/definitions/metricmodels.GatewayMetricDataQueryReq"
                         }
                     }
                 ],
@@ -2889,7 +3033,7 @@
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -3004,7 +3148,7 @@
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -3119,7 +3263,7 @@
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -3271,7 +3415,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
@@ -3302,7 +3446,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
@@ -3424,7 +3568,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/buildingModels.SetSysBuilding"
+                            "$ref": "#/definitions/buildingmodels.SetSysBuilding"
                         }
                     }
                 ],
@@ -3572,7 +3716,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceCheckPlanVO"
+                            "$ref": "#/definitions/devicemodels.SysDeviceCheckPlanVO"
                         }
                     }
                 ],
@@ -3686,7 +3830,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceCheckSubjectVO"
+                            "$ref": "#/definitions/devicemodels.SysDeviceCheckSubjectVO"
                         }
                     }
                 ],
@@ -3798,7 +3942,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceCheckPlanVO"
+                            "$ref": "#/definitions/devicemodels.SysDeviceCheckPlanVO"
                         }
                     }
                 ],
@@ -3942,7 +4086,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.DeviceInfo"
+                            "$ref": "#/definitions/devicemodels.DeviceInfo"
                         }
                     }
                 ],
@@ -4054,7 +4198,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceSubjectVO"
+                            "$ref": "#/definitions/devicemodels.SysDeviceSubjectVO"
                         }
                     }
                 ],
@@ -4172,7 +4316,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SetSysModbusDeviceConfigDataReq"
+                            "$ref": "#/definitions/devicemodels.SetSysModbusDeviceConfigDataReq"
                         }
                     }
                 ],
@@ -4310,7 +4454,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.SysDeviceTemplateSetReq"
+                            "$ref": "#/definitions/devicemodels.SysDeviceTemplateSetReq"
                         }
                     }
                 ],
@@ -4428,7 +4572,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceModels.DeviceGroup"
+                            "$ref": "#/definitions/devicemodels.DeviceGroup"
                         }
                     }
                 ],
@@ -4689,7 +4833,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/buildingModels.SetSysFloor"
+                            "$ref": "#/definitions/buildingmodels.SetSysFloor"
                         }
                     }
                 ],
@@ -4720,7 +4864,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/materialModels.InboundInfo"
+                            "$ref": "#/definitions/materialmodels.InboundInfo"
                         }
                     }
                 ],
@@ -4894,7 +5038,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/materialModels.OutboundInfo"
+                            "$ref": "#/definitions/materialmodels.OutboundInfo"
                         }
                     }
                 ],
@@ -4984,7 +5128,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/materialModels.MaterialInfo"
+                            "$ref": "#/definitions/materialmodels.MaterialInfo"
                         }
                     }
                 ],
@@ -5203,7 +5347,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/resourceModels.SysResourceFileDML"
+                            "$ref": "#/definitions/resourcemodels.SysResourceFileDML"
                         }
                     }
                 ],
@@ -5341,7 +5485,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/configurationModels.SetSysConfiguration"
+                            "$ref": "#/definitions/configurationmodels.SetSysConfiguration"
                         }
                     }
                 ],
@@ -5456,7 +5600,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProSetProcessContent"
+                            "$ref": "#/definitions/craftroutemodels.SysProSetProcessContent"
                         }
                     }
                 ],
@@ -5582,7 +5726,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProProcess"
+                            "$ref": "#/definitions/craftroutemodels.SysProProcess"
                         }
                     }
                 ],
@@ -5613,7 +5757,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.ProcessTopo"
+                            "$ref": "#/definitions/craftroutemodels.ProcessTopo"
                         }
                     }
                 ],
@@ -5739,7 +5883,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProRouteProcessListReq"
+                            "$ref": "#/definitions/craftroutemodels.SysProRouteProcessListReq"
                         }
                     }
                 ],
@@ -5799,7 +5943,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysProRouteProcessSetRequest"
+                            "$ref": "#/definitions/craftroutemodels.SysProRouteProcessSetRequest"
                         }
                     }
                 ],
@@ -6010,7 +6154,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SetSysProductSchedule"
+                            "$ref": "#/definitions/craftroutemodels.SetSysProductSchedule"
                         }
                     }
                 ],
@@ -6041,7 +6185,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/craftRouteModels.SysCraftRouteRequest"
+                            "$ref": "#/definitions/craftroutemodels.SysCraftRouteRequest"
                         }
                     }
                 ],
@@ -6148,7 +6292,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.StartProcessReq"
+                            "$ref": "#/definitions/daemonizemodels.StartProcessReq"
                         }
                     }
                 ],
@@ -6179,7 +6323,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.StartProcessReq"
+                            "$ref": "#/definitions/daemonizemodels.StartProcessReq"
                         }
                     }
                 ],
@@ -6239,7 +6383,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.SysIotAgentSetReq"
+                            "$ref": "#/definitions/daemonizemodels.SysIotAgentSetReq"
                         }
                     }
                 ],
@@ -6327,7 +6471,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dashboardModels.SetSysDashboardData"
+                            "$ref": "#/definitions/dashboardmodels.SetSysDashboardData"
                         }
                     }
                 ],
@@ -6416,7 +6560,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricDataQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricDataQueryReq"
                         }
                     }
                 ],
@@ -6476,7 +6620,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dashboardModels.SetSysDashboard"
+                            "$ref": "#/definitions/dashboardmodels.SetSysDashboard"
                         }
                     }
                 ],
@@ -6507,7 +6651,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.CameraOfferReq"
+                            "$ref": "#/definitions/devicemonitormodel.CameraOfferReq"
                         }
                     }
                 ],
@@ -6535,7 +6679,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.ControlReq"
+                            "$ref": "#/definitions/devicemonitormodel.ControlReq"
                         }
                     }
                 ],
@@ -6636,7 +6780,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.ControlStatusReq"
+                            "$ref": "#/definitions/devicemonitormodel.ControlStatusReq"
                         }
                     }
                 ],
@@ -6681,7 +6825,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.DevDataReq"
+                            "$ref": "#/definitions/devicemonitormodel.DevDataReq"
                         }
                     }
                 ],
@@ -6709,7 +6853,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.DevDataReq"
+                            "$ref": "#/definitions/devicemonitormodel.DevDataReq"
                         }
                     }
                 ],
@@ -6882,7 +7026,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
@@ -6913,7 +7057,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
@@ -6985,13 +7129,184 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/metricModels.MetricQueryReq"
+                            "$ref": "#/definitions/metricmodels.MetricQueryReq"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "设备监控",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/integration-config/check-login-state": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按集成类型检查当前启用配置的登录态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "检查集成系统登录态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "接入类型",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "检查地址，优先级高于配置",
+                        "name": "checkUrl",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "回调地址，优先级高于配置",
+                        "name": "redirectUrl",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "检查成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/integration-config/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询ERP集成配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "集成配置列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "接入类型",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页条数",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/integration-config/oauth/callback": {
+            "get": {
+                "description": "接收管家婆OAuth回调的code和state",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "集成OAuth回调",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "授权码",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "透传字段",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "接收成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/integration-config/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改ERP集成配置，仅允许存在一条启用配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "集成配置设置",
+                "parameters": [
+                    {
+                        "description": "集成配置参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/settingmodels.IntegrationConfigSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -7306,7 +7621,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/daemonizeModels.SysIotAgentConfigSetReq"
+                            "$ref": "#/definitions/daemonizemodels.SysIotAgentConfigSetReq"
                         }
                     }
                 ],
@@ -7347,7 +7662,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.GetInfo"
+                                            "$ref": "#/definitions/systemmodels.GetInfo"
                                         }
                                     }
                                 }
@@ -7389,7 +7704,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.LoginBody"
+                            "$ref": "#/definitions/systemmodels.LoginBody"
                         }
                     }
                 ],
@@ -7565,7 +7880,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.RemoveDevMapInfo"
+                            "$ref": "#/definitions/devicemonitormodel.RemoveDevMapInfo"
                         }
                     }
                 ],
@@ -7593,7 +7908,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/deviceMonitorModel.SetDevMapInfo"
+                            "$ref": "#/definitions/devicemonitormodel.SetDevMapInfo"
                         }
                     }
                 ],
@@ -7629,7 +7944,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/monitorModels.JobDML"
+                            "$ref": "#/definitions/monitormodels.JobDML"
                         }
                     }
                 ],
@@ -7663,7 +7978,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/monitorModels.JobDML"
+                            "$ref": "#/definitions/monitormodels.JobDML"
                         }
                     }
                 ],
@@ -7699,7 +8014,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/monitorModels.JobDML"
+                            "$ref": "#/definitions/monitormodels.JobDML"
                         }
                     }
                 ],
@@ -7767,7 +8082,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/monitorModels.JobIdAndName"
+                                                "$ref": "#/definitions/monitormodels.JobIdAndName"
                                             }
                                         }
                                     }
@@ -7858,7 +8173,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/monitorModels.JobVo"
+                                                                "$ref": "#/definitions/monitormodels.JobVo"
                                                             }
                                                         }
                                                     }
@@ -7948,7 +8263,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/monitorModels.JobLog"
+                                                                "$ref": "#/definitions/monitormodels.JobLog"
                                                             }
                                                         }
                                                     }
@@ -7999,7 +8314,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/monitorModels.JobLog"
+                                            "$ref": "#/definitions/monitormodels.JobLog"
                                         }
                                     }
                                 }
@@ -8031,7 +8346,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/monitorModels.JobVo"
+                            "$ref": "#/definitions/monitormodels.JobVo"
                         }
                     }
                 ],
@@ -8115,7 +8430,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/monitorModels.JobVo"
+                                            "$ref": "#/definitions/monitormodels.JobVo"
                                         }
                                     }
                                 }
@@ -8174,7 +8489,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/monitorModels.SysUserOnline"
+                                                                "$ref": "#/definitions/monitormodels.SysUserOnline"
                                                             }
                                                         }
                                                     }
@@ -8259,7 +8574,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                            "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                         }
                                     }
                                 }
@@ -8369,7 +8684,7 @@
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -8484,7 +8799,7 @@
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                                                             }
                                                         }
                                                     }
@@ -8555,7 +8870,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/productModels.SysProductLaboratoryVo"
+                            "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
                         }
                     }
                 ],
@@ -8583,7 +8898,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.LoginBody"
+                            "$ref": "#/definitions/systemmodels.LoginBody"
                         }
                     }
                 ],
@@ -8619,7 +8934,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysConfigVo"
+                            "$ref": "#/definitions/systemmodels.SysConfigVo"
                         }
                     }
                 ],
@@ -8653,7 +8968,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysConfigVo"
+                            "$ref": "#/definitions/systemmodels.SysConfigVo"
                         }
                     }
                 ],
@@ -8856,7 +9171,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysConfigVo"
+                                                                "$ref": "#/definitions/systemmodels.SysConfigVo"
                                                             }
                                                         }
                                                     }
@@ -8907,7 +9222,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysConfigVo"
+                                            "$ref": "#/definitions/systemmodels.SysConfigVo"
                                         }
                                     }
                                 }
@@ -9117,7 +9432,7 @@
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.ConsumptionNoticeVo"
+                                                                "$ref": "#/definitions/systemmodels.ConsumptionNoticeVo"
                                                             }
                                                         }
                                                     }
@@ -9168,7 +9483,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.ConsumptionNoticeVo"
+                                            "$ref": "#/definitions/systemmodels.ConsumptionNoticeVo"
                                         }
                                     }
                                 }
@@ -9261,7 +9576,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysDeptVo"
+                                                                "$ref": "#/definitions/systemmodels.SysDeptVo"
                                                             }
                                                         }
                                                     }
@@ -9296,7 +9611,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDeptVo"
+                            "$ref": "#/definitions/systemmodels.SysDeptVo"
                         }
                     }
                 ],
@@ -9330,7 +9645,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDeptVo"
+                            "$ref": "#/definitions/systemmodels.SysDeptVo"
                         }
                     }
                 ],
@@ -9380,7 +9695,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.RoleDeptTree"
+                                            "$ref": "#/definitions/systemmodels.RoleDeptTree"
                                         }
                                     }
                                 }
@@ -9426,7 +9741,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDeptVo"
+                                            "$ref": "#/definitions/systemmodels.SysDeptVo"
                                         }
                                     }
                                 }
@@ -9490,7 +9805,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                         }
                     }
                 ],
@@ -9524,7 +9839,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                         }
                     }
                 ],
@@ -9618,7 +9933,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                                                "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                                             }
                                                         }
                                                     }
@@ -9679,7 +9994,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                                                "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                                             }
                                                         }
                                                     }
@@ -9735,7 +10050,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                         }
                                     }
                                 }
@@ -9781,7 +10096,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                         }
                                     }
                                 }
@@ -9813,7 +10128,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                         }
                     }
                 ],
@@ -9847,7 +10162,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                         }
                     }
                 ],
@@ -9978,7 +10293,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                                                "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                                             }
                                                         }
                                                     }
@@ -10020,7 +10335,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                         }
                                     }
                                 }
@@ -10105,7 +10420,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysDictDataVo"
+                                            "$ref": "#/definitions/systemmodels.SysDictDataVo"
                                         }
                                     }
                                 }
@@ -10253,7 +10568,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysNoticeVo"
+                            "$ref": "#/definitions/systemmodels.SysNoticeVo"
                         }
                     }
                 ],
@@ -10347,7 +10662,7 @@
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysNoticeVo"
+                                                                "$ref": "#/definitions/systemmodels.SysNoticeVo"
                                                             }
                                                         }
                                                     }
@@ -10398,7 +10713,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysNoticeVo"
+                                            "$ref": "#/definitions/systemmodels.SysNoticeVo"
                                         }
                                     }
                                 }
@@ -10430,7 +10745,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysPermissionEdit"
+                            "$ref": "#/definitions/systemmodels.SysPermissionEdit"
                         }
                     }
                 ],
@@ -10464,7 +10779,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysPermissionAdd"
+                            "$ref": "#/definitions/systemmodels.SysPermissionAdd"
                         }
                     }
                 ],
@@ -10516,7 +10831,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/systemModels.SysPermissionVo"
+                                                "$ref": "#/definitions/systemmodels.SysPermissionVo"
                                             }
                                         }
                                     }
@@ -10588,7 +10903,7 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/systemModels.SysPermissionVo"
+                                                "$ref": "#/definitions/systemmodels.SysPermissionVo"
                                             }
                                         }
                                     }
@@ -10635,7 +10950,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysPermissionVo"
+                                            "$ref": "#/definitions/systemmodels.SysPermissionVo"
                                         }
                                     }
                                 }
@@ -10699,7 +11014,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysPostVo"
+                            "$ref": "#/definitions/systemmodels.SysPostVo"
                         }
                     }
                 ],
@@ -10733,7 +11048,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysPostVo"
+                            "$ref": "#/definitions/systemmodels.SysPostVo"
                         }
                     }
                 ],
@@ -10899,7 +11214,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysPostVo"
+                                                                "$ref": "#/definitions/systemmodels.SysPostVo"
                                                             }
                                                         }
                                                     }
@@ -10988,7 +11303,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysPostVo"
+                                            "$ref": "#/definitions/systemmodels.SysPostVo"
                                         }
                                     }
                                 }
@@ -11020,7 +11335,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysRoleDML"
+                            "$ref": "#/definitions/systemmodels.SysRoleDML"
                         }
                     }
                 ],
@@ -11054,7 +11369,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysRoleDML"
+                            "$ref": "#/definitions/systemmodels.SysRoleDML"
                         }
                     }
                 ],
@@ -11090,7 +11405,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserRole"
+                            "$ref": "#/definitions/systemmodels.SysUserRole"
                         }
                     }
                 ],
@@ -11275,7 +11590,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysUserVo"
+                                                                "$ref": "#/definitions/systemmodels.SysUserVo"
                                                             }
                                                         }
                                                     }
@@ -11371,7 +11686,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysUserVo"
+                                                                "$ref": "#/definitions/systemmodels.SysUserVo"
                                                             }
                                                         }
                                                     }
@@ -11406,7 +11721,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysRoleDML"
+                            "$ref": "#/definitions/systemmodels.SysRoleDML"
                         }
                     }
                 ],
@@ -11505,7 +11820,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysRoleVo"
+                                                                "$ref": "#/definitions/systemmodels.SysRoleVo"
                                                             }
                                                         }
                                                     }
@@ -11556,7 +11871,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SysRoleVo"
+                                            "$ref": "#/definitions/systemmodels.SysRoleVo"
                                         }
                                     }
                                 }
@@ -11631,7 +11946,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SelectPermission"
+                                            "$ref": "#/definitions/systemmodels.SelectPermission"
                                         }
                                     }
                                 }
@@ -11668,7 +11983,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.SelectPermission"
+                                            "$ref": "#/definitions/systemmodels.SelectPermission"
                                         }
                                     }
                                 }
@@ -11777,7 +12092,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysWorkShiftSettingVO"
+                            "$ref": "#/definitions/systemmodels.SysWorkShiftSettingVO"
                         }
                     }
                 ],
@@ -11837,7 +12152,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserDML"
+                            "$ref": "#/definitions/systemmodels.SysUserDML"
                         }
                     }
                 ],
@@ -11871,7 +12186,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserDML"
+                            "$ref": "#/definitions/systemmodels.SysUserDML"
                         }
                     }
                 ],
@@ -11912,7 +12227,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.Accredit"
+                                            "$ref": "#/definitions/systemmodels.Accredit"
                                         }
                                     }
                                 }
@@ -12014,7 +12329,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysUserVo"
+                                                                "$ref": "#/definitions/systemmodels.SysUserVo"
                                                             }
                                                         }
                                                     }
@@ -12078,7 +12393,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.EditUserStatus"
+                            "$ref": "#/definitions/systemmodels.EditUserStatus"
                         }
                     }
                 ],
@@ -12114,7 +12429,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserDataScope"
+                            "$ref": "#/definitions/systemmodels.SysUserDataScope"
                         }
                     }
                 ],
@@ -12423,7 +12738,7 @@
                                                         "Rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/systemModels.SysUserVo"
+                                                                "$ref": "#/definitions/systemmodels.SysUserVo"
                                                             }
                                                         }
                                                     }
@@ -12465,7 +12780,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.UserProfile"
+                                            "$ref": "#/definitions/systemmodels.UserProfile"
                                         }
                                     }
                                 }
@@ -12495,7 +12810,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.SysUserDML"
+                            "$ref": "#/definitions/systemmodels.SysUserDML"
                         }
                     }
                 ],
@@ -12609,7 +12924,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/systemModels.ResetPwd"
+                            "$ref": "#/definitions/systemmodels.ResetPwd"
                         }
                     }
                 ],
@@ -12660,7 +12975,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/systemModels.UserAndAccredit"
+                                            "$ref": "#/definitions/systemmodels.UserAndAccredit"
                                         }
                                     }
                                 }
@@ -12672,7 +12987,7 @@
         }
     },
     "definitions": {
-        "aiDataSetModels.AddChunkReq": {
+        "aidatasetmodels.AddChunkReq": {
             "type": "object",
             "properties": {
                 "content": {
@@ -12698,7 +13013,7 @@
                 }
             }
         },
-        "aiDataSetModels.AgentsCompletionsRequest": {
+        "aidatasetmodels.AgentsCompletionsRequest": {
             "type": "object",
             "properties": {
                 "agent_id": {
@@ -12721,7 +13036,7 @@
                 }
             }
         },
-        "aiDataSetModels.AskRequest": {
+        "aidatasetmodels.AskRequest": {
             "type": "object",
             "properties": {
                 "dataset_ids": {
@@ -12735,7 +13050,7 @@
                 }
             }
         },
-        "aiDataSetModels.ChatsCompletionsRequest": {
+        "aidatasetmodels.ChatsCompletionsRequest": {
             "type": "object",
             "required": [
                 "chat_id"
@@ -12758,7 +13073,7 @@
                 }
             }
         },
-        "aiDataSetModels.ConversationRelatedQuestionsRequest": {
+        "aidatasetmodels.ConversationRelatedQuestionsRequest": {
             "type": "object",
             "properties": {
                 "question": {
@@ -12766,7 +13081,7 @@
                 }
             }
         },
-        "aiDataSetModels.CreateAssistantRequest": {
+        "aidatasetmodels.CreateAssistantRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -12785,16 +13100,16 @@
                     "type": "string"
                 },
                 "llm": {
-                    "$ref": "#/definitions/aiDataSetModels.Llm"
+                    "$ref": "#/definitions/aidatasetmodels.Llm"
                 },
                 "name": {
                     "type": "string"
                 },
                 "prompt": {
-                    "$ref": "#/definitions/aiDataSetModels.Prompt"
+                    "$ref": "#/definitions/aidatasetmodels.Prompt"
                 },
                 "prompt_config": {
-                    "$ref": "#/definitions/aiDataSetModels.PromptConfig"
+                    "$ref": "#/definitions/aidatasetmodels.PromptConfig"
                 },
                 "top_k": {
                     "type": "integer"
@@ -12804,7 +13119,7 @@
                 }
             }
         },
-        "aiDataSetModels.CreateSessionsRequest": {
+        "aidatasetmodels.CreateSessionsRequest": {
             "type": "object",
             "required": [
                 "chat_id",
@@ -12822,7 +13137,7 @@
                 }
             }
         },
-        "aiDataSetModels.DataSetRequest": {
+        "aidatasetmodels.DataSetRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -12847,14 +13162,14 @@
                     "type": "string"
                 },
                 "parser_config": {
-                    "$ref": "#/definitions/aiDataSetModels.ParserConfig"
+                    "$ref": "#/definitions/aidatasetmodels.ParserConfig"
                 },
                 "permission": {
                     "type": "string"
                 }
             }
         },
-        "aiDataSetModels.DeleteDocumentRequest": {
+        "aidatasetmodels.DeleteDocumentRequest": {
             "type": "object",
             "properties": {
                 "dataset_id": {
@@ -12869,7 +13184,7 @@
                 }
             }
         },
-        "aiDataSetModels.DeleteSessionRequest": {
+        "aidatasetmodels.DeleteSessionRequest": {
             "type": "object",
             "required": [
                 "chat_id"
@@ -12886,7 +13201,7 @@
                 }
             }
         },
-        "aiDataSetModels.Graphrag": {
+        "aidatasetmodels.Graphrag": {
             "type": "object",
             "properties": {
                 "community": {
@@ -12909,7 +13224,7 @@
                 }
             }
         },
-        "aiDataSetModels.Llm": {
+        "aidatasetmodels.Llm": {
             "type": "object",
             "properties": {
                 "frequency_penalty": {
@@ -12929,7 +13244,7 @@
                 }
             }
         },
-        "aiDataSetModels.ParseDocumentApiRequest": {
+        "aidatasetmodels.ParseDocumentApiRequest": {
             "type": "object",
             "properties": {
                 "dataset_id": {
@@ -12944,7 +13259,7 @@
                 }
             }
         },
-        "aiDataSetModels.ParserConfig": {
+        "aidatasetmodels.ParserConfig": {
             "type": "object",
             "properties": {
                 "auto_keywords": {
@@ -12960,7 +13275,7 @@
                     "type": "string"
                 },
                 "graphrag": {
-                    "$ref": "#/definitions/aiDataSetModels.Graphrag"
+                    "$ref": "#/definitions/aidatasetmodels.Graphrag"
                 },
                 "html4excel": {
                     "type": "boolean"
@@ -12969,7 +13284,7 @@
                     "type": "string"
                 },
                 "raptor": {
-                    "$ref": "#/definitions/aiDataSetModels.Raptor"
+                    "$ref": "#/definitions/aidatasetmodels.Raptor"
                 },
                 "tag_kb_ids": {
                     "type": "integer"
@@ -12979,7 +13294,7 @@
                 }
             }
         },
-        "aiDataSetModels.Prompt": {
+        "aidatasetmodels.Prompt": {
             "type": "object",
             "properties": {
                 "empty_response": {
@@ -13024,12 +13339,12 @@
                 "variables": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/aiDataSetModels.Variables"
+                        "$ref": "#/definitions/aidatasetmodels.Variables"
                     }
                 }
             }
         },
-        "aiDataSetModels.PromptConfig": {
+        "aidatasetmodels.PromptConfig": {
             "type": "object",
             "properties": {
                 "empty_response": {
@@ -13055,7 +13370,7 @@
                 }
             }
         },
-        "aiDataSetModels.PutDocumentRequest": {
+        "aidatasetmodels.PutDocumentRequest": {
             "type": "object",
             "properties": {
                 "chunk_method": {
@@ -13072,11 +13387,11 @@
                     "type": "string"
                 },
                 "parser_config": {
-                    "$ref": "#/definitions/aiDataSetModels.ParserConfig"
+                    "$ref": "#/definitions/aidatasetmodels.ParserConfig"
                 }
             }
         },
-        "aiDataSetModels.Raptor": {
+        "aidatasetmodels.Raptor": {
             "type": "object",
             "properties": {
                 "max_cluster": {
@@ -13099,7 +13414,7 @@
                 }
             }
         },
-        "aiDataSetModels.RemoveAgentSessionsRequest": {
+        "aidatasetmodels.RemoveAgentSessionsRequest": {
             "type": "object",
             "required": [
                 "agent_id"
@@ -13116,7 +13431,7 @@
                 }
             }
         },
-        "aiDataSetModels.RemoveChunkReq": {
+        "aidatasetmodels.RemoveChunkReq": {
             "type": "object",
             "properties": {
                 "chunk_ids": {
@@ -13133,7 +13448,7 @@
                 }
             }
         },
-        "aiDataSetModels.RetrievalListReq": {
+        "aidatasetmodels.RetrievalListReq": {
             "type": "object",
             "properties": {
                 "dataset_uuids": {
@@ -13180,7 +13495,21 @@
                 }
             }
         },
-        "aiDataSetModels.SessionAgentCreate": {
+        "aidatasetmodels.SendMessageInput": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "conversation_id": {
+                    "type": "integer"
+                },
+                "tab_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "aidatasetmodels.SessionAgentCreate": {
             "type": "object",
             "properties": {
                 "agent_id": {
@@ -13192,7 +13521,33 @@
                 }
             }
         },
-        "aiDataSetModels.SetSysAiLLMSetting": {
+        "aidatasetmodels.SetAiConversation": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "chatMode": {
+                    "type": "string"
+                },
+                "enableThinking": {
+                    "type": "integer"
+                },
+                "llmModelId": {
+                    "type": "string"
+                },
+                "llmProviderId": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "aidatasetmodels.SetSysAiLLMSetting": {
             "type": "object",
             "properties": {
                 "asr_id": {
@@ -13234,7 +13589,7 @@
                 }
             }
         },
-        "aiDataSetModels.SetSysAiPrediction": {
+        "aidatasetmodels.SetSysAiPrediction": {
             "type": "object",
             "properties": {
                 "action_id": {
@@ -13293,7 +13648,7 @@
                 }
             }
         },
-        "aiDataSetModels.SetSysAiPredictionControl": {
+        "aidatasetmodels.SetSysAiPredictionControl": {
             "type": "object",
             "properties": {
                 "agg_function": {
@@ -13337,7 +13692,7 @@
                 }
             }
         },
-        "aiDataSetModels.SetSysUserLLM": {
+        "aidatasetmodels.SetSysUserLLM": {
             "type": "object",
             "properties": {
                 "api_base": {
@@ -13351,7 +13706,7 @@
                 }
             }
         },
-        "aiDataSetModels.UpdateAssistantRequest": {
+        "aidatasetmodels.UpdateAssistantRequest": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -13367,17 +13722,17 @@
                     }
                 },
                 "llm": {
-                    "$ref": "#/definitions/aiDataSetModels.Llm"
+                    "$ref": "#/definitions/aidatasetmodels.Llm"
                 },
                 "name": {
                     "type": "string"
                 },
                 "prompt": {
-                    "$ref": "#/definitions/aiDataSetModels.Prompt"
+                    "$ref": "#/definitions/aidatasetmodels.Prompt"
                 }
             }
         },
-        "aiDataSetModels.UpdateChunkReq": {
+        "aidatasetmodels.UpdateChunkReq": {
             "type": "object",
             "properties": {
                 "available": {
@@ -13409,7 +13764,7 @@
                 }
             }
         },
-        "aiDataSetModels.UpdateDataSetRequest": {
+        "aidatasetmodels.UpdateDataSetRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -13431,11 +13786,11 @@
                     "type": "integer"
                 },
                 "parser_config": {
-                    "$ref": "#/definitions/aiDataSetModels.ParserConfig"
+                    "$ref": "#/definitions/aidatasetmodels.ParserConfig"
                 }
             }
         },
-        "aiDataSetModels.UpdateSessionsRequest": {
+        "aidatasetmodels.UpdateSessionsRequest": {
             "type": "object",
             "required": [
                 "chat_id",
@@ -13456,7 +13811,7 @@
                 }
             }
         },
-        "aiDataSetModels.Variables": {
+        "aidatasetmodels.Variables": {
             "type": "object",
             "properties": {
                 "key": {
@@ -13467,13 +13822,13 @@
                 }
             }
         },
-        "alertModels.AlertLogData": {
+        "alertmodels.AlertLogData": {
             "type": "object",
             "properties": {
                 "alerts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/alertModels.AlertValue"
+                        "$ref": "#/definitions/alertmodels.AlertValue"
                     }
                 },
                 "commonLabels": {
@@ -13496,7 +13851,7 @@
                 }
             }
         },
-        "alertModels.AlertValue": {
+        "alertmodels.AlertValue": {
             "type": "object",
             "properties": {
                 "annotations": {
@@ -13541,7 +13896,7 @@
                 }
             }
         },
-        "alertModels.ApiNotify": {
+        "alertmodels.ApiNotify": {
             "type": "object",
             "properties": {
                 "period": {
@@ -13570,7 +13925,7 @@
                 }
             }
         },
-        "alertModels.ChangeSysAlert": {
+        "alertmodels.ChangeSysAlert": {
             "type": "object",
             "properties": {
                 "id": {
@@ -13582,7 +13937,7 @@
                 }
             }
         },
-        "alertModels.Receiver": {
+        "alertmodels.Receiver": {
             "type": "object",
             "required": [
                 "nickName",
@@ -13607,14 +13962,14 @@
                 }
             }
         },
-        "alertModels.SetAlertAction": {
+        "alertmodels.SetAlertAction": {
             "type": "object",
             "properties": {
                 "api_notify": {
                     "description": "通知用户",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/alertModels.ApiNotify"
+                        "$ref": "#/definitions/alertmodels.ApiNotify"
                     }
                 },
                 "id": {
@@ -13630,12 +13985,12 @@
                     "description": "通知周期，逗号分隔",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/alertModels.UserNotify"
+                        "$ref": "#/definitions/alertmodels.UserNotify"
                     }
                 }
             }
         },
-        "alertModels.SetAlertAiReason": {
+        "alertmodels.SetAlertAiReason": {
             "type": "object",
             "properties": {
                 "agent_id": {
@@ -13661,7 +14016,7 @@
                 }
             }
         },
-        "alertModels.SetSysAlert": {
+        "alertmodels.SetSysAlert": {
             "type": "object",
             "properties": {
                 "action_id": {
@@ -13730,7 +14085,7 @@
                 }
             }
         },
-        "alertModels.SetSysAlertSinkTemplate": {
+        "alertmodels.SetSysAlertSinkTemplate": {
             "type": "object",
             "required": [
                 "addr",
@@ -13776,7 +14131,7 @@
                 }
             }
         },
-        "alertModels.SysAlertLogListReq": {
+        "alertmodels.SysAlertLogListReq": {
             "type": "object",
             "properties": {
                 "alert_id": {
@@ -13823,7 +14178,7 @@
                 }
             }
         },
-        "alertModels.UserNotify": {
+        "alertmodels.UserNotify": {
             "type": "object",
             "properties": {
                 "channels": {
@@ -13841,7 +14196,7 @@
                 "receiver": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/alertModels.Receiver"
+                        "$ref": "#/definitions/alertmodels.Receiver"
                     }
                 },
                 "time_end": {
@@ -13872,7 +14227,7 @@
                 }
             }
         },
-        "buildingModels.SetSysBuilding": {
+        "buildingmodels.SetSysBuilding": {
             "type": "object",
             "properties": {
                 "address": {
@@ -13930,7 +14285,7 @@
                 }
             }
         },
-        "buildingModels.SetSysFloor": {
+        "buildingmodels.SetSysFloor": {
             "type": "object",
             "properties": {
                 "building_id": {
@@ -13953,7 +14308,7 @@
                 }
             }
         },
-        "configurationModels.SetSysConfiguration": {
+        "configurationmodels.SetSysConfiguration": {
             "type": "object",
             "required": [
                 "name",
@@ -13964,7 +14319,7 @@
                     "description": "注解",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/deviceModels.Annotation"
+                        "$ref": "#/definitions/devicemodels.Annotation"
                     }
                 },
                 "description": {
@@ -13986,7 +14341,7 @@
                 }
             }
         },
-        "craftRouteModels.CaptureData": {
+        "craftroutemodels.CaptureData": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -14000,7 +14355,7 @@
                 }
             }
         },
-        "craftRouteModels.ComputedPosition": {
+        "craftroutemodels.ComputedPosition": {
             "type": "object",
             "properties": {
                 "x": {
@@ -14014,27 +14369,27 @@
                 }
             }
         },
-        "craftRouteModels.ControlRule": {
+        "craftroutemodels.ControlRule": {
             "type": "object",
             "properties": {
                 "captures": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.CaptureData"
+                        "$ref": "#/definitions/craftroutemodels.CaptureData"
                     }
                 },
                 "pid_rules": {
-                    "$ref": "#/definitions/craftRouteModels.PidRules"
+                    "$ref": "#/definitions/craftroutemodels.PidRules"
                 },
                 "predict_rules": {
-                    "$ref": "#/definitions/craftRouteModels.PredictRules"
+                    "$ref": "#/definitions/craftroutemodels.PredictRules"
                 },
                 "trigger_rules": {
-                    "$ref": "#/definitions/craftRouteModels.TriggerRules"
+                    "$ref": "#/definitions/craftroutemodels.TriggerRules"
                 }
             }
         },
-        "craftRouteModels.ControllerAction": {
+        "craftroutemodels.ControllerAction": {
             "type": "object",
             "properties": {
                 "condition": {
@@ -14063,7 +14418,7 @@
                 }
             }
         },
-        "craftRouteModels.DeviceRuleInfo": {
+        "craftroutemodels.DeviceRuleInfo": {
             "type": "object",
             "properties": {
                 "dataId": {
@@ -14074,7 +14429,7 @@
                 }
             }
         },
-        "craftRouteModels.Dimensions": {
+        "craftroutemodels.Dimensions": {
             "type": "object",
             "properties": {
                 "height": {
@@ -14085,36 +14440,7 @@
                 }
             }
         },
-        "craftRouteModels.HandleBoundsSource": {
-            "type": "object",
-            "properties": {
-                "height": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "nodeId": {
-                    "type": "string"
-                },
-                "position": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "width": {
-                    "type": "integer"
-                },
-                "x": {
-                    "type": "number"
-                },
-                "y": {
-                    "type": "number"
-                }
-            }
-        },
-        "craftRouteModels.HandleBoundsTarget": {
+        "craftroutemodels.HandleBoundsSource": {
             "type": "object",
             "properties": {
                 "height": {
@@ -14143,13 +14469,42 @@
                 }
             }
         },
-        "craftRouteModels.PidRules": {
+        "craftroutemodels.HandleBoundsTarget": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "nodeId": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            }
+        },
+        "craftroutemodels.PidRules": {
             "type": "object",
             "properties": {
                 "actions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ControllerAction"
+                        "$ref": "#/definitions/craftroutemodels.ControllerAction"
                     }
                 },
                 "data_id": {
@@ -14181,7 +14536,7 @@
                 }
             }
         },
-        "craftRouteModels.PredictData": {
+        "craftroutemodels.PredictData": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -14195,13 +14550,13 @@
                 }
             }
         },
-        "craftRouteModels.PredictRules": {
+        "craftroutemodels.PredictRules": {
             "type": "object",
             "properties": {
                 "actions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ControllerAction"
+                        "$ref": "#/definitions/craftroutemodels.ControllerAction"
                     }
                 },
                 "agg_function": {
@@ -14211,7 +14566,7 @@
                 "cases": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.TriggerCase"
+                        "$ref": "#/definitions/craftroutemodels.TriggerCase"
                     }
                 },
                 "interval": {
@@ -14232,7 +14587,7 @@
                 "predicts": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.PredictData"
+                        "$ref": "#/definitions/craftroutemodels.PredictData"
                     }
                 },
                 "step": {
@@ -14249,33 +14604,33 @@
                 }
             }
         },
-        "craftRouteModels.ProcessTopo": {
+        "craftroutemodels.ProcessTopo": {
             "type": "object",
             "properties": {
                 "edges": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ProcessTopoEdge"
+                        "$ref": "#/definitions/craftroutemodels.ProcessTopoEdge"
                     }
                 },
                 "nodes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ProcessTopoNode"
+                        "$ref": "#/definitions/craftroutemodels.ProcessTopoNode"
                     }
                 },
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.SysProRouteSetProduct"
+                        "$ref": "#/definitions/craftroutemodels.SysProRouteSetProduct"
                     }
                 },
                 "route": {
-                    "$ref": "#/definitions/craftRouteModels.SysCraftRoute"
+                    "$ref": "#/definitions/craftroutemodels.SysCraftRoute"
                 }
             }
         },
-        "craftRouteModels.ProcessTopoData": {
+        "craftroutemodels.ProcessTopoData": {
             "type": "object",
             "properties": {
                 "config": {},
@@ -14287,7 +14642,7 @@
                 }
             }
         },
-        "craftRouteModels.ProcessTopoEdge": {
+        "craftroutemodels.ProcessTopoEdge": {
             "type": "object",
             "properties": {
                 "animated": {
@@ -14371,17 +14726,17 @@
                 }
             }
         },
-        "craftRouteModels.ProcessTopoNode": {
+        "craftroutemodels.ProcessTopoNode": {
             "type": "object",
             "properties": {
                 "computedPosition": {
-                    "$ref": "#/definitions/craftRouteModels.ComputedPosition"
+                    "$ref": "#/definitions/craftroutemodels.ComputedPosition"
                 },
                 "data": {
-                    "$ref": "#/definitions/craftRouteModels.ProcessTopoData"
+                    "$ref": "#/definitions/craftroutemodels.ProcessTopoData"
                 },
                 "dimensions": {
-                    "$ref": "#/definitions/craftRouteModels.Dimensions"
+                    "$ref": "#/definitions/craftroutemodels.Dimensions"
                 },
                 "dragging": {
                     "type": "boolean"
@@ -14395,13 +14750,13 @@
                         "source": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/craftRouteModels.HandleBoundsSource"
+                                "$ref": "#/definitions/craftroutemodels.HandleBoundsSource"
                             }
                         },
                         "target": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/craftRouteModels.HandleBoundsTarget"
+                                "$ref": "#/definitions/craftroutemodels.HandleBoundsTarget"
                             }
                         }
                     }
@@ -14416,7 +14771,7 @@
                     "type": "boolean"
                 },
                 "position": {
-                    "$ref": "#/definitions/craftRouteModels.ProcessTopoNodePosition"
+                    "$ref": "#/definitions/craftroutemodels.ProcessTopoNodePosition"
                 },
                 "resizing": {
                     "type": "boolean"
@@ -14429,7 +14784,7 @@
                 }
             }
         },
-        "craftRouteModels.ProcessTopoNodePosition": {
+        "craftroutemodels.ProcessTopoNodePosition": {
             "type": "object",
             "properties": {
                 "x": {
@@ -14440,7 +14795,7 @@
                 }
             }
         },
-        "craftRouteModels.ScheduleReq": {
+        "craftroutemodels.ScheduleReq": {
             "type": "object",
             "properties": {
                 "gateway_id": {
@@ -14460,7 +14815,7 @@
                 }
             }
         },
-        "craftRouteModels.SetSysProductSchedule": {
+        "craftroutemodels.SetSysProductSchedule": {
             "type": "object",
             "required": [
                 "schedule_name",
@@ -14490,7 +14845,7 @@
                 "time_manager": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.TimeManagerData"
+                        "$ref": "#/definitions/craftroutemodels.TimeManagerData"
                     }
                 },
                 "type": {
@@ -14498,7 +14853,7 @@
                 }
             }
         },
-        "craftRouteModels.SysCraftRoute": {
+        "craftroutemodels.SysCraftRoute": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -14579,7 +14934,7 @@
                 }
             }
         },
-        "craftRouteModels.SysCraftRouteRequest": {
+        "craftroutemodels.SysCraftRouteRequest": {
             "type": "object",
             "required": [
                 "route_code",
@@ -14617,7 +14972,7 @@
                 }
             }
         },
-        "craftRouteModels.SysProProcess": {
+        "craftroutemodels.SysProProcess": {
             "type": "object",
             "required": [
                 "process_code",
@@ -14693,7 +15048,7 @@
                 }
             }
         },
-        "craftRouteModels.SysProRouteProcessListReq": {
+        "craftroutemodels.SysProRouteProcessListReq": {
             "type": "object",
             "properties": {
                 "isAsc": {
@@ -14716,7 +15071,7 @@
                 }
             }
         },
-        "craftRouteModels.SysProRouteProcessSetRequest": {
+        "craftroutemodels.SysProRouteProcessSetRequest": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -14805,7 +15160,7 @@
                 }
             }
         },
-        "craftRouteModels.SysProRouteSetProduct": {
+        "craftroutemodels.SysProRouteSetProduct": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -14874,7 +15229,7 @@
                 }
             }
         },
-        "craftRouteModels.SysProSetProcessContent": {
+        "craftroutemodels.SysProSetProcessContent": {
             "type": "object",
             "required": [
                 "content_text",
@@ -14911,7 +15266,7 @@
                     "type": "string"
                 },
                 "control_rules": {
-                    "$ref": "#/definitions/craftRouteModels.ControlRule"
+                    "$ref": "#/definitions/craftroutemodels.ControlRule"
                 },
                 "control_type": {
                     "type": "string"
@@ -14943,7 +15298,7 @@
                 }
             }
         },
-        "craftRouteModels.TimeManagerData": {
+        "craftroutemodels.TimeManagerData": {
             "type": "object",
             "properties": {
                 "begin_time": {
@@ -14958,7 +15313,7 @@
                 }
             }
         },
-        "craftRouteModels.TriggerCase": {
+        "craftroutemodels.TriggerCase": {
             "type": "object",
             "properties": {
                 "conditions": {
@@ -14998,7 +15353,7 @@
                 }
             }
         },
-        "craftRouteModels.TriggerRules": {
+        "craftroutemodels.TriggerRules": {
             "type": "object",
             "required": [
                 "actions"
@@ -15007,13 +15362,13 @@
                 "actions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.ControllerAction"
+                        "$ref": "#/definitions/craftroutemodels.ControllerAction"
                     }
                 },
                 "cases": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.TriggerCase"
+                        "$ref": "#/definitions/craftroutemodels.TriggerCase"
                     }
                 },
                 "combined_rule": {
@@ -15022,7 +15377,7 @@
                 "dataIds": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/craftRouteModels.DeviceRuleInfo"
+                        "$ref": "#/definitions/craftroutemodels.DeviceRuleInfo"
                     }
                 },
                 "name": {
@@ -15030,7 +15385,7 @@
                 }
             }
         },
-        "daemonizeModels.BindGatewayConfigReq": {
+        "daemonizemodels.BindGatewayConfigReq": {
             "type": "object",
             "properties": {
                 "config_id": {
@@ -15049,7 +15404,7 @@
                 }
             }
         },
-        "daemonizeModels.ProcessOperateInfo": {
+        "daemonizemodels.ProcessOperateInfo": {
             "type": "object",
             "properties": {
                 "AgentObjectId": {
@@ -15064,18 +15419,18 @@
                 }
             }
         },
-        "daemonizeModels.StartProcessReq": {
+        "daemonizemodels.StartProcessReq": {
             "type": "object",
             "properties": {
                 "processOperateInfoList": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/daemonizeModels.ProcessOperateInfo"
+                        "$ref": "#/definitions/daemonizemodels.ProcessOperateInfo"
                     }
                 }
             }
         },
-        "daemonizeModels.SysIotAgentConfigSetReq": {
+        "daemonizemodels.SysIotAgentConfigSetReq": {
             "type": "object",
             "required": [
                 "agent_object_id",
@@ -15103,7 +15458,7 @@
                 }
             }
         },
-        "daemonizeModels.SysIotAgentSetReq": {
+        "daemonizemodels.SysIotAgentSetReq": {
             "type": "object",
             "properties": {
                 "config_uuid": {
@@ -15133,7 +15488,7 @@
                 }
             }
         },
-        "dashboardModels.SetSysDashboard": {
+        "dashboardmodels.SetSysDashboard": {
             "type": "object",
             "required": [
                 "name",
@@ -15157,7 +15512,7 @@
                 }
             }
         },
-        "dashboardModels.SetSysDashboardData": {
+        "dashboardmodels.SetSysDashboardData": {
             "type": "object",
             "properties": {
                 "data": {
@@ -15176,7 +15531,7 @@
                 }
             }
         },
-        "deviceModels.Annotation": {
+        "devicemodels.Annotation": {
             "type": "object",
             "properties": {
                 "key": {
@@ -15187,7 +15542,7 @@
                 }
             }
         },
-        "deviceModels.DeviceGroup": {
+        "devicemodels.DeviceGroup": {
             "type": "object",
             "properties": {
                 "groupId": {
@@ -15202,7 +15557,7 @@
                 }
             }
         },
-        "deviceModels.DeviceInfo": {
+        "devicemodels.DeviceInfo": {
             "type": "object",
             "properties": {
                 "Action": {
@@ -15268,7 +15623,7 @@
                 }
             }
         },
-        "deviceModels.PerturbationVariableData": {
+        "devicemodels.PerturbationVariableData": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -15285,7 +15640,7 @@
                 }
             }
         },
-        "deviceModels.SetSysModbusDeviceConfigDataReq": {
+        "devicemodels.SetSysModbusDeviceConfigDataReq": {
             "type": "object",
             "required": [
                 "name",
@@ -15302,7 +15657,7 @@
                     "description": "扰动变量",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/deviceModels.Annotation"
+                        "$ref": "#/definitions/devicemodels.Annotation"
                     }
                 },
                 "configuration_enable": {
@@ -15348,7 +15703,7 @@
                     "description": "扰动变量",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/deviceModels.PerturbationVariableData"
+                        "$ref": "#/definitions/devicemodels.PerturbationVariableData"
                     }
                 },
                 "precision": {
@@ -15392,7 +15747,7 @@
                 }
             }
         },
-        "deviceModels.SysDeviceCheckPlanVO": {
+        "devicemodels.SysDeviceCheckPlanVO": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -15454,7 +15809,7 @@
                 }
             }
         },
-        "deviceModels.SysDeviceCheckSubjectVO": {
+        "devicemodels.SysDeviceCheckSubjectVO": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -15513,7 +15868,7 @@
                 }
             }
         },
-        "deviceModels.SysDeviceSubjectVO": {
+        "devicemodels.SysDeviceSubjectVO": {
             "type": "object",
             "properties": {
                 "attr1": {
@@ -15567,7 +15922,7 @@
                 }
             }
         },
-        "deviceModels.SysDeviceTemplateSetReq": {
+        "devicemodels.SysDeviceTemplateSetReq": {
             "type": "object",
             "required": [
                 "name",
@@ -15598,7 +15953,7 @@
                 }
             }
         },
-        "deviceMonitorModel.CameraOfferReq": {
+        "devicemonitormodel.CameraOfferReq": {
             "type": "object",
             "required": [
                 "device_id",
@@ -15622,7 +15977,7 @@
                 }
             }
         },
-        "deviceMonitorModel.ControlReq": {
+        "devicemonitormodel.ControlReq": {
             "type": "object",
             "properties": {
                 "agent_id": {
@@ -15642,7 +15997,7 @@
                 }
             }
         },
-        "deviceMonitorModel.ControlStatusItem": {
+        "devicemonitormodel.ControlStatusItem": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -15655,18 +16010,18 @@
                 }
             }
         },
-        "deviceMonitorModel.ControlStatusReq": {
+        "devicemonitormodel.ControlStatusReq": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/deviceMonitorModel.ControlStatusItem"
+                        "$ref": "#/definitions/devicemonitormodel.ControlStatusItem"
                     }
                 }
             }
         },
-        "deviceMonitorModel.DevDataReq": {
+        "devicemonitormodel.DevDataReq": {
             "type": "object",
             "properties": {
                 "dev": {
@@ -15701,7 +16056,7 @@
                 }
             }
         },
-        "deviceMonitorModel.DeviceIdsReq": {
+        "devicemonitormodel.DeviceIdsReq": {
             "type": "object",
             "required": [
                 "deviceIds"
@@ -15715,7 +16070,7 @@
                 }
             }
         },
-        "deviceMonitorModel.RemoveDevMapInfo": {
+        "devicemonitormodel.RemoveDevMapInfo": {
             "type": "object",
             "properties": {
                 "device": {
@@ -15724,7 +16079,7 @@
                 }
             }
         },
-        "deviceMonitorModel.SetDevMapInfo": {
+        "devicemonitormodel.SetDevMapInfo": {
             "type": "object",
             "properties": {
                 "data_name": {
@@ -15831,7 +16186,7 @@
                 }
             }
         },
-        "materialModels.InboundInfo": {
+        "materialmodels.InboundInfo": {
             "type": "object",
             "properties": {
                 "materialId": {
@@ -15843,7 +16198,7 @@
                 }
             }
         },
-        "materialModels.MaterialInfo": {
+        "materialmodels.MaterialInfo": {
             "type": "object",
             "required": [
                 "address",
@@ -15885,7 +16240,7 @@
                 }
             }
         },
-        "materialModels.OutboundInfo": {
+        "materialmodels.OutboundInfo": {
             "type": "object",
             "properties": {
                 "materialId": {
@@ -15900,7 +16255,7 @@
                 }
             }
         },
-        "metricModels.GatewayMetricDataQueryReq": {
+        "metricmodels.GatewayMetricDataQueryReq": {
             "type": "object",
             "properties": {
                 "end": {
@@ -15932,12 +16287,12 @@
                     "type": "string"
                 },
                 "predict": {
-                    "$ref": "#/definitions/metricModels.Predict"
+                    "$ref": "#/definitions/metricmodels.Predict"
                 },
                 "query_metric": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/metricModels.MetricQueryCondition"
+                        "$ref": "#/definitions/metricmodels.MetricQueryCondition"
                     }
                 },
                 "start": {
@@ -15954,7 +16309,7 @@
                 }
             }
         },
-        "metricModels.MetricDataQueryReq": {
+        "metricmodels.MetricDataQueryReq": {
             "type": "object",
             "properties": {
                 "end": {
@@ -15979,12 +16334,12 @@
                     "type": "string"
                 },
                 "predict": {
-                    "$ref": "#/definitions/metricModels.Predict"
+                    "$ref": "#/definitions/metricmodels.Predict"
                 },
                 "query_metric": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/metricModels.MetricQueryCondition"
+                        "$ref": "#/definitions/metricmodels.MetricQueryCondition"
                     }
                 },
                 "start": {
@@ -15998,7 +16353,7 @@
                 }
             }
         },
-        "metricModels.MetricQueryCondition": {
+        "metricmodels.MetricQueryCondition": {
             "type": "object",
             "properties": {
                 "dataId": {
@@ -16015,7 +16370,7 @@
                 }
             }
         },
-        "metricModels.MetricQueryReq": {
+        "metricmodels.MetricQueryReq": {
             "type": "object",
             "properties": {
                 "data_id": {
@@ -16053,7 +16408,7 @@
                 }
             }
         },
-        "metricModels.Predict": {
+        "metricmodels.Predict": {
             "type": "object",
             "properties": {
                 "enable": {
@@ -16143,7 +16498,7 @@
                 }
             }
         },
-        "monitorModels.JobDML": {
+        "monitormodels.JobDML": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -16183,7 +16538,7 @@
                 }
             }
         },
-        "monitorModels.JobIdAndName": {
+        "monitormodels.JobIdAndName": {
             "type": "object",
             "properties": {
                 "jobId": {
@@ -16195,7 +16550,7 @@
                 }
             }
         },
-        "monitorModels.JobLog": {
+        "monitormodels.JobLog": {
             "type": "object",
             "properties": {
                 "costTime": {
@@ -16229,7 +16584,7 @@
                 }
             }
         },
-        "monitorModels.JobVo": {
+        "monitormodels.JobVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -16272,7 +16627,7 @@
                 }
             }
         },
-        "monitorModels.SysUserOnline": {
+        "monitormodels.SysUserOnline": {
             "type": "object",
             "properties": {
                 "browser": {
@@ -16298,7 +16653,7 @@
                 }
             }
         },
-        "productModels.SysProductLaboratoryVo": {
+        "productmodels.SysProductLaboratoryVo": {
             "type": "object",
             "required": [
                 "material",
@@ -16355,7 +16710,7 @@
                 }
             }
         },
-        "resourceModels.SysResourceFileDML": {
+        "resourcemodels.SysResourceFileDML": {
             "type": "object",
             "properties": {
                 "category": {
@@ -16500,26 +16855,43 @@
                 }
             }
         },
-        "systemModels.Accredit": {
+        "settingmodels.IntegrationConfigSet": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "systemmodels.Accredit": {
             "type": "object",
             "properties": {
                 "posts": {
                     "description": "岗位",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysPostVo"
+                        "$ref": "#/definitions/systemmodels.SysPostVo"
                     }
                 },
                 "roles": {
                     "description": "角色",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysRoleIdAndName"
+                        "$ref": "#/definitions/systemmodels.SysRoleIdAndName"
                     }
                 }
             }
         },
-        "systemModels.ConsumptionNoticeVo": {
+        "systemmodels.ConsumptionNoticeVo": {
             "type": "object",
             "required": [
                 "type"
@@ -16554,7 +16926,7 @@
                 }
             }
         },
-        "systemModels.EditUserStatus": {
+        "systemmodels.EditUserStatus": {
             "type": "object",
             "required": [
                 "status",
@@ -16588,7 +16960,7 @@
                 }
             }
         },
-        "systemModels.GetInfo": {
+        "systemmodels.GetInfo": {
             "type": "object",
             "properties": {
                 "permissions": {
@@ -16604,11 +16976,11 @@
                     }
                 },
                 "user": {
-                    "$ref": "#/definitions/systemModels.User"
+                    "$ref": "#/definitions/systemmodels.User"
                 }
             }
         },
-        "systemModels.LoginBody": {
+        "systemmodels.LoginBody": {
             "type": "object",
             "required": [
                 "password",
@@ -16633,7 +17005,7 @@
                 }
             }
         },
-        "systemModels.ResetPwd": {
+        "systemmodels.ResetPwd": {
             "type": "object",
             "required": [
                 "password",
@@ -16651,7 +17023,7 @@
                 }
             }
         },
-        "systemModels.RoleDeptTree": {
+        "systemmodels.RoleDeptTree": {
             "type": "object",
             "properties": {
                 "checkedKeys": {
@@ -16665,12 +17037,12 @@
                     "description": "部门",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysDeptVo"
+                        "$ref": "#/definitions/systemmodels.SysDeptVo"
                     }
                 }
             }
         },
-        "systemModels.SelectPermission": {
+        "systemmodels.SelectPermission": {
             "type": "object",
             "properties": {
                 "parentId": {
@@ -16686,7 +17058,7 @@
                 }
             }
         },
-        "systemModels.SysConfigVo": {
+        "systemmodels.SysConfigVo": {
             "type": "object",
             "properties": {
                 "configId": {
@@ -16732,7 +17104,7 @@
                 }
             }
         },
-        "systemModels.SysDeptVo": {
+        "systemmodels.SysDeptVo": {
             "type": "object",
             "properties": {
                 "ancestors": {
@@ -16795,7 +17167,7 @@
                 }
             }
         },
-        "systemModels.SysDictDataVo": {
+        "systemmodels.SysDictDataVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -16847,7 +17219,7 @@
                 }
             }
         },
-        "systemModels.SysNoticeVo": {
+        "systemmodels.SysNoticeVo": {
             "type": "object",
             "required": [
                 "title",
@@ -16902,7 +17274,7 @@
                 }
             }
         },
-        "systemModels.SysPermissionAdd": {
+        "systemmodels.SysPermissionAdd": {
             "type": "object",
             "required": [
                 "permission"
@@ -16947,7 +17319,7 @@
                 }
             }
         },
-        "systemModels.SysPermissionEdit": {
+        "systemmodels.SysPermissionEdit": {
             "type": "object",
             "required": [
                 "permissionId"
@@ -16997,7 +17369,7 @@
                 }
             }
         },
-        "systemModels.SysPermissionVo": {
+        "systemmodels.SysPermissionVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -17044,7 +17416,7 @@
                 }
             }
         },
-        "systemModels.SysPostVo": {
+        "systemmodels.SysPostVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -17084,7 +17456,7 @@
                 }
             }
         },
-        "systemModels.SysRoleDML": {
+        "systemmodels.SysRoleDML": {
             "type": "object",
             "properties": {
                 "RoleId": {
@@ -17130,7 +17502,7 @@
                 }
             }
         },
-        "systemModels.SysRoleIdAndName": {
+        "systemmodels.SysRoleIdAndName": {
             "type": "object",
             "properties": {
                 "roleId": {
@@ -17142,7 +17514,7 @@
                 }
             }
         },
-        "systemModels.SysRoleVo": {
+        "systemmodels.SysRoleVo": {
             "type": "object",
             "properties": {
                 "createBy": {
@@ -17185,7 +17557,7 @@
                 }
             }
         },
-        "systemModels.SysUserDML": {
+        "systemmodels.SysUserDML": {
             "type": "object",
             "required": [
                 "deptId",
@@ -17272,7 +17644,7 @@
                 }
             }
         },
-        "systemModels.SysUserDataScope": {
+        "systemmodels.SysUserDataScope": {
             "type": "object",
             "required": [
                 "dataScope",
@@ -17297,7 +17669,7 @@
                 }
             }
         },
-        "systemModels.SysUserRole": {
+        "systemmodels.SysUserRole": {
             "type": "object",
             "properties": {
                 "roleId": {
@@ -17310,7 +17682,7 @@
                 }
             }
         },
-        "systemModels.SysUserVo": {
+        "systemmodels.SysUserVo": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -17375,7 +17747,7 @@
                 }
             }
         },
-        "systemModels.SysWorkShiftSettingVO": {
+        "systemmodels.SysWorkShiftSettingVO": {
             "type": "object",
             "properties": {
                 "begin_time": {
@@ -17408,7 +17780,7 @@
                 }
             }
         },
-        "systemModels.User": {
+        "systemmodels.User": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -17426,7 +17798,7 @@
                 }
             }
         },
-        "systemModels.UserAndAccredit": {
+        "systemmodels.UserAndAccredit": {
             "type": "object",
             "properties": {
                 "postIds": {
@@ -17440,7 +17812,7 @@
                     "description": "岗位",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysPostVo"
+                        "$ref": "#/definitions/systemmodels.SysPostVo"
                     }
                 },
                 "roleIds": {
@@ -17454,20 +17826,20 @@
                     "description": "角色",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/systemModels.SysRoleIdAndName"
+                        "$ref": "#/definitions/systemmodels.SysRoleIdAndName"
                     }
                 },
                 "user": {
                     "description": "user",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/systemModels.SysUserVo"
+                            "$ref": "#/definitions/systemmodels.SysUserVo"
                         }
                     ]
                 }
             }
         },
-        "systemModels.UserProfile": {
+        "systemmodels.UserProfile": {
             "type": "object",
             "properties": {
                 "postGroup": {
@@ -17482,7 +17854,7 @@
                     "description": "user",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/systemModels.SysUserVo"
+                            "$ref": "#/definitions/systemmodels.SysUserVo"
                         }
                     ]
                 }

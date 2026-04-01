@@ -31,7 +31,6 @@ func (a *AIGatewayDaoImpl) Create(c *gin.Context, req *gatewaymodels.AIGatewayUp
 		BaseURL: req.BaseURL,
 		APIKey:  req.APIKey,
 		Enabled: req.Enabled,
-		Active:  req.Active,
 		DeptID:  baizeContext.GetDeptId(c),
 		State:   commonStatus.NORMAL,
 	}
@@ -49,12 +48,11 @@ func (a *AIGatewayDaoImpl) Update(c *gin.Context, req *gatewaymodels.AIGatewayUp
 		BaseURL: req.BaseURL,
 		APIKey:  req.APIKey,
 		Enabled: req.Enabled,
-		Active:  req.Active,
 	}
 	item.SetUpdateBy(baizeContext.GetUserId(c))
 	if err := a.db.WithContext(c).Table(a.table).Where("id = ?", item.ID).Where("state = ?", commonStatus.NORMAL).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Select("name", "base_url", "api_key", "enabled", "active", "update_by", "update_time").
+		Select("name", "base_url", "api_key", "enabled", "update_by", "update_time").
 		Updates(item).Error; err != nil {
 		return nil, err
 	}
@@ -84,7 +82,7 @@ func (a *AIGatewayDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.AIG
 }
 
 func (a *AIGatewayDaoImpl) List(c *gin.Context, req *gatewaymodels.AIGatewayQuery) (*gatewaymodels.AIGatewayListData, error) {
-	db := a.db.WithContext(c).Table(a.table).Where("state = ?", commonStatus.NORMAL).Where("dept_id = ?", baizeContext.GetDeptId(c))
+	db := a.db.Table(a.table)
 	if req.Name != "" {
 		db = db.Where("name LIKE ?", "%"+req.Name+"%")
 	}
@@ -94,6 +92,7 @@ func (a *AIGatewayDaoImpl) List(c *gin.Context, req *gatewaymodels.AIGatewayQuer
 	if req.Active != nil {
 		db = db.Where("active = ?", req.Active)
 	}
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if req.Page <= 0 {
 		req.Page = 1
 	}

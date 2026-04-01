@@ -58,11 +58,6 @@ func (a *AIGatewayServiceImpl) validateUpsert(req *gatewaymodels.AIGatewayUpsert
 	if strings.TrimSpace(req.APIKey) == "" {
 		return errors.New("API Key不能为空")
 	}
-	if req.Enabled != 0 && req.Enabled != 1 {
-		return errors.New("启用状态不合法")
-	}
-	if req.Active != 0 && req.Active != 1 {
-		return errors.New("在线状态不合法")
-	}
+
 	return nil
 }

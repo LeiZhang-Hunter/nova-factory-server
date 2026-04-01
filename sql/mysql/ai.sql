@@ -232,3 +232,23 @@ CREATE TABLE IF NOT EXISTS ai_gateway (
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_general_ci
     COMMENT = '智能体网关配置表';
+
+CREATE TABLE IF NOT EXISTS ai_conversations (
+    id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    name varchar(255) NOT NULL DEFAULT '' COMMENT '会话名称',
+    message text NULL COMMENT '最后一条消息',
+    llm_provider_id varchar(128) NOT NULL DEFAULT '' COMMENT '模型供应商ID',
+    llm_model_id varchar(128) NOT NULL DEFAULT '' COMMENT '模型ID',
+    enable_thinking tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否开启思考模式',
+    chat_mode varchar(32) NOT NULL DEFAULT '' COMMENT '聊天模式',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (id),
+    KEY idx_create_time (create_time),
+    KEY idx_update_time (update_time)
+) ENGINE = InnoDB
+DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表';

@@ -7,8 +7,8 @@ type AIGateway struct {
 	Name    string `json:"name" gorm:"column:name"`
 	BaseURL string `json:"baseUrl" gorm:"column:base_url"`
 	APIKey  string `json:"apiKey" gorm:"column:api_key"`
-	Enabled int32  `json:"enabled" gorm:"column:enabled"`
-	Active  int32  `json:"active" gorm:"column:active"`
+	Enabled *bool  `json:"enabled" gorm:"column:enabled"`
+	Active  *bool  `json:"active" gorm:"column:active"`
 	DeptID  int64  `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
@@ -16,7 +16,7 @@ type AIGateway struct {
 
 type AIGatewayQuery struct {
 	Name    string `form:"name"`
-	Enabled *int32 `form:"enabled"`
+	Enabled *bool  `form:"enabled"`
 	Active  *int32 `form:"active"`
 	Page    int64  `form:"page"`
 	Size    int64  `form:"size"`
@@ -27,8 +27,7 @@ type AIGatewayUpsert struct {
 	Name    string `json:"name"`
 	BaseURL string `json:"baseUrl"`
 	APIKey  string `json:"apiKey"`
-	Enabled int32  `json:"enabled"`
-	Active  int32  `json:"active"`
+	Enabled *bool  `json:"enabled"`
 }
 
 type AIGatewayListData struct {

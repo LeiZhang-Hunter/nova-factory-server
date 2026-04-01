@@ -1,0 +1,160 @@
+package aidatasetcontroller
+
+import (
+	"io"
+	"net/http"
+
+	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
+	"nova-factory-server/app/business/ai/agent/aidatasetservice"
+	"nova-factory-server/app/middlewares"
+	"nova-factory-server/app/utils/baizeContext"
+
+	"github.com/gin-gonic/gin"
+)
+
+type Agent struct {
+	service        aidatasetservice.IAiConversationService
+	gatewayService aidatasetservice.IAIGatewayService
+}
+
+// NewAgent 会话控制器构造函数。
+func NewAgent(service aidatasetservice.IAiConversationService, gatewayService aidatasetservice.IAIGatewayService) *Agent {
+	return &Agent{
+		service:        service,
+		gatewayService: gatewayService,
+	}
+}
+
+// PrivateRoutes 注册会话相关私有路由。
+func (agent *Agent) PrivateRoutes(router *gin.RouterGroup) {
+	group := router.Group("/ai/agent/conversations")
+	group.GET("/list", middlewares.HasPermission("ai:agent:conversations:list"), agent.ListConversations)
+	group.POST("/create", middlewares.HasPermission("ai:agent:conversations:create"), agent.CreateConversation)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:conversations:remove"), agent.RemoveConversation)
+	group.POST("/chat", middlewares.HasPermission("ai:agent:conversations:chat"), agent.Chat)
+}
+
+// ListConversations 查询会话列表
+// @Summary 查询会话列表
+// @Description 查询会话列表
+// @Tags 工业智能体/会话管理
+// @Param object query aidatasetmodels.AiConversationQuery true "会话列表查询参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /ai/agent/conversations/list [get]
+func (agent *Agent) ListConversations(c *gin.Context) {
+	req := new(aidatasetmodels.AiConversationQuery)
+	if err := c.ShouldBindQuery(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := agent.service.List(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// CreateConversation 创建会话
+// @Summary 创建会话
+// @Description 创建会话
+// @Tags 工业智能体/会话管理
+// @Param object body aidatasetmodels.SetAiConversation true "创建会话参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "创建成功"
+// @Router /ai/agent/conversations/create [post]
+func (agent *Agent) CreateConversation(c *gin.Context) {
+	req := new(aidatasetmodels.SetAiConversation)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := agent.service.Create(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// RemoveConversation 删除会话（软删除）
+// @Summary 删除会话
+// @Description 删除会话（软删除）
+// @Tags 工业智能体/会话管理
+// @Param ids path string true "会话ID，多个用逗号分隔"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "删除成功"
+// @Router /ai/agent/conversations/remove/{ids} [delete]
+func (agent *Agent) RemoveConversation(c *gin.Context) {
+	ids := baizeContext.ParamInt64Array(c, "ids")
+	if len(ids) == 0 {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if err := agent.service.Remove(c, ids); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
+}
+
+// Chat 会话聊天
+// @Summary 会话聊天
+// @Description 会话聊天
+// @Tags 工业智能体/会话管理
+// @Param object body aidatasetmodels.SendMessageInput true "发送消息参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "发送成功"
+// @Router /ai/agent/conversations/chat [post]
+func (agent *Agent) Chat(c *gin.Context) {
+	req := new(aidatasetmodels.SendMessageInput)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Content == "" {
+		baizeContext.Waring(c, "提问内容不能为空")
+		return
+	}
+	data, err := agent.gatewayService.Chat(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	if data != nil && data.IsStream && data.Body != nil {
+		defer data.Body.Close()
+		for k, v := range data.Headers {
+			if v != "" {
+				c.Header(k, v)
+			}
+		}
+		if data.StatusCode > 0 {
+			c.Status(data.StatusCode)
+		} else {
+			c.Status(http.StatusOK)
+		}
+		flusher, ok := c.Writer.(http.Flusher)
+		if !ok {
+			baizeContext.Waring(c, "当前连接不支持流式输出")
+			return
+		}
+		buf := make([]byte, 4096)
+		for {
+			n, readErr := data.Body.Read(buf)
+			if n > 0 {
+				if _, writeErr := c.Writer.Write(buf[:n]); writeErr != nil {
+					return
+				}
+				flusher.Flush()
+			}
+			if readErr != nil {
+				if readErr == io.EOF {
+					return
+				}
+				return
+			}
+		}
+	}
+	baizeContext.SuccessData(c, data)
+}

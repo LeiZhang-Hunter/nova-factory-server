@@ -18,6 +18,150 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/ai/agent/conversations/chat": {
+            "post": {
+                "description": "会话聊天",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "会话聊天",
+                "parameters": [
+                    {
+                        "description": "发送消息参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.SendMessageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "发送成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/conversations/create": {
+            "post": {
+                "description": "创建会话",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "创建会话",
+                "parameters": [
+                    {
+                        "description": "创建会话参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.SetAiConversation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/conversations/list": {
+            "get": {
+                "description": "查询会话列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "查询会话列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/conversations/remove/{ids}": {
+            "delete": {
+                "description": "删除会话（软删除）",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "删除会话",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "会话ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/control/list": {
             "get": {
                 "description": "预测控制列表",
@@ -7007,6 +7151,177 @@ const docTemplate = `{
                 }
             }
         },
+        "/erp/setting/integration-config/check-login-state": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按集成类型检查当前启用配置的登录态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "检查集成系统登录态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "接入类型",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "检查地址，优先级高于配置",
+                        "name": "checkUrl",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "回调地址，优先级高于配置",
+                        "name": "redirectUrl",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "检查成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/integration-config/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询ERP集成配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "集成配置列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "接入类型",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页条数",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/integration-config/oauth/callback": {
+            "get": {
+                "description": "接收管家婆OAuth回调的code和state",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "集成OAuth回调",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "授权码",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "透传字段",
+                        "name": "state",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "接收成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/integration-config/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改ERP集成配置，仅允许存在一条启用配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "集成配置设置",
+                "parameters": [
+                    {
+                        "description": "集成配置参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/settingmodels.IntegrationConfigSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/file/downloadPrivateFile": {
             "get": {
                 "security": [
@@ -13188,6 +13503,20 @@ const docTemplate = `{
                 }
             }
         },
+        "aidatasetmodels.SendMessageInput": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "conversation_id": {
+                    "type": "integer"
+                },
+                "tab_id": {
+                    "type": "string"
+                }
+            }
+        },
         "aidatasetmodels.SessionAgentCreate": {
             "type": "object",
             "properties": {
@@ -13197,6 +13526,32 @@ const docTemplate = `{
                 "data": {
                     "type": "object",
                     "additionalProperties": true
+                }
+            }
+        },
+        "aidatasetmodels.SetAiConversation": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "chatMode": {
+                    "type": "string"
+                },
+                "enableThinking": {
+                    "type": "integer"
+                },
+                "llmModelId": {
+                    "type": "string"
+                },
+                "llmProviderId": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -16504,6 +16859,23 @@ const docTemplate = `{
                 },
                 "msg": {
                     "description": "提示信息",
+                    "type": "string"
+                }
+            }
+        },
+        "settingmodels.IntegrationConfigSet": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "type": {
                     "type": "string"
                 }
             }
