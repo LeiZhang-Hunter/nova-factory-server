@@ -4,6 +4,7 @@ package ai
 
 import (
 	"nova-factory-server/app/business/ai/agent/aidatasetcontroller"
+	"nova-factory-server/app/business/ai/gateway/gatewaycontroller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
@@ -18,6 +19,7 @@ func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
 	ai *aidatasetcontroller.AiDataSet,
+	gateway *gatewaycontroller.Controller,
 	bootstrap *FactoryBootstrap) *AI {
 	go func() {
 		defer func() {
@@ -41,6 +43,7 @@ func NewGinEngine(
 		ai.Control.PrivateRoutes(group)
 		ai.Model.PrivateRoutes(group)
 		ai.OCR.PrivateRoutes(group)
+		gateway.AIGateway.PrivateRoutes(group)
 	}
 
 	return &AI{}
