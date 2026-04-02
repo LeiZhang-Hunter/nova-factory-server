@@ -11,7 +11,7 @@ type Conversations interface {
 
 // SendMessageInput input for sending a message
 type SendMessageInput struct {
-	ConversationID int64  `json:"conversation_id"`
+	ConversationID int64  `json:"conversation_id,string"`
 	AgentGateway   string `json:"agent_gateway"` // AgentGateway 指定网关标识。
 	Content        string `json:"content"`
 	TabID          string `json:"tab_id"`

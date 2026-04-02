@@ -36,7 +36,7 @@ type AiConversationListData struct {
 
 // SendMessageInput input for sending a message
 type SendMessageInput struct {
-	ConversationID int64  `json:"conversation_id"`
+	ConversationID int64  `json:"conversation_id,string"`
 	Content        string `json:"content"`
 	TabID          string `json:"tab_id"`
 }

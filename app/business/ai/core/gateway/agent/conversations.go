@@ -39,7 +39,7 @@ func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*a
 	}
 	resp, _, err := c.client.DoRaw(ctx, client.Request{
 		Method:       "POST",
-		Path:         "/agent/chat",
+		Path:         "/api/agent/chat",
 		Headers:      map[string]string{},
 		AgentGateway: req.AgentGateway,
 		Body:         chatBodyJSON,
