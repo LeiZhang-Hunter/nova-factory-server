@@ -8,7 +8,6 @@ type AIGateway struct {
 	BaseURL string `json:"baseUrl" gorm:"column:base_url"`
 	APIKey  string `json:"apiKey" gorm:"column:api_key"`
 	Enabled *bool  `json:"enabled" gorm:"column:enabled"`
-	Active  *bool  `json:"active" gorm:"column:active"`
 	DeptID  int64  `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
