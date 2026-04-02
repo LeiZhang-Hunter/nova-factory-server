@@ -1,16 +1,15 @@
 package aidatasetcontroller
 
 import (
-	"fmt"
 	"net/http"
 
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	sseUtils "nova-factory-server/app/utils/sse"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tmaxmax/go-sse"
 	"go.uber.org/zap"
 )
 
@@ -122,6 +121,7 @@ func (agent *Agent) Chat(c *gin.Context) {
 	}
 	data, err := agent.gatewayService.Chat(c, req)
 	if err != nil {
+		zap.L().Error("chat error", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}
@@ -137,26 +137,10 @@ func (agent *Agent) Chat(c *gin.Context) {
 		} else {
 			c.Status(http.StatusOK)
 		}
-		flusher, ok := c.Writer.(http.Flusher)
-		if !ok {
-			baizeContext.Waring(c, "当前连接不支持流式输出")
-			return
+		if streamErr := sseUtils.Transport(c.Writer, data.Body); streamErr != nil {
+			zap.L().Warn("sse stream read failed", zap.Error(streamErr))
 		}
-		for ev, readErr := range sse.Read(data.Body, nil) {
-			if readErr != nil {
-				fmt.Fprintf(c.Writer, "event: error\n")
-				fmt.Fprintf(c.Writer, "data: %s\n\n", readErr.Error())
-				flusher.Flush()
-				return
-			}
-			if _, writeErr := fmt.Fprintf(c.Writer, "data: %s\n\n", ev.Data); writeErr != nil {
-				fmt.Fprintf(c.Writer, "event: error\n")
-				fmt.Fprintf(c.Writer, "data: %s\n\n", readErr.Error())
-				flusher.Flush()
-				return
-			}
-			flusher.Flush()
-		}
+		return
 	}
 	baizeContext.SuccessData(c, data)
 }
