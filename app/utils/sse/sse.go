@@ -2,10 +2,46 @@ package sse
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
 )
+
+// ApplyHeaders 应用并补齐 SSE 响应头。
+func ApplyHeaders(h http.Header, upstream map[string]string) {
+	for k, v := range upstream {
+		if v != "" {
+			h.Set(k, v)
+		}
+	}
+	if h.Get("Content-Type") == "" {
+		h.Set("Content-Type", "text/event-stream; charset=utf-8")
+	}
+	if h.Get("Cache-Control") == "" {
+		h.Set("Cache-Control", "no-cache")
+	}
+	if h.Get("Connection") == "" {
+		h.Set("Connection", "keep-alive")
+	}
+	if h.Get("X-Accel-Buffering") == "" {
+		h.Set("X-Accel-Buffering", "no")
+	}
+}
+
+// WriteErrorEvent 向下游写入 SSE 错误事件。
+func WriteErrorEvent(w http.ResponseWriter, message string) error {
+	if message == "" {
+		message = "sse stream failed"
+	}
+	if _, err := fmt.Fprintf(w, "event: error\ndata: %s\n\n", message); err != nil {
+		return err
+	}
+	if flusher, ok := w.(http.Flusher); ok {
+		flusher.Flush()
+	}
+	return nil
+}
 
 // Transport SSE透传给下游并支持空闲超时控制。
 func Transport(w http.ResponseWriter, body io.ReadCloser, idleTimeout time.Duration) error {

@@ -127,18 +127,22 @@ func (agent *Agent) Chat(c *gin.Context) {
 		return
 	}
 	if data != nil && data.IsStream && data.Body != nil {
+		c.Writer.Header().Set("Content-Type", "text/event-stream")
+		c.Writer.Header().Set("Cache-Control", "no-cache")
+		c.Writer.Header().Set("Connection", "keep-alive")
+		// 禁用nginx缓存,防止nginx会缓存数据导致数据流是一段一段的
+		c.Writer.Header().Set("X-Accel-Buffering", "no")
 		defer data.Body.Close()
-		for k, v := range data.Headers {
-			if v != "" {
-				c.Header(k, v)
-			}
-		}
+		sseUtils.ApplyHeaders(c.Writer.Header(), data.Headers)
 		if data.StatusCode > 0 {
 			c.Status(data.StatusCode)
 		} else {
 			c.Status(http.StatusOK)
 		}
 		if streamErr := sseUtils.Transport(c.Writer, data.Body, 60*time.Second); streamErr != nil {
+			if writeErr := sseUtils.WriteErrorEvent(c.Writer, streamErr.Error()); writeErr != nil {
+				zap.L().Warn("sse write error event failed", zap.Error(writeErr))
+			}
 			zap.L().Warn("sse stream read failed", zap.Error(streamErr))
 		}
 		return
