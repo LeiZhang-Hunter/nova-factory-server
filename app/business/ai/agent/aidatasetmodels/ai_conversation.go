@@ -16,6 +16,7 @@ type AiConversation struct {
 }
 
 type SetAiConversation struct {
+	ID             int64  `json:"id,string"`
 	Name           string `json:"name" binding:"required"`
 	Message        string `json:"message"`
 	LLMProviderID  string `json:"llmProviderId"`

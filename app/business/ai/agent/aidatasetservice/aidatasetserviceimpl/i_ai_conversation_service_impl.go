@@ -22,6 +22,10 @@ func (i *IAiConversationServiceImpl) Create(c *gin.Context, req *aidatasetmodels
 	return i.dao.Create(c, req)
 }
 
+func (i *IAiConversationServiceImpl) Update(c *gin.Context, req *aidatasetmodels.SetAiConversation) (*aidatasetmodels.AiConversation, error) {
+	return i.dao.Update(c, req)
+}
+
 func (i *IAiConversationServiceImpl) List(c *gin.Context, req *aidatasetmodels.AiConversationQuery) (*aidatasetmodels.AiConversationListData, error) {
 	return i.dao.List(c, req)
 }

@@ -45,6 +45,7 @@ func NewGinEngine(
 		ai.Agent.PrivateRoutes(group)
 		ai.OCR.PrivateRoutes(group)
 		gateway.AIGateway.PrivateRoutes(group)
+		gateway.Conversations.PrivateRoutes(group)
 	}
 
 	return &AI{}

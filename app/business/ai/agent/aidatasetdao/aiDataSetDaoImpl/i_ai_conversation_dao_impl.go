@@ -43,6 +43,40 @@ func (i *IAiConversationDaoImpl) Create(c *gin.Context, req *aidatasetmodels.Set
 	return data, nil
 }
 
+func (i *IAiConversationDaoImpl) Update(c *gin.Context, req *aidatasetmodels.SetAiConversation) (*aidatasetmodels.AiConversation, error) {
+	data := &aidatasetmodels.AiConversation{}
+	if err := i.db.WithContext(c).Table(i.table).
+		Where("id = ?", req.ID).
+		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL).
+		First(data).Error; err != nil {
+		return nil, err
+	}
+	data.Name = req.Name
+	data.Message = req.Message
+	data.LLMProviderID = req.LLMProviderID
+	data.LLMModelID = req.LLMModelID
+	data.EnableThinking = req.EnableThinking
+	data.ChatMode = req.ChatMode
+	data.SetUpdateBy(baizeContext.GetUserId(c))
+	if err := i.db.WithContext(c).Table(i.table).
+		Where("id = ?", req.ID).
+		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Updates(map[string]interface{}{
+			"name":            data.Name,
+			"message":         data.Message,
+			"llm_provider_id": data.LLMProviderID,
+			"llm_model_id":    data.LLMModelID,
+			"enable_thinking": data.EnableThinking,
+			"chat_mode":       data.ChatMode,
+			"update_by":       data.UpdateBy,
+			"update_time":     data.UpdateTime,
+		}).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiConversationQuery) (*aidatasetmodels.AiConversationListData, error) {
 	db := i.db.WithContext(c).Table(i.table).Where("state = ?", commonStatus.NORMAL).
 		Where("dept_id = ?", baizeContext.GetDeptId(c))
