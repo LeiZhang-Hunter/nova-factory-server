@@ -7,6 +7,7 @@ import (
 
 type Conversations interface {
 	Chat(ctx context.Context, req *SendMessageInput) (*ChatResponse, error)
+	StopGeneration(ctx context.Context, req *StopGenerationInput) (*StopGenerationResponse, error)
 }
 
 // SendMessageInput input for sending a message
@@ -15,6 +16,13 @@ type SendMessageInput struct {
 	AgentGateway   string `json:"agent_gateway"` // AgentGateway 指定网关标识。
 	Content        string `json:"content"`
 	TabID          string `json:"tab_id"`
+}
+
+// StopGenerationInput 停止生成请求参数。
+type StopGenerationInput struct {
+	ConversationID int64  `json:"conversation_id,string"` // ConversationID 会话ID。
+	AgentGateway   string `json:"agent_gateway"`          // AgentGateway 指定网关标识。
+	TabID          string `json:"tab_id"`                 // TabID 标签页ID。
 }
 
 // ChatRequest 网关聊天请求参数。
@@ -34,4 +42,10 @@ type ChatResponse struct {
 	IsStream   bool              `json:"is_stream"`
 	Headers    map[string]string `json:"-"`
 	Body       io.ReadCloser     `json:"-"`
+}
+
+// StopGenerationResponse 停止生成响应。
+type StopGenerationResponse struct {
+	StatusCode int    `json:"status_code"` // StatusCode 上游返回状态码。
+	Message    string `json:"message"`     // Message 上游返回消息。
 }

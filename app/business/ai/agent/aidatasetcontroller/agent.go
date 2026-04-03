@@ -34,6 +34,7 @@ func (agent *Agent) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/create", middlewares.HasPermission("ai:agent:conversations:create"), agent.CreateConversation)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:conversations:remove"), agent.RemoveConversation)
 	group.POST("/chat", middlewares.HasPermission("ai:agent:conversations:chat"), agent.Chat)
+	group.POST("/stop-generation", middlewares.HasPermission("ai:agent:conversations:stop-generation"), agent.StopGeneration)
 }
 
 // ListConversations 查询会话列表
@@ -145,6 +146,30 @@ func (agent *Agent) Chat(c *gin.Context) {
 			}
 			zap.L().Warn("sse stream read failed", zap.Error(streamErr))
 		}
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// StopGeneration 停止会话生成
+// @Summary 停止会话生成
+// @Description 停止上游会话生成任务
+// @Tags 工业智能体/会话管理
+// @Param object body aidatasetmodels.StopGenerationInput true "停止生成参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "停止成功"
+// @Router /ai/agent/conversations/stop-generation [post]
+func (agent *Agent) StopGeneration(c *gin.Context) {
+	req := new(aidatasetmodels.StopGenerationInput)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		zap.L().Error("param error", zap.Error(err))
+		return
+	}
+	data, err := agent.gatewayService.StopGeneration(c, req)
+	if err != nil {
+		zap.L().Error("stop generation error", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
 		return
 	}
 	baizeContext.SuccessData(c, data)

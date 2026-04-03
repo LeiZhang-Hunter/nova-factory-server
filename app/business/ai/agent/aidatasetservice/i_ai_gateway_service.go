@@ -9,4 +9,5 @@ import (
 
 type IAIGatewayService interface {
 	Chat(c *gin.Context, req *aidatasetmodels.SendMessageInput) (*gatewayapi.ChatResponse, error)
+	StopGeneration(c *gin.Context, req *aidatasetmodels.StopGenerationInput) (*gatewayapi.StopGenerationResponse, error)
 }

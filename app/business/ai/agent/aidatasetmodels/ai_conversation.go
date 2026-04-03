@@ -40,3 +40,9 @@ type SendMessageInput struct {
 	Content        string `json:"content"`
 	TabID          string `json:"tab_id"`
 }
+
+// StopGenerationInput input for stopping message generation
+type StopGenerationInput struct {
+	ConversationID int64  `json:"conversation_id,string"`
+	TabID          string `json:"tab_id"`
+}

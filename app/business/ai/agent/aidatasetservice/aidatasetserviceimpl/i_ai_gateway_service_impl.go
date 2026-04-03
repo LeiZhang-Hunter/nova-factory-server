@@ -3,6 +3,8 @@ package aidatasetserviceimpl
 import (
 	"context"
 	"errors"
+	"strings"
+
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	coreclient "nova-factory-server/app/business/ai/core/client"
@@ -44,6 +46,42 @@ func (i *IAIGatewayServiceImpl) Chat(c *gin.Context, req *aidatasetmodels.SendMe
 	if req.TabID == "" {
 		return nil, errors.New("tab_id不能为空")
 	}
+	conversations, err := i.newConversationsClient(c)
+	if err != nil {
+		return nil, err
+	}
+	return conversations.Chat(context.Background(), &gatewayapi.SendMessageInput{
+		ConversationID: req.ConversationID,
+		AgentGateway:   "",
+		Content:        req.Content,
+		TabID:          req.TabID,
+	})
+}
+
+// StopGeneration 停止上游正在进行中的模型生成。
+func (i *IAIGatewayServiceImpl) StopGeneration(c *gin.Context, req *aidatasetmodels.StopGenerationInput) (*gatewayapi.StopGenerationResponse, error) {
+	if req == nil {
+		return nil, errors.New("request is nil")
+	}
+	if req.ConversationID == 0 {
+		return nil, errors.New("conversation_id不能为空")
+	}
+	if strings.TrimSpace(req.TabID) == "" {
+		return nil, errors.New("tab_id不能为空")
+	}
+	conversations, err := i.newConversationsClient(c)
+	if err != nil {
+		return nil, err
+	}
+	return conversations.StopGeneration(context.Background(), &gatewayapi.StopGenerationInput{
+		ConversationID: req.ConversationID,
+		AgentGateway:   "",
+		TabID:          req.TabID,
+	})
+}
+
+// newConversationsClient 创建会话网关客户端并注入当前可用网关。
+func (i *IAIGatewayServiceImpl) newConversationsClient(c *gin.Context) (gatewayapi.Conversations, error) {
 	enabled := true
 	listData, err := i.gatewayService.List(c, &gatewaymodels.AIGatewayQuery{
 		Enabled: &enabled,
@@ -75,16 +113,11 @@ func (i *IAIGatewayServiceImpl) Chat(c *gin.Context, req *aidatasetmodels.SendMe
 	if len(endpoints) == 0 {
 		return nil, errors.New("未配置可用网关")
 	}
-	i.config.Endpoints = endpoints
-	cli, err := coreclient.NewClient(*i.config)
+	cfg := *i.config
+	cfg.Endpoints = endpoints
+	cli, err := coreclient.NewClient(cfg)
 	if err != nil {
 		return nil, err
 	}
-	conversations := conversationagent.NewConversations(cli)
-	return conversations.Chat(context.Background(), &gatewayapi.SendMessageInput{
-		ConversationID: req.ConversationID,
-		AgentGateway:   "",
-		Content:        req.Content,
-		TabID:          req.TabID,
-	})
+	return conversationagent.NewConversations(cli), nil
 }

@@ -75,3 +75,36 @@ func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*a
 		Message:    message,
 	}, nil
 }
+
+// StopGeneration 停止指定会话下的模型生成。
+func (c *Conversations) StopGeneration(ctx context.Context, req *api.StopGenerationInput) (*api.StopGenerationResponse, error) {
+	if req == nil {
+		return nil, errors.New("request is nil")
+	}
+	if req.ConversationID == 0 {
+		return nil, errors.New("conversation_id不能为空")
+	}
+	if strings.TrimSpace(req.TabID) == "" {
+		return nil, errors.New("tab_id不能为空")
+	}
+	bodyJSON, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	statusCode, message, err := c.client.Do(ctx, client.Request{
+		Method: "POST",
+		Path:   "/api/agent/stop-generation",
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+		AgentGateway: req.AgentGateway,
+		Body:         bodyJSON,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &api.StopGenerationResponse{
+		StatusCode: statusCode,
+		Message:    message,
+	}, nil
+}
