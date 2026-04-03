@@ -2,6 +2,7 @@ package aidatasetcontroller
 
 import (
 	"net/http"
+	"time"
 
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
@@ -137,7 +138,7 @@ func (agent *Agent) Chat(c *gin.Context) {
 		} else {
 			c.Status(http.StatusOK)
 		}
-		if streamErr := sseUtils.Transport(c.Writer, data.Body); streamErr != nil {
+		if streamErr := sseUtils.Transport(c.Writer, data.Body, 60*time.Second); streamErr != nil {
 			zap.L().Warn("sse stream read failed", zap.Error(streamErr))
 		}
 		return

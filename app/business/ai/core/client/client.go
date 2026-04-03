@@ -25,6 +25,7 @@ type endpointState struct {
 
 type Client struct {
 	httpClient          *http.Client
+	streamHTTPClient    *http.Client
 	endpoints           []endpointState
 	algorithm           Algorithm
 	apiKeyHeader        string
@@ -106,6 +107,10 @@ func NewClient(cfg Config) (*Client, error) {
 			Timeout:   timeout,
 			Transport: transport,
 		},
+		streamHTTPClient: &http.Client{
+			Timeout:   0,
+			Transport: transport,
+		},
 		endpoints:           endpoints,
 		algorithm:           algo,
 		apiKeyHeader:        apiKeyHeader,
@@ -155,7 +160,11 @@ func (c *Client) doRaw(ctx context.Context, req Request) (*http.Response, string
 		if err != nil {
 			return nil, "", err
 		}
-		resp, err := c.httpClient.Do(httpReq)
+		httpCli := c.httpClient
+		if req.Stream {
+			httpCli = c.streamHTTPClient
+		}
+		resp, err := httpCli.Do(httpReq)
 		if err != nil {
 			lastErr = err
 			continue

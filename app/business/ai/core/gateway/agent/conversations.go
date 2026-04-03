@@ -43,6 +43,7 @@ func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*a
 		Headers:      map[string]string{},
 		AgentGateway: req.AgentGateway,
 		Body:         chatBodyJSON,
+		Stream:       true,
 	})
 	if err != nil {
 		return nil, err

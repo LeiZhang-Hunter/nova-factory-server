@@ -46,4 +46,5 @@ type Request struct {
 	Headers      map[string]string
 	Body         []byte
 	AgentGateway string
+	Stream       bool
 }

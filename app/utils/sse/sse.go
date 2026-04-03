@@ -2,55 +2,75 @@ package sse
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
-	"strings"
-
-	gosse "github.com/tmaxmax/go-sse"
+	"time"
 )
 
-// Transport SSE透传给下游
-func Transport(w http.ResponseWriter, body io.Reader) error {
+// Transport SSE透传给下游并支持空闲超时控制。
+func Transport(w http.ResponseWriter, body io.ReadCloser, idleTimeout time.Duration) error {
+	if idleTimeout <= 0 {
+		idleTimeout = 60 * time.Second
+	}
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		return errors.New("response writer not support flush")
 	}
-	for ev, readErr := range gosse.Read(body, nil) {
-		if readErr != nil {
-			fmt.Fprintf(w, "event: error\n")
-			fmt.Fprintf(w, "data: %s\n\n", readErr.Error())
-			flusher.Flush()
-			return readErr
-		}
-		var builder strings.Builder
-		if ev.Type != "" {
-			builder.WriteString("event: ")
-			builder.WriteString(ev.Type)
-			builder.WriteString("\n")
-		}
-		if ev.LastEventID != "" {
-			builder.WriteString("id: ")
-			builder.WriteString(ev.LastEventID)
-			builder.WriteString("\n")
-		}
-		if ev.Data == "" {
-			builder.WriteString("data:\n")
-		} else {
-			for _, line := range strings.Split(ev.Data, "\n") {
-				builder.WriteString("data: ")
-				builder.WriteString(line)
-				builder.WriteString("\n")
+	type streamResult struct {
+		data []byte
+		err  error
+	}
+	resultCh := make(chan streamResult)
+	go func() {
+		defer close(resultCh)
+		buf := make([]byte, 32*1024)
+		for {
+			n, readErr := body.Read(buf)
+			if n > 0 {
+				chunk := make([]byte, n)
+				copy(chunk, buf[:n])
+				resultCh <- streamResult{data: chunk}
+			}
+			if readErr != nil {
+				if errors.Is(readErr, io.EOF) {
+					return
+				}
+				resultCh <- streamResult{err: readErr}
+				return
 			}
 		}
-		builder.WriteString("\n")
-		if _, writeErr := w.Write([]byte(builder.String())); writeErr != nil {
-			fmt.Fprintf(w, "event: error\n")
-			fmt.Fprintf(w, "data: %s\n\n", writeErr.Error())
-			flusher.Flush()
-			return writeErr
+	}()
+	timer := time.NewTimer(idleTimeout)
+	defer timer.Stop()
+	resetTimer := func() {
+		if !timer.Stop() {
+			select {
+			case <-timer.C:
+			default:
+			}
 		}
-		flusher.Flush()
+		timer.Reset(idleTimeout)
 	}
-	return nil
+	for {
+		select {
+		case <-timer.C:
+			_ = body.Close()
+			return errors.New("sse idle timeout")
+		case result, ok := <-resultCh:
+			if !ok {
+				return nil
+			}
+			if result.err != nil {
+				return result.err
+			}
+			resetTimer()
+			if len(result.data) == 0 {
+				continue
+			}
+			if _, writeErr := w.Write(result.data); writeErr != nil {
+				return writeErr
+			}
+			flusher.Flush()
+		}
+	}
 }
