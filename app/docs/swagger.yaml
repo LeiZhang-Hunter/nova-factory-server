@@ -337,7 +337,8 @@ definitions:
       content:
         type: string
       conversation_id:
-        type: integer
+        example: "0"
+        type: string
       tab_id:
         type: string
     type: object
@@ -355,6 +356,9 @@ definitions:
         type: string
       enableThinking:
         type: integer
+      id:
+        example: "0"
+        type: string
       llmModelId:
         type: string
       llmProviderId:
@@ -476,6 +480,14 @@ definitions:
       api_key:
         type: string
       llm_factory:
+        type: string
+    type: object
+  aidatasetmodels.StopGenerationInput:
+    properties:
+      conversation_id:
+        example: "0"
+        type: string
+      tab_id:
         type: string
     type: object
   aidatasetmodels.UpdateAssistantRequest:
@@ -2648,7 +2660,6 @@ definitions:
     - 412
     - 500
     - 600
-    format: int64
     type: integer
     x-enum-comments:
       Error: 系统异常
@@ -2657,13 +2668,6 @@ definitions:
       Success: 成功
       Unauthorized: token失效
       Waring: 详情看msg
-    x-enum-descriptions:
-    - 成功
-    - token失效
-    - 没有权限
-    - 参数错误
-    - 系统异常
-    - 详情看msg
     x-enum-varnames:
     - Success
     - Unauthorized
@@ -3523,6 +3527,26 @@ paths:
       summary: 删除会话
       tags:
       - 工业智能体/会话管理
+  /ai/agent/conversations/stop-generation:
+    post:
+      description: 停止上游会话生成任务
+      parameters:
+      - description: 停止生成参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.StopGenerationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 停止成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 停止会话生成
+      tags:
+      - 工业智能体/会话管理
   /ai/control/list:
     get:
       description: 预测控制列表
@@ -3861,7 +3885,6 @@ paths:
       description: 下载文档
       parameters:
       - description: document_id
-        format: int64
         in: path
         name: document_id
         required: true
@@ -3981,7 +4004,6 @@ paths:
       description: 移除数据集
       parameters:
       - description: dataset_id
-        format: int64
         in: path
         name: dataset_id
         required: true
@@ -4352,7 +4374,6 @@ paths:
       description: 更新文档
       parameters:
       - description: document_id
-        format: int64
         in: path
         name: document_id
         required: true
@@ -4382,7 +4403,6 @@ paths:
       description: 上传文档
       parameters:
       - description: datasetId
-        format: int64
         in: path
         name: datasetId
         required: true
@@ -4493,6 +4513,80 @@ paths:
       summary: 设置异常预警
       tags:
       - 工业智能体/异常预警
+  /ai/gateway/conversations/list:
+    get:
+      description: 查询会话列表
+      parameters:
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 查询会话列表
+      tags:
+      - 网关/会话管理
+  /ai/gateway/conversations/remove/{ids}:
+    delete:
+      description: 删除会话（软删除）
+      parameters:
+      - description: 会话ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除会话
+      tags:
+      - 网关/会话管理
+  /ai/gateway/conversations/set:
+    post:
+      description: 传入id时修改，不传id时新增
+      parameters:
+      - description: 会话设置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.SetAiConversation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 新增或修改会话
+      tags:
+      - 网关/会话管理
   /ai/model/provider/global/get:
     get:
       description: 读取SetGlobalModel保存的用户模型配置
@@ -4776,7 +4870,6 @@ paths:
       description: 告警数据详情
       parameters:
       - description: objectId
-        format: int64
         in: query
         name: object
         required: true
@@ -7260,7 +7353,6 @@ paths:
       description: 移除工艺
       parameters:
       - description: craft_route_id
-        format: int64
         in: path
         name: craft_route_id
         required: true
@@ -9227,7 +9319,6 @@ paths:
           description: OK
           schema:
             items:
-              format: int32
               type: integer
             type: array
       security:
@@ -9697,7 +9788,6 @@ paths:
         description: dictCodes
         in: path
         items:
-          format: int64
           type: integer
         name: dictCodes
         required: true
@@ -10467,7 +10557,6 @@ paths:
           description: OK
           schema:
             items:
-              format: int32
               type: integer
             type: array
       security:
@@ -11093,7 +11182,6 @@ paths:
         description: userIds
         in: path
         items:
-          format: int64
           type: integer
         name: userIds
         required: true
@@ -11115,7 +11203,6 @@ paths:
       description: 根据用户ID获取用户信息
       parameters:
       - description: userId
-        format: int64
         in: path
         name: id
         required: true
@@ -11241,7 +11328,6 @@ paths:
       description: 查询用户数据权限
       parameters:
       - description: userId
-        format: int64
         in: path
         name: id
         required: true
@@ -11311,7 +11397,6 @@ paths:
           description: OK
           schema:
             items:
-              format: int32
               type: integer
             type: array
       security:
@@ -11352,7 +11437,6 @@ paths:
           description: OK
           schema:
             items:
-              format: int32
               type: integer
             type: array
       security:

@@ -1,4 +1,4 @@
-package aidatasetcontroller
+package gatewaycontroller
 
 import (
 	"net/http"
@@ -117,10 +117,19 @@ func (agent *Agent) Chat(c *gin.Context) {
 		zap.L().Error("param error", zap.Error(err))
 		return
 	}
+	if req.ConversationID == 0 {
+		baizeContext.Waring(c, "会话id不能为空")
+		zap.L().Error("ConversationID error")
+		return
+	}
 	if req.Content == "" {
 		baizeContext.Waring(c, "提问内容不能为空")
 		return
 	}
+	if req.TabID == "" {
+		req.TabID = "team"
+	}
+
 	data, err := agent.gatewayService.Chat(c, req)
 	if err != nil {
 		zap.L().Error("chat error", zap.Error(err))

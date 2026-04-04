@@ -37,9 +37,6 @@ func (i *IAIGatewayServiceImpl) Chat(c *gin.Context, req *aidatasetmodels.SendMe
 	if req == nil {
 		return nil, errors.New("request is nil")
 	}
-	if req.ConversationID == 0 {
-		return nil, errors.New("conversation_id不能为空")
-	}
 	if req.Content == "" {
 		return nil, errors.New("content不能为空")
 	}

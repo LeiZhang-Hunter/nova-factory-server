@@ -162,6 +162,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/agent/conversations/stop-generation": {
+            "post": {
+                "description": "停止上游会话生成任务",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/会话管理"
+                ],
+                "summary": "停止会话生成",
+                "parameters": [
+                    {
+                        "description": "停止生成参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.StopGenerationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "停止成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/control/list": {
             "get": {
                 "description": "预测控制列表",
@@ -690,7 +721,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -872,7 +902,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "dataset_id",
                         "name": "dataset_id",
                         "in": "path",
@@ -1417,7 +1446,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "document_id",
                         "name": "document_id",
                         "in": "path",
@@ -1502,7 +1530,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "datasetId",
                         "name": "datasetId",
                         "in": "path",
@@ -1655,6 +1682,119 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/gateway/conversations/list": {
+            "get": {
+                "description": "查询会话列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关/会话管理"
+                ],
+                "summary": "查询会话列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/gateway/conversations/remove/{ids}": {
+            "delete": {
+                "description": "删除会话（软删除）",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关/会话管理"
+                ],
+                "summary": "删除会话",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "会话ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/gateway/conversations/set": {
+            "post": {
+                "description": "传入id时修改，不传id时新增",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "网关/会话管理"
+                ],
+                "summary": "新增或修改会话",
+                "parameters": [
+                    {
+                        "description": "会话设置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.SetAiConversation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -2106,7 +2246,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "objectId",
                         "name": "object",
                         "in": "query",
@@ -5978,7 +6117,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "craft_route_id",
                         "name": "craft_route_id",
                         "in": "path",
@@ -9088,8 +9226,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer",
-                                "format": "int32"
+                                "type": "integer"
                             }
                         }
                     }
@@ -10036,8 +10173,7 @@ const docTemplate = `{
                     {
                         "type": "array",
                         "items": {
-                            "type": "integer",
-                            "format": "int64"
+                            "type": "integer"
                         },
                         "collectionFormat": "csv",
                         "description": "dictCodes",
@@ -11134,8 +11270,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer",
-                                "format": "int32"
+                                "type": "integer"
                             }
                         }
                     }
@@ -12264,8 +12399,7 @@ const docTemplate = `{
                     {
                         "type": "array",
                         "items": {
-                            "type": "integer",
-                            "format": "int64"
+                            "type": "integer"
                         },
                         "collectionFormat": "csv",
                         "description": "userIds",
@@ -12469,7 +12603,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "userId",
                         "name": "id",
                         "in": "path",
@@ -12571,8 +12704,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer",
-                                "format": "int32"
+                                "type": "integer"
                             }
                         }
                     }
@@ -12637,8 +12769,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "integer",
-                                "format": "int32"
+                                "type": "integer"
                             }
                         }
                     }
@@ -12964,7 +13095,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "format": "int64",
                         "description": "userId",
                         "name": "id",
                         "in": "path",
@@ -13510,7 +13640,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "conversation_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "tab_id": {
                     "type": "string"
@@ -13540,6 +13671,10 @@ const docTemplate = `{
                 },
                 "enableThinking": {
                     "type": "integer"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
                 },
                 "llmModelId": {
                     "type": "string"
@@ -13710,6 +13845,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "llm_factory": {
+                    "type": "string"
+                }
+            }
+        },
+        "aidatasetmodels.StopGenerationInput": {
+            "type": "object",
+            "properties": {
+                "conversation_id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "tab_id": {
                     "type": "string"
                 }
             }
@@ -16809,7 +16956,6 @@ const docTemplate = `{
         },
         "response.ResCode": {
             "type": "integer",
-            "format": "int64",
             "enum": [
                 200,
                 401,
@@ -16826,14 +16972,6 @@ const docTemplate = `{
                 "Unauthorized": "token失效",
                 "Waring": "详情看msg"
             },
-            "x-enum-descriptions": [
-                "成功",
-                "token失效",
-                "没有权限",
-                "参数错误",
-                "系统异常",
-                "详情看msg"
-            ],
             "x-enum-varnames": [
                 "Success",
                 "Unauthorized",

@@ -42,10 +42,10 @@ func NewGinEngine(
 		ai.Exception.PrivateRoutes(group)  // 工业智能体
 		ai.Control.PrivateRoutes(group)
 		ai.Model.PrivateRoutes(group)
-		ai.Agent.PrivateRoutes(group)
 		ai.OCR.PrivateRoutes(group)
 		gateway.AIGateway.PrivateRoutes(group)
 		gateway.Conversations.PrivateRoutes(group)
+		gateway.Agent.PrivateRoutes(group)
 	}
 
 	return &AI{}
