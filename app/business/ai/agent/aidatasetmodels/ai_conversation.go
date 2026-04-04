@@ -1,9 +1,12 @@
 package aidatasetmodels
 
-import "nova-factory-server/app/baize"
+import (
+	"nova-factory-server/app/baize"
+	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
+)
 
 type AiConversation struct {
-	ID             int64  `json:"id" gorm:"column:id"`
+	ID             int64  `json:"id,string" gorm:"column:id"`
 	Name           string `json:"name" gorm:"column:name"`
 	Message        string `json:"message" gorm:"column:message"`
 	LLMProviderID  string `json:"llmProviderId" gorm:"column:llm_provider_id"`
@@ -12,7 +15,8 @@ type AiConversation struct {
 	ChatMode       string `json:"chatMode" gorm:"column:chat_mode"`
 	DeptID         int64  `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
-	State int32 `json:"state" gorm:"column:state"`
+	State    int32                           `json:"state" gorm:"column:state"`
+	Messages []*gatewaymodels.AIAgentMessage `json:"messages" gorm:"-"`
 }
 
 type SetAiConversation struct {
@@ -26,6 +30,7 @@ type SetAiConversation struct {
 }
 
 type AiConversationQuery struct {
+	ID   int64  `form:"id,string"`
 	Name string `form:"name"`
 	baize.BaseEntityDQL
 }

@@ -2,6 +2,7 @@ package gatewaycontroller
 
 import (
 	"net/http"
+	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"time"
 
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
@@ -15,12 +16,12 @@ import (
 )
 
 type Agent struct {
-	service        aidatasetservice.IAiConversationService
+	service        gatewayservice.IAiConversationService
 	gatewayService aidatasetservice.IAIGatewayService
 }
 
 // NewAgent 会话控制器构造函数。
-func NewAgent(service aidatasetservice.IAiConversationService, gatewayService aidatasetservice.IAIGatewayService) *Agent {
+func NewAgent(service gatewayservice.IAiConversationService, gatewayService aidatasetservice.IAIGatewayService) *Agent {
 	return &Agent{
 		service:        service,
 		gatewayService: gatewayService,

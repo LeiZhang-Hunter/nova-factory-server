@@ -2,4 +2,4 @@ package gatewaydaoimpl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewAIGatewayDao)
+var ProviderSet = wire.NewSet(NewAIGatewayDao, NewAIAgentMessageDao, NewInstalledSkillDao)

@@ -89,6 +89,9 @@ func (i *IAiConversationDaoImpl) Update(c *gin.Context, req *aidatasetmodels.Set
 func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiConversationQuery) (*aidatasetmodels.AiConversationListData, error) {
 	db := i.db.WithContext(c).Table(i.table).Where("state = ?", commonStatus.NORMAL).
 		Where("dept_id = ?", baizeContext.GetDeptId(c))
+	if req.ID != 0 {
+		db = db.Where("id = ?", req.ID)
+	}
 	if strings.TrimSpace(req.Name) != "" {
 		db = db.Where("name LIKE ?", "%"+strings.TrimSpace(req.Name)+"%")
 	}

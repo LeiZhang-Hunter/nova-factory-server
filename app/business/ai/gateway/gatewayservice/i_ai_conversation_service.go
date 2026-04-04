@@ -1,4 +1,4 @@
-package aidatasetservice
+package gatewayservice
 
 import (
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"

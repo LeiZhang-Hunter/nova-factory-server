@@ -2,4 +2,4 @@ package gatewayserviceimpl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewAIGatewayService)
+var ProviderSet = wire.NewSet(NewAIGatewayService, NewIAiConversationServiceImpl)
