@@ -73,6 +73,10 @@ func (agent *Agent) CreateConversation(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+	if req.Name == "" {
+		baizeContext.Waring(c, "名称为空")
+		return
+	}
 	data, err := agent.service.Create(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())

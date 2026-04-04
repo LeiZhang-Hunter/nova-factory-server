@@ -8,7 +8,7 @@ type AiConversation struct {
 	Message        string `json:"message" gorm:"column:message"`
 	LLMProviderID  string `json:"llmProviderId" gorm:"column:llm_provider_id"`
 	LLMModelID     string `json:"llmModelId" gorm:"column:llm_model_id"`
-	EnableThinking int32  `json:"enableThinking" gorm:"column:enable_thinking"`
+	EnableThinking *bool  `json:"enableThinking" gorm:"column:enable_thinking"`
 	ChatMode       string `json:"chatMode" gorm:"column:chat_mode"`
 	DeptID         int64  `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
@@ -21,7 +21,7 @@ type SetAiConversation struct {
 	Message        string `json:"message"`
 	LLMProviderID  string `json:"llmProviderId"`
 	LLMModelID     string `json:"llmModelId"`
-	EnableThinking int32  `json:"enableThinking"`
+	EnableThinking *bool  `json:"enableThinking"`
 	ChatMode       string `json:"chatMode"`
 }
 

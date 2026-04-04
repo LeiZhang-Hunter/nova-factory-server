@@ -1,6 +1,7 @@
 package aiDataSetDaoImpl
 
 import (
+	"nova-factory-server/app/utils/snowflake"
 	"strings"
 	"time"
 
@@ -26,6 +27,13 @@ func NewIAiConversationDaoImpl(db *gorm.DB) aidatasetdao.IAiConversationDao {
 }
 
 func (i *IAiConversationDaoImpl) Create(c *gin.Context, req *aidatasetmodels.SetAiConversation) (*aidatasetmodels.AiConversation, error) {
+	if req.ChatMode == "" {
+		req.ChatMode = "task"
+	}
+	if req.EnableThinking == nil {
+		ret := true
+		req.EnableThinking = &ret
+	}
 	data := &aidatasetmodels.AiConversation{
 		Name:           req.Name,
 		Message:        req.Message,
@@ -36,6 +44,7 @@ func (i *IAiConversationDaoImpl) Create(c *gin.Context, req *aidatasetmodels.Set
 		DeptID:         baizeContext.GetDeptId(c),
 		State:          commonStatus.NORMAL,
 	}
+	data.ID = snowflake.GenID()
 	data.SetCreateBy(baizeContext.GetUserId(c))
 	if err := i.db.WithContext(c).Table(i.table).Create(data).Error; err != nil {
 		return nil, err
