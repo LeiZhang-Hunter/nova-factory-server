@@ -163,7 +163,7 @@ func (a *AIAgentMessageDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentM
 	if req.Size > 0 {
 		query = query.Offset(int((req.Page - 1) * req.Size)).Limit(int(req.Size))
 	}
-	if err := query.Debug().Find(&rows).Error; err != nil {
+	if err := query.Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	return &gatewaymodels.AIAgentMessageListData{

@@ -87,8 +87,7 @@ func (i *IAiConversationDaoImpl) Update(c *gin.Context, req *aidatasetmodels.Set
 }
 
 func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiConversationQuery) (*aidatasetmodels.AiConversationListData, error) {
-	db := i.db.WithContext(c).Table(i.table).Where("state = ?", commonStatus.NORMAL).
-		Where("dept_id = ?", baizeContext.GetDeptId(c))
+	db := i.db.WithContext(c).Table(i.table)
 	if req.ID != 0 {
 		db = db.Where("id = ?", req.ID)
 	}
@@ -101,7 +100,9 @@ func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiCon
 	if req.Size <= 0 {
 		req.Size = 20
 	}
+	db.Where("create_by = ?", baizeContext.GetUserId(c))
 	var total int64
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
