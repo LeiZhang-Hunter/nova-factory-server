@@ -3,7 +3,7 @@ package gatewaymodels
 import "nova-factory-server/app/baize"
 
 type MCPServer struct {
-	ID          string `gorm:"column:id;primaryKey" json:"id"`
+	ID          int64  `gorm:"column:id;primaryKey" json:"id,string"`
 	Name        string `gorm:"column:name" json:"name"`
 	Description string `gorm:"column:description" json:"description"`
 	Transport   string `gorm:"column:transport" json:"transport"`
@@ -29,7 +29,7 @@ type MCPServerQuery struct {
 }
 
 type MCPServerUpsert struct {
-	ID          string `json:"id"`
+	ID          int64  `json:"id,string"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Transport   string `json:"transport"`

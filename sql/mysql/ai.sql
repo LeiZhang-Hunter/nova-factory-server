@@ -254,7 +254,7 @@ CREATE TABLE IF NOT EXISTS ai_conversations (
 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表';
 
 CREATE TABLE IF NOT EXISTS mcp_servers (
-    `id` varchar(64) NOT NULL COMMENT 'MCP服务ID',
+    id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'MCP服务ID',
     `name` varchar(255) NOT NULL COMMENT 'MCP服务名称',
     `description` text NULL COMMENT 'MCP服务描述',
     `transport` varchar(32) NOT NULL DEFAULT 'stdio' COMMENT '传输方式: stdio | streamableHttp',

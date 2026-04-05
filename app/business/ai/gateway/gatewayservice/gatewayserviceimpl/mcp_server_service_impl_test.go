@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
+
+	"github.com/gin-gonic/gin"
 )
 
 func TestMCPServerPrepareUpsertForStdio(t *testing.T) {
@@ -44,7 +46,7 @@ func TestMCPServerPrepareUpsertForStdio(t *testing.T) {
 func TestMCPServerPrepareUpsertForStreamableHTTP(t *testing.T) {
 	service := &MCPServerServiceImpl{}
 	req := &gatewaymodels.MCPServerUpsert{
-		ID:        "1",
+		ID:        1,
 		Name:      "http-server",
 		Transport: "streamablehttp",
 		Command:   "npx",
@@ -81,4 +83,132 @@ func TestMCPServerPrepareUpsertValidateJSON(t *testing.T) {
 	if err := service.prepareUpsert(req, false); err == nil {
 		t.Fatalf("expected json validation error")
 	}
+}
+
+func TestMCPServerUpdateRejectEnabledConfigModification(t *testing.T) {
+	dao := &mockMCPServerDao{
+		current: &gatewaymodels.MCPServer{
+			ID:          1,
+			Name:        "demo",
+			Description: "old",
+			Transport:   mcpTransportStdio,
+			Command:     "npx",
+			Args:        `["-y","demo"]`,
+			Env:         `{"NODE_ENV":"prod"}`,
+			Timeout:     30,
+			IsCommon:    boolPtr(false),
+			Enabled:     boolPtr(true),
+		},
+	}
+	service := &MCPServerServiceImpl{dao: dao}
+	req := &gatewaymodels.MCPServerUpsert{
+		ID:          1,
+		Name:        "demo",
+		Description: "new",
+		Transport:   mcpTransportStdio,
+		Command:     "npx",
+		Args:        `["-y","demo"]`,
+		Env:         `{"NODE_ENV":"prod"}`,
+		Timeout:     30,
+		IsCommon:    boolPtr(false),
+		Enabled:     boolPtr(true),
+	}
+
+	_, err := service.Update(&gin.Context{}, req)
+	if err == nil || err.Error() != "MCP服务已启用，请先关闭后再修改" {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if dao.updateCalled {
+		t.Fatalf("unexpected update call")
+	}
+}
+
+func TestMCPServerUpdateAllowDisableOnly(t *testing.T) {
+	dao := &mockMCPServerDao{
+		current: &gatewaymodels.MCPServer{
+			ID:          1,
+			Name:        "demo",
+			Description: "same",
+			Transport:   mcpTransportStdio,
+			Command:     "npx",
+			Args:        `["-y","demo"]`,
+			Env:         `{"NODE_ENV":"prod"}`,
+			Timeout:     30,
+			IsCommon:    boolPtr(false),
+			Enabled:     boolPtr(true),
+		},
+	}
+	service := &MCPServerServiceImpl{dao: dao}
+	req := &gatewaymodels.MCPServerUpsert{
+		ID:          1,
+		Name:        "demo",
+		Description: "same",
+		Transport:   mcpTransportStdio,
+		Command:     "npx",
+		Args:        `["-y","demo"]`,
+		Env:         `{"NODE_ENV":"prod"}`,
+		Timeout:     30,
+		IsCommon:    boolPtr(false),
+		Enabled:     boolPtr(false),
+	}
+
+	data, err := service.Update(&gin.Context{}, req)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if !dao.updateCalled {
+		t.Fatalf("expected update call")
+	}
+	if data == nil || data.Enabled == nil || *data.Enabled {
+		t.Fatalf("expected disabled result")
+	}
+}
+
+func TestMCPServerDeleteRejectEnabledConfig(t *testing.T) {
+	dao := &mockMCPServerDao{
+		current: &gatewaymodels.MCPServer{
+			ID:      1,
+			Enabled: boolPtr(true),
+		},
+	}
+	service := &MCPServerServiceImpl{dao: dao}
+
+	err := service.DeleteByIDs(&gin.Context{}, []int64{1})
+	if err == nil || err.Error() != "MCP服务已启用，请先关闭后再删除" {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if dao.deleteCalled {
+		t.Fatalf("unexpected delete call")
+	}
+}
+
+type mockMCPServerDao struct {
+	current      *gatewaymodels.MCPServer
+	updateCalled bool
+	deleteCalled bool
+}
+
+func (m *mockMCPServerDao) Create(c *gin.Context, req *gatewaymodels.MCPServerUpsert) (*gatewaymodels.MCPServer, error) {
+	return nil, nil
+}
+
+func (m *mockMCPServerDao) Update(c *gin.Context, req *gatewaymodels.MCPServerUpsert) (*gatewaymodels.MCPServer, error) {
+	m.updateCalled = true
+	result := *m.current
+	result.Enabled = cloneBoolPtr(req.Enabled)
+	result.Description = req.Description
+	return &result, nil
+}
+
+func (m *mockMCPServerDao) DeleteByIDs(c *gin.Context, ids []int64) error {
+	m.deleteCalled = true
+	return nil
+}
+
+func (m *mockMCPServerDao) GetByID(c *gin.Context, id int64) (*gatewaymodels.MCPServer, error) {
+	return m.current, nil
+}
+
+func (m *mockMCPServerDao) List(c *gin.Context, req *gatewaymodels.MCPServerQuery) (*gatewaymodels.MCPServerListData, error) {
+	return nil, nil
 }

@@ -1,7 +1,7 @@
 package gatewaydaoimpl
 
 import (
-	"strconv"
+	"errors"
 	"strings"
 	"time"
 
@@ -29,7 +29,7 @@ func NewMCPServerDao(db *gorm.DB) gatewaydao.IMCPServerDao {
 
 func (m *MCPServerDaoImpl) Create(c *gin.Context, req *gatewaymodels.MCPServerUpsert) (*gatewaymodels.MCPServer, error) {
 	item := &gatewaymodels.MCPServer{
-		ID:          strconv.FormatInt(snowflake.GenID(), 10),
+		ID:          snowflake.GenID(),
 		Name:        req.Name,
 		Description: req.Description,
 		Transport:   req.Transport,
@@ -75,14 +75,15 @@ func (m *MCPServerDaoImpl) Update(c *gin.Context, req *gatewaymodels.MCPServerUp
 		Updates(item).Error; err != nil {
 		return nil, err
 	}
-	return m.getByID(c, item.ID)
+	return m.GetByID(c, item.ID)
 }
 
-func (m *MCPServerDaoImpl) DeleteByIDs(c *gin.Context, ids []string) error {
+func (m *MCPServerDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	now := time.Now()
 	return m.db.WithContext(c).Table(m.table).
 		Where("id IN ?", ids).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL).
 		Updates(map[string]interface{}{
 			"state":       commonStatus.DELETE,
 			"update_by":   baizeContext.GetUserId(c),
@@ -126,13 +127,16 @@ func (m *MCPServerDaoImpl) List(c *gin.Context, req *gatewaymodels.MCPServerQuer
 	}, nil
 }
 
-func (m *MCPServerDaoImpl) getByID(c *gin.Context, id string) (*gatewaymodels.MCPServer, error) {
+func (m *MCPServerDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.MCPServer, error) {
 	var item gatewaymodels.MCPServer
 	if err := m.db.WithContext(c).Table(m.table).
 		Where("id = ?", id).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &item, nil

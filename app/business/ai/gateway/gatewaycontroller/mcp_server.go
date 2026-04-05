@@ -67,7 +67,7 @@ func (m *MCPServer) Set(c *gin.Context) {
 		data *gatewaymodels.MCPServer
 		err  error
 	)
-	if req.ID != "" {
+	if req.ID != 0 {
 		data, err = m.service.Update(c, req)
 	} else {
 		data, err = m.service.Create(c, req)
@@ -89,7 +89,7 @@ func (m *MCPServer) Set(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "删除成功"
 // @Router /ai/mcp/server/remove/{ids} [delete]
 func (m *MCPServer) Delete(c *gin.Context) {
-	ids := baizeContext.ParamStringArray(c, "ids")
+	ids := baizeContext.ParamInt64Array(c, "ids")
 	if len(ids) == 0 {
 		baizeContext.ParameterError(c)
 		return
