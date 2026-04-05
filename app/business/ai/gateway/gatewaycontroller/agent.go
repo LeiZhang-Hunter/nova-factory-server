@@ -3,6 +3,7 @@ package gatewaycontroller
 import (
 	"net/http"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
+	"strconv"
 	"time"
 
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
@@ -150,11 +151,11 @@ func (agent *Agent) Chat(c *gin.Context) {
 		defer data.Body.Close()
 		sseUtils.ApplyHeaders(c.Writer.Header(), data.Headers)
 		if data.StatusCode > 0 {
-			c.Status(data.StatusCode)
-		} else {
-			c.Status(http.StatusOK)
+			c.Writer.Header().Set("X-Upstream-Status-Code", strconv.Itoa(data.StatusCode))
 		}
-		if streamErr := sseUtils.Transport(c.Writer, data.Body, 60*time.Second); streamErr != nil {
+		c.Status(http.StatusOK)
+		streamErr := sseUtils.Transport(c.Writer, data.Body, 60*time.Second)
+		if streamErr != nil {
 			if writeErr := sseUtils.WriteErrorEvent(c.Writer, streamErr.Error()); writeErr != nil {
 				zap.L().Warn("sse write error event failed", zap.Error(writeErr))
 			}
@@ -184,6 +185,10 @@ func (agent *Agent) StopGeneration(c *gin.Context) {
 	if err != nil {
 		zap.L().Error("stop generation error", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
+		return
+	}
+	if data.StatusCode != 200 {
+		baizeContext.Waring(c, data.Message)
 		return
 	}
 	baizeContext.SuccessData(c, data)

@@ -93,7 +93,7 @@ func (c *Conversations) StopGeneration(ctx context.Context, req *api.StopGenerat
 	}
 	statusCode, message, err := c.client.Do(ctx, client.Request{
 		Method: "POST",
-		Path:   "/api/agent/stop-generation",
+		Path:   "/api/agent/chat/stop",
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
