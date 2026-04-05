@@ -252,3 +252,29 @@ CREATE TABLE IF NOT EXISTS ai_conversations (
     KEY idx_update_time (update_time)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表';
+
+CREATE TABLE IF NOT EXISTS mcp_servers (
+    `id` varchar(64) NOT NULL COMMENT 'MCP服务ID',
+    `name` varchar(255) NOT NULL COMMENT 'MCP服务名称',
+    `description` text NULL COMMENT 'MCP服务描述',
+    `transport` varchar(32) NOT NULL DEFAULT 'stdio' COMMENT '传输方式: stdio | streamableHttp',
+    `command` text NULL COMMENT 'stdio 模式启动命令',
+    `args` text NULL COMMENT 'stdio 模式参数(JSON数组字符串)',
+    `env` text NULL COMMENT 'stdio 模式环境变量(JSON对象字符串)',
+    `url` varchar(1024) DEFAULT '' COMMENT 'streamableHttp 模式URL',
+    `headers` text NULL COMMENT 'streamableHttp 请求头(JSON对象字符串)',
+    `timeout` int(11) NOT NULL DEFAULT 30 COMMENT '超时时间(秒)',
+    `is_common` tinyint(1) DEFAULT 0 COMMENT '是否是共用的',
+    `enabled` tinyint(1) DEFAULT 1 COMMENT '是否启用',
+    `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) DEFAULT NULL COMMENT '创建时间(系统)',
+    `update_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) DEFAULT NULL COMMENT '更新时间(系统)',
+    `state` tinyint(1) DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    KEY `idx_mcp_servers_name` (`name`),
+    KEY `idx_mcp_servers_transport` (`transport`),
+    KEY `idx_mcp_servers_enabled` (`enabled`)
+) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'mcp服务器配置';

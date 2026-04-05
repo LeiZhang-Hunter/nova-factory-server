@@ -84,6 +84,11 @@
                 "summary": "查询会话列表",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "description": "排序规则  降序desc   asc升序",
                         "name": "isAsc",
@@ -1681,21 +1686,25 @@
                 }
             }
         },
-        "/ai/gateway/conversations/list": {
+        "/ai/mcp/server/list": {
             "get": {
-                "description": "查询会话列表",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取MCP服务配置列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "网关/会话管理"
+                    "工业智能体/MCP服务配置"
                 ],
-                "summary": "查询会话列表",
+                "summary": "获取MCP服务配置列表",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
+                        "type": "boolean",
+                        "name": "enabled",
                         "in": "query"
                     },
                     {
@@ -1704,29 +1713,24 @@
                         "in": "query"
                     },
                     {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
+                        "name": "transport",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "查询成功",
+                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -1734,20 +1738,25 @@
                 }
             }
         },
-        "/ai/gateway/conversations/remove/{ids}": {
+        "/ai/mcp/server/remove/{ids}": {
             "delete": {
-                "description": "删除会话（软删除）",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除MCP服务配置",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "网关/会话管理"
+                    "工业智能体/MCP服务配置"
                 ],
-                "summary": "删除会话",
+                "summary": "删除MCP服务配置",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "会话ID，多个用逗号分隔",
+                        "description": "MCP服务ID，多个以逗号分隔",
                         "name": "ids",
                         "in": "path",
                         "required": true
@@ -1763,30 +1772,35 @@
                 }
             }
         },
-        "/ai/gateway/conversations/set": {
+        "/ai/mcp/server/set": {
             "post": {
-                "description": "传入id时修改，不传id时新增",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "保存MCP服务配置，id为空时新增，不为空时修改",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "网关/会话管理"
+                    "工业智能体/MCP服务配置"
                 ],
-                "summary": "新增或修改会话",
+                "summary": "保存MCP服务配置",
                 "parameters": [
                     {
-                        "description": "会话设置参数",
+                        "description": "MCP服务配置保存参数",
                         "name": "object",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/aidatasetmodels.SetAiConversation"
+                            "$ref": "#/definitions/gatewaymodels.MCPServerUpsert"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "操作成功",
+                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -13662,7 +13676,7 @@
                     "type": "string"
                 },
                 "enableThinking": {
-                    "type": "integer"
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "string",
@@ -16244,6 +16258,47 @@
                 },
                 "unit": {
                     "description": "数据名字",
+                    "type": "string"
+                }
+            }
+        },
+        "gatewaymodels.MCPServerUpsert": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "string"
+                },
+                "command": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "env": {
+                    "type": "string"
+                },
+                "headers": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isCommon": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "timeout": {
+                    "type": "integer"
+                },
+                "transport": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }

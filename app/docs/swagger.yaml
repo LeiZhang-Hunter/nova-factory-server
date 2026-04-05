@@ -355,7 +355,7 @@ definitions:
       chatMode:
         type: string
       enableThinking:
-        type: integer
+        type: boolean
       id:
         example: "0"
         type: string
@@ -2176,6 +2176,33 @@ definitions:
         description: 数据名字
         type: string
     type: object
+  gatewaymodels.MCPServerUpsert:
+    properties:
+      args:
+        type: string
+      command:
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      env:
+        type: string
+      headers:
+        type: string
+      id:
+        type: string
+      isCommon:
+        type: boolean
+      name:
+        type: string
+      timeout:
+        type: integer
+      transport:
+        type: string
+      url:
+        type: string
+    type: object
   logalert.Advanced:
     properties:
       duration:
@@ -3477,6 +3504,9 @@ paths:
     get:
       description: 查询会话列表
       parameters:
+      - in: query
+        name: id
+        type: integer
       - description: 排序规则  降序desc   asc升序
         in: query
         name: isAsc
@@ -4513,46 +4543,42 @@ paths:
       summary: 设置异常预警
       tags:
       - 工业智能体/异常预警
-  /ai/gateway/conversations/list:
+  /ai/mcp/server/list:
     get:
-      description: 查询会话列表
+      description: 获取MCP服务配置列表
       parameters:
-      - description: 排序规则  降序desc   asc升序
-        in: query
-        name: isAsc
-        type: string
+      - in: query
+        name: enabled
+        type: boolean
       - in: query
         name: name
         type: string
-      - description: 排序字段
-        in: query
-        name: orderBy
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: transport
         type: string
-      - default: 1
-        description: 第几页
-        in: query
-        name: pageNum
-        type: integer
-      - default: 10000
-        description: 数量
-        in: query
-        name: pageSize
-        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: 查询成功
+          description: 获取成功
           schema:
             $ref: '#/definitions/response.ResponseData'
-      summary: 查询会话列表
+      security:
+      - BearerAuth: []
+      summary: 获取MCP服务配置列表
       tags:
-      - 网关/会话管理
-  /ai/gateway/conversations/remove/{ids}:
+      - 工业智能体/MCP服务配置
+  /ai/mcp/server/remove/{ids}:
     delete:
-      description: 删除会话（软删除）
+      description: 删除MCP服务配置
       parameters:
-      - description: 会话ID，多个用逗号分隔
+      - description: MCP服务ID，多个以逗号分隔
         in: path
         name: ids
         required: true
@@ -4564,29 +4590,33 @@ paths:
           description: 删除成功
           schema:
             $ref: '#/definitions/response.ResponseData'
-      summary: 删除会话
+      security:
+      - BearerAuth: []
+      summary: 删除MCP服务配置
       tags:
-      - 网关/会话管理
-  /ai/gateway/conversations/set:
+      - 工业智能体/MCP服务配置
+  /ai/mcp/server/set:
     post:
-      description: 传入id时修改，不传id时新增
+      description: 保存MCP服务配置，id为空时新增，不为空时修改
       parameters:
-      - description: 会话设置参数
+      - description: MCP服务配置保存参数
         in: body
         name: object
         required: true
         schema:
-          $ref: '#/definitions/aidatasetmodels.SetAiConversation'
+          $ref: '#/definitions/gatewaymodels.MCPServerUpsert'
       produces:
       - application/json
       responses:
         "200":
-          description: 操作成功
+          description: 保存成功
           schema:
             $ref: '#/definitions/response.ResponseData'
-      summary: 新增或修改会话
+      security:
+      - BearerAuth: []
+      summary: 保存MCP服务配置
       tags:
-      - 网关/会话管理
+      - 工业智能体/MCP服务配置
   /ai/model/provider/global/get:
     get:
       description: 读取SetGlobalModel保存的用户模型配置
