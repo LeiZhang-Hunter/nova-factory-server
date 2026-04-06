@@ -1,10 +1,16 @@
 package aidatasetcontroller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"io"
+	"net/http"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/utils/baizeContext"
+	"strings"
+	"time"
 )
 
 // ChunkList chunk列表
@@ -130,4 +136,90 @@ func (d *Dataset) RetrievalChunk(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, response.Data)
+}
+
+// GetRagFlowDocumentPreview 获取 RagFlow 预览文件
+// @Summary 获取 RagFlow 预览文件
+// @Description 携带 RagFlow API Key 拉取预览资源并透传给客户端
+// @Tags 工业智能体/文档管理
+// @Param doc_id path string true "RagFlow 文档预览资源ID"
+// @Produce application/octet-stream
+// @Success 200 {file} file "预览文件"
+// @Router /ai/dataset/document/get/{doc_id} [get]
+func (d *Dataset) GetRagFlowDocumentPreview(c *gin.Context) {
+	docID := strings.TrimSpace(c.Param("doc_id"))
+	if docID == "" {
+		baizeContext.ParameterError(c)
+		return
+	}
+	apiKey := strings.TrimSpace(viper.GetString("dataSet.api_key"))
+	if apiKey == "" {
+		apiKey = strings.TrimSpace(viper.GetString("dataset.api_key"))
+	}
+	if apiKey == "" {
+		baizeContext.Waring(c, "ragflow api key未配置")
+		return
+	}
+	baseURL := strings.TrimSpace(viper.GetString("dataSet.image_url"))
+	if baseURL == "" {
+		baseURL = strings.TrimSpace(viper.GetString("dataset.image_url"))
+	}
+	if baseURL == "" {
+		baseURL = strings.TrimSpace(viper.GetString("dataSet.host"))
+	}
+	if baseURL == "" {
+		baseURL = strings.TrimSpace(viper.GetString("dataset.host"))
+	}
+	if baseURL == "" {
+		baizeContext.Waring(c, "ragflow地址未配置")
+		return
+	}
+
+	previewURL := fmt.Sprintf("%s/v1/document/get/%s", strings.TrimRight(baseURL, "/"), docID)
+	req, err := http.NewRequestWithContext(c, http.MethodGet, previewURL, nil)
+	if err != nil {
+		zap.L().Error("create ragflow request failed", zap.Error(err))
+		baizeContext.Waring(c, "请求失败")
+		return
+	}
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	httpClient := &http.Client{Timeout: 120 * time.Second}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		zap.L().Error("ragflow request failed", zap.Error(err))
+		baizeContext.Waring(c, "请求失败")
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+		msg := strings.TrimSpace(string(body))
+		if msg == "" {
+			msg = "预览文件获取失败"
+		}
+		baizeContext.Waring(c, msg)
+		return
+	}
+
+	contentType := resp.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	c.Writer.Header().Set("Content-Type", contentType)
+	if cd := resp.Header.Get("Content-Disposition"); cd != "" {
+		c.Writer.Header().Set("Content-Disposition", cd)
+	}
+	if cc := resp.Header.Get("Cache-Control"); cc != "" {
+		c.Writer.Header().Set("Cache-Control", cc)
+	}
+	if lm := resp.Header.Get("Last-Modified"); lm != "" {
+		c.Writer.Header().Set("Last-Modified", lm)
+	}
+	if etag := resp.Header.Get("ETag"); etag != "" {
+		c.Writer.Header().Set("ETag", etag)
+	}
+	c.Status(http.StatusOK)
+	_, _ = io.Copy(c.Writer, resp.Body)
 }

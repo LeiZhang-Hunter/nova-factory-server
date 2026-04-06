@@ -49,6 +49,8 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 		d.DownloadDocument) // 更新知识库文档
 	ai.GET("/list/document", middlewares.HasPermission("ai:dataset:update:document"),
 		d.ListDocument) // 更新知识库文档
+	ai.GET("/document/get/:doc_id", middlewares.HasPermission("ai:dataset:update:document"),
+		d.GetRagFlowDocumentPreview) // 预览文件透传
 	ai.DELETE("/remove/document", middlewares.HasPermission("ai:dataset:remove:document"), d.RemoveDocument) //删除文档列表
 	ai.POST("/start/document", middlewares.HasPermission("ai:dataset:start:document"), d.StartParseDocument) //解析文档
 	ai.POST("/stop/document", middlewares.HasPermission("ai:dataset:stop:document"), d.StopParseDocument)    //停止解析文档

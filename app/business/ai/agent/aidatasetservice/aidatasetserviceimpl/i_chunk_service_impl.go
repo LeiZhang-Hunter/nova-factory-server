@@ -80,7 +80,7 @@ func (i *IChunkServiceImpl) ChunkList(c *gin.Context, req *aidatasetmodels.Chunk
 		zap.L().Error(fmt.Sprintf("读取CHUNK列表失败: %s", response.Message))
 		return &aidatasetmodels.ChunkListResponse{}, errors.New("读取chunk列表失败")
 	}
-	response.Data.Doc.URL = fmt.Sprintf("%s/v1/document/get/%s", i.config.ImageUrl, response.Data.Doc.Id)
+	response.Data.Doc.URL = fmt.Sprintf("/ai/dataset/document/get/%s", response.Data.Doc.Id)
 	return &response, nil
 }
 
