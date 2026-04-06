@@ -2,15 +2,16 @@ package aidatasetcontroller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/utils/baizeContext"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 // ChunkList chunk列表
@@ -152,24 +153,13 @@ func (d *Dataset) GetRagFlowDocumentPreview(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	apiKey := strings.TrimSpace(viper.GetString("dataSet.api_key"))
-	if apiKey == "" {
-		apiKey = strings.TrimSpace(viper.GetString("dataset.api_key"))
-	}
+	apiKey := strings.TrimSpace(viper.GetString("dataset.api_key"))
 	if apiKey == "" {
 		baizeContext.Waring(c, "ragflow api key未配置")
 		return
 	}
-	baseURL := strings.TrimSpace(viper.GetString("dataSet.image_url"))
-	if baseURL == "" {
-		baseURL = strings.TrimSpace(viper.GetString("dataset.image_url"))
-	}
-	if baseURL == "" {
-		baseURL = strings.TrimSpace(viper.GetString("dataSet.host"))
-	}
-	if baseURL == "" {
-		baseURL = strings.TrimSpace(viper.GetString("dataset.host"))
-	}
+
+	baseURL := strings.TrimSpace(viper.GetString("dataset.host"))
 	if baseURL == "" {
 		baizeContext.Waring(c, "ragflow地址未配置")
 		return
