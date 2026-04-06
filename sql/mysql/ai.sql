@@ -56,6 +56,31 @@ CREATE TABLE IF NOT EXISTS `sys_dataset_document`  (
      PRIMARY KEY (`document_id`) USING BTREE
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '文档管理' ROW_FORMAT = Dynamic;
 
+CREATE TABLE IF NOT EXISTS `sys_dataset_role_permission` (
+    `id` bigint(20) NOT NULL COMMENT '主键ID',
+    `role_id` bigint(20) NOT NULL COMMENT '角色ID(sys_role.role_id)',
+    `dataset_id` bigint(20) NOT NULL COMMENT '知识库ID(sys_dataset.dataset_id)',
+    `document_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '文档ID(sys_dataset_document.document_id)，为0表示对整个知识库授权',
+    `permission` varchar(32) NOT NULL DEFAULT 'read' COMMENT '权限类型：read/write/admin',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uk_role_dataset_document` (`role_id`, `dataset_id`, `document_id`, `state`) USING BTREE,
+    KEY `idx_role_id` (`role_id`) USING BTREE,
+    KEY `idx_dataset_id` (`dataset_id`) USING BTREE,
+    KEY `idx_document_id` (`document_id`) USING BTREE,
+    KEY `idx_dept_id` (`dept_id`) USING BTREE,
+    KEY `idx_create_time` (`create_time`) USING BTREE,
+    KEY `idx_update_time` (`update_time`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  COMMENT = '知识库/文档-角色权限表';
+
 CREATE TABLE IF NOT EXISTS `sys_ai_prediction_list`  (
      `id` bigint(20) NOT NULL COMMENT 'id',
      `reason_id` bigint(20) NOT NULL COMMENT '模型推理id',

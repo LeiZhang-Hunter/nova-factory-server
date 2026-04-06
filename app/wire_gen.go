@@ -416,6 +416,9 @@ func wireApp() (*gin.Engine, func(), error) {
 	iAiUserLLMService := aidatasetserviceimpl.NewIAiUserLLMServiceImpl(iAiUserLLMDao)
 	model := aidatasetcontroller.NewModel(iAiModelProviderService, iAiLLMSettingService, iAiUserLLMService)
 	ocr := aidatasetcontroller.NewOCR()
+	iDatasetRolePermissionDao := aiDataSetDaoImpl.NewIDatasetRolePermissionDaoImpl(db)
+	iDatasetRolePermissionService := aidatasetserviceimpl.NewIDatasetRolePermissionServiceImpl(iDatasetRolePermissionDao)
+	datasetRole := aidatasetcontroller.NewRole(iDatasetRolePermissionService)
 	aiDataSet := &aidatasetcontroller.AiDataSet{
 		Dataset:    dataset,
 		Exception:  exception,
@@ -423,6 +426,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Control:    control,
 		Model:      model,
 		OCR:        ocr,
+		Role:       datasetRole,
 	}
 	iaiGatewayDao := gatewaydaoimpl.NewAIGatewayDao(db)
 	iaiGatewayService := gatewayserviceimpl.NewAIGatewayService(iaiGatewayDao)

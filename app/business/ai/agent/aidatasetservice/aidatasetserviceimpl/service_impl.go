@@ -7,4 +7,4 @@ import (
 var ProviderSet = wire.NewSet(NewIDataSetServiceImpl, NewHttpClient, NewIDataSetDocumentServiceImpl,
 	NewIChunkServiceImpl, NewIAssistantServiceImpl, NewIChartServiceImpl, NewIAiPredictionServiceImpl,
 	NewIAiPredictionExceptionServiceImpl, NewIAiPredictionControlServiceImpl, NewIAiModelProviderServiceImpl,
-	NewIAiLLMSettingServiceImpl, NewIAiUserLLMServiceImpl, NewAIGatewayService)
+	NewIAiLLMSettingServiceImpl, NewIAiUserLLMServiceImpl, NewAIGatewayService, NewIDatasetRolePermissionServiceImpl)

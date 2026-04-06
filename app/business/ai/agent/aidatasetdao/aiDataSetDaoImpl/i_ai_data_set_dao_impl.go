@@ -3,4 +3,4 @@ package aiDataSetDaoImpl
 import "github.com/google/wire"
 
 var ProviderSet = wire.NewSet(NewDataSetDaoImpl, NewIDataSetDocumentDaoImpl, NewIAiPredictionListDaoImpl,
-	NewIAiPredictionExceptionDaoImpl, NewIAiPredictionControlDaoImpl, NewAiLLMDaoImpl, NewIAiModelProviderDaoImpl, NewIAiLLMSettingDaoImpl, NewIAiUserLLMDaoImpl, NewIAiConversationDaoImpl)
+	NewIAiPredictionExceptionDaoImpl, NewIAiPredictionControlDaoImpl, NewAiLLMDaoImpl, NewIAiModelProviderDaoImpl, NewIAiLLMSettingDaoImpl, NewIAiUserLLMDaoImpl, NewIAiConversationDaoImpl, NewIDatasetRolePermissionDaoImpl)

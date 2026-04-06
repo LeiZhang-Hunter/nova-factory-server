@@ -43,6 +43,7 @@ func NewGinEngine(
 		ai.Control.PrivateRoutes(group)
 		ai.Model.PrivateRoutes(group)
 		ai.OCR.PrivateRoutes(group)
+		ai.Role.PrivateRoutes(group)
 		gateway.AIGateway.PrivateRoutes(group)
 		gateway.Agent.PrivateRoutes(group)
 		gateway.MCPServer.PrivateRoutes(group)
