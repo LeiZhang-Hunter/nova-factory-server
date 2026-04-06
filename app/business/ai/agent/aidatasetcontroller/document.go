@@ -1,11 +1,13 @@
 package aidatasetcontroller
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/constant/sessionStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/fileUtils"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // UploadDocument 上传文档
@@ -31,11 +33,15 @@ func (d *Dataset) UploadDocument(c *gin.Context) {
 		baizeContext.Waring(c, "请选择要上传的文件")
 		return
 	}
+	if err = fileUtils.ValidateAllowedDocumentFiles(files); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
 	datasetId := baizeContext.ParamInt64(c, "datasetId")
 
 	documents, err := d.iDataSetDocumentService.UploadFile(c, datasetId)
 	if err != nil {
-		baizeContext.SuccessData(c, documents)
+		baizeContext.Waring(c, err.Error())
 		c.Set(sessionStatus.MsgKey, err.Error())
 		return
 	}
