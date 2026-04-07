@@ -2,6 +2,7 @@ package gatewaydaoimpl
 
 import (
 	"errors"
+	"nova-factory-server/app/utils/snowflake"
 	"time"
 
 	"nova-factory-server/app/business/ai/gateway/gatewaydao"
@@ -27,6 +28,7 @@ func NewAIGatewayDao(db *gorm.DB) gatewaydao.IAIGatewayDao {
 
 func (a *AIGatewayDaoImpl) Create(c *gin.Context, req *gatewaymodels.AIGatewayUpsert) (*gatewaymodels.AIGateway, error) {
 	item := &gatewaymodels.AIGateway{
+		ID:      snowflake.GenID(),
 		Name:    req.Name,
 		BaseURL: req.BaseURL,
 		APIKey:  req.APIKey,
