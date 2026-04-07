@@ -30,7 +30,6 @@ type Client struct {
 	algorithm           Algorithm
 	apiKeyHeader        string
 	apiKeyPrefix        string
-	agentGatewayHeader  string
 	roundRobinCounter   atomic.Uint64
 	weightedCursor      atomic.Uint64
 	weightedRoundBucket []int
@@ -115,7 +114,6 @@ func NewClient(cfg Config) (*Client, error) {
 		algorithm:           algo,
 		apiKeyHeader:        apiKeyHeader,
 		apiKeyPrefix:        cfg.APIKeyPrefix,
-		agentGatewayHeader:  agentGatewayHeader,
 		weightedRoundBucket: bucket,
 		random:              rand.New(rand.NewSource(time.Now().UnixNano())),
 	}, nil
@@ -251,9 +249,6 @@ func (c *Client) buildRequest(ctx context.Context, method string, req Request, e
 	}
 	if ep.apiKey != "" {
 		httpReq.Header.Set(c.apiKeyHeader, c.apiKeyPrefix+ep.apiKey)
-	}
-	if req.AgentGateway != "" {
-		httpReq.Header.Set(c.agentGatewayHeader, req.AgentGateway)
 	}
 	return httpReq, nil
 }

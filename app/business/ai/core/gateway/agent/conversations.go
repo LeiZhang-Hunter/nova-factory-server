@@ -34,13 +34,14 @@ func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*a
 	}
 
 	chatBodyJSON, err := json.Marshal(req)
+	headers := map[string]string{}
 	if err != nil {
 		return nil, err
 	}
 	resp, _, err := c.client.DoRaw(ctx, client.Request{
 		Method:       "POST",
 		Path:         "/api/agent/chat",
-		Headers:      map[string]string{},
+		Headers:      headers,
 		AgentGateway: req.AgentGateway,
 		Body:         chatBodyJSON,
 		Stream:       true,
