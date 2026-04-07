@@ -3,7 +3,7 @@ package gatewaymodels
 import "nova-factory-server/app/baize"
 
 type AIGateway struct {
-	ID      int64  `json:"id" gorm:"column:id"`
+	ID      int64  `json:"id,string" gorm:"column:id"`
 	Name    string `json:"name" gorm:"column:name"`
 	BaseURL string `json:"baseUrl" gorm:"column:base_url"`
 	APIKey  string `json:"apiKey" gorm:"column:api_key"`

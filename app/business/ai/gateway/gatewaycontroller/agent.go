@@ -142,6 +142,11 @@ func (agent *Agent) Chat(c *gin.Context) {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
+
+	if data.StatusCode != http.StatusOK {
+		baizeContext.Waring(c, data.Message)
+		return
+	}
 	if data != nil && data.IsStream && data.Body != nil {
 		c.Writer.Header().Set("Content-Type", "text/event-stream")
 		c.Writer.Header().Set("Cache-Control", "no-cache")
