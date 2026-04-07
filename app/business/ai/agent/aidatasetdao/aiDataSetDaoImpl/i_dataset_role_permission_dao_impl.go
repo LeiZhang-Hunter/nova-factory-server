@@ -1,6 +1,7 @@
 package aiDataSetDaoImpl
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"nova-factory-server/app/utils/snowflake"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -30,14 +32,24 @@ func NewIDatasetRolePermissionDaoImpl(db *gorm.DB) aidatasetdao.IDatasetRolePerm
 
 // Create 创建知识库/文档-角色权限记录。
 func (i *IDatasetRolePermissionDaoImpl) Create(c *gin.Context, req *aidatasetmodels.SetDatasetRolePermission) (*aidatasetmodels.DatasetRolePermission, error) {
+	datasetIds, err := json.Marshal(req.DatasetID)
+	if err != nil {
+		zap.L().Error("json marshal datasetId failed", zap.Error(err))
+	}
+
+	documentIDs, err := json.Marshal(req.DocumentID)
+	if err != nil {
+		zap.L().Error("json marshal DocumentID failed", zap.Error(err))
+	}
+
 	data := &aidatasetmodels.DatasetRolePermission{
-		ID:         snowflake.GenID(),
-		RoleID:     req.RoleID,
-		DatasetID:  req.DatasetID,
-		DocumentID: req.DocumentID,
-		Permission: req.Permission,
-		DeptID:     baizeContext.GetDeptId(c),
-		State:      commonStatus.NORMAL,
+		ID:          snowflake.GenID(),
+		RoleID:      req.RoleID,
+		DatasetIDs:  string(datasetIds),
+		DocumentIDs: string(documentIDs),
+		Permission:  req.Permission,
+		DeptID:      baizeContext.GetDeptId(c),
+		State:       commonStatus.NORMAL,
 	}
 	data.SetCreateBy(baizeContext.GetUserId(c))
 	if err := i.db.WithContext(c).Table(i.table).Create(data).Error; err != nil {
@@ -60,20 +72,32 @@ func (i *IDatasetRolePermissionDaoImpl) Update(c *gin.Context, req *aidatasetmod
 		return nil, err
 	}
 	data.RoleID = req.RoleID
-	data.DatasetID = req.DatasetID
-	data.DocumentID = req.DocumentID
+
+	datasetIds, err := json.Marshal(req.DatasetID)
+	if err != nil {
+		zap.L().Error("json marshal datasetId failed", zap.Error(err))
+	}
+
+	documentIDs, err := json.Marshal(req.DocumentID)
+	if err != nil {
+		zap.L().Error("json marshal DocumentID failed", zap.Error(err))
+	}
+
+	data.DatasetIDs = string(datasetIds)
+	data.DocumentIDs = string(documentIDs)
 	data.Permission = req.Permission
 	data.SetUpdateBy(baizeContext.GetUserId(c))
 	if err := i.db.WithContext(c).Table(i.table).
 		Where("id = ?", req.ID).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Updates(map[string]interface{}{
-			"role_id":     data.RoleID,
-			"dataset_id":  data.DatasetID,
-			"document_id": data.DocumentID,
-			"permission":  data.Permission,
-			"update_by":   data.UpdateBy,
-			"update_time": data.UpdateTime,
+			"role_id":      data.RoleID,
+			"dataset_ids":  data.DatasetIDs,
+			"document_ids": data.DocumentIDs,
+			"permission":   data.Permission,
+			"status":       req.Status,
+			"update_by":    data.UpdateBy,
+			"update_time":  data.UpdateTime,
 		}).Error; err != nil {
 		return nil, err
 	}
@@ -82,9 +106,7 @@ func (i *IDatasetRolePermissionDaoImpl) Update(c *gin.Context, req *aidatasetmod
 
 // List 查询知识库/文档-角色权限列表。
 func (i *IDatasetRolePermissionDaoImpl) List(c *gin.Context, req *aidatasetmodels.DatasetRolePermissionQuery) (*aidatasetmodels.DatasetRolePermissionListData, error) {
-	db := i.db.WithContext(c).Table(i.table).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Where("state = ?", commonStatus.NORMAL)
+	db := i.db.WithContext(c).Table(i.table)
 	if req.RoleID > 0 {
 		db = db.Where("role_id = ?", req.RoleID)
 	}
@@ -97,6 +119,8 @@ func (i *IDatasetRolePermissionDaoImpl) List(c *gin.Context, req *aidatasetmodel
 	if strings.TrimSpace(req.Permission) != "" {
 		db = db.Where("permission = ?", strings.TrimSpace(req.Permission))
 	}
+	db = db.Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL)
 	page := req.GetPage()
 	size := req.GetSize()
 	var total int64
@@ -106,6 +130,24 @@ func (i *IDatasetRolePermissionDaoImpl) List(c *gin.Context, req *aidatasetmodel
 	rows := make([]*aidatasetmodels.DatasetRolePermission, 0)
 	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
+	}
+
+	for k, row := range rows {
+		documentIDArray := make([]string, 0)
+		datasetIDArray := make([]string, 0)
+
+		err := json.Unmarshal([]byte(row.DocumentIDs), &documentIDArray)
+		if err != nil {
+			zap.L().Error("json unmarshal DocumentIDs failed", zap.Error(err))
+		}
+
+		err = json.Unmarshal([]byte(row.DatasetIDs), &datasetIDArray)
+		if err != nil {
+			zap.L().Error("json unmarshal DocumentIDs failed", zap.Error(err))
+		}
+
+		rows[k].DatasetIDArray = datasetIDArray
+		rows[k].DocumentIDsArray = documentIDArray
 	}
 	return &aidatasetmodels.DatasetRolePermissionListData{
 		Rows:  rows,

@@ -33,7 +33,7 @@ func (i *IDatasetRolePermissionServiceImpl) Set(c *gin.Context, req *aidatasetmo
 	if req.RoleID == 0 {
 		return nil, errors.New("roleId不能为空")
 	}
-	if req.DatasetID == 0 {
+	if len(req.DatasetID) == 0 {
 		return nil, errors.New("datasetId不能为空")
 	}
 	perm := strings.TrimSpace(req.Permission)
