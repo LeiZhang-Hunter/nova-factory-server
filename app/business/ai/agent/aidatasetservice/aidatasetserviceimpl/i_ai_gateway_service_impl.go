@@ -72,7 +72,7 @@ func (i *IAIGatewayServiceImpl) StopGeneration(c *gin.Context, req *aidatasetmod
 	if err != nil {
 		return nil, err
 	}
-	return conversations.StopGeneration(context.Background(), &gatewayapi.StopGenerationInput{
+	return conversations.StopGeneration(c, &gatewayapi.StopGenerationInput{
 		ConversationID: req.ConversationID,
 		AgentGateway:   "",
 		TabID:          req.TabID,

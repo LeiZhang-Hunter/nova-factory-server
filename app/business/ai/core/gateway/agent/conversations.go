@@ -8,11 +8,14 @@ import (
 	"net/http"
 	"nova-factory-server/app/setting"
 	"nova-factory-server/app/utils/aes"
+	"nova-factory-server/app/utils/baizeContext"
 	"strconv"
 	"strings"
 
 	"nova-factory-server/app/business/ai/core/client"
 	"nova-factory-server/app/business/ai/core/gateway/api"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Conversations struct {
@@ -90,7 +93,7 @@ func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*a
 }
 
 // StopGeneration 停止指定会话下的模型生成。
-func (c *Conversations) StopGeneration(ctx context.Context, req *api.StopGenerationInput) (*api.StopGenerationResponse, error) {
+func (c *Conversations) StopGeneration(ctx *gin.Context, req *api.StopGenerationInput) (*api.StopGenerationResponse, error) {
 	if req == nil {
 		return nil, errors.New("request is nil")
 	}
@@ -104,12 +107,23 @@ func (c *Conversations) StopGeneration(ctx context.Context, req *api.StopGenerat
 	if err != nil {
 		return nil, err
 	}
+
+	headers := map[string]string{
+		"Content-Type": "application/json",
+	}
+
+	userId := baizeContext.GetUserId(ctx)
+	userIdStr := strconv.FormatInt(userId, 10)
+	encryptString, err := aes.EncryptString([]byte(c.aesKey), userIdStr)
+	if err != nil {
+		return nil, err
+	}
+	headers["X-User-Id"] = encryptString
+
 	statusCode, message, err := c.client.Do(ctx, client.Request{
-		Method: "POST",
-		Path:   "/api/agent/chat/stop",
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		},
+		Method:       "POST",
+		Path:         "/api/agent/chat/stop",
+		Headers:      headers,
 		AgentGateway: req.AgentGateway,
 		Body:         bodyJSON,
 	})

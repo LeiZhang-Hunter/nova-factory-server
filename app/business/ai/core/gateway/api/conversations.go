@@ -3,11 +3,13 @@ package api
 import (
 	"context"
 	"io"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Conversations interface {
 	Chat(ctx context.Context, req *SendMessageInput) (*ChatResponse, error)
-	StopGeneration(ctx context.Context, req *StopGenerationInput) (*StopGenerationResponse, error)
+	StopGeneration(ctx *gin.Context, req *StopGenerationInput) (*StopGenerationResponse, error)
 }
 
 // SendMessageInput input for sending a message
