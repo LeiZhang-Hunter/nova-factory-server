@@ -7,8 +7,10 @@ type DatasetRolePermission struct {
 	ID               int64    `json:"id,string" gorm:"column:id"`
 	RoleID           int64    `json:"roleId,string" gorm:"column:role_id"`
 	DatasetIDs       string   `json:"-" gorm:"column:dataset_ids"`
+	DatasetUuIDs     string   `json:"-" gorm:"column:dataset_uuids"`
 	DatasetIDArray   []string `json:"datasetIds" gorm:"-"`
 	DocumentIDs      string   `json:"-" gorm:"column:document_ids"`
+	DocumentUuIDs    string   `json:"-" gorm:"column:document_uuids"`
 	DocumentIDsArray []string `json:"documentIds" gorm:"-"`
 	Permission       string   `json:"permission" gorm:"column:permission"`
 	Status           bool     `json:"status,string" gorm:"column:status"`

@@ -41,7 +41,7 @@ func (i *IDatasetRolePermissionServiceImpl) Set(c *gin.Context, req *aidatasetmo
 		perm = "read"
 	}
 	switch perm {
-	case "read", "write", "admin":
+	case "read":
 	default:
 		return nil, errors.New("permission不合法")
 	}

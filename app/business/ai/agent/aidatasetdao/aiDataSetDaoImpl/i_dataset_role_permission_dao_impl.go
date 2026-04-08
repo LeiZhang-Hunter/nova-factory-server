@@ -3,6 +3,8 @@ package aiDataSetDaoImpl
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -22,6 +24,116 @@ type IDatasetRolePermissionDaoImpl struct {
 	table string
 }
 
+func (i *IDatasetRolePermissionDaoImpl) translateDatasetIDsToUUIDs(c *gin.Context, datasetIDs []string) ([]string, error) {
+	if len(datasetIDs) == 0 {
+		return nil, errors.New("datasetId不能为空")
+	}
+	idList := make([]int64, 0, len(datasetIDs))
+	for _, idStr := range datasetIDs {
+		idStr = strings.TrimSpace(idStr)
+		if idStr == "" {
+			continue
+		}
+		id, err := strconv.ParseInt(idStr, 10, 64)
+		if err != nil {
+			return nil, errors.New("datasetId格式不合法")
+		}
+		idList = append(idList, id)
+	}
+	if len(idList) == 0 {
+		return nil, errors.New("datasetId不能为空")
+	}
+
+	rows := make([]*aidatasetmodels.SysDataset, 0)
+	if err := i.db.WithContext(c).Table("sys_dataset").
+		Select("dataset_id", "dataset_uuid").
+		Where("dataset_id IN ?", idList).
+		Where("state = ?", commonStatus.NORMAL).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return nil, errors.New("datasetId不存在")
+	}
+	m := make(map[int64]string, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		m[row.DatasetID] = strings.TrimSpace(row.DatasetUUID)
+	}
+
+	uuidList := make([]string, 0, len(idList))
+	missing := make([]string, 0)
+	for _, id := range idList {
+		uuid := strings.TrimSpace(m[id])
+		if uuid == "" {
+			missing = append(missing, strconv.FormatInt(id, 10))
+			continue
+		}
+		uuidList = append(uuidList, uuid)
+	}
+	if len(missing) > 0 {
+		return nil, errors.New(fmt.Sprintf("datasetId不存在: %s", strings.Join(missing, ",")))
+	}
+	return uuidList, nil
+}
+
+func (i *IDatasetRolePermissionDaoImpl) translateDocumentIDsToUUIDs(c *gin.Context, documentIDs []string) ([]string, error) {
+	if len(documentIDs) == 0 {
+		return make([]string, 0), nil
+	}
+	idList := make([]int64, 0, len(documentIDs))
+	for _, idStr := range documentIDs {
+		idStr = strings.TrimSpace(idStr)
+		if idStr == "" {
+			continue
+		}
+		id, err := strconv.ParseInt(idStr, 10, 64)
+		if err != nil {
+			return nil, errors.New("documentId格式不合法")
+		}
+		idList = append(idList, id)
+	}
+	if len(idList) == 0 {
+		return make([]string, 0), nil
+	}
+
+	rows := make([]*aidatasetmodels.SysDatasetDocument, 0)
+	if err := i.db.WithContext(c).Table("sys_dataset_document").
+		Select("document_id", "dataset_document_uuid").
+		Where("document_id IN ?", idList).
+		Where("state = ?", commonStatus.NORMAL).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return nil, errors.New("documentId不存在")
+	}
+	m := make(map[int64]string, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		m[row.DocumentID] = strings.TrimSpace(row.DatasetDocumentUUID)
+	}
+
+	uuidList := make([]string, 0, len(idList))
+	missing := make([]string, 0)
+	for _, id := range idList {
+		uuid := strings.TrimSpace(m[id])
+		if uuid == "" {
+			missing = append(missing, strconv.FormatInt(id, 10))
+			continue
+		}
+		uuidList = append(uuidList, uuid)
+	}
+	if len(missing) > 0 {
+		return nil, errors.New(fmt.Sprintf("documentId不存在: %s", strings.Join(missing, ",")))
+	}
+	return uuidList, nil
+}
+
 // NewIDatasetRolePermissionDaoImpl 知识库/文档-角色权限DAO构造函数。
 func NewIDatasetRolePermissionDaoImpl(db *gorm.DB) aidatasetdao.IDatasetRolePermissionDao {
 	return &IDatasetRolePermissionDaoImpl{
@@ -32,24 +144,48 @@ func NewIDatasetRolePermissionDaoImpl(db *gorm.DB) aidatasetdao.IDatasetRolePerm
 
 // Create 创建知识库/文档-角色权限记录。
 func (i *IDatasetRolePermissionDaoImpl) Create(c *gin.Context, req *aidatasetmodels.SetDatasetRolePermission) (*aidatasetmodels.DatasetRolePermission, error) {
-	datasetIds, err := json.Marshal(req.DatasetID)
+	datasetUUIDs, err := i.translateDatasetIDsToUUIDs(c, req.DatasetID)
 	if err != nil {
-		zap.L().Error("json marshal datasetId failed", zap.Error(err))
+		return nil, err
+	}
+	datasetUuIdStr, err := json.Marshal(datasetUUIDs)
+	if err != nil {
+		zap.L().Error("json marshal datasetUUIDs failed", zap.Error(err))
+		return nil, err
 	}
 
-	documentIDs, err := json.Marshal(req.DocumentID)
+	documentUUIDs, err := i.translateDocumentIDsToUUIDs(c, req.DocumentID)
 	if err != nil {
-		zap.L().Error("json marshal DocumentID failed", zap.Error(err))
+		return nil, err
+	}
+	documentUuIDStr, err := json.Marshal(documentUUIDs)
+	if err != nil {
+		zap.L().Error("json marshal documentUUIDs failed", zap.Error(err))
+		return nil, err
+	}
+
+	datasetIDStr, err := json.Marshal(req.DatasetID)
+	if err != nil {
+		zap.L().Error("json marshal datasetId failed", zap.Error(err))
+		return nil, err
+	}
+
+	documentIDStr, err := json.Marshal(req.DocumentID)
+	if err != nil {
+		zap.L().Error("json marshal document failed", zap.Error(err))
+		return nil, err
 	}
 
 	data := &aidatasetmodels.DatasetRolePermission{
-		ID:          snowflake.GenID(),
-		RoleID:      req.RoleID,
-		DatasetIDs:  string(datasetIds),
-		DocumentIDs: string(documentIDs),
-		Permission:  req.Permission,
-		DeptID:      baizeContext.GetDeptId(c),
-		State:       commonStatus.NORMAL,
+		ID:            snowflake.GenID(),
+		RoleID:        req.RoleID,
+		DatasetIDs:    string(datasetIDStr),
+		DatasetUuIDs:  string(datasetUuIdStr),
+		DocumentIDs:   string(documentIDStr),
+		DocumentUuIDs: string(documentUuIDStr),
+		Permission:    req.Permission,
+		DeptID:        baizeContext.GetDeptId(c),
+		State:         commonStatus.NORMAL,
 	}
 	data.SetCreateBy(baizeContext.GetUserId(c))
 	if err := i.db.WithContext(c).Table(i.table).Create(data).Error; err != nil {
@@ -73,18 +209,42 @@ func (i *IDatasetRolePermissionDaoImpl) Update(c *gin.Context, req *aidatasetmod
 	}
 	data.RoleID = req.RoleID
 
-	datasetIds, err := json.Marshal(req.DatasetID)
+	datasetUUIDs, err := i.translateDatasetIDsToUUIDs(c, req.DatasetID)
+	if err != nil {
+		return nil, err
+	}
+	datasetUuIdStr, err := json.Marshal(datasetUUIDs)
+	if err != nil {
+		zap.L().Error("json marshal datasetUUIDs failed", zap.Error(err))
+		return nil, err
+	}
+
+	documentUUIDs, err := i.translateDocumentIDsToUUIDs(c, req.DocumentID)
+	if err != nil {
+		return nil, err
+	}
+	documentUuIDStr, err := json.Marshal(documentUUIDs)
+	if err != nil {
+		zap.L().Error("json marshal documentUUIDs failed", zap.Error(err))
+		return nil, err
+	}
+
+	datasetIdStr, err := json.Marshal(req.DatasetID)
 	if err != nil {
 		zap.L().Error("json marshal datasetId failed", zap.Error(err))
+		return nil, err
 	}
 
-	documentIDs, err := json.Marshal(req.DocumentID)
+	documentIDStr, err := json.Marshal(req.DocumentID)
 	if err != nil {
 		zap.L().Error("json marshal DocumentID failed", zap.Error(err))
+		return nil, err
 	}
 
-	data.DatasetIDs = string(datasetIds)
-	data.DocumentIDs = string(documentIDs)
+	data.DatasetIDs = string(datasetIdStr)
+	data.DocumentIDs = string(documentIDStr)
+	data.DocumentUuIDs = string(documentUuIDStr)
+	data.DatasetUuIDs = string(datasetUuIdStr)
 	data.Permission = req.Permission
 	data.SetUpdateBy(baizeContext.GetUserId(c))
 	if err := i.db.WithContext(c).Table(i.table).
