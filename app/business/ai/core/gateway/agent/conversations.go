@@ -6,6 +6,9 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"nova-factory-server/app/setting"
+	"nova-factory-server/app/utils/aes"
+	"strconv"
 	"strings"
 
 	"nova-factory-server/app/business/ai/core/client"
@@ -14,12 +17,17 @@ import (
 
 type Conversations struct {
 	client *client.Client
+	aesKey string
 }
 
 func NewConversations(client *client.Client) api.Conversations {
-	return &Conversations{
+	c := &Conversations{
 		client: client,
 	}
+
+	c.aesKey = setting.Conf.AesKey
+
+	return c
 }
 
 func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*api.ChatResponse, error) {
@@ -35,9 +43,13 @@ func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*a
 
 	chatBodyJSON, err := json.Marshal(req)
 	headers := map[string]string{}
+	userId := strconv.FormatInt(req.UserID, 10)
+	encryptString, err := aes.EncryptString([]byte(c.aesKey), userId)
 	if err != nil {
 		return nil, err
 	}
+	headers["X-User-Id"] = encryptString
+
 	resp, _, err := c.client.DoRaw(ctx, client.Request{
 		Method:       "POST",
 		Path:         "/api/agent/chat",

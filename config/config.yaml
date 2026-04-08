@@ -1,5 +1,6 @@
 name: "baize"
 mode: "dev" #dev 开发模式，日志打印到控制台，prod  生产模式，日志不打印控制台
+aes_key: "zhide-api"
 port: 8080
 version: 2.0.0
 start_time: "2022-08-08"  #此日期用于雪花算法

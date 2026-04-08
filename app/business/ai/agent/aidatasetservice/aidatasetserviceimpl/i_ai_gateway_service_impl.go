@@ -3,6 +3,7 @@ package aidatasetserviceimpl
 import (
 	"context"
 	"errors"
+	"nova-factory-server/app/utils/baizeContext"
 	"strings"
 
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
@@ -52,6 +53,7 @@ func (i *IAIGatewayServiceImpl) Chat(c *gin.Context, req *aidatasetmodels.SendMe
 		AgentGateway:   "",
 		Content:        req.Content,
 		TabID:          req.TabID,
+		UserID:         baizeContext.GetUserId(c),
 	})
 }
 

@@ -2,6 +2,7 @@ package setting
 
 import (
 	"fmt"
+
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -17,6 +18,7 @@ type AppConfig struct {
 	Cluster      bool   `mapstructure:"cluster"`
 	*TokenConfig `mapstructure:"token"`
 	*LogConfig   `mapstructure:"log"`
+	AesKey       string `mapstructure:"aes_key"`
 }
 
 type TokenConfig struct {

@@ -16,6 +16,7 @@ type SendMessageInput struct {
 	AgentGateway   string `json:"agent_gateway"` // AgentGateway 指定网关标识。
 	Content        string `json:"content"`
 	TabID          string `json:"tab_id"`
+	UserID         int64  `json:"user_id"`
 }
 
 // StopGenerationInput 停止生成请求参数。
