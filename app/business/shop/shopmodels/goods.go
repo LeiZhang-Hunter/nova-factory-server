@@ -96,5 +96,16 @@ type ImportGoodsRawData struct {
 	Remark      string                  `json:"remark"`
 	Skus        []ImportGoodsSkuRawData `json:"skus"`
 	UnitName    string                  `json:"unit_name"`
-	Units       []interface{}           `json:"units"`
+	Units       []Unit                  `json:"units"`
+}
+
+type Unit struct {
+	Unitname string `json:"unitname"`
+	Barcode  string `json:"barcode"`
+	Rate     int    `json:"rate"`
+	Price    int    `json:"price"`
+	Price2   int    `json:"price2"`
+	Price3   int    `json:"price3"`
+	Price4   int    `json:"price4"`
+	Price5   int    `json:"price5"`
 }
