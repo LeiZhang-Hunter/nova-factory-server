@@ -4,6 +4,8 @@ import (
 	"errors"
 	"nova-factory-server/app/business/shop/shopdao"
 	"nova-factory-server/app/business/shop/shopmodels"
+	"nova-factory-server/app/constant/commonStatus"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -39,8 +41,14 @@ func (s *ShopGoodsDaoImpl) BatchCreate(c *gin.Context, reqs []*shopmodels.GoodsU
 		batchSize = len(reqs)
 	}
 	models := make([]*shopmodels.Goods, 0, len(reqs))
+	now := time.Now()
 	for _, req := range reqs {
-		models = append(models, buildGoodsModel(req))
+		model := buildGoodsModel(req)
+		model.CreateBy = 0
+		model.UpdateBy = 0
+		model.CreateTime = &now
+		model.UpdateTime = &now
+		models = append(models, model)
 	}
 	return s.db.WithContext(c).Table(s.tableName).CreateInBatches(models, batchSize).Error
 }
@@ -127,9 +135,11 @@ func (s *ShopGoodsDaoImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*sh
 	if req.OuterID != "" {
 		db = db.Where("outer_id = ?", req.OuterID)
 	}
-	if req.IsOnSale == 0 || req.IsOnSale == 1 {
+	if req.IsOnSale != nil {
 		db = db.Where("is_on_sale = ?", req.IsOnSale)
 	}
+
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if req.Page <= 0 {
 		req.Page = 1
 	}

@@ -2,7 +2,10 @@ package shopserviceimpl
 
 import (
 	"errors"
+	"nova-factory-server/app/baize"
+	"nova-factory-server/app/utils/snowflake"
 	"strings"
+	"time"
 
 	"nova-factory-server/app/business/shop/shopdao"
 	"nova-factory-server/app/business/shop/shopmodels"
@@ -102,6 +105,7 @@ func buildGoodsUpsert(record shopmodels.ImportGoodsRecord) (*shopmodels.GoodsUps
 			weight = sku.Weight
 		}
 	}
+	now := time.Now()
 	return &shopmodels.GoodsUpsert{
 		GoodsID:       goodsID,
 		GoodsName:     strings.TrimSpace(record.Data.ProductName),
@@ -115,6 +119,12 @@ func buildGoodsUpsert(record shopmodels.ImportGoodsRecord) (*shopmodels.GoodsUps
 		Quantity:      quantity,
 		RetailPrice:   retailPrice,
 		GalleryImages: "[]",
+		BaseEntity: baize.BaseEntity{
+			CreateBy:   1,
+			UpdateBy:   1,
+			CreateTime: &now,
+			UpdateTime: &now,
+		},
 	}, nil
 }
 
@@ -130,6 +140,7 @@ func buildGoodsSkuUpsert(goodsID string, record shopmodels.ImportGoodsRecord, sk
 	if skuID == "" {
 		return nil, false
 	}
+	now := time.Now()
 	return &shopmodels.GoodsSkuUpsert{
 		GoodsID:       goodsID,
 		SkuID:         skuID,
@@ -144,6 +155,12 @@ func buildGoodsSkuUpsert(goodsID string, record shopmodels.ImportGoodsRecord, sk
 		Quantity:      int64(sku.Size),
 		RetailPrice:   pickRetailPrice(sku),
 		GalleryImages: "[]",
+		BaseEntity: baize.BaseEntity{
+			CreateBy:   1,
+			UpdateBy:   1,
+			CreateTime: &now,
+			UpdateTime: &now,
+		},
 	}, true
 }
 
@@ -224,6 +241,7 @@ func (s *ShopGoodsServiceImpl) diffGoods(c *gin.Context, goodsMap map[string]*sh
 	for goodsID, req := range goodsMap {
 		current := existingMap[goodsID]
 		if current == nil {
+			req.ID = snowflake.GenID()
 			creates = append(creates, req)
 			continue
 		}
