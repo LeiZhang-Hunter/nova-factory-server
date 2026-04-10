@@ -82,7 +82,7 @@ type ImportGoodsSkuRawData struct {
 	Price3   float64 `json:"price3"`
 	Price4   float64 `json:"price4"`
 	Price5   float64 `json:"price5"`
-	Size     int     `json:"size"`
+	Size     float64 `json:"size"`
 	Skucode  string  `json:"skucode"`
 	Skuid    string  `json:"skuid"`
 	Skuname  string  `json:"skuname"`
@@ -100,12 +100,12 @@ type ImportGoodsRawData struct {
 }
 
 type Unit struct {
-	Unitname string `json:"unitname"`
-	Barcode  string `json:"barcode"`
-	Rate     int    `json:"rate"`
-	Price    int    `json:"price"`
-	Price2   int    `json:"price2"`
-	Price3   int    `json:"price3"`
-	Price4   int    `json:"price4"`
-	Price5   int    `json:"price5"`
+	Unitname string  `json:"unitname"`
+	Barcode  string  `json:"barcode"`
+	Rate     float64 `json:"rate"`
+	Price    float64 `json:"price"`
+	Price2   float64 `json:"price2"`
+	Price3   float64 `json:"price3"`
+	Price4   float64 `json:"price4"`
+	Price5   float64 `json:"price5"`
 }

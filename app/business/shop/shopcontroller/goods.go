@@ -162,11 +162,6 @@ func (s *Goods) Delete(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "新增成功"
 // @Router /shop/goods/import [post]
 func (s *Goods) Import(c *gin.Context) {
-	//body := c.Request.Body
-	//all, err := ioutil.ReadAll(body)
-	//if err != nil {
-	//	return
-	//}
 	goods := new(shopmodels.ImportGoodsList)
 	err := c.ShouldBindJSON(goods)
 	if err != nil {
