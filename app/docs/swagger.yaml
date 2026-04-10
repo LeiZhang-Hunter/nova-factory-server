@@ -370,6 +370,30 @@ definitions:
     required:
     - name
     type: object
+  aidatasetmodels.SetDatasetRolePermission:
+    properties:
+      datasetIds:
+        items:
+          type: string
+        type: array
+      documentIds:
+        items:
+          type: string
+        type: array
+      id:
+        example: "0"
+        type: string
+      permission:
+        type: string
+      roleId:
+        example: "0"
+        type: string
+      status:
+        type: boolean
+    required:
+    - datasetIds
+    - roleId
+    type: object
   aidatasetmodels.SetSysAiLLMSetting:
     properties:
       asr_id:
@@ -2191,6 +2215,7 @@ definitions:
       headers:
         type: string
       id:
+        example: "0"
         type: string
       isCommon:
         type: boolean
@@ -2724,6 +2749,128 @@ definitions:
         type: string
     required:
     - type
+    type: object
+  shopmodels.CategoryUpsert:
+    properties:
+      categoryCode:
+        type: string
+      categoryName:
+        type: string
+      id:
+        type: integer
+      parentId:
+        type: integer
+      sort:
+        type: integer
+      status:
+        type: integer
+    required:
+    - categoryName
+    type: object
+  shopmodels.GoodsSkuUpsert:
+    properties:
+      barcode:
+        type: string
+      description:
+        type: string
+      galleryImages:
+        type: string
+      goodsId:
+        type: string
+      id:
+        type: integer
+      imageUrl:
+        type: string
+      outerId:
+        type: string
+      quantity:
+        type: integer
+      retailPrice:
+        type: number
+      skuCode:
+        type: string
+      skuId:
+        type: string
+      skuName:
+        type: string
+      unit:
+        type: string
+      videoUrl:
+        type: string
+      weight:
+        type: number
+      weightUnit:
+        type: string
+    required:
+    - goodsId
+    - skuId
+    type: object
+  shopmodels.GoodsUpsert:
+    properties:
+      description:
+        type: string
+      galleryImages:
+        type: string
+      goodsCode:
+        type: string
+      goodsId:
+        type: string
+      goodsName:
+        type: string
+      id:
+        type: integer
+      imageUrl:
+        type: string
+      isOnSale:
+        type: integer
+      outerId:
+        type: string
+      quantity:
+        type: integer
+      retailPrice:
+        type: number
+      unit:
+        type: string
+      videoUrl:
+        type: string
+      weight:
+        type: number
+      weightUnit:
+        type: string
+    required:
+    - goodsId
+    - goodsName
+    type: object
+  shopmodels.UserUpsert:
+    properties:
+      companyName:
+        type: string
+      contactName:
+        type: string
+      contactPhone:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      mobile:
+        type: string
+      nickname:
+        type: string
+      password:
+        type: string
+      status:
+        type: integer
+      userId:
+        type: string
+      userType:
+        type: integer
+      username:
+        type: string
+    required:
+    - userId
+    - userType
+    - username
     type: object
   systemmodels.Accredit:
     properties:
@@ -3910,6 +4057,25 @@ paths:
       summary: 添加数据集
       tags:
       - 工业智能体/知识库管理
+  /ai/dataset/document/get/{doc_id}:
+    get:
+      description: 携带 RagFlow API Key 拉取预览资源并透传给客户端
+      parameters:
+      - description: RagFlow 文档预览资源ID
+        in: path
+        name: doc_id
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: 预览文件
+          schema:
+            type: file
+      summary: 获取 RagFlow 预览文件
+      tags:
+      - 工业智能体/文档管理
   /ai/dataset/download/document/{document_id}:
     get:
       description: 下载文档
@@ -4068,6 +4234,89 @@ paths:
       summary: 删除文档
       tags:
       - 工业智能体/文档管理
+  /ai/dataset/role/permission/list:
+    get:
+      description: 查询知识库/文档角色权限列表
+      parameters:
+      - in: query
+        name: datasetId
+        type: integer
+      - in: query
+        name: documentId
+        type: integer
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: permission
+        type: string
+      - in: query
+        name: roleId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 查询知识库/文档角色权限列表
+      tags:
+      - 工业智能体/知识库权限
+  /ai/dataset/role/permission/remove/{ids}:
+    delete:
+      description: 删除知识库/文档角色权限（软删除）
+      parameters:
+      - description: 权限ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除知识库/文档角色权限
+      tags:
+      - 工业智能体/知识库权限
+  /ai/dataset/role/permission/set:
+    post:
+      description: 传入id时修改，不传id时新增。documentId 为0表示对整个知识库授权
+      parameters:
+      - description: 权限设置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.SetDatasetRolePermission'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 新增或修改知识库/文档角色权限
+      tags:
+      - 工业智能体/知识库权限
   /ai/dataset/session/agents/completions:
     post:
       description: Agent聊天
@@ -9221,6 +9470,482 @@ paths:
       summary: 用户登录
       tags:
       - 登录
+  /shop/category:
+    post:
+      description: 新增商品分类
+      parameters:
+      - description: 商品分类新增参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.CategoryUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 新增成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增商品分类
+      tags:
+      - 商城/商品分类
+    put:
+      description: 修改商品分类
+      parameters:
+      - description: 商品分类修改参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.CategoryUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 修改成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改商品分类
+      tags:
+      - 商城/商品分类
+  /shop/category/{id}:
+    get:
+      description: 根据ID获取商品分类详情
+      parameters:
+      - description: 商品分类ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商品分类详情
+      tags:
+      - 商城/商品分类
+  /shop/category/{ids}:
+    delete:
+      description: 根据ID删除商品分类
+      parameters:
+      - description: 商品分类ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除商品分类
+      tags:
+      - 商城/商品分类
+  /shop/category/list:
+    get:
+      description: 获取商品分类列表
+      parameters:
+      - in: query
+        name: categoryCode
+        type: string
+      - in: query
+        name: categoryName
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商品分类列表
+      tags:
+      - 商城/商品分类
+  /shop/goods:
+    post:
+      description: 新增商品
+      parameters:
+      - description: 商品新增参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.GoodsUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 新增成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增商品
+      tags:
+      - 商城/商品管理
+    put:
+      description: 修改商品
+      parameters:
+      - description: 商品修改参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.GoodsUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 修改成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改商品
+      tags:
+      - 商城/商品管理
+  /shop/goods/{id}:
+    get:
+      description: 根据ID获取商品详情
+      parameters:
+      - description: 商品ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商品详情
+      tags:
+      - 商城/商品管理
+  /shop/goods/{ids}:
+    delete:
+      description: 根据ID删除商品
+      parameters:
+      - description: 商品ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除商品
+      tags:
+      - 商城/商品管理
+  /shop/goods/list:
+    get:
+      description: 获取商品列表
+      parameters:
+      - in: query
+        name: goodsCode
+        type: string
+      - in: query
+        name: goodsName
+        type: string
+      - in: query
+        name: isOnSale
+        type: integer
+      - in: query
+        name: outerId
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商品列表
+      tags:
+      - 商城/商品管理
+  /shop/sku:
+    post:
+      description: 新增商品规格
+      parameters:
+      - description: 商品规格新增参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.GoodsSkuUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 新增成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增商品规格
+      tags:
+      - 商城/商品规格
+    put:
+      description: 修改商品规格
+      parameters:
+      - description: 商品规格修改参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.GoodsSkuUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 修改成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改商品规格
+      tags:
+      - 商城/商品规格
+  /shop/sku/{id}:
+    get:
+      description: 根据ID获取商品规格详情
+      parameters:
+      - description: 商品规格ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商品规格详情
+      tags:
+      - 商城/商品规格
+  /shop/sku/{ids}:
+    delete:
+      description: 根据ID删除商品规格
+      parameters:
+      - description: 商品规格ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除商品规格
+      tags:
+      - 商城/商品规格
+  /shop/sku/list:
+    get:
+      description: 获取商品规格列表
+      parameters:
+      - in: query
+        name: barcode
+        type: string
+      - in: query
+        name: goodsId
+        type: string
+      - in: query
+        name: outerId
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: skuCode
+        type: string
+      - in: query
+        name: skuName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商品规格列表
+      tags:
+      - 商城/商品规格
+  /shop/user:
+    post:
+      description: 新增商城用户
+      parameters:
+      - description: 商城用户新增参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.UserUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 新增成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增商城用户
+      tags:
+      - 商城/用户管理
+    put:
+      description: 修改商城用户
+      parameters:
+      - description: 商城用户修改参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.UserUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 修改成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改商城用户
+      tags:
+      - 商城/用户管理
+  /shop/user/{id}:
+    get:
+      description: 根据ID获取商城用户详情
+      parameters:
+      - description: 商城用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商城用户详情
+      tags:
+      - 商城/用户管理
+  /shop/user/{ids}:
+    delete:
+      description: 根据ID删除商城用户
+      parameters:
+      - description: 商城用户ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除商城用户
+      tags:
+      - 商城/用户管理
+  /shop/user/list:
+    get:
+      description: 获取商城用户列表
+      parameters:
+      - in: query
+        name: mobile
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: status
+        type: integer
+      - in: query
+        name: userType
+        type: integer
+      - in: query
+        name: username
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商城用户列表
+      tags:
+      - 商城/用户管理
   /system/Config:
     post:
       description: 添加配置

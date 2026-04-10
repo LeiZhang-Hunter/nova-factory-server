@@ -708,6 +708,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/dataset/document/get/{doc_id}": {
+            "get": {
+                "description": "携带 RagFlow API Key 拉取预览资源并透传给客户端",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "工业智能体/文档管理"
+                ],
+                "summary": "获取 RagFlow 预览文件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RagFlow 文档预览资源ID",
+                        "name": "doc_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "预览文件",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/dataset/download/document/{document_id}": {
             "get": {
                 "security": [
@@ -949,6 +978,134 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "删除文档成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/dataset/role/permission/list": {
+            "get": {
+                "description": "查询知识库/文档角色权限列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/知识库权限"
+                ],
+                "summary": "查询知识库/文档角色权限列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "datasetId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "documentId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "permission",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "roleId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/dataset/role/permission/remove/{ids}": {
+            "delete": {
+                "description": "删除知识库/文档角色权限（软删除）",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/知识库权限"
+                ],
+                "summary": "删除知识库/文档角色权限",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "权限ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/dataset/role/permission/set": {
+            "post": {
+                "description": "传入id时修改，不传id时新增。documentId 为0表示对整个知识库授权",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/知识库权限"
+                ],
+                "summary": "新增或修改知识库/文档角色权限",
+                "parameters": [
+                    {
+                        "description": "权限设置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.SetDatasetRolePermission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -9072,6 +9229,786 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/category": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改商品分类",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品分类"
+                ],
+                "summary": "修改商品分类",
+                "parameters": [
+                    {
+                        "description": "商品分类修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.CategoryUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增商品分类",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品分类"
+                ],
+                "summary": "新增商品分类",
+                "parameters": [
+                    {
+                        "description": "商品分类新增参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.CategoryUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/category/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取商品分类列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品分类"
+                ],
+                "summary": "获取商品分类列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "categoryCode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "categoryName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/category/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除商品分类",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品分类"
+                ],
+                "summary": "删除商品分类",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品分类ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/category/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取商品分类详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品分类"
+                ],
+                "summary": "获取商品分类详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品分类ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "修改商品",
+                "parameters": [
+                    {
+                        "description": "商品修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "新增商品",
+                "parameters": [
+                    {
+                        "description": "商品新增参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取商品列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "获取商品列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "goodsCode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "goodsName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "isOnSale",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "outerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "删除商品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取商品详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "获取商品详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/sku": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改商品规格",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品规格"
+                ],
+                "summary": "修改商品规格",
+                "parameters": [
+                    {
+                        "description": "商品规格修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsSkuUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增商品规格",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品规格"
+                ],
+                "summary": "新增商品规格",
+                "parameters": [
+                    {
+                        "description": "商品规格新增参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsSkuUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/sku/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取商品规格列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品规格"
+                ],
+                "summary": "获取商品规格列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "barcode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "goodsId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "outerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "skuCode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "skuName",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/sku/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除商品规格",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品规格"
+                ],
+                "summary": "删除商品规格",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品规格ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/sku/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取商品规格详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品规格"
+                ],
+                "summary": "获取商品规格详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品规格ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改商城用户",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理"
+                ],
+                "summary": "修改商城用户",
+                "parameters": [
+                    {
+                        "description": "商城用户修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.UserUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增商城用户",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理"
+                ],
+                "summary": "新增商城用户",
+                "parameters": [
+                    {
+                        "description": "商城用户新增参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.UserUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取商城用户列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理"
+                ],
+                "summary": "获取商城用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "mobile",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "userType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "username",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除商城用户",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理"
+                ],
+                "summary": "删除商城用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商城用户ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取商城用户详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理"
+                ],
+                "summary": "获取商城用户详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商城用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/system/Config": {
             "put": {
                 "security": [
@@ -13704,6 +14641,41 @@ const docTemplate = `{
                 }
             }
         },
+        "aidatasetmodels.SetDatasetRolePermission": {
+            "type": "object",
+            "required": [
+                "datasetIds",
+                "roleId"
+            ],
+            "properties": {
+                "datasetIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "documentIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "permission": {
+                    "type": "string"
+                },
+                "roleId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
         "aidatasetmodels.SetSysAiLLMSetting": {
             "type": "object",
             "properties": {
@@ -16292,7 +17264,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "0"
                 },
                 "isCommon": {
                     "type": "boolean"
@@ -17069,6 +18042,189 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "shopmodels.CategoryUpsert": {
+            "type": "object",
+            "required": [
+                "categoryName"
+            ],
+            "properties": {
+                "categoryCode": {
+                    "type": "string"
+                },
+                "categoryName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "shopmodels.GoodsSkuUpsert": {
+            "type": "object",
+            "required": [
+                "goodsId",
+                "skuId"
+            ],
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "galleryImages": {
+                    "type": "string"
+                },
+                "goodsId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imageUrl": {
+                    "type": "string"
+                },
+                "outerId": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "retailPrice": {
+                    "type": "number"
+                },
+                "skuCode": {
+                    "type": "string"
+                },
+                "skuId": {
+                    "type": "string"
+                },
+                "skuName": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "videoUrl": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "number"
+                },
+                "weightUnit": {
+                    "type": "string"
+                }
+            }
+        },
+        "shopmodels.GoodsUpsert": {
+            "type": "object",
+            "required": [
+                "goodsId",
+                "goodsName"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "galleryImages": {
+                    "type": "string"
+                },
+                "goodsCode": {
+                    "type": "string"
+                },
+                "goodsId": {
+                    "type": "string"
+                },
+                "goodsName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imageUrl": {
+                    "type": "string"
+                },
+                "isOnSale": {
+                    "type": "integer"
+                },
+                "outerId": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "retailPrice": {
+                    "type": "number"
+                },
+                "unit": {
+                    "type": "string"
+                },
+                "videoUrl": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "number"
+                },
+                "weightUnit": {
+                    "type": "string"
+                }
+            }
+        },
+        "shopmodels.UserUpsert": {
+            "type": "object",
+            "required": [
+                "userId",
+                "userType",
+                "username"
+            ],
+            "properties": {
+                "companyName": {
+                    "type": "string"
+                },
+                "contactName": {
+                    "type": "string"
+                },
+                "contactPhone": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "userType": {
+                    "type": "integer"
+                },
+                "username": {
                     "type": "string"
                 }
             }
