@@ -8,8 +8,12 @@ import (
 
 type IShopGoodsDao interface {
 	Create(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error)
+	BatchCreate(c *gin.Context, reqs []*shopmodels.GoodsUpsert, batchSize int) error
 	Update(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error)
+	BatchUpdate(c *gin.Context, reqs []*shopmodels.GoodsUpsert, batchSize int) error
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error)
+	GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error)
+	ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.Goods, error)
 	List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error)
 }

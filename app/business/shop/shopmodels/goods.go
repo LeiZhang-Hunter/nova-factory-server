@@ -58,15 +58,43 @@ type GoodsListData struct {
 	Total int64    `json:"total"` // 总数
 }
 
-type ExportGoodsList struct {
+// ImportGoodsList 商品导入列表
+type ImportGoodsList struct {
 	Count   int                 `json:"count"`
-	Records []ExportGoodsRecord `json:"records"`
+	Records []ImportGoodsRecord `json:"records"`
 }
 
-type ExportGoodsRecord struct {
-	ExternalID string         `json:"external_id"`
-	Source     string         `json:"source"`
-	Entity     string         `json:"entity"`
-	Data       map[string]any `json:"data"`
-	SyncedAt   time.Time      `json:"synced_at"`
+// ImportGoodsRecord 导入商品结果
+type ImportGoodsRecord struct {
+	ExternalID string             `json:"external_id"`
+	Source     string             `json:"source"`
+	Entity     string             `json:"entity"`
+	Data       ImportGoodsRawData `json:"data"`
+	SyncedAt   time.Time          `json:"synced_at"`
+}
+
+// ImportGoodsSkuRawData 导入的sku原始数据
+type ImportGoodsSkuRawData struct {
+	Barcode  string  `json:"barcode"`
+	Lcmccode string  `json:"lcmccode"`
+	Price    float64 `json:"price"`
+	Price2   float64 `json:"price2"`
+	Price3   float64 `json:"price3"`
+	Price4   float64 `json:"price4"`
+	Price5   float64 `json:"price5"`
+	Size     int     `json:"size"`
+	Skucode  string  `json:"skucode"`
+	Skuid    string  `json:"skuid"`
+	Skuname  string  `json:"skuname"`
+	Weight   float64 `json:"weight"`
+}
+
+// ImportGoodsRawData 导入的商品原始数据
+type ImportGoodsRawData struct {
+	ProductCode string                  `json:"product_code"`
+	ProductName string                  `json:"product_name"`
+	Remark      string                  `json:"remark"`
+	Skus        []ImportGoodsSkuRawData `json:"skus"`
+	UnitName    string                  `json:"unit_name"`
+	Units       []interface{}           `json:"units"`
 }

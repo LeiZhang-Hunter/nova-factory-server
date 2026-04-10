@@ -65,8 +65,7 @@ CREATE TABLE IF NOT EXISTS `shop_goods_sku` (
   UNIQUE KEY `uk_sku_id` (`sku_id`),
   KEY `idx_goods_id` (`goods_id`),
   KEY `idx_sku_code` (`sku_code`),
-  KEY `idx_outer_id` (`outer_id`),
-  CONSTRAINT `fk_sku_goods_id` FOREIGN KEY (`goods_id`) REFERENCES `shop_goods` (`goods_id`)
+  KEY `idx_outer_id` (`outer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品SKU表';
 
 CREATE TABLE IF NOT EXISTS `shop_user` (

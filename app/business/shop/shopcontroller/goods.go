@@ -31,7 +31,7 @@ func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 // PublicRoutes 导入接口注册
 func (s *Goods) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/goods")
-	group.Any("/export", s.Export)
+	group.Any("/import", s.Import)
 }
 
 // List 获取商品列表
@@ -152,7 +152,7 @@ func (s *Goods) Delete(c *gin.Context) {
 	baizeContext.Success(c)
 }
 
-// Export 导入商品
+// Import 导入商品
 // @Summary 导入商品
 // @Description 导入商品
 // @Tags 商城/商品管理
@@ -160,18 +160,24 @@ func (s *Goods) Delete(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "新增成功"
-// @Router /shop/goods/export [post]
-func (s *Goods) Export(c *gin.Context) {
+// @Router /shop/goods/import [post]
+func (s *Goods) Import(c *gin.Context) {
 	//body := c.Request.Body
 	//all, err := ioutil.ReadAll(body)
 	//if err != nil {
 	//	return
 	//}
-	goods := new(shopmodels.ExportGoodsList)
+	goods := new(shopmodels.ImportGoodsList)
 	err := c.ShouldBindJSON(goods)
 	if err != nil {
 		zap.L().Error("parse goods fail", zap.Error(err))
+		baizeContext.ParameterError(c)
 		return
 	}
-	return
+	if err = s.service.Import(c, goods.Records); err != nil {
+		zap.L().Error("import goods fail", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
 }
