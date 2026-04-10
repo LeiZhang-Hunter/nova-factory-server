@@ -1,6 +1,7 @@
 package shopcontroller
 
 import (
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/shopmodels"
 	"nova-factory-server/app/business/shop/shopservice"
 	"nova-factory-server/app/middlewares"
@@ -25,6 +26,12 @@ func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("", middlewares.HasPermission("shop:goods:add"), s.Create)
 	group.PUT("", middlewares.HasPermission("shop:goods:edit"), s.Update)
 	group.DELETE("/:ids", middlewares.HasPermission("shop:goods:remove"), s.Delete)
+}
+
+// PublicRoutes 导入接口注册
+func (s *Goods) PublicRoutes(router *gin.RouterGroup) {
+	group := router.Group("/shop/goods")
+	group.Any("/export", s.Export)
 }
 
 // List 获取商品列表
@@ -143,4 +150,28 @@ func (s *Goods) Delete(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// Export 导入商品
+// @Summary 导入商品
+// @Description 导入商品
+// @Tags 商城/商品管理
+// @Param object body shopmodels.GoodsUpsert true "商品新增参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "新增成功"
+// @Router /shop/goods/export [post]
+func (s *Goods) Export(c *gin.Context) {
+	//body := c.Request.Body
+	//all, err := ioutil.ReadAll(body)
+	//if err != nil {
+	//	return
+	//}
+	goods := new(shopmodels.ExportGoodsList)
+	err := c.ShouldBindJSON(goods)
+	if err != nil {
+		zap.L().Error("parse goods fail", zap.Error(err))
+		return
+	}
+	return
 }

@@ -2,57 +2,61 @@ package shopmodels
 
 import "time"
 
+// GoodsSku 商品规格信息
 type GoodsSku struct {
-	ID            uint64    `json:"id" db:"id"`
-	GoodsID       string    `json:"goodsId" db:"goods_id"`
-	SkuID         string    `json:"skuId" db:"sku_id"`
-	SkuName       string    `json:"skuName" db:"sku_name"`
-	SkuCode       string    `json:"skuCode" db:"sku_code"`
-	OuterID       string    `json:"outerId" db:"outer_id"`
-	Barcode       string    `json:"barcode" db:"barcode"`
-	ImageURL      string    `json:"imageUrl" db:"image_url"`
-	RetailPrice   float64   `json:"retailPrice" db:"retail_price"`
-	GalleryImages string    `json:"galleryImages" db:"gallery_images"`
-	VideoURL      string    `json:"videoUrl" db:"video_url"`
-	Description   string    `json:"description" db:"description"`
-	Weight        float64   `json:"weight" db:"weight"`
-	WeightUnit    string    `json:"weightUnit" db:"weight_unit"`
-	Unit          string    `json:"unit" db:"unit"`
-	Quantity      int64     `json:"quantity" db:"quantity"`
-	CreatedAt     time.Time `json:"createdAt" db:"created_at"`
-	UpdatedAt     time.Time `json:"updatedAt" db:"updated_at"`
+	ID            uint64    `json:"id" db:"id"`                        // 主键ID
+	GoodsID       string    `json:"goodsId" db:"goods_id"`             // 商品业务ID
+	SkuID         string    `json:"skuId" db:"sku_id"`                 // 规格业务ID
+	SkuName       string    `json:"skuName" db:"sku_name"`             // 规格名称
+	SkuCode       string    `json:"skuCode" db:"sku_code"`             // 规格编码
+	OuterID       string    `json:"outerId" db:"outer_id"`             // 外部系统ID
+	Barcode       string    `json:"barcode" db:"barcode"`              // 条码
+	ImageURL      string    `json:"imageUrl" db:"image_url"`           // 主图地址
+	RetailPrice   float64   `json:"retailPrice" db:"retail_price"`     // 零售价
+	GalleryImages string    `json:"galleryImages" db:"gallery_images"` // 图集
+	VideoURL      string    `json:"videoUrl" db:"video_url"`           // 视频地址
+	Description   string    `json:"description" db:"description"`      // 规格描述
+	Weight        float64   `json:"weight" db:"weight"`                // 重量
+	WeightUnit    string    `json:"weightUnit" db:"weight_unit"`       // 重量单位
+	Unit          string    `json:"unit" db:"unit"`                    // 销售单位
+	Quantity      int64     `json:"quantity" db:"quantity"`            // 库存数量
+	CreatedAt     time.Time `json:"createdAt" db:"created_at"`         // 创建时间
+	UpdatedAt     time.Time `json:"updatedAt" db:"updated_at"`         // 更新时间
 }
 
+// GoodsSkuUpsert 商品规格新增修改参数
 type GoodsSkuUpsert struct {
-	ID            uint64  `json:"id"`
-	GoodsID       string  `json:"goodsId" binding:"required"`
-	SkuID         string  `json:"skuId" binding:"required"`
-	SkuName       string  `json:"skuName"`
-	SkuCode       string  `json:"skuCode"`
-	OuterID       string  `json:"outerId"`
-	Barcode       string  `json:"barcode"`
-	ImageURL      string  `json:"imageUrl"`
-	RetailPrice   float64 `json:"retailPrice"`
-	GalleryImages string  `json:"galleryImages"`
-	VideoURL      string  `json:"videoUrl"`
-	Description   string  `json:"description"`
-	Weight        float64 `json:"weight"`
-	WeightUnit    string  `json:"weightUnit"`
-	Unit          string  `json:"unit"`
-	Quantity      int64   `json:"quantity"`
+	ID            uint64  `json:"id"`                         // 主键ID
+	GoodsID       string  `json:"goodsId" binding:"required"` // 商品业务ID
+	SkuID         string  `json:"skuId" binding:"required"`   // 规格业务ID
+	SkuName       string  `json:"skuName"`                    // 规格名称
+	SkuCode       string  `json:"skuCode"`                    // 规格编码
+	OuterID       string  `json:"outerId"`                    // 外部系统ID
+	Barcode       string  `json:"barcode"`                    // 条码
+	ImageURL      string  `json:"imageUrl"`                   // 主图地址
+	RetailPrice   float64 `json:"retailPrice"`                // 零售价
+	GalleryImages string  `json:"galleryImages"`              // 图集
+	VideoURL      string  `json:"videoUrl"`                   // 视频地址
+	Description   string  `json:"description"`                // 规格描述
+	Weight        float64 `json:"weight"`                     // 重量
+	WeightUnit    string  `json:"weightUnit"`                 // 重量单位
+	Unit          string  `json:"unit"`                       // 销售单位
+	Quantity      int64   `json:"quantity"`                   // 库存数量
 }
 
+// GoodsSkuQuery 商品规格查询参数
 type GoodsSkuQuery struct {
-	GoodsID string `form:"goodsId"`
-	SkuName string `form:"skuName"`
-	SkuCode string `form:"skuCode"`
-	OuterID string `form:"outerId"`
-	Barcode string `form:"barcode"`
-	Page    int64  `form:"page"`
-	Size    int64  `form:"size"`
+	GoodsID string `form:"goodsId"` // 商品业务ID
+	SkuName string `form:"skuName"` // 规格名称
+	SkuCode string `form:"skuCode"` // 规格编码
+	OuterID string `form:"outerId"` // 外部系统ID
+	Barcode string `form:"barcode"` // 条码
+	Page    int64  `form:"page"`    // 页码
+	Size    int64  `form:"size"`    // 每页数量
 }
 
+// GoodsSkuListData 商品规格列表结果
 type GoodsSkuListData struct {
-	Rows  []*GoodsSku `json:"rows"`
-	Total int64       `json:"total"`
+	Rows  []*GoodsSku `json:"rows"`  // 数据列表
+	Total int64       `json:"total"` // 总数
 }

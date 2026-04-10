@@ -20,10 +20,19 @@ func NewGinEngine(
 	controller *shopcontroller.Controller,
 ) *Shop {
 	group := app.Engine.Group("")
+
+	//不做鉴权的
+	{
+		controller.Goods.PublicRoutes(group)
+	}
+
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
-	controller.Category.PrivateRoutes(group)
-	controller.Goods.PrivateRoutes(group)
-	controller.Sku.PrivateRoutes(group)
-	controller.User.PrivateRoutes(group)
+	{
+		controller.Category.PrivateRoutes(group)
+		controller.Goods.PrivateRoutes(group)
+		controller.Sku.PrivateRoutes(group)
+		controller.User.PrivateRoutes(group)
+	}
+
 	return &Shop{}
 }
