@@ -1,7 +1,7 @@
 package shopdao
 
 import (
-	"nova-factory-server/app/business/shop/shopmodels"
+	"nova-factory-server/app/business/shop/product/shopmodels"
 
 	"github.com/gin-gonic/gin"
 )

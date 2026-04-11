@@ -2,8 +2,8 @@ package shopdaoimpl
 
 import (
 	"errors"
-	"nova-factory-server/app/business/shop/shopdao"
-	"nova-factory-server/app/business/shop/shopmodels"
+	"nova-factory-server/app/business/shop/product/shopdao"
+	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"time"
 

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"nova-factory-server/app/business/shop/shopdao"
-	"nova-factory-server/app/business/shop/shopmodels"
-	"nova-factory-server/app/business/shop/shopservice"
+	"nova-factory-server/app/business/shop/product/shopdao"
+	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/business/shop/product/shopservice"
 
 	"github.com/gin-gonic/gin"
 )

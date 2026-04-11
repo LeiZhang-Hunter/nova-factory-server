@@ -1,12 +1,12 @@
-package shopservice
+package shopdao
 
 import (
-	"nova-factory-server/app/business/shop/shopmodels"
+	"nova-factory-server/app/business/shop/product/shopmodels"
 
 	"github.com/gin-gonic/gin"
 )
 
-type IShopUserService interface {
+type IShopUserDao interface {
 	Create(c *gin.Context, req *shopmodels.UserUpsert) (*shopmodels.User, error)
 	Update(c *gin.Context, req *shopmodels.UserUpsert) (*shopmodels.User, error)
 	DeleteByIDs(c *gin.Context, ids []int64) error

@@ -4,7 +4,7 @@
 package shop
 
 import (
-	"nova-factory-server/app/business/shop/shopcontroller"
+	"nova-factory-server/app/business/shop/product/shopcontroller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"

@@ -4,9 +4,9 @@
 package shop
 
 import (
-	"nova-factory-server/app/business/shop/shopcontroller"
-	"nova-factory-server/app/business/shop/shopdao/shopdaoimpl"
-	"nova-factory-server/app/business/shop/shopservice/shopserviceimpl"
+	"nova-factory-server/app/business/shop/product/shopcontroller"
+	"nova-factory-server/app/business/shop/product/shopdao/shopdaoimpl"
+	"nova-factory-server/app/business/shop/product/shopservice/shopserviceimpl"
 
 	"github.com/google/wire"
 )

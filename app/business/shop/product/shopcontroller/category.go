@@ -1,8 +1,8 @@
 package shopcontroller
 
 import (
-	"nova-factory-server/app/business/shop/shopmodels"
-	"nova-factory-server/app/business/shop/shopservice"
+	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 
