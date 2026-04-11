@@ -21,10 +21,10 @@ func NewSku(service shopservice.IShopSkuService) *Sku {
 func (s *Sku) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/sku")
 	group.GET("/list", middlewares.HasPermission("shop:sku:list"), s.List)
-	group.GET("/:id", middlewares.HasPermission("shop:sku:query"), s.GetByID)
-	group.POST("", middlewares.HasPermission("shop:sku:add"), s.Create)
-	group.PUT("", middlewares.HasPermission("shop:sku:edit"), s.Update)
-	group.DELETE("/:ids", middlewares.HasPermission("shop:sku:remove"), s.Delete)
+	group.GET("/info/:id", middlewares.HasPermission("shop:sku:query"), s.GetByID)
+	group.POST("/add", middlewares.HasPermission("shop:sku:add"), s.Create)
+	group.PUT("/update", middlewares.HasPermission("shop:sku:update"), s.Update)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:sku:remove"), s.Delete)
 }
 
 // List 获取商品规格列表
