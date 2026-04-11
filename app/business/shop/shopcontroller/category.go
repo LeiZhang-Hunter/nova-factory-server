@@ -21,9 +21,9 @@ func NewCategory(service shopservice.IShopCategoryService) *Category {
 func (s *Category) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/category")
 	group.GET("/list", middlewares.HasPermission("shop:category:list"), s.List)
-	group.GET("/:id", middlewares.HasPermission("shop:category:query"), s.GetByID)
-	group.POST("", middlewares.HasPermission("shop:category:add"), s.Create)
-	group.PUT("", middlewares.HasPermission("shop:category:edit"), s.Update)
+	group.GET("/info/:id", middlewares.HasPermission("shop:category:info"), s.GetByID)
+	group.POST("/add", middlewares.HasPermission("shop:category:add"), s.Create)
+	group.PUT("/update", middlewares.HasPermission("shop:category:update"), s.Update)
 	group.DELETE("/:ids", middlewares.HasPermission("shop:category:remove"), s.Delete)
 }
 

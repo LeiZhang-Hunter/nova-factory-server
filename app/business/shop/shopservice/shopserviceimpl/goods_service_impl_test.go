@@ -100,12 +100,83 @@ func TestImportIncrementalUpsert(t *testing.T) {
 	}
 }
 
+func TestListAttachSkus(t *testing.T) {
+	goodsDao := &mockShopGoodsDao{
+		listData: &shopmodels.GoodsListData{
+			Rows: []*shopmodels.Goods{
+				{GoodsID: "g-1", GoodsName: "商品1"},
+				{GoodsID: "g-2", GoodsName: "商品2"},
+			},
+			Total: 2,
+		},
+	}
+	skuDao := &mockShopSkuDao{
+		skusByGoodsID: map[string][]*shopmodels.GoodsSku{
+			"g-1": {
+				{SkuID: "s-1", GoodsID: "g-1"},
+				{SkuID: "s-2", GoodsID: "g-1"},
+			},
+			"g-2": {
+				{SkuID: "s-3", GoodsID: "g-2"},
+			},
+		},
+	}
+	service := &ShopGoodsServiceImpl{
+		dao:    goodsDao,
+		skuDao: skuDao,
+	}
+
+	data, err := service.List(&gin.Context{}, &shopmodels.GoodsQuery{})
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if len(data.Rows[0].Skus) != 2 {
+		t.Fatalf("unexpected sku count for goods 1: %d", len(data.Rows[0].Skus))
+	}
+	if len(data.Rows[1].Skus) != 1 {
+		t.Fatalf("unexpected sku count for goods 2: %d", len(data.Rows[1].Skus))
+	}
+}
+
+func TestGetByIDAttachSkus(t *testing.T) {
+	goodsDao := &mockShopGoodsDao{
+		byID: map[int64]*shopmodels.Goods{
+			1: {ID: 1, GoodsID: "g-1", GoodsName: "商品1"},
+		},
+	}
+	skuDao := &mockShopSkuDao{
+		skusByGoodsID: map[string][]*shopmodels.GoodsSku{
+			"g-1": {
+				{SkuID: "s-1", GoodsID: "g-1"},
+				{SkuID: "s-2", GoodsID: "g-1"},
+			},
+		},
+	}
+	service := &ShopGoodsServiceImpl{
+		dao:    goodsDao,
+		skuDao: skuDao,
+	}
+
+	data, err := service.GetByID(&gin.Context{}, 1)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if data == nil {
+		t.Fatal("expected goods data")
+	}
+	if len(data.Skus) != 2 {
+		t.Fatalf("unexpected sku count: %d", len(data.Skus))
+	}
+}
+
 type mockShopGoodsDao struct {
+	byID         map[int64]*shopmodels.Goods
 	byGoodsID    map[string]*shopmodels.Goods
 	created      []*shopmodels.GoodsUpsert
 	updated      []*shopmodels.GoodsUpsert
 	batchCreated []*shopmodels.GoodsUpsert
 	batchUpdated []*shopmodels.GoodsUpsert
+	listData     *shopmodels.GoodsListData
 }
 
 func (m *mockShopGoodsDao) Create(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error) {
@@ -139,6 +210,9 @@ func (m *mockShopGoodsDao) DeleteByIDs(c *gin.Context, ids []int64) error {
 }
 
 func (m *mockShopGoodsDao) GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error) {
+	if item, ok := m.byID[id]; ok {
+		return item, nil
+	}
 	return nil, nil
 }
 
@@ -160,15 +234,16 @@ func (m *mockShopGoodsDao) ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]
 }
 
 func (m *mockShopGoodsDao) List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error) {
-	return nil, nil
+	return m.listData, nil
 }
 
 type mockShopSkuDao struct {
-	bySkuID      map[string]*shopmodels.GoodsSku
-	created      []*shopmodels.GoodsSkuUpsert
-	updated      []*shopmodels.GoodsSkuUpsert
-	batchCreated []*shopmodels.GoodsSkuUpsert
-	batchUpdated []*shopmodels.GoodsSkuUpsert
+	bySkuID       map[string]*shopmodels.GoodsSku
+	created       []*shopmodels.GoodsSkuUpsert
+	updated       []*shopmodels.GoodsSkuUpsert
+	batchCreated  []*shopmodels.GoodsSkuUpsert
+	batchUpdated  []*shopmodels.GoodsSkuUpsert
+	skusByGoodsID map[string][]*shopmodels.GoodsSku
 }
 
 func (m *mockShopSkuDao) Create(c *gin.Context, req *shopmodels.GoodsSkuUpsert) (*shopmodels.GoodsSku, error) {
@@ -212,6 +287,14 @@ func (m *mockShopSkuDao) GetBySkuID(c *gin.Context, skuID string) (*shopmodels.G
 		return item, nil
 	}
 	return nil, nil
+}
+
+func (m *mockShopSkuDao) ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.GoodsSku, error) {
+	rows := make([]*shopmodels.GoodsSku, 0)
+	for _, goodsID := range goodsIDs {
+		rows = append(rows, m.skusByGoodsID[goodsID]...)
+	}
+	return rows, nil
 }
 
 func (m *mockShopSkuDao) ListBySkuIDs(c *gin.Context, skuIDs []string) ([]*shopmodels.GoodsSku, error) {

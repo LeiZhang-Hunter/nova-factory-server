@@ -14,6 +14,7 @@ type IShopSkuDao interface {
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*shopmodels.GoodsSku, error)
 	GetBySkuID(c *gin.Context, skuID string) (*shopmodels.GoodsSku, error)
+	ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.GoodsSku, error)
 	ListBySkuIDs(c *gin.Context, skuIDs []string) ([]*shopmodels.GoodsSku, error)
 	List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*shopmodels.GoodsSkuListData, error)
 }

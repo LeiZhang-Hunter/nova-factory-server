@@ -22,10 +22,10 @@ func NewGoods(service shopservice.IShopGoodsService) *Goods {
 func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/goods")
 	group.GET("/list", middlewares.HasPermission("shop:goods:list"), s.List)
-	group.GET("/:id", middlewares.HasPermission("shop:goods:query"), s.GetByID)
-	group.POST("", middlewares.HasPermission("shop:goods:add"), s.Create)
-	group.PUT("", middlewares.HasPermission("shop:goods:edit"), s.Update)
-	group.DELETE("/:ids", middlewares.HasPermission("shop:goods:remove"), s.Delete)
+	group.GET("/info/:id", middlewares.HasPermission("shop:goods:info"), s.GetByID)
+	group.POST("/add", middlewares.HasPermission("shop:goods:add"), s.Create)
+	group.PUT("/edit", middlewares.HasPermission("shop:goods:edit"), s.Update)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:goods:remove"), s.Delete)
 }
 
 // PublicRoutes 导入接口注册

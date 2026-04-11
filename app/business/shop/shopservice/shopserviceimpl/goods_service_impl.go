@@ -42,11 +42,31 @@ func (s *ShopGoodsServiceImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 }
 
 func (s *ShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error) {
-	return s.dao.GetByID(c, id)
+	data, err := s.dao.GetByID(c, id)
+	if err != nil {
+		return nil, err
+	}
+	if data == nil {
+		return nil, nil
+	}
+	if err = s.attachSkus(c, []*shopmodels.Goods{data}); err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func (s *ShopGoodsServiceImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error) {
-	return s.dao.List(c, req)
+	data, err := s.dao.List(c, req)
+	if err != nil {
+		return nil, err
+	}
+	if data == nil || len(data.Rows) == 0 {
+		return data, nil
+	}
+	if err = s.attachSkus(c, data.Rows); err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 // Import 增量导入商品与规格数据
@@ -332,4 +352,43 @@ func mapKeys[T any](data map[string]T) []string {
 		keys = append(keys, key)
 	}
 	return keys
+}
+
+// goodsIDsFromRows 提取商品列表中的商品业务ID
+func goodsIDsFromRows(rows []*shopmodels.Goods) []string {
+	goodsIDs := make([]string, 0, len(rows))
+	seen := make(map[string]struct{}, len(rows))
+	for _, row := range rows {
+		if row == nil || row.GoodsID == "" {
+			continue
+		}
+		if _, ok := seen[row.GoodsID]; ok {
+			continue
+		}
+		seen[row.GoodsID] = struct{}{}
+		goodsIDs = append(goodsIDs, row.GoodsID)
+	}
+	return goodsIDs
+}
+
+// attachSkus 为商品挂载规格列表
+func (s *ShopGoodsServiceImpl) attachSkus(c *gin.Context, rows []*shopmodels.Goods) error {
+	if len(rows) == 0 {
+		return nil
+	}
+	skus, err := s.skuDao.ListByGoodsIDs(c, goodsIDsFromRows(rows))
+	if err != nil {
+		return err
+	}
+	skuMap := make(map[string][]*shopmodels.GoodsSku, len(rows))
+	for _, sku := range skus {
+		skuMap[sku.GoodsID] = append(skuMap[sku.GoodsID], sku)
+	}
+	for _, row := range rows {
+		row.Skus = skuMap[row.GoodsID]
+		if row.Skus == nil {
+			row.Skus = make([]*shopmodels.GoodsSku, 0)
+		}
+	}
+	return nil
 }
