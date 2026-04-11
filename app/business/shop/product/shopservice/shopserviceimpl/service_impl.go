@@ -1,5 +1,7 @@
 package shopserviceimpl
 
-import "github.com/google/wire"
+import (
+	"github.com/google/wire"
+)
 
-var ProviderSet = wire.NewSet(NewShopCategoryService, NewShopGoodsService, NewShopSkuService, NewShopUserService)
+var ProviderSet = wire.NewSet(NewShopCategoryService, NewShopGoodsService, NewShopSkuService)

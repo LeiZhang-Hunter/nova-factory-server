@@ -5,6 +5,7 @@ package shop
 
 import (
 	"nova-factory-server/app/business/shop/product/shopcontroller"
+	userController "nova-factory-server/app/business/shop/user/controller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
@@ -18,6 +19,7 @@ func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
 	controller *shopcontroller.Controller,
+	userController *userController.Controller,
 ) *Shop {
 	group := app.Engine.Group("")
 
@@ -31,7 +33,7 @@ func NewGinEngine(
 		controller.Category.PrivateRoutes(group)
 		controller.Goods.PrivateRoutes(group)
 		controller.Sku.PrivateRoutes(group)
-		controller.User.PrivateRoutes(group)
+		userController.User.PrivateRoutes(group)
 	}
 
 	return &Shop{}

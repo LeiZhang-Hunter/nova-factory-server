@@ -1,8 +1,8 @@
 package shopcontroller
 
 import (
-	"nova-factory-server/app/business/shop/product/shopmodels"
-	"nova-factory-server/app/business/shop/product/shopservice"
+	"nova-factory-server/app/business/shop/user/models"
+	"nova-factory-server/app/business/shop/user/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -10,21 +10,21 @@ import (
 )
 
 type User struct {
-	service shopservice.IShopUserService
+	service service.IShopUserService
 }
 
-func NewUser(service shopservice.IShopUserService) *User {
+func NewUser(service service.IShopUserService) *User {
 	return &User{service: service}
 }
 
 // PrivateRoutes 注册商城用户路由
 func (s *User) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/shop/user")
-	group.GET("/list", middlewares.HasPermission("shop:user:list"), s.List)
-	group.GET("/:id", middlewares.HasPermission("shop:user:query"), s.GetByID)
-	group.POST("", middlewares.HasPermission("shop:user:add"), s.Create)
-	group.PUT("", middlewares.HasPermission("shop:user:edit"), s.Update)
-	group.DELETE("/:ids", middlewares.HasPermission("shop:user:remove"), s.Delete)
+	group := router.Group("/shop/user/info")
+	group.GET("/list", middlewares.HasPermission("shop:user:info:list"), s.List)
+	group.GET("/info/:id", middlewares.HasPermission("shop:user:info:query"), s.GetByID)
+	group.POST("/add", middlewares.HasPermission("shop:user:info:add"), s.Create)
+	group.PUT("/update", middlewares.HasPermission("shop:user:info:update"), s.Update)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:user:info:remove"), s.Delete)
 }
 
 // List 获取商城用户列表
@@ -37,7 +37,7 @@ func (s *User) PrivateRoutes(router *gin.RouterGroup) {
 // @Success 200 {object} response.ResponseData "获取成功"
 // @Router /shop/user/list [get]
 func (s *User) List(c *gin.Context) {
-	req := new(shopmodels.UserQuery)
+	req := new(models.UserQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -83,7 +83,7 @@ func (s *User) GetByID(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "新增成功"
 // @Router /shop/user [post]
 func (s *User) Create(c *gin.Context) {
-	req := new(shopmodels.UserUpsert)
+	req := new(models.UserUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -106,7 +106,7 @@ func (s *User) Create(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "修改成功"
 // @Router /shop/user [put]
 func (s *User) Update(c *gin.Context) {
-	req := new(shopmodels.UserUpsert)
+	req := new(models.UserUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
