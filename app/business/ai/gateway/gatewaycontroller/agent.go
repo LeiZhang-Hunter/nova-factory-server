@@ -1,6 +1,13 @@
 package gatewaycontroller
 
 import (
+	"errors"
+	"strconv"
+	"strings"
+
+	"nova-factory-server/app/business/ai/agent/aidatasetdao"
+	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
+	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
@@ -11,12 +18,18 @@ import (
 
 // Agent 智能体控制器。
 type Agent struct {
-	service gatewayservice.IAIAgentService
+	service              gatewayservice.IAIAgentService
+	modelProviderService aidatasetservice.IAiModelProviderService
+	llmDao               aidatasetdao.IAiLLMDao
 }
 
 // NewAgent 创建智能体控制器。
-func NewAgent(service gatewayservice.IAIAgentService) *Agent {
-	return &Agent{service: service}
+func NewAgent(service gatewayservice.IAIAgentService, modelProviderService aidatasetservice.IAiModelProviderService, llmDao aidatasetdao.IAiLLMDao) *Agent {
+	return &Agent{
+		service:              service,
+		modelProviderService: modelProviderService,
+		llmDao:               llmDao,
+	}
 }
 
 // PrivateRoutes 注册智能体配置路由。
@@ -36,7 +49,7 @@ func (agent *Agent) PrivateRoutes(router *gin.RouterGroup) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "获取成功"
-// @Router /ai/agent/list [get]
+// @Router /ai/agent/config/list [get]
 func (agent *Agent) List(c *gin.Context) {
 	req := new(gatewaymodels.AIAgentQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
@@ -59,7 +72,7 @@ func (agent *Agent) List(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "获取成功"
-// @Router /ai/agent/query/{id} [get]
+// @Router /ai/agent/config/query/{id} [get]
 func (agent *Agent) GetByID(c *gin.Context) {
 	id := baizeContext.ParamInt64(c, "id")
 	if id == 0 {
@@ -82,11 +95,15 @@ func (agent *Agent) GetByID(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "保存成功"
-// @Router /ai/agent/set [post]
+// @Router /ai/agent/config/set [post]
 func (agent *Agent) Set(c *gin.Context) {
 	req := new(gatewaymodels.AIAgentUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
+		return
+	}
+	if err := agent.validateDefaultLLM(c, req); err != nil {
+		baizeContext.Waring(c, err.Error())
 		return
 	}
 	var (
@@ -113,7 +130,7 @@ func (agent *Agent) Set(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "删除成功"
-// @Router /ai/agent/remove/{ids} [delete]
+// @Router /ai/agent/config/remove/{ids} [delete]
 func (agent *Agent) Delete(c *gin.Context) {
 	ids := baizeContext.ParamInt64Array(c, "ids")
 	if len(ids) == 0 {
@@ -125,4 +142,51 @@ func (agent *Agent) Delete(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+func (agent *Agent) validateDefaultLLM(c *gin.Context, req *gatewaymodels.AIAgentUpsert) error {
+	if req == nil {
+		return errors.New("参数不能为空")
+	}
+	req.DefaultLLMProviderID = strings.TrimSpace(req.DefaultLLMProviderID)
+	req.DefaultLLMModelID = strings.TrimSpace(req.DefaultLLMModelID)
+	if req.DefaultLLMProviderID == "" && req.DefaultLLMModelID == "" {
+		return nil
+	}
+	if req.DefaultLLMProviderID == "" || req.DefaultLLMModelID == "" {
+		return errors.New("defaultLlmProviderId 和 defaultLlmModelId 不能为空")
+	}
+	providers, err := agent.modelProviderService.ListWithLLM(c, &aidatasetmodels.SysAiModelProviderListReq{
+		Name: req.DefaultLLMProviderID,
+	})
+	if err != nil {
+		return err
+	}
+	providerKey := strings.ToLower(req.DefaultLLMProviderID)
+	var matchedProvider *aidatasetmodels.SysAiModelProvider
+	for _, provider := range providers.Rows {
+		if provider == nil {
+			continue
+		}
+		if strings.ToLower(provider.Name) == strings.ToLower(providerKey) || strconv.FormatInt(provider.ID, 10) == req.DefaultLLMProviderID {
+			matchedProvider = provider
+			break
+		}
+	}
+	if matchedProvider == nil {
+		return errors.New("defaultLlmProviderId 不存在")
+	}
+	llms, err := agent.llmDao.ListByFactory(c, matchedProvider.Name)
+	if err != nil {
+		return err
+	}
+	for _, llm := range llms {
+		if llm == nil {
+			continue
+		}
+		if llm.LlmName == req.DefaultLLMModelID || llm.ModelType == req.DefaultLLMModelID {
+			return nil
+		}
+	}
+	return errors.New("defaultLlmModelId 不存在")
 }
