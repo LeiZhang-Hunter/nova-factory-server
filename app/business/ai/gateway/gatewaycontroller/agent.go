@@ -1,55 +1,44 @@
 package gatewaycontroller
 
 import (
-	"encoding/json"
-	"net/http"
+	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
-	"strconv"
-	"time"
-
-	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
-	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
-	sseUtils "nova-factory-server/app/utils/sse"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
+// Agent 智能体控制器。
 type Agent struct {
-	service        gatewayservice.IAiConversationService
-	gatewayService aidatasetservice.IAIGatewayService
+	service gatewayservice.IAIAgentService
 }
 
-// NewAgent 会话控制器构造函数。
-func NewAgent(service gatewayservice.IAiConversationService, gatewayService aidatasetservice.IAIGatewayService) *Agent {
-	return &Agent{
-		service:        service,
-		gatewayService: gatewayService,
-	}
+// NewAgent 创建智能体控制器。
+func NewAgent(service gatewayservice.IAIAgentService) *Agent {
+	return &Agent{service: service}
 }
 
-// PrivateRoutes 注册会话相关私有路由。
+// PrivateRoutes 注册智能体配置路由。
 func (agent *Agent) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/ai/agent/conversations")
-	group.GET("/list", middlewares.HasPermission("ai:agent:conversations:list"), agent.ListConversations)
-	group.POST("/create", middlewares.HasPermission("ai:agent:conversations:create"), agent.CreateConversation)
-	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:conversations:remove"), agent.RemoveConversation)
-	group.POST("/chat", middlewares.HasPermission("ai:agent:conversations:chat"), agent.Chat)
-	group.POST("/stop-generation", middlewares.HasPermission("ai:agent:conversations:stop-generation"), agent.StopGeneration)
+	group := router.Group("/ai/agent/config")
+	group.GET("/list", middlewares.HasPermission("ai:agent:config:list"), agent.List)
+	group.GET("/query/:id", middlewares.HasPermission("ai:agent:config:query"), agent.GetByID)
+	group.POST("/set", middlewares.HasPermission("ai:agent:config:set"), agent.Set)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:config:remove"), agent.Delete)
 }
 
-// ListConversations 查询会话列表
-// @Summary 查询会话列表
-// @Description 查询会话列表
-// @Tags 工业智能体/会话管理
-// @Param object query aidatasetmodels.AiConversationQuery true "会话列表查询参数"
+// List 获取智能体列表
+// @Summary 获取智能体列表
+// @Description 获取智能体列表
+// @Tags 工业智能体/智能体管理
+// @Param object query gatewaymodels.AIAgentQuery true "智能体查询参数"
+// @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "获取成功"
-// @Router /ai/agent/conversations/list [get]
-func (agent *Agent) ListConversations(c *gin.Context) {
-	req := new(aidatasetmodels.AiConversationQuery)
+// @Router /ai/agent/list [get]
+func (agent *Agent) List(c *gin.Context) {
+	req := new(gatewaymodels.AIAgentQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -62,25 +51,22 @@ func (agent *Agent) ListConversations(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// CreateConversation 创建会话
-// @Summary 创建会话
-// @Description 创建会话
-// @Tags 工业智能体/会话管理
-// @Param object body aidatasetmodels.SetAiConversation true "创建会话参数"
+// GetByID 获取智能体详情
+// @Summary 获取智能体详情
+// @Description 根据ID获取智能体详情
+// @Tags 工业智能体/智能体管理
+// @Param id path int true "智能体ID"
+// @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object} response.ResponseData "创建成功"
-// @Router /ai/agent/conversations/create [post]
-func (agent *Agent) CreateConversation(c *gin.Context) {
-	req := new(aidatasetmodels.SetAiConversation)
-	if err := c.ShouldBindJSON(req); err != nil {
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /ai/agent/query/{id} [get]
+func (agent *Agent) GetByID(c *gin.Context) {
+	id := baizeContext.ParamInt64(c, "id")
+	if id == 0 {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if req.Name == "" {
-		baizeContext.Waring(c, "名称为空")
-		return
-	}
-	data, err := agent.service.Create(c, req)
+	data, err := agent.service.GetByID(c, id)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -88,117 +74,55 @@ func (agent *Agent) CreateConversation(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// RemoveConversation 删除会话（软删除）
-// @Summary 删除会话
-// @Description 删除会话（软删除）
-// @Tags 工业智能体/会话管理
-// @Param ids path string true "会话ID，多个用逗号分隔"
+// Set 保存智能体
+// @Summary 保存智能体
+// @Description 保存智能体，id为空时新增，不为空时修改
+// @Tags 工业智能体/智能体管理
+// @Param object body gatewaymodels.AIAgentUpsert true "智能体保存参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "保存成功"
+// @Router /ai/agent/set [post]
+func (agent *Agent) Set(c *gin.Context) {
+	req := new(gatewaymodels.AIAgentUpsert)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	var (
+		data *gatewaymodels.AIAgent
+		err  error
+	)
+	if req.ID != 0 {
+		data, err = agent.service.Update(c, req)
+	} else {
+		data, err = agent.service.Create(c, req)
+	}
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// Delete 删除智能体
+// @Summary 删除智能体
+// @Description 删除智能体
+// @Tags 工业智能体/智能体管理
+// @Param ids path string true "智能体ID，多个以逗号分隔"
+// @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "删除成功"
-// @Router /ai/agent/conversations/remove/{ids} [delete]
-func (agent *Agent) RemoveConversation(c *gin.Context) {
+// @Router /ai/agent/remove/{ids} [delete]
+func (agent *Agent) Delete(c *gin.Context) {
 	ids := baizeContext.ParamInt64Array(c, "ids")
 	if len(ids) == 0 {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if err := agent.service.Remove(c, ids); err != nil {
+	if err := agent.service.DeleteByIDs(c, ids); err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
 	baizeContext.Success(c)
-}
-
-// Chat 会话聊天
-// @Summary 会话聊天
-// @Description 会话聊天
-// @Tags 工业智能体/会话管理
-// @Param object body aidatasetmodels.SendMessageInput true "发送消息参数"
-// @Produce application/json
-// @Success 200 {object} response.ResponseData "发送成功"
-// @Router /ai/agent/conversations/chat [post]
-func (agent *Agent) Chat(c *gin.Context) {
-	req := new(aidatasetmodels.SendMessageInput)
-
-	metadata := c.PostForm("metadata")
-	err := json.Unmarshal([]byte(metadata), req)
-	if err != nil {
-		baizeContext.ParameterError(c)
-		zap.L().Error("param error", zap.Error(err))
-		return
-	}
-	if req.ConversationID == 0 {
-		baizeContext.Waring(c, "会话id不能为空")
-		zap.L().Error("ConversationID error")
-		return
-	}
-	if req.Content == "" {
-		baizeContext.Waring(c, "提问内容不能为空")
-		return
-	}
-	if req.TabID == "" {
-		req.TabID = "team"
-	}
-
-	data, err := agent.gatewayService.Chat(c, req)
-	if err != nil {
-		zap.L().Error("chat error", zap.Error(err))
-		baizeContext.Waring(c, err.Error())
-		return
-	}
-
-	if data.StatusCode != http.StatusOK {
-		baizeContext.Waring(c, data.Message)
-		return
-	}
-	if data != nil && data.IsStream && data.Body != nil {
-		c.Writer.Header().Set("Content-Type", "text/event-stream")
-		c.Writer.Header().Set("Cache-Control", "no-cache")
-		c.Writer.Header().Set("Connection", "keep-alive")
-		// 禁用nginx缓存,防止nginx会缓存数据导致数据流是一段一段的
-		c.Writer.Header().Set("X-Accel-Buffering", "no")
-		defer data.Body.Close()
-		sseUtils.ApplyHeaders(c.Writer.Header(), data.Headers)
-		if data.StatusCode > 0 {
-			c.Writer.Header().Set("X-Upstream-Status-Code", strconv.Itoa(data.StatusCode))
-		}
-		c.Status(http.StatusOK)
-		streamErr := sseUtils.Transport(c.Writer, data.Body, 60*time.Second)
-		if streamErr != nil {
-			if writeErr := sseUtils.WriteErrorEvent(c.Writer, streamErr.Error()); writeErr != nil {
-				zap.L().Warn("sse write error event failed", zap.Error(writeErr))
-			}
-			zap.L().Warn("sse stream read failed", zap.Error(streamErr))
-		}
-		return
-	}
-	baizeContext.SuccessData(c, data)
-}
-
-// StopGeneration 停止会话生成
-// @Summary 停止会话生成
-// @Description 停止上游会话生成任务
-// @Tags 工业智能体/会话管理
-// @Param object body aidatasetmodels.StopGenerationInput true "停止生成参数"
-// @Produce application/json
-// @Success 200 {object} response.ResponseData "停止成功"
-// @Router /ai/agent/conversations/stop-generation [post]
-func (agent *Agent) StopGeneration(c *gin.Context) {
-	req := new(aidatasetmodels.StopGenerationInput)
-	if err := c.ShouldBindJSON(req); err != nil {
-		baizeContext.ParameterError(c)
-		zap.L().Error("param error", zap.Error(err))
-		return
-	}
-	data, err := agent.gatewayService.StopGeneration(c, req)
-	if err != nil {
-		zap.L().Error("stop generation error", zap.Error(err))
-		baizeContext.Waring(c, err.Error())
-		return
-	}
-	if data.StatusCode != 200 {
-		baizeContext.Waring(c, data.Message)
-		return
-	}
-	baizeContext.SuccessData(c, data)
 }

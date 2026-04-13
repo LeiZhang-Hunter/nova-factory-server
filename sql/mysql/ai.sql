@@ -279,6 +279,39 @@ CREATE TABLE IF NOT EXISTS ai_conversations (
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表';
 
+CREATE TABLE IF NOT EXISTS ai_agents (
+    id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `name` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体名称',
+    `prompt` text NULL COMMENT '提示词',
+    `default_llm_provider_id` varchar(128) NOT NULL DEFAULT '' COMMENT '默认模型供应商ID',
+    `default_llm_model_id` varchar(128) NOT NULL DEFAULT '' COMMENT '默认模型ID',
+    `llm_temperature` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT '温度参数',
+    `llm_top_p` decimal(10,4) NOT NULL DEFAULT 0.0000 COMMENT 'TopP参数',
+    `llm_max_tokens` int(11) NOT NULL DEFAULT 0 COMMENT '最大输出Token数',
+    `enable_llm_temperature` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否启用温度参数',
+    `enable_llm_top_p` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否启用TopP参数',
+    `enable_llm_max_tokens` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否启用最大Token参数',
+    `llm_max_context_count` int(11) NOT NULL DEFAULT 0 COMMENT '最大上下文条数',
+    `sandbox_mode` varchar(64) NOT NULL DEFAULT '' COMMENT '沙箱模式',
+    `sandbox_network` tinyint(1) NOT NULL DEFAULT 0 COMMENT '沙箱是否允许联网',
+    `work_dir` varchar(512) NOT NULL DEFAULT '' COMMENT '工作目录',
+    `mcp_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否启用MCP',
+    `mcp_server_ids` text NULL COMMENT 'MCP服务ID列表',
+    `mcp_server_enabled_ids` text NULL COMMENT '已启用MCP服务ID列表',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    KEY `idx_ai_agents_name` (`name`),
+    KEY `idx_ai_agents_default_provider` (`default_llm_provider_id`),
+    KEY `idx_ai_agents_default_model` (`default_llm_model_id`),
+    KEY `idx_ai_agents_mcp_enabled` (`mcp_enabled`)
+) ENGINE = InnoDB
+DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '智能体配置表';
+
 CREATE TABLE IF NOT EXISTS mcp_servers (
     id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'MCP服务ID',
     `name` varchar(255) NOT NULL COMMENT 'MCP服务名称',

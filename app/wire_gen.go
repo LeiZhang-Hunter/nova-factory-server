@@ -434,22 +434,26 @@ func wireApp() (*gin.Engine, func(), error) {
 	iaiGatewayDao := gatewaydaoimpl.NewAIGatewayDao(db)
 	iaiGatewayService := gatewayserviceimpl.NewAIGatewayService(iaiGatewayDao)
 	aiGateway := gatewaycontroller.NewAIGateway(iaiGatewayService)
-	iAiConversationDao := aiDataSetDaoImpl.NewIAiConversationDaoImpl(db)
-	iaiAgentMessageDao := gatewaydaoimpl.NewAIAgentMessageDao(db)
-	iAiConversationService := gatewayserviceimpl.NewIAiConversationServiceImpl(iAiConversationDao, iaiAgentMessageDao)
-	aidatasetserviceIAIGatewayService := aidatasetserviceimpl.NewAIGatewayService(iaiGatewayService)
-	agent := gatewaycontroller.NewAgent(iAiConversationService, aidatasetserviceIAIGatewayService)
+	iaiAgentDao := gatewaydaoimpl.NewAIAgentDao(db)
+	iaiAgentService := gatewayserviceimpl.NewAIAgentService(iaiAgentDao)
+	agent := gatewaycontroller.NewAgent(iaiAgentService)
 	iInstalledSkillDao := gatewaydaoimpl.NewInstalledSkillDao(db)
 	iInstalledSkillService := gatewayserviceimpl.NewInstalledSkillService(iInstalledSkillDao)
 	skills := gatewaycontroller.NewSkills(iInstalledSkillService)
 	imcpServerDao := gatewaydaoimpl.NewMCPServerDao(db)
 	imcpServerService := gatewayserviceimpl.NewMCPServerService(imcpServerDao)
 	mcpServer := gatewaycontroller.NewMCPServer(imcpServerService)
+	iAiConversationDao := aiDataSetDaoImpl.NewIAiConversationDaoImpl(db)
+	iaiAgentMessageDao := gatewaydaoimpl.NewAIAgentMessageDao(db)
+	iAiConversationService := gatewayserviceimpl.NewIAiConversationServiceImpl(iAiConversationDao, iaiAgentMessageDao)
+	aidatasetserviceIAIGatewayService := aidatasetserviceimpl.NewAIGatewayService(iaiGatewayService)
+	conversations := gatewaycontroller.NewConversations(iAiConversationService, aidatasetserviceIAIGatewayService)
 	gatewaycontrollerController := &gatewaycontroller.Controller{
-		AIGateway: aiGateway,
-		Agent:     agent,
-		Skills:    skills,
-		MCPServer: mcpServer,
+		AIGateway:     aiGateway,
+		Agent:         agent,
+		Skills:        skills,
+		MCPServer:     mcpServer,
+		Conversations: conversations,
 	}
 	factoryBootstrap := ai.NewFactoryBootstrap(db, iAiModelProviderDao, iAiLLMDao)
 	aiAI := ai.NewGinEngine(app, cacheCache, aiDataSet, gatewaycontrollerController, factoryBootstrap)
