@@ -6,6 +6,7 @@ import "nova-factory-server/app/baize"
 type AIAgent struct {
 	ID                   int64   `json:"id,string" gorm:"column:id"`
 	Name                 string  `json:"name" gorm:"column:name"`
+	Type                 string  `json:"type"`
 	Prompt               string  `json:"prompt" gorm:"column:prompt"`
 	DefaultLLMProviderID string  `json:"defaultLlmProviderId" gorm:"column:default_llm_provider_id"`
 	DefaultLLMModelID    string  `json:"defaultLlmModelId" gorm:"column:default_llm_model_id"`
@@ -22,6 +23,7 @@ type AIAgent struct {
 	MCPEnabled           *bool   `json:"mcpEnabled" gorm:"column:mcp_enabled"`
 	MCPServerIDs         string  `json:"mcpServerIds" gorm:"column:mcp_server_ids"`
 	MCPServerEnabledIDs  string  `json:"mcpServerEnabledIds" gorm:"column:mcp_server_enabled_ids"`
+	Enable               *bool   `json:"enable"`
 	DeptID               int64   `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
@@ -40,6 +42,7 @@ type AIAgentQuery struct {
 type AIAgentUpsert struct {
 	ID                      int64   `json:"id,string"`
 	Name                    string  `json:"name"`
+	Type                    string  `json:"type"`
 	Prompt                  string  `json:"prompt"`
 	DefaultLLMProviderID    string  `json:"defaultLlmProviderId"`
 	DefaultLLMModelID       string  `json:"defaultLlmModelId"`
@@ -58,6 +61,7 @@ type AIAgentUpsert struct {
 	MCPEnabled              *bool   `json:"mcpEnabled"`
 	MCPServerIDs            string  `json:"mcpServerIds"`
 	MCPServerEnabledIDs     string  `json:"mcpServerEnabledIds"`
+	Enable                  *bool   `json:"enable"`
 }
 
 // AIAgentListData 智能体列表结果

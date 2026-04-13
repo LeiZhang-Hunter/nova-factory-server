@@ -50,7 +50,7 @@ func (a *AIAgentDaoImpl) Update(c *gin.Context, req *gatewaymodels.AIAgentUpsert
 		Where("id = ?", item.ID).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
-		Select("name", "prompt", "default_llm_provider_id", "default_llm_model_id", "llm_temperature", "llm_top_p",
+		Select("name", "type", "prompt", "default_llm_provider_id", "default_llm_model_id", "llm_temperature", "llm_top_p",
 			"llm_max_tokens", "enable_llm_temperature", "enable_llm_top_p", "enable_llm_max_tokens",
 			"llm_max_context_count", "sandbox_mode", "sandbox_network",
 			"work_dir", "mcp_enabled", "mcp_server_ids", "mcp_server_enabled_ids", "update_by", "update_time").
@@ -130,6 +130,7 @@ func (a *AIAgentDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (
 func buildAIAgentModel(c *gin.Context, req *gatewaymodels.AIAgentUpsert) *gatewaymodels.AIAgent {
 	return &gatewaymodels.AIAgent{
 		Name:                 req.Name,
+		Type:                 req.Type,
 		Prompt:               req.Prompt,
 		DefaultLLMProviderID: req.DefaultLLMProviderID,
 		DefaultLLMModelID:    req.DefaultLLMModelID,
@@ -146,6 +147,7 @@ func buildAIAgentModel(c *gin.Context, req *gatewaymodels.AIAgentUpsert) *gatewa
 		MCPEnabled:           req.MCPEnabled,
 		MCPServerIDs:         req.MCPServerIDs,
 		MCPServerEnabledIDs:  req.MCPServerEnabledIDs,
+		Enable:               req.Enable,
 		DeptID:               baizeContext.GetDeptId(c),
 	}
 }

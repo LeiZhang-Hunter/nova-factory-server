@@ -282,6 +282,7 @@ DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表';
 CREATE TABLE IF NOT EXISTS ai_agents (
     id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `name` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体名称',
+    `type` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体类型，用来读取位置',
     `prompt` text NULL COMMENT '提示词',
     `default_llm_provider_id` varchar(128) NOT NULL DEFAULT '' COMMENT '默认模型供应商ID',
     `default_llm_model_id` varchar(128) NOT NULL DEFAULT '' COMMENT '默认模型ID',
@@ -298,6 +299,7 @@ CREATE TABLE IF NOT EXISTS ai_agents (
     `mcp_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否启用MCP',
     `mcp_server_ids` text NULL COMMENT 'MCP服务ID列表',
     `mcp_server_enabled_ids` text NULL COMMENT '已启用MCP服务ID列表',
+    `enable` tinyint(1) NULL DEFAULT 0 COMMENT '是否开启，0为关闭 1为开启',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
