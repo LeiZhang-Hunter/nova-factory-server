@@ -1,10 +1,11 @@
 package agent
 
 import (
-	"context"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"nova-factory-server/app/setting"
 	"nova-factory-server/app/utils/aes"
@@ -33,7 +34,7 @@ func NewConversations(client *client.Client) api.Conversations {
 	return c
 }
 
-func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*api.ChatResponse, error) {
+func (c *Conversations) Chat(ctx *gin.Context, req *api.SendMessageInput) (*api.ChatResponse, error) {
 	if req == nil {
 		return nil, errors.New("request is nil")
 	}
@@ -44,8 +45,14 @@ func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*a
 		return nil, errors.New("question不能为空")
 	}
 
-	chatBodyJSON, err := json.Marshal(req)
 	headers := map[string]string{}
+	requestBody, contentType, err := buildChatRequestBody(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	if contentType != "" {
+		headers["Content-Type"] = contentType
+	}
 	userId := strconv.FormatInt(req.UserID, 10)
 	encryptString, err := aes.EncryptString([]byte(c.aesKey), userId)
 	if err != nil {
@@ -54,18 +61,17 @@ func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*a
 	headers["X-User-Id"] = encryptString
 
 	resp, _, err := c.client.DoRaw(ctx, client.Request{
-		Method:       "POST",
-		Path:         "/api/agent/chat",
-		Headers:      headers,
-		AgentGateway: req.AgentGateway,
-		Body:         chatBodyJSON,
-		Stream:       true,
+		Method:  "POST",
+		Path:    "/api/agent/chat",
+		Headers: headers,
+		Body:    requestBody,
+		Stream:  true,
 	})
 	if err != nil {
 		return nil, err
 	}
-	contentType := resp.Header.Get("Content-Type")
-	if strings.Contains(strings.ToLower(contentType), "text/event-stream") {
+	respContentType := resp.Header.Get("Content-Type")
+	if strings.Contains(strings.ToLower(respContentType), "text/event-stream") {
 		return &api.ChatResponse{
 			StatusCode: resp.StatusCode,
 			IsStream:   true,
@@ -90,6 +96,52 @@ func (c *Conversations) Chat(ctx context.Context, req *api.SendMessageInput) (*a
 		StatusCode: resp.StatusCode,
 		Message:    message,
 	}, nil
+}
+
+func buildChatRequestBody(ctx *gin.Context, req *api.SendMessageInput) ([]byte, string, error) {
+	form, err := ctx.MultipartForm()
+	if err == nil && form != nil && len(form.File) > 0 {
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		metadata := strings.TrimSpace(ctx.PostForm("metadata"))
+		if metadata == "" {
+			metadataBytes, marshalErr := json.Marshal(req)
+			if marshalErr != nil {
+				return nil, "", marshalErr
+			}
+			metadata = string(metadataBytes)
+		}
+		if err = writer.WriteField("metadata", metadata); err != nil {
+			return nil, "", err
+		}
+		headers := form.File["file"]
+		for _, header := range headers {
+			file, openErr := header.Open()
+			if openErr != nil {
+				return nil, "", openErr
+			}
+			formFile, createErr := writer.CreateFormFile("file", header.Filename)
+			if createErr != nil {
+				_ = file.Close()
+				return nil, "", createErr
+			}
+			if _, copyErr := io.Copy(formFile, file); copyErr != nil {
+				_ = file.Close()
+				return nil, "", copyErr
+			}
+			_ = file.Close()
+		}
+		if err = writer.Close(); err != nil {
+			return nil, "", err
+		}
+		return body.Bytes(), writer.FormDataContentType(), nil
+	}
+
+	requestBody, err := json.Marshal(req)
+	if err != nil {
+		return nil, "", err
+	}
+	return requestBody, "application/json", nil
 }
 
 // StopGeneration 停止指定会话下的模型生成。

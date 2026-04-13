@@ -1,21 +1,19 @@
 package api
 
 import (
-	"context"
 	"io"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Conversations interface {
-	Chat(ctx context.Context, req *SendMessageInput) (*ChatResponse, error)
+	Chat(ctx *gin.Context, req *SendMessageInput) (*ChatResponse, error)
 	StopGeneration(ctx *gin.Context, req *StopGenerationInput) (*StopGenerationResponse, error)
 }
 
 // SendMessageInput input for sending a message
 type SendMessageInput struct {
 	ConversationID int64  `json:"conversation_id,string"`
-	AgentGateway   string `json:"agent_gateway"` // AgentGateway 指定网关标识。
 	Content        string `json:"content"`
 	TabID          string `json:"tab_id"`
 	UserID         int64  `json:"user_id"`

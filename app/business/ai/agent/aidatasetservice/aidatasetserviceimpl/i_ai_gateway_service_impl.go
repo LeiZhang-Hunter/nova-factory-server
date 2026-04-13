@@ -1,7 +1,6 @@
 package aidatasetserviceimpl
 
 import (
-	"context"
 	"errors"
 	"nova-factory-server/app/utils/baizeContext"
 	"strings"
@@ -48,9 +47,8 @@ func (i *IAIGatewayServiceImpl) Chat(c *gin.Context, req *aidatasetmodels.SendMe
 	if err != nil {
 		return nil, err
 	}
-	return conversations.Chat(context.Background(), &gatewayapi.SendMessageInput{
+	return conversations.Chat(c, &gatewayapi.SendMessageInput{
 		ConversationID: req.ConversationID,
-		AgentGateway:   "",
 		Content:        req.Content,
 		TabID:          req.TabID,
 		UserID:         baizeContext.GetUserId(c),

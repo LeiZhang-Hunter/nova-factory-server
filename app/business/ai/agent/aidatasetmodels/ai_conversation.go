@@ -1,6 +1,7 @@
 package aidatasetmodels
 
 import (
+	"mime/multipart"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 )
@@ -42,9 +43,10 @@ type AiConversationListData struct {
 
 // SendMessageInput input for sending a message
 type SendMessageInput struct {
-	ConversationID int64  `json:"conversation_id,string"`
-	Content        string `json:"content"`
-	TabID          string `json:"tab_id"`
+	ConversationID int64                 `json:"conversation_id,string"`
+	Content        string                `json:"content"`
+	TabID          string                `json:"tab_id"`
+	File           *multipart.FileHeader `json:"-"`
 }
 
 // StopGenerationInput input for stopping message generation
