@@ -64,8 +64,16 @@ func collectModelIDs(req *aidatasetmodels.SetSysAiLLMSetting) []string {
 		if id == "" || m[id] {
 			continue
 		}
+		if id == "-" {
+			continue
+		}
+		llmArray := strings.Split(id, "@")
+		if len(llmArray) != 2 {
+			continue
+		}
 		m[id] = true
-		ret = append(ret, id)
+
+		ret = append(ret, llmArray[0])
 	}
 	return ret
 }

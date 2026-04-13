@@ -99,3 +99,12 @@ func (i *IAiUserLLMDaoImpl) Get(c *gin.Context, req *aidatasetmodels.GetSysUserL
 	}
 	return rows, nil
 }
+
+func (i *IAiUserLLMDaoImpl) Remove(c *gin.Context, req *aidatasetmodels.GetSysUserLLMReq) error {
+	userID := int64(0)
+	db := i.db.Table(i.table).Where("user_id = ?", userID)
+	if req != nil && req.LLMFactory != "" {
+		db = db.Where("llm_factory = ?", req.LLMFactory)
+	}
+	return db.Delete(&aidatasetmodels.SysUserLLM{}).Error
+}

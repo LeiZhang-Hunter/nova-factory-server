@@ -9,4 +9,5 @@ import (
 type IAiUserLLMService interface {
 	Set(c *gin.Context, req *aidatasetmodels.SetSysUserLLM) (*aidatasetmodels.SysUserLLM, error)
 	Get(c *gin.Context, req *aidatasetmodels.GetSysUserLLMReq) ([]*aidatasetmodels.SysUserLLM, error)
+	Remove(c *gin.Context, req *aidatasetmodels.GetSysUserLLMReq) error
 }

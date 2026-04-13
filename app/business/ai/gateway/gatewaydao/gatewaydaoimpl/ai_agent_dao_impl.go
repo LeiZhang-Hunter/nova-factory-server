@@ -52,7 +52,7 @@ func (a *AIAgentDaoImpl) Update(c *gin.Context, req *gatewaymodels.AIAgentUpsert
 		Where("state = ?", commonStatus.NORMAL).
 		Select("name", "prompt", "default_llm_provider_id", "default_llm_model_id", "llm_temperature", "llm_top_p",
 			"llm_max_tokens", "enable_llm_temperature", "enable_llm_top_p", "enable_llm_max_tokens",
-			"llm_max_context_count", "retrieval_top_k", "retrieval_match_threshold", "sandbox_mode", "sandbox_network",
+			"llm_max_context_count", "sandbox_mode", "sandbox_network",
 			"work_dir", "mcp_enabled", "mcp_server_ids", "mcp_server_enabled_ids", "update_by", "update_time").
 		Updates(item).Error; err != nil {
 		return nil, err
@@ -129,25 +129,23 @@ func (a *AIAgentDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (
 
 func buildAIAgentModel(c *gin.Context, req *gatewaymodels.AIAgentUpsert) *gatewaymodels.AIAgent {
 	return &gatewaymodels.AIAgent{
-		Name:                    req.Name,
-		Prompt:                  req.Prompt,
-		DefaultLLMProviderID:    req.DefaultLLMProviderID,
-		DefaultLLMModelID:       req.DefaultLLMModelID,
-		LLMTemperature:          req.LLMTemperature,
-		LLMTopP:                 req.LLMTopP,
-		LLMMaxTokens:            req.LLMMaxTokens,
-		EnableLLMTemperature:    req.EnableLLMTemperature,
-		EnableLLMTopP:           req.EnableLLMTopP,
-		EnableLLMMaxTokens:      req.EnableLLMMaxTokens,
-		LLMMaxContextCount:      req.LLMMaxContextCount,
-		RetrievalTopK:           req.RetrievalTopK,
-		RetrievalMatchThreshold: req.RetrievalMatchThreshold,
-		SandboxMode:             req.SandboxMode,
-		SandboxNetwork:          req.SandboxNetwork,
-		WorkDir:                 req.WorkDir,
-		MCPEnabled:              req.MCPEnabled,
-		MCPServerIDs:            req.MCPServerIDs,
-		MCPServerEnabledIDs:     req.MCPServerEnabledIDs,
-		DeptID:                  baizeContext.GetDeptId(c),
+		Name:                 req.Name,
+		Prompt:               req.Prompt,
+		DefaultLLMProviderID: req.DefaultLLMProviderID,
+		DefaultLLMModelID:    req.DefaultLLMModelID,
+		LLMTemperature:       req.LLMTemperature,
+		LLMTopP:              req.LLMTopP,
+		LLMMaxTokens:         req.LLMMaxTokens,
+		EnableLLMTemperature: req.EnableLLMTemperature,
+		EnableLLMTopP:        req.EnableLLMTopP,
+		EnableLLMMaxTokens:   req.EnableLLMMaxTokens,
+		LLMMaxContextCount:   req.LLMMaxContextCount,
+		SandboxMode:          req.SandboxMode,
+		SandboxNetwork:       req.SandboxNetwork,
+		WorkDir:              req.WorkDir,
+		MCPEnabled:           req.MCPEnabled,
+		MCPServerIDs:         req.MCPServerIDs,
+		MCPServerEnabledIDs:  req.MCPServerEnabledIDs,
+		DeptID:               baizeContext.GetDeptId(c),
 	}
 }

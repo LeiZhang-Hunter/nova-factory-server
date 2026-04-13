@@ -30,6 +30,7 @@ func (m *Model) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/provider/setting/set", middlewares.HasPermission("ai:model:provider:setting:set"), m.SetSetting)
 	group.GET("/provider/global/get", middlewares.HasPermission("ai:model:provider:global:get"), m.GetGlobalModel)
 	group.POST("/provider/global/set", middlewares.HasPermission("ai:model:provider:global:set"), m.SetGlobalModel)
+	group.DELETE("/provider/global/remove", middlewares.HasPermission("ai:model:provider:global:remove"), m.RemoveGlobalModel)
 }
 
 // ProviderList 模型供应商列表
@@ -140,4 +141,25 @@ func (m *Model) GetGlobalModel(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, data)
+}
+
+// RemoveGlobalModel 删除用户模型
+// @Summary 删除用户模型
+// @Description 删除 SetGlobalModel 保存的用户模型配置
+// @Tags 工业智能体/模型配置
+// @Param  object query aidatasetmodels.GetSysUserLLMReq true "用户模型删除参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "删除成功"
+// @Router /ai/model/provider/global/remove [delete]
+func (m *Model) RemoveGlobalModel(c *gin.Context) {
+	req := new(aidatasetmodels.GetSysUserLLMReq)
+	if err := c.ShouldBindQuery(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if err := m.userLLMService.Remove(c, req); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
 }

@@ -1,14 +1,13 @@
 package aiDataSetDaoImpl
 
 import (
+	"errors"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"nova-factory-server/app/business/ai/agent/aidatasetdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
-	"nova-factory-server/app/utils/snowflake"
-
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type IAiLLMSettingDaoImpl struct {
@@ -39,7 +38,7 @@ func (i *IAiLLMSettingDaoImpl) Set(c *gin.Context, req *aidatasetmodels.SetSysAi
 		Status:    req.Status,
 	}
 	if data.ID == 0 {
-		data.ID = snowflake.GenID()
+		data.ID = 1
 		data.DeptID = baizeContext.GetDeptId(c)
 		data.State = commonStatus.NORMAL
 		data.SetCreateBy(baizeContext.GetUserId(c))
@@ -49,7 +48,7 @@ func (i *IAiLLMSettingDaoImpl) Set(c *gin.Context, req *aidatasetmodels.SetSysAi
 		return data, nil
 	}
 	data.SetUpdateBy(baizeContext.GetUserId(c))
-	if err := i.db.Table(i.table).Where("id = ?", data.ID).Where("state = ?", commonStatus.NORMAL).
+	if err := i.db.Table(i.table).Where("id = ?", 1).Where("state = ?", commonStatus.NORMAL).
 		Select("name", "public_key", "llm_id", "embd_id", "asr_id", "img2txt_id", "rerank_id", "tts_id", "parser_ids", "credit", "status", "update_by", "update_time").
 		Updates(data).Error; err != nil {
 		return nil, err
@@ -70,6 +69,9 @@ func (i *IAiLLMSettingDaoImpl) Get(c *gin.Context, req *aidatasetmodels.GetSysAi
 		db = db.Where("dept_id = ?", baizeContext.GetDeptId(c))
 	}
 	if err := db.Order("update_time desc").First(&ret).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &ret, nil
