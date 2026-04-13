@@ -1,6 +1,7 @@
 package gatewaycontroller
 
 import (
+	"encoding/json"
 	"net/http"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"strconv"
@@ -118,7 +119,10 @@ func (agent *Agent) RemoveConversation(c *gin.Context) {
 // @Router /ai/agent/conversations/chat [post]
 func (agent *Agent) Chat(c *gin.Context) {
 	req := new(aidatasetmodels.SendMessageInput)
-	if err := c.ShouldBindJSON(req); err != nil {
+
+	metadata := c.PostForm("metadata")
+	err := json.Unmarshal([]byte(metadata), req)
+	if err != nil {
 		baizeContext.ParameterError(c)
 		zap.L().Error("param error", zap.Error(err))
 		return

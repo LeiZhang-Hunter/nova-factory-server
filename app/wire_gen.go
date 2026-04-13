@@ -439,12 +439,16 @@ func wireApp() (*gin.Engine, func(), error) {
 	iAiConversationService := gatewayserviceimpl.NewIAiConversationServiceImpl(iAiConversationDao, iaiAgentMessageDao)
 	aidatasetserviceIAIGatewayService := aidatasetserviceimpl.NewAIGatewayService(iaiGatewayService)
 	agent := gatewaycontroller.NewAgent(iAiConversationService, aidatasetserviceIAIGatewayService)
+	iInstalledSkillDao := gatewaydaoimpl.NewInstalledSkillDao(db)
+	iInstalledSkillService := gatewayserviceimpl.NewInstalledSkillService(iInstalledSkillDao)
+	skills := gatewaycontroller.NewSkills(iInstalledSkillService)
 	imcpServerDao := gatewaydaoimpl.NewMCPServerDao(db)
 	imcpServerService := gatewayserviceimpl.NewMCPServerService(imcpServerDao)
 	mcpServer := gatewaycontroller.NewMCPServer(imcpServerService)
 	gatewaycontrollerController := &gatewaycontroller.Controller{
 		AIGateway: aiGateway,
 		Agent:     agent,
+		Skills:    skills,
 		MCPServer: mcpServer,
 	}
 	factoryBootstrap := ai.NewFactoryBootstrap(db, iAiModelProviderDao, iAiLLMDao)

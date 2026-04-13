@@ -91,6 +91,20 @@ func (i *InstalledSkillDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodel
 	return &item, nil
 }
 
+func (i *InstalledSkillDaoImpl) GetBySlug(c *gin.Context, slug string) (*gatewaymodels.InstalledSkill, error) {
+	var item gatewaymodels.InstalledSkill
+	if err := i.db.WithContext(c).Table(i.table).Where("slug = ?", slug).
+		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
 func (i *InstalledSkillDaoImpl) List(c *gin.Context, req *gatewaymodels.InstalledSkillQuery) (*gatewaymodels.InstalledSkillListData, error) {
 	db := i.db.WithContext(c).Table(i.table).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).

@@ -25,7 +25,7 @@ func New() *Client {
 		tokenURL = "http://local.gjpqqd.cn:5929/Service/ERPService.asmx/EMallApi"
 	} else {
 		oauthURL = "https://www.gjpqqd.com"
-		tokenURL = "https://www.gjpqqd.com/Service/ERPService.asmx/EMallApi"
+		tokenURL = "https://openapi.gjpqqd.com/Service/ERPService.asmx/EMallApi"
 	}
 	return &Client{
 		oauthURL: oauthURL,

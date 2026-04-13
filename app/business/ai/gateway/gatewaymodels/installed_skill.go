@@ -2,6 +2,7 @@ package gatewaymodels
 
 import "nova-factory-server/app/baize"
 
+// InstalledSkill 已安装技能信息
 type InstalledSkill struct {
 	ID          int64  `json:"id,string" gorm:"column:id"`
 	Name        string `json:"name" gorm:"column:name"`
@@ -15,6 +16,7 @@ type InstalledSkill struct {
 	State int32 `json:"state" gorm:"column:state"`
 }
 
+// InstalledSkillUpsert 已安装技能新增修改参数
 type InstalledSkillUpsert struct {
 	ID          int64  `json:"id,string"`
 	Name        string `json:"name"`
@@ -25,6 +27,7 @@ type InstalledSkillUpsert struct {
 	Enabled     *bool  `json:"enabled"`
 }
 
+// InstalledSkillQuery 已安装技能查询参数
 type InstalledSkillQuery struct {
 	Name    string `form:"name"`
 	Slug    string `form:"slug"`
@@ -33,6 +36,7 @@ type InstalledSkillQuery struct {
 	Size    int64  `form:"size"`
 }
 
+// InstalledSkillListData 已安装技能列表结果
 type InstalledSkillListData struct {
 	Rows  []*InstalledSkill `json:"rows"`
 	Total int64             `json:"total"`
