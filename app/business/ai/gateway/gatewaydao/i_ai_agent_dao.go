@@ -12,5 +12,6 @@ type IAIAgentDao interface {
 	Update(c *gin.Context, req *gatewaymodels.AIAgentUpsert) (*gatewaymodels.AIAgent, error)
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAgent, error)
+	GetEnabledByType(c *gin.Context, agentType string) (*gatewaymodels.AIAgent, error)
 	List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error)
 }

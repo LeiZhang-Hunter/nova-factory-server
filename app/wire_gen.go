@@ -436,7 +436,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	aiGateway := gatewaycontroller.NewAIGateway(iaiGatewayService)
 	iaiAgentDao := gatewaydaoimpl.NewAIAgentDao(db)
 	iaiAgentService := gatewayserviceimpl.NewAIAgentService(iaiAgentDao)
-	agent := gatewaycontroller.NewAgent(iaiAgentService, iAiModelProviderService, iAiLLMDao)
+	agent := gatewaycontroller.NewAgent(iaiAgentService, iAiModelProviderService, iaiAgentDao, iAiLLMDao, iDictDataDao)
 	iInstalledSkillDao := gatewaydaoimpl.NewInstalledSkillDao(db)
 	iInstalledSkillService := gatewayserviceimpl.NewInstalledSkillService(iInstalledSkillDao)
 	skills := gatewaycontroller.NewSkills(iInstalledSkillService)

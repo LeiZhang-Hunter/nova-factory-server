@@ -5,9 +5,11 @@ import (
 	"strconv"
 	"strings"
 
+	"nova-factory-server/app/business/admin/system/systemdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
+	"nova-factory-server/app/business/ai/gateway/gatewaydao"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
@@ -20,15 +22,19 @@ import (
 type Agent struct {
 	service              gatewayservice.IAIAgentService
 	modelProviderService aidatasetservice.IAiModelProviderService
+	agentDao             gatewaydao.IAIAgentDao
 	llmDao               aidatasetdao.IAiLLMDao
+	dictDataDao          systemdao.IDictDataDao
 }
 
 // NewAgent 创建智能体控制器。
-func NewAgent(service gatewayservice.IAIAgentService, modelProviderService aidatasetservice.IAiModelProviderService, llmDao aidatasetdao.IAiLLMDao) *Agent {
+func NewAgent(service gatewayservice.IAIAgentService, modelProviderService aidatasetservice.IAiModelProviderService, agentDao gatewaydao.IAIAgentDao, llmDao aidatasetdao.IAiLLMDao, dictDataDao systemdao.IDictDataDao) *Agent {
 	return &Agent{
 		service:              service,
 		modelProviderService: modelProviderService,
+		agentDao:             agentDao,
 		llmDao:               llmDao,
+		dictDataDao:          dictDataDao,
 	}
 }
 
@@ -102,6 +108,14 @@ func (agent *Agent) Set(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+	if err := agent.validateType(c, req); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	if err := agent.validateSingleEnabledByType(c, req); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
 	if err := agent.validateDefaultLLM(c, req); err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -142,6 +156,54 @@ func (agent *Agent) Delete(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+func (agent *Agent) validateType(c *gin.Context, req *gatewaymodels.AIAgentUpsert) error {
+	if req == nil {
+		return errors.New("参数不能为空")
+	}
+	req.Type = strings.TrimSpace(req.Type)
+	if req.Type == "" {
+		return errors.New("type不能为空")
+	}
+	typeKey := strings.ToLower(req.Type)
+	rows := agent.dictDataDao.SelectDictDataByType(c, "ai_agent_type")
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		if strings.ToLower(strings.TrimSpace(row.DictValue)) == typeKey || strings.ToLower(strings.TrimSpace(row.DictLabel)) == typeKey {
+			return nil
+		}
+	}
+	return errors.New("type 不存在于 ai_agent_type 字典")
+}
+
+func (agent *Agent) validateSingleEnabledByType(c *gin.Context, req *gatewaymodels.AIAgentUpsert) error {
+	if req == nil {
+		return errors.New("参数不能为空")
+	}
+	if req.Enable == nil || !*req.Enable {
+		return nil
+	}
+	typeKey := strings.ToLower(strings.TrimSpace(req.Type))
+	if typeKey == "" {
+		return nil
+	}
+	current, err := agent.agentDao.GetEnabledByType(c, req.Type)
+	if err != nil {
+		return err
+	}
+	if current == nil {
+		return nil
+	}
+	if req.ID != 0 && current.ID == req.ID {
+		return nil
+	}
+	if strings.ToLower(strings.TrimSpace(current.Type)) == typeKey {
+		return errors.New("同一 type 只能启用一个智能体")
+	}
+	return nil
 }
 
 func (agent *Agent) validateDefaultLLM(c *gin.Context, req *gatewaymodels.AIAgentUpsert) error {

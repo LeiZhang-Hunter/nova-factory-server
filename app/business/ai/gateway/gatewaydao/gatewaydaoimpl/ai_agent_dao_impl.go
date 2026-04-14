@@ -90,6 +90,23 @@ func (a *AIAgentDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAge
 	return &item, nil
 }
 
+// GetEnabledByType 查询指定类型下已启用的智能体。
+func (a *AIAgentDaoImpl) GetEnabledByType(c *gin.Context, agentType string) (*gatewaymodels.AIAgent, error) {
+	var item gatewaymodels.AIAgent
+	if err := a.db.WithContext(c).Table(a.table).
+		Where("type = ?", agentType).
+		Where("enable = ?", true).
+		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
 // List 查询智能体配置列表。
 func (a *AIAgentDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error) {
 	db := a.db.WithContext(c).Table(a.table).

@@ -47,6 +47,10 @@ func (m *mockAIAgentDao) GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAge
 	return &gatewaymodels.AIAgent{ID: id, Name: "demo-agent"}, nil
 }
 
+func (m *mockAIAgentDao) GetEnabledByType(c *gin.Context, agentType string) (*gatewaymodels.AIAgent, error) {
+	return nil, nil
+}
+
 func (m *mockAIAgentDao) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error) {
 	return nil, nil
 }

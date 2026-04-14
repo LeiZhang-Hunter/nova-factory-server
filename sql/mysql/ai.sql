@@ -260,8 +260,10 @@ CREATE TABLE IF NOT EXISTS ai_gateway (
     COMMENT = '智能体网关配置表';
 
 CREATE TABLE IF NOT EXISTS ai_conversations (
-    id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    id bigint(20) UNSIGNED NOT NULL  COMMENT '主键ID',
     name varchar(255) NOT NULL DEFAULT '' COMMENT '会话名称',
+    agent_id bigint(20) UNSIGNED NOT NULL  COMMENT '智能体代理',
+    agent_type varchar(255) NOT NULL DEFAULT '' COMMENT '智能体类型',
     message text NULL COMMENT '最后一条消息',
     llm_provider_id varchar(128) NOT NULL DEFAULT '' COMMENT '模型供应商ID',
     llm_model_id varchar(128) NOT NULL DEFAULT '' COMMENT '模型ID',
@@ -278,6 +280,8 @@ CREATE TABLE IF NOT EXISTS ai_conversations (
     KEY idx_update_time (update_time)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表';
+
+
 
 CREATE TABLE IF NOT EXISTS ai_agents (
     id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
@@ -308,6 +312,7 @@ CREATE TABLE IF NOT EXISTS ai_agents (
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`),
     KEY `idx_ai_agents_name` (`name`),
+    KEY `idx_ai_agents_type` (`type`),
     KEY `idx_ai_agents_default_provider` (`default_llm_provider_id`),
     KEY `idx_ai_agents_default_model` (`default_llm_model_id`),
     KEY `idx_ai_agents_mcp_enabled` (`mcp_enabled`)
