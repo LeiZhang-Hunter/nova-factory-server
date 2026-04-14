@@ -5,6 +5,7 @@ type SysUserLLM struct {
 	LLMFactory string `gorm:"column:llm_factory;primaryKey" json:"llm_factory"`
 	ModelType  string `gorm:"column:model_type" json:"model_type"`
 	LLMName    string `gorm:"column:llm_name;primaryKey" json:"llm_name"`
+	APIType    string `gorm:"column:api_type" json:"api_type"`
 	APIKey     string `gorm:"column:api_key" json:"api_key"`
 	APIBase    string `gorm:"column:api_base" json:"api_base"`
 	MaxTokens  int64  `gorm:"column:max_tokens" json:"max_tokens"`
@@ -16,6 +17,7 @@ type SetSysUserLLM struct {
 	LLMFactory string `json:"llm_factory"`
 	APIKey     string `json:"api_key"`
 	APIBase    string `json:"api_base"`
+	APIType    string `json:"api_type"`
 }
 
 type GetSysUserLLMReq struct {

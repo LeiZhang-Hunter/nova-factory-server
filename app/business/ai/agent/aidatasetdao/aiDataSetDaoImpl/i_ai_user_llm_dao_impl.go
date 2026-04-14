@@ -43,6 +43,7 @@ func (i *IAiUserLLMDaoImpl) Set(c *gin.Context, req *aidatasetmodels.SetSysUserL
 				LLMFactory: req.LLMFactory,
 				ModelType:  llm.ModelType,
 				LLMName:    llm.LlmName,
+				APIType:    req.APIType,
 				APIKey:     req.APIKey,
 				APIBase:    req.APIBase,
 				MaxTokens:  llm.MaxTokens,
@@ -64,7 +65,7 @@ func (i *IAiUserLLMDaoImpl) Set(c *gin.Context, req *aidatasetmodels.SetSysUserL
 			}
 			if err = tx.Table(i.table).Where("user_id = ?", userID).Where("llm_factory = ?", req.LLMFactory).
 				Where("llm_name = ?", llm.LlmName).
-				Select("model_type", "api_key", "api_base", "max_tokens", "status").Updates(data).Error; err != nil {
+				Select("model_type", "api_key", "api_base", "api_type", "max_tokens", "status").Updates(data).Error; err != nil {
 				return err
 			}
 			if err = tx.Table(i.table).Where("user_id = ?", userID).Where("llm_factory = ?", req.LLMFactory).

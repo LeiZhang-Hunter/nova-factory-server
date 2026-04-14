@@ -1,6 +1,7 @@
 package aidatasetcontroller
 
 import (
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/middlewares"
@@ -67,6 +68,7 @@ func (m *Model) SetSetting(c *gin.Context) {
 	req := new(aidatasetmodels.SetSysAiLLMSetting)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
+		zap.L().Error("param error", zap.Error(err))
 		return
 	}
 	data, err := m.settingService.Set(c, req)

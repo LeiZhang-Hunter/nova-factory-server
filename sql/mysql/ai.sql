@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS `ai_llm` (
     `tts_id` varchar(256) DEFAULT NULL,
     `parser_ids` varchar(256) NOT NULL,
     `credit` int NOT NULL,
-    `status` varchar(1) DEFAULT NULL,
+    `status` tinyint(1) DEFAULT NULL,
     `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) DEFAULT NULL COMMENT '创建时间(系统)',
@@ -223,6 +223,7 @@ CREATE TABLE IF NOT EXISTS `ai_llm` (
 CREATE TABLE IF NOT EXISTS `ai_user_llm` (
     `user_id` bigint(20) NOT NULL COMMENT '用户id',
     `llm_factory` varchar(128) NOT NULL,
+    `api_type` varchar(128) DEFAULT NULL,
     `model_type` varchar(128) DEFAULT NULL,
     `llm_name` varchar(128) NOT NULL,
     `api_key` text,
@@ -239,6 +240,8 @@ CREATE TABLE IF NOT EXISTS `ai_user_llm` (
     KEY `tenantllm_used_tokens` (`used_tokens`),
     KEY `tenant_llm_status` (`status`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '用户选择的模型厂商' ROW_FORMAT = Dynamic;
+
+
 
 CREATE TABLE IF NOT EXISTS ai_gateway (
     id               bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',

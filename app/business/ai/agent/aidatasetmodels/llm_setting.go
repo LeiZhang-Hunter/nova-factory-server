@@ -14,7 +14,7 @@ type SysAiLLMSetting struct {
 	TtsID     string `gorm:"column:tts_id;comment:tts_id" json:"tts_id"`
 	ParserIDs string `gorm:"column:parser_ids;comment:parser_ids" json:"parser_ids"`
 	Credit    int64  `gorm:"column:credit;comment:额度" json:"credit"`
-	Status    string `gorm:"column:status;comment:状态" json:"status"`
+	Status    bool   `gorm:"column:status;comment:状态" json:"status"`
 	DeptID    int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id,string"`
 	baize.BaseEntity
 	State int32 `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"`
@@ -32,7 +32,7 @@ type SetSysAiLLMSetting struct {
 	TtsID     string `json:"tts_id"`
 	ParserIDs string `json:"parser_ids"`
 	Credit    int64  `json:"credit"`
-	Status    string `json:"status"`
+	Status    bool   `json:"status"`
 }
 
 type GetSysAiLLMSettingReq struct {
