@@ -447,7 +447,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	iaiAgentMessageDao := gatewaydaoimpl.NewAIAgentMessageDao(db)
 	iAiConversationService := gatewayserviceimpl.NewIAiConversationServiceImpl(iAiConversationDao, iaiAgentMessageDao)
 	aidatasetserviceIAIGatewayService := aidatasetserviceimpl.NewAIGatewayService(iaiGatewayService)
-	conversations := gatewaycontroller.NewConversations(iAiConversationService, aidatasetserviceIAIGatewayService)
+	conversations := gatewaycontroller.NewConversations(iAiConversationService, aidatasetserviceIAIGatewayService, iaiAgentService, iDictDataDao)
 	gatewaycontrollerController := &gatewaycontroller.Controller{
 		AIGateway:     aiGateway,
 		Agent:         agent,

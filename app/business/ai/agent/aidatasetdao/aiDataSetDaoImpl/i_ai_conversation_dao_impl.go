@@ -36,6 +36,8 @@ func (i *IAiConversationDaoImpl) Create(c *gin.Context, req *aidatasetmodels.Set
 	}
 	data := &aidatasetmodels.AiConversation{
 		Name:           req.Name,
+		AgentID:        req.AgentID,
+		AgentType:      req.AgentType,
 		Message:        req.Message,
 		LLMProviderID:  req.LLMProviderID,
 		LLMModelID:     req.LLMModelID,
@@ -62,6 +64,8 @@ func (i *IAiConversationDaoImpl) Update(c *gin.Context, req *aidatasetmodels.Set
 		return nil, err
 	}
 	data.Name = req.Name
+	data.AgentID = req.AgentID
+	data.AgentType = req.AgentType
 	data.Message = req.Message
 	data.LLMProviderID = req.LLMProviderID
 	data.LLMModelID = req.LLMModelID
@@ -73,6 +77,8 @@ func (i *IAiConversationDaoImpl) Update(c *gin.Context, req *aidatasetmodels.Set
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Updates(map[string]interface{}{
 			"name":            data.Name,
+			"agent_id":        data.AgentID,
+			"agent_type":      data.AgentType,
 			"message":         data.Message,
 			"llm_provider_id": data.LLMProviderID,
 			"llm_model_id":    data.LLMModelID,

@@ -9,6 +9,8 @@ import (
 type AiConversation struct {
 	ID             int64  `json:"id,string" gorm:"column:id"`
 	Name           string `json:"name" gorm:"column:name"`
+	AgentID        int64  `json:"agentId,string"`
+	AgentType      string `json:"agentType,string"  gorm:"column:agent_type"`
 	Message        string `json:"message" gorm:"column:message"`
 	LLMProviderID  string `json:"llmProviderId" gorm:"column:llm_provider_id"`
 	LLMModelID     string `json:"llmModelId" gorm:"column:llm_model_id"`
@@ -22,6 +24,8 @@ type AiConversation struct {
 
 type SetAiConversation struct {
 	ID             int64  `json:"id,string"`
+	AgentID        int64  `json:"agentId,string"`
+	AgentType      string `json:"agentType,string"`
 	Name           string `json:"name" binding:"required"`
 	Message        string `json:"message"`
 	LLMProviderID  string `json:"llmProviderId"`

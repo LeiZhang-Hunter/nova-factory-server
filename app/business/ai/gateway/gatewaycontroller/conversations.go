@@ -2,9 +2,9 @@ package gatewaycontroller
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
+	"errors"
 	"net/http"
+	"nova-factory-server/app/business/admin/system/systemdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
@@ -12,19 +12,27 @@ import (
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/sse"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type Conversations struct {
 	service        gatewayservice.IAiConversationService
 	gatewayService aidatasetservice.IAIGatewayService
+	agentService   gatewayservice.IAIAgentService
+	dictDataDao    systemdao.IDictDataDao
 }
 
 // NewConversations 会话控制器构造函数。
-func NewConversations(service gatewayservice.IAiConversationService, gatewayService aidatasetservice.IAIGatewayService) *Conversations {
+func NewConversations(service gatewayservice.IAiConversationService, gatewayService aidatasetservice.IAIGatewayService, agentService gatewayservice.IAIAgentService, dictDataDao systemdao.IDictDataDao) *Conversations {
 	return &Conversations{
 		service:        service,
 		gatewayService: gatewayService,
+		agentService:   agentService,
+		dictDataDao:    dictDataDao,
 	}
 }
 
@@ -78,12 +86,50 @@ func (conversations *Conversations) CreateConversation(c *gin.Context) {
 		baizeContext.Waring(c, "名称为空")
 		return
 	}
+	if req.AgentID == 0 {
+		baizeContext.Waring(c, "智能体ID不能为空")
+		return
+	}
+	agentInfo, err := conversations.agentService.GetByID(c, req.AgentID)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	if agentInfo == nil {
+		baizeContext.Waring(c, "智能体配置不存在")
+		return
+	}
+	if agentInfo.Enable == nil || !*agentInfo.Enable {
+		baizeContext.Waring(c, "智能体配置未启用")
+		return
+	}
+	req.AgentID = agentInfo.ID
+	req.AgentType = agentInfo.Type
+	req.LLMProviderID = agentInfo.DefaultLLMProviderID
+	req.LLMModelID = agentInfo.DefaultLLMModelID
 	data, err := conversations.service.Create(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
 	baizeContext.SuccessData(c, data)
+}
+
+func (conversations *Conversations) resolveAgentTypeCode(c *gin.Context, agentType string) (int64, error) {
+	typeKey := strings.ToLower(strings.TrimSpace(agentType))
+	if typeKey == "" {
+		return 0, errors.New("智能体类型不能为空")
+	}
+	rows := conversations.dictDataDao.SelectDictDataByType(c, "ai_agent_type")
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		if strings.ToLower(strings.TrimSpace(row.DictValue)) == typeKey || strings.ToLower(strings.TrimSpace(row.DictLabel)) == typeKey {
+			return row.DictCode, nil
+		}
+	}
+	return 0, errors.New("智能体类型不存在")
 }
 
 // RemoveConversation 删除会话（软删除）

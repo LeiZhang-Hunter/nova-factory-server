@@ -52,7 +52,7 @@ func (a *AIAgentDaoImpl) Update(c *gin.Context, req *gatewaymodels.AIAgentUpsert
 		Where("state = ?", commonStatus.NORMAL).
 		Select("name", "type", "prompt", "default_llm_provider_id", "default_llm_model_id", "llm_temperature", "llm_top_p",
 			"llm_max_tokens", "enable_llm_temperature", "enable_llm_top_p", "enable_llm_max_tokens",
-			"llm_max_context_count", "sandbox_mode", "sandbox_network",
+			"llm_max_context_count", "sandbox_mode", "sandbox_network", "enable",
 			"work_dir", "mcp_enabled", "mcp_server_ids", "mcp_server_enabled_ids", "update_by", "update_time").
 		Updates(item).Error; err != nil {
 		return nil, err
@@ -96,7 +96,6 @@ func (a *AIAgentDaoImpl) GetEnabledByType(c *gin.Context, agentType string) (*ga
 	if err := a.db.WithContext(c).Table(a.table).
 		Where("type = ?", agentType).
 		Where("enable = ?", true).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
