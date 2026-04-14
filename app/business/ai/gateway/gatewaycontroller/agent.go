@@ -43,6 +43,7 @@ func (agent *Agent) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/ai/agent/config")
 	group.GET("/list", middlewares.HasPermission("ai:agent:config:list"), agent.List)
 	group.GET("/query/:id", middlewares.HasPermission("ai:agent:config:query"), agent.GetByID)
+	group.GET("/query/type/:type", middlewares.HasPermission("ai:agent:config:query"), agent.GetEnabledByType)
 	group.POST("/set", middlewares.HasPermission("ai:agent:config:set"), agent.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:config:remove"), agent.Delete)
 }
@@ -86,6 +87,29 @@ func (agent *Agent) GetByID(c *gin.Context) {
 		return
 	}
 	data, err := agent.service.GetByID(c, id)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// GetEnabledByType 获取指定类型下已启用的智能体详情
+// @Summary 获取指定类型下已启用的智能体详情
+// @Description 通过type查询enable=true的智能体配置
+// @Tags 工业智能体/智能体管理
+// @Param type path string true "智能体类型"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /ai/agent/config/query/type/{type} [get]
+func (agent *Agent) GetEnabledByType(c *gin.Context) {
+	agentType := strings.TrimSpace(c.Param("type"))
+	if agentType == "" {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := agent.service.GetEnabledByType(c, agentType)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

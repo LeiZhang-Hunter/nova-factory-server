@@ -73,6 +73,15 @@ func (a *AIAgentServiceImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.A
 	return a.dao.GetByID(c, id)
 }
 
+// GetEnabledByType 查询指定类型下已启用的智能体。
+func (a *AIAgentServiceImpl) GetEnabledByType(c *gin.Context, agentType string) (*gatewaymodels.AIAgent, error) {
+	agentType = strings.TrimSpace(agentType)
+	if agentType == "" {
+		return nil, errors.New("type不能为空")
+	}
+	return a.dao.GetEnabledByType(c, agentType)
+}
+
 // List 查询智能体列表。
 func (a *AIAgentServiceImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error) {
 	if req == nil {
