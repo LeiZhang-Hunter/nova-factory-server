@@ -2,7 +2,6 @@ package gatewaycontroller
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"nova-factory-server/app/business/admin/system/systemdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
@@ -12,7 +11,6 @@ import (
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/sse"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -113,23 +111,6 @@ func (conversations *Conversations) CreateConversation(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, data)
-}
-
-func (conversations *Conversations) resolveAgentTypeCode(c *gin.Context, agentType string) (int64, error) {
-	typeKey := strings.ToLower(strings.TrimSpace(agentType))
-	if typeKey == "" {
-		return 0, errors.New("智能体类型不能为空")
-	}
-	rows := conversations.dictDataDao.SelectDictDataByType(c, "ai_agent_type")
-	for _, row := range rows {
-		if row == nil {
-			continue
-		}
-		if strings.ToLower(strings.TrimSpace(row.DictValue)) == typeKey || strings.ToLower(strings.TrimSpace(row.DictLabel)) == typeKey {
-			return row.DictCode, nil
-		}
-	}
-	return 0, errors.New("智能体类型不存在")
 }
 
 // RemoveConversation 删除会话（软删除）
