@@ -79,7 +79,6 @@ func (a *AIAgentDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAge
 	var item gatewaymodels.AIAgent
 	if err := a.db.WithContext(c).Table(a.table).
 		Where("id = ?", id).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

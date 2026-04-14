@@ -43,7 +43,7 @@ func (agent *Agent) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/ai/agent/config")
 	group.GET("/list", middlewares.HasPermission("ai:agent:config:list"), agent.List)
 	group.GET("/query/:id", middlewares.HasPermission("ai:agent:config:query"), agent.GetByID)
-	group.GET("/query/type/:type", middlewares.HasPermission("ai:agent:config:query"), agent.GetEnabledByType)
+	group.GET("/query/type/:type", middlewares.HasPermission("ai:agent:config:type"), agent.GetEnabledByType)
 	group.POST("/set", middlewares.HasPermission("ai:agent:config:set"), agent.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:config:remove"), agent.Delete)
 }
