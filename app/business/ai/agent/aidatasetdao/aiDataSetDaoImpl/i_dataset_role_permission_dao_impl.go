@@ -249,15 +249,16 @@ func (i *IDatasetRolePermissionDaoImpl) Update(c *gin.Context, req *aidatasetmod
 	data.SetUpdateBy(baizeContext.GetUserId(c))
 	if err := i.db.WithContext(c).Table(i.table).
 		Where("id = ?", req.ID).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Updates(map[string]interface{}{
-			"role_id":      data.RoleID,
-			"dataset_ids":  data.DatasetIDs,
-			"document_ids": data.DocumentIDs,
-			"permission":   data.Permission,
-			"status":       req.Status,
-			"update_by":    data.UpdateBy,
-			"update_time":  data.UpdateTime,
+			"role_id":        data.RoleID,
+			"dataset_ids":    data.DatasetIDs,
+			"dataset_uuids":  data.DatasetUuIDs,
+			"document_ids":   data.DocumentIDs,
+			"document_uuids": data.DocumentUuIDs,
+			"permission":     data.Permission,
+			"status":         req.Status,
+			"update_by":      data.UpdateBy,
+			"update_time":    data.UpdateTime,
 		}).Error; err != nil {
 		return nil, err
 	}
