@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS `shop_category` (
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_category_code` (`category_code`),
-  UNIQUE KEY `uk_parent_name` (`parent_id`, `category_name`, `state`),
+  KEY `uk_category_code` (`category_code`),
+  KEY `uk_parent_name` (`parent_id`, `category_name`, `state`),
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_ancestor_path` (`ancestor_path`(191)),
   KEY `idx_status` (`status`)
