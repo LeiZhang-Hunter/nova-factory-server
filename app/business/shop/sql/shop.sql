@@ -15,14 +15,15 @@ CREATE TABLE IF NOT EXISTS `shop_category` (
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
   PRIMARY KEY (`id`),
   KEY `uk_category_code` (`category_code`),
-  KEY `uk_parent_name` (`parent_id`, `category_name`, `state`),
   KEY `idx_parent_id` (`parent_id`),
   KEY `idx_ancestor_path` (`ancestor_path`(191)),
   KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品分类表';
 
+
 CREATE TABLE IF NOT EXISTS `shop_goods` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `shop_category_id`  bigint(20) NOT NULL DEFAULT 0 COMMENT '分类id',
   `goods_id` VARCHAR(64) NOT NULL COMMENT '商品ID，对应goodsID',
   `goods_name` VARCHAR(255) NOT NULL COMMENT '商品名称',
   `goods_code` VARCHAR(128) DEFAULT NULL COMMENT '商品编码',

@@ -224,7 +224,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	category := shopcontroller.NewCategory(iShopCategoryService)
 	iShopGoodsDao := shopdaoimpl.NewShopGoodsDao(db)
 	iShopSkuDao := shopdaoimpl.NewShopSkuDao(db)
-	iShopGoodsService := shopserviceimpl.NewShopGoodsService(iShopGoodsDao, iShopSkuDao)
+	iShopGoodsService := shopserviceimpl.NewShopGoodsService(iShopGoodsDao, iShopSkuDao, iShopCategoryDao)
 	goods := shopcontroller.NewGoods(iShopGoodsService)
 	iShopSkuService := shopserviceimpl.NewShopSkuService(iShopSkuDao)
 	sku := shopcontroller.NewSku(iShopSkuService)

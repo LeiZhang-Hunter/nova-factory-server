@@ -4,6 +4,7 @@ import (
 	"errors"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/snowflake"
+	"sort"
 	"strings"
 	"time"
 
@@ -15,17 +16,19 @@ import (
 )
 
 type ShopGoodsServiceImpl struct {
-	dao    shopdao.IShopGoodsDao
-	skuDao shopdao.IShopSkuDao
+	dao         shopdao.IShopGoodsDao
+	skuDao      shopdao.IShopSkuDao
+	categoryDao shopdao.IShopCategoryDao
 }
 
 const importBatchSize = 100
 
 // NewShopGoodsService 创建商品服务
-func NewShopGoodsService(dao shopdao.IShopGoodsDao, skuDao shopdao.IShopSkuDao) shopservice.IShopGoodsService {
+func NewShopGoodsService(dao shopdao.IShopGoodsDao, skuDao shopdao.IShopSkuDao, categoryDao shopdao.IShopCategoryDao) shopservice.IShopGoodsService {
 	return &ShopGoodsServiceImpl{
-		dao:    dao,
-		skuDao: skuDao,
+		dao:         dao,
+		skuDao:      skuDao,
+		categoryDao: categoryDao,
 	}
 }
 
@@ -49,6 +52,9 @@ func (s *ShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Go
 	if data == nil {
 		return nil, nil
 	}
+	if err = s.attachCategoryNames(c, []*shopmodels.Goods{data}); err != nil {
+		return nil, err
+	}
 	if err = s.attachSkus(c, []*shopmodels.Goods{data}); err != nil {
 		return nil, err
 	}
@@ -63,10 +69,52 @@ func (s *ShopGoodsServiceImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) 
 	if data == nil || len(data.Rows) == 0 {
 		return data, nil
 	}
+	if err = s.attachCategoryNames(c, data.Rows); err != nil {
+		return nil, err
+	}
 	if err = s.attachSkus(c, data.Rows); err != nil {
 		return nil, err
 	}
 	return data, nil
+}
+
+func (s *ShopGoodsServiceImpl) attachCategoryNames(c *gin.Context, goodsRows []*shopmodels.Goods) error {
+	if len(goodsRows) == 0 || s.categoryDao == nil {
+		return nil
+	}
+	categoryIDSet := make(map[int64]struct{})
+	for _, goods := range goodsRows {
+		if goods == nil || goods.ShopCategoryId == 0 {
+			continue
+		}
+		categoryIDSet[goods.ShopCategoryId] = struct{}{}
+	}
+	if len(categoryIDSet) == 0 {
+		return nil
+	}
+	categoryIDs := make([]int64, 0, len(categoryIDSet))
+	for id := range categoryIDSet {
+		categoryIDs = append(categoryIDs, id)
+	}
+	sort.Slice(categoryIDs, func(i, j int) bool { return categoryIDs[i] < categoryIDs[j] })
+	categories, err := s.categoryDao.ListByIDs(c, categoryIDs)
+	if err != nil {
+		return err
+	}
+	categoryNameMap := make(map[int64]string, len(categories))
+	for _, category := range categories {
+		if category == nil {
+			continue
+		}
+		categoryNameMap[category.ID] = category.CategoryName
+	}
+	for _, goods := range goodsRows {
+		if goods == nil {
+			continue
+		}
+		goods.ShopCategoryName = categoryNameMap[goods.ShopCategoryId]
+	}
+	return nil
 }
 
 // Import 增量导入商品与规格数据
