@@ -1,6 +1,7 @@
 package gatewaycontroller
 
 import (
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
@@ -57,6 +58,7 @@ func (a *AIGateway) Set(c *gin.Context) {
 	req := new(gatewaymodels.AIGatewayUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
+		zap.L().Error("gateway set failed", zap.Error(err))
 		return
 	}
 	var (

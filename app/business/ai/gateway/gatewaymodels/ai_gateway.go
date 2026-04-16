@@ -22,7 +22,7 @@ type AIGatewayQuery struct {
 }
 
 type AIGatewayUpsert struct {
-	ID      int64  `json:"id"`
+	ID      int64  `json:"id,string"`
 	Name    string `json:"name"`
 	BaseURL string `json:"baseUrl"`
 	APIKey  string `json:"apiKey"`
