@@ -219,6 +219,9 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	factoryBootstrap := ai.NewFactoryBootstrap(db, iAiModelProviderDao, iAiLLMDao)
 	aiAI := ai.NewGinEngine(app, cacheCache, aiDataSet, controller, factoryBootstrap)
+	iShopAddressDao := shopdaoimpl.NewShopAddressDao(db)
+	iShopAddressService := shopserviceimpl.NewShopAddressService(iShopAddressDao)
+	address := shopcontroller.NewAddress(iShopAddressService)
 	iShopCategoryDao := shopdaoimpl.NewShopCategoryDao(db)
 	iShopCategoryService := shopserviceimpl.NewShopCategoryService(iShopCategoryDao)
 	category := shopcontroller.NewCategory(iShopCategoryService)
@@ -229,6 +232,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	iShopSkuService := shopserviceimpl.NewShopSkuService(iShopSkuDao)
 	sku := shopcontroller.NewSku(iShopSkuService)
 	shopcontrollerController := &shopcontroller.Controller{
+		Address:  address,
 		Category: category,
 		Goods:    goods,
 		Sku:      sku,
