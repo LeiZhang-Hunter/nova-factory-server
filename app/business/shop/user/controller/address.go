@@ -1,18 +1,22 @@
 package shopcontroller
 
 import (
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/business/shop/user/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
-
-	"github.com/gin-gonic/gin"
+	"nova-factory-server/app/utils/region"
+	"strconv"
+	"strings"
+	"sync"
 )
 
 // Address 商城用户地址控制器
 type Address struct {
 	service service.IShopAddressService
+	mtx     sync.Mutex
 }
 
 // NewAddress 创建商城用户地址控制器。
@@ -25,6 +29,7 @@ func (s *Address) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/user/address")
 	group.GET("/list", middlewares.HasPermission("shop:user:address:list"), s.List)
 	group.GET("/info/:id", middlewares.HasPermission("shop:user:address:info"), s.GetByID)
+	group.GET("/region", middlewares.HasPermission("shop:user:address:region"), s.Region)
 	group.POST("/set", middlewares.HasPermission("shop:user:address:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:user:address:remove"), s.Remove)
 }
@@ -119,4 +124,83 @@ func (s *Address) Remove(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// Region 获取省市区行政区列表
+// @Summary 获取省市区行政区列表
+// @Description 不传 parentCode 返回省级列表，传省编码返回市级，传市编码返回区级
+// @Tags 商城/用户地址
+// @Param parentCode query string false "父级行政区编码"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /shop/user/address/region [get]
+func (s *Address) Region(c *gin.Context) {
+	req := new(models.AddressRegionQuery)
+	if err := c.ShouldBindQuery(req); err != nil {
+		zap.L().Error("get address region error", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	req.ParentCode = strings.TrimSpace(req.ParentCode)
+	req.Type = strings.TrimSpace(strings.ToLower(req.Type))
+
+	pid := 0
+	currentLevel := -1
+	if req.ParentCode != "" {
+		regionID, err := strconv.Atoi(req.ParentCode)
+		if err != nil {
+			baizeContext.ParameterError(c)
+			return
+		}
+		s.mtx.Lock()
+		info := region.GetRegionInfo(regionID)
+		defer s.mtx.Unlock()
+		if info == nil {
+			baizeContext.ParameterError(c)
+			return
+		}
+		pid = regionID
+		currentLevel = info.Level
+	}
+
+	rows := region.GetRegionList(pid)
+	items := make([]*models.AddressRegionItem, 0, len(rows))
+	for _, item := range rows {
+		level := regionLevelName(item.Level)
+		if req.Type != "" && req.Type != level {
+			continue
+		}
+		items = append(items, &models.AddressRegionItem{
+			Code:       strconv.FormatInt(item.ID, 10),
+			Name:       item.Name,
+			Level:      level,
+			ParentCode: req.ParentCode,
+		})
+	}
+
+	if req.Type != "" && req.ParentCode != "" {
+		expectedLevel := regionLevelName(currentLevel + 1)
+		if expectedLevel != "" && req.Type != expectedLevel {
+			items = make([]*models.AddressRegionItem, 0)
+		}
+	}
+
+	baizeContext.SuccessData(c, items)
+}
+
+func regionLevelName(level int) string {
+	switch level {
+	case 0:
+		return "province"
+	case 1:
+		return "city"
+	case 2:
+		return "district"
+	case 3:
+		return "street"
+	default:
+		return ""
+	}
 }

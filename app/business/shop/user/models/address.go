@@ -33,11 +33,11 @@ type AddressSetReq struct {
 	ReceiverName   string `json:"receiverName"`                      // 收货人姓名
 	ReceiverMobile string `json:"receiverMobile" binding:"required"` // 收货人手机号
 	ProvinceCode   string `json:"provinceCode"`                      // 省编码
-	ProvinceName   string `json:"provinceName" binding:"required"`   // 省名称
+	ProvinceName   string `json:"provinceName"`                      // 省名称
 	CityCode       string `json:"cityCode"`                          // 市编码
-	CityName       string `json:"cityName" binding:"required"`       // 市名称
+	CityName       string `json:"cityName"`                          // 市名称
 	DistrictCode   string `json:"districtCode"`                      // 区编码
-	DistrictName   string `json:"districtName" binding:"required"`   // 区名称
+	DistrictName   string `json:"districtName"`                      // 区名称
 	StreetCode     string `json:"streetCode"`                        // 街道编码
 	StreetName     string `json:"streetName"`                        // 街道名称
 	DetailAddress  string `json:"detailAddress" binding:"required"`  // 详细地址
@@ -61,4 +61,18 @@ type AddressQuery struct {
 type AddressListData struct {
 	Rows  []*Address `json:"rows"`  // 数据列表
 	Total int64      `json:"total"` // 总数
+}
+
+// AddressRegionQuery 行政区查询参数
+type AddressRegionQuery struct {
+	ParentCode string `form:"parentCode"` // 父级行政区编码，为空时查询省级
+	Type       string `form:"type"`       // 行政区层级：province/city/district/street
+}
+
+// AddressRegionItem 行政区节点
+type AddressRegionItem struct {
+	Code       string `json:"code"`       // 行政区编码
+	Name       string `json:"name"`       // 行政区名称
+	Level      string `json:"level"`      // 层级：province/city/district
+	ParentCode string `json:"parentCode"` // 父级行政区编码
 }

@@ -2,10 +2,12 @@ package impl
 
 import (
 	"errors"
+	"github.com/itmisx/go_regions"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/business/shop/user/service"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -32,13 +34,13 @@ func (s *ShopAddressServiceImpl) Set(c *gin.Context, req *models.AddressSetReq) 
 	}
 	req.ReceiverMobile = strings.TrimSpace(req.ReceiverMobile)
 	req.ProvinceCode = strings.TrimSpace(req.ProvinceCode)
-	req.ProvinceName = strings.TrimSpace(req.ProvinceName)
 	req.CityCode = strings.TrimSpace(req.CityCode)
-	req.CityName = strings.TrimSpace(req.CityName)
 	req.DistrictCode = strings.TrimSpace(req.DistrictCode)
-	req.DistrictName = strings.TrimSpace(req.DistrictName)
 	req.StreetCode = strings.TrimSpace(req.StreetCode)
-	req.StreetName = strings.TrimSpace(req.StreetName)
+	req.ProvinceName = ""
+	req.CityName = ""
+	req.DistrictName = ""
+	req.StreetName = ""
 	req.DetailAddress = strings.TrimSpace(req.DetailAddress)
 	req.PostalCode = strings.TrimSpace(req.PostalCode)
 	req.AddressLabel = strings.TrimSpace(req.AddressLabel)
@@ -57,6 +59,26 @@ func (s *ShopAddressServiceImpl) Set(c *gin.Context, req *models.AddressSetReq) 
 	}
 	req.UserID = user.UserID
 	req.ReceiverName = resolveReceiverName(user)
+	if err = fillRegionNames(req); err != nil {
+		return nil, err
+	}
+
+	if req.ProvinceName == "" {
+		return nil, errors.New("省份输入错误")
+	}
+
+	if req.CityName == "" {
+		return nil, errors.New("市输入错误")
+	}
+
+	if req.DistrictName == "" {
+		return nil, errors.New("输入区错误")
+	}
+
+	if req.StreetName == "" {
+		return nil, errors.New("街道不能为空")
+	}
+
 	return s.dao.Set(c, req)
 }
 
@@ -86,4 +108,41 @@ func resolveReceiverName(user *models.User) string {
 		return value
 	}
 	return strings.TrimSpace(user.Username)
+}
+
+func fillRegionNames(req *models.AddressSetReq) error {
+	var err error
+	req.ProvinceName, err = regionNameByCode(req.ProvinceCode, "省")
+	if err != nil {
+		return err
+	}
+	req.CityName, err = regionNameByCode(req.CityCode, "市")
+	if err != nil {
+		return err
+	}
+	req.DistrictName, err = regionNameByCode(req.DistrictCode, "区")
+	if err != nil {
+		return err
+	}
+	req.StreetName, err = regionNameByCode(req.StreetCode, "街道")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func regionNameByCode(code string, label string) (string, error) {
+	code = strings.TrimSpace(code)
+	if code == "" {
+		return "", nil
+	}
+	id, err := strconv.Atoi(code)
+	if err != nil {
+		return "", errors.New(label + "编码格式不正确")
+	}
+	info := go_regions.RegionInfo(id)
+	if info == nil {
+		return "", errors.New(label + "编码不存在")
+	}
+	return strings.TrimSpace(info.Name), nil
 }
