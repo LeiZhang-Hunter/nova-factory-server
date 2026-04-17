@@ -19,7 +19,7 @@ type Address struct {
 	DetailAddress  string `json:"detailAddress" db:"detail_address"`         // 详细地址
 	PostalCode     string `json:"postalCode" db:"postal_code"`               // 邮政编码
 	AddressLabel   string `json:"addressLabel" db:"address_label"`           // 地址标签
-	IsDefault      int32  `json:"isDefault" db:"is_default"`                 // 是否默认地址
+	IsDefault      *bool  `json:"isDefault" db:"is_default"`                 // 是否默认地址
 	Status         int32  `json:"status" db:"status"`                        // 状态
 	DeptID         int64  `json:"deptId" gorm:"column:dept_id" db:"dept_id"` // 部门ID
 	baize.BaseEntity
@@ -29,8 +29,8 @@ type Address struct {
 // AddressSetReq 地址新增修改参数
 type AddressSetReq struct {
 	ID             int64  `json:"id,string"`                         // 主键ID
-	UserID         string `json:"userId" binding:"required"`         // 用户业务ID
-	ReceiverName   string `json:"receiverName" binding:"required"`   // 收货人姓名
+	UserID         string `json:"userId"`                            // 用户业务ID
+	ReceiverName   string `json:"receiverName"`                      // 收货人姓名
 	ReceiverMobile string `json:"receiverMobile" binding:"required"` // 收货人手机号
 	ProvinceCode   string `json:"provinceCode"`                      // 省编码
 	ProvinceName   string `json:"provinceName" binding:"required"`   // 省名称
@@ -43,7 +43,7 @@ type AddressSetReq struct {
 	DetailAddress  string `json:"detailAddress" binding:"required"`  // 详细地址
 	PostalCode     string `json:"postalCode"`                        // 邮政编码
 	AddressLabel   string `json:"addressLabel"`                      // 地址标签
-	IsDefault      int32  `json:"isDefault"`                         // 是否默认地址
+	IsDefault      *bool  `json:"isDefault"`                         // 是否默认地址
 	Status         *int32 `json:"status"`                            // 状态
 }
 

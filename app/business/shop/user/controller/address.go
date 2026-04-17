@@ -1,6 +1,7 @@
 package shopcontroller
 
 import (
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/business/shop/user/service"
 	"nova-factory-server/app/middlewares"
@@ -23,6 +24,7 @@ func NewAddress(service service.IShopAddressService) *Address {
 func (s *Address) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/user/address")
 	group.GET("/list", middlewares.HasPermission("shop:user:address:list"), s.List)
+	group.GET("/info/:id", middlewares.HasPermission("shop:user:address:info"), s.GetByID)
 	group.POST("/set", middlewares.HasPermission("shop:user:address:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:user:address:remove"), s.Remove)
 }
@@ -50,6 +52,29 @@ func (s *Address) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
+// GetByID 获取商城用户地址详情
+// @Summary 获取商城用户地址详情
+// @Description 根据ID获取商城用户地址详情
+// @Tags 商城/用户地址
+// @Param id path int true "商城用户地址ID"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /shop/user/address/info/{id} [get]
+func (s *Address) GetByID(c *gin.Context) {
+	id := baizeContext.ParamInt64(c, "id")
+	if id == 0 {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.GetByID(c, id)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
 // Set 新增或修改商城用户地址
 // @Summary 新增或修改商城用户地址
 // @Description 新增或修改商城用户地址
@@ -62,6 +87,7 @@ func (s *Address) List(c *gin.Context) {
 func (s *Address) Set(c *gin.Context) {
 	req := new(models.AddressSetReq)
 	if err := c.ShouldBindJSON(req); err != nil {
+		zap.L().Error("set address error", zap.Error(err))
 		baizeContext.ParameterError(c)
 		return
 	}

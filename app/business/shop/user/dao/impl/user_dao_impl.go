@@ -117,6 +117,22 @@ func (s *ShopUserDaoImpl) GetByID(c *gin.Context, id int64) (*models.User, error
 	return &item, nil
 }
 
+// GetByMobile 根据手机号查询商城用户。
+func (s *ShopUserDaoImpl) GetByMobile(c *gin.Context, mobile string) (*models.User, error) {
+	var item models.User
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("mobile = ?", mobile).
+		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
 func (s *ShopUserDaoImpl) List(c *gin.Context, req *models.UserQuery) (*models.UserListData, error) {
 	db := s.db.WithContext(c).Table(s.tableName).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).

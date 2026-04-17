@@ -219,9 +219,6 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	factoryBootstrap := ai.NewFactoryBootstrap(db, iAiModelProviderDao, iAiLLMDao)
 	aiAI := ai.NewGinEngine(app, cacheCache, aiDataSet, controller, factoryBootstrap)
-	iShopAddressDao := shopdaoimpl.NewShopAddressDao(db)
-	iShopAddressService := shopserviceimpl.NewShopAddressService(iShopAddressDao)
-	address := shopcontroller.NewAddress(iShopAddressService)
 	iShopCategoryDao := shopdaoimpl.NewShopCategoryDao(db)
 	iShopCategoryService := shopserviceimpl.NewShopCategoryService(iShopCategoryDao)
 	category := shopcontroller.NewCategory(iShopCategoryService)
@@ -232,16 +229,19 @@ func wireApp() (*gin.Engine, func(), error) {
 	iShopSkuService := shopserviceimpl.NewShopSkuService(iShopSkuDao)
 	sku := shopcontroller.NewSku(iShopSkuService)
 	shopcontrollerController := &shopcontroller.Controller{
-		Address:  address,
 		Category: category,
 		Goods:    goods,
 		Sku:      sku,
 	}
+	iShopAddressDao := impl.NewShopAddressDao(db)
 	iShopUserDao := impl.NewShopUserDao(db)
+	iShopAddressService := impl2.NewShopAddressService(iShopAddressDao, iShopUserDao)
+	address := shopcontroller2.NewAddress(iShopAddressService)
 	iShopUserService := impl2.NewShopUserService(iShopUserDao)
 	shopcontrollerUser := shopcontroller2.NewUser(iShopUserService)
 	controller2 := &shopcontroller2.Controller{
-		User: shopcontrollerUser,
+		Address: address,
+		User:    shopcontrollerUser,
 	}
 	shopShop := shop.NewGinEngine(app, cacheCache, shopcontrollerController, controller2)
 	iAgentConfigDao := settingdaoimpl.NewAgentConfigDao(db)

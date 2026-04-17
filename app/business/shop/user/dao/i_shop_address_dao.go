@@ -9,6 +9,7 @@ import (
 // IShopAddressDao 商城用户地址数据访问接口
 type IShopAddressDao interface {
 	Set(c *gin.Context, req *models.AddressSetReq) (*models.Address, error)
+	GetByID(c *gin.Context, id int64) (*models.Address, error)
 	List(c *gin.Context, req *models.AddressQuery) (*models.AddressListData, error)
 	Remove(c *gin.Context, ids []int64) error
 }

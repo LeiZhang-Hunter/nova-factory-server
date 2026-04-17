@@ -11,5 +11,6 @@ type IShopUserDao interface {
 	Update(c *gin.Context, req *models.UserUpsert) (*models.User, error)
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*models.User, error)
+	GetByMobile(c *gin.Context, mobile string) (*models.User, error)
 	List(c *gin.Context, req *models.UserQuery) (*models.UserListData, error)
 }

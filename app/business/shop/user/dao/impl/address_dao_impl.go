@@ -37,7 +37,7 @@ func (s *ShopAddressDaoImpl) Set(c *gin.Context, req *models.AddressSetReq) (*mo
 
 	var result *models.Address
 	err := s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
-		if req.IsDefault == 1 {
+		if req.IsDefault != nil && *req.IsDefault {
 			clearDefault := tx.Table(s.tableName).
 				Where("user_id = ?", req.UserID).
 				Where("dept_id = ?", deptID).
@@ -125,6 +125,22 @@ func (s *ShopAddressDaoImpl) Set(c *gin.Context, req *models.AddressSetReq) (*mo
 		return nil, err
 	}
 	return result, nil
+}
+
+// GetByID 根据主键查询商城用户地址。
+func (s *ShopAddressDaoImpl) GetByID(c *gin.Context, id int64) (*models.Address, error) {
+	var item models.Address
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("id = ?", id).
+		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
 }
 
 // List 查询商城用户地址列表。
