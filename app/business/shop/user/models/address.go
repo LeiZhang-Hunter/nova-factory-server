@@ -1,4 +1,4 @@
-package shopmodels
+package models
 
 import "nova-factory-server/app/baize"
 
@@ -8,7 +8,6 @@ type Address struct {
 	UserID         string `json:"userId" db:"user_id"`                       // 用户业务ID
 	ReceiverName   string `json:"receiverName" db:"receiver_name"`           // 收货人姓名
 	ReceiverMobile string `json:"receiverMobile" db:"receiver_mobile"`       // 收货人手机号
-	ReceiverPhone  string `json:"receiverPhone" db:"receiver_phone"`         // 收货人电话
 	ProvinceCode   string `json:"provinceCode" db:"province_code"`           // 省编码
 	ProvinceName   string `json:"provinceName" db:"province_name"`           // 省名称
 	CityCode       string `json:"cityCode" db:"city_code"`                   // 市编码
@@ -27,13 +26,12 @@ type Address struct {
 	State int32 `json:"state" gorm:"column:state" db:"state"` // 操作状态
 }
 
-// AddressSetReq 地址新增或修改参数
+// AddressSetReq 地址新增修改参数
 type AddressSetReq struct {
 	ID             int64  `json:"id,string"`                         // 主键ID
 	UserID         string `json:"userId" binding:"required"`         // 用户业务ID
 	ReceiverName   string `json:"receiverName" binding:"required"`   // 收货人姓名
 	ReceiverMobile string `json:"receiverMobile" binding:"required"` // 收货人手机号
-	ReceiverPhone  string `json:"receiverPhone"`                     // 收货人电话
 	ProvinceCode   string `json:"provinceCode"`                      // 省编码
 	ProvinceName   string `json:"provinceName" binding:"required"`   // 省名称
 	CityCode       string `json:"cityCode"`                          // 市编码
