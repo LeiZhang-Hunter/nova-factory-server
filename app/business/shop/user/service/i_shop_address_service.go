@@ -12,4 +12,5 @@ type IShopAddressService interface {
 	GetByID(c *gin.Context, id int64) (*models.Address, error)
 	List(c *gin.Context, req *models.AddressQuery) (*models.AddressListData, error)
 	Remove(c *gin.Context, ids []int64) error
+	Query(c *gin.Context, req *models.UserAddressInfoQuery) (*models.AddressListData, error)
 }

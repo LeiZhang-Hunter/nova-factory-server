@@ -172,3 +172,18 @@ func (s *ShopUserDaoImpl) List(c *gin.Context, req *models.UserQuery) (*models.U
 func boolPtr(v bool) *bool {
 	return &v
 }
+
+func (s *ShopUserDaoImpl) GetByUsername(c *gin.Context, username string) (*models.User, error) {
+	var user *models.User
+	db := s.db.WithContext(c).Table(s.tableName)
+	db = db.Where("username = ?", username)
+	db = db.Where("state = ?", commonStatus.NORMAL)
+	ret := db.First(&user)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+	return user, ret.Error
+}

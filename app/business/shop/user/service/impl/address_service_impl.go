@@ -146,3 +146,27 @@ func regionNameByCode(code string, label string) (string, error) {
 	}
 	return strings.TrimSpace(info.Name), nil
 }
+
+func (s *ShopAddressServiceImpl) Query(c *gin.Context, req *models.UserAddressInfoQuery) (*models.AddressListData, error) {
+	user, err := s.userDao.GetByUsername(c, req.Username)
+	if err != nil {
+		zap.L().Error("get username error", zap.Error(err))
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, nil
+	}
+
+	list, err := s.dao.List(c, &models.AddressQuery{
+		UserID: user.UserID,
+		Page:   1,
+		Size:   20,
+	})
+	if err != nil {
+		zap.L().Error("list error", zap.Error(err))
+		return list, err
+	}
+
+	return list, nil
+}

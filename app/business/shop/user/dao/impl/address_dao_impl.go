@@ -145,9 +145,8 @@ func (s *ShopAddressDaoImpl) GetByID(c *gin.Context, id int64) (*models.Address,
 
 // List 查询商城用户地址列表。
 func (s *ShopAddressDaoImpl) List(c *gin.Context, req *models.AddressQuery) (*models.AddressListData, error) {
-	db := s.db.WithContext(c).Table(s.tableName).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Where("state = ?", commonStatus.NORMAL)
+	db := s.db.WithContext(c).Table(s.tableName)
+
 	if req.UserID != "" {
 		db = db.Where("user_id = ?", req.UserID)
 	}
@@ -166,6 +165,8 @@ func (s *ShopAddressDaoImpl) List(c *gin.Context, req *models.AddressQuery) (*mo
 	if req.Size <= 0 {
 		req.Size = 20
 	}
+
+	db = db.Debug().Where("state = ?", commonStatus.NORMAL)
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {

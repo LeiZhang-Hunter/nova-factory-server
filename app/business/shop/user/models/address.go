@@ -76,3 +76,7 @@ type AddressRegionItem struct {
 	Level      string `json:"level"`      // 层级：province/city/district
 	ParentCode string `json:"parentCode"` // 父级行政区编码
 }
+
+type UserAddressInfoQuery struct {
+	Username string `form:"username"`
+}

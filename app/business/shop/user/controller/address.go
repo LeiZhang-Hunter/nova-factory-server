@@ -29,6 +29,7 @@ func (s *Address) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/user/address")
 	group.GET("/list", middlewares.HasPermission("shop:user:address:list"), s.List)
 	group.GET("/info/:id", middlewares.HasPermission("shop:user:address:info"), s.GetByID)
+	group.GET("/query", middlewares.HasPermission("shop:user:address:query"), s.Query)
 	group.GET("/region", middlewares.HasPermission("shop:user:address:region"), s.Region)
 	group.POST("/set", middlewares.HasPermission("shop:user:address:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:user:address:remove"), s.Remove)
@@ -203,4 +204,37 @@ func regionLevelName(level int) string {
 	default:
 		return ""
 	}
+}
+
+// Query 获取商城用户地址详情
+// @Summary 获取商城用户地址详情
+// @Description 根据ID获取商城用户地址详情
+// @Tags 商城/用户地址
+// @Param id path int true "商城用户地址ID"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /shop/user/address/query [get]
+func (s *Address) Query(c *gin.Context) {
+	req := new(models.UserAddressInfoQuery)
+	if err := c.ShouldBindQuery(req); err != nil {
+		zap.L().Error("get address region error", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	address, err := s.service.Query(c, req)
+	if err != nil {
+		zap.L().Error("address query error", zap.Error(err))
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	if address == nil {
+		baizeContext.SuccessData(c, &models.AddressListData{})
+		return
+	}
+
+	baizeContext.SuccessData(c, address)
+
 }
