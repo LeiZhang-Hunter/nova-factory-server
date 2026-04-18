@@ -97,38 +97,48 @@ type OrderAccount struct {
 
 // OrderSet ERP订单保存参数
 type OrderSet struct {
-	ID               uint64             `json:"id,string"`
-	Tid              string             `json:"tid"`
-	Weight           float64            `json:"weight"`
-	Size             float64            `json:"size"`
-	BuyerNick        string             `json:"buyernick"`
-	BuyerMessage     string             `json:"buyermessage"`
-	SellerMemo       string             `json:"sellermemo"`
-	Total            float64            `json:"total"`
-	Privilege        float64            `json:"privilege"`
-	PostFee          float64            `json:"postfee"`
-	ReceiverName     string             `json:"receivername"`
-	ReceiverState    string             `json:"receiverstate"`
-	ReceiverCity     string             `json:"receivercity"`
-	ReceiverDistrict string             `json:"receiverdistrict"`
-	ReceiverAddress  string             `json:"receiveraddress"`
-	ReceiverPhone    string             `json:"receiverphone"`
-	ReceiverMobile   string             `json:"receivermobile"`
-	ReceiverZip      string             `json:"receiverzip"`
-	Status           string             `json:"status"`
-	Type             string             `json:"type"`
-	InvoiceName      string             `json:"invoicename"`
-	SellerFlag       string             `json:"sellerflag"`
-	PayTime          string             `json:"paytime"`
-	LogistBTypeCode  string             `json:"logistbtypecode"`
-	LogistBillCode   string             `json:"logistbillcode"`
-	BTypeCode        string             `json:"btypecode"`
-	BillCode         string             `json:"billcode"`
-	SyncMessage      string             `json:"syncMessage"`
-	SyncStatus       int32              `json:"syncStatus"`
-	SyncTime         string             `json:"syncTime"`
-	Details          []*OrderDetailSet  `json:"details"`
-	Accounts         []*OrderAccountSet `json:"accounts"`
+	ID           uint64  `json:"id,string"`
+	Tid          string  `json:"tid"`
+	Weight       float64 `json:"weight"`
+	Size         float64 `json:"size"`
+	BuyerNick    string  `json:"buyernick"`
+	BuyerMessage string  `json:"buyermessage"`
+	SellerMemo   string  `json:"sellermemo"`
+	Total        float64 `json:"total"`
+	Privilege    float64 `json:"privilege"`
+	PostFee      float64 `json:"postfee"`
+	ReceiverName string  `json:"receivername"`
+
+	ReceiverState     string `json:"receiverstate"`
+	ReceiverStateName string `json:"receiverstate_name"`
+
+	ReceiverStreet     string `json:"receiverstreet"`
+	ReceiverStreetName string `json:"receiverstreet_name"`
+
+	ReceiverCity     string `json:"receivercity"`
+	ReceiverCityName string `json:"receivercity_name"`
+
+	ReceiverDistrict     string `json:"receiverdistrict"`
+	ReceiverDistrictName string `json:"receiverdistrict_name"`
+
+	ReceiverAddress string             `json:"receiveraddress"`
+	ReceiverPhone   string             `json:"receiverphone"`
+	ReceiverMobile  string             `json:"receivermobile"`
+	ReceiverZip     string             `json:"receiverzip"`
+	Status          string             `json:"status"`
+	Type            string             `json:"type"`
+	InvoiceName     string             `json:"invoicename"`
+	SellerFlag      string             `json:"sellerflag"`
+	PayTime         string             `json:"paytime"`
+	LogistBTypeCode string             `json:"logistbtypecode"`
+	LogistBillCode  string             `json:"logistbillcode"`
+	BTypeCode       string             `json:"btypecode"`
+	BillCode        string             `json:"billcode"`
+	SyncMessage     string             `json:"syncMessage"`
+	SyncStatus      int32              `json:"syncStatus"`
+	SyncTime        string             `json:"syncTime"`
+	Details         []*OrderDetailSet  `json:"details"`
+	Accounts        []*OrderAccountSet `json:"accounts"`
 }
 
 // OrderDetailSet ERP订单明细保存参数

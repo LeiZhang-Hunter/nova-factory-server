@@ -3,6 +3,7 @@ package orderserviceimpl
 import (
 	"errors"
 	"nova-factory-server/app/business/erp/setting/settingdao"
+	"nova-factory-server/app/utils/order"
 	"strings"
 
 	"nova-factory-server/app/business/erp/core/integration"
@@ -38,18 +39,46 @@ func (o *OrderServiceImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*orde
 	}
 	req.Tid = strings.TrimSpace(req.Tid)
 	req.ReceiverName = strings.TrimSpace(req.ReceiverName)
+
 	req.ReceiverState = strings.TrimSpace(req.ReceiverState)
+	req.ReceiverStateName = strings.TrimSpace(req.ReceiverStateName)
+
 	req.ReceiverCity = strings.TrimSpace(req.ReceiverCity)
+	req.ReceiverCityName = strings.TrimSpace(req.ReceiverCityName)
+
 	req.ReceiverDistrict = strings.TrimSpace(req.ReceiverDistrict)
+	req.ReceiverDistrictName = strings.TrimSpace(req.ReceiverDistrictName)
+
+	req.ReceiverStreet = strings.TrimSpace(req.ReceiverStreet)
+	req.ReceiverStreetName = strings.TrimSpace(req.ReceiverStreetName)
+
 	req.ReceiverAddress = strings.TrimSpace(req.ReceiverAddress)
 	req.ReceiverMobile = strings.TrimSpace(req.ReceiverMobile)
 	req.Status = strings.TrimSpace(req.Status)
 	req.Type = strings.TrimSpace(req.Type)
 	if req.Tid == "" {
-		return nil, errors.New("tid不能为空")
+		if req.ID > 0 {
+			return nil, errors.New("tid不能为空")
+		}
+		req.Tid = order.GenerateOrderNo()
 	}
-	if req.ReceiverName == "" || req.ReceiverState == "" || req.ReceiverCity == "" || req.ReceiverDistrict == "" || req.ReceiverAddress == "" || req.ReceiverMobile == "" {
-		return nil, errors.New("收货信息不能为空")
+	if req.ReceiverName == "" {
+		return nil, errors.New("收货人名称不能为空")
+	}
+	if req.ReceiverState == "" {
+		return nil, errors.New("收货省不能为空")
+	}
+	if req.ReceiverCity == "" {
+		return nil, errors.New("收货市不能为空")
+	}
+	if req.ReceiverDistrict == "" {
+		return nil, errors.New("收货区不能为空")
+	}
+	if req.ReceiverAddress == "" {
+		return nil, errors.New("收货地址不能为空")
+	}
+	if req.ReceiverMobile == "" {
+		return nil, errors.New("收货人手机号不能为空")
 	}
 	if req.Status == "" {
 		return nil, errors.New("status不能为空")
