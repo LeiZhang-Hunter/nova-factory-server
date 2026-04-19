@@ -31,6 +31,7 @@ func NewGinEngine(
 	group.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
 	{
 		userController.Address.PrivateRoutes(group)
+		userController.Cart.PrivateRoutes(group)
 		controller.Category.PrivateRoutes(group)
 		controller.Goods.PrivateRoutes(group)
 		controller.Sku.PrivateRoutes(group)

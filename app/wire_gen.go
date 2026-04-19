@@ -237,10 +237,14 @@ func wireApp() (*gin.Engine, func(), error) {
 	iShopUserDao := impl.NewShopUserDao(db)
 	iShopAddressService := impl2.NewShopAddressService(iShopAddressDao, iShopUserDao)
 	address := shopcontroller2.NewAddress(iShopAddressService)
+	iShopCartDao := impl.NewShopCartDao(db)
+	iShopCartService := impl2.NewShopCartService(iShopCartDao, iShopUserDao)
+	cart := shopcontroller2.NewCart(iShopCartService)
 	iShopUserService := impl2.NewShopUserService(iShopUserDao)
 	shopcontrollerUser := shopcontroller2.NewUser(iShopUserService)
 	controller2 := &shopcontroller2.Controller{
 		Address: address,
+		Cart:    cart,
 		User:    shopcontrollerUser,
 	}
 	shopShop := shop.NewGinEngine(app, cacheCache, shopcontrollerController, controller2)
