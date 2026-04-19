@@ -5,7 +5,7 @@ import "nova-factory-server/app/baize"
 // Address 商城用户地址
 type Address struct {
 	ID             int64  `json:"id,string" db:"id"`                         // 主键ID
-	UserID         string `json:"userId" db:"user_id"`                       // 用户业务ID
+	UserID         int64  `json:"userId" db:"user_id"`                       // 用户业务ID
 	ReceiverName   string `json:"receiverName" db:"receiver_name"`           // 收货人姓名
 	ReceiverMobile string `json:"receiverMobile" db:"receiver_mobile"`       // 收货人手机号
 	ProvinceCode   string `json:"provinceCode" db:"province_code"`           // 省编码
@@ -29,7 +29,7 @@ type Address struct {
 // AddressSetReq 地址新增修改参数
 type AddressSetReq struct {
 	ID             int64  `json:"id,string"`                         // 主键ID
-	UserID         string `json:"userId"`                            // 用户业务ID
+	UserID         int64  `json:"-"`                                 // 用户业务ID
 	ReceiverName   string `json:"receiverName"`                      // 收货人姓名
 	ReceiverMobile string `json:"receiverMobile" binding:"required"` // 收货人手机号
 	ProvinceCode   string `json:"provinceCode"`                      // 省编码
@@ -49,7 +49,7 @@ type AddressSetReq struct {
 
 // AddressQuery 地址查询参数
 type AddressQuery struct {
-	UserID         string `form:"userId"`         // 用户业务ID
+	UserId         int64  `form:"userId"`         // 用户业务ID
 	ReceiverName   string `form:"receiverName"`   // 收货人姓名
 	ReceiverMobile string `form:"receiverMobile"` // 收货人手机号
 	Status         *int32 `form:"status"`         // 状态

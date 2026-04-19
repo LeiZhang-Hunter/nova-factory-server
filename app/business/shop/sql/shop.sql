@@ -82,7 +82,6 @@ CREATE TABLE IF NOT EXISTS `shop_goods_sku` (
 
 CREATE TABLE IF NOT EXISTS `shop_user` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `user_id` VARCHAR(64) NOT NULL COMMENT '用户业务ID',
   `username` VARCHAR(64) NOT NULL COMMENT '用户名',
   `nickname` VARCHAR(128) DEFAULT NULL COMMENT '用户昵称',
   `mobile` VARCHAR(32) DEFAULT NULL COMMENT '手机号',
@@ -101,7 +100,6 @@ CREATE TABLE IF NOT EXISTS `shop_user` (
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_user_id` (`user_id`),
   UNIQUE KEY `uk_username` (`username`),
   KEY `idx_mobile` (`mobile`),
   KEY `idx_user_type` (`user_type`),
@@ -110,7 +108,7 @@ CREATE TABLE IF NOT EXISTS `shop_user` (
 
 CREATE TABLE IF NOT EXISTS `shop_user_address` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `user_id` VARCHAR(64) NOT NULL COMMENT '用户业务ID，对应shop_user.user_id',
+    `user_id` bigint(20) NOT NULL COMMENT '用户业务ID，对应shop_user.user_id',
     `receiver_name` VARCHAR(128) NOT NULL COMMENT '收货人姓名',
     `receiver_mobile` VARCHAR(32) NOT NULL COMMENT '收货人手机号',
     `province_code` VARCHAR(32) DEFAULT NULL COMMENT '省编码',

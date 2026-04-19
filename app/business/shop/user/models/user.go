@@ -5,7 +5,6 @@ import "nova-factory-server/app/baize"
 // User 商城用户
 type User struct {
 	ID           int64  `json:"id,string" db:"id"`               // 主键ID
-	UserID       string `json:"userId" db:"user_id"`             // 用户业务ID
 	Username     string `json:"username" db:"username"`          // 用户名
 	Nickname     string `json:"nickname" db:"nickname"`          // 用户昵称
 	Mobile       string `json:"mobile" db:"mobile"`              // 手机号
@@ -25,7 +24,6 @@ type User struct {
 // UserUpsert 商城用户新增修改参数
 type UserUpsert struct {
 	ID           int64  `json:"id,string"`                   // 主键ID
-	UserID       string `json:"userId"`                      // 用户业务ID
 	Username     string `json:"username" binding:"required"` // 用户名
 	Nickname     string `json:"nickname"`                    // 用户昵称
 	Mobile       string `json:"mobile"`                      // 手机号

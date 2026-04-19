@@ -4,8 +4,6 @@ import (
 	"errors"
 	"nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/business/shop/user/models"
-	"strconv"
-
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
@@ -29,7 +27,6 @@ func NewShopUserDao(ms *gorm.DB) dao.IShopUserDao {
 func (s *ShopUserDaoImpl) Create(c *gin.Context, req *models.UserUpsert) (*models.User, error) {
 	model := &models.User{
 		ID:           snowflake.GenID(),
-		UserID:       req.UserID,
 		Username:     req.Username,
 		Nickname:     req.Nickname,
 		Mobile:       req.Mobile,
@@ -43,9 +40,6 @@ func (s *ShopUserDaoImpl) Create(c *gin.Context, req *models.UserUpsert) (*model
 		Status:       req.Status,
 		DeptID:       baizeContext.GetDeptId(c),
 		State:        commonStatus.NORMAL,
-	}
-	if model.UserID == "" {
-		model.UserID = strconv.FormatInt(snowflake.GenID(), 10)
 	}
 	if model.Status == nil {
 		model.Status = boolPtr(false)
@@ -61,7 +55,6 @@ func (s *ShopUserDaoImpl) Create(c *gin.Context, req *models.UserUpsert) (*model
 func (s *ShopUserDaoImpl) Update(c *gin.Context, req *models.UserUpsert) (*models.User, error) {
 	updates := &models.User{
 		ID:           req.ID,
-		UserID:       req.UserID,
 		Username:     req.Username,
 		Nickname:     req.Nickname,
 		Mobile:       req.Mobile,

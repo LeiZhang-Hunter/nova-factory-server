@@ -57,7 +57,6 @@ func (s *ShopAddressServiceImpl) Set(c *gin.Context, req *models.AddressSetReq) 
 		zap.L().Error("not found user info", zap.String("mobile", req.ReceiverMobile), zap.Error(err))
 		return nil, errors.New("未找到对应商城用户")
 	}
-	req.UserID = user.UserID
 	req.ReceiverName = resolveReceiverName(user)
 	if err = fillRegionNames(req); err != nil {
 		return nil, err
@@ -79,6 +78,7 @@ func (s *ShopAddressServiceImpl) Set(c *gin.Context, req *models.AddressSetReq) 
 		return nil, errors.New("街道不能为空")
 	}
 
+	req.UserID = user.ID
 	return s.dao.Set(c, req)
 }
 
@@ -159,7 +159,7 @@ func (s *ShopAddressServiceImpl) Query(c *gin.Context, req *models.UserAddressIn
 	}
 
 	list, err := s.dao.List(c, &models.AddressQuery{
-		UserID: user.UserID,
+		UserId: user.ID,
 		Page:   1,
 		Size:   20,
 	})

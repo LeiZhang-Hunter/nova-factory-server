@@ -2,6 +2,7 @@ package orderdaoimpl
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -34,6 +35,7 @@ func NewOrderDao(db *gorm.DB) orderdao.IOrderDao {
 
 // Set 新增或修改 ERP 订单。
 func (o *OrderDaoImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Order, error) {
+
 	var resultID uint64
 	err := o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
 		exists, findErr := o.findExists(tx, c, req)
@@ -56,10 +58,12 @@ func (o *OrderDaoImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*ordermod
 				Where("id = ?", exists.ID).
 				Where("dept_id = ?", baizeContext.GetDeptId(c)).
 				Where("state = ?", commonStatus.NORMAL).
-				Select("tid", "weight", "size", "buyernick", "buyermessage", "sellermemo", "total", "privilege",
-					"postfee", "receivername", "receiverstate", "receivercity", "receiverdistrict", "receiveraddress",
-					"receiverphone", "receivermobile", "receiverzip", "created", "status", "type", "invoicename",
-					"sellerflag", "paytime", "logistbtypecode", "logistbillcode", "btypecode", "billcode",
+				Select("tid", "weight", "size", "buyer_nick", "buyer_message", "seller_memo", "total", "privilege",
+					"post_fee", "receiver_name", "receiver_province", "receiver_province_name", "receiver_city",
+					"receiver_city_name", "receiver_district", "receiver_district_name", "receiver_street",
+					"receiver_street_name", "receiver_address", "receiver_phone", "receiver_mobile", "receiver_zip",
+					"status", "order_type", "invoice_name", "seller_flag", "pay_time", "logist_b_type_code",
+					"logist_bill_code", "b_type_code", "bill_code",
 					"sync_message", "sync_status", "sync_time", "update_by", "update_time").
 				Updates(data).Error; err != nil {
 				return err
@@ -118,7 +122,7 @@ func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*order
 			db = db.Where("sync_status = ?", *req.SyncStatus)
 		}
 		if strings.TrimSpace(req.ReceiverName) != "" {
-			db = db.Where("receivername LIKE ?", "%"+strings.TrimSpace(req.ReceiverName)+"%")
+			db = db.Where("receiver_name LIKE ?", "%"+strings.TrimSpace(req.ReceiverName)+"%")
 		}
 	}
 	page := int64(1)
@@ -177,14 +181,13 @@ func (o *OrderDaoImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 // findExists 根据订单ID或订单编号查询当前部门下的有效订单。
 func (o *OrderDaoImpl) findExists(tx *gorm.DB, c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Order, error) {
 	var item ordermodels.Order
-	db := tx.Table(o.table).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Where("state = ?", commonStatus.NORMAL)
+	db := tx.Table(o.table)
 	if req.ID > 0 {
 		db = db.Where("id = ?", req.ID)
 	} else {
 		db = db.Where("tid = ?", req.Tid)
 	}
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -205,37 +208,42 @@ func buildOrderModel(c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Or
 		return nil, errors.New("syncTime时间格式错误，要求: 2006-01-02 15:04:05")
 	}
 	data := &ordermodels.Order{
-		Tid:              req.Tid,
-		Weight:           req.Weight,
-		Size:             req.Size,
-		BuyerNick:        req.BuyerNick,
-		BuyerMessage:     req.BuyerMessage,
-		SellerMemo:       req.SellerMemo,
-		Total:            req.Total,
-		Privilege:        req.Privilege,
-		PostFee:          req.PostFee,
-		ReceiverName:     req.ReceiverName,
-		ReceiverState:    req.ReceiverState,
-		ReceiverCity:     req.ReceiverCity,
-		ReceiverDistrict: req.ReceiverDistrict,
-		ReceiverAddress:  req.ReceiverAddress,
-		ReceiverPhone:    req.ReceiverPhone,
-		ReceiverMobile:   req.ReceiverMobile,
-		ReceiverZip:      req.ReceiverZip,
-		Status:           req.Status,
-		Type:             req.Type,
-		InvoiceName:      req.InvoiceName,
-		SellerFlag:       req.SellerFlag,
-		PayTime:          payTime,
-		LogistBTypeCode:  req.LogistBTypeCode,
-		LogistBillCode:   req.LogistBillCode,
-		BTypeCode:        req.BTypeCode,
-		BillCode:         req.BillCode,
-		SyncMessage:      req.SyncMessage,
-		SyncStatus:       req.SyncStatus,
-		SyncTime:         syncTime,
-		DeptID:           baizeContext.GetDeptId(c),
-		State:            commonStatus.NORMAL,
+		Tid:                  req.Tid,
+		Weight:               req.Weight,
+		Size:                 req.Size,
+		BuyerNick:            req.BuyerNick,
+		BuyerMessage:         req.BuyerMessage,
+		SellerMemo:           req.SellerMemo,
+		Total:                req.Total,
+		Privilege:            req.Privilege,
+		PostFee:              req.PostFee,
+		ReceiverName:         req.ReceiverName,
+		ReceiverProvince:     req.ReceiverProvince,
+		ReceiverProvinceName: req.ReceiverProvinceName,
+		ReceiverCity:         req.ReceiverCity,
+		ReceiverCityName:     req.ReceiverCityName,
+		ReceiverDistrict:     req.ReceiverDistrict,
+		ReceiverDistrictName: req.ReceiverDistrictName,
+		ReceiverStreet:       req.ReceiverStreet,
+		ReceiverStreetName:   req.ReceiverStreetName,
+		ReceiverAddress:      req.ReceiverAddress,
+		ReceiverPhone:        req.ReceiverPhone,
+		ReceiverMobile:       req.ReceiverMobile,
+		ReceiverZip:          req.ReceiverZip,
+		Status:               req.Status,
+		Type:                 req.OrderType,
+		InvoiceName:          req.InvoiceName,
+		SellerFlag:           req.SellerFlag,
+		PayTime:              payTime,
+		LogistBTypeCode:      req.LogistBTypeCode,
+		LogistBillCode:       req.LogistBillCode,
+		BTypeCode:            req.BTypeCode,
+		BillCode:             req.BillCode,
+		SyncMessage:          req.SyncMessage,
+		SyncStatus:           req.SyncStatus,
+		SyncTime:             syncTime,
+		DeptID:               baizeContext.GetDeptId(c),
+		State:                commonStatus.NORMAL,
 	}
 	data.SetCreateBy(baizeContext.GetUserId(c))
 	return data, nil
@@ -263,18 +271,21 @@ func parseOrderTimePtr(value string) (*time.Time, error) {
 func (o *OrderDaoImpl) softDeleteChildren(tx *gorm.DB, c *gin.Context, orderID uint64) error {
 	if err := tx.Table(o.detailTable).
 		Where("order_id = ?", orderID).
-		Delete(nil).Error; err != nil {
+		Delete(&ordermodels.OrderDetail{}).Error; err != nil {
 		return err
 	}
 	return tx.Table(o.accountTable).
 		Where("order_id = ?", orderID).
-		Delete(nil).Error
+		Delete(&ordermodels.OrderAccount{}).Error
 }
 
 // createDetails 批量创建订单明细记录。
 func (o *OrderDaoImpl) createDetails(tx *gorm.DB, c *gin.Context, orderID uint64, tid string, details []*ordermodels.OrderDetailSet) error {
 	if len(details) == 0 {
 		return nil
+	}
+	if err := o.validateDetailOIDs(tx, orderID, details); err != nil {
+		return err
 	}
 	rows := make([]*ordermodels.OrderDetail, 0, len(details))
 	for _, item := range details {
@@ -310,6 +321,41 @@ func (o *OrderDaoImpl) createDetails(tx *gorm.DB, c *gin.Context, orderID uint64
 		return nil
 	}
 	return tx.Table(o.detailTable).Create(&rows).Error
+}
+
+func (o *OrderDaoImpl) validateDetailOIDs(tx *gorm.DB, orderID uint64, details []*ordermodels.OrderDetailSet) error {
+	oidSet := make(map[string]struct{}, len(details))
+	oids := make([]string, 0, len(details))
+	for _, item := range details {
+		if item == nil {
+			continue
+		}
+		oid := strings.TrimSpace(item.OID)
+		if oid == "" {
+			continue
+		}
+		if _, exists := oidSet[oid]; exists {
+			return fmt.Errorf("订单明细oid重复: %s", oid)
+		}
+		oidSet[oid] = struct{}{}
+		oids = append(oids, oid)
+	}
+	if len(oids) == 0 {
+		return nil
+	}
+
+	var exists ordermodels.OrderDetail
+	db := tx.Table(o.detailTable).Where("oid IN ?", oids)
+	if orderID > 0 {
+		db = db.Where("order_id <> ?", orderID)
+	}
+	if err := db.First(&exists).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return err
+	}
+	return fmt.Errorf("订单明细oid已存在: %s", exists.OID)
 }
 
 // createAccounts 批量创建订单账户记录。

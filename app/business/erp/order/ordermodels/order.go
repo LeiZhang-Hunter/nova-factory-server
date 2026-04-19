@@ -15,44 +15,49 @@ type CheckLoginStateResp struct {
 	Online   bool   `json:"online"`
 	Message  string `json:"message"`
 	Type     string `json:"type"`
-	CheckURL string `json:"checkUrl"`
+	CheckURL string `json:"check_url"`
 }
 
 // Order ERP订单主表
 type Order struct {
-	ID               uint64          `json:"id,string" gorm:"column:id"`
-	Tid              string          `json:"tid" gorm:"column:tid"`
-	Weight           float64         `json:"weight" gorm:"column:weight"`
-	Size             float64         `json:"size" gorm:"column:size"`
-	BuyerNick        string          `json:"buyernick" gorm:"column:buyernick"`
-	BuyerMessage     string          `json:"buyermessage" gorm:"column:buyermessage"`
-	SellerMemo       string          `json:"sellermemo" gorm:"column:sellermemo"`
-	Total            float64         `json:"total" gorm:"column:total"`
-	Privilege        float64         `json:"privilege" gorm:"column:privilege"`
-	PostFee          float64         `json:"postfee" gorm:"column:postfee"`
-	ReceiverName     string          `json:"receivername" gorm:"column:receivername"`
-	ReceiverState    string          `json:"receiverstate" gorm:"column:receiverstate"`
-	ReceiverCity     string          `json:"receivercity" gorm:"column:receivercity"`
-	ReceiverDistrict string          `json:"receiverdistrict" gorm:"column:receiverdistrict"`
-	ReceiverAddress  string          `json:"receiveraddress" gorm:"column:receiveraddress"`
-	ReceiverPhone    string          `json:"receiverphone" gorm:"column:receiverphone"`
-	ReceiverMobile   string          `json:"receivermobile" gorm:"column:receivermobile"`
-	ReceiverZip      string          `json:"receiverzip" gorm:"column:receiverzip"`
-	Status           string          `json:"status" gorm:"column:status"`
-	Type             string          `json:"type" gorm:"column:type"`
-	InvoiceName      string          `json:"invoicename" gorm:"column:invoicename"`
-	SellerFlag       string          `json:"sellerflag" gorm:"column:sellerflag"`
-	PayTime          *time.Time      `json:"paytime" gorm:"column:paytime"`
-	LogistBTypeCode  string          `json:"logistbtypecode" gorm:"column:logistbtypecode"`
-	LogistBillCode   string          `json:"logistbillcode" gorm:"column:logistbillcode"`
-	BTypeCode        string          `json:"btypecode" gorm:"column:btypecode"`
-	BillCode         string          `json:"billcode" gorm:"column:billcode"`
-	SyncMessage      string          `json:"syncMessage" gorm:"column:sync_message"`
-	SyncStatus       int32           `json:"syncStatus" gorm:"column:sync_status"`
-	SyncTime         *time.Time      `json:"syncTime" gorm:"column:sync_time"`
-	DeptID           int64           `json:"deptId" gorm:"column:dept_id"`
-	Details          []*OrderDetail  `json:"details" gorm:"-"`
-	Accounts         []*OrderAccount `json:"accounts" gorm:"-"`
+	ID                   uint64          `json:"id,string" gorm:"column:id"`
+	Tid                  string          `json:"tid" gorm:"column:tid"`
+	Weight               float64         `json:"weight" gorm:"column:weight"`
+	Size                 float64         `json:"size" gorm:"column:size"`
+	BuyerNick            string          `json:"buyer_nick" gorm:"column:buyer_nick"`
+	BuyerMessage         string          `json:"buyer_message" gorm:"column:buyer_message"`
+	SellerMemo           string          `json:"seller_memo" gorm:"column:seller_memo"`
+	Total                float64         `json:"total" gorm:"column:total"`
+	Privilege            float64         `json:"privilege" gorm:"column:privilege"`
+	PostFee              float64         `json:"post_fee" gorm:"column:post_fee"`
+	ReceiverName         string          `json:"receiver_name" gorm:"column:receiver_name"`
+	ReceiverProvince     string          `json:"receiver_province" gorm:"column:receiver_province"`
+	ReceiverProvinceName string          `json:"receiver_province_name" gorm:"column:receiver_province_name"`
+	ReceiverCity         string          `json:"receiver_city" gorm:"column:receiver_city"`
+	ReceiverCityName     string          `json:"receiver_city_name" gorm:"column:receiver_city_name"`
+	ReceiverDistrict     string          `json:"receiver_district" gorm:"column:receiver_district"`
+	ReceiverDistrictName string          `json:"receiver_district_name" gorm:"column:receiver_district_name"`
+	ReceiverStreet       string          `json:"receiver_street" gorm:"column:receiver_street"`
+	ReceiverStreetName   string          `json:"receiver_street_name" gorm:"column:receiver_street_name"`
+	ReceiverAddress      string          `json:"receiver_address" gorm:"column:receiver_address"`
+	ReceiverPhone        string          `json:"receiver_phone" gorm:"column:receiver_phone"`
+	ReceiverMobile       string          `json:"receiver_mobile" gorm:"column:receiver_mobile"`
+	ReceiverZip          string          `json:"receiver_zip" gorm:"column:receiver_zip"`
+	Status               string          `json:"status" gorm:"column:status"`
+	Type                 string          `json:"order_type" gorm:"column:order_type"`
+	InvoiceName          string          `json:"invoice_name" gorm:"column:invoice_name"`
+	SellerFlag           string          `json:"seller_flag" gorm:"column:seller_flag"`
+	PayTime              *time.Time      `json:"pay_time" gorm:"column:pay_time"`
+	LogistBTypeCode      string          `json:"logist_b_type_code" gorm:"column:logist_b_type_code"`
+	LogistBillCode       string          `json:"logist_bill_code" gorm:"column:logist_bill_code"`
+	BTypeCode            string          `json:"b_type_code" gorm:"column:b_type_code"`
+	BillCode             string          `json:"bill_code" gorm:"column:bill_code"`
+	SyncMessage          string          `json:"sync_message" gorm:"column:sync_message"`
+	SyncStatus           int32           `json:"sync_status" gorm:"column:sync_status"`
+	SyncTime             *time.Time      `json:"sync_time" gorm:"column:sync_time"`
+	DeptID               int64           `json:"dept_id" gorm:"column:dept_id"`
+	Details              []*OrderDetail  `json:"details" gorm:"-"`
+	Accounts             []*OrderAccount `json:"accounts" gorm:"-"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
 }
@@ -60,25 +65,25 @@ type Order struct {
 // OrderDetail ERP订单明细
 type OrderDetail struct {
 	ID             uint64  `json:"id,string" gorm:"column:id"`
-	OrderID        uint64  `json:"orderId,string" gorm:"column:order_id"`
+	OrderID        uint64  `json:"order_id,string" gorm:"column:order_id"`
 	Tid            string  `json:"tid" gorm:"column:tid"`
 	OID            string  `json:"oid" gorm:"column:oid"`
 	Barcode        string  `json:"barcode" gorm:"column:barcode"`
-	EShopGoodsID   string  `json:"eshopgoodsid" gorm:"column:eshopgoodsid"`
-	OuterIID       string  `json:"outeriid" gorm:"column:outeriid"`
-	EShopGoodsName string  `json:"eshopgoodsname" gorm:"column:eshopgoodsname"`
-	EShopSkuID     string  `json:"eshopskuid" gorm:"column:eshopskuid"`
-	EShopSkuName   string  `json:"eshopskuname" gorm:"column:eshopskuname"`
-	NumIID         int64   `json:"numiid" gorm:"column:numiid"`
-	SkuID          int64   `json:"skuid" gorm:"column:skuid"`
+	EShopGoodsID   string  `json:"eshop_goods_id" gorm:"column:eshop_goods_id"`
+	OuterIID       string  `json:"outer_iid" gorm:"column:outer_iid"`
+	EShopGoodsName string  `json:"eshop_goods_name" gorm:"column:eshop_goods_name"`
+	EShopSkuID     string  `json:"eshop_sku_id" gorm:"column:eshop_sku_id"`
+	EShopSkuName   string  `json:"eshop_sku_name" gorm:"column:eshop_sku_name"`
+	NumIID         int64   `json:"num_iid" gorm:"column:num_iid"`
+	SkuID          int64   `json:"sku_id" gorm:"column:sku_id"`
 	Num            float64 `json:"num" gorm:"column:num"`
 	Payment        float64 `json:"payment" gorm:"column:payment"`
-	PicPath        string  `json:"picpath" gorm:"column:picpath"`
+	PicPath        string  `json:"pic_path" gorm:"column:pic_path"`
 	Weight         float64 `json:"weight" gorm:"column:weight"`
 	Size           float64 `json:"size" gorm:"column:size"`
-	UnitID         int64   `json:"unitid" gorm:"column:unitid"`
-	UnitQty        float64 `json:"unitqty" gorm:"column:unitqty"`
-	DeptID         int64   `json:"deptId" gorm:"column:dept_id"`
+	UnitID         int64   `json:"unit_id" gorm:"column:unit_id"`
+	UnitQty        float64 `json:"unit_qty" gorm:"column:unit_qty"`
+	DeptID         int64   `json:"dept_id" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
 }
@@ -86,11 +91,11 @@ type OrderDetail struct {
 // OrderAccount ERP订单账户
 type OrderAccount struct {
 	ID          uint64  `json:"id,string" gorm:"column:id"`
-	OrderID     uint64  `json:"orderId,string" gorm:"column:order_id"`
+	OrderID     uint64  `json:"order_id,string" gorm:"column:order_id"`
 	Tid         string  `json:"tid" gorm:"column:tid"`
-	FinanceCode string  `json:"financeCode" gorm:"column:finance_code"`
+	FinanceCode string  `json:"finance_code" gorm:"column:finance_code"`
 	Total       float64 `json:"total" gorm:"column:total"`
-	DeptID      int64   `json:"deptId" gorm:"column:dept_id"`
+	DeptID      int64   `json:"dept_id" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
 }
@@ -101,42 +106,42 @@ type OrderSet struct {
 	Tid          string  `json:"tid"`
 	Weight       float64 `json:"weight"`
 	Size         float64 `json:"size"`
-	BuyerNick    string  `json:"buyernick"`
-	BuyerMessage string  `json:"buyermessage"`
-	SellerMemo   string  `json:"sellermemo"`
+	BuyerNick    string  `json:"buyer_nick"`
+	BuyerMessage string  `json:"buyer_message"`
+	SellerMemo   string  `json:"seller_memo"`
 	Total        float64 `json:"total"`
 	Privilege    float64 `json:"privilege"`
-	PostFee      float64 `json:"postfee"`
-	ReceiverName string  `json:"receivername"`
+	PostFee      float64 `json:"post_fee"`
+	ReceiverName string  `json:"receiver_name"`
 
-	ReceiverState     string `json:"receiverstate"`
-	ReceiverStateName string `json:"receiverstate_name"`
+	ReceiverProvince     string `json:"receiver_province"`
+	ReceiverProvinceName string `json:"receiver_province_name"`
 
-	ReceiverStreet     string `json:"receiverstreet"`
-	ReceiverStreetName string `json:"receiverstreet_name"`
+	ReceiverCity     string `json:"receiver_city"`
+	ReceiverCityName string `json:"receiver_city_name"`
 
-	ReceiverCity     string `json:"receivercity"`
-	ReceiverCityName string `json:"receivercity_name"`
+	ReceiverDistrict     string `json:"receiver_district"`
+	ReceiverDistrictName string `json:"receiver_district_name"`
 
-	ReceiverDistrict     string `json:"receiverdistrict"`
-	ReceiverDistrictName string `json:"receiverdistrict_name"`
+	ReceiverStreet     string `json:"receiver_street"`
+	ReceiverStreetName string `json:"receiver_street_name"`
 
-	ReceiverAddress string             `json:"receiveraddress"`
-	ReceiverPhone   string             `json:"receiverphone"`
-	ReceiverMobile  string             `json:"receivermobile"`
-	ReceiverZip     string             `json:"receiverzip"`
+	ReceiverAddress string             `json:"receiver_address"`
+	ReceiverPhone   string             `json:"receiver_phone"`
+	ReceiverMobile  string             `json:"receiver_mobile"`
+	ReceiverZip     string             `json:"receiver_zip"`
 	Status          string             `json:"status"`
-	Type            string             `json:"type"`
-	InvoiceName     string             `json:"invoicename"`
-	SellerFlag      string             `json:"sellerflag"`
-	PayTime         string             `json:"paytime"`
-	LogistBTypeCode string             `json:"logistbtypecode"`
-	LogistBillCode  string             `json:"logistbillcode"`
-	BTypeCode       string             `json:"btypecode"`
-	BillCode        string             `json:"billcode"`
-	SyncMessage     string             `json:"syncMessage"`
-	SyncStatus      int32              `json:"syncStatus"`
-	SyncTime        string             `json:"syncTime"`
+	OrderType       string             `json:"order_type"`
+	InvoiceName     string             `json:"invoice_name"`
+	SellerFlag      string             `json:"seller_flag"`
+	PayTime         string             `json:"pay_time"`
+	LogistBTypeCode string             `json:"logist_b_type_code"`
+	LogistBillCode  string             `json:"logist_bill_code"`
+	BTypeCode       string             `json:"b_type_code"`
+	BillCode        string             `json:"bill_code"`
+	SyncMessage     string             `json:"sync_message"`
+	SyncStatus      int32              `json:"sync_status"`
+	SyncTime        string             `json:"sync_time"`
 	Details         []*OrderDetailSet  `json:"details"`
 	Accounts        []*OrderAccountSet `json:"accounts"`
 }
@@ -145,25 +150,25 @@ type OrderSet struct {
 type OrderDetailSet struct {
 	OID            string  `json:"oid"`
 	Barcode        string  `json:"barcode"`
-	EShopGoodsID   string  `json:"eshopgoodsid"`
+	EShopGoodsID   string  `json:"eshop_goods_id"`
 	OuterIID       string  `json:"outeriid"`
-	EShopGoodsName string  `json:"eshopgoodsname"`
-	EShopSkuID     string  `json:"eshopskuid"`
-	EShopSkuName   string  `json:"eshopskuname"`
+	EShopGoodsName string  `json:"eshop_goods_name"`
+	EShopSkuID     string  `json:"eshop_sku_id"`
+	EShopSkuName   string  `json:"eshop_sku_name"`
 	NumIID         int64   `json:"numiid"`
 	SkuID          int64   `json:"skuid"`
 	Num            float64 `json:"num"`
 	Payment        float64 `json:"payment"`
-	PicPath        string  `json:"picpath"`
+	PicPath        string  `json:"pic_path"`
 	Weight         float64 `json:"weight"`
 	Size           float64 `json:"size"`
-	UnitID         int64   `json:"unitid"`
-	UnitQty        float64 `json:"unitqty"`
+	UnitID         int64   `json:"unit_id"`
+	UnitQty        float64 `json:"unit_qty"`
 }
 
 // OrderAccountSet ERP订单账户保存参数
 type OrderAccountSet struct {
-	FinanceCode string  `json:"financeCode"`
+	FinanceCode string  `json:"finance_code"`
 	Total       float64 `json:"total"`
 }
 

@@ -5,13 +5,10 @@ import (
 	"nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/business/shop/user/service"
-	"strconv"
 	"strings"
 
-	"nova-factory-server/app/utils/bCryptPasswordEncoder"
-	"nova-factory-server/app/utils/snowflake"
-
 	"github.com/gin-gonic/gin"
+	"nova-factory-server/app/utils/bCryptPasswordEncoder"
 )
 
 type ShopUserServiceImpl struct {
@@ -55,7 +52,6 @@ func (s *ShopUserServiceImpl) prepareUpsert(c *gin.Context, req *models.UserUpse
 	if isUpdate && req.ID == 0 {
 		return errors.New("用户ID不能为空")
 	}
-	req.UserID = strings.TrimSpace(req.UserID)
 	req.Username = strings.TrimSpace(req.Username)
 	req.Nickname = strings.TrimSpace(req.Nickname)
 	req.Mobile = strings.TrimSpace(req.Mobile)
@@ -72,9 +68,6 @@ func (s *ShopUserServiceImpl) prepareUpsert(c *gin.Context, req *models.UserUpse
 	}
 	if req.Status == nil {
 		req.Status = userStatusPtr(false)
-	}
-	if req.UserID == "" {
-		req.UserID = strconv.FormatInt(snowflake.GenID(), 10)
 	}
 	if isUpdate {
 		current, err := s.dao.GetByID(c, req.ID)

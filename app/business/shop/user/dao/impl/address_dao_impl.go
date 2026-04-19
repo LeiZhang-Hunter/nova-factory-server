@@ -147,8 +147,8 @@ func (s *ShopAddressDaoImpl) GetByID(c *gin.Context, id int64) (*models.Address,
 func (s *ShopAddressDaoImpl) List(c *gin.Context, req *models.AddressQuery) (*models.AddressListData, error) {
 	db := s.db.WithContext(c).Table(s.tableName)
 
-	if req.UserID != "" {
-		db = db.Where("user_id = ?", req.UserID)
+	if req.UserId != 0 {
+		db = db.Where("user_id = ?", req.UserId)
 	}
 	if req.ReceiverName != "" {
 		db = db.Where("receiver_name LIKE ?", "%"+req.ReceiverName+"%")

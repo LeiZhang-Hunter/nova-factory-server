@@ -40,8 +40,8 @@ func (o *OrderServiceImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*orde
 	req.Tid = strings.TrimSpace(req.Tid)
 	req.ReceiverName = strings.TrimSpace(req.ReceiverName)
 
-	req.ReceiverState = strings.TrimSpace(req.ReceiverState)
-	req.ReceiverStateName = strings.TrimSpace(req.ReceiverStateName)
+	req.ReceiverProvince = strings.TrimSpace(req.ReceiverProvince)
+	req.ReceiverProvinceName = strings.TrimSpace(req.ReceiverProvinceName)
 
 	req.ReceiverCity = strings.TrimSpace(req.ReceiverCity)
 	req.ReceiverCityName = strings.TrimSpace(req.ReceiverCityName)
@@ -55,7 +55,7 @@ func (o *OrderServiceImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*orde
 	req.ReceiverAddress = strings.TrimSpace(req.ReceiverAddress)
 	req.ReceiverMobile = strings.TrimSpace(req.ReceiverMobile)
 	req.Status = strings.TrimSpace(req.Status)
-	req.Type = strings.TrimSpace(req.Type)
+	req.OrderType = strings.TrimSpace(req.OrderType)
 	if req.Tid == "" {
 		if req.ID > 0 {
 			return nil, errors.New("tid不能为空")
@@ -65,7 +65,7 @@ func (o *OrderServiceImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*orde
 	if req.ReceiverName == "" {
 		return nil, errors.New("收货人名称不能为空")
 	}
-	if req.ReceiverState == "" {
+	if req.ReceiverProvince == "" {
 		return nil, errors.New("收货省不能为空")
 	}
 	if req.ReceiverCity == "" {
@@ -83,12 +83,13 @@ func (o *OrderServiceImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*orde
 	if req.Status == "" {
 		return nil, errors.New("status不能为空")
 	}
-	if req.Type == "" {
-		return nil, errors.New("type不能为空")
+	if req.OrderType == "" {
+		return nil, errors.New("订单type不能为空")
 	}
 	if len(req.Details) == 0 {
 		return nil, errors.New("details不能为空")
 	}
+	detailOIDMap := make(map[string]struct{}, len(req.Details))
 	for _, detail := range req.Details {
 		if detail == nil {
 			continue
@@ -98,6 +99,10 @@ func (o *OrderServiceImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*orde
 		if detail.OID == "" {
 			return nil, errors.New("订单明细oid不能为空")
 		}
+		if _, exists := detailOIDMap[detail.OID]; exists {
+			return nil, errors.New("订单明细oid重复: " + detail.OID)
+		}
+		detailOIDMap[detail.OID] = struct{}{}
 		if detail.EShopGoodsName == "" {
 			return nil, errors.New("订单明细商品名称不能为空")
 		}
