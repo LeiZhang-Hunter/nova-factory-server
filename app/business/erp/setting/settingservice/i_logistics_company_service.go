@@ -12,5 +12,7 @@ type ILogisticsCompanyService interface {
 	Update(c *gin.Context, req *settingmodels.LogisticsCompanyUpsert) (*settingmodels.LogisticsCompany, error)
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*settingmodels.LogisticsCompany, error)
+	GetByCode(c *gin.Context, code string) (*settingmodels.LogisticsCompany, error)
+	GetByName(c *gin.Context, name string) (*settingmodels.LogisticsCompany, error)
 	List(c *gin.Context, req *settingmodels.LogisticsCompanyQuery) (*settingmodels.LogisticsCompanyListData, error)
 }

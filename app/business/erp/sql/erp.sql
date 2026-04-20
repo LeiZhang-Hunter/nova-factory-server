@@ -156,12 +156,13 @@ CREATE TABLE IF NOT EXISTS `erp_order_account` (
 CREATE TABLE IF NOT EXISTS `erp_logistics_company` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `code` VARCHAR(64) NOT NULL COMMENT '物流公司编码',
+    `company` VARCHAR(128) NOT NULL COMMENT '关联公司',
     `name` VARCHAR(128) NOT NULL COMMENT '物流公司名称',
     `short_name` VARCHAR(64) DEFAULT NULL COMMENT '物流公司简称',
     `contact_name` VARCHAR(64) DEFAULT NULL COMMENT '联系人',
     `contact_phone` VARCHAR(32) DEFAULT NULL COMMENT '联系电话',
     `address` VARCHAR(255) DEFAULT NULL COMMENT '联系地址',
-    `website` VARCHAR(255) DEFAULT NULL COMMENT '官网地址',
+    
     `province_code` VARCHAR(32) DEFAULT NULL COMMENT '省编码',
     `province_name` VARCHAR(64) NOT NULL COMMENT '省名称',
     `city_code` VARCHAR(32) DEFAULT NULL COMMENT '市编码',
@@ -170,7 +171,7 @@ CREATE TABLE IF NOT EXISTS `erp_logistics_company` (
     `district_name` VARCHAR(64) NOT NULL COMMENT '区名称',
     `street_code` VARCHAR(32) DEFAULT NULL COMMENT '街道编码',
     `street_name` VARCHAR(64) DEFAULT NULL COMMENT '街道名称',
-    `detail_address` VARCHAR(255) NOT NULL COMMENT '详细地址',
+
     `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
     `sort` INT NOT NULL DEFAULT 0 COMMENT '排序值',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',

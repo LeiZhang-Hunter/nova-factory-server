@@ -24,9 +24,9 @@ func NewLogistics(service settingservice.ILogisticsCompanyService) *Logistics {
 func (l *Logistics) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/setting/logistics-company")
 	group.GET("/list", middlewares.HasPermission("erp:setting:logisticsCompany:list"), l.List)
-	group.GET("/:id", middlewares.HasPermission("erp:setting:logisticsCompany:query"), l.GetByID)
+	group.GET("/query/:id", middlewares.HasPermission("erp:setting:logisticsCompany:query"), l.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:setting:logisticsCompany:set"), l.Set)
-	group.DELETE("/:ids", middlewares.HasPermission("erp:setting:logisticsCompany:remove"), l.Delete)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:setting:logisticsCompany:remove"), l.Delete)
 }
 
 // List 查询 ERP物流公司列表。

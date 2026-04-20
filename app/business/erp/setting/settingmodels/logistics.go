@@ -4,14 +4,27 @@ import "nova-factory-server/app/baize"
 
 // LogisticsCompany ERP物流公司
 type LogisticsCompany struct {
-	ID           uint64 `json:"id,string" db:"id"`
-	Code         string `json:"code" db:"code"`
-	Name         string `json:"name" db:"name"`
+	ID      int64  `json:"id,string" db:"id"`
+	Code    string `json:"code" db:"code"`
+	Name    string `json:"name" db:"name"`
+	Company string `json:"company" db:"company"`
+
+	ProvinceName string `json:"provinceName" db:"province_name"`
+	ProvinceCode string `json:"provinceCode" db:"province_code"`
+
+	CityName string `json:"cityName" db:"city_name"`
+	CityCode string `json:"cityCode" db:"city_code"`
+
+	DistrictName string `json:"districtName" db:"district_name"`
+	DistrictCode string `json:"districtCode" db:"district_code"`
+
+	StreetName string `json:"streetName" db:"street_name"`
+	StreetCode string `json:"streetCode" db:"street_code"`
+
 	ShortName    string `json:"shortName" db:"short_name"`
 	ContactName  string `json:"contactName" db:"contact_name"`
 	ContactPhone string `json:"contactPhone" db:"contact_phone"`
 	Address      string `json:"address" db:"address"`
-	Website      string `json:"website" db:"website"`
 	Remark       string `json:"remark" db:"remark"`
 	Sort         int32  `json:"sort" db:"sort"`
 	Status       *bool  `json:"status" db:"status"`
@@ -22,14 +35,27 @@ type LogisticsCompany struct {
 
 // LogisticsCompanyUpsert ERP物流公司新增修改参数
 type LogisticsCompanyUpsert struct {
-	ID           uint64 `json:"id,string"`
-	Code         string `json:"code" binding:"required"`
-	Name         string `json:"name" binding:"required"`
+	ID      int64  `json:"id,string"`
+	Code    string `json:"code" binding:"required"`
+	Name    string `json:"name" binding:"required"`
+	Company string `json:"company" binding:"required"`
+
+	ProvinceName string `json:"provinceName" binding:"required"`
+	ProvinceCode string `json:"provinceCode" binding:"required"`
+
+	CityName string `json:"cityName" binding:"required"`
+	CityCode string `json:"cityCode" binding:"required"`
+
+	DistrictName string `json:"districtName" binding:"required"`
+	DistrictCode string `json:"districtCode" binding:"required"`
+
+	StreetName string `json:"streetName" binding:"required"`
+	StreetCode string `json:"streetCode" binding:"required"`
+
 	ShortName    string `json:"shortName"`
 	ContactName  string `json:"contactName"`
 	ContactPhone string `json:"contactPhone"`
 	Address      string `json:"address"`
-	Website      string `json:"website"`
 	Remark       string `json:"remark"`
 	Sort         int32  `json:"sort"`
 	Status       *bool  `json:"status"`

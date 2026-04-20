@@ -2,6 +2,8 @@ package settingdaoimpl
 
 import (
 	"errors"
+	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/utils/snowflake"
 	"strings"
 	"time"
 
@@ -30,18 +32,32 @@ func NewLogisticsCompanyDao(db *gorm.DB) settingdao.ILogisticsCompanyDao {
 // Create 新增 ERP 物流公司记录。
 func (l *LogisticsCompanyDaoImpl) Create(c *gin.Context, req *settingmodels.LogisticsCompanyUpsert) (*settingmodels.LogisticsCompany, error) {
 	model := &settingmodels.LogisticsCompany{
-		Code:         strings.TrimSpace(req.Code),
-		Name:         strings.TrimSpace(req.Name),
+		ID:      snowflake.GenID(),
+		Code:    strings.TrimSpace(req.Code),
+		Name:    strings.TrimSpace(req.Name),
+		Company: strings.TrimSpace(req.Company),
+
+		ProvinceName: strings.TrimSpace(req.ProvinceName),
+		ProvinceCode: strings.TrimSpace(req.ProvinceCode),
+
+		CityName: strings.TrimSpace(req.CityName),
+		CityCode: strings.TrimSpace(req.CityCode),
+
+		DistrictName: strings.TrimSpace(req.DistrictName),
+		DistrictCode: strings.TrimSpace(req.DistrictCode),
+
+		StreetName: strings.TrimSpace(req.StreetName),
+		StreetCode: strings.TrimSpace(req.StreetCode),
+
 		ShortName:    strings.TrimSpace(req.ShortName),
 		ContactName:  strings.TrimSpace(req.ContactName),
 		ContactPhone: strings.TrimSpace(req.ContactPhone),
 		Address:      strings.TrimSpace(req.Address),
-		Website:      strings.TrimSpace(req.Website),
 		Remark:       strings.TrimSpace(req.Remark),
 		Sort:         req.Sort,
 		Status:       req.Status,
 		DeptID:       baizeContext.GetDeptId(c),
-		State:        0,
+		State:        commonStatus.NORMAL,
 	}
 	model.SetCreateBy(baizeContext.GetUserId(c))
 	if err := l.db.WithContext(c).Table(l.table).Create(model).Error; err != nil {
@@ -53,14 +69,27 @@ func (l *LogisticsCompanyDaoImpl) Create(c *gin.Context, req *settingmodels.Logi
 // Update 修改 ERP 物流公司记录。
 func (l *LogisticsCompanyDaoImpl) Update(c *gin.Context, req *settingmodels.LogisticsCompanyUpsert) (*settingmodels.LogisticsCompany, error) {
 	model := &settingmodels.LogisticsCompany{
-		ID:           req.ID,
-		Code:         strings.TrimSpace(req.Code),
-		Name:         strings.TrimSpace(req.Name),
+		ID:      req.ID,
+		Code:    strings.TrimSpace(req.Code),
+		Name:    strings.TrimSpace(req.Name),
+		Company: strings.TrimSpace(req.Company),
+
+		ProvinceName: strings.TrimSpace(req.ProvinceName),
+		ProvinceCode: strings.TrimSpace(req.ProvinceCode),
+
+		CityName: strings.TrimSpace(req.CityName),
+		CityCode: strings.TrimSpace(req.CityCode),
+
+		DistrictName: strings.TrimSpace(req.DistrictName),
+		DistrictCode: strings.TrimSpace(req.DistrictCode),
+
+		StreetName: strings.TrimSpace(req.StreetName),
+		StreetCode: strings.TrimSpace(req.StreetCode),
+
 		ShortName:    strings.TrimSpace(req.ShortName),
 		ContactName:  strings.TrimSpace(req.ContactName),
 		ContactPhone: strings.TrimSpace(req.ContactPhone),
 		Address:      strings.TrimSpace(req.Address),
-		Website:      strings.TrimSpace(req.Website),
 		Remark:       strings.TrimSpace(req.Remark),
 		Sort:         req.Sort,
 		Status:       req.Status,
@@ -91,6 +120,36 @@ func (l *LogisticsCompanyDaoImpl) GetByID(c *gin.Context, id int64) (*settingmod
 	var item settingmodels.LogisticsCompany
 	if err := l.db.WithContext(c).Table(l.table).
 		Where("id = ?", id).
+		Where("state = 0").
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
+// GetByCode 根据编码查询 ERP 物流公司记录。
+func (l *LogisticsCompanyDaoImpl) GetByCode(c *gin.Context, code string) (*settingmodels.LogisticsCompany, error) {
+	var item settingmodels.LogisticsCompany
+	if err := l.db.WithContext(c).Table(l.table).
+		Where("code = ?", strings.TrimSpace(code)).
+		Where("state = 0").
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
+// GetByName 根据名称查询 ERP 物流公司记录。
+func (l *LogisticsCompanyDaoImpl) GetByName(c *gin.Context, name string) (*settingmodels.LogisticsCompany, error) {
+	var item settingmodels.LogisticsCompany
+	if err := l.db.WithContext(c).Table(l.table).
+		Where("name = ?", strings.TrimSpace(name)).
 		Where("state = 0").
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
