@@ -26,6 +26,15 @@ func (a *AgentConfig) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/:ids", middlewares.HasPermission("erp:setting:sale:agentConfig:remove"), a.Delete)
 }
 
+// List 销售订单智能体配置列表
+// @Summary 销售订单智能体配置列表
+// @Description 按条件分页查询销售订单智能体配置
+// @Tags ERP/系统配置
+// @Security BearerAuth
+// @Param object query settingmodels.AgentConfigQuery true "销售订单智能体配置查询参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "查询成功"
+// @Router /erp/setting/sale/agent-config/list [get]
 func (a *AgentConfig) List(c *gin.Context) {
 	req := new(settingmodels.AgentConfigQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
@@ -40,6 +49,15 @@ func (a *AgentConfig) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
+// GetByID 销售订单智能体配置详情
+// @Summary 销售订单智能体配置详情
+// @Description 根据ID查询销售订单智能体配置详情
+// @Tags ERP/系统配置
+// @Security BearerAuth
+// @Param id path int true "配置ID"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "查询成功"
+// @Router /erp/setting/sale/agent-config/{id} [get]
 func (a *AgentConfig) GetByID(c *gin.Context) {
 	id := baizeContext.ParamInt64(c, "id")
 	if id == 0 {
@@ -54,6 +72,16 @@ func (a *AgentConfig) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
+// Set 销售订单智能体配置设置
+// @Summary 销售订单智能体配置设置
+// @Description 新增或修改销售订单智能体配置
+// @Tags ERP/系统配置
+// @Security BearerAuth
+// @Accept application/json
+// @Param body body settingmodels.AgentConfigUpsert true "销售订单智能体配置参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "设置成功"
+// @Router /erp/setting/sale/agent-config/set [post]
 func (a *AgentConfig) Set(c *gin.Context) {
 	req := new(settingmodels.AgentConfigUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {
@@ -85,6 +113,15 @@ func (a *AgentConfig) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
+// Delete 删除销售订单智能体配置
+// @Summary 删除销售订单智能体配置
+// @Description 根据ID删除销售订单智能体配置，多个ID用逗号分隔
+// @Tags ERP/系统配置
+// @Security BearerAuth
+// @Param ids path string true "配置ID，多个用逗号分隔"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "删除成功"
+// @Router /erp/setting/sale/agent-config/{ids} [delete]
 func (a *AgentConfig) Delete(c *gin.Context) {
 	ids := baizeContext.ParamInt64Array(c, "ids")
 	if len(ids) == 0 {

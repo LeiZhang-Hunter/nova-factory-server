@@ -24,6 +24,7 @@ func NewGinEngine(app *routes.App, cache cache.Cache, setting *settingcontroller
 	{
 		setting.AgentConfig.PrivateRoutes(group)
 		setting.IntegrationConfig.PrivateRoutes(group)
+		setting.Logistics.PrivateRoutes(group)
 		order.Order.PrivateRoutes(group)
 	}
 	return &Erp{}
