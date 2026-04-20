@@ -37,46 +37,46 @@ func (i *IAiConversationServiceImpl) List(c *gin.Context, req *aidatasetmodels.A
 		zap.L().Error("conversation list failed", zap.Error(err))
 		return conversationList, err
 	}
-	conversationIDs := make([]int64, 0, len(conversationList.Rows))
-	conversationMap := make(map[int64]*aidatasetmodels.AiConversation, len(conversationList.Rows))
-	for _, row := range conversationList.Rows {
-		if row == nil || row.ID == 0 {
-			continue
-		}
-		conversationIDs = append(conversationIDs, row.ID)
-		conversationMap[row.ID] = row
-	}
-	if len(conversationIDs) == 0 {
-		return conversationList, nil
-	}
-	messageList, messageErr := i.messageDao.List(c, &gatewaymodels.AIAgentMessageQuery{
-		ConversationIDs: conversationIDs,
-	})
-	if messageErr != nil {
-		zap.L().Error("conversation messages list failed", zap.Int("conversation_count", len(conversationIDs)), zap.Error(messageErr))
-		return nil, messageErr
-	}
-	messageMap := make(map[int64][]*gatewaymodels.AIAgentMessage, len(conversationIDs))
-	for _, message := range messageList.Rows {
-		if message == nil || message.ConversationID == 0 {
-			continue
-		}
-		rows := messageMap[message.ConversationID]
-		if len(rows) >= 100 {
-			continue
-		}
-		messageMap[message.ConversationID] = append(rows, message)
-	}
-	for conversationID, messages := range messageMap {
-		row, exists := conversationMap[conversationID]
-		if !exists {
-			continue
-		}
-		row.Messages = reverseAIAgentMessages(messages)
-		if row.Messages == nil {
-			row.Messages = make([]*gatewaymodels.AIAgentMessage, 0)
-		}
-	}
+	//conversationIDs := make([]int64, 0, len(conversationList.Rows))
+	//conversationMap := make(map[int64]*aidatasetmodels.AiConversation, len(conversationList.Rows))
+	//for _, row := range conversationList.Rows {
+	//	if row == nil || row.ID == 0 {
+	//		continue
+	//	}
+	//	conversationIDs = append(conversationIDs, row.ID)
+	//	conversationMap[row.ID] = row
+	//}
+	//if len(conversationIDs) == 0 {
+	//	return conversationList, nil
+	//}
+	//messageList, messageErr := i.messageDao.List(c, &gatewaymodels.AIAgentMessageQuery{
+	//	ConversationIDs: conversationIDs,
+	//})
+	//if messageErr != nil {
+	//	zap.L().Error("conversation messages list failed", zap.Int("conversation_count", len(conversationIDs)), zap.Error(messageErr))
+	//	return nil, messageErr
+	//}
+	//messageMap := make(map[int64][]*gatewaymodels.AIAgentMessage, len(conversationIDs))
+	//for _, message := range messageList.Rows {
+	//	if message == nil || message.ConversationID == 0 {
+	//		continue
+	//	}
+	//	rows := messageMap[message.ConversationID]
+	//	if len(rows) >= 100 {
+	//		continue
+	//	}
+	//	messageMap[message.ConversationID] = append(rows, message)
+	//}
+	//for conversationID, messages := range messageMap {
+	//	row, exists := conversationMap[conversationID]
+	//	if !exists {
+	//		continue
+	//	}
+	//	row.Messages = reverseAIAgentMessages(messages)
+	//	if row.Messages == nil {
+	//		row.Messages = make([]*gatewaymodels.AIAgentMessage, 0)
+	//	}
+	//}
 	for k, _ := range conversationList.Rows {
 		if conversationList.Rows[k].Messages == nil {
 			conversationList.Rows[k].Messages = make([]*gatewaymodels.AIAgentMessage, 0)
