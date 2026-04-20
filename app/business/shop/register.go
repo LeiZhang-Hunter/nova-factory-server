@@ -4,6 +4,8 @@
 package shop
 
 import (
+	"nova-factory-server/app/business/shop/api/controller/auth"
+	"nova-factory-server/app/business/shop/api/controller/product"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
 	"nova-factory-server/app/business/shop/product/shopdao/shopdaoimpl"
 	"nova-factory-server/app/business/shop/product/shopservice/shopserviceimpl"
@@ -16,6 +18,10 @@ import (
 )
 
 var ProviderSet = wire.NewSet(
+
+	auth.ProviderSet,
+	product.ProviderSet,
+
 	shopdaoimpl.ProviderSet,
 	shopserviceimpl.ProviderSet,
 	shopcontroller.ProviderSet,

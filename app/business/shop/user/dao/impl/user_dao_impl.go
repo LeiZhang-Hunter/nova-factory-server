@@ -110,6 +110,21 @@ func (s *ShopUserDaoImpl) GetByID(c *gin.Context, id int64) (*models.User, error
 	return &item, nil
 }
 
+// GetByAccount 根据用户名或手机号查询商城用户。
+func (s *ShopUserDaoImpl) GetByAccount(c *gin.Context, account string) (*models.User, error) {
+	var item models.User
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("(username = ? OR mobile = ?)", account, account).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
 // GetByMobile 根据手机号查询商城用户。
 func (s *ShopUserDaoImpl) GetByMobile(c *gin.Context, mobile string) (*models.User, error) {
 	var item models.User
