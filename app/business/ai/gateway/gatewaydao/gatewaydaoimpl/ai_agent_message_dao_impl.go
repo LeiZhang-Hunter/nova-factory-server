@@ -157,6 +157,9 @@ func (a *AIAgentMessageDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentM
 	if req.Page <= 0 {
 		req.Page = 1
 	}
+	if req.Size <= 0 || req.Size > 100 {
+		req.Size = 100
+	}
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	rows := make([]*gatewaymodels.AIAgentMessage, 0)
 	query := db.Order("conversation_id ASC").Order("id DESC")

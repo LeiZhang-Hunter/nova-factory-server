@@ -31,7 +31,7 @@ func (s *User) PrivateRoutes(router *gin.RouterGroup) {
 // @Summary 获取商城用户列表
 // @Description 获取商城用户列表
 // @Tags 商城/用户管理
-// @Param object query shopmodels.UserQuery true "商城用户查询参数"
+// @Param object query models.UserQuery true "商城用户查询参数"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "获取成功"
@@ -77,7 +77,7 @@ func (s *User) GetByID(c *gin.Context) {
 // @Summary 新增商城用户
 // @Description 新增商城用户
 // @Tags 商城/用户管理
-// @Param object body shopmodels.UserUpsert true "商城用户新增参数"
+// @Param object body models.UserUpsert true "商城用户新增参数"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "新增成功"
@@ -100,7 +100,7 @@ func (s *User) Create(c *gin.Context) {
 // @Summary 修改商城用户
 // @Description 修改商城用户
 // @Tags 商城/用户管理
-// @Param object body shopmodels.UserUpsert true "商城用户修改参数"
+// @Param object body models.UserUpsert true "商城用户修改参数"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "修改成功"

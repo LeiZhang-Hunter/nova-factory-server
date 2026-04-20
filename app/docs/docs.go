@@ -18,6 +18,196 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/ai/agent/config/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取智能体列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/智能体管理"
+                ],
+                "summary": "获取智能体列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "name": "mcpEnabled",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sandboxMode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/config/query/type/{type}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "通过type查询enable=true的智能体配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/智能体管理"
+                ],
+                "summary": "获取指定类型下已启用的智能体详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "智能体类型",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/config/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取智能体详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/智能体管理"
+                ],
+                "summary": "获取智能体详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "智能体ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/config/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除智能体",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/智能体管理"
+                ],
+                "summary": "删除智能体",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "智能体ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/config/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "保存智能体，id为空时新增，不为空时修改",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/智能体管理"
+                ],
+                "summary": "保存智能体",
+                "parameters": [
+                    {
+                        "description": "智能体保存参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gatewaymodels.AIAgentUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/agent/conversations/chat": {
             "post": {
                 "description": "会话聊天",
@@ -191,6 +381,40 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "停止成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/agent/messages/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据会话ID读取消息列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/消息管理"
+                ],
+                "summary": "根据会话ID读取消息列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "会话ID",
+                        "name": "conversationId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -2000,6 +2224,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/model/provider/global/remove": {
+            "delete": {
+                "description": "删除 SetGlobalModel 保存的用户模型配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "删除用户模型",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "llm_factory",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/model/provider/global/set": {
             "post": {
                 "description": "新增或修改用户模型配置，user_id为0表示全局设置",
@@ -2287,6 +2538,162 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/skills/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取已安装技能列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/已安装技能"
+                ],
+                "summary": "获取已安装技能列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "name": "enabled",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "slug",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/skills/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取已安装技能详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/已安装技能"
+                ],
+                "summary": "获取已安装技能详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "技能ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/skills/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除已安装技能",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/已安装技能"
+                ],
+                "summary": "删除已安装技能",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "技能ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/skills/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "保存已安装技能，id为空时新增，不为空时修改",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/已安装技能"
+                ],
+                "summary": "保存已安装技能",
+                "parameters": [
+                    {
+                        "description": "已安装技能保存参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gatewaymodels.InstalledSkillUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -7460,6 +7867,248 @@ const docTemplate = `{
                 }
             }
         },
+        "/erp/order/check-login-state": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "检查当前启用 ERP 集成配置的登录状态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单管理"
+                ],
+                "summary": "检查管家婆登录状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "登录状态检查地址",
+                        "name": "checkUrl",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询ERP订单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单管理"
+                ],
+                "summary": "ERP订单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "网店订单编号",
+                        "name": "tid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "订单状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "同步状态",
+                        "name": "syncStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "收货人名称",
+                        "name": "receiverName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页条数",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询ERP订单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单管理"
+                ],
+                "summary": "ERP订单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除ERP订单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单管理"
+                ],
+                "summary": "ERP订单删除",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "订单ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改ERP订单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单管理"
+                ],
+                "summary": "ERP订单保存",
+                "parameters": [
+                    {
+                        "description": "ERP订单保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ordermodels.OrderSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order/synchronize-sales-orders": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "调用管家婆订单同步接口推送销售订单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单管理"
+                ],
+                "summary": "同步销售订单",
+                "parameters": [
+                    {
+                        "description": "销售订单同步参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/grasp.OrderSyncRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "同步成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/erp/setting/integration-config/check-login-state": {
             "get": {
                 "security": [
@@ -9229,6 +9878,90 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/app/getInfo": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前商城登录用户信息及权限",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "获取当前商城登录用户信息",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/app/login": {
+            "post": {
+                "description": "使用 shop_user 账号登录商城",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "商城用户登录",
+                "parameters": [
+                    {
+                        "description": "商城用户登录参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ShopLoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/app/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "退出当前商城登录会话",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "退出当前商城登录会话",
+                "responses": {
+                    "200": {
+                        "description": "退出成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/category": {
             "put": {
                 "security": [
@@ -9317,26 +10050,31 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "分类编码",
                         "name": "categoryCode",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "description": "分类名称",
                         "name": "categoryName",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "description": "页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "description": "每页数量",
                         "name": "size",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
+                        "type": "boolean",
+                        "description": "状态",
                         "name": "status",
                         "in": "query"
                     }
@@ -9489,6 +10227,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/goods/import": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "导入商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "导入商品",
+                "parameters": [
+                    {
+                        "description": "商品新增参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/goods/list": {
             "get": {
                 "security": [
@@ -9507,31 +10281,37 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "商品编码",
                         "name": "goodsCode",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "description": "商品名称",
                         "name": "goodsName",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
+                        "type": "boolean",
+                        "description": "是否上架",
                         "name": "isOnSale",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "description": "外部系统ID",
                         "name": "outerId",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "description": "页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "description": "每页数量",
                         "name": "size",
                         "in": "query"
                     }
@@ -9702,36 +10482,43 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "条码",
                         "name": "barcode",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "description": "商品业务ID",
                         "name": "goodsId",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "description": "外部系统ID",
                         "name": "outerId",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "description": "页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "description": "每页数量",
                         "name": "size",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "description": "规格编码",
                         "name": "skuCode",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "description": "规格名称",
                         "name": "skuName",
                         "in": "query"
                     }
@@ -9836,7 +10623,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/shopmodels.UserUpsert"
+                            "$ref": "#/definitions/models.UserUpsert"
                         }
                     }
                 ],
@@ -9870,13 +10657,420 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/shopmodels.UserUpsert"
+                            "$ref": "#/definitions/models.UserUpsert"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/address/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取商城用户地址详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取商城用户地址详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商城用户地址ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/address/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取商城用户地址列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取商城用户地址列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "收货人手机号",
+                        "name": "receiverMobile",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "收货人姓名",
+                        "name": "receiverName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户业务ID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/address/query": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取商城用户地址详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取商城用户地址详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商城用户地址ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/address/region": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "不传 parentCode 返回省级列表，传省编码返回市级，传市编码返回区级",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取省市区行政区列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "父级行政区编码",
+                        "name": "parentCode",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/address/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除商城用户地址",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "删除商城用户地址",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商城用户地址ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/address/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改商城用户地址",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "新增或修改商城用户地址",
+                "parameters": [
+                    {
+                        "description": "商城用户地址设置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddressSetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/cart/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取商城用户购物车详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户购物车"
+                ],
+                "summary": "获取商城用户购物车详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商城用户购物车ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/cart/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取商城用户购物车列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户购物车"
+                ],
+                "summary": "获取商城用户购物车列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品ID",
+                        "name": "goodsId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "是否选中",
+                        "name": "selected",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "SKU ID",
+                        "name": "skuId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/cart/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除商城用户购物车",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户购物车"
+                ],
+                "summary": "删除商城用户购物车",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商城用户购物车ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/cart/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改商城用户购物车",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户购物车"
+                ],
+                "summary": "新增或修改商城用户购物车",
+                "parameters": [
+                    {
+                        "description": "商城用户购物车设置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CartSetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -9902,31 +11096,37 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "手机号",
                         "name": "mobile",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "description": "页码",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "description": "每页数量",
                         "name": "size",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
+                        "type": "boolean",
+                        "description": "状态",
                         "name": "status",
                         "in": "query"
                     },
                     {
                         "type": "integer",
+                        "description": "用户类型",
                         "name": "userType",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "description": "用户名",
                         "name": "username",
                         "in": "query"
                     }
@@ -14617,6 +15817,14 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "agentId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "agentType": {
+                    "type": "string",
+                    "example": ""
+                },
                 "chatMode": {
                     "type": "string"
                 },
@@ -14711,7 +15919,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "tts_id": {
                     "type": "string"
@@ -14828,6 +16036,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "api_key": {
+                    "type": "string"
+                },
+                "api_type": {
                     "type": "string"
                 },
                 "llm_factory": {
@@ -17242,6 +18453,105 @@ const docTemplate = `{
                 }
             }
         },
+        "gatewaymodels.AIAgentUpsert": {
+            "type": "object",
+            "properties": {
+                "defaultLlmModelId": {
+                    "type": "string"
+                },
+                "defaultLlmProviderId": {
+                    "type": "string"
+                },
+                "enable": {
+                    "type": "boolean"
+                },
+                "enableLlmMaxTokens": {
+                    "type": "boolean"
+                },
+                "enableLlmTemperature": {
+                    "type": "boolean"
+                },
+                "enableLlmTopP": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "llmMaxContextCount": {
+                    "type": "integer"
+                },
+                "llmMaxTokens": {
+                    "type": "integer"
+                },
+                "llmTemperature": {
+                    "type": "number"
+                },
+                "llmTopP": {
+                    "type": "number"
+                },
+                "mcpEnabled": {
+                    "type": "boolean"
+                },
+                "mcpServerEnabledIds": {
+                    "type": "string"
+                },
+                "mcpServerIds": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "retrievalMatchThreshold": {
+                    "type": "number"
+                },
+                "retrievalTopK": {
+                    "type": "integer"
+                },
+                "sandboxMode": {
+                    "type": "string"
+                },
+                "sandboxNetwork": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "workDir": {
+                    "type": "string"
+                }
+            }
+        },
+        "gatewaymodels.InstalledSkillUpsert": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "gatewaymodels.MCPServerUpsert": {
             "type": "object",
             "properties": {
@@ -17281,6 +18591,173 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "grasp.OrderSyncAccount": {
+            "type": "object",
+            "properties": {
+                "financeCode": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "grasp.OrderSyncDetail": {
+            "type": "object",
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "eshopgoodsid": {
+                    "type": "string"
+                },
+                "eshopgoodsname": {
+                    "type": "string"
+                },
+                "eshopskuid": {
+                    "type": "string"
+                },
+                "eshopskuname": {
+                    "type": "string"
+                },
+                "num": {
+                    "type": "number"
+                },
+                "numiid": {
+                    "type": "integer"
+                },
+                "oid": {
+                    "type": "string"
+                },
+                "outeriid": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "number"
+                },
+                "picpath": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "skuid": {
+                    "type": "integer"
+                },
+                "unitid": {
+                    "type": "integer"
+                },
+                "unitqty": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "grasp.OrderSyncOrder": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/grasp.OrderSyncAccount"
+                    }
+                },
+                "btypecode": {
+                    "type": "string"
+                },
+                "buyermessage": {
+                    "type": "string"
+                },
+                "buyernick": {
+                    "type": "string"
+                },
+                "created": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/grasp.OrderSyncDetail"
+                    }
+                },
+                "invoicename": {
+                    "type": "string"
+                },
+                "logistbillcode": {
+                    "type": "string"
+                },
+                "logistbtypecode": {
+                    "type": "string"
+                },
+                "paytime": {
+                    "type": "string"
+                },
+                "postfee": {
+                    "type": "number"
+                },
+                "privilege": {
+                    "type": "number"
+                },
+                "receiveraddress": {
+                    "type": "string"
+                },
+                "receivercity": {
+                    "type": "string"
+                },
+                "receiverdistrict": {
+                    "type": "string"
+                },
+                "receivermobile": {
+                    "type": "string"
+                },
+                "receivername": {
+                    "type": "string"
+                },
+                "receiverphone": {
+                    "type": "string"
+                },
+                "receiverstate": {
+                    "type": "string"
+                },
+                "sellerflag": {
+                    "type": "string"
+                },
+                "sellermemo": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tid": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "grasp.OrderSyncRequest": {
+            "type": "object",
+            "properties": {
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/grasp.OrderSyncOrder"
+                    }
                 }
             }
         },
@@ -17605,6 +19082,136 @@ const docTemplate = `{
                 }
             }
         },
+        "models.AddressSetReq": {
+            "type": "object",
+            "required": [
+                "detailAddress",
+                "receiverMobile"
+            ],
+            "properties": {
+                "addressLabel": {
+                    "description": "地址标签",
+                    "type": "string"
+                },
+                "cityCode": {
+                    "description": "市编码",
+                    "type": "string"
+                },
+                "cityName": {
+                    "description": "市名称",
+                    "type": "string"
+                },
+                "detailAddress": {
+                    "description": "详细地址",
+                    "type": "string"
+                },
+                "districtCode": {
+                    "description": "区编码",
+                    "type": "string"
+                },
+                "districtName": {
+                    "description": "区名称",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "isDefault": {
+                    "description": "是否默认地址",
+                    "type": "boolean"
+                },
+                "postalCode": {
+                    "description": "邮政编码",
+                    "type": "string"
+                },
+                "provinceCode": {
+                    "description": "省编码",
+                    "type": "string"
+                },
+                "provinceName": {
+                    "description": "省名称",
+                    "type": "string"
+                },
+                "receiverMobile": {
+                    "description": "收货人手机号",
+                    "type": "string"
+                },
+                "receiverName": {
+                    "description": "收货人姓名",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer"
+                },
+                "streetCode": {
+                    "description": "街道编码",
+                    "type": "string"
+                },
+                "streetName": {
+                    "description": "街道名称",
+                    "type": "string"
+                }
+            }
+        },
+        "models.CartSetReq": {
+            "type": "object",
+            "required": [
+                "goodsId",
+                "goodsName",
+                "quantity",
+                "skuId"
+            ],
+            "properties": {
+                "goodsId": {
+                    "description": "商品ID",
+                    "type": "string"
+                },
+                "goodsName": {
+                    "description": "商品名称",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "imageUrl": {
+                    "description": "图片地址",
+                    "type": "string"
+                },
+                "quantity": {
+                    "description": "数量",
+                    "type": "integer"
+                },
+                "retailPrice": {
+                    "description": "零售价",
+                    "type": "number"
+                },
+                "selected": {
+                    "description": "是否选中",
+                    "type": "integer"
+                },
+                "skuId": {
+                    "description": "SKU ID",
+                    "type": "string"
+                },
+                "skuName": {
+                    "description": "SKU名称",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
         "models.Expression": {
             "type": "object",
             "properties": {
@@ -17654,6 +19261,23 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ShopLoginReq": {
+            "type": "object",
+            "required": [
+                "account",
+                "password"
+            ],
+            "properties": {
+                "account": {
+                    "description": "登录账号，支持用户名或手机号",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "登录密码",
+                    "type": "string"
+                }
+            }
+        },
         "models.SysDeviceElectricSettingVO": {
             "type": "object",
             "properties": {
@@ -17677,6 +19301,64 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "智能预警名称",
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserUpsert": {
+            "type": "object",
+            "required": [
+                "userType",
+                "username"
+            ],
+            "properties": {
+                "avatar": {
+                    "description": "头像",
+                    "type": "string"
+                },
+                "companyName": {
+                    "description": "企业名称",
+                    "type": "string"
+                },
+                "contactName": {
+                    "description": "联系人",
+                    "type": "string"
+                },
+                "contactPhone": {
+                    "description": "联系人手机号",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "邮箱",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "mobile": {
+                    "description": "手机号",
+                    "type": "string"
+                },
+                "nickname": {
+                    "description": "用户昵称",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "密码摘要",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "boolean"
+                },
+                "userType": {
+                    "description": "用户类型",
+                    "type": "integer"
+                },
+                "username": {
+                    "description": "用户名",
                     "type": "string"
                 }
             }
@@ -17833,6 +19515,193 @@ const docTemplate = `{
                 },
                 "userName": {
                     "type": "string"
+                }
+            }
+        },
+        "ordermodels.OrderAccountSet": {
+            "type": "object",
+            "properties": {
+                "finance_code": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "ordermodels.OrderDetailSet": {
+            "type": "object",
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "eshop_goods_id": {
+                    "type": "string"
+                },
+                "eshop_goods_name": {
+                    "type": "string"
+                },
+                "eshop_sku_id": {
+                    "type": "string"
+                },
+                "eshop_sku_name": {
+                    "type": "string"
+                },
+                "num": {
+                    "type": "number"
+                },
+                "numiid": {
+                    "type": "integer"
+                },
+                "oid": {
+                    "type": "string"
+                },
+                "outeriid": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "number"
+                },
+                "pic_path": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "skuid": {
+                    "type": "integer"
+                },
+                "unit_id": {
+                    "type": "integer"
+                },
+                "unit_qty": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "ordermodels.OrderSet": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ordermodels.OrderAccountSet"
+                    }
+                },
+                "b_type_code": {
+                    "type": "string"
+                },
+                "bill_code": {
+                    "type": "string"
+                },
+                "buyer_message": {
+                    "type": "string"
+                },
+                "buyer_nick": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ordermodels.OrderDetailSet"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "invoice_name": {
+                    "type": "string"
+                },
+                "logist_b_type_code": {
+                    "type": "string"
+                },
+                "logist_bill_code": {
+                    "type": "string"
+                },
+                "order_type": {
+                    "type": "string"
+                },
+                "pay_time": {
+                    "type": "string"
+                },
+                "post_fee": {
+                    "type": "number"
+                },
+                "privilege": {
+                    "type": "number"
+                },
+                "receiver_address": {
+                    "type": "string"
+                },
+                "receiver_city": {
+                    "type": "string"
+                },
+                "receiver_city_name": {
+                    "type": "string"
+                },
+                "receiver_district": {
+                    "type": "string"
+                },
+                "receiver_district_name": {
+                    "type": "string"
+                },
+                "receiver_mobile": {
+                    "type": "string"
+                },
+                "receiver_name": {
+                    "type": "string"
+                },
+                "receiver_phone": {
+                    "type": "string"
+                },
+                "receiver_province": {
+                    "type": "string"
+                },
+                "receiver_province_name": {
+                    "type": "string"
+                },
+                "receiver_street": {
+                    "type": "string"
+                },
+                "receiver_street_name": {
+                    "type": "string"
+                },
+                "receiver_zip": {
+                    "type": "string"
+                },
+                "seller_flag": {
+                    "type": "string"
+                },
+                "seller_memo": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "sync_message": {
+                    "type": "string"
+                },
+                "sync_status": {
+                    "type": "integer"
+                },
+                "sync_time": {
+                    "type": "string"
+                },
+                "tid": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
                 }
             }
         },
@@ -18053,22 +19922,30 @@ const docTemplate = `{
             ],
             "properties": {
                 "categoryCode": {
+                    "description": "分类编码",
                     "type": "string"
                 },
                 "categoryName": {
+                    "description": "分类名称",
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
                 },
                 "parentId": {
-                    "type": "integer"
+                    "description": "父级分类ID",
+                    "type": "string",
+                    "example": "0"
                 },
                 "sort": {
+                    "description": "排序值",
                     "type": "integer"
                 },
                 "status": {
-                    "type": "integer"
+                    "description": "状态",
+                    "type": "boolean"
                 }
             }
         },
@@ -18080,51 +19957,83 @@ const docTemplate = `{
             ],
             "properties": {
                 "barcode": {
+                    "description": "条码",
+                    "type": "string"
+                },
+                "createBy": {
+                    "description": "创建人",
+                    "type": "integer"
+                },
+                "createTime": {
+                    "description": "创建时间",
                     "type": "string"
                 },
                 "description": {
+                    "description": "规格描述",
                     "type": "string"
                 },
                 "galleryImages": {
+                    "description": "图集",
                     "type": "string"
                 },
                 "goodsId": {
+                    "description": "商品业务ID",
                     "type": "string"
                 },
                 "id": {
+                    "description": "主键ID",
                     "type": "integer"
                 },
                 "imageUrl": {
+                    "description": "主图地址",
                     "type": "string"
                 },
                 "outerId": {
+                    "description": "外部系统ID",
                     "type": "string"
                 },
                 "quantity": {
+                    "description": "库存数量",
                     "type": "integer"
                 },
                 "retailPrice": {
+                    "description": "零售价",
                     "type": "number"
                 },
                 "skuCode": {
+                    "description": "规格编码",
                     "type": "string"
                 },
                 "skuId": {
+                    "description": "规格业务ID",
                     "type": "string"
                 },
                 "skuName": {
+                    "description": "规格名称",
                     "type": "string"
                 },
                 "unit": {
+                    "description": "销售单位",
+                    "type": "string"
+                },
+                "updateBy": {
+                    "description": "修改人",
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "description": "修改时间",
                     "type": "string"
                 },
                 "videoUrl": {
+                    "description": "视频地址",
                     "type": "string"
                 },
                 "weight": {
+                    "description": "重量",
                     "type": "number"
                 },
                 "weightUnit": {
+                    "description": "重量单位",
                     "type": "string"
                 }
             }
@@ -18136,95 +20045,81 @@ const docTemplate = `{
                 "goodsName"
             ],
             "properties": {
+                "createBy": {
+                    "description": "创建人",
+                    "type": "integer"
+                },
+                "createTime": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
                 "description": {
+                    "description": "商品描述",
                     "type": "string"
                 },
                 "galleryImages": {
+                    "description": "图集",
                     "type": "string"
                 },
                 "goodsCode": {
+                    "description": "商品编码",
                     "type": "string"
                 },
                 "goodsId": {
+                    "description": "商品业务ID",
                     "type": "string"
                 },
                 "goodsName": {
+                    "description": "商品名称",
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
                 },
                 "imageUrl": {
+                    "description": "主图地址",
                     "type": "string"
                 },
                 "isOnSale": {
+                    "description": "是否上架",
                     "type": "integer"
                 },
                 "outerId": {
+                    "description": "外部系统ID",
                     "type": "string"
                 },
                 "quantity": {
+                    "description": "库存数量",
                     "type": "integer"
                 },
                 "retailPrice": {
+                    "description": "零售价",
                     "type": "number"
                 },
                 "unit": {
+                    "description": "销售单位",
+                    "type": "string"
+                },
+                "updateBy": {
+                    "description": "修改人",
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "description": "修改时间",
                     "type": "string"
                 },
                 "videoUrl": {
+                    "description": "视频地址",
                     "type": "string"
                 },
                 "weight": {
+                    "description": "重量",
                     "type": "number"
                 },
                 "weightUnit": {
-                    "type": "string"
-                }
-            }
-        },
-        "shopmodels.UserUpsert": {
-            "type": "object",
-            "required": [
-                "userId",
-                "userType",
-                "username"
-            ],
-            "properties": {
-                "companyName": {
-                    "type": "string"
-                },
-                "contactName": {
-                    "type": "string"
-                },
-                "contactPhone": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "mobile": {
-                    "type": "string"
-                },
-                "nickname": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "integer"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "userType": {
-                    "type": "integer"
-                },
-                "username": {
+                    "description": "重量单位",
                     "type": "string"
                 }
             }

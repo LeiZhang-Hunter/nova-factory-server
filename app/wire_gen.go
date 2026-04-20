@@ -37,6 +37,8 @@ import (
 	"nova-factory-server/app/business/erp/setting/settingservice/settingserviceimpl"
 	"nova-factory-server/app/business/iot"
 	"nova-factory-server/app/business/shop"
+	"nova-factory-server/app/business/shop/api/controller/auth"
+	"nova-factory-server/app/business/shop/api/controller/product"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
 	"nova-factory-server/app/business/shop/product/shopdao/shopdaoimpl"
 	"nova-factory-server/app/business/shop/product/shopservice/shopserviceimpl"
@@ -149,10 +151,10 @@ func wireApp() (*gin.Engine, func(), error) {
 	iSysProductLaboratoryDao := productDaoImpl.NewSysProductLaboratoryDao(db)
 	iSysProductLaboratoryService := productServiceImpl.NewSysProductLaboratoryService(iSysProductLaboratoryDao, iUserDao)
 	laboratory := productcontroller.NewLaboratory(iSysProductLaboratoryService, iDictDataService)
-	product := &productcontroller.Product{
+	productcontrollerProduct := &productcontroller.Product{
 		Laboratory: laboratory,
 	}
-	adminAdmin := admin.NewGinEngine(app, cacheCache, system, monitor, tool, product)
+	adminAdmin := admin.NewGinEngine(app, cacheCache, system, monitor, tool, productcontrollerProduct)
 	iotIot := iot.NewGinEngine(app, cacheCache)
 	iDataSetDao := aiDataSetDaoImpl.NewDataSetDaoImpl(db)
 	client := aidatasetserviceimpl.NewHttpClient()
@@ -210,12 +212,15 @@ func wireApp() (*gin.Engine, func(), error) {
 	iAiConversationService := gatewayserviceimpl.NewIAiConversationServiceImpl(iAiConversationDao, iaiAgentMessageDao)
 	aidatasetserviceIAIGatewayService := aidatasetserviceimpl.NewAIGatewayService(iaiGatewayService)
 	conversations := gatewaycontroller.NewConversations(iAiConversationService, aidatasetserviceIAIGatewayService, iaiAgentService, iDictDataDao)
+	iaiMessageService := gatewayserviceimpl.NewIAiMessageServiceImpl(iaiAgentMessageDao)
+	message := gatewaycontroller.NewMessage(iaiMessageService)
 	controller := &gatewaycontroller.Controller{
 		AIGateway:     aiGateway,
 		Agent:         agent,
 		Skills:        skills,
 		MCPServer:     mcpServer,
 		Conversations: conversations,
+		Message:       message,
 	}
 	factoryBootstrap := ai.NewFactoryBootstrap(db, iAiModelProviderDao, iAiLLMDao)
 	aiAI := ai.NewGinEngine(app, cacheCache, aiDataSet, controller, factoryBootstrap)
@@ -247,7 +252,18 @@ func wireApp() (*gin.Engine, func(), error) {
 		Cart:    cart,
 		User:    shopcontrollerUser,
 	}
-	shopShop := shop.NewGinEngine(app, cacheCache, shopcontrollerController, controller2)
+	iShopAuthService := impl2.NewShopAuthService(cacheCache, iShopUserDao)
+	authAuth := auth.NewAuth(iShopAuthService)
+	authController := &auth.Controller{
+		Auth: authAuth,
+	}
+	productProduct := product.NewProduct()
+	productCategory := product.NewCategory()
+	productController := &product.Controller{
+		Product:  productProduct,
+		Category: productCategory,
+	}
+	shopShop := shop.NewGinEngine(app, cacheCache, shopcontrollerController, controller2, authController, productController)
 	iAgentConfigDao := settingdaoimpl.NewAgentConfigDao(db)
 	iAgentConfigService := settingserviceimpl.NewAgentConfigService(iAgentConfigDao)
 	agentConfig := settingcontroller.NewAgentConfig(iAgentConfigService)

@@ -49,6 +49,7 @@ func NewGinEngine(
 		gateway.Conversations.PrivateRoutes(group)
 		gateway.Skills.PrivateRoutes(group)
 		gateway.MCPServer.PrivateRoutes(group)
+		gateway.Message.PrivateRoutes(group)
 	}
 
 	return &AI{}

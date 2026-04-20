@@ -352,6 +352,12 @@ definitions:
     type: object
   aidatasetmodels.SetAiConversation:
     properties:
+      agentId:
+        example: "0"
+        type: string
+      agentType:
+        example: ""
+        type: string
       chatMode:
         type: string
       enableThinking:
@@ -418,7 +424,7 @@ definitions:
       rerank_id:
         type: string
       status:
-        type: string
+        type: boolean
       tts_id:
         type: string
     type: object
@@ -502,6 +508,8 @@ definitions:
       api_base:
         type: string
       api_key:
+        type: string
+      api_type:
         type: string
       llm_factory:
         type: string
@@ -2200,6 +2208,72 @@ definitions:
         description: 数据名字
         type: string
     type: object
+  gatewaymodels.AIAgentUpsert:
+    properties:
+      defaultLlmModelId:
+        type: string
+      defaultLlmProviderId:
+        type: string
+      enable:
+        type: boolean
+      enableLlmMaxTokens:
+        type: boolean
+      enableLlmTemperature:
+        type: boolean
+      enableLlmTopP:
+        type: boolean
+      id:
+        example: "0"
+        type: string
+      llmMaxContextCount:
+        type: integer
+      llmMaxTokens:
+        type: integer
+      llmTemperature:
+        type: number
+      llmTopP:
+        type: number
+      mcpEnabled:
+        type: boolean
+      mcpServerEnabledIds:
+        type: string
+      mcpServerIds:
+        type: string
+      name:
+        type: string
+      prompt:
+        type: string
+      retrievalMatchThreshold:
+        type: number
+      retrievalTopK:
+        type: integer
+      sandboxMode:
+        type: string
+      sandboxNetwork:
+        type: boolean
+      type:
+        type: string
+      workDir:
+        type: string
+    type: object
+  gatewaymodels.InstalledSkillUpsert:
+    properties:
+      description:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        example: "0"
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+      source:
+        type: string
+      version:
+        type: string
+    type: object
   gatewaymodels.MCPServerUpsert:
     properties:
       args:
@@ -2227,6 +2301,116 @@ definitions:
         type: string
       url:
         type: string
+    type: object
+  grasp.OrderSyncAccount:
+    properties:
+      financeCode:
+        type: string
+      total:
+        type: number
+    type: object
+  grasp.OrderSyncDetail:
+    properties:
+      barcode:
+        type: string
+      eshopgoodsid:
+        type: string
+      eshopgoodsname:
+        type: string
+      eshopskuid:
+        type: string
+      eshopskuname:
+        type: string
+      num:
+        type: number
+      numiid:
+        type: integer
+      oid:
+        type: string
+      outeriid:
+        type: string
+      payment:
+        type: number
+      picpath:
+        type: string
+      size:
+        type: number
+      skuid:
+        type: integer
+      unitid:
+        type: integer
+      unitqty:
+        type: number
+      weight:
+        type: number
+    type: object
+  grasp.OrderSyncOrder:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/grasp.OrderSyncAccount'
+        type: array
+      btypecode:
+        type: string
+      buyermessage:
+        type: string
+      buyernick:
+        type: string
+      created:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/grasp.OrderSyncDetail'
+        type: array
+      invoicename:
+        type: string
+      logistbillcode:
+        type: string
+      logistbtypecode:
+        type: string
+      paytime:
+        type: string
+      postfee:
+        type: number
+      privilege:
+        type: number
+      receiveraddress:
+        type: string
+      receivercity:
+        type: string
+      receiverdistrict:
+        type: string
+      receivermobile:
+        type: string
+      receivername:
+        type: string
+      receiverphone:
+        type: string
+      receiverstate:
+        type: string
+      sellerflag:
+        type: string
+      sellermemo:
+        type: string
+      size:
+        type: number
+      status:
+        type: string
+      tid:
+        type: string
+      total:
+        type: number
+      type:
+        type: string
+      weight:
+        type: number
+    type: object
+  grasp.OrderSyncRequest:
+    properties:
+      orders:
+        items:
+          $ref: '#/definitions/grasp.OrderSyncOrder'
+        type: array
     type: object
   logalert.Advanced:
     properties:
@@ -2443,6 +2627,103 @@ definitions:
       param:
         type: string
     type: object
+  models.AddressSetReq:
+    properties:
+      addressLabel:
+        description: 地址标签
+        type: string
+      cityCode:
+        description: 市编码
+        type: string
+      cityName:
+        description: 市名称
+        type: string
+      detailAddress:
+        description: 详细地址
+        type: string
+      districtCode:
+        description: 区编码
+        type: string
+      districtName:
+        description: 区名称
+        type: string
+      id:
+        description: 主键ID
+        example: "0"
+        type: string
+      isDefault:
+        description: 是否默认地址
+        type: boolean
+      postalCode:
+        description: 邮政编码
+        type: string
+      provinceCode:
+        description: 省编码
+        type: string
+      provinceName:
+        description: 省名称
+        type: string
+      receiverMobile:
+        description: 收货人手机号
+        type: string
+      receiverName:
+        description: 收货人姓名
+        type: string
+      status:
+        description: 状态
+        type: integer
+      streetCode:
+        description: 街道编码
+        type: string
+      streetName:
+        description: 街道名称
+        type: string
+    required:
+    - detailAddress
+    - receiverMobile
+    type: object
+  models.CartSetReq:
+    properties:
+      goodsId:
+        description: 商品ID
+        type: string
+      goodsName:
+        description: 商品名称
+        type: string
+      id:
+        description: 主键ID
+        example: "0"
+        type: string
+      imageUrl:
+        description: 图片地址
+        type: string
+      quantity:
+        description: 数量
+        type: integer
+      retailPrice:
+        description: 零售价
+        type: number
+      selected:
+        description: 是否选中
+        type: integer
+      skuId:
+        description: SKU ID
+        type: string
+      skuName:
+        description: SKU名称
+        type: string
+      status:
+        description: 状态
+        type: integer
+      username:
+        description: 用户名
+        type: string
+    required:
+    - goodsId
+    - goodsName
+    - quantity
+    - skuId
+    type: object
   models.Expression:
     properties:
       rules:
@@ -2475,6 +2756,18 @@ definitions:
         example: "0"
         type: string
     type: object
+  models.ShopLoginReq:
+    properties:
+      account:
+        description: 登录账号，支持用户名或手机号
+        type: string
+      password:
+        description: 登录密码
+        type: string
+    required:
+    - account
+    - password
+    type: object
   models.SysDeviceElectricSettingVO:
     properties:
       device_id:
@@ -2492,6 +2785,49 @@ definitions:
       name:
         description: 智能预警名称
         type: string
+    type: object
+  models.UserUpsert:
+    properties:
+      avatar:
+        description: 头像
+        type: string
+      companyName:
+        description: 企业名称
+        type: string
+      contactName:
+        description: 联系人
+        type: string
+      contactPhone:
+        description: 联系人手机号
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      id:
+        description: 主键ID
+        example: "0"
+        type: string
+      mobile:
+        description: 手机号
+        type: string
+      nickname:
+        description: 用户昵称
+        type: string
+      password:
+        description: 密码摘要
+        type: string
+      status:
+        description: 状态
+        type: boolean
+      userType:
+        description: 用户类型
+        type: integer
+      username:
+        description: 用户名
+        type: string
+    required:
+    - userType
+    - username
     type: object
   monitormodels.JobDML:
     properties:
@@ -2598,6 +2934,130 @@ definitions:
         type: string
       userName:
         type: string
+    type: object
+  ordermodels.OrderAccountSet:
+    properties:
+      finance_code:
+        type: string
+      total:
+        type: number
+    type: object
+  ordermodels.OrderDetailSet:
+    properties:
+      barcode:
+        type: string
+      eshop_goods_id:
+        type: string
+      eshop_goods_name:
+        type: string
+      eshop_sku_id:
+        type: string
+      eshop_sku_name:
+        type: string
+      num:
+        type: number
+      numiid:
+        type: integer
+      oid:
+        type: string
+      outeriid:
+        type: string
+      payment:
+        type: number
+      pic_path:
+        type: string
+      size:
+        type: number
+      skuid:
+        type: integer
+      unit_id:
+        type: integer
+      unit_qty:
+        type: number
+      weight:
+        type: number
+    type: object
+  ordermodels.OrderSet:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/ordermodels.OrderAccountSet'
+        type: array
+      b_type_code:
+        type: string
+      bill_code:
+        type: string
+      buyer_message:
+        type: string
+      buyer_nick:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/ordermodels.OrderDetailSet'
+        type: array
+      id:
+        example: "0"
+        type: string
+      invoice_name:
+        type: string
+      logist_b_type_code:
+        type: string
+      logist_bill_code:
+        type: string
+      order_type:
+        type: string
+      pay_time:
+        type: string
+      post_fee:
+        type: number
+      privilege:
+        type: number
+      receiver_address:
+        type: string
+      receiver_city:
+        type: string
+      receiver_city_name:
+        type: string
+      receiver_district:
+        type: string
+      receiver_district_name:
+        type: string
+      receiver_mobile:
+        type: string
+      receiver_name:
+        type: string
+      receiver_phone:
+        type: string
+      receiver_province:
+        type: string
+      receiver_province_name:
+        type: string
+      receiver_street:
+        type: string
+      receiver_street_name:
+        type: string
+      receiver_zip:
+        type: string
+      seller_flag:
+        type: string
+      seller_memo:
+        type: string
+      size:
+        type: number
+      status:
+        type: string
+      sync_message:
+        type: string
+      sync_status:
+        type: integer
+      sync_time:
+        type: string
+      tid:
+        type: string
+      total:
+        type: number
+      weight:
+        type: number
     type: object
   productmodels.SysProductLaboratoryVo:
     properties:
@@ -2753,53 +3213,89 @@ definitions:
   shopmodels.CategoryUpsert:
     properties:
       categoryCode:
+        description: 分类编码
         type: string
       categoryName:
+        description: 分类名称
         type: string
       id:
-        type: integer
+        description: 主键ID
+        example: "0"
+        type: string
       parentId:
-        type: integer
+        description: 父级分类ID
+        example: "0"
+        type: string
       sort:
+        description: 排序值
         type: integer
       status:
-        type: integer
+        description: 状态
+        type: boolean
     required:
     - categoryName
     type: object
   shopmodels.GoodsSkuUpsert:
     properties:
       barcode:
+        description: 条码
+        type: string
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
         type: string
       description:
+        description: 规格描述
         type: string
       galleryImages:
+        description: 图集
         type: string
       goodsId:
+        description: 商品业务ID
         type: string
       id:
+        description: 主键ID
         type: integer
       imageUrl:
+        description: 主图地址
         type: string
       outerId:
+        description: 外部系统ID
         type: string
       quantity:
+        description: 库存数量
         type: integer
       retailPrice:
+        description: 零售价
         type: number
       skuCode:
+        description: 规格编码
         type: string
       skuId:
+        description: 规格业务ID
         type: string
       skuName:
+        description: 规格名称
         type: string
       unit:
+        description: 销售单位
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
         type: string
       videoUrl:
+        description: 视频地址
         type: string
       weight:
+        description: 重量
         type: number
       weightUnit:
+        description: 重量单位
         type: string
     required:
     - goodsId
@@ -2807,70 +3303,67 @@ definitions:
     type: object
   shopmodels.GoodsUpsert:
     properties:
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
       description:
+        description: 商品描述
         type: string
       galleryImages:
+        description: 图集
         type: string
       goodsCode:
+        description: 商品编码
         type: string
       goodsId:
+        description: 商品业务ID
         type: string
       goodsName:
+        description: 商品名称
         type: string
       id:
-        type: integer
+        description: 主键ID
+        example: "0"
+        type: string
       imageUrl:
+        description: 主图地址
         type: string
       isOnSale:
+        description: 是否上架
         type: integer
       outerId:
+        description: 外部系统ID
         type: string
       quantity:
+        description: 库存数量
         type: integer
       retailPrice:
+        description: 零售价
         type: number
       unit:
+        description: 销售单位
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
         type: string
       videoUrl:
+        description: 视频地址
         type: string
       weight:
+        description: 重量
         type: number
       weightUnit:
+        description: 重量单位
         type: string
     required:
     - goodsId
     - goodsName
-    type: object
-  shopmodels.UserUpsert:
-    properties:
-      companyName:
-        type: string
-      contactName:
-        type: string
-      contactPhone:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      mobile:
-        type: string
-      nickname:
-        type: string
-      password:
-        type: string
-      status:
-        type: integer
-      userId:
-        type: string
-      userType:
-        type: integer
-      username:
-        type: string
-    required:
-    - userId
-    - userType
-    - username
     type: object
   systemmodels.Accredit:
     properties:
@@ -3607,6 +4100,122 @@ info:
   title: baize
   version: 2.0.x
 paths:
+  /ai/agent/config/list:
+    get:
+      description: 获取智能体列表
+      parameters:
+      - in: query
+        name: mcpEnabled
+        type: boolean
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: sandboxMode
+        type: string
+      - in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取智能体列表
+      tags:
+      - 工业智能体/智能体管理
+  /ai/agent/config/query/{id}:
+    get:
+      description: 根据ID获取智能体详情
+      parameters:
+      - description: 智能体ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取智能体详情
+      tags:
+      - 工业智能体/智能体管理
+  /ai/agent/config/query/type/{type}:
+    get:
+      description: 通过type查询enable=true的智能体配置
+      parameters:
+      - description: 智能体类型
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取指定类型下已启用的智能体详情
+      tags:
+      - 工业智能体/智能体管理
+  /ai/agent/config/remove/{ids}:
+    delete:
+      description: 删除智能体
+      parameters:
+      - description: 智能体ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除智能体
+      tags:
+      - 工业智能体/智能体管理
+  /ai/agent/config/set:
+    post:
+      description: 保存智能体，id为空时新增，不为空时修改
+      parameters:
+      - description: 智能体保存参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/gatewaymodels.AIAgentUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存智能体
+      tags:
+      - 工业智能体/智能体管理
   /ai/agent/conversations/chat:
     post:
       description: 会话聊天
@@ -3724,6 +4333,27 @@ paths:
       summary: 停止会话生成
       tags:
       - 工业智能体/会话管理
+  /ai/agent/messages/list:
+    get:
+      description: 根据会话ID读取消息列表
+      parameters:
+      - description: 会话ID
+        in: query
+        name: conversationId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 根据会话ID读取消息列表
+      tags:
+      - 工业智能体/消息管理
   /ai/control/list:
     get:
       description: 预测控制列表
@@ -4883,6 +5513,23 @@ paths:
       summary: 读取用户模型
       tags:
       - 工业智能体/模型配置
+  /ai/model/provider/global/remove:
+    delete:
+      description: 删除 SetGlobalModel 保存的用户模型配置
+      parameters:
+      - in: query
+        name: llm_factory
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除用户模型
+      tags:
+      - 工业智能体/模型配置
   /ai/model/provider/global/set:
     post:
       description: 新增或修改用户模型配置，user_id为0表示全局设置
@@ -5071,6 +5718,101 @@ paths:
       summary: 设置智能预警
       tags:
       - 工业智能体/智能预警
+  /ai/skills/list:
+    get:
+      description: 获取已安装技能列表
+      parameters:
+      - in: query
+        name: enabled
+        type: boolean
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: slug
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取已安装技能列表
+      tags:
+      - 工业智能体/已安装技能
+  /ai/skills/query/{id}:
+    get:
+      description: 根据ID获取已安装技能详情
+      parameters:
+      - description: 技能ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取已安装技能详情
+      tags:
+      - 工业智能体/已安装技能
+  /ai/skills/remove/{ids}:
+    delete:
+      description: 根据ID删除已安装技能
+      parameters:
+      - description: 技能ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除已安装技能
+      tags:
+      - 工业智能体/已安装技能
+  /ai/skills/set:
+    post:
+      description: 保存已安装技能，id为空时新增，不为空时修改
+      parameters:
+      - description: 已安装技能保存参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/gatewaymodels.InstalledSkillUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存已安装技能
+      tags:
+      - 工业智能体/已安装技能
   /alert/action/list:
     get:
       description: 告警动作列表
@@ -8397,6 +9139,156 @@ paths:
       summary: 稼动率统计
       tags:
       - 设备监控/设备监控
+  /erp/order/check-login-state:
+    get:
+      description: 检查当前启用 ERP 集成配置的登录状态
+      parameters:
+      - description: 登录状态检查地址
+        in: query
+        name: checkUrl
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 检查管家婆登录状态
+      tags:
+      - ERP/订单管理
+  /erp/order/list:
+    get:
+      description: 按条件分页查询ERP订单
+      parameters:
+      - description: 网店订单编号
+        in: query
+        name: tid
+        type: string
+      - description: 订单状态
+        in: query
+        name: status
+        type: string
+      - description: 同步状态
+        in: query
+        name: syncStatus
+        type: integer
+      - description: 收货人名称
+        in: query
+        name: receiverName
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页条数
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单列表
+      tags:
+      - ERP/订单管理
+  /erp/order/query/{id}:
+    get:
+      description: 根据ID查询ERP订单详情
+      parameters:
+      - description: 订单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单详情
+      tags:
+      - ERP/订单管理
+  /erp/order/remove/{ids}:
+    delete:
+      description: 根据ID删除ERP订单
+      parameters:
+      - description: 订单ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单删除
+      tags:
+      - ERP/订单管理
+  /erp/order/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改ERP订单
+      parameters:
+      - description: ERP订单保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ordermodels.OrderSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单保存
+      tags:
+      - ERP/订单管理
+  /erp/order/synchronize-sales-orders:
+    post:
+      consumes:
+      - application/json
+      description: 调用管家婆订单同步接口推送销售订单
+      parameters:
+      - description: 销售订单同步参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/grasp.OrderSyncRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 同步成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 同步销售订单
+      tags:
+      - ERP/订单管理
   /erp/setting/integration-config/check-login-state:
     get:
       description: 按集成类型检查当前启用配置的登录态
@@ -9470,6 +10362,58 @@ paths:
       summary: 用户登录
       tags:
       - 登录
+  /shop/app/getInfo:
+    get:
+      description: 获取当前商城登录用户信息及权限
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取当前商城登录用户信息
+      tags:
+      - 商城/App鉴权
+  /shop/app/login:
+    post:
+      consumes:
+      - application/json
+      description: 使用 shop_user 账号登录商城
+      parameters:
+      - description: 商城用户登录参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.ShopLoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 商城用户登录
+      tags:
+      - 商城/App鉴权
+  /shop/app/logout:
+    post:
+      description: 退出当前商城登录会话
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 退出成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 退出当前商城登录会话
+      tags:
+      - 商城/App鉴权
   /shop/category:
     post:
       description: 新增商品分类
@@ -9559,21 +10503,26 @@ paths:
     get:
       description: 获取商品分类列表
       parameters:
-      - in: query
+      - description: 分类编码
+        in: query
         name: categoryCode
         type: string
-      - in: query
+      - description: 分类名称
+        in: query
         name: categoryName
         type: string
-      - in: query
+      - description: 页码
+        in: query
         name: page
         type: integer
-      - in: query
+      - description: 每页数量
+        in: query
         name: size
         type: integer
-      - in: query
+      - description: 状态
+        in: query
         name: status
-        type: integer
+        type: boolean
       produces:
       - application/json
       responses:
@@ -9671,26 +10620,54 @@ paths:
       summary: 删除商品
       tags:
       - 商城/商品管理
+  /shop/goods/import:
+    post:
+      description: 导入商品
+      parameters:
+      - description: 商品新增参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.GoodsUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 新增成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 导入商品
+      tags:
+      - 商城/商品管理
   /shop/goods/list:
     get:
       description: 获取商品列表
       parameters:
-      - in: query
+      - description: 商品编码
+        in: query
         name: goodsCode
         type: string
-      - in: query
+      - description: 商品名称
+        in: query
         name: goodsName
         type: string
-      - in: query
+      - description: 是否上架
+        in: query
         name: isOnSale
-        type: integer
-      - in: query
+        type: boolean
+      - description: 外部系统ID
+        in: query
         name: outerId
         type: string
-      - in: query
+      - description: 页码
+        in: query
         name: page
         type: integer
-      - in: query
+      - description: 每页数量
+        in: query
         name: size
         type: integer
       produces:
@@ -9794,25 +10771,32 @@ paths:
     get:
       description: 获取商品规格列表
       parameters:
-      - in: query
+      - description: 条码
+        in: query
         name: barcode
         type: string
-      - in: query
+      - description: 商品业务ID
+        in: query
         name: goodsId
         type: string
-      - in: query
+      - description: 外部系统ID
+        in: query
         name: outerId
         type: string
-      - in: query
+      - description: 页码
+        in: query
         name: page
         type: integer
-      - in: query
+      - description: 每页数量
+        in: query
         name: size
         type: integer
-      - in: query
+      - description: 规格编码
+        in: query
         name: skuCode
         type: string
-      - in: query
+      - description: 规格名称
+        in: query
         name: skuName
         type: string
       produces:
@@ -9836,7 +10820,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/shopmodels.UserUpsert'
+          $ref: '#/definitions/models.UserUpsert'
       produces:
       - application/json
       responses:
@@ -9857,7 +10841,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/shopmodels.UserUpsert'
+          $ref: '#/definitions/models.UserUpsert'
       produces:
       - application/json
       responses:
@@ -9912,26 +10896,285 @@ paths:
       summary: 删除商城用户
       tags:
       - 商城/用户管理
+  /shop/user/address/info/{id}:
+    get:
+      description: 根据ID获取商城用户地址详情
+      parameters:
+      - description: 商城用户地址ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商城用户地址详情
+      tags:
+      - 商城/用户地址
+  /shop/user/address/list:
+    get:
+      description: 获取商城用户地址列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 收货人手机号
+        in: query
+        name: receiverMobile
+        type: string
+      - description: 收货人姓名
+        in: query
+        name: receiverName
+        type: string
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      - description: 用户业务ID
+        in: query
+        name: userId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商城用户地址列表
+      tags:
+      - 商城/用户地址
+  /shop/user/address/query:
+    get:
+      description: 根据ID获取商城用户地址详情
+      parameters:
+      - description: 商城用户地址ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商城用户地址详情
+      tags:
+      - 商城/用户地址
+  /shop/user/address/region:
+    get:
+      description: 不传 parentCode 返回省级列表，传省编码返回市级，传市编码返回区级
+      parameters:
+      - description: 父级行政区编码
+        in: query
+        name: parentCode
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取省市区行政区列表
+      tags:
+      - 商城/用户地址
+  /shop/user/address/remove/{ids}:
+    delete:
+      description: 根据ID删除商城用户地址
+      parameters:
+      - description: 商城用户地址ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除商城用户地址
+      tags:
+      - 商城/用户地址
+  /shop/user/address/set:
+    post:
+      description: 新增或修改商城用户地址
+      parameters:
+      - description: 商城用户地址设置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddressSetReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增或修改商城用户地址
+      tags:
+      - 商城/用户地址
+  /shop/user/cart/info/{id}:
+    get:
+      description: 根据ID获取商城用户购物车详情
+      parameters:
+      - description: 商城用户购物车ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商城用户购物车详情
+      tags:
+      - 商城/用户购物车
+  /shop/user/cart/list:
+    get:
+      description: 获取商城用户购物车列表
+      parameters:
+      - description: 商品ID
+        in: query
+        name: goodsId
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 是否选中
+        in: query
+        name: selected
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: SKU ID
+        in: query
+        name: skuId
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      - description: 用户ID
+        in: query
+        name: userId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商城用户购物车列表
+      tags:
+      - 商城/用户购物车
+  /shop/user/cart/remove/{ids}:
+    delete:
+      description: 根据ID删除商城用户购物车
+      parameters:
+      - description: 商城用户购物车ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除商城用户购物车
+      tags:
+      - 商城/用户购物车
+  /shop/user/cart/set:
+    post:
+      description: 新增或修改商城用户购物车
+      parameters:
+      - description: 商城用户购物车设置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CartSetReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增或修改商城用户购物车
+      tags:
+      - 商城/用户购物车
   /shop/user/list:
     get:
       description: 获取商城用户列表
       parameters:
-      - in: query
+      - description: 手机号
+        in: query
         name: mobile
         type: string
-      - in: query
+      - description: 页码
+        in: query
         name: page
         type: integer
-      - in: query
+      - description: 每页数量
+        in: query
         name: size
         type: integer
-      - in: query
+      - description: 状态
+        in: query
         name: status
-        type: integer
-      - in: query
+        type: boolean
+      - description: 用户类型
+        in: query
         name: userType
         type: integer
-      - in: query
+      - description: 用户名
+        in: query
         name: username
         type: string
       produces:
