@@ -1,6 +1,7 @@
 package gatewaydaoimpl
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -53,7 +54,7 @@ func (a *AIAgentDaoImpl) Update(c *gin.Context, req *gatewaymodels.AIAgentUpsert
 		Select("name", "type", "prompt", "default_llm_provider_id", "default_llm_model_id", "llm_temperature", "llm_top_p",
 			"llm_max_tokens", "enable_llm_temperature", "enable_llm_top_p", "enable_llm_max_tokens",
 			"llm_max_context_count", "sandbox_mode", "sandbox_network", "enable",
-			"work_dir", "mcp_enabled", "mcp_server_ids", "mcp_server_enabled_ids", "update_by", "update_time").
+			"work_dir", "mcp_enabled", "mcp_server_ids", "mcp_server_enabled_ids", "allow_mcp_server_ids_tools", "update_by", "update_time").
 		Updates(item).Error; err != nil {
 		return nil, err
 	}
@@ -86,6 +87,7 @@ func (a *AIAgentDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAge
 		}
 		return nil, err
 	}
+	decodeAllowMcpServerIdsTools(&item)
 	return &item, nil
 }
 
@@ -136,6 +138,9 @@ func (a *AIAgentDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (
 		Find(&rows).Error; err != nil {
 		return nil, err
 	}
+	for _, row := range rows {
+		decodeAllowMcpServerIdsTools(row)
+	}
 	return &gatewaymodels.AIAgentListData{
 		Rows:  rows,
 		Total: total,
@@ -144,25 +149,38 @@ func (a *AIAgentDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (
 
 func buildAIAgentModel(c *gin.Context, req *gatewaymodels.AIAgentUpsert) *gatewaymodels.AIAgent {
 	return &gatewaymodels.AIAgent{
-		Name:                 req.Name,
-		Type:                 req.Type,
-		Prompt:               req.Prompt,
-		DefaultLLMProviderID: req.DefaultLLMProviderID,
-		DefaultLLMModelID:    req.DefaultLLMModelID,
-		LLMTemperature:       req.LLMTemperature,
-		LLMTopP:              req.LLMTopP,
-		LLMMaxTokens:         req.LLMMaxTokens,
-		EnableLLMTemperature: req.EnableLLMTemperature,
-		EnableLLMTopP:        req.EnableLLMTopP,
-		EnableLLMMaxTokens:   req.EnableLLMMaxTokens,
-		LLMMaxContextCount:   req.LLMMaxContextCount,
-		SandboxMode:          req.SandboxMode,
-		SandboxNetwork:       req.SandboxNetwork,
-		WorkDir:              req.WorkDir,
-		MCPEnabled:           req.MCPEnabled,
-		MCPServerIDs:         req.MCPServerIDs,
-		MCPServerEnabledIDs:  req.MCPServerEnabledIDs,
-		Enable:               req.Enable,
-		DeptID:               baizeContext.GetDeptId(c),
+		Name:                      req.Name,
+		Type:                      req.Type,
+		Prompt:                    req.Prompt,
+		DefaultLLMProviderID:      req.DefaultLLMProviderID,
+		DefaultLLMModelID:         req.DefaultLLMModelID,
+		LLMTemperature:            req.LLMTemperature,
+		LLMTopP:                   req.LLMTopP,
+		LLMMaxTokens:              req.LLMMaxTokens,
+		EnableLLMTemperature:      req.EnableLLMTemperature,
+		EnableLLMTopP:             req.EnableLLMTopP,
+		EnableLLMMaxTokens:        req.EnableLLMMaxTokens,
+		LLMMaxContextCount:        req.LLMMaxContextCount,
+		SandboxMode:               req.SandboxMode,
+		SandboxNetwork:            req.SandboxNetwork,
+		WorkDir:                   req.WorkDir,
+		MCPEnabled:                req.MCPEnabled,
+		MCPServerIDs:              req.MCPServerIDs,
+		MCPServerEnabledIDs:       req.MCPServerEnabledIDs,
+		AllowMcpServerIdsToolsRaw: req.AllowMcpServerIdsToolsRaw,
+		Enable:                    req.Enable,
+		DeptID:                    baizeContext.GetDeptId(c),
 	}
+}
+
+func decodeAllowMcpServerIdsTools(item *gatewaymodels.AIAgent) {
+	if item == nil {
+		return
+	}
+	item.AllowMcpServerIdsTools = make(map[string][]string)
+	content := strings.TrimSpace(item.AllowMcpServerIdsToolsRaw)
+	if content == "" {
+		return
+	}
+	_ = json.Unmarshal([]byte(content), &item.AllowMcpServerIdsTools)
 }

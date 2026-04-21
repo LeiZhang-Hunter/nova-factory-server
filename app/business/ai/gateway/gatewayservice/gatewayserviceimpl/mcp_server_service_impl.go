@@ -17,6 +17,7 @@ import (
 const (
 	mcpTransportStdio          = "stdio"
 	mcpTransportStreamableHTTP = "streamableHttp"
+	mcpTransportSse            = "sse"
 )
 
 type MCPServerServiceImpl struct {
@@ -106,8 +107,8 @@ func (m *MCPServerServiceImpl) prepareUpsert(req *gatewaymodels.MCPServerUpsert,
 	if req.Transport == "" {
 		return errors.New("传输方式不能为空")
 	}
-	if req.Transport != mcpTransportStdio && req.Transport != mcpTransportStreamableHTTP {
-		return errors.New("传输方式仅支持 stdio 或 streamableHttp")
+	if req.Transport != mcpTransportStdio && req.Transport != mcpTransportStreamableHTTP && req.Transport != mcpTransportSse {
+		return errors.New("传输方式仅支持 stdio 或 streamableHttp 或sse")
 	}
 
 	req.Description = strings.TrimSpace(req.Description)

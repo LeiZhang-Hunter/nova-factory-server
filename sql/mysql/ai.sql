@@ -306,6 +306,7 @@ CREATE TABLE IF NOT EXISTS ai_agents (
     `mcp_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否启用MCP',
     `mcp_server_ids` text NULL COMMENT 'MCP服务ID列表',
     `mcp_server_enabled_ids` text NULL COMMENT '已启用MCP服务ID列表',
+    `allow_mcp_server_ids_tools` text NULL COMMENT 'MCP服务工具列表',
     `enable` tinyint(1) NULL DEFAULT 0 COMMENT '是否开启，0为关闭 1为开启',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
@@ -321,6 +322,8 @@ CREATE TABLE IF NOT EXISTS ai_agents (
     KEY `idx_ai_agents_mcp_enabled` (`mcp_enabled`)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '智能体配置表';
+
+
 
 CREATE TABLE IF NOT EXISTS mcp_servers (
     id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'MCP服务ID',

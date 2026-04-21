@@ -1,7 +1,10 @@
 package gatewaycontroller
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"go.uber.org/zap"
 	"strconv"
 	"strings"
 
@@ -23,16 +26,18 @@ type Agent struct {
 	service              gatewayservice.IAIAgentService
 	modelProviderService aidatasetservice.IAiModelProviderService
 	agentDao             gatewaydao.IAIAgentDao
+	mcpServerDao         gatewaydao.IMCPServerDao
 	llmDao               aidatasetdao.IAiLLMDao
 	dictDataDao          systemdao.IDictDataDao
 }
 
 // NewAgent 创建智能体控制器。
-func NewAgent(service gatewayservice.IAIAgentService, modelProviderService aidatasetservice.IAiModelProviderService, agentDao gatewaydao.IAIAgentDao, llmDao aidatasetdao.IAiLLMDao, dictDataDao systemdao.IDictDataDao) *Agent {
+func NewAgent(service gatewayservice.IAIAgentService, modelProviderService aidatasetservice.IAiModelProviderService, agentDao gatewaydao.IAIAgentDao, mcpServerDao gatewaydao.IMCPServerDao, llmDao aidatasetdao.IAiLLMDao, dictDataDao systemdao.IDictDataDao) *Agent {
 	return &Agent{
 		service:              service,
 		modelProviderService: modelProviderService,
 		agentDao:             agentDao,
+		mcpServerDao:         mcpServerDao,
 		llmDao:               llmDao,
 		dictDataDao:          dictDataDao,
 	}
@@ -144,6 +149,10 @@ func (agent *Agent) Set(c *gin.Context) {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
+	if err := agent.prepareAllowMcpServerIdsTools(c, req); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
 	var (
 		data *gatewaymodels.AIAgent
 		err  error
@@ -154,10 +163,58 @@ func (agent *Agent) Set(c *gin.Context) {
 		data, err = agent.service.Create(c, req)
 	}
 	if err != nil {
+		zap.L().Error("set agent error", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}
 	baizeContext.SuccessData(c, data)
+}
+
+func (agent *Agent) prepareAllowMcpServerIdsTools(c *gin.Context, req *gatewaymodels.AIAgentUpsert) error {
+	if req == nil {
+		return errors.New("参数不能为空")
+	}
+	if len(req.AllowMcpServerIdsTools) == 0 {
+		req.AllowMcpServerIdsToolsRaw = ""
+		return nil
+	}
+
+	normalized := make(map[string][]string, len(req.AllowMcpServerIdsTools))
+	for serverIDText, tools := range req.AllowMcpServerIdsTools {
+		serverIDText = strings.TrimSpace(serverIDText)
+		if serverIDText == "" {
+			return errors.New("允许使用工具的MCP服务ID不能为空")
+		}
+		serverID, err := strconv.ParseInt(serverIDText, 10, 64)
+		if err != nil || serverID <= 0 {
+			return fmt.Errorf("MCP服务ID格式不正确: %s", serverIDText)
+		}
+		server, err := agent.mcpServerDao.GetByID(c, serverID)
+		if err != nil {
+			return err
+		}
+		if server == nil {
+			return fmt.Errorf("MCP服务不存在: %s", serverIDText)
+		}
+
+		toolNames := make([]string, 0, len(tools))
+		for _, tool := range tools {
+			tool = strings.TrimSpace(tool)
+			if tool == "" {
+				continue
+			}
+			toolNames = append(toolNames, tool)
+		}
+		normalized[serverIDText] = toolNames
+	}
+
+	body, err := json.Marshal(normalized)
+	if err != nil {
+		return fmt.Errorf("允许使用的MCP工具配置编码失败: %w", err)
+	}
+	req.AllowMcpServerIdsTools = normalized
+	req.AllowMcpServerIdsToolsRaw = string(body)
+	return nil
 }
 
 // Delete 删除智能体
