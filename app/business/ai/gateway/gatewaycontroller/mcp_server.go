@@ -22,6 +22,7 @@ func (m *MCPServer) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/ai/mcp/server")
 	group.GET("/list", middlewares.HasPermission("ai:mcp:server:list"), m.List)
 	group.POST("/set", middlewares.HasPermission("ai:mcp:server:set"), m.Set)
+	group.POST("/probe", middlewares.HasPermission("ai:mcp:server:set"), m.McpProbe)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:mcp:server:remove"), m.Delete)
 }
 
@@ -99,4 +100,28 @@ func (m *MCPServer) Delete(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// McpProbe 探测MCP服务连通性和能力
+// @Summary 探测MCP服务
+// @Description 连接指定MCP服务，完成初始化、心跳和工具探测，支持 SSE 和 Streamable HTTP
+// @Tags 工业智能体/MCP服务配置
+// @Param object body gatewaymodels.MCPServerProbeRequest true "MCP服务探测参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "探测成功"
+// @Router /ai/mcp/server/probe [post]
+func (m *MCPServer) McpProbe(c *gin.Context) {
+	req := new(gatewaymodels.MCPServerProbeRequest)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	result, err := m.service.Probe(c.Request.Context(), req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, result)
 }

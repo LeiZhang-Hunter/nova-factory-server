@@ -9,8 +9,8 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"go.uber.org/zap"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"nova-factory-server/app/utils/gin_mcp/pkg/convert"
 	"nova-factory-server/app/utils/gin_mcp/pkg/transport"
@@ -90,6 +90,7 @@ func New(engine *gin.Engine, config *Config) *GinMCP {
 		registeredSchemas: make(map[string]types.RegisteredSchemaInfo),
 		path:              config.Path,
 		mcpServer:         s,
+		handler:           engine,
 	}
 
 	m.executeToolFunc = m.defaultExecuteTool // Initialize with the default implementation
@@ -114,6 +115,12 @@ func New(engine *gin.Engine, config *Config) *GinMCP {
 // This is useful for implementing dynamic baseURL resolution or custom execution logic.
 func (m *GinMCP) SetExecuteToolFunc(fn func(ctx context.Context, operationID string, parameters map[string]interface{}, headers http.Header) (interface{}, error)) {
 	m.executeToolFunc = fn
+}
+
+// UseInMemoryExecuteTool switches tool execution to an in-process Gin handler call.
+// This avoids the extra network hop when the target route is mounted in the same process.
+func (m *GinMCP) UseInMemoryExecuteTool() {
+	m.executeToolFunc = m.inMemoryExecuteTool
 }
 
 // RegisterSchema associates Go struct types with a specific route for automatic schema generation.
@@ -577,13 +584,9 @@ func (m *GinMCP) defaultExecuteTool(ctx context.Context, operationID string, par
 		log.Printf("[Tool Execution] Starting execution of tool '%s' with parameters: %+v", operationID, parameters)
 	}
 
-	// Find the operation associated with the tool name (operationID)
-	operation, ok := m.operations[operationID]
-	if !ok {
-		if isDebugMode() {
-			log.Printf("Error: Operation details not found for tool '%s'", operationID)
-		}
-		return nil, fmt.Errorf("operation '%s' not found", operationID)
+	operation, err := m.getOperation(operationID)
+	if err != nil {
+		return nil, err
 	}
 	if isDebugMode() {
 		log.Printf("[Tool Execution] Found operation for tool '%s': Method=%s, Path=%s", operationID, operation.Method, operation.Path)
@@ -602,10 +605,76 @@ func (m *GinMCP) defaultExecuteTool(ctx context.Context, operationID string, par
 	return m.executeToolLogic(ctx, operation, parameters, baseURL, headers)
 }
 
+// inMemoryExecuteTool executes the mapped Gin route directly in-process without using http.Client.
+func (m *GinMCP) inMemoryExecuteTool(ctx context.Context, operationID string, parameters map[string]interface{}, headers http.Header) (interface{}, error) {
+	if isDebugMode() {
+		log.Printf("[Tool Execution] Starting in-memory execution of tool '%s' with parameters: %+v", operationID, parameters)
+	}
+
+	operation, err := m.getOperation(operationID)
+	if err != nil {
+		return nil, err
+	}
+	if isDebugMode() {
+		log.Printf("[Tool Execution] Found operation for tool '%s': Method=%s, Path=%s", operationID, operation.Method, operation.Path)
+	}
+
+	return m.executeToolLogicInMemory(ctx, operation, parameters, headers)
+}
+
 // executeToolLogic contains the core tool execution logic that can be reused
 // with different baseURL resolution strategies
 func (m *GinMCP) executeToolLogic(ctx context.Context, operation types.Operation, parameters map[string]interface{}, baseURL string, headers http.Header) (interface{}, error) {
+	req, err := m.buildToolRequest(ctx, operation, parameters, baseURL, headers)
+	if err != nil {
+		return nil, err
+	}
 
+	if isDebugMode() {
+		log.Printf("[Tool Execution] Sending request with headers: %+v", req.Header)
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		if isDebugMode() {
+			log.Printf("[Tool Execution] Error executing request: %v", err)
+		}
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return m.parseToolResponse(resp)
+}
+
+// executeToolLogicInMemory executes the mapped route against the local Gin handler directly.
+func (m *GinMCP) executeToolLogicInMemory(ctx context.Context, operation types.Operation, parameters map[string]interface{}, headers http.Header) (interface{}, error) {
+	handler := m.handler
+	if handler == nil {
+		handler = m.engine
+	}
+	if handler == nil {
+		return nil, fmt.Errorf("gin handler is not configured")
+	}
+
+	req, err := m.buildToolRequest(ctx, operation, parameters, "", headers)
+	if err != nil {
+		return nil, err
+	}
+	if isDebugMode() {
+		log.Printf("[Tool Execution] Executing in-memory request: %s %s", req.Method, req.URL.String())
+	}
+
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, req)
+
+	resp := recorder.Result()
+	defer resp.Body.Close()
+
+	return m.parseToolResponse(resp)
+}
+
+func (m *GinMCP) buildToolRequest(ctx context.Context, operation types.Operation, parameters map[string]interface{}, baseURL string, headers http.Header) (*http.Request, error) {
 	path := operation.Path
 	queryParams := url.Values{}
 	pathParams := make(map[string]string)
@@ -645,7 +714,6 @@ func (m *GinMCP) executeToolLogic(ctx context.Context, operation types.Operation
 		log.Printf("[Tool Execution] Making request: %s %s", operation.Method, targetURL)
 	}
 
-	// 3. Create and execute the HTTP request
 	var reqBody io.Reader
 	if operation.Method == "POST" || operation.Method == "PUT" || operation.Method == "PATCH" {
 		// For POST/PUT/PATCH, send all non-path args in the body
@@ -675,7 +743,7 @@ func (m *GinMCP) executeToolLogic(ctx context.Context, operation types.Operation
 		}
 	}
 
-	req, err := http.NewRequest(operation.Method, targetURL, reqBody)
+	req, err := http.NewRequestWithContext(ctx, operation.Method, targetURL, reqBody)
 	if err != nil {
 		if isDebugMode() {
 			log.Printf("[Tool Execution] Error creating request: %v", err)
@@ -683,31 +751,25 @@ func (m *GinMCP) executeToolLogic(ctx context.Context, operation types.Operation
 		return nil, err
 	}
 
-	// 再次创建一个可取消的 context，嵌套原始的 context
-	authorization := headers.Get("Authorization")
-	//req.Header.Set("Authorization")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", authorization)
-	if reqBody != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
-
-	if isDebugMode() {
-		log.Printf("[Tool Execution] Sending request with headers: %+v", req.Header)
-	}
-
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		if isDebugMode() {
-			log.Printf("[Tool Execution] Error executing request: %v", err)
+	for key, values := range headers {
+		for _, value := range values {
+			req.Header.Add(key, value)
 		}
-		return nil, err
 	}
-	defer resp.Body.Close()
+	if req.Header.Get("Accept") == "" {
+		req.Header.Set("Accept", "application/json")
+	}
+	if reqBody != nil {
+		if req.Header.Get("Content-Type") == "" {
+			req.Header.Set("Content-Type", "application/json")
+		}
+	}
 
-	// 4. Read and parse the response
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	return req, nil
+}
+
+func (m *GinMCP) parseToolResponse(resp *http.Response) (interface{}, error) {
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		if isDebugMode() {
 			log.Printf("[Tool Execution] Error reading response body: %v", err)
@@ -745,6 +807,17 @@ func (m *GinMCP) executeToolLogic(ctx context.Context, operation types.Operation
 	}
 
 	return resultData, nil
+}
+
+func (m *GinMCP) getOperation(operationID string) (types.Operation, error) {
+	operation, ok := m.operations[operationID]
+	if !ok {
+		if isDebugMode() {
+			log.Printf("Error: Operation details not found for tool '%s'", operationID)
+		}
+		return types.Operation{}, fmt.Errorf("operation '%s' not found", operationID)
+	}
+	return operation, nil
 }
 
 // BaseURLResolver is a function type for resolving baseURL dynamically

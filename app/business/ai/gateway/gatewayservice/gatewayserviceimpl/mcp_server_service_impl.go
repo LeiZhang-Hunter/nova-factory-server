@@ -1,16 +1,17 @@
 package gatewayserviceimpl
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/url"
+	"nova-factory-server/app/utils/mcp"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/ai/gateway/gatewaydao"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
-
-	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -83,6 +84,10 @@ func (m *MCPServerServiceImpl) List(c *gin.Context, req *gatewaymodels.MCPServer
 	}
 	req.Transport = normalizeTransport(req.Transport)
 	return m.dao.List(c, req)
+}
+
+func (m *MCPServerServiceImpl) Probe(ctx context.Context, req *gatewaymodels.MCPServerProbeRequest) (*gatewaymodels.MCPServerProbeResult, error) {
+	return mcp.ProbeMCPServer(ctx, req)
 }
 
 func (m *MCPServerServiceImpl) prepareUpsert(req *gatewaymodels.MCPServerUpsert, isUpdate bool) error {

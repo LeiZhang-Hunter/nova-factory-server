@@ -56,6 +56,7 @@ func NewGinApp() *App {
 		Description: "API for managing products.",
 		BaseURL:     "http://localhost:8080",
 	})
+	mpcServer.UseInMemoryExecuteTool()
 	//type McpConfig struct {
 	//	Path           string `mapstructure:"path"`
 	//	OperationsPath string `mapstructure:"operationsPath"`

@@ -1,6 +1,11 @@
 package gatewaymodels
 
-import "nova-factory-server/app/baize"
+import (
+	"encoding/json"
+	"nova-factory-server/app/baize"
+
+	"github.com/mark3labs/mcp-go/mcp"
+)
 
 type MCPServer struct {
 	ID          int64  `gorm:"column:id;primaryKey" json:"id,string"`
@@ -46,4 +51,24 @@ type MCPServerUpsert struct {
 type MCPServerListData struct {
 	Rows  []*MCPServer `json:"rows"`
 	Total int64        `json:"total"`
+}
+
+type MCPServerProbeRequest struct {
+	Transport string          `json:"transport"`
+	URL       string          `json:"url"`
+	Headers   json.RawMessage `json:"headers"`
+	Timeout   int32           `json:"timeout"`
+}
+
+type MCPServerProbeResult struct {
+	Transport         string                 `json:"transport"`
+	URL               string                 `json:"url"`
+	ProtocolVersion   string                 `json:"protocolVersion"`
+	ServerInfo        mcp.Implementation     `json:"serverInfo"`
+	Capabilities      mcp.ServerCapabilities `json:"capabilities"`
+	Tools             []mcp.Tool             `json:"tools"`
+	Prompts           []mcp.Prompt           `json:"prompts,omitempty"`
+	Resources         []mcp.Resource         `json:"resources,omitempty"`
+	ResourceTemplates []mcp.ResourceTemplate `json:"resourceTemplates,omitempty"`
+	Warnings          []string               `json:"warnings,omitempty"`
 }
