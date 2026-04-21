@@ -22,7 +22,7 @@ func (m *MCPServer) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/ai/mcp/server")
 	group.GET("/list", middlewares.HasPermission("ai:mcp:server:list"), m.List)
 	group.POST("/set", middlewares.HasPermission("ai:mcp:server:set"), m.Set)
-	group.POST("/probe", middlewares.HasPermission("ai:mcp:server:set"), m.McpProbe)
+	group.POST("/probe", middlewares.HasPermission("ai:mcp:server:probe"), m.McpProbe)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:mcp:server:remove"), m.Delete)
 }
 
