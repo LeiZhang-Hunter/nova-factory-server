@@ -5,7 +5,9 @@ import (
 	"reflect"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
+	"time"
 
 	"go/ast"
 	"go/parser"
@@ -220,32 +222,7 @@ func reflectAndAddProperties(goType interface{}, properties map[string]*types.JS
 			continue
 		}
 
-		propSchema := &types.JSONSchema{}
-
-		// Basic type mapping
-		switch field.Type.Kind() {
-		case reflect.String:
-			propSchema.Type = "string"
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			propSchema.Type = "integer"
-		case reflect.Float32, reflect.Float64:
-			propSchema.Type = "number"
-		case reflect.Bool:
-			propSchema.Type = "boolean"
-		case reflect.Slice, reflect.Array:
-			propSchema.Type = "array"
-			// TODO: Implement items schema based on element type
-			propSchema.Items = &types.JSONSchema{Type: "string"} // Placeholder
-		case reflect.Map:
-			propSchema.Type = "object"
-			// TODO: Implement properties schema based on map key/value types
-		case reflect.Struct:
-			propSchema.Type = "object"
-			// Potentially recurse, but keep simple for now
-		default:
-			propSchema.Type = "string" // Default fallback
-		}
+		propSchema := schemaFromReflectType(field.Type, map[reflect.Type]bool{})
 
 		// Basic 'required' and 'description' handling from jsonschema tag
 		isRequired := false // Default to not required
@@ -257,8 +234,20 @@ func reflectAndAddProperties(goType interface{}, properties map[string]*types.JS
 					isRequired = true
 				} else if strings.HasPrefix(trimmed, "description=") {
 					propSchema.Description = strings.TrimPrefix(trimmed, "description=")
+				} else if strings.HasPrefix(trimmed, "minimum=") {
+					if minimum, ok := parseFloatTagValue(strings.TrimPrefix(trimmed, "minimum=")); ok {
+						propSchema.Minimum = &minimum
+					}
+				} else if strings.HasPrefix(trimmed, "maximum=") {
+					if maximum, ok := parseFloatTagValue(strings.TrimPrefix(trimmed, "maximum=")); ok {
+						propSchema.Maximum = &maximum
+					}
+				} else if strings.HasPrefix(trimmed, "enum=") {
+					enumValues := parseEnumTagValues(strings.TrimPrefix(trimmed, "enum="), field.Type)
+					if len(enumValues) > 0 {
+						propSchema.Enum = enumValues
+					}
 				}
-				// TODO: Add more tag parsing (minimum, maximum, enum, etc.)
 			}
 		}
 
@@ -270,6 +259,199 @@ func reflectAndAddProperties(goType interface{}, properties map[string]*types.JS
 			*required = append(*required, fieldName)
 		}
 	}
+}
+
+func schemaFromReflectType(fieldType reflect.Type, visiting map[reflect.Type]bool) *types.JSONSchema {
+	if fieldType == nil {
+		return &types.JSONSchema{Type: "string"}
+	}
+
+	for fieldType.Kind() == reflect.Ptr {
+		fieldType = fieldType.Elem()
+	}
+
+	if fieldType == nil {
+		return &types.JSONSchema{Type: "string"}
+	}
+
+	if fieldType == reflect.TypeOf(time.Time{}) {
+		return &types.JSONSchema{Type: "string"}
+	}
+
+	switch fieldType.Kind() {
+	case reflect.String:
+		return &types.JSONSchema{Type: "string"}
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return &types.JSONSchema{Type: "integer"}
+	case reflect.Float32, reflect.Float64:
+		return &types.JSONSchema{Type: "number"}
+	case reflect.Bool:
+		return &types.JSONSchema{Type: "boolean"}
+	case reflect.Slice, reflect.Array:
+		return &types.JSONSchema{
+			Type:  "array",
+			Items: schemaFromReflectType(fieldType.Elem(), visiting),
+		}
+	case reflect.Map:
+		return &types.JSONSchema{
+			Type:                 "object",
+			AdditionalProperties: schemaFromReflectType(fieldType.Elem(), visiting),
+		}
+	case reflect.Struct:
+		schema := &types.JSONSchema{
+			Type:       "object",
+			Properties: make(map[string]*types.JSONSchema),
+			Required:   make([]string, 0),
+		}
+		if visiting[fieldType] {
+			return schema
+		}
+		visiting[fieldType] = true
+		reflectTypeFields(fieldType, schema.Properties, &schema.Required, visiting)
+		delete(visiting, fieldType)
+		return schema
+	case reflect.Interface:
+		return &types.JSONSchema{Type: "object"}
+	default:
+		return &types.JSONSchema{Type: "string"}
+	}
+}
+
+func reflectTypeFields(t reflect.Type, properties map[string]*types.JSONSchema, required *[]string, visiting map[reflect.Type]bool) {
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if !field.IsExported() {
+			continue
+		}
+
+		jsonTag := field.Tag.Get("json")
+		formTag := field.Tag.Get("form")
+		jsonschemaTag := field.Tag.Get("jsonschema")
+		fieldName := field.Name
+		ignoreField := false
+
+		if jsonTag != "" {
+			parts := strings.Split(jsonTag, ",")
+			if parts[0] == "-" {
+				ignoreField = true
+			} else if parts[0] != "" {
+				fieldName = parts[0]
+			}
+		} else if formTag != "" {
+			parts := strings.Split(formTag, ",")
+			if parts[0] == "-" {
+				ignoreField = true
+			} else if parts[0] != "" {
+				fieldName = parts[0]
+			}
+		}
+
+		if ignoreField {
+			continue
+		}
+
+		if field.Anonymous && jsonTag == "" && formTag == "" {
+			embeddedType := field.Type
+			for embeddedType.Kind() == reflect.Ptr {
+				embeddedType = embeddedType.Elem()
+			}
+			if embeddedType.Kind() == reflect.Struct {
+				reflectTypeFields(embeddedType, properties, required, visiting)
+				continue
+			}
+		}
+
+		propSchema := schemaFromReflectType(field.Type, visiting)
+		isRequired := false
+		if jsonschemaTag != "" {
+			parts := strings.Split(jsonschemaTag, ",")
+			for _, part := range parts {
+				trimmed := strings.TrimSpace(part)
+				if trimmed == "required" {
+					isRequired = true
+				} else if strings.HasPrefix(trimmed, "description=") {
+					propSchema.Description = strings.TrimPrefix(trimmed, "description=")
+				} else if strings.HasPrefix(trimmed, "minimum=") {
+					if minimum, ok := parseFloatTagValue(strings.TrimPrefix(trimmed, "minimum=")); ok {
+						propSchema.Minimum = &minimum
+					}
+				} else if strings.HasPrefix(trimmed, "maximum=") {
+					if maximum, ok := parseFloatTagValue(strings.TrimPrefix(trimmed, "maximum=")); ok {
+						propSchema.Maximum = &maximum
+					}
+				} else if strings.HasPrefix(trimmed, "enum=") {
+					enumValues := parseEnumTagValues(strings.TrimPrefix(trimmed, "enum="), field.Type)
+					if len(enumValues) > 0 {
+						propSchema.Enum = enumValues
+					}
+				}
+			}
+		}
+
+		properties[fieldName] = propSchema
+		if isRequired {
+			*required = append(*required, fieldName)
+		}
+	}
+}
+
+func parseFloatTagValue(raw string) (float64, bool) {
+	value, err := strconv.ParseFloat(strings.TrimSpace(raw), 64)
+	if err != nil {
+		return 0, false
+	}
+	return value, true
+}
+
+func parseEnumTagValues(raw string, fieldType reflect.Type) []any {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+
+	for fieldType.Kind() == reflect.Ptr {
+		fieldType = fieldType.Elem()
+	}
+
+	items := strings.Split(raw, "|")
+	values := make([]any, 0, len(items))
+	for _, item := range items {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			continue
+		}
+
+		switch fieldType.Kind() {
+		case reflect.Bool:
+			parsed, err := strconv.ParseBool(item)
+			if err == nil {
+				values = append(values, parsed)
+				continue
+			}
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			parsed, err := strconv.ParseInt(item, 10, 64)
+			if err == nil {
+				values = append(values, parsed)
+				continue
+			}
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			parsed, err := strconv.ParseUint(item, 10, 64)
+			if err == nil {
+				values = append(values, parsed)
+				continue
+			}
+		case reflect.Float32, reflect.Float64:
+			parsed, err := strconv.ParseFloat(item, 64)
+			if err == nil {
+				values = append(values, parsed)
+				continue
+			}
+		}
+
+		values = append(values, item)
+	}
+	return values
 }
 
 // HandlerDoc stores function documentation

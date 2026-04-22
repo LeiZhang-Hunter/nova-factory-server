@@ -397,15 +397,17 @@ func TestGenerateInputSchema_WithPathAndBody(t *testing.T) {
 // --- Tests for reflectAndAddProperties (also called indirectly) ---
 
 type ReflectTestStruct struct {
-	RequiredString string  `json:"req_str" jsonschema:"required,description=A required string"`
-	OptionalInt    int     `json:"opt_int,omitempty"`
-	DefaultName    bool    // No tags
-	Hyphenated     string  `json:"-"`          // Ignored
-	FormQuery      float64 `form:"form_query"` // Use form tag if json missing
-	unexported     string  // Ignored
-	SliceField     []int   `json:"slice_field"` // Basic slice support
-	// MapField    map[string]string `json:"map_field"` // TODO: Test when map support added
-	// StructField TestBody          `json:"struct_field"` // TODO: Test when struct recursion added
+	RequiredString string            `json:"req_str" jsonschema:"required,description=A required string"`
+	OptionalInt    int               `json:"opt_int,omitempty"`
+	DefaultName    bool              // No tags
+	Hyphenated     string            `json:"-"`          // Ignored
+	FormQuery      float64           `form:"form_query"` // Use form tag if json missing
+	unexported     string            // Ignored
+	SliceField     []int             `json:"slice_field"`
+	MapField       map[string]string `json:"map_field"`
+	StructField    TestBody          `json:"struct_field"`
+	EnumField      string            `json:"enum_field" jsonschema:"enum=pending|approved|rejected"`
+	RangeField     int               `json:"range_field" jsonschema:"minimum=1,maximum=10"`
 }
 
 func TestReflectAndAddProperties(t *testing.T) {
@@ -416,7 +418,7 @@ func TestReflectAndAddProperties(t *testing.T) {
 	reflectAndAddProperties(ReflectTestStruct{}, properties, &required, "test")
 
 	// Check properties
-	assert.Len(t, properties, 5, "Should have 5 exported, non-ignored fields")
+	assert.Len(t, properties, 9, "Should have 9 exported, non-ignored fields")
 
 	// req_str
 	assert.Contains(t, properties, "req_str")
@@ -439,7 +441,29 @@ func TestReflectAndAddProperties(t *testing.T) {
 	assert.Contains(t, properties, "slice_field")
 	assert.Equal(t, "array", properties["slice_field"].Type)
 	require.NotNil(t, properties["slice_field"].Items, "Array items schema should exist")
-	assert.Equal(t, "string", properties["slice_field"].Items.Type, "Basic array item type is string") // Placeholder
+	assert.Equal(t, "integer", properties["slice_field"].Items.Type)
+
+	assert.Contains(t, properties, "map_field")
+	assert.Equal(t, "object", properties["map_field"].Type)
+	require.NotNil(t, properties["map_field"].AdditionalProperties)
+	assert.Equal(t, "string", properties["map_field"].AdditionalProperties.Type)
+
+	assert.Contains(t, properties, "struct_field")
+	assert.Equal(t, "object", properties["struct_field"].Type)
+	require.Contains(t, properties["struct_field"].Properties, "bodyField")
+	require.Contains(t, properties["struct_field"].Properties, "numField")
+	assert.Equal(t, "string", properties["struct_field"].Properties["bodyField"].Type)
+	assert.Equal(t, "integer", properties["struct_field"].Properties["numField"].Type)
+	assert.Contains(t, properties["struct_field"].Required, "bodyField")
+
+	assert.Contains(t, properties, "enum_field")
+	assert.Equal(t, []any{"pending", "approved", "rejected"}, properties["enum_field"].Enum)
+
+	assert.Contains(t, properties, "range_field")
+	require.NotNil(t, properties["range_field"].Minimum)
+	require.NotNil(t, properties["range_field"].Maximum)
+	assert.Equal(t, 1.0, *properties["range_field"].Minimum)
+	assert.Equal(t, 10.0, *properties["range_field"].Maximum)
 
 	// Check ignored fields
 	assert.NotContains(t, properties, "-")
@@ -453,6 +477,7 @@ func TestReflectAndAddProperties(t *testing.T) {
 	assert.NotContains(t, required, "DefaultName") // Not marked required
 	assert.NotContains(t, required, "form_query")  // Not marked required
 	assert.NotContains(t, required, "slice_field") // Not marked required
+	assert.NotContains(t, required, "struct_field")
 
 	assert.NotContains(t, required, "opt_int") // Has omitempty and not marked required
 }

@@ -52,10 +52,14 @@ func NewGinApp() *App {
 
 	// --- Configure MCP Server ---
 	mpcServer := server.New(r, &server.Config{
-		Name:        "Product API",
-		Description: "API for managing products.",
-		BaseURL:     "http://localhost:8080",
+		Name:              "Product API",
+		Description:       "API for managing products.",
+		BaseURL:           "http://localhost:8080",
+		IncludeOperations: []string{
+			//"POST_erp_order-audit_import",
+		},
 	})
+	mpcServer.UseInMemoryExecuteTool()
 	pprof.Register(r)
 	return &App{
 		Engine:    r,

@@ -79,11 +79,15 @@ type RegisteredSchemaInfo struct {
 // JSONSchema represents a basic JSON Schema structure.
 // This needs to be expanded based on actual schema generation needs.
 type JSONSchema struct {
-	Type        string                 `json:"type"`
-	Description string                 `json:"description,omitempty"`
-	Properties  map[string]*JSONSchema `json:"properties,omitempty"`
-	Required    []string               `json:"required,omitempty"`
-	Items       *JSONSchema            `json:"items,omitempty"` // For array type
+	Type                 string                 `json:"type"`
+	Description          string                 `json:"description,omitempty"`
+	Properties           map[string]*JSONSchema `json:"properties,omitempty"`
+	Required             []string               `json:"required,omitempty"`
+	Items                *JSONSchema            `json:"items,omitempty"` // For array type
+	AdditionalProperties *JSONSchema            `json:"additionalProperties,omitempty"`
+	Minimum              *float64               `json:"minimum,omitempty"`
+	Maximum              *float64               `json:"maximum,omitempty"`
+	Enum                 []any                  `json:"enum,omitempty"`
 	// Add other JSON Schema fields as needed (e.g., format, enum, etc.)
 }
 

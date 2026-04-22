@@ -44,7 +44,6 @@ func (lc *Laboratory) PublicRoutes(router *gin.RouterGroup) {
 }
 
 func (lc *Laboratory) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
-	router.RegisterSchema("GET", "/api/v1/product/laboratory/first/list", nil, productmodels.SysProductLaboratoryDQL{})
 }
 
 // LaboratoryList 化验单列表

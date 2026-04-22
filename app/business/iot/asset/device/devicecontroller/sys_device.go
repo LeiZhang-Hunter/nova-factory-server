@@ -22,7 +22,7 @@ func NewDeviceInfo(d deviceservice.IDeviceService) *DeviceInfo {
 }
 
 func (di *DeviceInfo) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
-	router.RegisterSchema("GET", "/asset/device/list", devicemodels.DeviceListReq{}, nil)
+	//router.RegisterSchema("GET", "/asset/device/list", devicemodels.DeviceListReq{}, nil)
 }
 
 func (di *DeviceInfo) PrivateRoutes(router *gin.RouterGroup) {

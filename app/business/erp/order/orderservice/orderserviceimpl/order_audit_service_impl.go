@@ -29,6 +29,10 @@ func (o *OrderAuditServiceImpl) Set(c *gin.Context, req *ordermodels.OrderAuditS
 	return o.dao.Set(c, req)
 }
 
+func (o *OrderAuditServiceImpl) ImportData(c *gin.Context, req *ordermodels.OrderAuditSet) (*ordermodels.OrderAudit, error) {
+
+	return o.dao.Set(c, req)
+}
 func (o *OrderAuditServiceImpl) Import(c *gin.Context, req *ordermodels.OrderAuditImportReq) (*ordermodels.OrderAuditImportResult, error) {
 	if req == nil || len(req.Records) == 0 {
 		return nil, errors.New("导入记录不能为空")
@@ -44,7 +48,7 @@ func (o *OrderAuditServiceImpl) Import(c *gin.Context, req *ordermodels.OrderAud
 		if record != nil {
 			item.Tid = strings.TrimSpace(record.Tid)
 		}
-		data, err := o.Set(c, record)
+		data, err := o.ImportData(c, record)
 		if err != nil {
 			item.Success = false
 			item.Message = err.Error()

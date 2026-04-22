@@ -547,8 +547,6 @@ func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.
 		panic(err)
 	}
 
-	// 2. Define your API routes (Gin-MCP will discover these)
-
-	app.McpServer.Mount(mcpConfig.Path, mcpConfig.OperationsPath)
+	app.McpServer.Mount()
 	return app.Engine
 }

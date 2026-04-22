@@ -47,7 +47,7 @@ func (d *DeviceMonitor) PublicRoutes(router *gin.RouterGroup) {
 }
 
 func (d *DeviceMonitor) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
-	router.RegisterSchema("POST", "/api/v1/metric/predict/query", nil, metricmodels.GatewayMetricDataQueryReq{})
+	//router.RegisterSchema("POST", "/api/v1/metric/predict/query", nil, metricmodels.GatewayMetricDataQueryReq{})
 }
 
 // List 设备监控

@@ -162,7 +162,7 @@ func (a *AIAgentMessageDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentM
 	}
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	rows := make([]*gatewaymodels.AIAgentMessage, 0)
-	query := db.Order("conversation_id ASC").Order("update_time DESC")
+	query := db.Order("conversation_id ASC").Order("create_time asc")
 	if req.Size > 0 {
 		query = query.Offset(int((req.Page - 1) * req.Size)).Limit(int(req.Size))
 	}

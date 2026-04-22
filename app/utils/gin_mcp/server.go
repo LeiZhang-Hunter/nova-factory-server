@@ -197,6 +197,22 @@ func toSchemaMap(schema *types.JSONSchema) map[string]any {
 		result["items"] = toSchemaMap(schema.Items)
 	}
 
+	if schema.AdditionalProperties != nil {
+		result["additionalProperties"] = toSchemaMap(schema.AdditionalProperties)
+	}
+
+	if schema.Minimum != nil {
+		result["minimum"] = *schema.Minimum
+	}
+
+	if schema.Maximum != nil {
+		result["maximum"] = *schema.Maximum
+	}
+
+	if len(schema.Enum) > 0 {
+		result["enum"] = schema.Enum
+	}
+
 	return result
 }
 
@@ -228,33 +244,7 @@ func toMCPTool(tool types.Tool) mcp.Tool {
 }
 
 // Mount sets up the MCP routes on the given path
-func (m *GinMCP) Mount(path string, operationsPath string) {
-	//content, err := os.ReadFile(path)
-	//if err != nil {
-	//	zap.L().Error("read mcp config error", zap.Error(err))
-	//	return
-	//}
-	//
-	//operationsContent, err := os.ReadFile(operationsPath)
-	//if err != nil {
-	//	zap.L().Error("read mcp config error", zap.Error(err))
-	//	return
-	//}
-	//
-	//var tools []mcp.Tool = make([]mcp.Tool, 0)
-	//err = json.Unmarshal(content, &tools)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//err = json.Unmarshal(operationsContent, &m.operations)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//if len(tools) == 0 {
-	//	return
-	//}
+func (m *GinMCP) Mount() {
 
 	if len(m.tools) == 0 {
 		routes := m.engine.Routes()
@@ -269,6 +259,8 @@ func (m *GinMCP) Mount(path string, operationsPath string) {
 		m.operations = operations
 		m.tools = append(m.tools, newTools...)
 	}
+
+	m.filterTools()
 
 	for _, tool := range m.tools {
 		m.mcpServer.AddTool(toMCPTool(tool), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -294,12 +286,6 @@ func (m *GinMCP) Mount(path string, operationsPath string) {
 
 	sseServer := server.NewSSEServer(m.mcpServer, server.WithStaticBasePath("/mcp"))
 
-	//httpWrap := &wrappedHTTP{Handler: sseServer}
-	//m.handler = sseServer
-	//m.engine.Any("/mcp", func(c *gin.Context) {
-	//	sseServer.SSEHandler().ServeHTTP(c.Writer, c.Request)
-	//})
-
 	m.engine.Any("/mcp", func(c *gin.Context) {
 		sseServer.SSEHandler().ServeHTTP(c.Writer, c.Request)
 		//httpWrap.ServeHTTP(c.Writer, c.Request)
@@ -310,72 +296,6 @@ func (m *GinMCP) Mount(path string, operationsPath string) {
 		//httpWrap.ServeHTTP(c.Writer, c.Request)
 	})
 	return
-	//if mountPath == "" {
-	//	mountPath = "/mcp"
-	//}
-	//
-	//// 1. Setup tools
-	//if err := m.SetupServer(); err != nil {
-	//	if isDebugMode() {
-	//		log.Printf("Failed to setup server: %v", err)
-	//	}
-	//	return
-	//}
-	//
-	//// 2. Create transport and register handlers
-	//m.transport = transport.NewSSETransport(mountPath)
-	//m.transport.RegisterHandler("initialize", m.handleInitialize)
-	//m.transport.RegisterHandler("tools/list", m.handleToolsList)
-	//m.transport.RegisterHandler("tools/call", m.handleToolCall)
-	//
-	//// 3. Setup CORS middleware
-	//m.engine.Use(func(c *gin.Context) {
-	//	if isDebugMode() {
-	//		log.Printf("[Middleware] Processing request: Method=%s, Path=%s, RemoteAddr=%s", c.Request.Method, c.Request.URL.Path, c.Request.RemoteAddr)
-	//	}
-	//
-	//	if strings.HasPrefix(c.Request.URL.Path, mountPath) {
-	//		if isDebugMode() {
-	//			log.Printf("[Middleware] Path %s matches mountPath %s. Applying headers.", c.Request.URL.Path, mountPath)
-	//		}
-	//		c.Header("Access-Control-Allow-Origin", "*")
-	//		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	//		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, X-Connection-ID")
-	//		c.Header("Access-Control-Expose-Headers", "X-Connection-ID")
-	//
-	//		if c.Request.Method == "OPTIONS" {
-	//			if isDebugMode() {
-	//				log.Printf("[Middleware] OPTIONS request for %s. Aborting with 204.", c.Request.URL.Path)
-	//			}
-	//			c.AbortWithStatus(204)
-	//			return
-	//		} else if c.Request.Method == "POST" {
-	//			if isDebugMode() {
-	//				log.Printf("[Middleware] POST request for %s. Proceeding to handler.", c.Request.URL.Path)
-	//			}
-	//		}
-	//	} else {
-	//		if isDebugMode() {
-	//			log.Printf("[Middleware] Path %s does NOT match mountPath %s. Skipping custom logic.", c.Request.URL.Path, mountPath)
-	//		}
-	//	}
-	//	c.Next() // Ensure processing continues
-	//	if isDebugMode() {
-	//		log.Printf("[Middleware] Finished processing request: Method=%s, Path=%s, Status=%d", c.Request.Method, c.Request.URL.Path, c.Writer.Status())
-	//	}
-	//})
-	//
-	//// 4. Setup endpoints
-	//if isDebugMode() {
-	//	log.Printf("[Server Mount DEBUG] Defining GET %s route", mountPath)
-	//}
-	//m.engine.GET(mountPath, m.handleMCPConnection)
-	//if isDebugMode() {
-	//	log.Printf("[Server Mount DEBUG] Defining POST %s route", mountPath)
-	//}
-	//m.engine.POST(mountPath, func(c *gin.Context) {
-	//	m.transport.HandleMessage(c)
-	//})
 }
 
 // handleMCPConnection handles a new MCP connection request
