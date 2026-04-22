@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"strconv"
 	"strings"
 
@@ -163,7 +162,6 @@ func (agent *Agent) Set(c *gin.Context) {
 		data, err = agent.service.Create(c, req)
 	}
 	if err != nil {
-		zap.L().Error("set agent error", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}

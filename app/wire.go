@@ -4,6 +4,9 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
+	"github.com/spf13/viper"
 	"nova-factory-server/app/business/admin"
 	"nova-factory-server/app/business/ai"
 	"nova-factory-server/app/business/erp"
@@ -11,12 +14,22 @@ import (
 	"nova-factory-server/app/business/shop"
 	"nova-factory-server/app/datasource"
 	"nova-factory-server/app/routes"
-
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
 )
 
 func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.Shop, _ *erp.Erp) *gin.Engine {
+	type McpConfig struct {
+		Path           string `mapstructure:"path"`
+		OperationsPath string `mapstructure:"operationsPath"`
+	}
+	// 把读取到的配置信息反序列化到 Conf 变量中
+	var mcpConfig McpConfig
+	if err := viper.UnmarshalKey("mcp", &mcpConfig); err != nil {
+		panic(err)
+	}
+
+	// 4. Mount the MCP server endpoint
+	app.McpServer.Mount(mcpConfig.Path,
+		mcpConfig.OperationsPath) // MCP clients will connect here
 	return app.Engine
 }
 

@@ -26,6 +26,13 @@ func NewGinEngine(app *routes.App, cache cache.Cache, setting *settingcontroller
 		setting.IntegrationConfig.PrivateRoutes(group)
 		setting.Logistics.PrivateRoutes(group)
 		order.Order.PrivateRoutes(group)
+		order.OrderAudit.PrivateRoutes(group)
+	}
+
+	// mpc
+	{
+		// 订单审计导入mcp
+		order.OrderAudit.PrivateMcpRoutes(app.McpServer)
 	}
 	return &Erp{}
 }

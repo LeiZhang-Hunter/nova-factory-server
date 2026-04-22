@@ -28,6 +28,72 @@ CREATE TABLE IF NOT EXISTS `erp_integration_config` (
     UNIQUE INDEX `type`(`type`) USING BTREE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='erp集成系统';
 
+CREATE TABLE IF NOT EXISTS `erp_order_audit` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `tid` VARCHAR(50) NOT NULL COMMENT '网店订单编号',
+    `weight` DECIMAL(18,4) DEFAULT NULL COMMENT '订单重量',
+    `size` DECIMAL(18,4) DEFAULT NULL COMMENT '订单尺寸/体积',
+
+    `buyer_nick` VARCHAR(50) DEFAULT NULL COMMENT '买家账号',
+    `buyer_message` VARCHAR(50) DEFAULT NULL COMMENT '买家留言',
+    `seller_memo` VARCHAR(50) DEFAULT NULL COMMENT '卖家备注',
+
+    `total` DECIMAL(20,8) DEFAULT NULL COMMENT '订单总金额（含运费）',
+    `privilege` DECIMAL(20,8) NOT NULL DEFAULT 0.00000000 COMMENT '订单优惠金额',
+    `post_fee` DECIMAL(20,8) NOT NULL DEFAULT 0.00000000 COMMENT '运费',
+
+    `receiver_name` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '收货人名称',
+    `receiver_province` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '收货省编码',
+    `receiver_province_name` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '收货省名称',
+    `receiver_city` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '收货市编码',
+    `receiver_city_name` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '收货市名称',
+    `receiver_district` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '收货区编码',
+    `receiver_district_name` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '收货区名称',
+    `receiver_street` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '收货街道编码',
+    `receiver_street_name` VARCHAR(50) NOT NULL DEFAULT '' COMMENT '收货街道名称',
+    `receiver_address` VARCHAR(255) NOT NULL COMMENT '收货详细地址',
+    `receiver_phone` VARCHAR(50) DEFAULT NULL COMMENT '收货电话',
+    `receiver_mobile` VARCHAR(50) NOT NULL COMMENT '收货人手机号',
+    `receiver_zip` VARCHAR(20) DEFAULT NULL COMMENT '邮编',
+
+    `status` VARCHAR(200) NOT NULL COMMENT '来源订单状态',
+    `order_type` VARCHAR(50) NOT NULL COMMENT '订单类型（Cod/NoCod）',
+    `invoice_name` VARCHAR(50) DEFAULT NULL COMMENT '发票抬头',
+    `seller_flag` VARCHAR(50) DEFAULT NULL COMMENT '卖家旗帜',
+    `pay_time` DATETIME(0) DEFAULT NULL COMMENT '付款时间',
+
+    `logist_b_type_code` VARCHAR(100) DEFAULT NULL COMMENT '物流公司编码',
+    `logist_bill_code` VARCHAR(100) DEFAULT NULL COMMENT '物流单号',
+    `b_type_code` VARCHAR(50) DEFAULT NULL COMMENT '往来单位编码',
+
+    `details_json` LONGTEXT COMMENT '订单商品明细JSON',
+    `accounts_json` LONGTEXT COMMENT '订单账户信息JSON',
+    `source_json` LONGTEXT COMMENT '原始订单报文JSON',
+
+    `audit_status` TINYINT NOT NULL DEFAULT 0 COMMENT '审核状态：0待审核 1审核通过 2审核驳回',
+    `audit_remark` VARCHAR(500) DEFAULT NULL COMMENT '审核意见',
+    `audit_by` BIGINT(20) NULL DEFAULT NULL COMMENT '审核人',
+    `audit_time` DATETIME(0) DEFAULT NULL COMMENT '审核时间',
+
+    `transfer_status` TINYINT NOT NULL DEFAULT 0 COMMENT '入正式订单状态：0未入库 1已入库 2入库失败',
+    `transfer_message` VARCHAR(500) DEFAULT NULL COMMENT '入正式订单结果描述',
+    `transfer_time` DATETIME(0) DEFAULT NULL COMMENT '入正式订单时间',
+    `erp_order_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '审核通过后生成的正式订单ID',
+
+    `dept_id` BIGINT(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` BIGINT(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` DATETIME(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` BIGINT(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` DATETIME(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` TINYINT(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `uk_erp_order_audit_tid` (`tid`) USING BTREE,
+    INDEX `idx_erp_order_audit_status` (`audit_status`) USING BTREE,
+    INDEX `idx_erp_order_audit_transfer_status` (`transfer_status`) USING BTREE,
+    INDEX `idx_erp_order_audit_erp_order_id` (`erp_order_id`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ERP订单审核表';
+
 CREATE TABLE IF NOT EXISTS `erp_order` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `tid` VARCHAR(50) NOT NULL COMMENT '网店订单编号',

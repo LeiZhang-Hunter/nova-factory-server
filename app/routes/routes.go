@@ -1,8 +1,7 @@
 package routes
 
 import (
-	"github.com/spf13/viper"
-	"nova-factory-server/app/utils/gin_mcp"
+	server "nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/logger"
 	"time"
 
@@ -23,7 +22,7 @@ import (
 
 type App struct {
 	Engine    *gin.Engine
-	McpServer *gin_mcp.GinMCP
+	McpServer *server.GinMCP
 }
 
 var ProviderSet = wire.NewSet(NewGinApp)
@@ -52,26 +51,11 @@ func NewGinApp() *App {
 	})
 
 	// --- Configure MCP Server ---
-	mpcServer := gin_mcp.New(r, &gin_mcp.Config{
+	mpcServer := server.New(r, &server.Config{
 		Name:        "Product API",
 		Description: "API for managing products.",
 		BaseURL:     "http://localhost:8080",
 	})
-	mpcServer.UseInMemoryExecuteTool()
-	type McpConfig struct {
-		Path           string `mapstructure:"path"`
-		OperationsPath string `mapstructure:"operationsPath"`
-	}
-	// 把读取到的配置信息反序列化到 Conf 变量中
-	var mcpConfig McpConfig
-	if err := viper.UnmarshalKey("mcp", &mcpConfig); err != nil {
-		panic(err)
-	}
-
-	// 4. Mount the MCP server endpoint
-	mpcServer.Mount(mcpConfig.Path,
-		mcpConfig.OperationsPath) // MCP clients will connect here
-
 	pprof.Register(r)
 	return &App{
 		Engine:    r,

@@ -8,6 +8,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"nova-factory-server/app/business/admin"
 	"nova-factory-server/app/business/admin/monitor/monitorcontroller"
 	"nova-factory-server/app/business/admin/monitor/monitordao/monitorDaoImpl"
@@ -519,8 +520,12 @@ func wireApp() (*gin.Engine, func(), error) {
 	iOrderDao := orderdaoimpl.NewOrderDao(db)
 	iOrderService := orderserviceimpl.NewOrderService(iOrderDao, iIntegrationConfigDao, cacheCache)
 	order := ordercontroller.NewOrder(iOrderService)
+	iOrderAuditDao := orderdaoimpl.NewOrderAuditDao(db)
+	iOrderAuditService := orderserviceimpl.NewOrderAuditService(iOrderAuditDao, iOrderDao)
+	orderAudit := ordercontroller.NewOrderAudit(iOrderAuditService)
 	ordercontrollerController := &ordercontroller.Controller{
-		Order: order,
+		Order:      order,
+		OrderAudit: orderAudit,
 	}
 	erpErp := erp.NewGinEngine(app, cacheCache, settingcontrollerController, ordercontrollerController)
 	engine := finalEngine(app, adminAdmin, iotIot, aiAI, shopShop, erpErp)
@@ -532,5 +537,18 @@ func wireApp() (*gin.Engine, func(), error) {
 // wire.go:
 
 func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.Shop, _ *erp.Erp) *gin.Engine {
+	type McpConfig struct {
+		Path           string `mapstructure:"path"`
+		OperationsPath string `mapstructure:"operationsPath"`
+	}
+	// 把读取到的配置信息反序列化到 Conf 变量中
+	var mcpConfig McpConfig
+	if err := viper.UnmarshalKey("mcp", &mcpConfig); err != nil {
+		panic(err)
+	}
+
+	// 2. Define your API routes (Gin-MCP will discover these)
+
+	app.McpServer.Mount(mcpConfig.Path, mcpConfig.OperationsPath)
 	return app.Engine
 }

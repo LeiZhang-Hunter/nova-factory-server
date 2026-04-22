@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -167,37 +166,112 @@ func (m *GinMCP) RegisterSchema(method string, path string, queryType interface{
 	}
 }
 
+func toSchemaMap(schema *types.JSONSchema) map[string]any {
+	if schema == nil {
+		return map[string]any{
+			"type": "object",
+		}
+	}
+
+	result := map[string]any{
+		"type": schema.Type,
+	}
+
+	if schema.Description != "" {
+		result["description"] = schema.Description
+	}
+
+	if len(schema.Properties) > 0 {
+		properties := map[string]any{}
+		for name, prop := range schema.Properties {
+			properties[name] = toSchemaMap(prop)
+		}
+		result["properties"] = properties
+	}
+
+	if len(schema.Required) > 0 {
+		result["required"] = schema.Required
+	}
+
+	if schema.Items != nil {
+		result["items"] = toSchemaMap(schema.Items)
+	}
+
+	return result
+}
+
+func toMCPToolInputSchema(schema *types.JSONSchema) mcp.ToolInputSchema {
+	if schema == nil {
+		return mcp.ToolInputSchema{
+			Type: "object",
+		}
+	}
+
+	properties := map[string]any{}
+	for name, prop := range schema.Properties {
+		properties[name] = toSchemaMap(prop)
+	}
+
+	return mcp.ToolInputSchema{
+		Type:       schema.Type,
+		Properties: properties,
+		Required:   schema.Required,
+	}
+}
+
+func toMCPTool(tool types.Tool) mcp.Tool {
+	return mcp.Tool{
+		Name:        tool.Name,
+		Description: tool.Description,
+		InputSchema: toMCPToolInputSchema(tool.InputSchema),
+	}
+}
+
 // Mount sets up the MCP routes on the given path
 func (m *GinMCP) Mount(path string, operationsPath string) {
-	content, err := os.ReadFile(path)
-	if err != nil {
-		zap.L().Error("read mcp config error", zap.Error(err))
-		return
+	//content, err := os.ReadFile(path)
+	//if err != nil {
+	//	zap.L().Error("read mcp config error", zap.Error(err))
+	//	return
+	//}
+	//
+	//operationsContent, err := os.ReadFile(operationsPath)
+	//if err != nil {
+	//	zap.L().Error("read mcp config error", zap.Error(err))
+	//	return
+	//}
+	//
+	//var tools []mcp.Tool = make([]mcp.Tool, 0)
+	//err = json.Unmarshal(content, &tools)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//err = json.Unmarshal(operationsContent, &m.operations)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//if len(tools) == 0 {
+	//	return
+	//}
+
+	if len(m.tools) == 0 {
+		routes := m.engine.Routes()
+
+		// Lock schema map while converting
+		m.schemasMu.RLock()
+		// Convert routes to tools with registered types
+		newTools, operations := convert.ConvertRoutesToTools(routes, m.registeredSchemas)
+		content, _ := json.Marshal(newTools)
+		fmt.Println(string(content))
+		m.schemasMu.RUnlock()
+		m.operations = operations
+		m.tools = append(m.tools, newTools...)
 	}
 
-	operationsContent, err := os.ReadFile(operationsPath)
-	if err != nil {
-		zap.L().Error("read mcp config error", zap.Error(err))
-		return
-	}
-
-	var tools []mcp.Tool = make([]mcp.Tool, 0)
-	err = json.Unmarshal(content, &tools)
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.Unmarshal(operationsContent, &m.operations)
-	if err != nil {
-		panic(err)
-	}
-
-	if len(tools) == 0 {
-		return
-	}
-
-	for _, tool := range tools {
-		m.mcpServer.AddTool(tool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	for _, tool := range m.tools {
+		m.mcpServer.AddTool(toMCPTool(tool), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			// Execute the actual Gin endpoint via internal HTTP call
 			//execResult, err := m.executeToolFunc(tool.Name, request.Params) // Use the function field
 			arguments, ok := request.Params.Arguments.(map[string]interface{})
