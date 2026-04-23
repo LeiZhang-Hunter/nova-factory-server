@@ -26,7 +26,7 @@ func NewAIGatewayService(gatewayService gatewayservice.IAIGatewayService) aidata
 		gatewayService: gatewayService,
 		config: &coreclient.Config{
 			Algorithm:          coreclient.AlgorithmRoundRobin,
-			APIKeyHeader:       "Authorization",
+			APIKeyHeader:       "Authorization-Api-Key",
 			APIKeyPrefix:       "Bearer ",
 			AgentGatewayHeader: "X-Agent-Gateway",
 		},

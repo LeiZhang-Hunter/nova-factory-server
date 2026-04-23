@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"strconv"
 	"strings"
 
@@ -133,6 +134,7 @@ func (agent *Agent) GetEnabledByType(c *gin.Context) {
 func (agent *Agent) Set(c *gin.Context) {
 	req := new(gatewaymodels.AIAgentUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {
+		zap.L().Error("bind param error", zap.Error(err))
 		baizeContext.ParameterError(c)
 		return
 	}

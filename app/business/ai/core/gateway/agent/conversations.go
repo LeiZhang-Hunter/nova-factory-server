@@ -59,7 +59,7 @@ func (c *Conversations) Chat(ctx *gin.Context, req *api.SendMessageInput) (*api.
 		return nil, err
 	}
 	headers["X-User-Id"] = encryptString
-
+	headers["authorization"] = ctx.GetHeader("authorization")
 	resp, _, err := c.client.DoRaw(ctx, client.Request{
 		Method:  "POST",
 		Path:    "/api/agent/chat",
