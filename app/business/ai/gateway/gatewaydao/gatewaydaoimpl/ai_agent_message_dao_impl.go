@@ -2,6 +2,7 @@ package gatewaydaoimpl
 
 import (
 	"errors"
+	"sort"
 	"time"
 
 	"nova-factory-server/app/business/ai/gateway/gatewaydao"
@@ -162,13 +163,33 @@ func (a *AIAgentMessageDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentM
 	}
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	rows := make([]*gatewaymodels.AIAgentMessage, 0)
-	query := db.Order("conversation_id ASC").Order("create_time asc")
+	query := db.Order("conversation_id ASC").Order("create_time ASC").Order("id ASC")
 	if req.Size > 0 {
 		query = query.Offset(int((req.Page - 1) * req.Size)).Limit(int(req.Size))
 	}
 	if err := query.Find(&rows).Error; err != nil {
 		return nil, err
 	}
+	sort.SliceStable(rows, func(i, j int) bool {
+		left := rows[i]
+		right := rows[j]
+		if left == nil || right == nil {
+			return left != nil
+		}
+		if left.ConversationID != right.ConversationID {
+			return left.ConversationID < right.ConversationID
+		}
+		if left.CreateTime == nil || right.CreateTime == nil {
+			if left.CreateTime == nil && right.CreateTime == nil {
+				return left.ID < right.ID
+			}
+			return left.CreateTime != nil
+		}
+		if !left.CreateTime.Equal(*right.CreateTime) {
+			return left.CreateTime.Before(*right.CreateTime)
+		}
+		return left.ID < right.ID
+	})
 	return &gatewaymodels.AIAgentMessageListData{
 		Rows:  rows,
 		Total: total,
