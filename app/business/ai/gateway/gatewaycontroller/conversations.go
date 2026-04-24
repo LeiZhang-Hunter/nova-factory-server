@@ -188,7 +188,7 @@ func (conversations *Conversations) Chat(c *gin.Context) {
 			c.Writer.Header().Set("X-Upstream-Status-Code", strconv.Itoa(data.StatusCode))
 		}
 		c.Status(http.StatusOK)
-		streamErr := sse.Transport(c.Writer, data.Body, 60*time.Second)
+		streamErr := sse.Transport(c.Writer, data.Body, 300*time.Second)
 		if streamErr != nil {
 			if writeErr := sse.WriteErrorEvent(c.Writer, streamErr.Error()); writeErr != nil {
 				zap.L().Warn("sse write error event failed", zap.Error(writeErr))

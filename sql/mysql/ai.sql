@@ -350,3 +350,54 @@ CREATE TABLE IF NOT EXISTS mcp_servers (
     KEY `idx_mcp_servers_enabled` (`enabled`)
 ) ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'mcp服务器配置';
+
+
+CREATE TABLE IF NOT EXISTS installed_skills (
+    `id` bigint(20) NOT NULL COMMENT '主键ID',
+    name         varchar(255) NOT NULL COMMENT '名字',
+    slug         varchar(255) NOT NULL COMMENT '技能唯一标识',
+    version       varchar(255) NOT NULL DEFAULT ''  COMMENT '版本',
+    source       TEXT NOT NULL COMMENT '出处',
+    description       TEXT NOT NULL COMMENT 'description',
+    enabled      BOOLEAN DEFAULT 1,
+    `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) DEFAULT NULL COMMENT '创建时间(系统)',
+    `update_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) DEFAULT NULL COMMENT '更新时间(系统)',
+    `state` tinyint(1) DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    KEY `idx_slug` (`slug`)
+    );
+
+CREATE TABLE IF NOT EXISTS ai_agent_messages (
+ `id` bigint(20) NOT NULL COMMENT '主键ID',
+    conversation_id bigint(20) NOT NULL,
+    role TEXT NULL,
+    content TEXT NULL,
+    provider_id varchar(255) NOT NULL,
+    model_id varchar(255) NOT NULL,
+    status TEXT NULL,
+    error TEXT  NULL ,
+    input_tokens bigint(20) DEFAULT 0,
+    output_tokens bigint(20) DEFAULT 0,
+    finish_reason TEXT NULL,
+    tool_calls TEXT NULL,
+    tool_call_id TEXT NULL,
+    tool_call_name TEXT NULL,
+    thinking_content TEXT NULL,
+    segments TEXT NULL,
+    images_json TEXT NULL,
+    `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) DEFAULT NULL COMMENT '创建时间(系统)',
+    `update_by` bigint(20) DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) DEFAULT NULL COMMENT '更新时间(系统)',
+    `state` tinyint(1) DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    KEY `idx_messages_provider_id` (`provider_id`),
+    KEY `idx_messages_model_id` (`model_id`),
+    KEY `idx_conversation_id` (`conversation_id`);
+
+ALTER TABLE ai_agent_messages MODIFY COLUMN tool_calls LONGTEXT NULL;
+ALTER TABLE ai_agent_messages MODIFY COLUMN content LONGTEXT NULL;
