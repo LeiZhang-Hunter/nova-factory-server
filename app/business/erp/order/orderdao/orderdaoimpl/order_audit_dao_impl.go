@@ -90,9 +90,7 @@ func (o *OrderAuditDaoImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.Ord
 }
 
 func (o *OrderAuditDaoImpl) List(c *gin.Context, req *ordermodels.OrderAuditQuery) (*ordermodels.OrderAuditListData, error) {
-	db := o.db.WithContext(c).Table(o.table).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Where("state = ?", commonStatus.NORMAL)
+	db := o.db.WithContext(c).Table(o.table)
 	if req != nil {
 		if strings.TrimSpace(req.Tid) != "" {
 			db = db.Where("tid LIKE ?", "%"+strings.TrimSpace(req.Tid)+"%")
@@ -107,6 +105,8 @@ func (o *OrderAuditDaoImpl) List(c *gin.Context, req *ordermodels.OrderAuditQuer
 			db = db.Where("receiver_name LIKE ?", "%"+strings.TrimSpace(req.ReceiverName)+"%")
 		}
 	}
+
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	page := int64(1)
 	size := int64(20)
 	if req != nil && req.Page > 0 {
