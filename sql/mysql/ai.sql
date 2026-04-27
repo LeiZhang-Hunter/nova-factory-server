@@ -374,7 +374,7 @@ CREATE TABLE IF NOT EXISTS ai_agent_messages (
  `id` bigint(20) NOT NULL COMMENT '主键ID',
     conversation_id bigint(20) NOT NULL,
     role TEXT NULL,
-    content TEXT NULL,
+    content LONGTEXT NULL,
     provider_id varchar(255) NOT NULL,
     model_id varchar(255) NOT NULL,
     status TEXT NULL,
@@ -382,11 +382,11 @@ CREATE TABLE IF NOT EXISTS ai_agent_messages (
     input_tokens bigint(20) DEFAULT 0,
     output_tokens bigint(20) DEFAULT 0,
     finish_reason TEXT NULL,
-    tool_calls TEXT NULL,
+    tool_calls LONGTEXT NULL,
     tool_call_id TEXT NULL,
     tool_call_name TEXT NULL,
-    thinking_content TEXT NULL,
-    segments TEXT NULL,
+    thinking_content LONGTEXT NULL,
+    segments LONGTEXT NULL,
     images_json TEXT NULL,
     `dept_id` bigint(20) DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) DEFAULT NULL COMMENT '创建者',
@@ -397,7 +397,7 @@ CREATE TABLE IF NOT EXISTS ai_agent_messages (
     PRIMARY KEY (`id`),
     KEY `idx_messages_provider_id` (`provider_id`),
     KEY `idx_messages_model_id` (`model_id`),
-    KEY `idx_conversation_id` (`conversation_id`);
+    KEY `idx_conversation_id` (`conversation_id`));
 
-ALTER TABLE ai_agent_messages MODIFY COLUMN tool_calls LONGTEXT NULL;
-ALTER TABLE ai_agent_messages MODIFY COLUMN content LONGTEXT NULL;
+alter table ai_agent_messages MODIFY column segments LONGTEXT NULL;
+alter table ai_agent_messages MODIFY column thinking_content LONGTEXT NULL;

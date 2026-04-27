@@ -2208,8 +2208,79 @@ definitions:
         description: 数据名字
         type: string
     type: object
+  gatewaymodels.AIAgentMessage:
+    properties:
+      content:
+        type: string
+      conversationId:
+        example: "0"
+        type: string
+      createBy:
+        description: 创建人
+        type: integer
+      createTime:
+        description: 创建时间
+        type: string
+      deptId:
+        type: integer
+      error:
+        type: string
+      finishReason:
+        type: string
+      id:
+        example: "0"
+        type: string
+      imagesJson:
+        type: string
+      inputTokens:
+        type: integer
+      modelId:
+        type: string
+      outputTokens:
+        type: integer
+      providerId:
+        type: string
+      role:
+        type: string
+      segments:
+        type: string
+      state:
+        type: integer
+      status:
+        type: string
+      thinkingContent:
+        type: string
+      toolCallId:
+        type: string
+      toolCallName:
+        type: string
+      toolCalls:
+        type: string
+      updateBy:
+        description: 修改人
+        type: integer
+      updateTime:
+        description: 修改时间
+        type: string
+    type: object
+  gatewaymodels.AIAgentMessageListData:
+    properties:
+      rows:
+        items:
+          $ref: '#/definitions/gatewaymodels.AIAgentMessage'
+        type: array
+      total:
+        type: integer
+    type: object
   gatewaymodels.AIAgentUpsert:
     properties:
+      allowMcpServerIdsTools:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: 允许描述的工具 mcp server id => tools
+        type: object
       defaultLlmModelId:
         type: string
       defaultLlmProviderId:
@@ -2273,6 +2344,8 @@ definitions:
         type: string
       version:
         type: string
+    type: object
+  gatewaymodels.MCPServerProbeRequest:
     type: object
   gatewaymodels.MCPServerUpsert:
     properties:
@@ -2942,6 +3015,97 @@ definitions:
       total:
         type: number
     type: object
+  ordermodels.OrderAuditAction:
+    properties:
+      audit_remark:
+        type: string
+      id:
+        example: "0"
+        type: string
+    type: object
+  ordermodels.OrderAuditImportReq:
+    properties:
+      records:
+        items:
+          $ref: '#/definitions/ordermodels.OrderAuditSet'
+        type: array
+    type: object
+  ordermodels.OrderAuditSet:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/ordermodels.OrderAccountSet'
+        type: array
+      b_type_code:
+        type: string
+      buyer_message:
+        type: string
+      buyer_nick:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/ordermodels.OrderDetailSet'
+        type: array
+      id:
+        example: "0"
+        type: string
+      invoice_name:
+        type: string
+      logist_b_type_code:
+        type: string
+      logist_bill_code:
+        type: string
+      order_type:
+        type: string
+      pay_time:
+        type: string
+      post_fee:
+        type: number
+      privilege:
+        type: number
+      receiver_address:
+        type: string
+      receiver_city:
+        type: string
+      receiver_city_name:
+        type: string
+      receiver_district:
+        type: string
+      receiver_district_name:
+        type: string
+      receiver_mobile:
+        type: string
+      receiver_name:
+        type: string
+      receiver_phone:
+        type: string
+      receiver_province:
+        type: string
+      receiver_province_name:
+        type: string
+      receiver_street:
+        type: string
+      receiver_street_name:
+        type: string
+      receiver_zip:
+        type: string
+      seller_flag:
+        type: string
+      seller_memo:
+        type: string
+      size:
+        type: number
+      source_json:
+        type: string
+      status:
+        type: string
+      tid:
+        type: string
+      total:
+        type: number
+      weight:
+        type: number
+    type: object
   ordermodels.OrderDetailSet:
     properties:
       barcode:
@@ -3199,6 +3363,23 @@ definitions:
         description: 提示信息
         type: string
     type: object
+  settingmodels.AgentConfigUpsert:
+    properties:
+      agentId:
+        type: string
+      id:
+        example: "0"
+        type: string
+      name:
+        type: string
+      remark:
+        type: string
+      status:
+        type: boolean
+    required:
+    - agentId
+    - name
+    type: object
   settingmodels.IntegrationConfigSet:
     properties:
       data:
@@ -3209,6 +3390,60 @@ definitions:
         type: string
     required:
     - type
+    type: object
+  settingmodels.LogisticsCompanyUpsert:
+    properties:
+      address:
+        type: string
+      cityCode:
+        type: string
+      cityName:
+        type: string
+      code:
+        type: string
+      company:
+        type: string
+      contactName:
+        type: string
+      contactPhone:
+        type: string
+      districtCode:
+        type: string
+      districtName:
+        type: string
+      id:
+        example: "0"
+        type: string
+      name:
+        type: string
+      provinceCode:
+        type: string
+      provinceName:
+        type: string
+      remark:
+        type: string
+      shortName:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: boolean
+      streetCode:
+        type: string
+      streetName:
+        type: string
+    required:
+    - cityCode
+    - cityName
+    - code
+    - company
+    - districtCode
+    - districtName
+    - name
+    - provinceCode
+    - provinceName
+    - streetCode
+    - streetName
     type: object
   shopmodels.CategoryUpsert:
     properties:
@@ -4335,12 +4570,10 @@ paths:
       - 工业智能体/会话管理
   /ai/agent/messages/list:
     get:
-      description: 根据会话ID读取消息列表
+      description: 根据会话ID查询该会话下的全部消息记录，按创建时间正序返回
       parameters:
-      - description: 会话ID
-        in: query
-        name: conversationId
-        required: true
+      - in: query
+        name: conversation_id
         type: integer
       produces:
       - application/json
@@ -4348,7 +4581,7 @@ paths:
         "200":
           description: 获取成功
           schema:
-            $ref: '#/definitions/response.ResponseData'
+            $ref: '#/definitions/gatewaymodels.AIAgentMessageListData'
       security:
       - BearerAuth: []
       summary: 根据会话ID读取消息列表
@@ -5453,6 +5686,28 @@ paths:
       summary: 获取MCP服务配置列表
       tags:
       - 工业智能体/MCP服务配置
+  /ai/mcp/server/probe:
+    post:
+      description: 连接指定MCP服务，完成初始化、心跳和工具探测，支持 SSE 和 Streamable HTTP
+      parameters:
+      - description: MCP服务探测参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/gatewaymodels.MCPServerProbeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 探测成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 探测MCP服务
+      tags:
+      - 工业智能体/MCP服务配置
   /ai/mcp/server/remove/{ids}:
     delete:
       description: 删除MCP服务配置
@@ -6265,6 +6520,21 @@ paths:
       summary: 读取调度任务
       tags:
       - 工艺管理/生产任务管理
+  /api/v1/app/shop/category/all:
+    get:
+      description: 读取商城全部商品分类，并按父子关系返回树形结构
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 读取全部商品分类
+      tags:
+      - app接口/商城/App商品分类
   /api/v1/building/list:
     get:
       description: 读取建筑物以及楼层详情列表
@@ -9139,6 +9409,184 @@ paths:
       summary: 稼动率统计
       tags:
       - 设备监控/设备监控
+  /erp/order-audit/approve:
+    post:
+      consumes:
+      - application/json
+      description: 审核通过订单审核记录并转入正式ERP订单
+      parameters:
+      - description: 订单审核动作参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ordermodels.OrderAuditAction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 审核通过成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单审核通过
+      tags:
+      - ERP/订单审核
+  /erp/order-audit/import:
+    post:
+      consumes:
+      - application/json
+      description: 批量导入订单审核记录
+      parameters:
+      - description: ERP订单审核批量导入参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ordermodels.OrderAuditImportReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 导入成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单审核批量导入
+      tags:
+      - ERP/订单审核
+  /erp/order-audit/list:
+    get:
+      description: 按条件分页查询ERP订单审核记录
+      parameters:
+      - description: 网店订单编号
+        in: query
+        name: tid
+        type: string
+      - description: 审核状态
+        in: query
+        name: auditStatus
+        type: integer
+      - description: 转正式订单状态
+        in: query
+        name: transferStatus
+        type: integer
+      - description: 收货人名称
+        in: query
+        name: receiverName
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页条数
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单审核列表
+      tags:
+      - ERP/订单审核
+  /erp/order-audit/query/{id}:
+    get:
+      description: 根据ID查询ERP订单审核详情
+      parameters:
+      - description: 订单审核ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单审核详情
+      tags:
+      - ERP/订单审核
+  /erp/order-audit/reject:
+    post:
+      consumes:
+      - application/json
+      description: 驳回订单审核记录
+      parameters:
+      - description: 订单审核动作参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ordermodels.OrderAuditAction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 驳回成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单审核驳回
+      tags:
+      - ERP/订单审核
+  /erp/order-audit/remove/{ids}:
+    delete:
+      description: 根据ID删除ERP订单审核记录
+      parameters:
+      - description: 订单审核ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单审核删除
+      tags:
+      - ERP/订单审核
+  /erp/order-audit/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改ERP订单审核记录
+      parameters:
+      - description: ERP订单审核保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/ordermodels.OrderAuditSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单审核保存
+      tags:
+      - ERP/订单审核
   /erp/order/check-login-state:
     get:
       description: 检查当前启用 ERP 集成配置的登录状态
@@ -9395,6 +9843,200 @@ paths:
       security:
       - BearerAuth: []
       summary: 集成配置设置
+      tags:
+      - ERP/系统配置
+  /erp/setting/logistics-company/{id}:
+    get:
+      description: 根据ID查询 ERP物流公司详情
+      parameters:
+      - description: 物流公司ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询 ERP物流公司详情
+      tags:
+      - ERP/系统配置
+  /erp/setting/logistics-company/{ids}:
+    delete:
+      description: 根据ID删除 ERP物流公司，多个ID用逗号分隔
+      parameters:
+      - description: 物流公司ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除 ERP物流公司
+      tags:
+      - ERP/系统配置
+  /erp/setting/logistics-company/list:
+    get:
+      description: 按条件分页查询 ERP物流公司列表
+      parameters:
+      - in: query
+        name: code
+        type: string
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: status
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询 ERP物流公司列表
+      tags:
+      - ERP/系统配置
+  /erp/setting/logistics-company/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改 ERP物流公司
+      parameters:
+      - description: ERP物流公司参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/settingmodels.LogisticsCompanyUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增或修改 ERP物流公司
+      tags:
+      - ERP/系统配置
+  /erp/setting/sale/agent-config/{id}:
+    get:
+      description: 根据ID查询销售订单智能体配置详情
+      parameters:
+      - description: 配置ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 销售订单智能体配置详情
+      tags:
+      - ERP/系统配置
+  /erp/setting/sale/agent-config/{ids}:
+    delete:
+      description: 根据ID删除销售订单智能体配置，多个ID用逗号分隔
+      parameters:
+      - description: 配置ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除销售订单智能体配置
+      tags:
+      - ERP/系统配置
+  /erp/setting/sale/agent-config/list:
+    get:
+      description: 按条件分页查询销售订单智能体配置
+      parameters:
+      - in: query
+        name: agentId
+        type: string
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: status
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 销售订单智能体配置列表
+      tags:
+      - ERP/系统配置
+  /erp/setting/sale/agent-config/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改销售订单智能体配置
+      parameters:
+      - description: 销售订单智能体配置参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/settingmodels.AgentConfigUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 销售订单智能体配置设置
       tags:
       - ERP/系统配置
   /file/downloadPrivateFile:

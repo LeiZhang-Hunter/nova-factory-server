@@ -86,6 +86,20 @@ func (s *ShopCategoryDaoImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Cat
 	return &item, nil
 }
 
+func (s *ShopCategoryDaoImpl) All(c *gin.Context) ([]*shopmodels.Category, error) {
+	rows := make([]*shopmodels.Category, 0)
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("status = ?", true).
+		Where("state = ?", commonStatus.NORMAL).
+		Order("depth ASC").
+		Order("sort ASC").
+		Order("id ASC").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func (s *ShopCategoryDaoImpl) ListByIDs(c *gin.Context, ids []int64) ([]*shopmodels.Category, error) {
 	if len(ids) == 0 {
 		return []*shopmodels.Category{}, nil

@@ -292,6 +292,14 @@ func (m *mockShopCategoryDao) GetByID(c *gin.Context, id int64) (*shopmodels.Cat
 	return nil, nil
 }
 
+func (m *mockShopCategoryDao) All(c *gin.Context) ([]*shopmodels.Category, error) {
+	rows := make([]*shopmodels.Category, 0, len(m.byID))
+	for _, item := range m.byID {
+		rows = append(rows, item)
+	}
+	return rows, nil
+}
+
 func (m *mockShopCategoryDao) ListByIDs(c *gin.Context, ids []int64) ([]*shopmodels.Category, error) {
 	rows := make([]*shopmodels.Category, 0, len(ids))
 	for _, id := range ids {

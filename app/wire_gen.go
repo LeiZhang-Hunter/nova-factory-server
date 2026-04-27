@@ -497,7 +497,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Auth: authAuth,
 	}
 	productProduct := product.NewProduct()
-	productCategory := product.NewCategory()
+	productCategory := product.NewCategory(iShopCategoryService)
 	productController := &product.Controller{
 		Product:  productProduct,
 		Category: productCategory,

@@ -387,7 +387,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据会话ID读取消息列表",
+                "description": "根据会话ID查询该会话下的全部消息记录，按创建时间正序返回",
                 "produces": [
                     "application/json"
                 ],
@@ -398,17 +398,15 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "会话ID",
-                        "name": "conversationId",
-                        "in": "query",
-                        "required": true
+                        "name": "conversation_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "获取成功",
                         "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
+                            "$ref": "#/definitions/gatewaymodels.AIAgentMessageListData"
                         }
                     }
                 }
@@ -2119,6 +2117,42 @@
                 }
             }
         },
+        "/ai/mcp/server/probe": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "连接指定MCP服务，完成初始化、心跳和工具探测，支持 SSE 和 Streamable HTTP",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/MCP服务配置"
+                ],
+                "summary": "探测MCP服务",
+                "parameters": [
+                    {
+                        "description": "MCP服务探测参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/gatewaymodels.MCPServerProbeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "探测成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/mcp/server/remove/{ids}": {
             "delete": {
                 "security": [
@@ -3390,6 +3424,31 @@
                 "responses": {
                     "200": {
                         "description": "设置分组成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/category/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "读取商城全部商品分类，并按父子关系返回树形结构",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App商品分类"
+                ],
+                "summary": "读取全部商品分类",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -7859,6 +7918,293 @@
                 }
             }
         },
+        "/erp/order-audit/approve": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "审核通过订单审核记录并转入正式ERP订单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单审核"
+                ],
+                "summary": "ERP订单审核通过",
+                "parameters": [
+                    {
+                        "description": "订单审核动作参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ordermodels.OrderAuditAction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "审核通过成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order-audit/import": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "批量导入订单审核记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单审核"
+                ],
+                "summary": "ERP订单审核批量导入",
+                "parameters": [
+                    {
+                        "description": "ERP订单审核批量导入参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ordermodels.OrderAuditImportReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "导入成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order-audit/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询ERP订单审核记录",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单审核"
+                ],
+                "summary": "ERP订单审核列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "网店订单编号",
+                        "name": "tid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "审核状态",
+                        "name": "auditStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "转正式订单状态",
+                        "name": "transferStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "收货人名称",
+                        "name": "receiverName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页条数",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order-audit/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询ERP订单审核详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单审核"
+                ],
+                "summary": "ERP订单审核详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单审核ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order-audit/reject": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "驳回订单审核记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单审核"
+                ],
+                "summary": "ERP订单审核驳回",
+                "parameters": [
+                    {
+                        "description": "订单审核动作参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ordermodels.OrderAuditAction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "驳回成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order-audit/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除ERP订单审核记录",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单审核"
+                ],
+                "summary": "ERP订单审核删除",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "订单审核ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/order-audit/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改ERP订单审核记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/订单审核"
+                ],
+                "summary": "ERP订单审核保存",
+                "parameters": [
+                    {
+                        "description": "ERP订单审核保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ordermodels.OrderAuditSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/erp/order/check-login-state": {
             "get": {
                 "security": [
@@ -8265,6 +8611,324 @@
                 "responses": {
                     "200": {
                         "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/logistics-company/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP物流公司列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "查询 ERP物流公司列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/logistics-company/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP物流公司",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "新增或修改 ERP物流公司",
+                "parameters": [
+                    {
+                        "description": "ERP物流公司参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/settingmodels.LogisticsCompanyUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/logistics-company/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP物流公司，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "删除 ERP物流公司",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "物流公司ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/logistics-company/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP物流公司详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "查询 ERP物流公司详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "物流公司ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/sale/agent-config/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询销售订单智能体配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "销售订单智能体配置列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "agentId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/sale/agent-config/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改销售订单智能体配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "销售订单智能体配置设置",
+                "parameters": [
+                    {
+                        "description": "销售订单智能体配置参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/settingmodels.AgentConfigUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/sale/agent-config/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除销售订单智能体配置，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "删除销售订单智能体配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "配置ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/setting/sale/agent-config/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询销售订单智能体配置详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/系统配置"
+                ],
+                "summary": "销售订单智能体配置详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "配置ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -18445,9 +19109,113 @@
                 }
             }
         },
+        "gatewaymodels.AIAgentMessage": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "conversationId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "createBy": {
+                    "description": "创建人",
+                    "type": "integer"
+                },
+                "createTime": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "deptId": {
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "finishReason": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "imagesJson": {
+                    "type": "string"
+                },
+                "inputTokens": {
+                    "type": "integer"
+                },
+                "modelId": {
+                    "type": "string"
+                },
+                "outputTokens": {
+                    "type": "integer"
+                },
+                "providerId": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "segments": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "thinkingContent": {
+                    "type": "string"
+                },
+                "toolCallId": {
+                    "type": "string"
+                },
+                "toolCallName": {
+                    "type": "string"
+                },
+                "toolCalls": {
+                    "type": "string"
+                },
+                "updateBy": {
+                    "description": "修改人",
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "description": "修改时间",
+                    "type": "string"
+                }
+            }
+        },
+        "gatewaymodels.AIAgentMessageListData": {
+            "type": "object",
+            "properties": {
+                "rows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gatewaymodels.AIAgentMessage"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "gatewaymodels.AIAgentUpsert": {
             "type": "object",
             "properties": {
+                "allowMcpServerIdsTools": {
+                    "description": "允许描述的工具 mcp server id =\u003e tools",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "defaultLlmModelId": {
                     "type": "string"
                 },
@@ -18543,6 +19311,9 @@
                     "type": "string"
                 }
             }
+        },
+        "gatewaymodels.MCPServerProbeRequest": {
+            "type": "object"
         },
         "gatewaymodels.MCPServerUpsert": {
             "type": "object",
@@ -19521,6 +20292,143 @@
                 }
             }
         },
+        "ordermodels.OrderAuditAction": {
+            "type": "object",
+            "properties": {
+                "audit_remark": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "ordermodels.OrderAuditImportReq": {
+            "type": "object",
+            "properties": {
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ordermodels.OrderAuditSet"
+                    }
+                }
+            }
+        },
+        "ordermodels.OrderAuditSet": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ordermodels.OrderAccountSet"
+                    }
+                },
+                "b_type_code": {
+                    "type": "string"
+                },
+                "buyer_message": {
+                    "type": "string"
+                },
+                "buyer_nick": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ordermodels.OrderDetailSet"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "invoice_name": {
+                    "type": "string"
+                },
+                "logist_b_type_code": {
+                    "type": "string"
+                },
+                "logist_bill_code": {
+                    "type": "string"
+                },
+                "order_type": {
+                    "type": "string"
+                },
+                "pay_time": {
+                    "type": "string"
+                },
+                "post_fee": {
+                    "type": "number"
+                },
+                "privilege": {
+                    "type": "number"
+                },
+                "receiver_address": {
+                    "type": "string"
+                },
+                "receiver_city": {
+                    "type": "string"
+                },
+                "receiver_city_name": {
+                    "type": "string"
+                },
+                "receiver_district": {
+                    "type": "string"
+                },
+                "receiver_district_name": {
+                    "type": "string"
+                },
+                "receiver_mobile": {
+                    "type": "string"
+                },
+                "receiver_name": {
+                    "type": "string"
+                },
+                "receiver_phone": {
+                    "type": "string"
+                },
+                "receiver_province": {
+                    "type": "string"
+                },
+                "receiver_province_name": {
+                    "type": "string"
+                },
+                "receiver_street": {
+                    "type": "string"
+                },
+                "receiver_street_name": {
+                    "type": "string"
+                },
+                "receiver_zip": {
+                    "type": "string"
+                },
+                "seller_flag": {
+                    "type": "string"
+                },
+                "seller_memo": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "source_json": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tid": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
         "ordermodels.OrderDetailSet": {
             "type": "object",
             "properties": {
@@ -19890,6 +20798,31 @@
                 }
             }
         },
+        "settingmodels.AgentConfigUpsert": {
+            "type": "object",
+            "required": [
+                "agentId",
+                "name"
+            ],
+            "properties": {
+                "agentId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
         "settingmodels.IntegrationConfigSet": {
             "type": "object",
             "required": [
@@ -19903,6 +20836,82 @@
                     "type": "boolean"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "settingmodels.LogisticsCompanyUpsert": {
+            "type": "object",
+            "required": [
+                "cityCode",
+                "cityName",
+                "code",
+                "company",
+                "districtCode",
+                "districtName",
+                "name",
+                "provinceCode",
+                "provinceName",
+                "streetCode",
+                "streetName"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "cityCode": {
+                    "type": "string"
+                },
+                "cityName": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "company": {
+                    "type": "string"
+                },
+                "contactName": {
+                    "type": "string"
+                },
+                "contactPhone": {
+                    "type": "string"
+                },
+                "districtCode": {
+                    "type": "string"
+                },
+                "districtName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "provinceCode": {
+                    "type": "string"
+                },
+                "provinceName": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "shortName": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                },
+                "streetCode": {
+                    "type": "string"
+                },
+                "streetName": {
                     "type": "string"
                 }
             }

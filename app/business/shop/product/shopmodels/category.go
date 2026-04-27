@@ -2,6 +2,7 @@ package shopmodels
 
 import (
 	"nova-factory-server/app/baize"
+	"time"
 )
 
 // Category 商品分类
@@ -17,6 +18,20 @@ type Category struct {
 	DeptID       int64  `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
+}
+
+type CategoryInfo struct {
+	ID           int64           `json:"id,string" db:"id"`               // 主键ID
+	ParentID     int64           `json:"parentId,string" db:"parent_id"`  // 父级分类ID
+	AncestorPath string          `json:"ancestorPath" db:"ancestor_path"` // 祖级路径
+	Depth        uint32          `json:"depth" db:"depth"`                // 分类层级
+	CategoryName string          `json:"categoryName" db:"category_name"` // 分类名称
+	CategoryCode string          `json:"categoryCode" db:"category_code"` // 分类编码
+	Sort         int32           `json:"sort" db:"sort"`                  // 排序值
+	Status       *bool           `json:"status" db:"status"`              // 状态
+	Children     []*CategoryInfo `json:"children" gorm:"-"`
+	CreateTime   *time.Time      `json:"createTime" db:"create_time"` //创建时间
+	UpdateTime   *time.Time      `json:"updateTime" db:"update_time"` //修改时间
 }
 
 // CategoryUpsert 商品分类新增修改参数

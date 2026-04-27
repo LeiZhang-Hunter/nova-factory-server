@@ -31,6 +31,7 @@ func NewGinEngine(
 	{
 		controller.Goods.PublicRoutes(group)
 		authController.Auth.PublicRoutes(group)
+		productController.Category.PublicRoutes(group)
 	}
 
 	appGroup := group.Group("")
