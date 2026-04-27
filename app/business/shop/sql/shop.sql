@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS `shop_category` (
   `depth` INT UNSIGNED NOT NULL DEFAULT 1 COMMENT '层级深度，从1开始',
   `category_name` VARCHAR(128) NOT NULL COMMENT '分类名称',
   `category_code` VARCHAR(64) DEFAULT NULL COMMENT '分类编码',
+  `image_url` VARCHAR(1024) DEFAULT NULL COMMENT '分类图片URL',
+  `description` TEXT COMMENT '分类描述',
   `sort` INT NOT NULL DEFAULT 0 COMMENT '排序值，越小越靠前',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',

@@ -31,6 +31,8 @@ func (s *ShopCategoryDaoImpl) Create(c *gin.Context, req *shopmodels.CategoryUps
 		ParentID:     req.ParentID,
 		CategoryName: req.CategoryName,
 		CategoryCode: req.CategoryCode,
+		ImageURL:     req.ImageURL,
+		Description:  req.Description,
 		Sort:         req.Sort,
 		Status:       req.Status,
 		Depth:        1,
@@ -57,6 +59,8 @@ func (s *ShopCategoryDaoImpl) Update(c *gin.Context, req *shopmodels.CategoryUps
 		ID:           req.ID,
 		CategoryName: req.CategoryName,
 		CategoryCode: req.CategoryCode,
+		ImageURL:     req.ImageURL,
+		Description:  req.Description,
 		Sort:         req.Sort,
 		Status:       req.Status,
 	}
@@ -64,7 +68,7 @@ func (s *ShopCategoryDaoImpl) Update(c *gin.Context, req *shopmodels.CategoryUps
 	updates.SetUpdateBy(baizeContext.GetUserId(c))
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("id = ?", req.ID).
-		Select("category_name", "category_code", "sort", "status", "update_by", "update_time").
+		Select("category_name", "category_code", "image_url", "description", "sort", "status", "update_by", "update_time").
 		Updates(updates).Error; err != nil {
 		return nil, err
 	}
@@ -115,7 +119,7 @@ func (s *ShopCategoryDaoImpl) ListByIDs(c *gin.Context, ids []int64) ([]*shopmod
 }
 
 func (s *ShopCategoryDaoImpl) List(c *gin.Context, req *shopmodels.CategoryQuery) (*shopmodels.CategoryListData, error) {
-	db := s.db.WithContext(c).Table(s.tableName).Where("state = 0")
+	db := s.db.WithContext(c).Table(s.tableName)
 	if req.CategoryName != "" {
 		db = db.Where("category_name LIKE ?", "%"+req.CategoryName+"%")
 	}
@@ -132,6 +136,7 @@ func (s *ShopCategoryDaoImpl) List(c *gin.Context, req *shopmodels.CategoryQuery
 		req.Size = 20
 	}
 	var total int64
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}

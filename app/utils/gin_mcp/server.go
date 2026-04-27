@@ -253,8 +253,6 @@ func (m *GinMCP) Mount() {
 		m.schemasMu.RLock()
 		// Convert routes to tools with registered types
 		newTools, operations := convert.ConvertRoutesToTools(routes, m.registeredSchemas)
-		content, _ := json.Marshal(newTools)
-		fmt.Println(string(content))
 		m.schemasMu.RUnlock()
 		m.operations = operations
 		m.tools = append(m.tools, newTools...)

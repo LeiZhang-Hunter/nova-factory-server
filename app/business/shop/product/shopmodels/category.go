@@ -13,6 +13,8 @@ type Category struct {
 	Depth        uint32 `json:"depth" db:"depth"`                // 分类层级
 	CategoryName string `json:"categoryName" db:"category_name"` // 分类名称
 	CategoryCode string `json:"categoryCode" db:"category_code"` // 分类编码
+	ImageURL     string `json:"imageUrl" db:"image_url"`         // 分类图片
+	Description  string `json:"description" db:"description"`    // 分类描述
 	Sort         int32  `json:"sort" db:"sort"`                  // 排序值
 	Status       *bool  `json:"status" db:"status"`              // 状态
 	DeptID       int64  `json:"deptId" gorm:"column:dept_id"`
@@ -27,6 +29,8 @@ type CategoryInfo struct {
 	Depth        uint32          `json:"depth" db:"depth"`                // 分类层级
 	CategoryName string          `json:"categoryName" db:"category_name"` // 分类名称
 	CategoryCode string          `json:"categoryCode" db:"category_code"` // 分类编码
+	ImageURL     string          `json:"imageUrl" db:"image_url"`         // 分类图片
+	Description  string          `json:"description" db:"description"`    // 分类描述
 	Sort         int32           `json:"sort" db:"sort"`                  // 排序值
 	Status       *bool           `json:"status" db:"status"`              // 状态
 	Children     []*CategoryInfo `json:"children" gorm:"-"`
@@ -40,6 +44,8 @@ type CategoryUpsert struct {
 	ParentID     int64  `json:"parentId,string" form:"parentId"`                     // 父级分类ID
 	CategoryName string `json:"categoryName" form:"categoryName" binding:"required"` // 分类名称
 	CategoryCode string `json:"categoryCode" form:"categoryCode"`                    // 分类编码
+	ImageURL     string `json:"imageUrl" form:"imageUrl"`                            // 分类图片
+	Description  string `json:"description" form:"description"`                      // 分类描述
 	Sort         int32  `json:"sort" form:"sort"`                                    // 排序值
 	Status       *bool  `json:"status" form:"status"`                                // 状态
 }

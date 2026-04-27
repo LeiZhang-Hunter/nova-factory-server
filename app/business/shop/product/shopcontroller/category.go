@@ -1,10 +1,14 @@
 package shopcontroller
 
 import (
+	"fmt"
+	"net/url"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"regexp"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +16,8 @@ import (
 type Category struct {
 	service shopservice.IShopCategoryService
 }
+
+var categoryUnsafeHTMLPattern = regexp.MustCompile(`(?i)<[^>]+>`)
 
 func NewCategory(service shopservice.IShopCategoryService) *Category {
 	return &Category{service: service}
@@ -42,6 +48,7 @@ func (s *Category) List(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+	req.CategoryName = strings.TrimSpace(req.CategoryName)
 	data, err := s.service.List(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
@@ -88,6 +95,10 @@ func (s *Category) Create(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+	if err := validateCategoryUpsertSecurity(req); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
 	data, err := s.service.Create(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
@@ -113,6 +124,10 @@ func (s *Category) Update(c *gin.Context) {
 	}
 	if req.ID == 0 {
 		baizeContext.ParameterError(c)
+		return
+	}
+	if err := validateCategoryUpsertSecurity(req); err != nil {
+		baizeContext.Waring(c, err.Error())
 		return
 	}
 	data, err := s.service.Update(c, req)
@@ -143,4 +158,86 @@ func (s *Category) Delete(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+func validateCategoryUpsertSecurity(req *shopmodels.CategoryUpsert) error {
+	req.CategoryName = strings.TrimSpace(req.CategoryName)
+	req.CategoryCode = strings.TrimSpace(req.CategoryCode)
+	req.ImageURL = strings.TrimSpace(req.ImageURL)
+	req.Description = strings.TrimSpace(req.Description)
+
+	if req.CategoryName == "" {
+		return fmt.Errorf("分类名称不能为空")
+	}
+	if hasUnsafeCategoryText(req.CategoryName) {
+		return fmt.Errorf("分类名称包含不安全内容")
+	}
+	if req.CategoryCode != "" && hasUnsafeCategoryText(req.CategoryCode) {
+		return fmt.Errorf("分类编号包含不安全内容")
+	}
+	if req.ImageURL == "" {
+		return fmt.Errorf("分类图片不能为空")
+	}
+	if req.Description == "" {
+		return fmt.Errorf("分类描述不能为空")
+	}
+	if req.Description != "" && hasUnsafeCategoryText(req.Description) {
+		return fmt.Errorf("分类描述包含不安全内容")
+	}
+	if err := validateCategoryImageURL(req.ImageURL); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func hasUnsafeCategoryText(value string) bool {
+	lowerValue := strings.ToLower(strings.TrimSpace(value))
+	if lowerValue == "" {
+		return false
+	}
+	if categoryUnsafeHTMLPattern.MatchString(value) {
+		return true
+	}
+
+	dangerousTokens := []string{
+		"javascript:",
+		"vbscript:",
+		"onerror=",
+		"onload=",
+		"<script",
+		"</script",
+		"<iframe",
+		"<svg",
+		"data:text/html",
+	}
+	for _, token := range dangerousTokens {
+		if strings.Contains(lowerValue, token) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func validateCategoryImageURL(imageURL string) error {
+	if imageURL == "" {
+		return nil
+	}
+	if hasUnsafeCategoryText(imageURL) {
+		return fmt.Errorf("分类图片地址包含不安全内容")
+	}
+	if strings.HasPrefix(imageURL, "/") {
+		return nil
+	}
+
+	parsedURL, err := url.ParseRequestURI(imageURL)
+	if err != nil {
+		return fmt.Errorf("分类图片地址格式不正确")
+	}
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return fmt.Errorf("分类图片地址仅支持http或https")
+	}
+
+	return nil
 }

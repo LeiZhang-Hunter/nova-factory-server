@@ -1,9 +1,14 @@
 package shopserviceimpl
 
 import (
+	"fmt"
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
+	"nova-factory-server/app/utils/fileUtils"
+	"nova-factory-server/app/utils/snowflake"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,10 +22,22 @@ func NewShopCategoryService(dao shopdao.IShopCategoryDao) shopservice.IShopCateg
 }
 
 func (s *ShopCategoryServiceImpl) Create(c *gin.Context, req *shopmodels.CategoryUpsert) (*shopmodels.Category, error) {
+	req.CategoryCode = normalizeCategoryCode(req.CategoryCode)
+	req.ImageURL = strings.TrimSpace(req.ImageURL)
+	req.Description = strings.TrimSpace(req.Description)
+	if req.CategoryCode == "" {
+		req.CategoryCode = generateCategoryCode()
+	}
 	return s.dao.Create(c, req)
 }
 
 func (s *ShopCategoryServiceImpl) Update(c *gin.Context, req *shopmodels.CategoryUpsert) (*shopmodels.Category, error) {
+	req.CategoryCode = normalizeCategoryCode(req.CategoryCode)
+	req.ImageURL = strings.TrimSpace(req.ImageURL)
+	req.Description = strings.TrimSpace(req.Description)
+	if req.CategoryCode == "" {
+		req.CategoryCode = generateCategoryCode()
+	}
 	return s.dao.Update(c, req)
 }
 
@@ -37,11 +54,24 @@ func (s *ShopCategoryServiceImpl) All(c *gin.Context) ([]*shopmodels.CategoryInf
 	if err != nil {
 		return nil, err
 	}
+	for k, v := range rows {
+		rows[k].ImageURL = fileUtils.BuildAbsoluteURL(c, v.ImageURL)
+	}
 	return buildCategoryTree(rows), nil
 }
 
 func (s *ShopCategoryServiceImpl) List(c *gin.Context, req *shopmodels.CategoryQuery) (*shopmodels.CategoryListData, error) {
-	return s.dao.List(c, req)
+	data, err := s.dao.List(c, req)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range data.Rows {
+		if row == nil {
+			continue
+		}
+		row.ImageURL = fileUtils.BuildAbsoluteURL(c, row.ImageURL)
+	}
+	return data, nil
 }
 
 func buildCategoryTree(rows []*shopmodels.Category) []*shopmodels.CategoryInfo {
@@ -95,9 +125,21 @@ func toCategoryInfo(row *shopmodels.Category) *shopmodels.CategoryInfo {
 		Depth:        row.Depth,
 		CategoryName: row.CategoryName,
 		CategoryCode: row.CategoryCode,
+		ImageURL:     row.ImageURL,
+		Description:  row.Description,
 		Sort:         row.Sort,
 		Status:       row.Status,
 		CreateTime:   row.CreateTime,
 		UpdateTime:   row.UpdateTime,
 	}
+}
+
+func normalizeCategoryCode(code string) string {
+	return strings.TrimSpace(code)
+}
+
+func generateCategoryCode() string {
+	now := time.Now()
+	uniqueNumber := snowflake.GenID()
+	return fmt.Sprintf("CAT%s%d", now.Format("20060102150405"), uniqueNumber)
 }
