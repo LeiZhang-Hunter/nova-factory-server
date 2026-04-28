@@ -4,6 +4,7 @@
 package shop
 
 import (
+	activityController "nova-factory-server/app/business/shop/activity/controller"
 	"nova-factory-server/app/business/shop/api/controller/auth"
 	"nova-factory-server/app/business/shop/api/controller/product"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
@@ -20,6 +21,7 @@ var GinProviderSet = wire.NewSet(NewGinEngine)
 func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
+	activityController *activityController.Controller,
 	controller *shopcontroller.Controller,
 	userController *userController.Controller,
 	authController *auth.Controller,
@@ -45,6 +47,8 @@ func NewGinEngine(
 	adminGroup := group.Group("")
 	adminGroup.Use(middlewares.NewSessionAuthMiddlewareBuilder(cache).Build())
 	{
+		activityController.Combination.PrivateRoutes(adminGroup)
+		activityController.Pink.PrivateRoutes(adminGroup)
 		userController.Address.PrivateRoutes(adminGroup)
 		userController.Cart.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)

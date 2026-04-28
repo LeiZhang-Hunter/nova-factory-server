@@ -4,6 +4,9 @@
 package shop
 
 import (
+	"nova-factory-server/app/business/shop/activity/controller"
+	activityDaoImpl "nova-factory-server/app/business/shop/activity/dao/impl"
+	activityServiceImpl "nova-factory-server/app/business/shop/activity/service/impl"
 	"nova-factory-server/app/business/shop/api/controller/auth"
 	"nova-factory-server/app/business/shop/api/controller/product"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
@@ -21,6 +24,10 @@ var ProviderSet = wire.NewSet(
 
 	auth.ProviderSet,
 	product.ProviderSet,
+
+	controller.ProviderSet,
+	activityDaoImpl.ProviderSet,
+	activityServiceImpl.ProviderSet,
 
 	shopdaoimpl.ProviderSet,
 	shopserviceimpl.ProviderSet,
