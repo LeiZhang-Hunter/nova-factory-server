@@ -1,10 +1,14 @@
 package shopdaoimpl
 
 import (
+	"encoding/json"
 	"errors"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/utils/fileUtils"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -54,7 +58,7 @@ func (s *ShopGoodsDaoImpl) BatchCreate(c *gin.Context, reqs []*shopmodels.GoodsU
 }
 
 func (s *ShopGoodsDaoImpl) Update(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error) {
-	updates := buildGoodsUpdates(req)
+	updates := buildGoodsUpdates(c, req)
 	if err := s.db.WithContext(c).Table(s.tableName).Where("id = ?", req.ID).Updates(updates).Error; err != nil {
 		return nil, err
 	}
@@ -76,7 +80,7 @@ func (s *ShopGoodsDaoImpl) BatchUpdate(c *gin.Context, reqs []*shopmodels.GoodsU
 				end = len(reqs)
 			}
 			for _, req := range reqs[start:end] {
-				if err := tx.Table(s.tableName).Where("id = ?", req.ID).Updates(buildGoodsUpdates(req)).Error; err != nil {
+				if err := tx.Table(s.tableName).Where("id = ?", req.ID).Updates(buildGoodsUpdates(c, req)).Error; err != nil {
 					return err
 				}
 			}
@@ -161,6 +165,10 @@ func (s *ShopGoodsDaoImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*sh
 }
 
 func buildGoodsModel(req *shopmodels.GoodsUpsert) *shopmodels.Goods {
+	content, err := json.Marshal(req.GalleryImages)
+	if err != nil {
+		zap.L().Error("buildGoodsModel json.Marshal", zap.Error(err))
+	}
 	return &shopmodels.Goods{
 		GoodsID:       req.GoodsID,
 		GoodsName:     req.GoodsName,
@@ -168,7 +176,7 @@ func buildGoodsModel(req *shopmodels.GoodsUpsert) *shopmodels.Goods {
 		OuterID:       req.OuterID,
 		ImageURL:      req.ImageURL,
 		RetailPrice:   req.RetailPrice,
-		GalleryImages: req.GalleryImages,
+		GalleryImages: string(content),
 		VideoURL:      req.VideoURL,
 		Description:   req.Description,
 		Weight:        req.Weight,
@@ -179,15 +187,34 @@ func buildGoodsModel(req *shopmodels.GoodsUpsert) *shopmodels.Goods {
 	}
 }
 
-func buildGoodsUpdates(req *shopmodels.GoodsUpsert) map[string]interface{} {
+func buildGoodsUpdates(c *gin.Context, req *shopmodels.GoodsUpsert) map[string]interface{} {
+	var galleryImagesArray []string
+	for _, v := range req.GalleryImages {
+		path, err := fileUtils.NormalizeResourcePath(v)
+		if err != nil {
+			zap.L().Error("normalizeResourcePath error", zap.Error(err))
+			continue
+		}
+		galleryImagesArray = append(galleryImagesArray, path)
+	}
+
+	var galleryImagesStr string
+	if len(galleryImagesArray) > 0 {
+		galleryImagesStr = strings.Join(galleryImagesArray, ",")
+	}
+
+	imageURL, err := fileUtils.NormalizeResourcePath(req.ImageURL)
+	if err != nil {
+		zap.L().Error("normalizeResourcePath error", zap.Error(err))
+	}
 	return map[string]interface{}{
 		"goods_id":       req.GoodsID,
 		"goods_name":     req.GoodsName,
 		"goods_code":     req.GoodsCode,
 		"outer_id":       req.OuterID,
-		"image_url":      req.ImageURL,
+		"image_url":      imageURL,
 		"retail_price":   req.RetailPrice,
-		"gallery_images": req.GalleryImages,
+		"gallery_images": galleryImagesStr,
 		"video_url":      req.VideoURL,
 		"description":    req.Description,
 		"weight":         req.Weight,

@@ -7,46 +7,47 @@ import (
 
 // Goods 商品信息
 type Goods struct {
-	ID               int64       `json:"id,string" db:"id"`                    // 主键ID
-	GoodsID          string      `json:"goodsId" db:"goods_id"`                // 商品业务ID
-	ShopCategoryId   int64       `json:"shopCategoryId" db:"shop_category_id"` // 商品分类id
-	ShopCategoryName string      `json:"shopCategoryName" gorm:"-" db:"-"`     // 商品分类名称
-	GoodsName        string      `json:"goodsName" db:"goods_name"`            // 商品名称
-	GoodsCode        string      `json:"goodsCode" db:"goods_code"`            // 商品编码
-	OuterID          string      `json:"outerId" db:"outer_id"`                // 外部系统ID
-	ImageURL         string      `json:"imageUrl" db:"image_url"`              // 主图地址
-	RetailPrice      float64     `json:"retailPrice" db:"retail_price"`        // 零售价
-	GalleryImages    string      `json:"galleryImages" db:"gallery_images"`    // 图集
-	VideoURL         string      `json:"videoUrl" db:"video_url"`              // 视频地址
-	Description      string      `json:"description" db:"description"`         // 商品描述
-	Weight           float64     `json:"weight" db:"weight"`                   // 重量
-	WeightUnit       string      `json:"weightUnit" db:"weight_unit"`          // 重量单位
-	Unit             string      `json:"unit" db:"unit"`                       // 销售单位
-	IsOnSale         int32       `json:"isOnSale" db:"is_on_sale"`             // 是否上架
-	Quantity         int64       `json:"quantity" db:"quantity"`               // 库存数量
-	Skus             []*GoodsSku `json:"skus" gorm:"-" db:"-"`                 // 商品规格列表
-	DeptID           int64       `json:"deptId" gorm:"column:dept_id"`
+	ID                 int64       `json:"id,string" db:"id"`                    // 主键ID
+	GoodsID            string      `json:"goodsId" db:"goods_id"`                // 商品业务ID
+	ShopCategoryId     int64       `json:"shopCategoryId" db:"shop_category_id"` // 商品分类id
+	ShopCategoryName   string      `json:"shopCategoryName" gorm:"-" db:"-"`     // 商品分类名称
+	GoodsName          string      `json:"goodsName" db:"goods_name"`            // 商品名称
+	GoodsCode          string      `json:"goodsCode" db:"goods_code"`            // 商品编码
+	OuterID            string      `json:"outerId" db:"outer_id"`                // 外部系统ID
+	ImageURL           string      `json:"imageUrl" db:"image_url"`              // 主图地址
+	RetailPrice        float64     `json:"retailPrice" db:"retail_price"`        // 零售价
+	GalleryImages      string      `json:"-" db:"gallery_images"`                // 图集
+	GalleryImagesArray []string    `json:"galleryImages" db:"-" gorm:"-"`        // 图集
+	VideoURL           string      `json:"videoUrl" db:"video_url"`              // 视频地址
+	Description        string      `json:"description" db:"description"`         // 商品描述
+	Weight             float64     `json:"weight" db:"weight"`                   // 重量
+	WeightUnit         string      `json:"weightUnit" db:"weight_unit"`          // 重量单位
+	Unit               string      `json:"unit" db:"unit"`                       // 销售单位
+	IsOnSale           int32       `json:"isOnSale" db:"is_on_sale"`             // 是否上架
+	Quantity           int64       `json:"quantity" db:"quantity"`               // 库存数量
+	Skus               []*GoodsSku `json:"skus" gorm:"-" db:"-"`                 // 商品规格列表
+	DeptID             int64       `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
 }
 
 // GoodsUpsert 商品新增修改参数
 type GoodsUpsert struct {
-	ID            int64   `json:"id,string"`                    // 主键ID
-	GoodsID       string  `json:"goodsId" binding:"required"`   // 商品业务ID
-	GoodsName     string  `json:"goodsName" binding:"required"` // 商品名称
-	GoodsCode     string  `json:"goodsCode"`                    // 商品编码
-	OuterID       string  `json:"outerId"`                      // 外部系统ID
-	ImageURL      string  `json:"imageUrl"`                     // 主图地址
-	RetailPrice   float64 `json:"retailPrice"`                  // 零售价
-	GalleryImages string  `json:"galleryImages"`                // 图集
-	VideoURL      string  `json:"videoUrl"`                     // 视频地址
-	Description   string  `json:"description"`                  // 商品描述
-	Weight        float64 `json:"weight"`                       // 重量
-	WeightUnit    string  `json:"weightUnit"`                   // 重量单位
-	Unit          string  `json:"unit"`                         // 销售单位
-	IsOnSale      int32   `json:"isOnSale"`                     // 是否上架
-	Quantity      int64   `json:"quantity"`                     // 库存数量
+	ID            int64    `json:"id,string"`                    // 主键ID
+	GoodsID       string   `json:"goodsId" binding:"required"`   // 商品业务ID
+	GoodsName     string   `json:"goodsName" binding:"required"` // 商品名称
+	GoodsCode     string   `json:"goodsCode"`                    // 商品编码
+	OuterID       string   `json:"outerId"`                      // 外部系统ID
+	ImageURL      string   `json:"imageUrl"`                     // 主图地址
+	RetailPrice   float64  `json:"retailPrice"`                  // 零售价
+	GalleryImages []string `json:"galleryImages"`                // 图集
+	VideoURL      string   `json:"videoUrl"`                     // 视频地址
+	Description   string   `json:"description"`                  // 商品描述
+	Weight        float64  `json:"weight"`                       // 重量
+	WeightUnit    string   `json:"weightUnit"`                   // 重量单位
+	Unit          string   `json:"unit"`                         // 销售单位
+	IsOnSale      int32    `json:"isOnSale"`                     // 是否上架
+	Quantity      int64    `json:"quantity"`                     // 库存数量
 	baize.BaseEntity
 }
 

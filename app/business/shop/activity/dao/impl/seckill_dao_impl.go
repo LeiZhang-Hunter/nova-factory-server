@@ -1,0 +1,211 @@
+package impl
+
+import (
+	"errors"
+	"nova-factory-server/app/business/shop/activity/dao"
+	"nova-factory-server/app/business/shop/activity/models"
+	"nova-factory-server/app/constant/commonStatus"
+	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
+	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+type ShopSeckillDaoImpl struct {
+	db        *gorm.DB
+	tableName string
+}
+
+func NewShopSeckillDao(ms *gorm.DB) dao.IShopSeckillDao {
+	return &ShopSeckillDaoImpl{db: ms, tableName: "shop_store_seckill"}
+}
+
+func (s *ShopSeckillDaoImpl) Set(c *gin.Context, req *models.SeckillSet) (*models.Seckill, error) {
+	if req.ID > 0 {
+		return s.update(c, req)
+	}
+	return s.create(c, req)
+}
+
+func (s *ShopSeckillDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
+	now := time.Now()
+	return s.db.WithContext(c).Table(s.tableName).
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("is_del = ?", 0).
+		Updates(map[string]any{
+			"is_del":      1,
+			"state":       commonStatus.DELETE,
+			"update_by":   baizeContext.GetUserId(c),
+			"update_time": &now,
+		}).Error
+}
+
+func (s *ShopSeckillDaoImpl) GetByID(c *gin.Context, id int64) (*models.Seckill, error) {
+	var item models.Seckill
+	if err := s.baseQuery(c).
+		Where("id = ?", id).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
+func (s *ShopSeckillDaoImpl) List(c *gin.Context, req *models.SeckillQuery) (*models.SeckillListData, error) {
+	db := s.baseQuery(c)
+	if title := strings.TrimSpace(req.Title); title != "" {
+		db = db.Where("title LIKE ?", "%"+title+"%")
+	}
+	if req.ActivityID > 0 {
+		db = db.Where("activity_id = ?", req.ActivityID)
+	}
+	if req.ProductID > 0 {
+		db = db.Where("product_id = ?", req.ProductID)
+	}
+	if req.Status != nil {
+		db = db.Where("status = ?", *req.Status)
+	}
+	if req.IsShow != nil {
+		db = db.Where("is_show = ?", *req.IsShow)
+	}
+	if req.IsHot != nil {
+		db = db.Where("is_hot = ?", *req.IsHot)
+	}
+	if req.Page <= 0 {
+		req.Page = 1
+	}
+	if req.Size <= 0 {
+		req.Size = 20
+	}
+	if req.Size > 200 {
+		req.Size = 200
+	}
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		return nil, err
+	}
+	rows := make([]*models.Seckill, 0)
+	if err := db.Offset(int((req.Page - 1) * req.Size)).Limit(int(req.Size)).Order("sort ASC").Order("id DESC").Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return &models.SeckillListData{Rows: rows, Total: total}, nil
+}
+
+func (s *ShopSeckillDaoImpl) baseQuery(c *gin.Context) *gorm.DB {
+	return s.db.WithContext(c).Table(s.tableName).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("is_del = ?", 0)
+}
+
+func (s *ShopSeckillDaoImpl) create(c *gin.Context, req *models.SeckillSet) (*models.Seckill, error) {
+	model := buildSeckillModel(req)
+	model.ID = snowflake.GenID()
+	model.IsDel = 0
+	model.State = commonStatus.NORMAL
+	model.DeptID = baizeContext.GetDeptId(c)
+	model.SetCreateBy(baizeContext.GetUserId(c))
+	if err := s.db.WithContext(c).Table(s.tableName).Create(model).Error; err != nil {
+		return nil, err
+	}
+	return model, nil
+}
+
+func (s *ShopSeckillDaoImpl) update(c *gin.Context, req *models.SeckillSet) (*models.Seckill, error) {
+	now := time.Now()
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("id = ?", req.ID).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("is_del = ?", 0).
+		Updates(buildSeckillUpdates(req, baizeContext.GetUserId(c), &now)).Error; err != nil {
+		return nil, err
+	}
+	return s.GetByID(c, req.ID)
+}
+
+func buildSeckillModel(req *models.SeckillSet) *models.Seckill {
+	nowStr := time.Now().Format("2006-01-02 15:04:05")
+	return &models.Seckill{
+		ActivityID:   req.ActivityID,
+		ProductID:    req.ProductID,
+		Image:        req.Image,
+		Images:       req.Images,
+		Title:        req.Title,
+		Info:         req.Info,
+		Price:        req.Price,
+		Cost:         req.Cost,
+		OtPrice:      req.OtPrice,
+		GiveIntegral: req.GiveIntegral,
+		Sort:         req.Sort,
+		Stock:        req.Stock,
+		Sales:        req.Sales,
+		UnitName:     req.UnitName,
+		Postage:      req.Postage,
+		StartTime:    req.StartTime,
+		StopTime:     req.StopTime,
+		AddTime:      nowStr,
+		Status:       req.Status,
+		IsPostage:    req.IsPostage,
+		IsHot:        req.IsHot,
+		Num:          req.Num,
+		IsShow:       req.IsShow,
+		TimeID:       req.TimeID,
+		TempID:       req.TempID,
+		Weight:       req.Weight,
+		Volume:       req.Volume,
+		Quota:        req.Quota,
+		QuotaShow:    req.QuotaShow,
+		OnceNum:      req.OnceNum,
+		Logistics:    req.Logistics,
+		Freight:      req.Freight,
+		CustomForm:   req.CustomForm,
+		VirtualType:  req.VirtualType,
+		IsCommission: req.IsCommission,
+	}
+}
+
+func buildSeckillUpdates(req *models.SeckillSet, userID int64, now *time.Time) map[string]any {
+	return map[string]any{
+		"activity_id":   req.ActivityID,
+		"product_id":    req.ProductID,
+		"image":         req.Image,
+		"images":        req.Images,
+		"title":         req.Title,
+		"info":          req.Info,
+		"price":         req.Price,
+		"cost":          req.Cost,
+		"ot_price":      req.OtPrice,
+		"give_integral": req.GiveIntegral,
+		"sort":          req.Sort,
+		"stock":         req.Stock,
+		"sales":         req.Sales,
+		"unit_name":     req.UnitName,
+		"postage":       req.Postage,
+		"start_time":    req.StartTime,
+		"stop_time":     req.StopTime,
+		"status":        req.Status,
+		"is_postage":    req.IsPostage,
+		"is_hot":        req.IsHot,
+		"num":           req.Num,
+		"is_show":       req.IsShow,
+		"time_id":       req.TimeID,
+		"temp_id":       req.TempID,
+		"weight":        req.Weight,
+		"volume":        req.Volume,
+		"quota":         req.Quota,
+		"quota_show":    req.QuotaShow,
+		"once_num":      req.OnceNum,
+		"logistics":     req.Logistics,
+		"freight":       req.Freight,
+		"custom_form":   req.CustomForm,
+		"virtual_type":  req.VirtualType,
+		"is_commission": req.IsCommission,
+		"update_by":     userID,
+		"update_time":   now,
+	}
+}

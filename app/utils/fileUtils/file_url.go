@@ -1,6 +1,8 @@
 package fileUtils
 
 import (
+	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +26,41 @@ func BuildAbsoluteURL(c *gin.Context, resourcePath string) string {
 	}
 
 	return strings.TrimRight(baseURL, "/") + resourcePath
+}
+
+// NormalizeResourcePath converts an absolute HTTP URL to a relative path for storage.
+func NormalizeResourcePath(resourcePath string) (string, error) {
+	resourcePath = strings.TrimSpace(resourcePath)
+	if resourcePath == "" {
+		return "", nil
+	}
+	if !strings.Contains(resourcePath, "://") {
+		if !strings.HasPrefix(resourcePath, "/") {
+			resourcePath = "/" + resourcePath
+		}
+		return resourcePath, nil
+	}
+
+	parsedURL, err := url.Parse(resourcePath)
+	if err != nil {
+		return "", fmt.Errorf("资源地址格式不正确")
+	}
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return "", fmt.Errorf("资源地址协议不支持")
+	}
+	if parsedURL.Path == "" {
+		return "", fmt.Errorf("资源地址缺少路径")
+	}
+
+	normalizedPath := parsedURL.EscapedPath()
+	if normalizedPath == "" {
+		normalizedPath = parsedURL.Path
+	}
+	if !strings.HasPrefix(normalizedPath, "/") {
+		normalizedPath = "/" + normalizedPath
+	}
+
+	return normalizedPath, nil
 }
 
 func configuredBaseURL(c *gin.Context) string {

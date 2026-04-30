@@ -47,7 +47,7 @@ type CombinationSet struct {
 	Attr          string  `json:"attr"`
 	People        int32   `json:"people" binding:"required"`
 	Info          string  `json:"info"`
-	Price         float64 `json:"price" binding:"required"`
+	Price         float64 `json:"price"`
 	Sort          int32   `json:"sort"`
 	Sales         int64   `json:"sales"`
 	Stock         int64   `json:"stock"`

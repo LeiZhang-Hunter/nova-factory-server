@@ -1,7 +1,9 @@
 package shopserviceimpl
 
 import (
+	"encoding/json"
 	"errors"
+	"go.uber.org/zap"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/snowflake"
 	"sort"
@@ -11,6 +13,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
+	"nova-factory-server/app/utils/fileUtils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,6 +61,7 @@ func (s *ShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Go
 	if err = s.attachSkus(c, []*shopmodels.Goods{data}); err != nil {
 		return nil, err
 	}
+	s.normalizeGoodsMediaURLs(c, []*shopmodels.Goods{data})
 	return data, nil
 }
 
@@ -75,6 +79,7 @@ func (s *ShopGoodsServiceImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) 
 	if err = s.attachSkus(c, data.Rows); err != nil {
 		return nil, err
 	}
+	s.normalizeGoodsMediaURLs(c, data.Rows)
 	return data, nil
 }
 
@@ -186,7 +191,7 @@ func buildGoodsUpsert(record shopmodels.ImportGoodsRecord) (*shopmodels.GoodsUps
 		IsOnSale:      1,
 		Quantity:      quantity,
 		RetailPrice:   retailPrice,
-		GalleryImages: "[]",
+		GalleryImages: []string{},
 		BaseEntity: baize.BaseEntity{
 			CreateBy:   1,
 			UpdateBy:   1,
@@ -355,13 +360,18 @@ func sameGoods(current *shopmodels.Goods, req *shopmodels.GoodsUpsert) bool {
 	if current == nil || req == nil {
 		return false
 	}
+	content, err := json.Marshal(req.GalleryImages)
+	if err != nil {
+		zap.L().Error("json marsh error", zap.Error(err))
+		return false
+	}
 	return current.GoodsID == req.GoodsID &&
 		current.GoodsName == req.GoodsName &&
 		current.GoodsCode == req.GoodsCode &&
 		current.OuterID == req.OuterID &&
 		current.ImageURL == req.ImageURL &&
 		current.RetailPrice == req.RetailPrice &&
-		current.GalleryImages == req.GalleryImages &&
+		current.GalleryImages == string(content) &&
 		current.VideoURL == req.VideoURL &&
 		current.Description == req.Description &&
 		current.Weight == req.Weight &&
@@ -439,4 +449,38 @@ func (s *ShopGoodsServiceImpl) attachSkus(c *gin.Context, rows []*shopmodels.Goo
 		}
 	}
 	return nil
+}
+
+func (s *ShopGoodsServiceImpl) normalizeGoodsMediaURLs(c *gin.Context, rows []*shopmodels.Goods) {
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		row.ImageURL = fileUtils.BuildAbsoluteURL(c, row.ImageURL)
+		row.GalleryImagesArray = splitAndNormalizeMediaURLs(c, row.GalleryImages)
+		for _, sku := range row.Skus {
+			if sku == nil {
+				continue
+			}
+			sku.ImageURL = fileUtils.BuildAbsoluteURL(c, sku.ImageURL)
+		}
+	}
+}
+
+func splitAndNormalizeMediaURLs(c *gin.Context, raw string) []string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return []string{}
+	}
+
+	parts := strings.Split(raw, ",")
+	urls := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		urls = append(urls, fileUtils.BuildAbsoluteURL(c, part))
+	}
+	return urls
 }

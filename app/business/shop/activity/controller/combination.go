@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/shop/activity/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/fileUtils"
 	"strings"
 	"time"
 
@@ -191,6 +192,19 @@ func (c *Combination) validateSet(ctx *gin.Context, req *models.CombinationSet) 
 		if current.StopTime > 0 && current.StopTime < time.Now().Unix() {
 			return fmt.Errorf("活动已结束,请重新添加")
 		}
+	}
+	if len(req.Image) != 0 {
+		req.Image, _ = fileUtils.NormalizeResourcePath(req.Image)
+	}
+
+	if len(req.Images) != 0 {
+		var images []string
+		imagesArr := strings.Split(req.Images, ",")
+		for _, img := range imagesArr {
+			imgStr, _ := fileUtils.NormalizeResourcePath(img)
+			images = append(images, imgStr)
+		}
+		req.Images = strings.Join(images, ",")
 	}
 	return nil
 }
