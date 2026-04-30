@@ -329,18 +329,19 @@ CREATE TABLE IF NOT EXISTS `shop_store_seckill` (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='商品秒杀商品表';
 
 
-CREATE TABLE IF NOT EXISTS `shop_system_group_data` (
-    `id` bigint(20) NOT NULL COMMENT '组合数据详情ID',
-    `gid` bigint(20) NOT NULL DEFAULT '0' COMMENT '对应的数据组id',
-    `value` text COMMENT '数据组对应的数据值（json数据）',
-    `add_time` int(10) NOT NULL DEFAULT '0' COMMENT '添加数据时间',
-    `sort` int(11) NOT NULL DEFAULT '0' COMMENT '数据排序',
-    `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态（1：开启；2：关闭；）',
-    PRIMARY KEY (`id`) USING BTREE,
+CREATE TABLE IF NOT EXISTS `shop_store_seckill_config`
+(
+    `id` bigint(20) UNSIGNED NOT NULL COMMENT '秒杀配置id',
+    `begin_clock` bigint(20) NOT NULL DEFAULT '0' COMMENT '开启时间',
+    `continue_clock` bigint(20) NOT NULL DEFAULT '0' COMMENT '持续时间',
+    `images` varchar(2000) NOT NULL DEFAULT '' COMMENT '轮播图',
+    `sort` bigint(20) UNSIGNED NOT NULL DEFAULT '0' COMMENT '排序',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
-    ) ENGINE=InnoDB AUTO_INCREMENT=1027 DEFAULT CHARSET=utf8 COMMENT='组合数据详情表';
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='商品秒杀配置';

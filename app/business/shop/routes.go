@@ -51,6 +51,7 @@ func NewGinEngine(
 		activityController.Pink.PrivateRoutes(adminGroup)
 		activityController.Seckill.PrivateRoutes(adminGroup)
 		activityController.SeckillActivity.PrivateRoutes(adminGroup)
+		activityController.SeckillConfig.PrivateRoutes(adminGroup)
 		userController.Address.PrivateRoutes(adminGroup)
 		userController.Cart.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)

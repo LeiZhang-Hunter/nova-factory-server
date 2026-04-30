@@ -87,12 +87,9 @@ import (
 	"nova-factory-server/app/business/shop/product/shopcontroller"
 	"nova-factory-server/app/business/shop/product/shopdao/shopdaoimpl"
 	"nova-factory-server/app/business/shop/product/shopservice/shopserviceimpl"
-	controller4 "nova-factory-server/app/business/shop/system/controller"
-	impl3 "nova-factory-server/app/business/shop/system/dao/impl"
-	impl4 "nova-factory-server/app/business/shop/system/service/impl"
 	shopcontroller2 "nova-factory-server/app/business/shop/user/controller"
-	impl5 "nova-factory-server/app/business/shop/user/dao/impl"
-	impl6 "nova-factory-server/app/business/shop/user/service/impl"
+	impl3 "nova-factory-server/app/business/shop/user/dao/impl"
+	impl4 "nova-factory-server/app/business/shop/user/service/impl"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/datasource/iotdb"
@@ -481,11 +478,15 @@ func wireApp() (*gin.Engine, func(), error) {
 	iShopSeckillActivityDao := impl.NewShopSeckillActivityDao(db)
 	iShopSeckillActivityService := impl2.NewShopSeckillActivityService(iShopSeckillActivityDao)
 	seckillActivity := controller3.NewSeckillActivity(iShopSeckillActivityService)
+	iShopSeckillConfigDao := impl.NewShopSeckillConfigDao(db)
+	iShopSeckillConfigService := impl2.NewShopSeckillConfigService(iShopSeckillConfigDao)
+	seckillConfig := controller3.NewSeckillConfig(iShopSeckillConfigService)
 	controllerController := &controller3.Controller{
 		Combination:     combination,
 		Pink:            pink,
 		Seckill:         seckill,
 		SeckillActivity: seckillActivity,
+		SeckillConfig:   seckillConfig,
 	}
 	iShopCategoryDao := shopdaoimpl.NewShopCategoryDao(db)
 	iShopCategoryService := shopserviceimpl.NewShopCategoryService(iShopCategoryDao)
@@ -501,27 +502,21 @@ func wireApp() (*gin.Engine, func(), error) {
 		Goods:    goods,
 		Sku:      sku,
 	}
-	iShopGroupDataDao := impl3.NewShopGroupDataDao(db)
-	iShopGroupDataService := impl4.NewShopGroupDataService(iShopGroupDataDao)
-	groupData := controller4.NewGroupData(iShopGroupDataService)
-	controller5 := &controller4.Controller{
-		GroupData: groupData,
-	}
-	iShopAddressDao := impl5.NewShopAddressDao(db)
-	iShopUserDao := impl5.NewShopUserDao(db)
-	iShopAddressService := impl6.NewShopAddressService(iShopAddressDao, iShopUserDao)
+	iShopAddressDao := impl3.NewShopAddressDao(db)
+	iShopUserDao := impl3.NewShopUserDao(db)
+	iShopAddressService := impl4.NewShopAddressService(iShopAddressDao, iShopUserDao)
 	address := shopcontroller2.NewAddress(iShopAddressService)
-	iShopCartDao := impl5.NewShopCartDao(db)
-	iShopCartService := impl6.NewShopCartService(iShopCartDao, iShopUserDao)
+	iShopCartDao := impl3.NewShopCartDao(db)
+	iShopCartService := impl4.NewShopCartService(iShopCartDao, iShopUserDao)
 	cart := shopcontroller2.NewCart(iShopCartService)
-	iShopUserService := impl6.NewShopUserService(iShopUserDao)
+	iShopUserService := impl4.NewShopUserService(iShopUserDao)
 	shopcontrollerUser := shopcontroller2.NewUser(iShopUserService)
-	controller6 := &shopcontroller2.Controller{
+	controller4 := &shopcontroller2.Controller{
 		Address: address,
 		Cart:    cart,
 		User:    shopcontrollerUser,
 	}
-	iShopAuthService := impl6.NewShopAuthService(cacheCache, iShopUserDao)
+	iShopAuthService := impl4.NewShopAuthService(cacheCache, iShopUserDao)
 	authAuth := auth.NewAuth(iShopAuthService)
 	authController := &auth.Controller{
 		Auth: authAuth,
@@ -532,7 +527,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		Product:  productProduct,
 		Category: productCategory,
 	}
-	shopShop := shop.NewGinEngine(app, cacheCache, controllerController, shopcontrollerController, controller5, controller6, authController, productController)
+	shopShop := shop.NewGinEngine(app, cacheCache, controllerController, shopcontrollerController, controller4, authController, productController)
 	iAgentConfigDao := settingdaoimpl.NewAgentConfigDao(db)
 	iAgentConfigService := settingserviceimpl.NewAgentConfigService(iAgentConfigDao)
 	agentConfig := settingcontroller.NewAgentConfig(iAgentConfigService)
