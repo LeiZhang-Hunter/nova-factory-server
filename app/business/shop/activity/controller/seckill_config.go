@@ -92,6 +92,11 @@ func (s *SeckillConfig) Set(ctx *gin.Context) {
 		baizeContext.ParameterError(ctx)
 		return
 	}
+	// 开始时间与持续时间的总和不能超过 24 小时，避免配置跨天。
+	if req.BeginClock+req.ContinueClock > 24 {
+		baizeContext.Waring(ctx, "开启时间和持续时间总和不能超过24小时")
+		return
+	}
 	var err error
 	if req.Images != "" {
 		req.Images, err = fileUtils.NormalizeResourcePath(req.Images)

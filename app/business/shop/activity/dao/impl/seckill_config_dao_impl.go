@@ -61,6 +61,20 @@ func (s *ShopSeckillConfigDaoImpl) GetByID(c *gin.Context, id int64) (*models.Se
 	return &item, nil
 }
 
+// GetByIDs 根据主键批量获取商品秒杀配置。
+func (s *ShopSeckillConfigDaoImpl) GetByIDs(c *gin.Context, ids []int64) ([]*models.SeckillConfig, error) {
+	if len(ids) == 0 {
+		return []*models.SeckillConfig{}, nil
+	}
+	rows := make([]*models.SeckillConfig, 0, len(ids))
+	if err := s.baseQuery(c).
+		Where("id IN ?", ids).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 // List 分页查询商品秒杀配置列表。
 func (s *ShopSeckillConfigDaoImpl) List(c *gin.Context, req *models.SeckillConfigQuery) (*models.SeckillConfigListData, error) {
 	db := s.baseQuery(c)

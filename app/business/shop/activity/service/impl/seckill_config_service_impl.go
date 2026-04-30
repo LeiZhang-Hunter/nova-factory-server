@@ -50,6 +50,11 @@ func (s *ShopSeckillConfigServiceImpl) GetByID(c *gin.Context, id int64) (*model
 	return s.dao.GetByID(c, id)
 }
 
+// GetByIDs 根据主键批量查询商品秒杀配置。
+func (s *ShopSeckillConfigServiceImpl) GetByIDs(c *gin.Context, ids []int64) ([]*models.SeckillConfig, error) {
+	return s.dao.GetByIDs(c, ids)
+}
+
 // List 查询商品秒杀配置列表。
 func (s *ShopSeckillConfigServiceImpl) List(c *gin.Context, req *models.SeckillConfigQuery) (*models.SeckillConfigListData, error) {
 	data, err := s.dao.List(c, req)

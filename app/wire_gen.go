@@ -477,9 +477,9 @@ func wireApp() (*gin.Engine, func(), error) {
 	seckill := controller3.NewSeckill(iShopSeckillService)
 	iShopSeckillActivityDao := impl.NewShopSeckillActivityDao(db)
 	iShopSeckillActivityService := impl2.NewShopSeckillActivityService(iShopSeckillActivityDao)
-	seckillActivity := controller3.NewSeckillActivity(iShopSeckillActivityService)
 	iShopSeckillConfigDao := impl.NewShopSeckillConfigDao(db)
 	iShopSeckillConfigService := impl2.NewShopSeckillConfigService(iShopSeckillConfigDao)
+	seckillActivity := controller3.NewSeckillActivity(iShopSeckillActivityService, iShopSeckillConfigService)
 	seckillConfig := controller3.NewSeckillConfig(iShopSeckillConfigService)
 	controllerController := &controller3.Controller{
 		Combination:     combination,

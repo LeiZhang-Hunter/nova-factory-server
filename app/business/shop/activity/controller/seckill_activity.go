@@ -6,17 +6,22 @@ import (
 	"nova-factory-server/app/business/shop/activity/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 type SeckillActivity struct {
-	service service.IShopSeckillActivityService
+	service       service.IShopSeckillActivityService
+	configService service.IShopSeckillConfigService
 }
 
-func NewSeckillActivity(service service.IShopSeckillActivityService) *SeckillActivity {
-	return &SeckillActivity{service: service}
+func NewSeckillActivity(service service.IShopSeckillActivityService, configService service.IShopSeckillConfigService) *SeckillActivity {
+	return &SeckillActivity{
+		service:       service,
+		configService: configService,
+	}
 }
 
 func (s *SeckillActivity) PrivateRoutes(router *gin.RouterGroup) {
@@ -121,8 +126,28 @@ func (s *SeckillActivity) validateSet(ctx *gin.Context, req *models.SeckillActiv
 	if req.EndDay < req.StartDay {
 		return fmt.Errorf("结束日期不能小于开始日期")
 	}
-	if req.TimeIDs == "" {
+	if len(req.TimeIDs) == 0 {
 		return fmt.Errorf("时间段ID不能为空")
+	}
+	configIDs, invalidTimeID := parseSeckillConfigIDs(req.TimeIDs)
+	if invalidTimeID != "" {
+		return fmt.Errorf("时间段ID格式不正确: %s", invalidTimeID)
+	}
+	configs, err := s.configService.GetByIDs(ctx, configIDs)
+	if err != nil {
+		return err
+	}
+	exists := make(map[int64]struct{}, len(configs))
+	for _, config := range configs {
+		if config == nil {
+			continue
+		}
+		exists[config.ID] = struct{}{}
+	}
+	for _, configID := range configIDs {
+		if _, ok := exists[configID]; !ok {
+			return fmt.Errorf("时间段ID不存在: %d", configID)
+		}
 	}
 	if req.OnceNum < 0 {
 		return fmt.Errorf("每日购买数量不能小于0")
@@ -139,8 +164,11 @@ func (s *SeckillActivity) validateSet(ctx *gin.Context, req *models.SeckillActiv
 	if req.Status < 0 {
 		return fmt.Errorf("显示状态不正确")
 	}
-	if req.LinkID < 0 {
-		return fmt.Errorf("关联ID不能小于0")
+	if len(req.ProductInfos) == 0 {
+		return fmt.Errorf("请选择参与活动的商品")
+	}
+	if err := validateSeckillActivityProducts(req.ProductInfos); err != nil {
+		return err
 	}
 
 	if req.ID > 0 {
@@ -155,15 +183,80 @@ func (s *SeckillActivity) validateSet(ctx *gin.Context, req *models.SeckillActiv
 	return nil
 }
 
-func normalizeSeckillActivityTimeIDs(raw string) string {
-	parts := strings.Split(strings.TrimSpace(raw), ",")
-	result := make([]string, 0, len(parts))
-	for _, part := range parts {
+// normalizeSeckillActivityTimeIDs 清洗时间段ID数组，移除空值和多余空格。
+func normalizeSeckillActivityTimeIDs(raw []string) []string {
+	result := make([]string, 0, len(raw))
+	for _, part := range raw {
 		part = strings.TrimSpace(part)
 		if part == "" {
 			continue
 		}
 		result = append(result, part)
 	}
-	return strings.Join(result, ",")
+	return result
+}
+
+// parseSeckillConfigIDs 将时间段ID数组转换为去重后的主键数组。
+func parseSeckillConfigIDs(raw []string) ([]int64, string) {
+	result := make([]int64, 0, len(raw))
+	seen := make(map[int64]struct{}, len(raw))
+	for _, item := range raw {
+		configID, err := strconv.ParseInt(item, 10, 64)
+		if err != nil || configID <= 0 {
+			return nil, item
+		}
+		if _, ok := seen[configID]; ok {
+			continue
+		}
+		seen[configID] = struct{}{}
+		result = append(result, configID)
+	}
+	return result, ""
+}
+
+// validateSeckillActivityProducts 校验活动商品列表。
+func validateSeckillActivityProducts(productInfos []*models.SeckillActivityProductInfo) error {
+	seen := make(map[int64]struct{}, len(productInfos))
+	for _, productInfo := range productInfos {
+		if productInfo == nil || productInfo.ID <= 0 {
+			return fmt.Errorf("活动商品不能为空")
+		}
+		if _, ok := seen[productInfo.ID]; ok {
+			return fmt.Errorf("活动商品重复: %d", productInfo.ID)
+		}
+		seen[productInfo.ID] = struct{}{}
+		if productInfo.Status < 0 {
+			return fmt.Errorf("商品状态不正确: %d", productInfo.ID)
+		}
+		if productInfo.Sort < 0 {
+			return fmt.Errorf("商品排序不能小于0: %d", productInfo.ID)
+		}
+		if productInfo.IsHot < 0 {
+			return fmt.Errorf("商品热门状态不正确: %d", productInfo.ID)
+		}
+		for _, attr := range productInfo.Attrs {
+			if attr == nil {
+				continue
+			}
+			if strings.TrimSpace(attr.SkuID) == "" {
+				return fmt.Errorf("商品规格不能为空: %d", productInfo.ID)
+			}
+			if attr.Status < 0 {
+				return fmt.Errorf("商品规格状态不正确: %s", attr.SkuID)
+			}
+			if attr.Price < 0 {
+				return fmt.Errorf("商品规格活动价不能小于0: %s", attr.SkuID)
+			}
+			if attr.Cost < 0 {
+				return fmt.Errorf("商品规格成本价不能小于0: %s", attr.SkuID)
+			}
+			if attr.OtPrice < 0 {
+				return fmt.Errorf("商品规格原价不能小于0: %s", attr.SkuID)
+			}
+			if attr.Quota < 0 {
+				return fmt.Errorf("商品规格限量不能小于0: %s", attr.SkuID)
+			}
+		}
+	}
+	return nil
 }
