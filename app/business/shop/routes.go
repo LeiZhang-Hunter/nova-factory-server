@@ -7,6 +7,7 @@ import (
 	activityController "nova-factory-server/app/business/shop/activity/controller"
 	"nova-factory-server/app/business/shop/api/controller/auth"
 	"nova-factory-server/app/business/shop/api/controller/product"
+	homeController "nova-factory-server/app/business/shop/home/controller"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
 	userController "nova-factory-server/app/business/shop/user/controller"
 	"nova-factory-server/app/datasource/cache"
@@ -22,6 +23,7 @@ func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
 	activityController *activityController.Controller,
+	homeController *homeController.Controller,
 	controller *shopcontroller.Controller,
 	userController *userController.Controller,
 	authController *auth.Controller,
@@ -52,6 +54,8 @@ func NewGinEngine(
 		activityController.Seckill.PrivateRoutes(adminGroup)
 		activityController.SeckillActivity.PrivateRoutes(adminGroup)
 		activityController.SeckillConfig.PrivateRoutes(adminGroup)
+		homeController.HomeModule.PrivateRoutes(adminGroup)
+		homeController.HomeModuleItem.PrivateRoutes(adminGroup)
 		userController.Address.PrivateRoutes(adminGroup)
 		userController.Cart.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)

@@ -345,3 +345,62 @@ CREATE TABLE IF NOT EXISTS `shop_store_seckill_config`
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='商品秒杀配置';
+
+
+CREATE TABLE IF NOT EXISTS `shop_home_module`
+(
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `page_key` varchar(64) NOT NULL DEFAULT 'index' COMMENT '页面标识，例如 index',
+    `module_type` varchar(32) NOT NULL DEFAULT '' COMMENT '模块类型，例如 banner、seckill、pink、goods',
+    `module_name` varchar(128) NOT NULL DEFAULT '' COMMENT '模块名称',
+    `title` varchar(128) NOT NULL DEFAULT '' COMMENT '展示标题',
+    `sub_title` varchar(255) NOT NULL DEFAULT '' COMMENT '展示副标题',
+    `source_type` tinyint(1) NOT NULL DEFAULT '1' COMMENT '数据来源：1手动配置，2自动匹配',
+    `limit_num` int(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT '展示数量，0表示不限制',
+    `sort` bigint(20) UNSIGNED NOT NULL DEFAULT '0' COMMENT '排序，值越小越靠前',
+    `start_time` bigint(20) NOT NULL DEFAULT '0' COMMENT '生效开始时间，时间戳，0表示不限',
+    `end_time` bigint(20) NOT NULL DEFAULT '0' COMMENT '生效结束时间，时间戳，0表示不限',
+    `show_more` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否显示更多入口：0否，1是',
+    `more_link` varchar(512) NOT NULL DEFAULT '' COMMENT '更多入口跳转链接',
+    `style_json` text COMMENT '样式配置JSON，例如背景图、主题色、倒计时开关',
+    `rule_json` text COMMENT '规则配置JSON，例如筛选条件、展示策略',
+    `ext_json` text COMMENT '扩展配置JSON，预留字段',
+    `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态：1启用，0禁用',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_page_key` (`page_key`) USING BTREE,
+    KEY `idx_module_type` (`module_type`) USING BTREE,
+    KEY `idx_status_sort` (`status`,`sort`) USING BTREE,
+    KEY `idx_start_end_time` (`start_time`,`end_time`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='首页模块配置表';
+
+
+CREATE TABLE IF NOT EXISTS `shop_home_module_item`
+(
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `module_id` bigint(20) UNSIGNED NOT NULL DEFAULT '0' COMMENT '首页模块ID，对应 shop_home_module.id',
+    `business_type` varchar(32) NOT NULL DEFAULT '' COMMENT '业务类型，例如 seckill、pink、goods、coupon',
+    `link_id` bigint(20) UNSIGNED NOT NULL DEFAULT '0' COMMENT '关联业务ID，例如活动ID、商品ID、专题ID',
+    `item_name` varchar(128) NOT NULL DEFAULT '' COMMENT '内容项名称',
+    `item_sub_title` varchar(255) NOT NULL DEFAULT '' COMMENT '内容项副标题',
+    `item_image` varchar(1024) NOT NULL DEFAULT '' COMMENT '内容项图片',
+    `sort` bigint(20) UNSIGNED NOT NULL DEFAULT '0' COMMENT '排序，值越小越靠前',
+    `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态：1启用，0禁用',
+    `ext_json` text COMMENT '扩展配置JSON，预留字段',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`) USING BTREE,
+    KEY `idx_module_id` (`module_id`) USING BTREE,
+    KEY `idx_business_type` (`business_type`) USING BTREE,
+    KEY `idx_link_id` (`link_id`) USING BTREE,
+    KEY `idx_status_sort` (`status`,`sort`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='首页模块明细表';
