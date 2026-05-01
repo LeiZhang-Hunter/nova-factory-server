@@ -2,6 +2,7 @@ package impl
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"nova-factory-server/app/business/shop/activity/dao"
@@ -15,6 +16,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+const seckillBatchSize = 100
 
 // ShopSeckillActivityServiceImpl 提供秒杀活动及其关联秒杀商品的业务能力。
 type ShopSeckillActivityServiceImpl struct {
@@ -78,7 +81,16 @@ func (s *ShopSeckillActivityServiceImpl) DeleteByIDs(c *gin.Context, ids []int64
 
 // GetByID 根据主键获取秒杀活动。
 func (s *ShopSeckillActivityServiceImpl) GetByID(c *gin.Context, id int64) (*models.SeckillActivity, error) {
-	return s.dao.GetByID(c, id)
+	activity, err := s.dao.GetByID(c, id)
+	if err != nil || activity == nil {
+		return activity, err
+	}
+	productInfos, err := s.loadActivityProductInfos(c, activity.ID)
+	if err != nil {
+		return nil, err
+	}
+	activity.ProductInfos = productInfos
+	return activity, nil
 }
 
 // List 查询秒杀活动列表。
@@ -222,7 +234,7 @@ func validateActivityProductAttrs(
 			if attr.Price <= 0 {
 				return fmt.Errorf("请填写商品规格活动价: %s", attr.SkuID)
 			}
-			if attr.Quota <= 0 {
+			if attr.Quota < 0 {
 				return fmt.Errorf("请填写商品规格限量: %s", attr.SkuID)
 			}
 			if attr.Quota > sku.Quantity {
@@ -254,6 +266,8 @@ func (s *ShopSeckillActivityServiceImpl) syncActivitySeckillGoods(
 	}
 
 	keepProductIDs := make(map[int64]struct{}, len(req.ProductInfos))
+	createReqs := make([]*models.SeckillSet, 0, len(req.ProductInfos))
+	updateReqs := make([]*models.SeckillSet, 0, len(req.ProductInfos))
 	for _, productInfo := range req.ProductInfos {
 		goods := goodsMap[productInfo.ID]
 		if goods == nil {
@@ -267,10 +281,28 @@ func (s *ShopSeckillActivityServiceImpl) syncActivitySeckillGoods(
 			skuMap[productInfo.ID],
 			currentMap[productInfo.ID],
 		)
-		if _, err = s.seckillDao.Set(c, seckillReq); err != nil {
-			return err
+		if seckillReq.ID > 0 {
+			updateReqs = append(updateReqs, seckillReq)
+		} else {
+			createReqs = append(createReqs, seckillReq)
 		}
 		keepProductIDs[productInfo.ID] = struct{}{}
+	}
+
+	if len(createReqs) == 0 && len(updateReqs) == 0 {
+		return errors.New("不存在要更新和写入的秒杀商品")
+	}
+
+	if len(createReqs) != 0 {
+		if err := s.seckillDao.BatchCreate(c, createReqs, seckillBatchSize); err != nil {
+			return err
+		}
+	}
+
+	if len(updateReqs) != 0 {
+		if err := s.seckillDao.BatchUpdate(c, updateReqs, seckillBatchSize); err != nil {
+			return err
+		}
 	}
 
 	removeIDs := make([]int64, 0)
@@ -300,6 +332,31 @@ func (s *ShopSeckillActivityServiceImpl) findSeckillsByActivityID(c *gin.Context
 		return []*models.Seckill{}, nil
 	}
 	return data.Rows, nil
+}
+
+// loadActivityProductInfos 从秒杀商品记录中还原活动商品列表。
+func (s *ShopSeckillActivityServiceImpl) loadActivityProductInfos(c *gin.Context, activityID int64) ([]*models.SeckillActivityProductInfo, error) {
+	rows, err := s.findSeckillsByActivityID(c, activityID)
+	if err != nil {
+		return nil, err
+	}
+	if len(rows) == 0 {
+		return []*models.SeckillActivityProductInfo{}, nil
+	}
+	productInfos := make([]*models.SeckillActivityProductInfo, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		productInfos = append(productInfos, &models.SeckillActivityProductInfo{
+			ID:     row.ProductID,
+			Status: row.Status,
+			Sort:   row.Sort,
+			IsHot:  row.IsHot,
+			Attrs:  []*models.SeckillActivityProductInfoAttr{},
+		})
+	}
+	return productInfos, nil
 }
 
 // buildSeckillSetFromActivity 将活动和商品信息组装为秒杀商品保存参数。

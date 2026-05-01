@@ -30,6 +30,69 @@ func (s *ShopSeckillDaoImpl) Set(c *gin.Context, req *models.SeckillSet) (*model
 	return s.create(c, req)
 }
 
+// BatchCreate 批量新增秒杀商品。
+func (s *ShopSeckillDaoImpl) BatchCreate(c *gin.Context, reqs []*models.SeckillSet, batchSize int) error {
+	if len(reqs) == 0 {
+		return nil
+	}
+	if batchSize <= 0 {
+		batchSize = len(reqs)
+	}
+	models := make([]*models.Seckill, 0, len(reqs))
+	now := time.Now()
+	for _, req := range reqs {
+		if req == nil {
+			continue
+		}
+		model := buildSeckillModel(req)
+		model.ID = snowflake.GenID()
+		model.IsDel = 0
+		model.State = commonStatus.NORMAL
+		model.DeptID = baizeContext.GetDeptId(c)
+		model.CreateBy = baizeContext.GetUserId(c)
+		model.UpdateBy = baizeContext.GetUserId(c)
+		model.CreateTime = &now
+		model.UpdateTime = &now
+		models = append(models, model)
+	}
+	if len(models) == 0 {
+		return nil
+	}
+	return s.db.WithContext(c).Table(s.tableName).CreateInBatches(models, batchSize).Error
+}
+
+// BatchUpdate 批量更新秒杀商品。
+func (s *ShopSeckillDaoImpl) BatchUpdate(c *gin.Context, reqs []*models.SeckillSet, batchSize int) error {
+	if len(reqs) == 0 {
+		return nil
+	}
+	if batchSize <= 0 {
+		batchSize = len(reqs)
+	}
+	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		for start := 0; start < len(reqs); start += batchSize {
+			end := start + batchSize
+			if end > len(reqs) {
+				end = len(reqs)
+			}
+			for _, req := range reqs[start:end] {
+				if req == nil {
+					continue
+				}
+				now := time.Now()
+				if err := tx.Table(s.tableName).
+					Where("id = ?", req.ID).
+					Where("state = ?", commonStatus.NORMAL).
+					Where("is_del = ?", 0).
+					Updates(buildSeckillUpdates(req, baizeContext.GetUserId(c), &now)).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+}
+
 func (s *ShopSeckillDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	now := time.Now()
 	return s.db.WithContext(c).Table(s.tableName).

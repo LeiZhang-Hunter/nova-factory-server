@@ -4,19 +4,20 @@ import "nova-factory-server/app/baize"
 
 // SeckillActivity 秒杀活动
 type SeckillActivity struct {
-	ID           int64  `json:"id,string" db:"id"`               // 活动ID
-	Type         int8   `json:"type" db:"type"`                  // 活动类型，1 表示秒杀
-	Title        string `json:"title" db:"title"`                // 活动名称
-	StartDay     int32  `json:"startDay" db:"start_day"`         // 开始日期
-	EndDay       int32  `json:"endDay" db:"end_day"`             // 结束日期
-	TimeIDs      string `json:"timeIds" db:"time_ids"`           // 时间段ID，多个逗号分隔
-	OnceNum      int64  `json:"onceNum" db:"once_num"`           // 活动期间每人每日购买数量，0 不限制
-	Num          int64  `json:"num" db:"num"`                    // 全部活动期间用户购买总数限制，0 不限制
-	IsCommission int32  `json:"isCommission" db:"is_commission"` // 是否参与分佣
-	Status       int8   `json:"status" db:"status"`              // 是否显示
-	LinkID       int32  `json:"linkId" db:"link_id"`             // 关联ID
-	AddTime      int64  `json:"addTime" db:"add_time"`           // 添加时间
-	DeptID       int64  `json:"deptId" db:"dept_id"`             // 部门ID
+	ID           int64                         `json:"id,string" db:"id"`               // 活动ID
+	Type         int8                          `json:"type" db:"type"`                  // 活动类型，1 表示秒杀
+	Title        string                        `json:"title" db:"title"`                // 活动名称
+	StartDay     int32                         `json:"startDay" db:"start_day"`         // 开始日期
+	EndDay       int32                         `json:"endDay" db:"end_day"`             // 结束日期
+	TimeIDs      string                        `json:"timeIds" db:"time_ids"`           // 时间段ID，多个逗号分隔
+	OnceNum      int64                         `json:"onceNum" db:"once_num"`           // 活动期间每人每日购买数量，0 不限制
+	Num          int64                         `json:"num" db:"num"`                    // 全部活动期间用户购买总数限制，0 不限制
+	IsCommission int32                         `json:"isCommission" db:"is_commission"` // 是否参与分佣
+	Status       int8                          `json:"status" db:"status"`              // 是否显示
+	LinkID       int32                         `json:"linkId" db:"link_id"`             // 关联ID
+	AddTime      int64                         `json:"addTime" db:"add_time"`           // 添加时间
+	DeptID       int64                         `json:"deptId" db:"dept_id"`             // 部门ID
+	ProductInfos []*SeckillActivityProductInfo `json:"productInfos" gorm:"-" db:"-"`    // 参与活动的商品列表
 	baize.BaseEntity
 	State int32 `json:"state" db:"state"` // 操作状态
 }

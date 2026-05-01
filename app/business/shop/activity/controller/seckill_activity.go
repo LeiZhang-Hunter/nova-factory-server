@@ -27,6 +27,7 @@ func NewSeckillActivity(service service.IShopSeckillActivityService, configServi
 func (s *SeckillActivity) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/activity/seckill_activity")
 	group.GET("/list", middlewares.HasPermission("shop:activity:seckill_activity:list"), s.List)
+	group.GET("/info/:id", middlewares.HasPermission("shop:activity:seckill_activity:info"), s.Info)
 	group.POST("/set", middlewares.HasPermission("shop:activity:seckill_activity:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:activity:seckill_activity:remove"), s.Delete)
 }
@@ -47,6 +48,29 @@ func (s *SeckillActivity) List(ctx *gin.Context) {
 		return
 	}
 	data, err := s.service.List(ctx, req)
+	if err != nil {
+		baizeContext.Waring(ctx, err.Error())
+		return
+	}
+	baizeContext.SuccessData(ctx, data)
+}
+
+// Info 获取秒杀活动详情
+// @Summary 获取秒杀活动详情
+// @Description 根据ID获取秒杀活动详情
+// @Tags 商城/活动管理/秒杀活动
+// @Param id path int true "秒杀活动ID"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /shop/activity/seckill_activity/info/{id} [get]
+func (s *SeckillActivity) Info(ctx *gin.Context) {
+	id := baizeContext.ParamInt64(ctx, "id")
+	if id == 0 {
+		baizeContext.ParameterError(ctx)
+		return
+	}
+	data, err := s.service.GetByID(ctx, id)
 	if err != nil {
 		baizeContext.Waring(ctx, err.Error())
 		return
