@@ -99,6 +99,24 @@ func (s *ShopHomeModuleItemDaoImpl) HasByModuleIDs(c *gin.Context, moduleIDs []i
 	return total > 0, nil
 }
 
+// ListByModuleIDs 按模块ID批量查询已启用的首页模块明细。
+func (s *ShopHomeModuleItemDaoImpl) ListByModuleIDs(c *gin.Context, moduleIDs []int64) ([]*models.HomeModuleItem, error) {
+	if len(moduleIDs) == 0 {
+		return []*models.HomeModuleItem{}, nil
+	}
+	rows := make([]*models.HomeModuleItem, 0)
+	if err := s.baseQuery(c).
+		Where("module_id IN ?", moduleIDs).
+		Where("status = ?", 1).
+		Order("module_id ASC").
+		Order("sort ASC").
+		Order("id DESC").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 // SyncBusinessModules 按业务数据同步首页模块明细。
 func (s *ShopHomeModuleItemDaoImpl) SyncBusinessModules(c *gin.Context, req *models.HomeModuleItemBusinessSync) error {
 	if req == nil {

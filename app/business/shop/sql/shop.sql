@@ -53,6 +53,8 @@ CREATE TABLE IF NOT EXISTS `shop_goods` (
   KEY `idx_outer_id` (`outer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品主表';
 
+
+
 CREATE TABLE IF NOT EXISTS `shop_goods_sku` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `goods_id` VARCHAR(64) NOT NULL COMMENT '商品ID，对应shop_goods.goods_id',

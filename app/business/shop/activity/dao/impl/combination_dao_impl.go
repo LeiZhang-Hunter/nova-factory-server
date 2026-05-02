@@ -5,7 +5,7 @@ import (
 	"nova-factory-server/app/business/shop/activity/dao"
 	"nova-factory-server/app/business/shop/activity/models"
 	homeDao "nova-factory-server/app/business/shop/home/dao"
-	homeModels "nova-factory-server/app
+	homeModels "nova-factory-server/app/business/shop/home/models"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"

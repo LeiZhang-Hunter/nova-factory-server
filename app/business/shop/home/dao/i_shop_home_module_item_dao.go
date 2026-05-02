@@ -13,6 +13,7 @@ type IShopHomeModuleItemDao interface {
 	DeleteByBusiness(c *gin.Context, businessType string, linkIDs []int64) error
 	GetByID(c *gin.Context, id int64) (*models.HomeModuleItem, error)
 	HasByModuleIDs(c *gin.Context, moduleIDs []int64) (bool, error)
+	ListByModuleIDs(c *gin.Context, moduleIDs []int64) ([]*models.HomeModuleItem, error)
 	SyncBusinessModules(c *gin.Context, req *models.HomeModuleItemBusinessSync) error
 	ListModuleIDsByBusiness(c *gin.Context, businessType string, linkIDs []int64) (map[int64]string, error)
 	List(c *gin.Context, req *models.HomeModuleItemQuery) (*models.HomeModuleItemListData, error)

@@ -2,9 +2,10 @@ package product
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewProduct, NewCategory, wire.Struct(new(Controller), "*"))
+var ProviderSet = wire.NewSet(NewProduct, NewCategory, NewHome, wire.Struct(new(Controller), "*"))
 
 type Controller struct {
 	Product  *Product
 	Category *Category
+	Home     *Home
 }

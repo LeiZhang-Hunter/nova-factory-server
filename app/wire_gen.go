@@ -80,12 +80,12 @@ import (
 	"nova-factory-server/app/business/iot/system/service/systemserviceimpl"
 	"nova-factory-server/app/business/shop"
 	controller3 "nova-factory-server/app/business/shop/activity/controller"
-	"nova-factory-server/app/business/shop/activity/dao/impl"
-	impl2 "nova-factory-server/app/business/shop/activity/service/impl"
+	impl2 "nova-factory-server/app/business/shop/activity/dao/impl"
+	impl3 "nova-factory-server/app/business/shop/activity/service/impl"
 	"nova-factory-server/app/business/shop/api/controller/auth"
 	"nova-factory-server/app/business/shop/api/controller/product"
 	controller4 "nova-factory-server/app/business/shop/home/controller"
-	impl3 "nova-factory-server/app/business/shop/home/dao/impl"
+	"nova-factory-server/app/business/shop/home/dao/impl"
 	impl4 "nova-factory-server/app/business/shop/home/service/impl"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
 	"nova-factory-server/app/business/shop/product/shopdao/shopdaoimpl"
@@ -469,21 +469,22 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	factoryBootstrap := ai.NewFactoryBootstrap(db, iAiModelProviderDao, iAiLLMDao)
 	aiAI := ai.NewGinEngine(app, cacheCache, aiDataSet, gatewaycontrollerController, factoryBootstrap)
-	iShopCombinationDao := impl.NewShopCombinationDao(db)
-	iShopCombinationService := impl2.NewShopCombinationService(iShopCombinationDao)
+	iShopHomeModuleItemDao := impl.NewShopHomeModuleItemDao(db)
+	iShopCombinationDao := impl2.NewShopCombinationDao(db, iShopHomeModuleItemDao)
+	iShopCombinationService := impl3.NewShopCombinationService(iShopCombinationDao)
 	combination := controller3.NewCombination(iShopCombinationService)
-	iShopPinkDao := impl.NewShopPinkDao(db)
-	iShopPinkService := impl2.NewShopPinkService(iShopPinkDao)
+	iShopPinkDao := impl2.NewShopPinkDao(db)
+	iShopPinkService := impl3.NewShopPinkService(iShopPinkDao)
 	pink := controller3.NewPink(iShopPinkService)
-	iShopSeckillDao := impl.NewShopSeckillDao(db)
-	iShopSeckillService := impl2.NewShopSeckillService(iShopSeckillDao)
+	iShopSeckillDao := impl2.NewShopSeckillDao(db)
+	iShopSeckillService := impl3.NewShopSeckillService(iShopSeckillDao)
 	seckill := controller3.NewSeckill(iShopSeckillService)
-	iShopSeckillActivityDao := impl.NewShopSeckillActivityDao(db)
-	iShopGoodsDao := shopdaoimpl.NewShopGoodsDao(db)
+	iShopSeckillActivityDao := impl2.NewShopSeckillActivityDao(db, iShopHomeModuleItemDao)
+	iShopGoodsDao := shopdaoimpl.NewShopGoodsDao(db, iShopHomeModuleItemDao)
 	iShopSkuDao := shopdaoimpl.NewShopSkuDao(db)
-	iShopSeckillActivityService := impl2.NewShopSeckillActivityService(iShopSeckillActivityDao, iShopSeckillDao, iShopGoodsDao, iShopSkuDao)
-	iShopSeckillConfigDao := impl.NewShopSeckillConfigDao(db)
-	iShopSeckillConfigService := impl2.NewShopSeckillConfigService(iShopSeckillConfigDao)
+	iShopSeckillActivityService := impl3.NewShopSeckillActivityService(iShopSeckillActivityDao, iShopSeckillDao, iShopGoodsDao, iShopSkuDao)
+	iShopSeckillConfigDao := impl2.NewShopSeckillConfigDao(db)
+	iShopSeckillConfigService := impl3.NewShopSeckillConfigService(iShopSeckillConfigDao)
 	seckillActivity := controller3.NewSeckillActivity(iShopSeckillActivityService, iShopSeckillConfigService)
 	seckillConfig := controller3.NewSeckillConfig(iShopSeckillConfigService)
 	controllerController := &controller3.Controller{
@@ -493,10 +494,9 @@ func wireApp() (*gin.Engine, func(), error) {
 		SeckillActivity: seckillActivity,
 		SeckillConfig:   seckillConfig,
 	}
-	iShopHomeModuleDao := impl3.NewShopHomeModuleDao(db)
+	iShopHomeModuleDao := impl.NewShopHomeModuleDao(db, iShopHomeModuleItemDao)
 	iShopHomeModuleService := impl4.NewShopHomeModuleService(iShopHomeModuleDao)
 	homeModule := controller4.NewHomeModule(iShopHomeModuleService)
-	iShopHomeModuleItemDao := impl3.NewShopHomeModuleItemDao(db)
 	iShopHomeModuleItemService := impl4.NewShopHomeModuleItemService(iShopHomeModuleItemDao, iShopHomeModuleDao)
 	homeModuleItem := controller4.NewHomeModuleItem(iShopHomeModuleItemService)
 	controller5 := &controller4.Controller{
@@ -536,9 +536,11 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	productProduct := product.NewProduct()
 	productCategory := product.NewCategory(iShopCategoryService)
+	productHome := product.NewHome(iShopHomeModuleService, iShopHomeModuleItemDao)
 	productController := &product.Controller{
 		Product:  productProduct,
 		Category: productCategory,
+		Home:     productHome,
 	}
 	shopShop := shop.NewGinEngine(app, cacheCache, controllerController, controller5, shopcontrollerController, controller6, authController, productController)
 	iAgentConfigDao := settingdaoimpl.NewAgentConfigDao(db)
