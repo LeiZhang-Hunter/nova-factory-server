@@ -109,3 +109,16 @@ type HomeModuleItemListData struct {
 	Rows  []*HomeModuleItem `json:"rows"`  // 列表数据
 	Total int64             `json:"total"` // 总数
 }
+
+// HomeModuleItemBusinessSync 首页模块明细业务同步参数。
+type HomeModuleItemBusinessSync struct {
+	BusinessType string   `json:"businessType"`  // 业务类型
+	LinkID       int64    `json:"linkId,string"` // 业务主键ID
+	ModuleIDs    []string `json:"moduleIds"`     // 首页模块ID集合
+	ItemName     string   `json:"itemName"`      // 内容项名称
+	ItemSubTitle string   `json:"itemSubTitle"`  // 内容项副标题
+	ItemImage    string   `json:"itemImage"`     // 内容项图片
+	Sort         int64    `json:"sort"`          // 排序值
+	Status       int8     `json:"status"`        // 状态
+	ExtJSON      string   `json:"extJson"`       // 扩展配置JSON
+}

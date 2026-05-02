@@ -25,6 +25,7 @@ type Goods struct {
 	Unit               string      `json:"unit" db:"unit"`                       // 销售单位
 	IsOnSale           int32       `json:"isOnSale" db:"is_on_sale"`             // 是否上架
 	Quantity           int64       `json:"quantity" db:"quantity"`               // 库存数量
+	HomeModuleIDs      string      `json:"homeModuleIds" db:"home_module_ids"`   // 推荐首页模块ID集合
 	Skus               []*GoodsSku `json:"skus" gorm:"-" db:"-"`                 // 商品规格列表
 	DeptID             int64       `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
@@ -48,6 +49,7 @@ type GoodsUpsert struct {
 	Unit          string   `json:"unit"`                         // 销售单位
 	IsOnSale      int32    `json:"isOnSale"`                     // 是否上架
 	Quantity      int64    `json:"quantity"`                     // 库存数量
+	HomeModuleIDs []string `json:"homeModuleIds"`                // 推荐首页模块ID集合
 	baize.BaseEntity
 }
 

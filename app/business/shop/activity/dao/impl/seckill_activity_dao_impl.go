@@ -4,6 +4,8 @@ import (
 	"errors"
 	"nova-factory-server/app/business/shop/activity/dao"
 	"nova-factory-server/app/business/shop/activity/models"
+	homeDao "nova-factory-server/app/business/shop/home/dao"
+	homeModels "nova-factory-server/app/business/shop/home/models"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
@@ -16,11 +18,14 @@ import (
 
 type ShopSeckillActivityDaoImpl struct {
 	db        *gorm.DB
+	itemDao   homeDao.IShopHomeModuleItemDao
 	tableName string
 }
 
-func NewShopSeckillActivityDao(ms *gorm.DB) dao.IShopSeckillActivityDao {
-	return &ShopSeckillActivityDaoImpl{db: ms, tableName: "eb_store_seckill_activity"}
+const seckillActivityBusinessType = "seckill_activity"
+
+func NewShopSeckillActivityDao(ms *gorm.DB, itemDao homeDao.IShopHomeModuleItemDao) dao.IShopSeckillActivityDao {
+	return &ShopSeckillActivityDaoImpl{db: ms, itemDao: itemDao, tableName: "eb_store_seckill_activity"}
 }
 
 func (s *ShopSeckillActivityDaoImpl) Set(c *gin.Context, req *models.SeckillActivitySet) (*models.SeckillActivity, error) {
@@ -31,6 +36,9 @@ func (s *ShopSeckillActivityDaoImpl) Set(c *gin.Context, req *models.SeckillActi
 }
 
 func (s *ShopSeckillActivityDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
+	if err := s.itemDao.DeleteByBusiness(c, seckillActivityBusinessType, ids); err != nil {
+		return err
+	}
 	now := time.Now()
 	return s.db.WithContext(c).Table(s.tableName).
 		Where("id IN ?", ids).
@@ -50,6 +58,9 @@ func (s *ShopSeckillActivityDaoImpl) GetByID(c *gin.Context, id int64) (*models.
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
+		return nil, err
+	}
+	if err := s.attachHomeModuleIDs(c, []*models.SeckillActivity{&item}); err != nil {
 		return nil, err
 	}
 	return &item, nil
@@ -86,6 +97,9 @@ func (s *ShopSeckillActivityDaoImpl) List(c *gin.Context, req *models.SeckillAct
 	if err := db.Offset(int((req.Page - 1) * req.Size)).Limit(int(req.Size)).Order("id DESC").Find(&rows).Error; err != nil {
 		return nil, err
 	}
+	if err := s.attachHomeModuleIDs(c, rows); err != nil {
+		return nil, err
+	}
 	return &models.SeckillActivityListData{Rows: rows, Total: total}, nil
 }
 
@@ -103,7 +117,19 @@ func (s *ShopSeckillActivityDaoImpl) create(c *gin.Context, req *models.SeckillA
 	if err := s.db.WithContext(c).Table(s.tableName).Create(model).Error; err != nil {
 		return nil, err
 	}
-	return model, nil
+	if err := s.itemDao.SyncBusinessModules(c, &homeModels.HomeModuleItemBusinessSync{
+		BusinessType: seckillActivityBusinessType,
+		LinkID:       model.ID,
+		ModuleIDs:    req.HomeModuleIDs,
+		ItemName:     req.Title,
+		ItemSubTitle: "",
+		ItemImage:    "",
+		Sort:         0,
+		Status:       req.Status,
+	}); err != nil {
+		return nil, err
+	}
+	return s.GetByID(c, model.ID)
 }
 
 func (s *ShopSeckillActivityDaoImpl) update(c *gin.Context, req *models.SeckillActivitySet) (*models.SeckillActivity, error) {
@@ -114,38 +140,73 @@ func (s *ShopSeckillActivityDaoImpl) update(c *gin.Context, req *models.SeckillA
 		Updates(buildSeckillActivityUpdates(req, baizeContext.GetUserId(c), &now)).Error; err != nil {
 		return nil, err
 	}
+	if err := s.itemDao.SyncBusinessModules(c, &homeModels.HomeModuleItemBusinessSync{
+		BusinessType: seckillActivityBusinessType,
+		LinkID:       req.ID,
+		ModuleIDs:    req.HomeModuleIDs,
+		ItemName:     req.Title,
+		ItemSubTitle: "",
+		ItemImage:    "",
+		Sort:         0,
+		Status:       req.Status,
+	}); err != nil {
+		return nil, err
+	}
 	return s.GetByID(c, req.ID)
 }
 
 func buildSeckillActivityModel(req *models.SeckillActivitySet) *models.SeckillActivity {
 	return &models.SeckillActivity{
-		Type:         req.Type,
-		Title:        req.Title,
-		StartDay:     req.StartDay,
-		EndDay:       req.EndDay,
-		TimeIDs:      strings.Join(req.TimeIDs, ","),
-		OnceNum:      req.OnceNum,
-		Num:          req.Num,
-		IsCommission: req.IsCommission,
-		Status:       req.Status,
-		LinkID:       req.LinkID,
-		AddTime:      time.Now().Unix(),
+		Type:          req.Type,
+		Title:         req.Title,
+		StartDay:      req.StartDay,
+		EndDay:        req.EndDay,
+		TimeIDs:       strings.Join(req.TimeIDs, ","),
+		OnceNum:       req.OnceNum,
+		Num:           req.Num,
+		IsCommission:  req.IsCommission,
+		Status:        req.Status,
+		LinkID:        req.LinkID,
+		HomeModuleIDs: strings.Join(req.HomeModuleIDs, ","),
+		AddTime:       time.Now().Unix(),
 	}
 }
 
 func buildSeckillActivityUpdates(req *models.SeckillActivitySet, userID int64, now *time.Time) map[string]any {
 	return map[string]any{
-		"type":          req.Type,
-		"title":         req.Title,
-		"start_day":     req.StartDay,
-		"end_day":       req.EndDay,
-		"time_ids":      strings.Join(req.TimeIDs, ","),
-		"once_num":      req.OnceNum,
-		"num":           req.Num,
-		"is_commission": req.IsCommission,
-		"status":        req.Status,
-		"link_id":       req.LinkID,
-		"update_by":     userID,
-		"update_time":   now,
+		"type":            req.Type,
+		"title":           req.Title,
+		"start_day":       req.StartDay,
+		"end_day":         req.EndDay,
+		"time_ids":        strings.Join(req.TimeIDs, ","),
+		"once_num":        req.OnceNum,
+		"num":             req.Num,
+		"is_commission":   req.IsCommission,
+		"status":          req.Status,
+		"link_id":         req.LinkID,
+		"home_module_ids": strings.Join(req.HomeModuleIDs, ","),
+		"update_by":       userID,
+		"update_time":     now,
 	}
+}
+
+func (s *ShopSeckillActivityDaoImpl) attachHomeModuleIDs(c *gin.Context, rows []*models.SeckillActivity) error {
+	linkIDs := make([]int64, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		linkIDs = append(linkIDs, row.ID)
+	}
+	moduleMap, err := s.itemDao.ListModuleIDsByBusiness(c, seckillActivityBusinessType, linkIDs)
+	if err != nil {
+		return err
+	}
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		row.HomeModuleIDs = moduleMap[row.ID]
+	}
+	return nil
 }

@@ -2,6 +2,8 @@ package impl
 
 import (
 	"errors"
+	"strconv"
+	"strings"
 	"time"
 
 	"nova-factory-server/app/business/shop/home/dao"
@@ -52,6 +54,23 @@ func (s *ShopHomeModuleItemDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) err
 		}).Error
 }
 
+// DeleteByBusiness 按业务类型与业务ID软删除首页模块明细。
+func (s *ShopHomeModuleItemDaoImpl) DeleteByBusiness(c *gin.Context, businessType string, linkIDs []int64) error {
+	if len(linkIDs) == 0 {
+		return nil
+	}
+	now := time.Now()
+	return s.db.WithContext(c).Table(s.tableName).
+		Where("business_type = ?", businessType).
+		Where("link_id IN ?", linkIDs).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(map[string]any{
+			"state":       commonStatus.DELETE,
+			"update_by":   baizeContext.GetUserId(c),
+			"update_time": &now,
+		}).Error
+}
+
 // GetByID 根据主键获取首页模块明细详情。
 func (s *ShopHomeModuleItemDaoImpl) GetByID(c *gin.Context, id int64) (*models.HomeModuleItem, error) {
 	var item models.HomeModuleItem
@@ -78,6 +97,125 @@ func (s *ShopHomeModuleItemDaoImpl) HasByModuleIDs(c *gin.Context, moduleIDs []i
 		return false, err
 	}
 	return total > 0, nil
+}
+
+// SyncBusinessModules 按业务数据同步首页模块明细。
+func (s *ShopHomeModuleItemDaoImpl) SyncBusinessModules(c *gin.Context, req *models.HomeModuleItemBusinessSync) error {
+	if req == nil {
+		return nil
+	}
+	moduleIDs := normalizeModuleIDs(req.ModuleIDs)
+	userID := baizeContext.GetUserId(c)
+	deptID := baizeContext.GetDeptId(c)
+
+	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		rows := make([]*models.HomeModuleItem, 0)
+		if err := tx.Table(s.tableName).
+			Where("business_type = ?", req.BusinessType).
+			Where("link_id = ?", req.LinkID).
+			Where("state = ?", commonStatus.NORMAL).
+			Find(&rows).Error; err != nil {
+			return err
+		}
+
+		currentMap := make(map[int64]*models.HomeModuleItem, len(rows))
+		for _, row := range rows {
+			if row == nil {
+				continue
+			}
+			currentMap[row.ModuleID] = row
+		}
+
+		now := time.Now()
+		keepModuleIDs := make(map[int64]struct{}, len(moduleIDs))
+		for _, moduleID := range moduleIDs {
+			keepModuleIDs[moduleID] = struct{}{}
+			if current := currentMap[moduleID]; current != nil {
+				if err := tx.Table(s.tableName).
+					Where("id = ?", current.ID).
+					Where("state = ?", commonStatus.NORMAL).
+					Updates(map[string]any{
+						"item_name":      req.ItemName,
+						"item_sub_title": req.ItemSubTitle,
+						"item_image":     req.ItemImage,
+						"sort":           req.Sort,
+						"status":         req.Status,
+						"ext_json":       req.ExtJSON,
+						"update_by":      userID,
+						"update_time":    &now,
+					}).Error; err != nil {
+					return err
+				}
+				continue
+			}
+
+			model := &models.HomeModuleItem{
+				ID:           snowflake.GenID(),
+				ModuleID:     moduleID,
+				BusinessType: req.BusinessType,
+				LinkID:       req.LinkID,
+				ItemName:     req.ItemName,
+				ItemSubTitle: req.ItemSubTitle,
+				ItemImage:    req.ItemImage,
+				Sort:         req.Sort,
+				Status:       req.Status,
+				ExtJSON:      req.ExtJSON,
+				DeptID:       deptID,
+				State:        commonStatus.NORMAL,
+			}
+			model.SetCreateBy(userID)
+			if err := tx.Table(s.tableName).Create(model).Error; err != nil {
+				return err
+			}
+		}
+
+		removeIDs := make([]int64, 0)
+		for moduleID, current := range currentMap {
+			if _, ok := keepModuleIDs[moduleID]; ok {
+				continue
+			}
+			removeIDs = append(removeIDs, current.ID)
+		}
+		if len(removeIDs) == 0 {
+			return nil
+		}
+		return tx.Table(s.tableName).
+			Where("id IN ?", removeIDs).
+			Where("state = ?", commonStatus.NORMAL).
+			Updates(map[string]any{
+				"state":       commonStatus.DELETE,
+				"update_by":   userID,
+				"update_time": &now,
+			}).Error
+	})
+}
+
+// ListModuleIDsByBusiness 按业务类型与业务ID查询首页模块ID集合。
+func (s *ShopHomeModuleItemDaoImpl) ListModuleIDsByBusiness(c *gin.Context, businessType string, linkIDs []int64) (map[int64]string, error) {
+	result := make(map[int64]string, len(linkIDs))
+	if len(linkIDs) == 0 {
+		return result, nil
+	}
+	rows := make([]*models.HomeModuleItem, 0)
+	if err := s.baseQuery(c).
+		Where("business_type = ?", businessType).
+		Where("link_id IN ?", linkIDs).
+		Order("module_id ASC").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	collector := make(map[int64][]string, len(linkIDs))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		collector[row.LinkID] = append(collector[row.LinkID], strconv.FormatInt(row.ModuleID, 10))
+	}
+	for linkID, moduleIDs := range collector {
+		result[linkID] = strings.Join(moduleIDs, ",")
+	}
+	return result, nil
 }
 
 // List 分页查询首页模块明细列表。
@@ -176,4 +314,25 @@ func (s *ShopHomeModuleItemDaoImpl) update(c *gin.Context, req *models.HomeModul
 			"update_by":      baizeContext.GetUserId(c),
 			"update_time":    &now,
 		}).Error
+}
+
+func normalizeModuleIDs(raw []string) []int64 {
+	result := make([]int64, 0, len(raw))
+	seen := make(map[int64]struct{}, len(raw))
+	for _, value := range raw {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		moduleID, err := strconv.ParseInt(value, 10, 64)
+		if err != nil || moduleID <= 0 {
+			continue
+		}
+		if _, ok := seen[moduleID]; ok {
+			continue
+		}
+		seen[moduleID] = struct{}{}
+		result = append(result, moduleID)
+	}
+	return result
 }

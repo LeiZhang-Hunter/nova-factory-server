@@ -32,41 +32,43 @@ type Combination struct {
 	Quota         int64   `json:"quota" db:"quota"`
 	QuotaShow     int64   `json:"quotaShow" db:"quota_show"`
 	Virtual       int64   `json:"virtual" db:"virtual"`
+	HomeModuleIDs string  `json:"homeModuleIds" db:"home_module_ids"`
 	DeptID        int64   `json:"deptId" db:"dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" db:"state"`
 }
 
 type CombinationSet struct {
-	ID            int64   `json:"id,string"`
-	ProductID     int64   `json:"productId,string" binding:"required"`
-	MerID         int64   `json:"merId,string"`
-	Image         string  `json:"image" binding:"required"`
-	Images        string  `json:"images"`
-	Title         string  `json:"title" binding:"required"`
-	Attr          string  `json:"attr"`
-	People        int32   `json:"people" binding:"required"`
-	Info          string  `json:"info"`
-	Price         float64 `json:"price"`
-	Sort          int32   `json:"sort"`
-	Sales         int64   `json:"sales"`
-	Stock         int64   `json:"stock"`
-	IsHost        int32   `json:"isHost"`
-	IsShow        int32   `json:"isShow"`
-	IsPostage     int32   `json:"isPostage"`
-	Postage       float64 `json:"postage"`
-	StartTime     int64   `json:"startTime"`
-	StopTime      int64   `json:"stopTime"`
-	EffectiveTime int64   `json:"effectiveTime"`
-	Browse        int64   `json:"browse"`
-	UnitName      string  `json:"unitName"`
-	Weight        float64 `json:"weight"`
-	Volume        float64 `json:"volume"`
-	Num           int64   `json:"num"`
-	OnceNum       int64   `json:"onceNum"`
-	Quota         int64   `json:"quota"`
-	QuotaShow     int64   `json:"quotaShow"`
-	Virtual       int64   `json:"virtual"`
+	ID            int64    `json:"id,string"`
+	ProductID     int64    `json:"productId,string" binding:"required"`
+	MerID         int64    `json:"merId,string"`
+	Image         string   `json:"image" binding:"required"`
+	Images        string   `json:"images"`
+	Title         string   `json:"title" binding:"required"`
+	Attr          string   `json:"attr"`
+	People        int32    `json:"people" binding:"required"`
+	Info          string   `json:"info"`
+	Price         float64  `json:"price"`
+	Sort          int32    `json:"sort"`
+	Sales         int64    `json:"sales"`
+	Stock         int64    `json:"stock"`
+	IsHost        int32    `json:"isHost"`
+	IsShow        int32    `json:"isShow"`
+	IsPostage     int32    `json:"isPostage"`
+	Postage       float64  `json:"postage"`
+	StartTime     int64    `json:"startTime"`
+	StopTime      int64    `json:"stopTime"`
+	EffectiveTime int64    `json:"effectiveTime"`
+	Browse        int64    `json:"browse"`
+	UnitName      string   `json:"unitName"`
+	Weight        float64  `json:"weight"`
+	Volume        float64  `json:"volume"`
+	Num           int64    `json:"num"`
+	OnceNum       int64    `json:"onceNum"`
+	Quota         int64    `json:"quota"`
+	QuotaShow     int64    `json:"quotaShow"`
+	Virtual       int64    `json:"virtual"`
+	HomeModuleIDs []string `json:"homeModuleIds"`
 }
 
 type CombinationQuery struct {
