@@ -17,13 +17,15 @@ import (
 // ShopHomeModuleDaoImpl 提供首页模块的数据访问能力。
 type ShopHomeModuleDaoImpl struct {
 	db          *gorm.DB
+	itemDao     dao.IShopHomeModuleItemDao
 	moduleTable string
 }
 
 // NewShopHomeModuleDao 创建首页模块 DAO。
-func NewShopHomeModuleDao(ms *gorm.DB) dao.IShopHomeModuleDao {
+func NewShopHomeModuleDao(ms *gorm.DB, itemDao dao.IShopHomeModuleItemDao) dao.IShopHomeModuleDao {
 	return &ShopHomeModuleDaoImpl{
 		db:          ms,
+		itemDao:     itemDao,
 		moduleTable: "shop_home_module",
 	}
 }
@@ -39,30 +41,26 @@ func (s *ShopHomeModuleDaoImpl) Set(c *gin.Context, req *models.HomeModuleSet) (
 	return s.create(c, req)
 }
 
-// DeleteByIDs 软删除首页模块，并同步软删除模块明细。
+// DeleteByIDs 软删除首页模块；存在明细数据时不允许删除。
 func (s *ShopHomeModuleDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
+	hasItems, err := s.itemDao.HasByModuleIDs(c, ids)
+	if err != nil {
+		return err
+	}
+	if hasItems {
+		return errors.New("存在首页模块明细数据，不能删除")
+	}
+
 	now := time.Now()
 	userID := baizeContext.GetUserId(c)
-	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
-		if err := tx.Table(s.moduleTable).
-			Where("id IN ?", ids).
-			Where("state = ?", commonStatus.NORMAL).
-			Updates(map[string]any{
-				"state":       commonStatus.DELETE,
-				"update_by":   userID,
-				"update_time": &now,
-			}).Error; err != nil {
-			return err
-		}
-		return tx.Table("shop_home_module_item").
-			Where("module_id IN ?", ids).
-			Where("state = ?", commonStatus.NORMAL).
-			Updates(map[string]any{
-				"state":       commonStatus.DELETE,
-				"update_by":   userID,
-				"update_time": &now,
-			}).Error
-	})
+	return s.db.WithContext(c).Table(s.moduleTable).
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(map[string]any{
+			"state":       commonStatus.DELETE,
+			"update_by":   userID,
+			"update_time": &now,
+		}).Error
 }
 
 // GetByID 根据主键获取首页模块详情。

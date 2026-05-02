@@ -66,6 +66,20 @@ func (s *ShopHomeModuleItemDaoImpl) GetByID(c *gin.Context, id int64) (*models.H
 	return &item, nil
 }
 
+// HasByModuleIDs 判断指定模块下是否存在有效的首页模块明细。
+func (s *ShopHomeModuleItemDaoImpl) HasByModuleIDs(c *gin.Context, moduleIDs []int64) (bool, error) {
+	if len(moduleIDs) == 0 {
+		return false, nil
+	}
+	var total int64
+	if err := s.baseQuery(c).
+		Where("module_id IN ?", moduleIDs).
+		Count(&total).Error; err != nil {
+		return false, err
+	}
+	return total > 0, nil
+}
+
 // List 分页查询首页模块明细列表。
 func (s *ShopHomeModuleItemDaoImpl) List(c *gin.Context, req *models.HomeModuleItemQuery) (*models.HomeModuleItemListData, error) {
 	db := s.baseQuery(c)
