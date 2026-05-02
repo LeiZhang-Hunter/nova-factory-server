@@ -93,6 +93,11 @@ func (s *ShopSeckillActivityServiceImpl) GetByID(c *gin.Context, id int64) (*mod
 	return activity, nil
 }
 
+// GetByIDs 根据主键批量获取秒杀活动。
+func (s *ShopSeckillActivityServiceImpl) GetByIDs(c *gin.Context, ids []int64) ([]*models.SeckillActivity, error) {
+	return s.dao.GetByIDs(c, ids)
+}
+
 // List 查询秒杀活动列表。
 func (s *ShopSeckillActivityServiceImpl) List(c *gin.Context, req *models.SeckillActivityQuery) (*models.SeckillActivityListData, error) {
 	return s.dao.List(c, req)

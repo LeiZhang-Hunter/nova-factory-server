@@ -66,6 +66,22 @@ func (s *ShopSeckillActivityDaoImpl) GetByID(c *gin.Context, id int64) (*models.
 	return &item, nil
 }
 
+func (s *ShopSeckillActivityDaoImpl) GetByIDs(c *gin.Context, ids []int64) ([]*models.SeckillActivity, error) {
+	if len(ids) == 0 {
+		return []*models.SeckillActivity{}, nil
+	}
+	rows := make([]*models.SeckillActivity, 0, len(ids))
+	if err := s.baseQuery(c).
+		Where("id IN ?", ids).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	if err := s.attachHomeModuleIDs(c, rows); err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func (s *ShopSeckillActivityDaoImpl) List(c *gin.Context, req *models.SeckillActivityQuery) (*models.SeckillActivityListData, error) {
 	db := s.baseQuery(c)
 	if title := strings.TrimSpace(req.Title); title != "" {

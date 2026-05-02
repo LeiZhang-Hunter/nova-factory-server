@@ -253,6 +253,7 @@ CREATE TABLE IF NOT EXISTS `shop_store_pink` (
     PRIMARY KEY (`id`) USING BTREE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='拼团表';
 
+
 CREATE TABLE IF NOT EXISTS `eb_store_seckill_activity` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
     `type` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1:秒杀',

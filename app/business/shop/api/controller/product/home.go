@@ -3,7 +3,6 @@ package product
 import (
 	"time"
 
-	homeDao "nova-factory-server/app/business/shop/home/dao"
 	homeModels "nova-factory-server/app/business/shop/home/models"
 	homeService "nova-factory-server/app/business/shop/home/service"
 	"nova-factory-server/app/utils/baizeContext"
@@ -14,7 +13,7 @@ import (
 // Home 前台首页模块控制器。
 type Home struct {
 	moduleService homeService.IShopHomeModuleService
-	itemDao       homeDao.IShopHomeModuleItemDao
+	itemService   homeService.IShopHomeModuleItemService
 }
 
 // HomeListQuery 前台首页模块查询参数。
@@ -63,10 +62,10 @@ type HomeModuleListData struct {
 }
 
 // NewHome 创建前台首页模块控制器。
-func NewHome(moduleService homeService.IShopHomeModuleService, itemDao homeDao.IShopHomeModuleItemDao) *Home {
+func NewHome(moduleService homeService.IShopHomeModuleService, itemService homeService.IShopHomeModuleItemService) *Home {
 	return &Home{
 		moduleService: moduleService,
-		itemDao:       itemDao,
+		itemService:   itemService,
 	}
 }
 
@@ -117,7 +116,7 @@ func (h *Home) List(ctx *gin.Context) {
 		moduleIDs = append(moduleIDs, row.ID)
 	}
 
-	items, err := h.itemDao.ListByModuleIDs(ctx, moduleIDs)
+	items, err := h.itemService.ListByModuleIDs(ctx, moduleIDs)
 	if err != nil {
 		baizeContext.Waring(ctx, err.Error())
 		return

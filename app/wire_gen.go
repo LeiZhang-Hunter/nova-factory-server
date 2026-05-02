@@ -497,7 +497,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	iShopHomeModuleDao := impl.NewShopHomeModuleDao(db, iShopHomeModuleItemDao)
 	iShopHomeModuleService := impl4.NewShopHomeModuleService(iShopHomeModuleDao)
 	homeModule := controller4.NewHomeModule(iShopHomeModuleService)
-	iShopHomeModuleItemService := impl4.NewShopHomeModuleItemService(iShopHomeModuleItemDao, iShopHomeModuleDao)
+	iShopHomeModuleItemService := impl4.NewShopHomeModuleItemService(iShopHomeModuleItemDao, iShopHomeModuleDao, iShopSeckillActivityService, iShopSeckillConfigService)
 	homeModuleItem := controller4.NewHomeModuleItem(iShopHomeModuleItemService)
 	controller5 := &controller4.Controller{
 		HomeModule:     homeModule,
@@ -536,7 +536,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	}
 	productProduct := product.NewProduct()
 	productCategory := product.NewCategory(iShopCategoryService)
-	productHome := product.NewHome(iShopHomeModuleService, iShopHomeModuleItemDao)
+	productHome := product.NewHome(iShopHomeModuleService, iShopHomeModuleItemService)
 	productController := &product.Controller{
 		Product:  productProduct,
 		Category: productCategory,
