@@ -4,7 +4,7 @@ import "nova-factory-server/app/baize"
 
 type Combination struct {
 	ID            int64   `json:"id,string" db:"id"`
-	ProductID     int64   `json:"productId,string" db:"product_id"`
+	ProductID     string  `json:"productId" db:"product_id"`
 	MerID         int64   `json:"merId,string" db:"mer_id"`
 	Image         string  `json:"image" db:"image"`
 	Images        string  `json:"images" db:"images"`
@@ -40,7 +40,7 @@ type Combination struct {
 
 type CombinationSet struct {
 	ID            int64    `json:"id,string"`
-	ProductID     int64    `json:"productId,string" binding:"required"`
+	ProductID     string   `json:"productId" binding:"required"`
 	MerID         int64    `json:"merId,string"`
 	Image         string   `json:"image" binding:"required"`
 	Images        string   `json:"images"`

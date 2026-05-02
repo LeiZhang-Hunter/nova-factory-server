@@ -137,7 +137,7 @@ func (c *Combination) validateSet(ctx *gin.Context, req *models.CombinationSet) 
 	req.Images = strings.TrimSpace(req.Images)
 	req.Attr = strings.TrimSpace(req.Attr)
 
-	if req.ProductID <= 0 {
+	if req.ProductID == "" {
 		return fmt.Errorf("商品ID不能为空")
 	}
 	if req.Title == "" {

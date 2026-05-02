@@ -43,6 +43,16 @@ func (s *ShopCombinationServiceImpl) GetByID(c *gin.Context, id int64) (*models.
 		return item, err
 	}
 	item.Image = fileUtils.BuildAbsoluteURL(c, item.Image)
+
+	if len(item.Images) != 0 {
+		var images []string
+		imagesArr := strings.Split(item.Images, ",")
+		for _, img := range imagesArr {
+			imgStr := fileUtils.BuildAbsoluteURL(c, img)
+			images = append(images, imgStr)
+		}
+		item.Images = strings.Join(images, ",")
+	}
 	return item, nil
 }
 

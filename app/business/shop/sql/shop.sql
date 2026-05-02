@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS `shop_user_cart` (
 
 CREATE TABLE IF NOT EXISTS `shop_store_combination` (
     `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '自增ID',
-    `product_id` bigint(20) UNSIGNED NOT NULL DEFAULT '0' COMMENT '商品id',
+    `product_id` VARCHAR(64)  NOT NULL  COMMENT '商品id',
     `mer_id` bigint(20) UNSIGNED NOT NULL DEFAULT '0' COMMENT '商户id',
     `image` varchar(255) NOT NULL DEFAULT '' COMMENT '推荐图',
     `images` varchar(2000) NOT NULL DEFAULT '' COMMENT '轮播图',
