@@ -318,8 +318,7 @@ CREATE TABLE `sys_device_electric_setting`  (
 -- ----------------------------
 -- 8、监控摄像头列表
 -- ----------------------------
-drop table if exists iot_camera;
-create table iot_camera (
+create table IF NOT EXISTS iot_camera (
     id                   bigint(20)      not null     comment '摄像头ID',
     `gateway_id` bigint unsigned NOT NULL COMMENT 'sys_iot_agent gateway id',
     name                        varchar(255)    not null                   comment '摄像头名称',
