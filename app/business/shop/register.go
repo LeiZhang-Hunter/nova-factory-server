@@ -12,6 +12,10 @@ import (
 	apiDaoImpl "nova-factory-server/app/business/shop/api/dao/impl"
 	apiServiceImpl "nova-factory-server/app/business/shop/api/service/impl"
 
+	"nova-factory-server/app/business/shop/api/controller/order"
+	"nova-factory-server/app/business/shop/api/controller/product"
+	apiDaoImpl "nova-factory-server/app/business/shop/api/dao/impl"
+	apiServiceImpl "nova-factory-server/app/business/shop/api/service/impl"
 	homeController "nova-factory-server/app/business/shop/home/controller"
 	homeDaoImpl "nova-factory-server/app/business/shop/home/dao/impl"
 	homeServiceImpl "nova-factory-server/app/business/shop/home/service/impl"
@@ -32,6 +36,8 @@ var ProviderSet = wire.NewSet(
 	apiProduct.ProviderSet,
 	apiDaoImpl.ProviderSet,
 	apiServiceImpl.ProviderSet,
+	product.ProviderSet,
+	order.ProviderSet,
 
 	controller.ProviderSet,
 	activityDaoImpl.ProviderSet,
@@ -47,5 +53,9 @@ var ProviderSet = wire.NewSet(
 	userDaoImpl.ProviderSet,
 	userServiceImpl.ProviderSet,
 	userController.ProviderSet,
+
+	apiDaoImpl.ProviderSet,
+	apiServiceImpl.ProviderSet,
+
 	GinProviderSet,
 )
