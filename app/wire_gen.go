@@ -539,7 +539,7 @@ func wireApp() (*gin.Engine, func(), error) {
 	authController := &auth.Controller{
 		Auth: authAuth,
 	}
-	productProduct := product.NewProduct()
+	productProduct := product.NewProduct(iShopGoodsService)
 	productCategory := product.NewCategory(iShopCategoryService)
 	productHome := product.NewHome(iShopHomeModuleService, iShopHomeModuleItemService)
 	productController := &product.Controller{
