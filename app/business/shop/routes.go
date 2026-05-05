@@ -59,6 +59,7 @@ func NewGinEngine(
 		homeController.HomeModuleItem.PrivateRoutes(adminGroup)
 		userController.Address.PrivateRoutes(adminGroup)
 		userController.Cart.PrivateRoutes(adminGroup)
+		userController.Order.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)
 		controller.Goods.PrivateRoutes(adminGroup)
 		controller.Sku.PrivateRoutes(adminGroup)
