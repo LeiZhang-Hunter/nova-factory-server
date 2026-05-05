@@ -6,7 +6,7 @@ import "nova-factory-server/app/baize"
 type Order struct {
 	ID                    int64   `json:"id,string" db:"id"`                                  // 主键ID
 	OrderNo               string  `json:"orderNo" db:"order_no"`                              // 订单号
-	UserID                int64   `json:"userId,string" db:"user_id"`                         // 用户ID
+	UserID                int64   `json:"userId" db:"user_id"`                                // 用户ID
 	TotalAmount           float64 `json:"totalAmount" db:"total_amount"`                      // 订单总金额
 	PayAmount             float64 `json:"payAmount" db:"pay_amount"`                          // 实付金额
 	FreightAmount         float64 `json:"freightAmount" db:"freight_amount"`                  // 运费金额
@@ -33,6 +33,7 @@ type Order struct {
 // OrderItem 订单商品明细
 type OrderItem struct {
 	ID          int64   `json:"id,string" db:"id"`             // 主键ID
+	OrderID     int64   `json:"orderId" db:"order_id"`         // 订单ID
 	OrderNo     string  `json:"orderNo" db:"order_no"`         // 订单号
 	GoodsID     string  `json:"goodsId" db:"goods_id"`         // 商品ID
 	SkuID       string  `json:"skuId" db:"sku_id"`             // SKU ID
