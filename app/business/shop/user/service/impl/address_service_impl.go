@@ -2,11 +2,11 @@ package impl
 
 import (
 	"errors"
-	"github.com/itmisx/go_regions"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/business/shop/user/service"
+	"nova-factory-server/app/utils/region"
 	"strconv"
 	"strings"
 
@@ -140,7 +140,7 @@ func regionNameByCode(code string, label string) (string, error) {
 	if err != nil {
 		return "", errors.New(label + "编码格式不正确")
 	}
-	info := go_regions.RegionInfo(id)
+	info := region.GetRegionInfo(id)
 	if info == nil {
 		return "", errors.New(label + "编码不存在")
 	}

@@ -3,12 +3,13 @@ package shopserviceimpl
 import (
 	"encoding/json"
 	"errors"
-	"go.uber.org/zap"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/snowflake"
 	"sort"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
@@ -457,12 +458,15 @@ func (s *ShopGoodsServiceImpl) normalizeGoodsMediaURLs(c *gin.Context, rows []*s
 			continue
 		}
 		row.ImageURL = fileUtils.BuildAbsoluteURL(c, row.ImageURL)
+		row.VideoURL = fileUtils.BuildAbsoluteURL(c, row.VideoURL)
 		row.GalleryImagesArray = splitAndNormalizeMediaURLs(c, row.GalleryImages)
 		for _, sku := range row.Skus {
 			if sku == nil {
 				continue
 			}
 			sku.ImageURL = fileUtils.BuildAbsoluteURL(c, sku.ImageURL)
+			sku.VideoURL = fileUtils.BuildAbsoluteURL(c, sku.VideoURL)
+			sku.GalleryImagesArray = splitAndNormalizeMediaURLs(c, sku.GalleryImages)
 		}
 	}
 }
