@@ -2,8 +2,11 @@ package shopdaoimpl
 
 import (
 	"errors"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/utils/fileUtils"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -165,7 +168,33 @@ func (s *ShopSkuDaoImpl) List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*s
 	}, nil
 }
 
+func buildImages(galleryImagesArray []string) string {
+	var galleryImagesStr string
+	var galleryImagesRetArray []string = make([]string, 0)
+	for _, v := range galleryImagesArray {
+		path, err := fileUtils.NormalizeResourcePath(v)
+		if err != nil {
+			zap.L().Error("normalizeResourcePath error", zap.Error(err))
+			continue
+		}
+		galleryImagesRetArray = append(galleryImagesRetArray, path)
+	}
+
+	if len(galleryImagesRetArray) > 0 {
+		galleryImagesStr = strings.Join(galleryImagesRetArray, ",")
+	}
+	return galleryImagesStr
+}
+
 func buildSkuModel(req *shopmodels.GoodsSkuUpsert) *shopmodels.GoodsSku {
+	if req.ImageURL != "" {
+		req.ImageURL, _ = fileUtils.NormalizeResourcePath(req.ImageURL)
+	}
+
+	if req.VideoURL != "" {
+		req.VideoURL, _ = fileUtils.NormalizeResourcePath(req.VideoURL)
+	}
+
 	return &shopmodels.GoodsSku{
 		GoodsID:       req.GoodsID,
 		SkuID:         req.SkuID,
@@ -175,7 +204,7 @@ func buildSkuModel(req *shopmodels.GoodsSkuUpsert) *shopmodels.GoodsSku {
 		Barcode:       req.Barcode,
 		ImageURL:      req.ImageURL,
 		RetailPrice:   req.RetailPrice,
-		GalleryImages: req.GalleryImages,
+		GalleryImages: buildImages(req.GalleryImagesArray),
 		VideoURL:      req.VideoURL,
 		Description:   req.Description,
 		Weight:        req.Weight,
@@ -186,6 +215,13 @@ func buildSkuModel(req *shopmodels.GoodsSkuUpsert) *shopmodels.GoodsSku {
 }
 
 func buildSkuUpdates(req *shopmodels.GoodsSkuUpsert) map[string]interface{} {
+	if req.ImageURL != "" {
+		req.ImageURL, _ = fileUtils.NormalizeResourcePath(req.ImageURL)
+	}
+
+	if req.VideoURL != "" {
+		req.VideoURL, _ = fileUtils.NormalizeResourcePath(req.VideoURL)
+	}
 	return map[string]interface{}{
 		"goods_id":       req.GoodsID,
 		"sku_id":         req.SkuID,
@@ -195,7 +231,7 @@ func buildSkuUpdates(req *shopmodels.GoodsSkuUpsert) map[string]interface{} {
 		"barcode":        req.Barcode,
 		"image_url":      req.ImageURL,
 		"retail_price":   req.RetailPrice,
-		"gallery_images": req.GalleryImages,
+		"gallery_images": buildImages(req.GalleryImagesArray),
 		"video_url":      req.VideoURL,
 		"description":    req.Description,
 		"weight":         req.Weight,
