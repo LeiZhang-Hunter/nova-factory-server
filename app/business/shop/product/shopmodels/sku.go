@@ -30,22 +30,22 @@ type GoodsSku struct {
 
 // GoodsSkuUpsert 商品规格新增修改参数
 type GoodsSkuUpsert struct {
-	ID            uint64  `json:"id"`                         // 主键ID
-	GoodsID       string  `json:"goodsId" binding:"required"` // 商品业务ID
-	SkuID         string  `json:"skuId" binding:"required"`   // 规格业务ID
-	SkuName       string  `json:"skuName"`                    // 规格名称
-	SkuCode       string  `json:"skuCode"`                    // 规格编码
-	OuterID       string  `json:"outerId"`                    // 外部系统ID
-	Barcode       string  `json:"barcode"`                    // 条码
-	ImageURL      string  `json:"imageUrl"`                   // 主图地址
-	RetailPrice   float64 `json:"retailPrice"`                // 零售价
-	GalleryImages string  `json:"galleryImages"`              // 图集
-	VideoURL      string  `json:"videoUrl"`                   // 视频地址
-	Description   string  `json:"description"`                // 规格描述
-	Weight        float64 `json:"weight"`                     // 重量
-	WeightUnit    string  `json:"weightUnit"`                 // 重量单位
-	Unit          string  `json:"unit"`                       // 销售单位
-	Quantity      int64   `json:"quantity"`                   // 库存数量
+	ID                 uint64   `json:"id"`                         // 主键ID
+	GoodsID            string   `json:"goodsId" binding:"required"` // 商品业务ID
+	SkuID              string   `json:"skuId" binding:"required"`   // 规格业务ID
+	SkuName            string   `json:"skuName"`                    // 规格名称
+	SkuCode            string   `json:"skuCode"`                    // 规格编码
+	OuterID            string   `json:"outerId"`                    // 外部系统ID
+	Barcode            string   `json:"barcode"`                    // 条码
+	ImageURL           string   `json:"imageUrl"`                   // 主图地址
+	RetailPrice        float64  `json:"retailPrice"`                // 零售价
+	GalleryImagesArray []string `json:"galleryImages" `
+	VideoURL           string   `json:"videoUrl"`    // 视频地址
+	Description        string   `json:"description"` // 规格描述
+	Weight             float64  `json:"weight"`      // 重量
+	WeightUnit         string   `json:"weightUnit"`  // 重量单位
+	Unit               string   `json:"unit"`        // 销售单位
+	Quantity           int64    `json:"quantity"`    // 库存数量
 	baize.BaseEntity
 }
 

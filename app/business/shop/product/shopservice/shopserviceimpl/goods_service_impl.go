@@ -216,19 +216,19 @@ func buildGoodsSkuUpsert(goodsID string, record shopmodels.ImportGoodsRecord, sk
 	}
 	now := time.Now()
 	return &shopmodels.GoodsSkuUpsert{
-		GoodsID:       goodsID,
-		SkuID:         skuID,
-		SkuName:       strings.TrimSpace(sku.Skuname),
-		SkuCode:       strings.TrimSpace(sku.Skucode),
-		OuterID:       strings.TrimSpace(sku.Lcmccode),
-		Barcode:       strings.TrimSpace(sku.Barcode),
-		Description:   strings.TrimSpace(record.Data.Remark),
-		Weight:        sku.Weight,
-		WeightUnit:    "kg",
-		Unit:          defaultString(strings.TrimSpace(record.Data.UnitName), "件"),
-		Quantity:      int64(sku.Size),
-		RetailPrice:   pickRetailPrice(sku),
-		GalleryImages: "[]",
+		GoodsID:            goodsID,
+		SkuID:              skuID,
+		SkuName:            strings.TrimSpace(sku.Skuname),
+		SkuCode:            strings.TrimSpace(sku.Skucode),
+		OuterID:            strings.TrimSpace(sku.Lcmccode),
+		Barcode:            strings.TrimSpace(sku.Barcode),
+		Description:        strings.TrimSpace(record.Data.Remark),
+		Weight:             sku.Weight,
+		WeightUnit:         "kg",
+		Unit:               defaultString(strings.TrimSpace(record.Data.UnitName), "件"),
+		Quantity:           int64(sku.Size),
+		RetailPrice:        pickRetailPrice(sku),
+		GalleryImagesArray: []string{},
 		BaseEntity: baize.BaseEntity{
 			CreateBy:   1,
 			UpdateBy:   1,
@@ -395,7 +395,6 @@ func sameSku(current *shopmodels.GoodsSku, req *shopmodels.GoodsSkuUpsert) bool 
 		current.Barcode == req.Barcode &&
 		current.ImageURL == req.ImageURL &&
 		current.RetailPrice == req.RetailPrice &&
-		current.GalleryImages == req.GalleryImages &&
 		current.VideoURL == req.VideoURL &&
 		current.Description == req.Description &&
 		current.Weight == req.Weight &&
