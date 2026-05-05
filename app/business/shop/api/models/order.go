@@ -33,7 +33,6 @@ type Order struct {
 // OrderItem 订单商品明细
 type OrderItem struct {
 	ID          int64   `json:"id,string" db:"id"`             // 主键ID
-	OrderID     int64   `json:"orderId,string" db:"order_id"`  // 订单ID
 	OrderNo     string  `json:"orderNo" db:"order_no"`         // 订单号
 	GoodsID     string  `json:"goodsId" db:"goods_id"`         // 商品ID
 	SkuID       string  `json:"skuId" db:"sku_id"`             // SKU ID
