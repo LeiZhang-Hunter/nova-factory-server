@@ -1,14 +1,11 @@
 package shopcontroller
 
-import (
-	"github.com/google/wire"
-)
-
-var ProviderSet = wire.NewSet(NewAddress, NewCart, NewOrder, NewUser, wire.Struct(new(Controller), "*"))
+import "github.com/google/wire"
 
 type Controller struct {
 	Address *Address
 	Cart    *Cart
-	Order   *Order
 	User    *User
 }
+
+var ProviderSet = wire.NewSet(NewAddress, NewCart, NewUser, wire.Struct(new(Controller), "*"))

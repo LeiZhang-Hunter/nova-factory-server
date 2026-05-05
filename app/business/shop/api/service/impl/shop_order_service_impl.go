@@ -3,33 +3,44 @@ package impl
 import (
 	"errors"
 	"fmt"
+	"time"
 
-	"nova-factory-server/app/business/shop/user/dao"
-	"nova-factory-server/app/business/shop/user/dao/impl"
-	"nova-factory-server/app/business/shop/user/models"
-	"nova-factory-server/app/business/shop/user/service"
+	"nova-factory-server/app/business/shop/api/dao"
+	"nova-factory-server/app/business/shop/api/models"
+	"nova-factory-server/app/business/shop/api/service"
+	shopuserdao "nova-factory-server/app/business/shop/user/dao"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// ShopOrderServiceImpl 订单服务实现
-type ShopOrderServiceImpl struct {
+// IShopOrderServiceImpl 提供订单相关的业务实现。
+type IShopOrderServiceImpl struct {
 	orderDao     dao.IShopOrderDao
 	orderItemDao dao.IShopOrderItemDao
-	userDao      dao.IShopUserDao
+	userDao      shopuserdao.IShopUserDao
 }
 
-func NewShopOrderService(orderDao dao.IShopOrderDao, orderItemDao dao.IShopOrderItemDao, userDao dao.IShopUserDao) service.IShopOrderService {
-	return &ShopOrderServiceImpl{
+// NewIShopOrderServiceImpl 创建订单服务实现。
+func NewIShopOrderServiceImpl(orderDao dao.IShopOrderDao, orderItemDao dao.IShopOrderItemDao, userDao shopuserdao.IShopUserDao) service.IShopOrderService {
+	return &IShopOrderServiceImpl{
 		orderDao:     orderDao,
 		orderItemDao: orderItemDao,
 		userDao:      userDao,
 	}
 }
 
-// Create 创建订单
-func (s *ShopOrderServiceImpl) Create(c *gin.Context, username string, req *models.OrderSetReq) (*models.Order, error) {
+// GenerateOrderNo 生成唯一订单号，格式: ORD+年月+时分秒+纳秒随机数。
+func GenerateOrderNo() string {
+	now := time.Now()
+	return fmt.Sprintf("ORD%s%04d%02d%02d%02d%02d%04d",
+		now.Format("200601"),
+		now.Hour(), now.Minute(), now.Second(),
+		now.Nanosecond()/10000%10000)
+}
+
+// Create 创建订单，包含订单商品明细，支持事务。
+func (s *IShopOrderServiceImpl) Create(c *gin.Context, username string, req *models.OrderSetReq) (*models.Order, error) {
 	if req == nil || len(req.Items) == 0 {
 		return nil, errors.New("订单商品不能为空")
 	}
@@ -81,14 +92,14 @@ func (s *ShopOrderServiceImpl) Create(c *gin.Context, username string, req *mode
 	}
 
 	// 生成订单号
-	orderNo := impl.GenerateOrderNo()
+	orderNo := GenerateOrderNo()
 
 	// 创建订单
 	order := &models.Order{
 		OrderNo:               orderNo,
 		UserID:                shopUser.ID,
 		TotalAmount:           totalAmount,
-		PayAmount:             totalAmount, // 初始实付金额等于总金额
+		PayAmount:             totalAmount,
 		Status:                models.OrderStatusPending,
 		ReceiverName:          req.ReceiverName,
 		ReceiverPhone:         req.ReceiverPhone,
@@ -134,8 +145,8 @@ func (s *ShopOrderServiceImpl) Create(c *gin.Context, username string, req *mode
 	return createdOrder, nil
 }
 
-// GetByID 获取订单详情
-func (s *ShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*models.OrderVO, error) {
+// GetByID 获取订单详情，包含商品明细。
+func (s *IShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*models.OrderVO, error) {
 	if id == 0 {
 		return nil, errors.New("订单ID不能为空")
 	}
@@ -156,8 +167,8 @@ func (s *ShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*models.OrderV
 	}, nil
 }
 
-// List 获取订单列表
-func (s *ShopOrderServiceImpl) List(c *gin.Context, username string, query *models.OrderQuery) (*models.OrderListData, error) {
+// List 获取当前用户的订单列表。
+func (s *IShopOrderServiceImpl) List(c *gin.Context, username string, query *models.OrderQuery) (*models.OrderListData, error) {
 	if query == nil {
 		query = &models.OrderQuery{}
 	}
@@ -172,8 +183,8 @@ func (s *ShopOrderServiceImpl) List(c *gin.Context, username string, query *mode
 	return s.orderDao.List(c, query)
 }
 
-// UpdateStatus 更新订单状态
-func (s *ShopOrderServiceImpl) UpdateStatus(c *gin.Context, username string, req *models.OrderStatusReq) error {
+// UpdateStatus 更新订单状态，验证状态流转合法性。
+func (s *IShopOrderServiceImpl) UpdateStatus(c *gin.Context, username string, req *models.OrderStatusReq) error {
 	if req.ID == 0 {
 		return errors.New("订单ID不能为空")
 	}
@@ -205,8 +216,8 @@ func (s *ShopOrderServiceImpl) UpdateStatus(c *gin.Context, username string, req
 	return nil
 }
 
-// Cancel 取消订单
-func (s *ShopOrderServiceImpl) Cancel(c *gin.Context, username string, id int64, reason string) error {
+// Cancel 取消订单，仅允许对待支付的订单进行取消。
+func (s *IShopOrderServiceImpl) Cancel(c *gin.Context, username string, id int64, reason string) error {
 	if id == 0 {
 		return errors.New("订单ID不能为空")
 	}
@@ -236,8 +247,8 @@ func (s *ShopOrderServiceImpl) Cancel(c *gin.Context, username string, id int64,
 	return nil
 }
 
-// ConfirmReceive 确认收货
-func (s *ShopOrderServiceImpl) ConfirmReceive(c *gin.Context, username string, id int64) error {
+// ConfirmReceive 确认收货，将已发货订单标记为已完成。
+func (s *IShopOrderServiceImpl) ConfirmReceive(c *gin.Context, username string, id int64) error {
 	if id == 0 {
 		return errors.New("订单ID不能为空")
 	}
@@ -267,8 +278,8 @@ func (s *ShopOrderServiceImpl) ConfirmReceive(c *gin.Context, username string, i
 	return nil
 }
 
-// GetStatistics 获取订单统计
-func (s *ShopOrderServiceImpl) GetStatistics(c *gin.Context, username string) (*models.OrderStatistics, error) {
+// GetStatistics 获取当前用户各状态订单数量统计。
+func (s *IShopOrderServiceImpl) GetStatistics(c *gin.Context, username string) (*models.OrderStatistics, error) {
 	user, err := s.userDao.GetByUsername(c, username)
 	if err != nil || user == nil {
 		return nil, errors.New("用户不存在")
@@ -277,12 +288,12 @@ func (s *ShopOrderServiceImpl) GetStatistics(c *gin.Context, username string) (*
 	return s.orderDao.GetStatistics(c, user.ID)
 }
 
-// isValidStatusTransition 验证状态流转是否合法
-func (s *ShopOrderServiceImpl) isValidStatusTransition(from, to int32) bool {
+// isValidStatusTransition 验证订单状态流转是否合法。
+func (s *IShopOrderServiceImpl) isValidStatusTransition(from, to int32) bool {
 	validTransitions := map[int32][]int32{
 		models.OrderStatusPending:   {models.OrderStatusPaid, models.OrderStatusCancelled},
 		models.OrderStatusPaid:      {models.OrderStatusShipped, models.OrderStatusCancelled},
-		models.OrderStatusShipped:  {models.OrderStatusCompleted},
+		models.OrderStatusShipped:   {models.OrderStatusCompleted},
 		models.OrderStatusCompleted: {},
 		models.OrderStatusCancelled: {},
 	}

@@ -6,6 +6,7 @@ package shop
 import (
 	activityController "nova-factory-server/app/business/shop/activity/controller"
 	"nova-factory-server/app/business/shop/api/controller/auth"
+	"nova-factory-server/app/business/shop/api/controller/order"
 	"nova-factory-server/app/business/shop/api/controller/product"
 	homeController "nova-factory-server/app/business/shop/home/controller"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
@@ -28,6 +29,7 @@ func NewGinEngine(
 	userController *userController.Controller,
 	authController *auth.Controller,
 	productController *product.Controller,
+	orderController *order.Order,
 ) *Shop {
 	group := app.Engine.Group("")
 
@@ -45,6 +47,7 @@ func NewGinEngine(
 		authController.Auth.PrivateRoutes(appGroup)
 		productController.Product.PublicRoutes(appGroup)
 		productController.Category.PrivateRoutes(appGroup)
+		orderController.PrivateRoutes(appGroup)
 	}
 
 	adminGroup := group.Group("")
@@ -59,7 +62,6 @@ func NewGinEngine(
 		homeController.HomeModuleItem.PrivateRoutes(adminGroup)
 		userController.Address.PrivateRoutes(adminGroup)
 		userController.Cart.PrivateRoutes(adminGroup)
-		userController.Order.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)
 		controller.Goods.PrivateRoutes(adminGroup)
 		controller.Sku.PrivateRoutes(adminGroup)

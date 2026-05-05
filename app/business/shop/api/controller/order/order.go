@@ -1,9 +1,8 @@
-package shopcontroller
+package order
 
 import (
-	"nova-factory-server/app/business/shop/user/models"
-	"nova-factory-server/app/business/shop/user/service"
-	"nova-factory-server/app/middlewares"
+	"nova-factory-server/app/business/shop/api/models"
+	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
@@ -19,16 +18,16 @@ func NewOrder(service service.IShopOrderService) *Order {
 	return &Order{service: service}
 }
 
-// PrivateRoutes 注册商城订单路由
+// PrivateRoutes 注册商城订单路由（商城模块只检查登录，不检查权限）
 func (s *Order) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/shop/user/order")
-	group.GET("/list", middlewares.HasPermission("shop:user:order:list"), s.List)
-	group.GET("/info/:id", middlewares.HasPermission("shop:user:order:info"), s.GetByID)
-	group.GET("/count", middlewares.HasPermission("shop:user:order:count"), s.GetStatistics)
-	group.POST("/create", middlewares.HasPermission("shop:user:order:create"), s.Create)
-	group.POST("/status", middlewares.HasPermission("shop:user:order:status"), s.UpdateStatus)
-	group.POST("/cancel/:id", middlewares.HasPermission("shop:user:order:cancel"), s.Cancel)
-	group.POST("/confirm/:id", middlewares.HasPermission("shop:user:order:confirm"), s.ConfirmReceive)
+	group := router.Group("/api/v1/app/shop/order")
+	group.GET("/list", s.List)
+	group.GET("/info/:id", s.GetByID)
+	group.GET("/count", s.GetStatistics)
+	group.POST("/create", s.Create)
+	group.POST("/status", s.UpdateStatus)
+	group.POST("/cancel/:id", s.Cancel)
+	group.POST("/confirm/:id", s.ConfirmReceive)
 }
 
 // List 获取订单列表

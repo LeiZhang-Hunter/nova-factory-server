@@ -1,58 +1,64 @@
 package impl
 
 import (
-	"fmt"
 	"time"
 
-	"nova-factory-server/app/business/shop/user/dao"
-	"nova-factory-server/app/business/shop/user/models"
+	"nova-factory-server/app/business/shop/api/dao"
+	"nova-factory-server/app/business/shop/api/models"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-type ShopOrderDao struct{}
-
-func NewShopOrderDao() dao.IShopOrderDao {
-	return &ShopOrderDao{}
+// IShopOrderDaoImpl 提供订单的数据库访问能力。
+type IShopOrderDaoImpl struct {
+	db        *gorm.DB
+	tableName string
 }
 
-func (d *ShopOrderDao) Create(c *gin.Context, order *models.Order) (*models.Order, error) {
-	db := c.Value("db").(*gorm.DB)
-	if err := db.WithContext(c).Create(order).Error; err != nil {
+// NewIShopOrderDaoImpl 创建订单 DAO 实现。
+func NewIShopOrderDaoImpl(db *gorm.DB) dao.IShopOrderDao {
+	return &IShopOrderDaoImpl{
+		db:        db,
+		tableName: "shop_order",
+	}
+}
+
+// Create 新增订单记录。
+func (d *IShopOrderDaoImpl) Create(c *gin.Context, order *models.Order) (*models.Order, error) {
+	if err := d.db.WithContext(c).Table(d.tableName).Create(order).Error; err != nil {
 		return nil, err
 	}
 	return order, nil
 }
 
-func (d *ShopOrderDao) GetByID(c *gin.Context, id int64) (*models.Order, error) {
-	db := c.Value("db").(*gorm.DB)
+// GetByID 根据ID获取订单。
+func (d *IShopOrderDaoImpl) GetByID(c *gin.Context, id int64) (*models.Order, error) {
 	var order models.Order
-	err := db.WithContext(c).Where("id = ? AND state = 0", id).First(&order).Error
+	err := d.db.WithContext(c).Table(d.tableName).Where("id = ? AND state = 0", id).First(&order).Error
 	if err != nil {
 		return nil, err
 	}
 	return &order, nil
 }
 
-func (d *ShopOrderDao) GetByOrderNo(c *gin.Context, orderNo string) (*models.Order, error) {
-	db := c.Value("db").(*gorm.DB)
+// GetByOrderNo 根据订单号获取订单。
+func (d *IShopOrderDaoImpl) GetByOrderNo(c *gin.Context, orderNo string) (*models.Order, error) {
 	var order models.Order
-	err := db.WithContext(c).Where("order_no = ? AND state = 0", orderNo).First(&order).Error
+	err := d.db.WithContext(c).Table(d.tableName).Where("order_no = ? AND state = 0", orderNo).First(&order).Error
 	if err != nil {
 		return nil, err
 	}
 	return &order, nil
 }
 
-func (d *ShopOrderDao) List(c *gin.Context, query *models.OrderQuery) (*models.OrderListData, error) {
-	db := c.Value("db").(*gorm.DB)
-
+// List 查询订单列表，支持分页和条件筛选。
+func (d *IShopOrderDaoImpl) List(c *gin.Context, query *models.OrderQuery) (*models.OrderListData, error) {
 	var total int64
 	var orders []*models.Order
 
-	// 构建查询
-	q := db.WithContext(c).Model(&models.Order{}).Where("state = 0")
+	// 构建查询条件：仅查询未删除记录
+	q := d.db.WithContext(c).Table(d.tableName).Where("state = 0")
 
 	if query.UserID > 0 {
 		q = q.Where("user_id = ?", query.UserID)
@@ -90,7 +96,8 @@ func (d *ShopOrderDao) List(c *gin.Context, query *models.OrderQuery) (*models.O
 	}, nil
 }
 
-func (d *ShopOrderDao) toOrderVOList(orders []*models.Order) []*models.OrderVO {
+// toOrderVOList 将订单列表转换为视图对象列表。
+func (d *IShopOrderDaoImpl) toOrderVOList(orders []*models.Order) []*models.OrderVO {
 	result := make([]*models.OrderVO, len(orders))
 	for i, order := range orders {
 		result[i] = &models.OrderVO{Order: *order}
@@ -98,9 +105,8 @@ func (d *ShopOrderDao) toOrderVOList(orders []*models.Order) []*models.OrderVO {
 	return result
 }
 
-func (d *ShopOrderDao) UpdateStatus(c *gin.Context, id int64, status int32, version int32) (int64, error) {
-	db := c.Value("db").(*gorm.DB)
-
+// UpdateStatus 更新订单状态，使用乐观锁版本号控制并发。
+func (d *IShopOrderDaoImpl) UpdateStatus(c *gin.Context, id int64, status int32, version int32) (int64, error) {
 	var updates map[string]interface{}
 	now := time.Now().Format("2006-01-02 15:04:05")
 
@@ -134,7 +140,7 @@ func (d *ShopOrderDao) UpdateStatus(c *gin.Context, id int64, status int32, vers
 		}
 	}
 
-	result := db.WithContext(c).Model(&models.Order{}).
+	result := d.db.WithContext(c).Table(d.tableName).
 		Where("id = ? AND version = ? AND state = 0", id, version).
 		Updates(updates)
 
@@ -144,11 +150,11 @@ func (d *ShopOrderDao) UpdateStatus(c *gin.Context, id int64, status int32, vers
 	return result.RowsAffected, nil
 }
 
-func (d *ShopOrderDao) Cancel(c *gin.Context, id int64, reason string, version int32) (int64, error) {
-	db := c.Value("db").(*gorm.DB)
+// Cancel 取消订单，仅允许对待支付的订单进行取消。
+func (d *IShopOrderDaoImpl) Cancel(c *gin.Context, id int64, reason string, version int32) (int64, error) {
 	now := time.Now().Format("2006-01-02 15:04:05")
 
-	result := db.WithContext(c).Model(&models.Order{}).
+	result := d.db.WithContext(c).Table(d.tableName).
 		Where("id = ? AND version = ? AND status = ? AND state = 0",
 			id, version, models.OrderStatusPending).
 		Updates(map[string]interface{}{
@@ -165,80 +171,34 @@ func (d *ShopOrderDao) Cancel(c *gin.Context, id int64, reason string, version i
 	return result.RowsAffected, nil
 }
 
-// GetStatistics 获取订单统计
-func (d *ShopOrderDao) GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error) {
-	db := c.Value("db").(*gorm.DB)
-
+// GetStatistics 获取用户各状态订单数量统计。
+func (d *IShopOrderDaoImpl) GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error) {
 	stats := &models.OrderStatistics{}
 
 	// 查询待付款
-	db.WithContext(c).Model(&models.Order{}).
+	d.db.WithContext(c).Table(d.tableName).
 		Where("user_id = ? AND status = ? AND state = 0", userID, models.OrderStatusPending).
 		Count(&stats.PendingPay)
 
 	// 查询待发货（已支付）
-	db.WithContext(c).Model(&models.Order{}).
+	d.db.WithContext(c).Table(d.tableName).
 		Where("user_id = ? AND status = ? AND state = 0", userID, models.OrderStatusPaid).
 		Count(&stats.PendingSend)
 
 	// 查询待收货（已发货）
-	db.WithContext(c).Model(&models.Order{}).
+	d.db.WithContext(c).Table(d.tableName).
 		Where("user_id = ? AND status = ? AND state = 0", userID, models.OrderStatusShipped).
 		Count(&stats.PendingReceive)
 
 	// 查询已完成
-	db.WithContext(c).Model(&models.Order{}).
+	d.db.WithContext(c).Table(d.tableName).
 		Where("user_id = ? AND status = ? AND state = 0", userID, models.OrderStatusCompleted).
 		Count(&stats.Completed)
 
 	// 查询已取消
-	db.WithContext(c).Model(&models.Order{}).
+	d.db.WithContext(c).Table(d.tableName).
 		Where("user_id = ? AND status = ? AND state = 0", userID, models.OrderStatusCancelled).
 		Count(&stats.Cancelled)
 
 	return stats, nil
-}
-
-// ShopOrderItemDao 订单商品明细DAO实现
-type ShopOrderItemDao struct{}
-
-func NewShopOrderItemDao() dao.IShopOrderItemDao {
-	return &ShopOrderItemDao{}
-}
-
-func (d *ShopOrderItemDao) BatchCreate(c *gin.Context, items []*models.OrderItem) error {
-	if len(items) == 0 {
-		return nil
-	}
-	db := c.Value("db").(*gorm.DB)
-	return db.WithContext(c).CreateInBatches(items, 100).Error
-}
-
-func (d *ShopOrderItemDao) GetByOrderID(c *gin.Context, orderID int64) ([]*models.OrderItem, error) {
-	db := c.Value("db").(*gorm.DB)
-	var items []*models.OrderItem
-	err := db.WithContext(c).Where("order_id = ? AND state = 0", orderID).Find(&items).Error
-	if err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-func (d *ShopOrderItemDao) GetByOrderNo(c *gin.Context, orderNo string) ([]*models.OrderItem, error) {
-	db := c.Value("db").(*gorm.DB)
-	var items []*models.OrderItem
-	err := db.WithContext(c).Where("order_no = ? AND state = 0", orderNo).Find(&items).Error
-	if err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-// 生成订单号
-func GenerateOrderNo() string {
-	now := time.Now()
-	return fmt.Sprintf("ORD%s%04d%02d%02d%02d%02d%04d",
-		now.Format("200601"),
-		now.Hour(), now.Minute(), now.Second(),
-		now.Nanosecond()/10000%10000)
 }

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"nova-factory-server/app/business/shop/user/models"
+	"nova-factory-server/app/business/shop/api/models"
 
 	"github.com/gin-gonic/gin"
 )
