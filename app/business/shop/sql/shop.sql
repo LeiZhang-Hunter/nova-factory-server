@@ -410,3 +410,14 @@ CREATE TABLE IF NOT EXISTS `shop_home_module_item`
     KEY `idx_link_id` (`link_id`) USING BTREE,
     KEY `idx_status_sort` (`status`,`sort`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='首页模块明细表';
+
+CREATE TABLE IF NOT EXISTS `sys_regions` (
+     `id`            bigint(20)       NOT NULL COMMENT '地区编码',
+    `pid`           bigint(20)       NOT NULL COMMENT '父级地区编码',
+    `level`         TINYINT(1)      NOT NULL COMMENT '层级',
+    `pinyin_prefix` CHAR(1)      NOT NULL COMMENT '拼音首字母',
+    `pinyin`        VARCHAR(50)  NOT NULL COMMENT '拼音',
+    `name`          VARCHAR(100)          DEFAULT NULL COMMENT '名称',
+    PRIMARY KEY (`id`),
+    KEY `idx_pid` (`pid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

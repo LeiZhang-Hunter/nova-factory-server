@@ -37,13 +37,13 @@ func NewGinEngine(
 		authController.Auth.PublicRoutes(group)
 		productController.Category.PublicRoutes(group)
 		productController.Home.PublicRoutes(group)
+		productController.Product.PublicRoutes(group)
 	}
 
 	appGroup := group.Group("")
 	appGroup.Use(middlewares.NewShopSessionAuthMiddlewareBuilder(cache).Build())
 	{
 		authController.Auth.PrivateRoutes(appGroup)
-		productController.Product.PublicRoutes(appGroup)
 		productController.Category.PrivateRoutes(appGroup)
 	}
 
