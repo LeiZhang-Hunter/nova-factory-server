@@ -24,8 +24,10 @@ type IotCamera struct {
 
 type IotCameraListReq struct {
 	Name      string `gorm:"column:name" form:"name"`
+	GatewayId int64  `form:"gateway_id"`
 	IpAddress string `gorm:"column:ip_address" form:"ip_address"`
 	Brand     string `gorm:"column:brand" form:"brand"`
+	Enable    *bool  `form:"enable"`
 }
 
 type IotCameraList struct {
