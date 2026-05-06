@@ -30,12 +30,6 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewaydao/gatewaydaoimpl"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice/gatewayserviceimpl"
 	"nova-factory-server/app/business/erp"
-	"nova-factory-server/app/business/erp/order/ordercontroller"
-	"nova-factory-server/app/business/erp/order/orderdao/orderdaoimpl"
-	"nova-factory-server/app/business/erp/order/orderservice/orderserviceimpl"
-	"nova-factory-server/app/business/erp/setting/settingcontroller"
-	"nova-factory-server/app/business/erp/setting/settingdao/settingdaoimpl"
-	"nova-factory-server/app/business/erp/setting/settingservice/settingserviceimpl"
 	"nova-factory-server/app/business/iot"
 	"nova-factory-server/app/business/iot/alert/alertcontroller"
 	"nova-factory-server/app/business/iot/alert/alertdao/alertdaoimpl"
@@ -203,10 +197,10 @@ func wireApp() (*gin.Engine, func(), error) {
 	iSysProductLaboratoryDao := productDaoImpl.NewSysProductLaboratoryDao(db)
 	iSysProductLaboratoryService := productServiceImpl.NewSysProductLaboratoryService(iSysProductLaboratoryDao, iUserDao)
 	laboratory := productcontroller.NewLaboratory(iSysProductLaboratoryService, iDictDataService)
-	productcontrollerProduct := &productcontroller.Product{
+	product := &productcontroller.Product{
 		Laboratory: laboratory,
 	}
-	adminAdmin := admin.NewGinEngine(app, cacheCache, system, monitor, tool, productcontrollerProduct)
+	adminAdmin := admin.NewGinEngine(app, cacheCache, system, monitor, tool, product)
 	iotDb := iotdb.NewIotDb()
 	iMaterialDao := materialdaoimpl.NewMaterialDaoImpl(db)
 	iMaterialService := materialserviceimpl.NewMaterialService(iMaterialDao, iUserDao)
