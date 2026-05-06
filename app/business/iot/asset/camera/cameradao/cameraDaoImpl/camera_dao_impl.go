@@ -70,6 +70,9 @@ func (c *CameraDaoImpl) List(req *cameramodels.IotCameraListReq) ([]*cameramodel
 	query := c.db.Table(c.table).Model(&cameramodels.IotCamera{})
 
 	if req != nil {
+		if req.GatewayId != 0 {
+			query = query.Where("gateway_id = ?", req.GatewayId)
+		}
 		if req.Name != "" {
 			query = query.Where("name LIKE ?", "%"+req.Name+"%")
 		}
@@ -78,6 +81,10 @@ func (c *CameraDaoImpl) List(req *cameramodels.IotCameraListReq) ([]*cameramodel
 		}
 		if req.Brand != "" {
 			query = query.Where("brand = ?", req.Brand)
+		}
+
+		if req.Enable != nil {
+			query = query.Where("enable = ?", req.Enable)
 		}
 	}
 

@@ -7,6 +7,8 @@ import (
 	"nova-factory-server/app/business/admin/system/systemdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetdao"
 	alertDao2 "nova-factory-server/app/business/iot/alert/alertdao"
+	"nova-factory-server/app/business/iot/asset/camera/cameradao"
+	"nova-factory-server/app/business/iot/asset/camera/cameramodels"
 	deviceDao2 "nova-factory-server/app/business/iot/asset/device/devicedao"
 	deviceModels2 "nova-factory-server/app/business/iot/asset/device/devicemodels"
 	"nova-factory-server/app/business/iot/daemonize/daemonizeservice"
@@ -17,9 +19,12 @@ import (
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 	logalertIntercept "nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/alertwebhook"
+	"nova-factory-server/app/utils/gateway/v1/config/app/sink/camera_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/metric_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/sink/time_data_exporter"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/bhps7"
+	"nova-factory-server/app/utils/gateway/v1/config/app/source/camera"
+	"nova-factory-server/app/utils/gateway/v1/config/app/source/camera/ipc"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/control"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/mqtt"
 	"nova-factory-server/app/utils/gateway/v1/config/app/source/prediction"
@@ -45,6 +50,7 @@ type iGatewayConfigServiceImpl struct {
 	deviceDao         deviceDao2.IDeviceDao
 	templateDao       deviceDao2.IDeviceTemplateDao
 	templateDataDao   deviceDao2.ISysModbusDeviceConfigDataDao
+	cameraDao         cameradao.ICameraDao
 	ruleDao           alertDao2.AlertRuleDao
 	sinkDao           alertDao2.AlertSinkTemplateDao
 	electricConfigDao dao.IDeviceElectricDao
@@ -56,6 +62,7 @@ func NewIGatewayConfigServiceImpl(
 	deviceDao deviceDao2.IDeviceDao,
 	templateDao deviceDao2.IDeviceTemplateDao,
 	templateDataDao deviceDao2.ISysModbusDeviceConfigDataDao,
+	cameraDao cameradao.ICameraDao,
 	ruleDao alertDao2.AlertRuleDao,
 	sinkDao alertDao2.AlertSinkTemplateDao, electricConfigDao dao.IDeviceElectricDao,
 	dictDataDao systemdao.IDictDataDao, predictionDao aidatasetdao.IAiPredictionControlDao) daemonizeservice.IGatewayConfigService {
@@ -63,6 +70,7 @@ func NewIGatewayConfigServiceImpl(
 		deviceDao:         deviceDao,
 		templateDao:       templateDao,
 		templateDataDao:   templateDataDao,
+		cameraDao:         cameraDao,
 		ruleDao:           ruleDao,
 		sinkDao:           sinkDao,
 		electricConfigDao: electricConfigDao,
@@ -108,6 +116,73 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	piplines := pipeline.NewPipelineConfig()
 	pipelinesConfig := pipeline.NewConfig()
 
+	enabled := true
+	cameras, err := i.cameraDao.List(&cameramodels.IotCameraListReq{
+		Enable:    &enabled,
+		GatewayId: gatewayId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	cameraDevices := make([]ipc.Device, 0)
+	for _, cam := range cameras {
+		if cam == nil {
+			continue
+		}
+		if cam.IpAddress == "" {
+			continue
+		}
+		name := cam.Name
+		if name == "" {
+			name = fmt.Sprintf("%d", cam.Id)
+		}
+		cameraDevices = append(cameraDevices, ipc.Device{
+			ID:       strconv.FormatInt(cam.Id, 10),
+			Name:     name,
+			Address:  cam.IpAddress,
+			Port:     uint16(cam.Port),
+			Brand:    cam.Brand,
+			Username: cam.Username,
+			Password: cam.Password,
+		})
+	}
+	if len(cameraDevices) != 0 {
+		cameraPipeline := pipeline.NewConfig()
+		cameraPipeline.Name = "camera"
+		cameraSource := source2.Config{
+			Enabled: &enabled,
+			Name:    "camera",
+			Type:    "camera",
+		}
+		cameraConfig := camera.Config{
+			Devices: cameraDevices,
+			GrpcClient: camera.GrpcClientConfig{
+				Enabled:         true,
+				Address:         grpcControlServerAddress,
+				SubscribeMethod: "",
+			},
+		}
+		cameraProps, err := cfg.Pack(cameraConfig)
+		if err != nil {
+			zap.L().Error("cfg.Pack() failed for camera", zap.Error(err))
+		} else {
+			cameraSource.Properties = cameraProps
+		}
+		cameraPipeline.Sources = append(cameraPipeline.Sources, &cameraSource)
+		cameraSinkProps, err := cfg.Pack(camera_exporter.Config{Address: sink_address})
+		if err != nil {
+			zap.L().Error("cfg.Pack() failed for camera_exporter", zap.Error(err))
+		}
+		cameraPipeline.Sink = &sink.Config{
+			Enabled:     &enabled,
+			Name:        "sink_camera_exporter",
+			Type:        "camera_exporter",
+			Properties:  cameraSinkProps,
+			Parallelism: 1,
+		}
+		piplines.Pipelines = append(piplines.Pipelines, *cameraPipeline)
+	}
+
 	// 组装设备
 	for _, device := range devices {
 
@@ -146,138 +221,138 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 		}
 	}
 
-	if len(templateIdMap) == 0 {
-		return nil, fmt.Errorf("设备未绑定模板")
-	}
-
-	for _, templateId := range templateIdMap {
-		templateIds = append(templateIds, templateId)
-	}
-
-	// 读取设备模板
-	templates, err := i.templateDao.GetByIds(c, templateIds)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, templateValue := range templates {
-		templatesMap[uint64(templateValue.TemplateID)] = make([]*deviceModels2.SysModbusDeviceConfigData, 0)
-	}
-
-	// 读取设备模板数据
-	templatesData, err := i.templateDataDao.GetByTemplateIds(c, templateIds)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, data := range templatesData {
-		templatesMap[uint64(data.TemplateID)] = append(templatesMap[uint64(data.TemplateID)], data)
-	}
-
-	//构建source
-	for addr, devicesData := range deviceAddressMap {
-		enabled := true
-
-		if len(devicesData) == 0 {
-			continue
+	if len(templateIdMap) != 0 {
+		for _, templateId := range templateIdMap {
+			templateIds = append(templateIds, templateId)
 		}
 
-		if devicesData[0].ExtensionInfo == nil {
-			continue
-		}
-
-		if len(devicesData[0].ExtensionInfo.LocalMqttInfo) == 0 && len(devicesData[0].ExtensionInfo.LocalInfo) == 0 {
-			continue
-		}
-
-		deviceType := devicesData[0].ProtocolType
-
-		if deviceType == device2.MODBUS_TCP {
-			source := source2.Config{
-				Enabled: &enabled,
-				Name:    fmt.Sprintf("gateway-%s", addr),
-				Type:    "bhp_s7_gateway",
-			}
-
-			var config bhps7.Config
-			config.Address = addr
-
-			config.Devices = make([]bhps7.Device, 0)
-
-			for _, d := range devicesData {
-				templateDatas, ok := templatesMap[d.DeviceProtocolId]
-				if !ok {
-					continue
-				}
-				bhps7Device := render.OfBhps7Device(d, templateDatas)
-				if bhps7Device == nil {
-					continue
-				}
-				bhps7Device.SlaveId = byte(d.ExtensionInfo.LocalInfo[0].Slave)
-				bhps7Device.Quantity = d.ExtensionInfo.LocalInfo[0].Quantity
-				config.Devices = append(config.Devices, *bhps7Device)
-			}
-			pack, err := cfg.Pack(config)
-			if err != nil {
-				zap.L().Error("cfg.Pack() failed", zap.Error(err))
-				continue
-			}
-			source.Properties = pack
-			pipelinesConfig.Sources = append(pipelinesConfig.Sources, &source)
-		} else if deviceType == device2.MQTT {
-			username := devicesData[0].ExtensionInfo.LocalMqttInfo[0].Username
-			password := devicesData[0].ExtensionInfo.LocalMqttInfo[0].Password
-			clientId := devicesData[0].ExtensionInfo.LocalMqttInfo[0].ClientId
-			source := source2.Config{
-				Enabled: &enabled,
-				Name:    fmt.Sprintf("gateway-%s", addr),
-				Type:    "mqtt",
-			}
-
-			var config mqtt.Config
-			config.Address = addr
-			config.Username = username
-			config.ClientId = clientId
-			config.Password = password
-			config.Devices = make([]mqtt.Device, 0)
-
-			for _, d := range devicesData {
-				templateDatas, ok := templatesMap[d.DeviceProtocolId]
-				if !ok {
-					continue
-				}
-				mqttDevice := render.OfMqttDevice(d, templateDatas)
-				if mqttDevice == nil {
-					continue
-				}
-				mqttDevice.Topic = d.ExtensionInfo.LocalMqttInfo[0].Topic
-				config.Devices = append(config.Devices, *mqttDevice)
-			}
-			pack, err := cfg.Pack(config)
-			if err != nil {
-				zap.L().Error("cfg.Pack() failed", zap.Error(err))
-				continue
-			}
-			source.Properties = pack
-			pipelinesConfig.Sources = append(pipelinesConfig.Sources, &source)
-		}
-
-		var exportConfig metric_exporter.Config
-		exportConfig.Address = sink_address
-		packContent, err := cfg.Pack(exportConfig)
+		// 读取设备模板
+		templates, err := i.templateDao.GetByIds(c, templateIds)
 		if err != nil {
-			zap.L().Error("cfg.Pack() failed", zap.Error(err))
-			continue
+			return nil, err
 		}
-		pipelinesConfig.Sink = &sink.Config{
-			Enabled:     &enabled,
-			Name:        fmt.Sprintf("sink-%d", snowflake.GenID()),
-			Type:        "metric_exporter",
-			Properties:  packContent,
-			Parallelism: 1,
+
+		for _, templateValue := range templates {
+			templatesMap[uint64(templateValue.TemplateID)] = make([]*deviceModels2.SysModbusDeviceConfigData, 0)
+		}
+
+		// 读取设备模板数据
+		templatesData, err := i.templateDataDao.GetByTemplateIds(c, templateIds)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, data := range templatesData {
+			templatesMap[uint64(data.TemplateID)] = append(templatesMap[uint64(data.TemplateID)], data)
+		}
+
+		//构建source
+		for addr, devicesData := range deviceAddressMap {
+
+			if len(devicesData) == 0 {
+				continue
+			}
+
+			if devicesData[0].ExtensionInfo == nil {
+				continue
+			}
+
+			if len(devicesData[0].ExtensionInfo.LocalMqttInfo) == 0 && len(devicesData[0].ExtensionInfo.LocalInfo) == 0 {
+				continue
+			}
+
+			deviceType := devicesData[0].ProtocolType
+
+			if deviceType == device2.MODBUS_TCP {
+				source := source2.Config{
+					Enabled: &enabled,
+					Name:    fmt.Sprintf("gateway-%s", addr),
+					Type:    "bhp_s7_gateway",
+				}
+
+				var config bhps7.Config
+				config.Address = addr
+
+				config.Devices = make([]bhps7.Device, 0)
+
+				for _, d := range devicesData {
+					templateDatas, ok := templatesMap[d.DeviceProtocolId]
+					if !ok {
+						continue
+					}
+					bhps7Device := render.OfBhps7Device(d, templateDatas)
+					if bhps7Device == nil {
+						continue
+					}
+					bhps7Device.SlaveId = byte(d.ExtensionInfo.LocalInfo[0].Slave)
+					bhps7Device.Quantity = d.ExtensionInfo.LocalInfo[0].Quantity
+					config.Devices = append(config.Devices, *bhps7Device)
+				}
+				pack, err := cfg.Pack(config)
+				if err != nil {
+					zap.L().Error("cfg.Pack() failed", zap.Error(err))
+					continue
+				}
+				source.Properties = pack
+				pipelinesConfig.Sources = append(pipelinesConfig.Sources, &source)
+			} else if deviceType == device2.MQTT {
+				username := devicesData[0].ExtensionInfo.LocalMqttInfo[0].Username
+				password := devicesData[0].ExtensionInfo.LocalMqttInfo[0].Password
+				clientId := devicesData[0].ExtensionInfo.LocalMqttInfo[0].ClientId
+				source := source2.Config{
+					Enabled: &enabled,
+					Name:    fmt.Sprintf("gateway-%s", addr),
+					Type:    "mqtt",
+				}
+
+				var config mqtt.Config
+				config.Address = addr
+				config.Username = username
+				config.ClientId = clientId
+				config.Password = password
+				config.Devices = make([]mqtt.Device, 0)
+
+				for _, d := range devicesData {
+					templateDatas, ok := templatesMap[d.DeviceProtocolId]
+					if !ok {
+						continue
+					}
+					mqttDevice := render.OfMqttDevice(d, templateDatas)
+					if mqttDevice == nil {
+						continue
+					}
+					mqttDevice.Topic = d.ExtensionInfo.LocalMqttInfo[0].Topic
+					config.Devices = append(config.Devices, *mqttDevice)
+				}
+				pack, err := cfg.Pack(config)
+				if err != nil {
+					zap.L().Error("cfg.Pack() failed", zap.Error(err))
+					continue
+				}
+				source.Properties = pack
+				pipelinesConfig.Sources = append(pipelinesConfig.Sources, &source)
+			}
+
+			var exportConfig metric_exporter.Config
+			exportConfig.Address = sink_address
+			packContent, err := cfg.Pack(exportConfig)
+			if err != nil {
+				zap.L().Error("cfg.Pack() failed", zap.Error(err))
+				continue
+			}
+			pipelinesConfig.Sink = &sink.Config{
+				Enabled:     &enabled,
+				Name:        fmt.Sprintf("sink-%d", snowflake.GenID()),
+				Type:        "metric_exporter",
+				Properties:  packContent,
+				Parallelism: 1,
+			}
 		}
 	}
-	pipelinesConfig.Name = fmt.Sprintf("gateway-pipeline-%d", gatewayId)
+	if len(pipelinesConfig.Sources) != 0 && pipelinesConfig.Sink != nil {
+		pipelinesConfig.Name = fmt.Sprintf("gateway-pipeline-%d", gatewayId)
+		piplines.Pipelines = append(piplines.Pipelines, *pipelinesConfig)
+	}
 
 	schedulerConfig := pipeline.NewConfig()
 	schedulerConfig.Name = "scheduler"
@@ -298,7 +373,6 @@ func (i *iGatewayConfigServiceImpl) Generate(c *gin.Context, gatewayId int64) (*
 	schedulerConfig.Sources = append(schedulerConfig.Sources, &source)
 
 	// 读取模板下的所有模板数据
-	piplines.Pipelines = append(piplines.Pipelines, *pipelinesConfig)
 	piplines.Pipelines = append(piplines.Pipelines, *schedulerConfig)
 
 	// ====================================== 告警配置 =====================================================
