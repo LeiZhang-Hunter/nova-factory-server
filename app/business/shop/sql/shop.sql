@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS `shop_user` (
   `company_name` VARCHAR(255) DEFAULT NULL COMMENT '企业名称',
   `contact_name` VARCHAR(128) DEFAULT NULL COMMENT '联系人',
   `contact_phone` VARCHAR(32) DEFAULT NULL COMMENT '联系人手机号',
+  `wechat_openid` VARCHAR(128) DEFAULT NULL COMMENT '微信Openid',
   `status` tinyint(1) NULL DEFAULT 0 COMMENT  '状态：1启用，0禁用',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
@@ -108,7 +109,8 @@ CREATE TABLE IF NOT EXISTS `shop_user` (
   UNIQUE KEY `uk_username` (`username`),
   KEY `idx_mobile` (`mobile`),
   KEY `idx_user_type` (`user_type`),
-  KEY `idx_status` (`status`)
+  KEY `idx_status` (`status`),
+  KEY `idx_wechat_openid` (`wechat_openid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商城用户表';
 
 CREATE TABLE IF NOT EXISTS `shop_user_address` (

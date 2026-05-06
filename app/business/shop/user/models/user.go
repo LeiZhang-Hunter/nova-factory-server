@@ -5,6 +5,7 @@ import "nova-factory-server/app/baize"
 // User 商城用户
 type User struct {
 	ID           int64  `json:"id,string" db:"id"`               // 主键ID
+	UserID       string `json:"userId" db:"user_id"`             // 用户业务ID
 	Username     string `json:"username" db:"username"`          // 用户名
 	Nickname     string `json:"nickname" db:"nickname"`          // 用户昵称
 	Mobile       string `json:"mobile" db:"mobile"`              // 手机号
@@ -15,6 +16,7 @@ type User struct {
 	CompanyName  string `json:"companyName" db:"company_name"`   // 企业名称
 	ContactName  string `json:"contactName" db:"contact_name"`   // 联系人
 	ContactPhone string `json:"contactPhone" db:"contact_phone"` // 联系人手机号
+	WechatOpenid string `json:"wechatOpenid" db:"wechat_openid"` // 微信Openid
 	Status       *bool  `json:"status" db:"status"`              // 状态
 	DeptID       int64  `json:"deptId" gorm:"column:dept_id"`    // 部门ID
 	baize.BaseEntity
