@@ -2,14 +2,17 @@ package impl
 
 import (
 	"errors"
+	"github.com/go-sql-driver/mysql"
 	"nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // ShopCartDaoImpl 提供商城用户购物车表的数据访问能力。
@@ -51,7 +54,6 @@ func (s *ShopCartDaoImpl) Set(c *gin.Context, req *models.CartSetReq) (*models.C
 			}
 			if err := tx.Table(s.tableName).
 				Where("id = ?", req.ID).
-				Where("dept_id = ?", deptID).
 				Where("state = ?", commonStatus.NORMAL).
 				Updates(map[string]interface{}{
 					"user_id":      req.UserID,
@@ -80,7 +82,6 @@ func (s *ShopCartDaoImpl) Set(c *gin.Context, req *models.CartSetReq) (*models.C
 		if existing != nil {
 			if err := tx.Table(s.tableName).
 				Where("id = ?", existing.ID).
-				Where("dept_id = ?", deptID).
 				Where("state = ?", commonStatus.NORMAL).
 				Updates(map[string]interface{}{
 					"goods_id":     req.GoodsID,
@@ -88,7 +89,7 @@ func (s *ShopCartDaoImpl) Set(c *gin.Context, req *models.CartSetReq) (*models.C
 					"sku_name":     req.SkuName,
 					"image_url":    req.ImageURL,
 					"retail_price": req.RetailPrice,
-					"quantity":     existing.Quantity + req.Quantity,
+					"quantity":     gorm.Expr("quantity + ?", req.Quantity),
 					"selected":     selected,
 					"status":       status,
 					"update_by":    userID,
@@ -117,6 +118,41 @@ func (s *ShopCartDaoImpl) Set(c *gin.Context, req *models.CartSetReq) (*models.C
 		}
 		model.SetCreateBy(userID)
 		if err := tx.Table(s.tableName).Create(model).Error; err != nil {
+			if isDuplicateKeyError(err) {
+				existing, getErr := s.getByUserIDAndSkuIDTxAnyState(c, tx, req.UserID, req.SkuID)
+				if getErr != nil {
+					return getErr
+				}
+				if existing == nil {
+					return err
+				}
+
+				updates := map[string]interface{}{
+					"goods_id":     req.GoodsID,
+					"goods_name":   req.GoodsName,
+					"sku_name":     req.SkuName,
+					"image_url":    req.ImageURL,
+					"retail_price": req.RetailPrice,
+					"selected":     selected,
+					"status":       status,
+					"update_by":    userID,
+					"update_time":  gorm.Expr("NOW()"),
+				}
+				if existing.State != commonStatus.NORMAL {
+					updates["state"] = commonStatus.NORMAL
+					updates["quantity"] = req.Quantity
+				} else {
+					updates["quantity"] = gorm.Expr("quantity + ?", req.Quantity)
+				}
+
+				if updateErr := tx.Table(s.tableName).
+					Where("id = ?", existing.ID).
+					Updates(updates).Error; updateErr != nil {
+					return updateErr
+				}
+				result, err = s.getByIDTx(c, tx, existing.ID)
+				return err
+			}
 			return err
 		}
 		result = model
@@ -209,6 +245,7 @@ func (s *ShopCartDaoImpl) Remove(c *gin.Context, ids []int64) error {
 func (s *ShopCartDaoImpl) getByIDTx(c *gin.Context, tx *gorm.DB, id int64) (*models.Cart, error) {
 	var item models.Cart
 	if err := tx.WithContext(c).Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("id = ?", id).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
@@ -224,9 +261,9 @@ func (s *ShopCartDaoImpl) getByIDTx(c *gin.Context, tx *gorm.DB, id int64) (*mod
 func (s *ShopCartDaoImpl) getByUserIDAndSkuIDTx(c *gin.Context, tx *gorm.DB, userID int64, skuID string) (*models.Cart, error) {
 	var item models.Cart
 	if err := tx.WithContext(c).Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("user_id = ?", userID).
 		Where("sku_id = ?", skuID).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -235,4 +272,29 @@ func (s *ShopCartDaoImpl) getByUserIDAndSkuIDTx(c *gin.Context, tx *gorm.DB, use
 		return nil, err
 	}
 	return &item, nil
+}
+
+// getByUserIDAndSkuIDTxAnyState 按 user_id 和 sku_id 查询购物车项（不限制 state），并对行加锁。
+func (s *ShopCartDaoImpl) getByUserIDAndSkuIDTxAnyState(c *gin.Context, tx *gorm.DB, userID int64, skuID string) (*models.Cart, error) {
+	var item models.Cart
+	if err := tx.WithContext(c).Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("user_id = ?", userID).
+		Where("sku_id = ?", skuID).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
+// isDuplicateKeyError 判断是否为唯一键冲突（主要用于并发下 insert 竞争场景）。
+func isDuplicateKeyError(err error) bool {
+	var mysqlErr *mysql.MySQLError
+	if errors.As(err, &mysqlErr) {
+		return mysqlErr.Number == 1062
+	}
+	return strings.Contains(err.Error(), "Duplicate entry")
 }
