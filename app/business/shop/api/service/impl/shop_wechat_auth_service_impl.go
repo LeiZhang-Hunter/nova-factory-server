@@ -9,6 +9,8 @@ import (
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
+	configDao "nova-factory-server/app/business/shop/config/dao"
+	userModels "nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/constant/sessionStatus"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares/session"
@@ -19,12 +21,12 @@ import (
 // ShopWechatAuthServiceImpl 提供商城微信授权登录能力。
 type ShopWechatAuthServiceImpl struct {
 	cache     cache.Cache
-	configDao dao.IShopSysConfigDao
+	configDao configDao.IShopSysConfigDao
 	userDao   dao.IShopWechatUserDao
 }
 
 // NewShopWechatAuthService 创建商城微信授权登录服务。
-func NewShopWechatAuthService(cache cache.Cache, configDao dao.IShopSysConfigDao, userDao dao.IShopWechatUserDao) service.IAppShopWechatAuthService {
+func NewShopWechatAuthService(cache cache.Cache, configDao configDao.IShopSysConfigDao, userDao dao.IShopWechatUserDao) service.IShopWechatAuthService {
 	return &ShopWechatAuthServiceImpl{
 		cache:     cache,
 		configDao: configDao,
@@ -75,7 +77,7 @@ func (s *ShopWechatAuthServiceImpl) WechatLogin(c *gin.Context, req *models.Wech
 		return nil, errors.New("创建会话失败")
 	}
 	currentSession.Set(c, sessionStatus.SessionType, sessionStatus.SessionTypeShopUser)
-	currentSession.Set(c, sessionStatus.UserId, user.UserID)
+	currentSession.Set(c, sessionStatus.UserId, user.ID)
 	currentSession.Set(c, sessionStatus.UserName, s.getUserDisplayName(user))
 	currentSession.Set(c, sessionStatus.Avatar, user.Avatar)
 
@@ -145,14 +147,14 @@ func (s *ShopWechatAuthServiceImpl) getWechatOpenid(c *gin.Context, appID, appSe
 }
 
 // createWechatUser 创建微信用户
-func (s *ShopWechatAuthServiceImpl) createWechatUser(c *gin.Context, openid, nickname, avatar string) (*models.User, error) {
+func (s *ShopWechatAuthServiceImpl) createWechatUser(c *gin.Context, openid, nickname, avatar string) (*userModels.User, error) {
 	// 生成随机用户名
-	nickname = fmt.Sprintf("用户-%s", openid[len(openid)-4:])
+	username := fmt.Sprintf("wx_%s", openid[:16])
 	userType := int32(1) // 默认代理商类型
 	status := true
 
 	userCreate := &models.WechatUserCreate{
-		//Username: username,
+		Username: username,
 		Nickname: nickname,
 		Avatar:   avatar,
 		UserType: userType,
@@ -164,7 +166,7 @@ func (s *ShopWechatAuthServiceImpl) createWechatUser(c *gin.Context, openid, nic
 }
 
 // getUserDisplayName 获取用户显示名称
-func (s *ShopWechatAuthServiceImpl) getUserDisplayName(user *models.User) string {
+func (s *ShopWechatAuthServiceImpl) getUserDisplayName(user *userModels.User) string {
 	if user == nil {
 		return ""
 	}

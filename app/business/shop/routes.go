@@ -5,9 +5,11 @@ package shop
 
 import (
 	activityController "nova-factory-server/app/business/shop/activity/controller"
+	"nova-factory-server/app/business/shop/api/controller/address"
 	"nova-factory-server/app/business/shop/api/controller/auth"
 	"nova-factory-server/app/business/shop/api/controller/order"
 	"nova-factory-server/app/business/shop/api/controller/product"
+	shopconfigController "nova-factory-server/app/business/shop/config/controller"
 	homeController "nova-factory-server/app/business/shop/home/controller"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
 	userController "nova-factory-server/app/business/shop/user/controller"
@@ -30,6 +32,8 @@ func NewGinEngine(
 	authController *auth.Controller,
 	productController *product.Controller,
 	orderController *order.Order,
+	addressController *address.Address,
+	shopConfigController *shopconfigController.Controller,
 ) *Shop {
 	group := app.Engine.Group("")
 
@@ -44,11 +48,13 @@ func NewGinEngine(
 	}
 
 	appGroup := group.Group("")
-	appGroup.Use(middlewares.NewShopSessionAuthMiddlewareBuilder(cache).Build())
+	appGroup.Use(middlewares.NewShopSessionAppAuthMiddlewareBuilder(cache).
+		Build())
 	{
 		authController.Auth.PrivateRoutes(appGroup)
 		productController.Category.PrivateRoutes(appGroup)
 		orderController.PrivateRoutes(appGroup)
+		addressController.PrivateRoutes(appGroup)
 	}
 
 	adminGroup := group.Group("")
@@ -63,6 +69,7 @@ func NewGinEngine(
 		homeController.HomeModuleItem.PrivateRoutes(adminGroup)
 		userController.Address.PrivateRoutes(adminGroup)
 		userController.Cart.PrivateRoutes(adminGroup)
+		shopConfigController.WechatConfig.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)
 		controller.Goods.PrivateRoutes(adminGroup)
 		controller.Sku.PrivateRoutes(adminGroup)

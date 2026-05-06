@@ -34,8 +34,8 @@ import (
 //
 // ShopUserAddressApp 移动端用户地址
 type ShopUserAddressApp struct {
-	ID             int64  `json:"id,string" db:"id"`
-	UserID         int64  `json:"userId,string" db:"user_id"`
+	ID             int64  `json:"id" db:"id"`
+	UserID         int64  `json:"userId" db:"user_id"`
 	ReceiverName   string `json:"receiverName" db:"receiver_name"`
 	ReceiverMobile string `json:"receiverMobile" db:"receiver_mobile"`
 	ProvinceCode   string `json:"provinceCode" db:"province_code"`
@@ -52,8 +52,8 @@ type ShopUserAddressApp struct {
 
 // AddressSetReq 地址设置请求
 type AddressSetReq struct {
-	ID             int64  `json:"id,string"`
-	UserID         int64  `json:"user_id,string"`
+	ID             int64  `json:"id"`
+	UserID         int64  `json:"-"`
 	ReceiverName   string `json:"receiverName" binding:"required"`
 	ReceiverMobile string `json:"receiverMobile" binding:"required"`
 	ProvinceCode   string `json:"provinceCode" binding:"required"`
