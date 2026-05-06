@@ -237,8 +237,8 @@ func (d *ShopOrderItemDao) GetByOrderNo(c *gin.Context, orderNo string) ([]*mode
 // 生成订单号
 func GenerateOrderNo() string {
 	now := time.Now()
-	return fmt.Sprintf("ORD%s%04d%02d%02d%02d%02d%04d",
-		now.Format("200601"),
+	return fmt.Sprintf("ORD%s%02d%02d%02d%04d",
+		now.Format("20060102"),
 		now.Hour(), now.Minute(), now.Second(),
 		now.Nanosecond()/10000%10000)
 }
