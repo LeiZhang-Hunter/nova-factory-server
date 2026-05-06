@@ -30,3 +30,4 @@ public/*
 nova-factory-server
 nova-factory-otel
 mcp_gen_exec
+app/wire_gen.go
