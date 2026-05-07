@@ -9,7 +9,6 @@ type CartItem struct {
 
 // CartSetDataReq 购物车新增修改参数
 type CartSetDataReq struct {
-	ID       int64 `json:"id,string"`                         // 主键ID
 	GoodsID  int64 `json:"goodsId,string" binding:"required"` // 商品ID
 	SkuID    int64 `json:"skuId,string" binding:"required"`   // SKU ID
 	Quantity int64 `json:"quantity" binding:"required"`       // 数量
