@@ -1,9 +1,8 @@
-package shopcontroller
+package order
 
 import (
-	"nova-factory-server/app/business/shop/user/models"
-	"nova-factory-server/app/business/shop/user/service"
-	"nova-factory-server/app/middlewares"
+	"nova-factory-server/app/business/shop/api/models"
+	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
@@ -11,24 +10,24 @@ import (
 
 // Order 订单控制器
 type Order struct {
-	service service.IShopOrderService
+	service service.IAppShopOrderService
 }
 
 // NewOrder 创建订单控制器
-func NewOrder(service service.IShopOrderService) *Order {
+func NewOrder(service service.IAppShopOrderService) *Order {
 	return &Order{service: service}
 }
 
-// PrivateRoutes 注册商城订单路由
+// PrivateRoutes 注册商城订单路由（商城模块只检查登录，不检查权限）
 func (s *Order) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/shop/user/order")
-	group.GET("/list", middlewares.HasPermission("shop:user:order:list"), s.List)
-	group.GET("/info/:id", middlewares.HasPermission("shop:user:order:info"), s.GetByID)
-	group.GET("/count", middlewares.HasPermission("shop:user:order:count"), s.GetStatistics)
-	group.POST("/create", middlewares.HasPermission("shop:user:order:create"), s.Create)
-	group.POST("/status", middlewares.HasPermission("shop:user:order:status"), s.UpdateStatus)
-	group.POST("/cancel/:id", middlewares.HasPermission("shop:user:order:cancel"), s.Cancel)
-	group.POST("/confirm/:id", middlewares.HasPermission("shop:user:order:confirm"), s.ConfirmReceive)
+	group := router.Group("/api/v1/app/shop/order")
+	group.GET("/list", s.List)
+	group.GET("/info/:id", s.GetByID)
+	group.GET("/count", s.GetStatistics)
+	group.POST("/create", s.Create)
+	group.POST("/status", s.UpdateStatus)
+	group.POST("/cancel/:id", s.Cancel)
+	group.POST("/confirm/:id", s.ConfirmReceive)
 }
 
 // List 获取订单列表
@@ -41,13 +40,13 @@ func (s *Order) PrivateRoutes(router *gin.RouterGroup) {
 // @Success 200 {object} response.ResponseData "获取成功"
 // @Router /shop/user/order/list [get]
 func (s *Order) List(c *gin.Context) {
-	username := baizeContext.GetUserName(c)
+	userID := baizeContext.GetUserId(c)
 	req := new(models.OrderQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
 	}
-	data, err := s.service.List(c, username, req)
+	data, err := s.service.List(c, userID, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -88,13 +87,13 @@ func (s *Order) GetByID(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "创建成功"
 // @Router /shop/user/order/create [post]
 func (s *Order) Create(c *gin.Context) {
-	username := baizeContext.GetUserName(c)
+	userID := baizeContext.GetUserId(c)
 	req := new(models.OrderSetReq)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
 	}
-	data, err := s.service.Create(c, username, req)
+	data, err := s.service.Create(c, userID, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -112,13 +111,13 @@ func (s *Order) Create(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "更新成功"
 // @Router /shop/user/order/status [post]
 func (s *Order) UpdateStatus(c *gin.Context) {
-	username := baizeContext.GetUserName(c)
+	userID := baizeContext.GetUserId(c)
 	req := new(models.OrderStatusReq)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if err := s.service.UpdateStatus(c, username, req); err != nil {
+	if err := s.service.UpdateStatus(c, userID, req); err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
@@ -135,14 +134,14 @@ func (s *Order) UpdateStatus(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "取消成功"
 // @Router /shop/user/order/cancel/{id} [post]
 func (s *Order) Cancel(c *gin.Context) {
-	username := baizeContext.GetUserName(c)
+	userID := baizeContext.GetUserId(c)
 	id := baizeContext.ParamInt64(c, "id")
 	if id == 0 {
 		baizeContext.ParameterError(c)
 		return
 	}
 	reason := c.Query("reason")
-	if err := s.service.Cancel(c, username, id, reason); err != nil {
+	if err := s.service.Cancel(c, userID, id, reason); err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
@@ -159,13 +158,13 @@ func (s *Order) Cancel(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "确认成功"
 // @Router /shop/user/order/confirm/{id} [post]
 func (s *Order) ConfirmReceive(c *gin.Context) {
-	username := baizeContext.GetUserName(c)
+	userID := baizeContext.GetUserId(c)
 	id := baizeContext.ParamInt64(c, "id")
 	if id == 0 {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if err := s.service.ConfirmReceive(c, username, id); err != nil {
+	if err := s.service.ConfirmReceive(c, userID, id); err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
@@ -181,8 +180,8 @@ func (s *Order) ConfirmReceive(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "获取成功"
 // @Router /shop/user/order/count [get]
 func (s *Order) GetStatistics(c *gin.Context) {
-	username := baizeContext.GetUserName(c)
-	data, err := s.service.GetStatistics(c, username)
+	userID := baizeContext.GetUserId(c)
+	data, err := s.service.GetStatistics(c, userID)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

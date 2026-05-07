@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS `shop_user` (
   `company_name` VARCHAR(255) DEFAULT NULL COMMENT '企业名称',
   `contact_name` VARCHAR(128) DEFAULT NULL COMMENT '联系人',
   `contact_phone` VARCHAR(32) DEFAULT NULL COMMENT '联系人手机号',
+  `wechat_openid` VARCHAR(128) DEFAULT NULL COMMENT '微信Openid',
   `status` tinyint(1) NULL DEFAULT 0 COMMENT  '状态：1启用，0禁用',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
@@ -108,7 +109,8 @@ CREATE TABLE IF NOT EXISTS `shop_user` (
   UNIQUE KEY `uk_username` (`username`),
   KEY `idx_mobile` (`mobile`),
   KEY `idx_user_type` (`user_type`),
-  KEY `idx_status` (`status`)
+  KEY `idx_status` (`status`),
+  KEY `idx_wechat_openid` (`wechat_openid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商城用户表';
 
 CREATE TABLE IF NOT EXISTS `shop_user_address` (
@@ -474,3 +476,27 @@ CREATE TABLE IF NOT EXISTS `shop_order_item`
     KEY `idx_goods_id` (`goods_id`) USING BTREE,
     KEY `idx_sku_id` (`sku_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单商品明细表';
+
+-- 商城系统配置表
+CREATE TABLE IF NOT EXISTS `shop_sys_config` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `config_key` varchar(255) NOT NULL COMMENT '配置键名',
+    `config_value` text COMMENT '配置键值',
+    `config_type` varchar(10) DEFAULT 'N' COMMENT '配置类型（Y是 N否）',
+    `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uk_config_key` (`config_key`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='商城系统配置表';
+
+-- 初始化微信小程序配置
+INSERT INTO `shop_sys_config` (`config_key`, `config_value`, `config_type`, `remark`) VALUES
+('wechat_mini_program_app_id', '', 'N', '微信小程序应用ID'),
+('wechat_mini_program_app_secret', '', 'N', '微信小程序应用密钥'),
+('wechat_mini_program_token', '', 'N', '微信令牌'),
+('wechat_mini_program_encoding_aes_key', '', 'N', '消息加密密钥');

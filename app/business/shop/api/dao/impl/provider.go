@@ -2,4 +2,4 @@ package impl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewIApiShopCartDaoImpl)
+var ProviderSet = wire.NewSet(NewIShopOrderDaoImpl, NewIShopOrderItemDaoImpl, NewShopAddressDao, NewShopWechatUserDao, NewShopSysConfigDao)

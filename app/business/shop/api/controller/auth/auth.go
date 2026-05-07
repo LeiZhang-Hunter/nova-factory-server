@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"nova-factory-server/app/business/shop/user/models"
-	"nova-factory-server/app/business/shop/user/service"
+	"nova-factory-server/app/business/shop/api/models"
+	shopAuthService "nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
@@ -10,43 +10,71 @@ import (
 
 // Auth 商城用户鉴权控制器
 type Auth struct {
-	service service.IShopAuthService
+	authService       shopAuthService.IAppShopAuthService
+	wechatAuthService shopAuthService.IAppShopWechatAuthService
 }
 
 // NewAuth 创建商城用户鉴权控制器。
-func NewAuth(service service.IShopAuthService) *Auth {
-	return &Auth{service: service}
+func NewAuth(authService shopAuthService.IAppShopAuthService, wechatAuthService shopAuthService.IAppShopWechatAuthService) *Auth {
+	return &Auth{
+		authService:       authService,
+		wechatAuthService: wechatAuthService,
+	}
 }
 
 // PublicRoutes 注册商城用户公开鉴权路由。
 func (s *Auth) PublicRoutes(router *gin.RouterGroup) {
-	group := router.Group("/shop/app")
-	group.POST("/login", s.Login)
+	group := router.Group("/api/v1/app/shop/auth")
+	group.POST("/wechat-login", s.WechatLogin)
+	group.POST("/refresh", s.RefreshToken)
 }
 
 // PrivateRoutes 注册商城用户受保护鉴权路由。
 func (s *Auth) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/shop/app")
+	group := router.Group("/api/v1/app/shop")
 	group.GET("/getInfo", s.GetInfo)
 	group.POST("/logout", s.Logout)
 }
 
-// Login 商城用户登录
-// @Summary 商城用户登录
-// @Description 使用 shop_user 账号登录商城
+// WechatLogin 微信小程序授权登录
+// @Summary 微信小程序授权登录
+// @Description 微信小程序授权登录，code换openid并生成JWT token
 // @Tags 商城/App鉴权
 // @Accept application/json
-// @Param body body models.ShopLoginReq true "商城用户登录参数"
+// @Param body body models.WechatLoginReq true "微信登录参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "登录成功"
-// @Router /shop/app/login [post]
-func (s *Auth) Login(c *gin.Context) {
-	req := new(models.ShopLoginReq)
+// @Router /api/v1/app/shop/auth/wechat-login [post]
+func (s *Auth) WechatLogin(c *gin.Context) {
+	req := new(models.WechatLoginReq)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
 	}
-	data, err := s.service.Login(c, req)
+	data, err := s.wechatAuthService.WechatLogin(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// RefreshToken 刷新JWT Token
+// @Summary 刷新JWT Token
+// @Description 用有效JWT换取新Token
+// @Tags 商城/App鉴权
+// @Accept application/json
+// @Param body body models.RefreshTokenReq true "刷新Token参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "刷新成功"
+// @Router /api/v1/app/shop/auth/refresh [post]
+func (s *Auth) RefreshToken(c *gin.Context) {
+	req := new(models.RefreshTokenReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.wechatAuthService.RefreshToken(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -61,9 +89,9 @@ func (s *Auth) Login(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "获取成功"
-// @Router /shop/app/getInfo [get]
+// @Router /api/v1/app/shop/getInfo [get]
 func (s *Auth) GetInfo(c *gin.Context) {
-	data, err := s.service.GetInfo(c)
+	data, err := s.authService.GetInfo(c)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -78,9 +106,9 @@ func (s *Auth) GetInfo(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "退出成功"
-// @Router /shop/app/logout [post]
+// @Router /api/v1/app/shop/logout [post]
 func (s *Auth) Logout(c *gin.Context) {
-	if err := s.service.Logout(c); err != nil {
+	if err := s.authService.Logout(c); err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
