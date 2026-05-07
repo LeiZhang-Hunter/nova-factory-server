@@ -29,11 +29,11 @@ func NewIShopOrderServiceImpl(orderDao dao.IShopOrderDao, orderItemDao dao.IShop
 	}
 }
 
-// GenerateOrderNo 生成唯一订单号，格式: ORD+年月+时分秒+纳秒随机数。
+// GenerateOrderNo 生成唯一订单号，格式: ORD+年月日+时分秒+纳秒随机数。
 func GenerateOrderNo() string {
 	now := time.Now()
-	return fmt.Sprintf("ORD%s%04d%02d%02d%02d%02d%04d",
-		now.Format("200601"),
+	return fmt.Sprintf("ORD%s%02d%02d%02d%04d",
+		now.Format("20060102"),
 		now.Hour(), now.Minute(), now.Second(),
 		now.Nanosecond()/10000%10000)
 }

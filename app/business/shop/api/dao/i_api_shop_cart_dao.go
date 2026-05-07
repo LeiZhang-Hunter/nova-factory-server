@@ -7,4 +7,5 @@ import (
 
 type IApiShopCartDao interface {
 	Save(c *gin.Context, req *models.CartSetData) (*models.CartDto, error)
+	List(c *gin.Context, userID int64) ([]*models.CartDto, error)
 }
