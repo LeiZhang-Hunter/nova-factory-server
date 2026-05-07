@@ -10,22 +10,22 @@ import (
 	"gorm.io/gorm"
 )
 
-// IShopOrderDaoImpl 提供订单的数据库访问能力。
-type IShopOrderDaoImpl struct {
+// IApiShopOrderDaoImpl 提供订单的数据库访问能力。
+type IApiShopOrderDaoImpl struct {
 	db        *gorm.DB
 	tableName string
 }
 
-// NewIShopOrderDaoImpl 创建订单 DAO 实现。
-func NewIShopOrderDaoImpl(db *gorm.DB) dao.IShopOrderDao {
-	return &IShopOrderDaoImpl{
+// NewIApiShopOrderDaoImpl 创建订单 DAO 实现。
+func NewIApiShopOrderDaoImpl(db *gorm.DB) dao.IApiShopOrderDao {
+	return &IApiShopOrderDaoImpl{
 		db:        db,
 		tableName: "shop_order",
 	}
 }
 
 // Create 新增订单记录。
-func (d *IShopOrderDaoImpl) Create(c *gin.Context, order *models.Order) (*models.Order, error) {
+func (d *IApiShopOrderDaoImpl) Create(c *gin.Context, order *models.Order) (*models.Order, error) {
 	if err := d.db.WithContext(c).Table(d.tableName).Create(order).Error; err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (d *IShopOrderDaoImpl) Create(c *gin.Context, order *models.Order) (*models
 }
 
 // GetByID 根据ID获取订单。
-func (d *IShopOrderDaoImpl) GetByID(c *gin.Context, id int64) (*models.Order, error) {
+func (d *IApiShopOrderDaoImpl) GetByID(c *gin.Context, id int64) (*models.Order, error) {
 	var order models.Order
 	err := d.db.WithContext(c).Table(d.tableName).Where("id = ? AND state = 0", id).First(&order).Error
 	if err != nil {
@@ -43,7 +43,7 @@ func (d *IShopOrderDaoImpl) GetByID(c *gin.Context, id int64) (*models.Order, er
 }
 
 // GetByOrderNo 根据订单号获取订单。
-func (d *IShopOrderDaoImpl) GetByOrderNo(c *gin.Context, orderNo string) (*models.Order, error) {
+func (d *IApiShopOrderDaoImpl) GetByOrderNo(c *gin.Context, orderNo string) (*models.Order, error) {
 	var order models.Order
 	err := d.db.WithContext(c).Table(d.tableName).Where("order_no = ? AND state = 0", orderNo).First(&order).Error
 	if err != nil {
@@ -53,7 +53,7 @@ func (d *IShopOrderDaoImpl) GetByOrderNo(c *gin.Context, orderNo string) (*model
 }
 
 // List 查询订单列表，支持分页和条件筛选。
-func (d *IShopOrderDaoImpl) List(c *gin.Context, query *models.OrderQuery) (*models.OrderListData, error) {
+func (d *IApiShopOrderDaoImpl) List(c *gin.Context, query *models.OrderQuery) (*models.OrderListData, error) {
 	var total int64
 	var orders []*models.Order
 
@@ -97,7 +97,7 @@ func (d *IShopOrderDaoImpl) List(c *gin.Context, query *models.OrderQuery) (*mod
 }
 
 // toOrderVOList 将订单列表转换为视图对象列表。
-func (d *IShopOrderDaoImpl) toOrderVOList(orders []*models.Order) []*models.OrderVO {
+func (d *IApiShopOrderDaoImpl) toOrderVOList(orders []*models.Order) []*models.OrderVO {
 	result := make([]*models.OrderVO, len(orders))
 	for i, order := range orders {
 		result[i] = &models.OrderVO{Order: *order}
@@ -106,7 +106,7 @@ func (d *IShopOrderDaoImpl) toOrderVOList(orders []*models.Order) []*models.Orde
 }
 
 // UpdateStatus 更新订单状态，使用乐观锁版本号控制并发。
-func (d *IShopOrderDaoImpl) UpdateStatus(c *gin.Context, id int64, status int32, version int32) (int64, error) {
+func (d *IApiShopOrderDaoImpl) UpdateStatus(c *gin.Context, id int64, status int32, version int32) (int64, error) {
 	var updates map[string]interface{}
 	now := time.Now().Format("2006-01-02 15:04:05")
 
@@ -151,7 +151,7 @@ func (d *IShopOrderDaoImpl) UpdateStatus(c *gin.Context, id int64, status int32,
 }
 
 // Cancel 取消订单，仅允许对待支付的订单进行取消。
-func (d *IShopOrderDaoImpl) Cancel(c *gin.Context, id int64, reason string, version int32) (int64, error) {
+func (d *IApiShopOrderDaoImpl) Cancel(c *gin.Context, id int64, reason string, version int32) (int64, error) {
 	now := time.Now().Format("2006-01-02 15:04:05")
 
 	result := d.db.WithContext(c).Table(d.tableName).
@@ -172,7 +172,7 @@ func (d *IShopOrderDaoImpl) Cancel(c *gin.Context, id int64, reason string, vers
 }
 
 // GetStatistics 获取用户各状态订单数量统计。
-func (d *IShopOrderDaoImpl) GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error) {
+func (d *IApiShopOrderDaoImpl) GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error) {
 	stats := &models.OrderStatistics{}
 
 	// 查询待付款

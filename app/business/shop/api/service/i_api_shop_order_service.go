@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// IAppShopOrderService  订单服务接口
-type IAppShopOrderService interface {
+// IApiShopOrderService   订单服务接口
+type IApiShopOrderService interface {
 	Create(c *gin.Context, userID int64, req *models.OrderSetReq) (*models.Order, error)
 	GetByID(c *gin.Context, id int64) (*models.OrderVO, error)
 	List(c *gin.Context, userID int64, query *models.OrderQuery) (*models.OrderListData, error)

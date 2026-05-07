@@ -2,5 +2,5 @@ package impl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewShopCartServiceImpl, NewShopWechatAuthService,
-	NewShopAuthService, NewShopAddressService, NewIShopOrderServiceImpl)
+var ProviderSet = wire.NewSet(NewIApiShopCartServiceImpl, NewIApiShopWechatAuthServiceImpl,
+	NewIApiShopAuthServiceImpl, NewIApiShopAddressServiceImpl, NewIApiShopOrderServiceImpl, NewIApiShopGoodsServiceImpl)

@@ -2,8 +2,6 @@ package impl
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/api/dao"
 	api "nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
@@ -11,21 +9,24 @@ import (
 	userDao "nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/fileUtils"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-type ShopCartServiceImpl struct {
+type IApiShopCartServiceImpl struct {
 	goodsDao     shopdao.IShopGoodsDao
 	goodsSkuDao  shopdao.IShopSkuDao
 	shopUserDao  userDao.IShopUserDao
 	iShopCartDao dao.IApiShopCartDao
 }
 
-// NewShopCartServiceImpl 购物车服务
-func NewShopCartServiceImpl(goodsDao shopdao.IShopGoodsDao,
+// NewIApiShopCartServiceImpl 购物车服务
+func NewIApiShopCartServiceImpl(goodsDao shopdao.IShopGoodsDao,
 	goodsSkuDao shopdao.IShopSkuDao,
 	shopUserDao userDao.IShopUserDao,
 	iShopCartDao dao.IApiShopCartDao) service.IApiShopCartService {
-	return &ShopCartServiceImpl{
+	return &IApiShopCartServiceImpl{
 		goodsDao:     goodsDao,
 		goodsSkuDao:  goodsSkuDao,
 		iShopCartDao: iShopCartDao,
@@ -34,7 +35,7 @@ func NewShopCartServiceImpl(goodsDao shopdao.IShopGoodsDao,
 }
 
 // GenCart 生成购物车，购物车下单
-func (s *ShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataReq) (*api.CartDto, error) {
+func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataReq) (*api.CartDto, error) {
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
@@ -119,7 +120,7 @@ func (s *ShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataReq) (
 }
 
 // List 查询用户购物车列表。
-func (s *ShopCartServiceImpl) List(c *gin.Context) ([]*api.CartDto, error) {
+func (s *IApiShopCartServiceImpl) List(c *gin.Context) ([]*api.CartDto, error) {
 	userID := baizeContext.GetUserId(c)
 	//var userID int64 = 486436412988592128
 	//if userID == 0 {

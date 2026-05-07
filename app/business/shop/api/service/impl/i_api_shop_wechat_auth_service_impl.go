@@ -16,16 +16,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ShopWechatAuthServiceImpl 提供商城微信授权登录能力。
-type ShopWechatAuthServiceImpl struct {
+// IApiShopWechatAuthServiceImpl 提供商城微信授权登录能力。
+type IApiShopWechatAuthServiceImpl struct {
 	cache     cache.Cache
-	configDao dao.IShopSysConfigDao
-	userDao   dao.IShopWechatUserDao
+	configDao dao.IApiShopSysConfigDao
+	userDao   dao.IApiShopWechatUserDao
 }
 
-// NewShopWechatAuthService 创建商城微信授权登录服务。
-func NewShopWechatAuthService(cache cache.Cache, configDao dao.IShopSysConfigDao, userDao dao.IShopWechatUserDao) service.IAppShopWechatAuthService {
-	return &ShopWechatAuthServiceImpl{
+// NewIApiShopWechatAuthServiceImpl NewShopWechatAuthService 创建商城微信授权登录服务。
+func NewIApiShopWechatAuthServiceImpl(cache cache.Cache, configDao dao.IApiShopSysConfigDao, userDao dao.IApiShopWechatUserDao) service.IApiShopWechatAuthService {
+	return &IApiShopWechatAuthServiceImpl{
 		cache:     cache,
 		configDao: configDao,
 		userDao:   userDao,
@@ -33,7 +33,7 @@ func NewShopWechatAuthService(cache cache.Cache, configDao dao.IShopSysConfigDao
 }
 
 // WechatLogin 微信小程序授权登录
-func (s *ShopWechatAuthServiceImpl) WechatLogin(c *gin.Context, req *models.WechatLoginReq) (*models.WechatLoginResp, error) {
+func (s *IApiShopWechatAuthServiceImpl) WechatLogin(c *gin.Context, req *models.WechatLoginReq) (*models.WechatLoginResp, error) {
 	if req == nil || req.Code == "" {
 		return nil, errors.New("参数不能为空")
 	}
@@ -86,7 +86,7 @@ func (s *ShopWechatAuthServiceImpl) WechatLogin(c *gin.Context, req *models.Wech
 }
 
 // RefreshToken 刷新 Session Token
-func (s *ShopWechatAuthServiceImpl) RefreshToken(c *gin.Context, req *models.RefreshTokenReq) (*models.WechatLoginResp, error) {
+func (s *IApiShopWechatAuthServiceImpl) RefreshToken(c *gin.Context, req *models.RefreshTokenReq) (*models.WechatLoginResp, error) {
 	if req == nil || req.Token == "" {
 		return nil, errors.New("参数不能为空")
 	}
@@ -109,7 +109,7 @@ func (s *ShopWechatAuthServiceImpl) RefreshToken(c *gin.Context, req *models.Ref
 }
 
 // getWechatConfig 获取微信配置
-func (s *ShopWechatAuthServiceImpl) getWechatConfig(c *gin.Context, key string) (string, error) {
+func (s *IApiShopWechatAuthServiceImpl) getWechatConfig(c *gin.Context, key string) (string, error) {
 	config, err := s.configDao.GetByConfigKey(c, key)
 	if err != nil || config == nil {
 		return "", errors.New("配置不存在")
@@ -118,7 +118,7 @@ func (s *ShopWechatAuthServiceImpl) getWechatConfig(c *gin.Context, key string) 
 }
 
 // getWechatOpenid 调用微信接口获取openid
-func (s *ShopWechatAuthServiceImpl) getWechatOpenid(c *gin.Context, appID, appSecret, code string) (string, error) {
+func (s *IApiShopWechatAuthServiceImpl) getWechatOpenid(c *gin.Context, appID, appSecret, code string) (string, error) {
 	url := fmt.Sprintf("https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code", appID, appSecret, code)
 
 	resp, err := http.Get(url)
@@ -145,7 +145,7 @@ func (s *ShopWechatAuthServiceImpl) getWechatOpenid(c *gin.Context, appID, appSe
 }
 
 // createWechatUser 创建微信用户
-func (s *ShopWechatAuthServiceImpl) createWechatUser(c *gin.Context, openid, nickname, avatar string) (*models.User, error) {
+func (s *IApiShopWechatAuthServiceImpl) createWechatUser(c *gin.Context, openid, nickname, avatar string) (*models.User, error) {
 	// 生成随机用户名
 	nickname = fmt.Sprintf("用户-%s", openid[len(openid)-4:])
 	userType := int32(1) // 默认代理商类型
@@ -164,7 +164,7 @@ func (s *ShopWechatAuthServiceImpl) createWechatUser(c *gin.Context, openid, nic
 }
 
 // getUserDisplayName 获取用户显示名称
-func (s *ShopWechatAuthServiceImpl) getUserDisplayName(user *models.User) string {
+func (s *IApiShopWechatAuthServiceImpl) getUserDisplayName(user *models.User) string {
 	if user == nil {
 		return ""
 	}

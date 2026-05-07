@@ -10,18 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ShopAddressServiceImpl 移动端地址服务实现
-type ShopAddressServiceImpl struct {
-	dao dao.IShopAddressDao
+// IApiShopAddressServiceImpl 移动端地址服务实现
+type IApiShopAddressServiceImpl struct {
+	dao dao.IApiShopAddressDao
 }
 
-// NewShopAddressService 创建移动端地址服务
-func NewShopAddressService(dao dao.IShopAddressDao) service.IAppShopAddressService {
-	return &ShopAddressServiceImpl{dao: dao}
+// NewIApiShopAddressServiceImpl  创建移动端地址服务
+func NewIApiShopAddressServiceImpl(dao dao.IApiShopAddressDao) service.IApiShopAddressService {
+	return &IApiShopAddressServiceImpl{dao: dao}
 }
 
 // Set 新增或修改地址
-func (s *ShopAddressServiceImpl) Set(c *gin.Context, req *models.AddressSetReq) (*models.ShopUserAddressApp, error) {
+func (s *IApiShopAddressServiceImpl) Set(c *gin.Context, req *models.AddressSetReq) (*models.ShopUserAddressApp, error) {
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
@@ -61,7 +61,7 @@ func (s *ShopAddressServiceImpl) Set(c *gin.Context, req *models.AddressSetReq) 
 }
 
 // GetByID 根据 ID 查询
-func (s *ShopAddressServiceImpl) GetByID(c *gin.Context, id int64) (*models.ShopUserAddressApp, error) {
+func (s *IApiShopAddressServiceImpl) GetByID(c *gin.Context, id int64) (*models.ShopUserAddressApp, error) {
 	if id == 0 {
 		return nil, errors.New("地址ID不能为空")
 	}
@@ -69,7 +69,7 @@ func (s *ShopAddressServiceImpl) GetByID(c *gin.Context, id int64) (*models.Shop
 }
 
 // List 查询用户地址列表
-func (s *ShopAddressServiceImpl) List(c *gin.Context, userId int64) (*models.AddressListData, error) {
+func (s *IApiShopAddressServiceImpl) List(c *gin.Context, userId int64) (*models.AddressListData, error) {
 	if userId == 0 {
 		return nil, errors.New("用户ID不能为空")
 	}
@@ -77,7 +77,7 @@ func (s *ShopAddressServiceImpl) List(c *gin.Context, userId int64) (*models.Add
 }
 
 // Remove 删除地址
-func (s *ShopAddressServiceImpl) Remove(c *gin.Context, ids []int64) error {
+func (s *IApiShopAddressServiceImpl) Remove(c *gin.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return errors.New("地址ID不能为空")
 	}
