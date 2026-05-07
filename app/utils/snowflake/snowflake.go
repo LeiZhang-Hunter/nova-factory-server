@@ -12,7 +12,11 @@ var sfNode *sf.Node
 func init() {
 	var id int64 = 1
 	var st time.Time
-	st, err := time.Parse("2006-01-02", viper.GetString("start_time"))
+	start_time := viper.GetString("start_time")
+	if start_time == "" {
+		start_time = "2022-08-08"
+	}
+	st, err := time.Parse("2006-01-02", start_time)
 	if err != nil {
 		panic(err)
 	}

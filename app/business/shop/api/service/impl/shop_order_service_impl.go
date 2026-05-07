@@ -3,7 +3,7 @@ package impl
 import (
 	"errors"
 	"fmt"
-	"time"
+	order2 "nova-factory-server/app/utils/order"
 
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
@@ -27,15 +27,6 @@ func NewIShopOrderServiceImpl(orderDao dao.IShopOrderDao, orderItemDao dao.IShop
 		orderItemDao: orderItemDao,
 		userDao:      userDao,
 	}
-}
-
-// GenerateOrderNo 生成唯一订单号，格式: ORD+年月日+时分秒+纳秒随机数。
-func GenerateOrderNo() string {
-	now := time.Now()
-	return fmt.Sprintf("ORD%s%02d%02d%02d%04d",
-		now.Format("20060102"),
-		now.Hour(), now.Minute(), now.Second(),
-		now.Nanosecond()/10000%10000)
 }
 
 // Create 创建订单，包含订单商品明细，支持事务。
@@ -83,7 +74,7 @@ func (s *IShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *models
 	}
 
 	// 生成订单号
-	orderNo := GenerateOrderNo()
+	orderNo := order2.GenerateOrderNo()
 
 	// 创建订单
 	order := &models.Order{
