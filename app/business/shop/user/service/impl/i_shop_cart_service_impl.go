@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/business/shop/user/service"
+	"nova-factory-server/app/utils/fileUtils"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -89,7 +90,18 @@ func (s *ShopCartServiceImpl) List(c *gin.Context, req *models.CartQuery) (*mode
 	}
 	req.GoodsID = strings.TrimSpace(req.GoodsID)
 	req.SkuID = strings.TrimSpace(req.SkuID)
-	return s.dao.List(c, req)
+	ret, err := s.dao.List(c, req)
+	if err != nil {
+		return nil, err
+	}
+	if ret == nil || len(ret.Rows) == 0 {
+		return ret, nil
+	}
+
+	for k, v := range ret.Rows {
+		ret.Rows[k].ImageURL = fileUtils.BuildAbsoluteURL(c, v.ImageURL)
+	}
+	return ret, nil
 }
 
 // Remove 删除商城用户购物车项。
