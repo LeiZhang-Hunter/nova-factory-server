@@ -2,16 +2,17 @@ package impl
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
-	"github.com/go-sql-driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/snowflake"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-sql-driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // IApiShopCartDaoImpl 购物车，这个购物车是用来给APp端用的
@@ -103,6 +104,17 @@ func (s *IApiShopCartDaoImpl) Save(c *gin.Context, req *models.CartSetData) (*mo
 		return nil, err
 	}
 	return result, nil
+}
+
+// List 查询购物车列表（不分页）。
+func (s *IApiShopCartDaoImpl) List(c *gin.Context, userID int64) ([]*models.CartDto, error) {
+	db := s.db.WithContext(c).Table(s.tableName).Where("user_id = ?", userID).Where("state = ?", commonStatus.NORMAL)
+
+	rows := make([]*models.CartDto, 0)
+	if err := db.Order("update_time DESC").Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
 }
 
 func (s *IApiShopCartDaoImpl) getByUserIDAndSkuIDTx(c *gin.Context, tx *gorm.DB, userID int64, skuID string) (*models.CartDto, error) {

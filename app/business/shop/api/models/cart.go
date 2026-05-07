@@ -7,6 +7,18 @@ import (
 type CartItem struct {
 }
 
+// CartQuery 购物车查询参数
+type CartQuery struct {
+	Page int64 `form:"page"`
+	Size int64 `form:"size"`
+}
+
+// CartListData 购物车列表结果
+type CartListData struct {
+	Rows  []*CartDto `json:"rows"`
+	Total int64      `json:"total"`
+}
+
 // CartSetDataReq 购物车新增修改参数
 type CartSetDataReq struct {
 	GoodsID  int64 `json:"goodsId,string" binding:"required"` // 商品ID
