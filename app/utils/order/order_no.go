@@ -1,31 +1,28 @@
 package order
 
 import (
-	"fmt"
-	"sync"
+	"strconv"
+	"strings"
 	"time"
+
+	"nova-factory-server/app/utils/snowflake"
 )
 
-var (
-	orderNoMutex      sync.Mutex
-	lastOrderNoMillis int64
-	orderNoSequence   int
+const (
+	defaultOrderPrefix = "ORD"
 )
 
-// GenerateOrderNo 生成可读且进程内有序的订单编号。
+// GenerateOrderNo 使用雪花算法生成订单编号，默认前缀为 ORD。
 func GenerateOrderNo() string {
-	now := time.Now()
-	millis := now.UnixMilli()
+	return GenerateOrderNoWithPrefix(defaultOrderPrefix)
+}
 
-	orderNoMutex.Lock()
-	if millis == lastOrderNoMillis {
-		orderNoSequence++
-	} else {
-		lastOrderNoMillis = millis
-		orderNoSequence = 0
+// GenerateOrderNoWithPrefix 使用雪花算法生成带前缀的订单编号。
+func GenerateOrderNoWithPrefix(prefix string) string {
+	prefix = strings.TrimSpace(prefix)
+	if prefix == "" {
+		prefix = defaultOrderPrefix
 	}
-	sequence := orderNoSequence
-	orderNoMutex.Unlock()
-
-	return fmt.Sprintf("ORD%s%03d%06d", now.Format("20060102150405"), now.Nanosecond()/int(time.Millisecond), sequence)
+	now := time.Now()
+	return prefix + now.Format("20060102") + strconv.FormatInt(snowflake.GenID(), 10)
 }
