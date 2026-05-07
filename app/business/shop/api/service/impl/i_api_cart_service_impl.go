@@ -10,6 +10,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopdao"
 	userDao "nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/fileUtils"
 )
 
 type ShopCartServiceImpl struct {
@@ -124,5 +125,13 @@ func (s *ShopCartServiceImpl) List(c *gin.Context) ([]*api.CartDto, error) {
 	//if userID == 0 {
 	//	return nil, errors.New("用户ID不能为空")
 	//}
-	return s.iShopCartDao.List(c, userID)
+	ret, err := s.iShopCartDao.List(c, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range ret {
+		ret[k].ImageURL = fileUtils.BuildAbsoluteURL(c, v.ImageURL)
+	}
+	return ret, nil
 }

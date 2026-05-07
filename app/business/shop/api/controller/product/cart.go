@@ -47,6 +47,7 @@ func (c *Cart) Add(ctx *gin.Context) {
 	info, err := c.shopCartService.GenCart(ctx, req)
 	if err != nil {
 		zap.L().Error("gen cart error", zap.Error(err))
+		baizeContext.Waring(ctx, err.Error())
 		return
 	}
 
