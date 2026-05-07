@@ -44,7 +44,6 @@ func NewGinEngine(
 		productController.Category.PublicRoutes(group)
 		productController.Home.PublicRoutes(group)
 		productController.Product.PublicRoutes(group)
-		productController.Cart.PublicRoutes(group)
 	}
 
 	appGroup := group.Group("")

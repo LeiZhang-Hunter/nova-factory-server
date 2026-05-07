@@ -99,6 +99,7 @@ func (s *ShopUserDaoImpl) GetByID(c *gin.Context, id int64) (*models.User, error
 	var item models.User
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("id = ?", id).
+		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
