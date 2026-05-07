@@ -147,8 +147,8 @@ CREATE TABLE IF NOT EXISTS `shop_user_address` (
 CREATE TABLE IF NOT EXISTS `shop_user_cart` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `user_id` BIGINT(20) NOT NULL COMMENT '用户ID，对应shop_user.id',
-    `goods_id` VARCHAR(64) NOT NULL COMMENT '商品ID，对应shop_goods.goods_id',
-    `sku_id` VARCHAR(64) NOT NULL COMMENT 'SKU ID，对应shop_goods_sku.sku_id',
+    `goods_id` BIGINT(20) NOT NULL COMMENT '商品ID，对应shop_goods.goods_id',
+    `sku_id` BIGINT(20) NOT NULL COMMENT 'SKU ID，对应shop_goods_sku.sku_id',
     `goods_name` VARCHAR(255) NOT NULL COMMENT '商品名称快照',
     `sku_name` VARCHAR(255) DEFAULT NULL COMMENT 'SKU名称快照',
     `image_url` VARCHAR(1024) DEFAULT NULL COMMENT '商品或SKU图片快照',
