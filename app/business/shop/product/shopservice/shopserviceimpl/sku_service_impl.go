@@ -4,6 +4,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
+	"nova-factory-server/app/utils/fileUtils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,5 +34,17 @@ func (s *ShopSkuServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Good
 }
 
 func (s *ShopSkuServiceImpl) List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*shopmodels.GoodsSkuListData, error) {
-	return s.dao.List(c, req)
+	ret, err := s.dao.List(c, req)
+	if err != nil {
+		return nil, err
+	}
+
+	if ret == nil || len(ret.Rows) == 0 {
+		return ret, nil
+	}
+
+	for k, v := range ret.Rows {
+		ret.Rows[k].ImageURL = fileUtils.BuildAbsoluteURL(c, v.ImageURL)
+	}
+	return ret, nil
 }

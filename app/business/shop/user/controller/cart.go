@@ -46,6 +46,7 @@ func (s *Cart) List(c *gin.Context) {
 	}
 	data, err := s.service.List(c, req)
 	if err != nil {
+		zap.L().Error("get list failed", zap.Any("err", err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}
