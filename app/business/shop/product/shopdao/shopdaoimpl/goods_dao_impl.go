@@ -184,6 +184,9 @@ func (s *ShopGoodsDaoImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*sh
 	if req.IsOnSale != nil {
 		db = db.Where("is_on_sale = ?", req.IsOnSale)
 	}
+	if req.CategoryId > 0 {
+		db = db.Where("shop_category_id = ?", req.CategoryId)
+	}
 
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	if req.Page <= 0 {
@@ -197,7 +200,13 @@ func (s *ShopGoodsDaoImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*sh
 		return nil, err
 	}
 	rows := make([]*shopmodels.Goods, 0)
-	if err := db.Offset(int((req.Page - 1) * req.Size)).Limit(int(req.Size)).Order("id DESC").Find(&rows).Error; err != nil {
+
+	// 构建排序
+	orderClause := "id DESC"
+	if req.SortBy == "retailPrice" && req.SortOrder != "" {
+		orderClause = "retail_price " + req.SortOrder
+	}
+	if err := db.Offset(int((req.Page - 1) * req.Size)).Limit(int(req.Size)).Order(orderClause).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	if err := s.attachHomeModuleIDs(c, rows); err != nil {
