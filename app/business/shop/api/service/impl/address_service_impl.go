@@ -16,7 +16,7 @@ type ShopAddressServiceImpl struct {
 }
 
 // NewShopAddressService 创建移动端地址服务
-func NewShopAddressService(dao dao.IShopAddressDao) service.IShopAddressService {
+func NewShopAddressService(dao dao.IShopAddressDao) service.IAppShopAddressService {
 	return &ShopAddressServiceImpl{dao: dao}
 }
 
