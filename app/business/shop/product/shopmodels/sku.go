@@ -30,7 +30,7 @@ type GoodsSku struct {
 
 // GoodsSkuUpsert 商品规格新增修改参数
 type GoodsSkuUpsert struct {
-	ID                 uint64   `json:"id"`                         // 主键ID
+	ID                 uint64   `json:"id,string"`                  // 主键ID
 	GoodsID            string   `json:"goodsId" binding:"required"` // 商品业务ID
 	SkuID              string   `json:"skuId" binding:"required"`   // 规格业务ID
 	SkuName            string   `json:"skuName"`                    // 规格名称
