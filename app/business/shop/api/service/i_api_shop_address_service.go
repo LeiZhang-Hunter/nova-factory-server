@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// IAppShopAddressService  移动端地址服务接口
-type IAppShopAddressService interface {
+// IApiShopAddressService   移动端地址服务接口
+type IApiShopAddressService interface {
 	Set(c *gin.Context, req *models.AddressSetReq) (*models.ShopUserAddressApp, error)
 	GetByID(c *gin.Context, id int64) (*models.ShopUserAddressApp, error)
 	List(c *gin.Context, userId int64) (*models.AddressListData, error)

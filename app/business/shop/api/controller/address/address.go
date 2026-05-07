@@ -14,11 +14,11 @@ import (
 
 // Address 地址控制器
 type Address struct {
-	service service.IAppShopAddressService
+	service service.IApiShopAddressService
 }
 
 // NewAddress 创建地址控制器
-func NewAddress(service service.IAppShopAddressService) *Address {
+func NewAddress(service service.IApiShopAddressService) *Address {
 	return &Address{service: service}
 }
 

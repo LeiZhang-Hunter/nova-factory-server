@@ -13,22 +13,22 @@ import (
 	"gorm.io/gorm"
 )
 
-// ShopWechatUserDaoImpl 提供微信用户数据访问能力。
-type ShopWechatUserDaoImpl struct {
+// IApiShopWechatUserDaoImpl 提供微信用户数据访问能力。
+type IApiShopWechatUserDaoImpl struct {
 	db        *gorm.DB
 	tableName string
 }
 
-// NewShopWechatUserDao 创建微信用户 DAO。
-func NewShopWechatUserDao(ms *gorm.DB) dao.IShopWechatUserDao {
-	return &ShopWechatUserDaoImpl{
+// NewIApiShopWechatUserDaoImpl 创建微信用户 DAO。
+func NewIApiShopWechatUserDaoImpl(ms *gorm.DB) dao.IApiShopWechatUserDao {
+	return &IApiShopWechatUserDaoImpl{
 		db:        ms,
 		tableName: "shop_user",
 	}
 }
 
 // GetByOpenid 根据微信openid查询商城用户。
-func (s *ShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (*models.User, error) {
+func (s *IApiShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (*models.User, error) {
 	var item models.User
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("wechat_openid = ?", openid).
@@ -43,7 +43,7 @@ func (s *ShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (*mod
 }
 
 // CreateWechatUser 创建微信用户。
-func (s *ShopWechatUserDaoImpl) CreateWechatUser(c *gin.Context, req *models.WechatUserCreate) (*models.User, error) {
+func (s *IApiShopWechatUserDaoImpl) CreateWechatUser(c *gin.Context, req *models.WechatUserCreate) (*models.User, error) {
 	// 微信登录无 session，使用默认 dept_id=0
 	const defaultDeptID int64 = 0
 	model := &models.User{
@@ -69,7 +69,7 @@ func (s *ShopWechatUserDaoImpl) CreateWechatUser(c *gin.Context, req *models.Wec
 }
 
 // GetByID 根据用户ID查询商城用户（不带 dept_id 过滤，用于小程序）。
-func (s *ShopWechatUserDaoImpl) GetByID(c *gin.Context, id int64) (*models.User, error) {
+func (s *IApiShopWechatUserDaoImpl) GetByID(c *gin.Context, id int64) (*models.User, error) {
 	var item models.User
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("id = ?", id).

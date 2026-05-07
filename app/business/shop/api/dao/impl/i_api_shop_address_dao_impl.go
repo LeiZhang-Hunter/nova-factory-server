@@ -10,22 +10,22 @@ import (
 	"gorm.io/gorm"
 )
 
-// ShopAddressDaoImpl 移动端地址 DAO 实现
-type ShopAddressDaoImpl struct {
+// IApiShopAddressDaoImpl 移动端地址 DAO 实现
+type IApiShopAddressDaoImpl struct {
 	db        *gorm.DB
 	tableName string
 }
 
 // NewShopAddressDao 创建移动端地址 DAO
-func NewShopAddressDao(ms *gorm.DB) dao.IShopAddressDao {
-	return &ShopAddressDaoImpl{
+func NewShopAddressDao(ms *gorm.DB) dao.IApiShopAddressDao {
+	return &IApiShopAddressDaoImpl{
 		db:        ms,
 		tableName: "shop_user_address",
 	}
 }
 
 // Set 新增或修改地址
-func (s *ShopAddressDaoImpl) Set(c *gin.Context, req *models.AddressSetReq) (*models.ShopUserAddressApp, error) {
+func (s *IApiShopAddressDaoImpl) Set(c *gin.Context, req *models.AddressSetReq) (*models.ShopUserAddressApp, error) {
 	var result *models.ShopUserAddressApp
 	err := s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
 		// 如果设置默认，先清除其他默认
@@ -93,7 +93,7 @@ func (s *ShopAddressDaoImpl) Set(c *gin.Context, req *models.AddressSetReq) (*mo
 }
 
 // GetByID 根据 ID 查询
-func (s *ShopAddressDaoImpl) GetByID(c *gin.Context, id int64) (*models.ShopUserAddressApp, error) {
+func (s *IApiShopAddressDaoImpl) GetByID(c *gin.Context, id int64) (*models.ShopUserAddressApp, error) {
 	var item models.ShopUserAddressApp
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("id = ?", id).
@@ -107,7 +107,7 @@ func (s *ShopAddressDaoImpl) GetByID(c *gin.Context, id int64) (*models.ShopUser
 }
 
 // List 查询用户地址列表
-func (s *ShopAddressDaoImpl) List(c *gin.Context, userId int64) (*models.AddressListData, error) {
+func (s *IApiShopAddressDaoImpl) List(c *gin.Context, userId int64) (*models.AddressListData, error) {
 	db := s.db.WithContext(c).Table(s.tableName).Where("user_id = ?", userId)
 
 	var total int64
@@ -124,14 +124,14 @@ func (s *ShopAddressDaoImpl) List(c *gin.Context, userId int64) (*models.Address
 }
 
 // Remove 删除地址
-func (s *ShopAddressDaoImpl) Remove(c *gin.Context, ids []int64) error {
+func (s *IApiShopAddressDaoImpl) Remove(c *gin.Context, ids []int64) error {
 	return s.db.WithContext(c).Table(s.tableName).
 		Where("id IN ?", ids).
 		Delete(nil).Error
 }
 
 // ClearDefault 清除用户的所有默认地址
-func (s *ShopAddressDaoImpl) ClearDefault(c *gin.Context, userId int64, excludeId int64) error {
+func (s *IApiShopAddressDaoImpl) ClearDefault(c *gin.Context, userId int64, excludeId int64) error {
 	db := s.db.WithContext(c).Table(s.tableName).Where("user_id = ?", userId)
 	if excludeId > 0 {
 		db = db.Where("id <> ?", excludeId)

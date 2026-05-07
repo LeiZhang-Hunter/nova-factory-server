@@ -10,12 +10,12 @@ import (
 
 // Auth 商城用户鉴权控制器
 type Auth struct {
-	authService       shopAuthService.IAppShopAuthService
-	wechatAuthService shopAuthService.IAppShopWechatAuthService
+	authService       shopAuthService.IApiShopAuthService
+	wechatAuthService shopAuthService.IApiShopWechatAuthService
 }
 
 // NewAuth 创建商城用户鉴权控制器。
-func NewAuth(authService shopAuthService.IAppShopAuthService, wechatAuthService shopAuthService.IAppShopWechatAuthService) *Auth {
+func NewAuth(authService shopAuthService.IApiShopAuthService, wechatAuthService shopAuthService.IApiShopWechatAuthService) *Auth {
 	return &Auth{
 		authService:       authService,
 		wechatAuthService: wechatAuthService,

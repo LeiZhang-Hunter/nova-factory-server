@@ -13,22 +13,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ShopAuthServiceImpl 提供商城小程序鉴权服务。
-type ShopAuthServiceImpl struct {
+// IApiShopAuthServiceImpl 提供商城小程序鉴权服务。
+type IApiShopAuthServiceImpl struct {
 	cache   cache.Cache
-	userDao dao.IShopWechatUserDao
+	userDao dao.IApiShopWechatUserDao
 }
 
-// NewShopAuthService 创建商城小程序鉴权服务。
-func NewShopAuthService(cache cache.Cache, userDao dao.IShopWechatUserDao) service.IAppShopAuthService {
-	return &ShopAuthServiceImpl{
+// NewIApiShopAuthServiceImpl   创建商城小程序鉴权服务。
+func NewIApiShopAuthServiceImpl(cache cache.Cache, userDao dao.IApiShopWechatUserDao) service.IApiShopAuthService {
+	return &IApiShopAuthServiceImpl{
 		cache:   cache,
 		userDao: userDao,
 	}
 }
 
 // GetInfo 获取当前商城登录用户信息（小程序）。
-func (s *ShopAuthServiceImpl) GetInfo(c *gin.Context) (*apiModels.ShopGetInfoResp, error) {
+func (s *IApiShopAuthServiceImpl) GetInfo(c *gin.Context) (*apiModels.ShopGetInfoResp, error) {
 	userID := baizeContext.GetUserId(c)
 	if userID == 0 {
 		return nil, errors.New("用户未登录")
@@ -48,7 +48,7 @@ func (s *ShopAuthServiceImpl) GetInfo(c *gin.Context) (*apiModels.ShopGetInfoRes
 }
 
 // Logout 退出当前商城登录会话（小程序）。
-func (s *ShopAuthServiceImpl) Logout(c *gin.Context) error {
+func (s *IApiShopAuthServiceImpl) Logout(c *gin.Context) error {
 	session.NewManger(s.cache).RemoveSession(c)
 	return nil
 }

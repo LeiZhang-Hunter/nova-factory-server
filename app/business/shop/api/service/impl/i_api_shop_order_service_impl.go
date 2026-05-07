@@ -13,16 +13,16 @@ import (
 	"gorm.io/gorm"
 )
 
-// IShopOrderServiceImpl 提供订单相关的业务实现。
-type IShopOrderServiceImpl struct {
-	orderDao     dao.IShopOrderDao
-	orderItemDao dao.IShopOrderItemDao
-	userDao      dao.IShopWechatUserDao
+// IApiShopOrderServiceImpl 提供订单相关的业务实现。
+type IApiShopOrderServiceImpl struct {
+	orderDao     dao.IApiShopOrderDao
+	orderItemDao dao.IApiShopOrderItemDao
+	userDao      dao.IApiShopWechatUserDao
 }
 
-// NewIShopOrderServiceImpl 创建订单服务实现。
-func NewIShopOrderServiceImpl(orderDao dao.IShopOrderDao, orderItemDao dao.IShopOrderItemDao, userDao dao.IShopWechatUserDao) service.IAppShopOrderService {
-	return &IShopOrderServiceImpl{
+// NewIApiShopOrderServiceImpl 创建订单服务实现。
+func NewIApiShopOrderServiceImpl(orderDao dao.IApiShopOrderDao, orderItemDao dao.IApiShopOrderItemDao, userDao dao.IApiShopWechatUserDao) service.IApiShopOrderService {
+	return &IApiShopOrderServiceImpl{
 		orderDao:     orderDao,
 		orderItemDao: orderItemDao,
 		userDao:      userDao,
@@ -30,7 +30,7 @@ func NewIShopOrderServiceImpl(orderDao dao.IShopOrderDao, orderItemDao dao.IShop
 }
 
 // Create 创建订单，包含订单商品明细，支持事务。
-func (s *IShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *models.OrderSetReq) (*models.Order, error) {
+func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *models.OrderSetReq) (*models.Order, error) {
 	if req == nil || len(req.Items) == 0 {
 		return nil, errors.New("订单商品不能为空")
 	}
@@ -128,7 +128,7 @@ func (s *IShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *models
 }
 
 // GetByID 获取订单详情，包含商品明细。
-func (s *IShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*models.OrderVO, error) {
+func (s *IApiShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*models.OrderVO, error) {
 	if id == 0 {
 		return nil, errors.New("订单ID不能为空")
 	}
@@ -150,7 +150,7 @@ func (s *IShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*models.Order
 }
 
 // List 获取当前用户的订单列表。
-func (s *IShopOrderServiceImpl) List(c *gin.Context, userID int64, query *models.OrderQuery) (*models.OrderListData, error) {
+func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *models.OrderQuery) (*models.OrderListData, error) {
 	if query == nil {
 		query = &models.OrderQuery{}
 	}
@@ -160,7 +160,7 @@ func (s *IShopOrderServiceImpl) List(c *gin.Context, userID int64, query *models
 }
 
 // UpdateStatus 更新订单状态，验证状态流转合法性。
-func (s *IShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, req *models.OrderStatusReq) error {
+func (s *IApiShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, req *models.OrderStatusReq) error {
 	if req.ID == 0 {
 		return errors.New("订单ID不能为空")
 	}
@@ -192,7 +192,7 @@ func (s *IShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, req *
 }
 
 // Cancel 取消订单，仅允许对待支付的订单进行取消。
-func (s *IShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64, reason string) error {
+func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64, reason string) error {
 	if id == 0 {
 		return errors.New("订单ID不能为空")
 	}
@@ -222,7 +222,7 @@ func (s *IShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64, r
 }
 
 // ConfirmReceive 确认收货，将已发货订单标记为已完成。
-func (s *IShopOrderServiceImpl) ConfirmReceive(c *gin.Context, userID int64, id int64) error {
+func (s *IApiShopOrderServiceImpl) ConfirmReceive(c *gin.Context, userID int64, id int64) error {
 	if id == 0 {
 		return errors.New("订单ID不能为空")
 	}
@@ -252,12 +252,12 @@ func (s *IShopOrderServiceImpl) ConfirmReceive(c *gin.Context, userID int64, id 
 }
 
 // GetStatistics 获取当前用户各状态订单数量统计。
-func (s *IShopOrderServiceImpl) GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error) {
+func (s *IApiShopOrderServiceImpl) GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error) {
 	return s.orderDao.GetStatistics(c, userID)
 }
 
 // isValidStatusTransition 验证订单状态流转是否合法。
-func (s *IShopOrderServiceImpl) isValidStatusTransition(from, to int32) bool {
+func (s *IApiShopOrderServiceImpl) isValidStatusTransition(from, to int32) bool {
 	validTransitions := map[int32][]int32{
 		models.OrderStatusPending:   {models.OrderStatusPaid, models.OrderStatusCancelled},
 		models.OrderStatusPaid:      {models.OrderStatusShipped, models.OrderStatusCancelled},

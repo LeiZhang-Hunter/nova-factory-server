@@ -9,22 +9,22 @@ import (
 	"gorm.io/gorm"
 )
 
-// ShopSysConfigDaoImpl 提供商城系统配置表的数据访问能力。
-type ShopSysConfigDaoImpl struct {
+// IApiShopSysConfigDaoImpl 提供商城系统配置表的数据访问能力。
+type IApiShopSysConfigDaoImpl struct {
 	db        *gorm.DB
 	tableName string
 }
 
-// NewShopSysConfigDao 创建商城系统配置 DAO。
-func NewShopSysConfigDao(ms *gorm.DB) dao.IShopSysConfigDao {
-	return &ShopSysConfigDaoImpl{
+// NewIApiShopSysConfigDaoImpl   创建商城系统配置 DAO。
+func NewIApiShopSysConfigDaoImpl(ms *gorm.DB) dao.IApiShopSysConfigDao {
+	return &IApiShopSysConfigDaoImpl{
 		db:        ms,
 		tableName: "shop_sys_config",
 	}
 }
 
 // GetByConfigKey 根据配置键名获取配置
-func (s *ShopSysConfigDaoImpl) GetByConfigKey(c *gin.Context, configKey string) (*models.ShopSysConfig, error) {
+func (s *IApiShopSysConfigDaoImpl) GetByConfigKey(c *gin.Context, configKey string) (*models.ShopSysConfig, error) {
 	var result models.ShopSysConfig
 	err := s.db.WithContext(c).Table(s.tableName).
 		Where("config_key = ?", configKey).
@@ -37,7 +37,7 @@ func (s *ShopSysConfigDaoImpl) GetByConfigKey(c *gin.Context, configKey string) 
 }
 
 // UpdateByConfigKey 根据配置键名更新配置值
-func (s *ShopSysConfigDaoImpl) UpdateByConfigKey(c *gin.Context, configKey string, configValue string) error {
+func (s *IApiShopSysConfigDaoImpl) UpdateByConfigKey(c *gin.Context, configKey string, configValue string) error {
 	return s.db.WithContext(c).Table(s.tableName).
 		Where("config_key = ?", configKey).
 		Where("state = ?", commonStatus.NORMAL).

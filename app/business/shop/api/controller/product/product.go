@@ -1,18 +1,18 @@
 package product
 
 import (
-	"nova-factory-server/app/business/shop/product/shopmodels"
-	"nova-factory-server/app/business/shop/product/shopservice"
+	"nova-factory-server/app/business/shop/api/models"
+	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Product struct {
-	service shopservice.IShopGoodsService
+	service service.IApiShopGoodsService
 }
 
-func NewProduct(service shopservice.IShopGoodsService) *Product {
+func NewProduct(service service.IApiShopGoodsService) *Product {
 	return &Product{service: service}
 }
 
@@ -60,7 +60,7 @@ func (p *Product) Info(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "获取成功"
 // @Router /api/v1/app/shop/product/list [get]
 func (p *Product) List(c *gin.Context) {
-	req := new(shopmodels.GoodsQuery)
+	req := new(models.GoodsQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
