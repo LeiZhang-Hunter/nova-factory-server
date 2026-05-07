@@ -10,11 +10,11 @@ import (
 
 // Order 订单控制器
 type Order struct {
-	service service.IAppShopOrderService
+	service service.IApiShopOrderService
 }
 
 // NewOrder 创建订单控制器
-func NewOrder(service service.IAppShopOrderService) *Order {
+func NewOrder(service service.IApiShopOrderService) *Order {
 	return &Order{service: service}
 }
 
