@@ -60,7 +60,7 @@ func (s *IApiShopCartDaoImpl) Save(c *gin.Context, req *models.CartSetData) (*mo
 			ID:          snowflake.GenID(),
 			UserID:      req.UserID,
 			GoodsID:     req.GoodsID,
-			SkuID:       req.SkuID,
+			SkuID:       int64(req.SkuID),
 			GoodsName:   req.GoodsName,
 			SkuName:     req.SkuName,
 			ImageURL:    req.ImageURL,
@@ -117,7 +117,7 @@ func (s *IApiShopCartDaoImpl) List(c *gin.Context, userID int64) ([]*models.Cart
 	return rows, nil
 }
 
-func (s *IApiShopCartDaoImpl) getByUserIDAndSkuIDTx(c *gin.Context, tx *gorm.DB, userID int64, skuID string) (*models.CartDto, error) {
+func (s *IApiShopCartDaoImpl) getByUserIDAndSkuIDTx(c *gin.Context, tx *gorm.DB, userID int64, skuID uint64) (*models.CartDto, error) {
 	var item models.CartDto
 	if err := tx.WithContext(c).Table(s.tableName).
 		Clauses(clause.Locking{Strength: "UPDATE"}).

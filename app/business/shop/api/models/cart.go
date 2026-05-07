@@ -30,8 +30,8 @@ type CartSetData struct {
 	ID          int64   `json:"id,string"` // 主键ID
 	UserID      int64   `json:"-"`
 	Username    string  `json:"username"`                     // 用户名
-	GoodsID     string  `json:"goodsId" binding:"required"`   // 商品ID
-	SkuID       string  `json:"skuId" binding:"required"`     // SKU ID
+	GoodsID     int64   `json:"goodsId" binding:"required"`   // 商品ID
+	SkuID       uint64  `json:"skuId" binding:"required"`     // SKU ID
 	GoodsName   string  `json:"goodsName" binding:"required"` // 商品名称
 	SkuName     string  `json:"skuName"`                      // SKU名称
 	ImageURL    string  `json:"imageUrl"`                     // 图片地址
@@ -43,8 +43,8 @@ type CartSetData struct {
 type CartDto struct {
 	ID          int64      `json:"id,string" db:"id"`                    // 主键ID
 	UserID      int64      `json:"userId" db:"user_id"`                  // 用户ID
-	GoodsID     string     `json:"goodsId" db:"goods_id"`                // 商品ID
-	SkuID       string     `json:"skuId" db:"sku_id"`                    // SKU ID
+	GoodsID     int64      `json:"goodsId" db:"goods_id"`                // 商品ID
+	SkuID       int64      `json:"skuId" db:"sku_id"`                    // SKU ID
 	GoodsName   string     `json:"goodsName" db:"goods_name"`            // 商品名称快照
 	SkuName     string     `json:"skuName" db:"sku_name"`                // SKU名称快照
 	ImageURL    string     `json:"imageUrl" db:"image_url"`              // 商品或SKU图片快照

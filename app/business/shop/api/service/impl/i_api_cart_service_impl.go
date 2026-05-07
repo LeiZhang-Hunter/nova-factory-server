@@ -102,8 +102,8 @@ func (s *ShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataReq) (
 	cartInfo, err := s.iShopCartDao.Save(c, &api.CartSetData{
 		UserID:      userId,
 		Username:    userInfo.Username,
-		GoodsID:     info.GoodsID,
-		SkuID:       skuInfo.SkuID,
+		GoodsID:     info.ID,
+		SkuID:       skuInfo.ID,
 		GoodsName:   info.GoodsName,
 		SkuName:     skuInfo.SkuName,
 		ImageURL:    skuInfo.ImageURL,
@@ -120,8 +120,8 @@ func (s *ShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataReq) (
 
 // List 查询用户购物车列表。
 func (s *ShopCartServiceImpl) List(c *gin.Context) ([]*api.CartDto, error) {
-	//userID := baizeContext.GetUserId(c)
-	var userID int64 = 486436412988592128
+	userID := baizeContext.GetUserId(c)
+	//var userID int64 = 486436412988592128
 	//if userID == 0 {
 	//	return nil, errors.New("用户ID不能为空")
 	//}
