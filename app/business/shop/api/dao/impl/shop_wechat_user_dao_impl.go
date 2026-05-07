@@ -5,8 +5,7 @@ import (
 	"fmt"
 
 	"nova-factory-server/app/business/shop/api/dao"
-	wechatModels "nova-factory-server/app/business/shop/api/models"
-	userModels "nova-factory-server/app/business/shop/user/models"
+	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/snowflake"
 
@@ -29,8 +28,8 @@ func NewShopWechatUserDao(ms *gorm.DB) dao.IShopWechatUserDao {
 }
 
 // GetByOpenid 根据微信openid查询商城用户。
-func (s *ShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (*userModels.User, error) {
-	var item userModels.User
+func (s *ShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (*models.User, error) {
+	var item models.User
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("wechat_openid = ?", openid).
 		Where("state = ?", commonStatus.NORMAL).
@@ -44,10 +43,10 @@ func (s *ShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (*use
 }
 
 // CreateWechatUser 创建微信用户。
-func (s *ShopWechatUserDaoImpl) CreateWechatUser(c *gin.Context, req *wechatModels.WechatUserCreate) (*userModels.User, error) {
+func (s *ShopWechatUserDaoImpl) CreateWechatUser(c *gin.Context, req *models.WechatUserCreate) (*models.User, error) {
 	// 微信登录无 session，使用默认 dept_id=0
 	const defaultDeptID int64 = 0
-	model := &userModels.User{
+	model := &models.User{
 		ID:           snowflake.GenID(),
 		UserID:       fmt.Sprintf("%d", snowflake.GenID()),
 		Username:     req.Username,
@@ -67,6 +66,21 @@ func (s *ShopWechatUserDaoImpl) CreateWechatUser(c *gin.Context, req *wechatMode
 		return nil, err
 	}
 	return model, nil
+}
+
+// GetByID 根据用户ID查询商城用户（不带 dept_id 过滤，用于小程序）。
+func (s *ShopWechatUserDaoImpl) GetByID(c *gin.Context, id int64) (*models.User, error) {
+	var item models.User
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
 }
 
 func boolPtr(v bool) *bool {

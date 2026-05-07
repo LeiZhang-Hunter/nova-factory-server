@@ -3,7 +3,6 @@ package auth
 import (
 	"nova-factory-server/app/business/shop/api/models"
 	shopAuthService "nova-factory-server/app/business/shop/api/service"
-	"nova-factory-server/app/business/shop/user/service"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
@@ -11,12 +10,12 @@ import (
 
 // Auth 商城用户鉴权控制器
 type Auth struct {
-	authService       service.IShopAuthService
-	wechatAuthService shopAuthService.IShopWechatAuthService
+	authService       shopAuthService.IAppShopAuthService
+	wechatAuthService shopAuthService.IAppShopWechatAuthService
 }
 
 // NewAuth 创建商城用户鉴权控制器。
-func NewAuth(authService service.IShopAuthService, wechatAuthService shopAuthService.IShopWechatAuthService) *Auth {
+func NewAuth(authService shopAuthService.IAppShopAuthService, wechatAuthService shopAuthService.IAppShopWechatAuthService) *Auth {
 	return &Auth{
 		authService:       authService,
 		wechatAuthService: wechatAuthService,
