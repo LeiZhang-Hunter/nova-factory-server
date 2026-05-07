@@ -9,7 +9,6 @@ import (
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/constant/commonStatus"
-	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
 	"strings"
 	"time"
@@ -24,7 +23,7 @@ type IApiShopCartDaoImpl struct {
 func NewIApiShopCartDaoImpl(db *gorm.DB) dao.IApiShopCartDao {
 	return &IApiShopCartDaoImpl{
 		db:        db,
-		tableName: "shop_cart",
+		tableName: "shop_user_cart",
 	}
 }
 
@@ -135,7 +134,6 @@ func (s *IApiShopCartDaoImpl) getByIDTx(c *gin.Context, tx *gorm.DB, id int64) (
 	var item models.CartDto
 	if err := tx.WithContext(c).Table(s.tableName).
 		Where("id = ?", id).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

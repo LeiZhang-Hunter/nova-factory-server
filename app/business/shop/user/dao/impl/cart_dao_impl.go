@@ -187,9 +187,7 @@ func (s *ShopCartDaoImpl) GetByUserIDAndSkuID(c *gin.Context, userID int64, skuI
 
 // List 查询商城用户购物车列表。
 func (s *ShopCartDaoImpl) List(c *gin.Context, req *models.CartQuery) (*models.CartListData, error) {
-	db := s.db.WithContext(c).Table(s.tableName).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Where("state = ?", commonStatus.NORMAL)
+	db := s.db.WithContext(c).Table(s.tableName)
 	if req.UserID > 0 {
 		db = db.Where("user_id = ?", req.UserID)
 	}
@@ -211,6 +209,8 @@ func (s *ShopCartDaoImpl) List(c *gin.Context, req *models.CartQuery) (*models.C
 	if req.Size <= 0 {
 		req.Size = 20
 	}
+
+	db = db.Where("state = ?", commonStatus.NORMAL)
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {

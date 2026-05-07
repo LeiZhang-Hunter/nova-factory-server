@@ -6,7 +6,7 @@ import (
 
 // GoodsSku 商品规格信息
 type GoodsSku struct {
-	ID                 uint64   `json:"id" db:"id"`                    // 主键ID
+	ID                 uint64   `json:"id,string" db:"id"`             // 主键ID
 	GoodsID            string   `json:"goodsId" db:"goods_id"`         // 商品业务ID
 	SkuID              string   `json:"skuId" db:"sku_id"`             // 规格业务ID
 	SkuName            string   `json:"skuName" db:"sku_name"`         // 规格名称
