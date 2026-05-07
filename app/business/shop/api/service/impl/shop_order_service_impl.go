@@ -54,7 +54,7 @@ func (s *IShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *models
 	}
 
 	// 获取用户信息
-	shopUser, err := s.userDao.GetByID(c, userID)
+	shopUser, err := s.userDao.GetByUserID(c, userID)
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
@@ -122,7 +122,6 @@ func (s *IShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *models
 
 	// 填充订单号到商品明细
 	for _, item := range orderItems {
-		item.OrderID = createdOrder.ID
 		item.OrderNo = orderNo
 	}
 

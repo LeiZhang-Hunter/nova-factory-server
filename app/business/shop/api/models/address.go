@@ -53,7 +53,7 @@ type ShopUserAddressApp struct {
 // AddressSetReq 地址设置请求
 type AddressSetReq struct {
 	ID             int64  `json:"id,string"`
-	UserID         int64  `json:"-"`
+	UserID         int64  `json:"user_id,string"`
 	ReceiverName   string `json:"receiverName" binding:"required"`
 	ReceiverMobile string `json:"receiverMobile" binding:"required"`
 	ProvinceCode   string `json:"provinceCode" binding:"required"`

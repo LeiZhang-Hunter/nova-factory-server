@@ -11,4 +11,5 @@ type IShopWechatUserDao interface {
 	GetByOpenid(c *gin.Context, openid string) (*models.User, error)
 	CreateWechatUser(c *gin.Context, req *models.WechatUserCreate) (*models.User, error)
 	GetByID(c *gin.Context, id int64) (*models.User, error)
+	GetByUserID(c *gin.Context, id int64) (*models.User, error)
 }
