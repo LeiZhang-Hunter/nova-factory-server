@@ -200,7 +200,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 
 	s.recalculateOrderAmounts(cacheData)
 
-	shopUser, err := s.userDao.GetByID(c, userID)
+	shopUser, err := s.userDao.GetByUserID(c, userID)
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
@@ -253,11 +253,24 @@ func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *mod
 	if query == nil {
 		query = &models.OrderQuery{}
 	}
+
+	query.UserID = userID
+
 	shopUser, err := s.userDao.GetByID(c, userID)
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
-	return s.listERPOrders(c, shopUser, query)
+	list, err :=  s.listERPOrders(c, shopUser, query)
+	if err != nil {
+		return nil, err
+	}
+	for _, order := range list.Rows {
+		for _, item := range order.Items {
+			item.ImageURL = fileUtils.BuildAbsoluteURL(c, item.ImageURL)
+		}
+
+	}
+	return list, nil
 }
 
 // UpdateStatus 更新订单状态，验证状态流转合法性。

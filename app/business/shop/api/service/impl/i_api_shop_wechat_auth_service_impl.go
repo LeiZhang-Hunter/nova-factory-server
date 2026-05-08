@@ -75,7 +75,7 @@ func (s *IApiShopWechatAuthServiceImpl) WechatLogin(c *gin.Context, req *models.
 		return nil, errors.New("创建会话失败")
 	}
 	currentSession.Set(c, sessionStatus.SessionType, sessionStatus.SessionTypeShopUser)
-	currentSession.Set(c, sessionStatus.UserId, user.ID)
+	currentSession.Set(c, sessionStatus.UserId, user.UserID)
 	currentSession.Set(c, sessionStatus.UserName, s.getUserDisplayName(user))
 	currentSession.Set(c, sessionStatus.Avatar, user.Avatar)
 

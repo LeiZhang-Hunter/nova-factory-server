@@ -34,7 +34,7 @@ func (s *IApiShopAuthServiceImpl) GetInfo(c *gin.Context) (*apiModels.ShopGetInf
 		return nil, errors.New("用户未登录")
 	}
 
-	user, err := s.userDao.GetByID(c, userID)
+	user, err := s.userDao.GetByUserID(c, userID)
 	if err != nil {
 		return nil, err
 	}

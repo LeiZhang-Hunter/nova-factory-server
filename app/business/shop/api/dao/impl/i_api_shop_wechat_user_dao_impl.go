@@ -82,7 +82,19 @@ func (s *IApiShopWechatUserDaoImpl) GetByID(c *gin.Context, id int64) (*models.U
 	}
 	return &item, nil
 }
-
+func (s *IApiShopWechatUserDaoImpl) GetByUserID(c *gin.Context, userId int64) (*models.User, error) {
+	var item models.User
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("user_id = ?", userId).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
 func boolPtr(v bool) *bool {
 	return &v
 }
