@@ -4,7 +4,7 @@ import (
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
-	"nova-factory-server/app/business/shop/product/shopmodels"
+	shopmodel "nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +25,7 @@ func NewIApiShopGoodsServiceImpl(dao dao.IApiShopGoodsDao, shopGoodsService shop
 }
 
 // GetByID 获取商品详情
-func (s *IApiShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error) {
+func (s *IApiShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodel.Goods, error) {
 	return s.shopGoodsService.GetByID(c, id)
 }
 

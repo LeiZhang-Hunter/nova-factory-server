@@ -39,6 +39,21 @@ func (s *IApiShopGoodsDaoImpl) GetByID(c *gin.Context, id int64) (*models.Goods,
 	return &item, nil
 }
 
+// GetByGoodsID 根据商品业务ID查询。
+func (s *IApiShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID string) (*models.Goods, error) {
+	var item models.Goods
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("goods_id = ?", goodsID).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	s.normalizeMediaURLs(&item)
+	return &item, nil
+}
+
 // List 查询商品列表
 func (s *IApiShopGoodsDaoImpl) List(c *gin.Context, query *models.GoodsQuery) (*models.GoodsListData, error) {
 	db := s.db.WithContext(c).Table(s.tableName)

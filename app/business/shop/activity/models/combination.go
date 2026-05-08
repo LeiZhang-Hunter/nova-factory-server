@@ -2,6 +2,68 @@ package models
 
 import "nova-factory-server/app/baize"
 
+type CombinationMainInfo struct {
+	ID            int64   `json:"id,string" db:"id"`
+	ProductID     string  `json:"productId" db:"product_id"`
+	MerID         int64   `json:"merId,string" db:"mer_id"`
+	Attr          string  `json:"attr" db:"attr"`
+	Price         float64 `json:"price" db:"price"`
+	Sort          int32   `json:"sort" db:"sort"`
+	Sales         int64   `json:"sales" db:"sales"`
+	Stock         int64   `json:"stock" db:"stock"`
+	IsHost        int32   `json:"isHost" db:"is_host"`
+	IsShow        int32   `json:"isShow" db:"is_show"`
+	IsPostage     int32   `json:"isPostage" db:"is_postage"`
+	Postage       float64 `json:"postage" db:"postage"`
+	StartTime     int64   `json:"startTime" db:"start_time"`
+	StopTime      int64   `json:"stopTime" db:"stop_time"`
+	EffectiveTime int64   `json:"effectiveTime" db:"effective_time"`
+	Browse        int64   `json:"browse" db:"browse"`
+	UnitName      string  `json:"unitName" db:"unit_name"`
+	Weight        float64 `json:"weight" db:"weight"`
+	Volume        float64 `json:"volume" db:"volume"`
+	Num           int64   `json:"num" db:"num"`
+	OnceNum       int64   `json:"onceNum" db:"once_num"`
+	Quota         int64   `json:"quota" db:"quota"`
+	QuotaShow     int64   `json:"quotaShow" db:"quota_show"`
+	Virtual       int64   `json:"virtual" db:"virtual"`
+	HomeModuleIDs string  `json:"homeModuleIds" db:"home_module_ids"`
+}
+
+// FormatCombinationMainInfo 提取拼团商品主信息。
+func FormatCombinationMainInfo(sec *Combination) *CombinationMainInfo {
+	if sec == nil {
+		return nil
+	}
+	return &CombinationMainInfo{
+		ID:            sec.ID,
+		ProductID:     sec.ProductID,
+		MerID:         sec.MerID,
+		Attr:          sec.Attr,
+		Price:         sec.Price,
+		Sort:          sec.Sort,
+		Sales:         sec.Sales,
+		Stock:         sec.Stock,
+		IsHost:        sec.IsHost,
+		IsShow:        sec.IsShow,
+		IsPostage:     sec.IsPostage,
+		Postage:       sec.Postage,
+		StartTime:     sec.StartTime,
+		StopTime:      sec.StopTime,
+		EffectiveTime: sec.EffectiveTime,
+		Browse:        sec.Browse,
+		UnitName:      sec.UnitName,
+		Weight:        sec.Weight,
+		Volume:        sec.Volume,
+		Num:           sec.Num,
+		OnceNum:       sec.OnceNum,
+		Quota:         sec.Quota,
+		QuotaShow:     sec.QuotaShow,
+		Virtual:       sec.Virtual,
+		HomeModuleIDs: sec.HomeModuleIDs,
+	}
+}
+
 type Combination struct {
 	ID            int64   `json:"id,string" db:"id"`
 	ProductID     string  `json:"productId" db:"product_id"`
