@@ -27,7 +27,7 @@ func (d *IApiShopOrderItemDaoImpl) BatchCreate(c *gin.Context, items []*models.O
 	if len(items) == 0 {
 		return nil
 	}
-	return d.db.WithContext(c).Table(d.tableName).CreateInBatches(items, 100).Error
+	return getCurrentDB(c, d.db).WithContext(c).Table(d.tableName).CreateInBatches(items, 100).Error
 }
 
 // GetByOrderID 根据订单ID获取商品明细列表。

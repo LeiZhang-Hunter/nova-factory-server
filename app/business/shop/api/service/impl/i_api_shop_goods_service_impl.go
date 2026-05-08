@@ -6,6 +6,8 @@ import (
 	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
+	shopmodel "nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/business/shop/product/shopservice"
 
 	"github.com/gin-gonic/gin"
 )

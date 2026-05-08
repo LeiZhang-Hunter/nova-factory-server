@@ -1,129 +1,263 @@
 package impl
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	order2 "nova-factory-server/app/utils/order"
+	activityDao "nova-factory-server/app/business/shop/activity/dao"
+	models2 "nova-factory-server/app/business/shop/activity/models"
+	"nova-factory-server/app/business/shop/product/shopmodels"
+	"strings"
+	"time"
 
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
+	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/utils/fileUtils"
+	order2 "nova-factory-server/app/utils/order"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
+const (
+	orderCachePrefix      = "shop:app:order:cache:"
+	orderCreateLockPrefix = "shop:app:order:create:"
+	orderCacheTTL         = 10 * time.Minute
+	orderCreateLockTTL    = 15 * time.Second
+	defaultDeliveryType   = "express"
+)
+
 // IApiShopOrderServiceImpl 提供订单相关的业务实现。
 type IApiShopOrderServiceImpl struct {
+	cache        cache.Cache
+	db           *gorm.DB
 	orderDao     dao.IApiShopOrderDao
 	orderItemDao dao.IApiShopOrderItemDao
 	userDao      dao.IApiShopWechatUserDao
+	addressDao   dao.IApiShopAddressDao
+	seckillDao   activityDao.IShopSeckillDao
+	combDao      activityDao.IShopCombinationDao
+	goodsDao     dao.IApiShopGoodsDao
+	skuDao       dao.IApiShopSkuDao
 }
 
 // NewIApiShopOrderServiceImpl 创建订单服务实现。
-func NewIApiShopOrderServiceImpl(orderDao dao.IApiShopOrderDao, orderItemDao dao.IApiShopOrderItemDao, userDao dao.IApiShopWechatUserDao) service.IApiShopOrderService {
+func NewIApiShopOrderServiceImpl(
+	cache cache.Cache,
+	db *gorm.DB,
+	orderDao dao.IApiShopOrderDao,
+	orderItemDao dao.IApiShopOrderItemDao,
+	userDao dao.IApiShopWechatUserDao,
+	addressDao dao.IApiShopAddressDao,
+	seckillDao activityDao.IShopSeckillDao,
+	combDao activityDao.IShopCombinationDao,
+	goodsDao dao.IApiShopGoodsDao,
+	skuDao dao.IApiShopSkuDao,
+) service.IApiShopOrderService {
 	return &IApiShopOrderServiceImpl{
+		cache:        cache,
+		db:           db,
 		orderDao:     orderDao,
 		orderItemDao: orderItemDao,
 		userDao:      userDao,
+		addressDao:   addressDao,
+		seckillDao:   seckillDao,
+		combDao:      combDao,
+		goodsDao:     goodsDao,
+		skuDao:       skuDao,
 	}
 }
 
-// Create 创建订单，包含订单商品明细，支持事务。
-func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *models.OrderSetReq) (*models.Order, error) {
-	if req == nil || len(req.Items) == 0 {
+// Cache 固化本次下单商品快照。
+func (s *IApiShopOrderServiceImpl) Cache(c *gin.Context, userID int64, req *models.OrderCacheReq) (*models.OrderCacheResp, error) {
+	if userID == 0 {
+		return nil, errors.New("用户未登录")
+	}
+	if req == nil {
+		return nil, errors.New("参数不能为空")
+	}
+	item, err := s.buildCacheItems(c, req)
+	if err != nil {
+		return nil, err
+	}
+	if item == nil {
 		return nil, errors.New("订单商品不能为空")
 	}
-	if req.ReceiverName == "" {
-		return nil, errors.New("收货人姓名不能为空")
-	}
-	if req.ReceiverPhone == "" {
-		return nil, errors.New("收货人手机号不能为空")
-	}
-	if req.ReceiverDetailAddress == "" {
-		return nil, errors.New("详细地址不能为空")
+
+	if _, err := s.userDao.GetByID(c, userID); err != nil {
+		return nil, errors.New("读取用户信息失败")
 	}
 
-	// 获取用户信息
+	orderKey := order2.GenerateOrderNo()
+	cacheData := &models.OrderCacheData{
+		OrderKey:       orderKey,
+		UserID:         userID,
+		Item:           item,
+		DeliveryType:   defaultDeliveryType,
+		GoodsAmount:    sumCacheItems([]*models.OrderCacheItem{item}),
+		FreightAmount:  0,
+		DiscountAmount: 0,
+		PayAmount:      sumCacheItems([]*models.OrderCacheItem{item}),
+	}
+
+	if err := s.saveOrderCache(c, cacheData); err != nil {
+		return nil, err
+	}
+
+	return &models.OrderCacheResp{
+		OrderKey:      orderKey,
+		Item:          item,
+		ExpireSeconds: int64(orderCacheTTL / time.Second),
+	}, nil
+}
+
+// Confirm 试算当前预订单并返回确认页数据。
+func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *models.OrderConfirmReq) (*models.OrderConfirmResp, error) {
+	if userID == 0 {
+		return nil, errors.New("用户未登录")
+	}
+	if req == nil || strings.TrimSpace(req.OrderKey) == "" {
+		return nil, errors.New("orderKey不能为空")
+	}
+
+	cacheData, err := s.getOrderCache(c, req.OrderKey)
+	if err != nil {
+		return nil, err
+	}
+	if cacheData.UserID != userID {
+		return nil, errors.New("无权操作该预订单")
+	}
+
+	address, err := s.resolveConfirmAddress(c, userID, req.AddressID)
+	if err != nil {
+		return nil, err
+	}
+	if address != nil {
+		cacheData.AddressID = address.ID
+	}
+	if strings.TrimSpace(req.DeliveryType) != "" {
+		cacheData.DeliveryType = strings.TrimSpace(req.DeliveryType)
+	}
+
+	s.recalculateOrderAmounts(cacheData)
+	if err := s.saveOrderCache(c, cacheData); err != nil {
+		return nil, err
+	}
+
+	return &models.OrderConfirmResp{
+		OrderKey:       cacheData.OrderKey,
+		Address:        address,
+		Item:           cacheData.Item,
+		GoodsAmount:    cacheData.GoodsAmount,
+		FreightAmount:  cacheData.FreightAmount,
+		DiscountAmount: cacheData.DiscountAmount,
+		PayAmount:      cacheData.PayAmount,
+		DeliveryType:   cacheData.DeliveryType,
+		ExpireSeconds:  int64(orderCacheTTL / time.Second),
+	}, nil
+}
+
+// Create 正式创建订单，读取预订单缓存并落库。
+func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *models.OrderCreateReq) (*models.Order, error) {
+	if userID == 0 {
+		return nil, errors.New("用户未登录")
+	}
+	if req == nil || strings.TrimSpace(req.OrderKey) == "" {
+		return nil, errors.New("orderKey不能为空")
+	}
+
+	lockKey := orderCreateLockPrefix + req.OrderKey
+	if !s.cache.SetNX(context.Background(), lockKey, "1", orderCreateLockTTL) {
+		return nil, errors.New("订单正在处理中，请勿重复提交")
+	}
+	defer s.cache.Del(context.Background(), lockKey)
+
+	cacheData, err := s.getOrderCache(c, req.OrderKey)
+	if err != nil {
+		return nil, err
+	}
+	if cacheData.UserID != userID {
+		return nil, errors.New("无权操作该预订单")
+	}
+	if cacheData.Item == nil {
+		return nil, errors.New("预订单商品不能为空")
+	}
+
+	address, err := s.resolveConfirmAddress(c, userID, cacheData.AddressID)
+	if err != nil {
+		return nil, err
+	}
+	if address == nil {
+		return nil, errors.New("请先选择收货地址")
+	}
+
+	s.recalculateOrderAmounts(cacheData)
+
 	shopUser, err := s.userDao.GetByID(c, userID)
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
 
-	// 计算订单总金额
-	var totalAmount float64
-	orderItems := make([]*models.OrderItem, 0, len(req.Items))
-	for _, item := range req.Items {
-		if item.Quantity <= 0 {
-			return nil, errors.New("商品数量必须大于0")
-		}
-		itemTotal := item.Price * float64(item.Quantity)
-		totalAmount += itemTotal
-
-		orderItems = append(orderItems, &models.OrderItem{
-			OrderNo:     "", // 稍后填充
-			GoodsID:     item.GoodsID,
-			SkuID:       item.SkuID,
-			GoodsName:   item.GoodsName,
-			SkuName:     item.SkuName,
-			ImageURL:    item.ImageURL,
-			Price:       item.Price,
-			Quantity:    item.Quantity,
-			TotalAmount: itemTotal,
-		})
-	}
-
-	// 生成订单号
 	orderNo := order2.GenerateOrderNo()
-
-	// 创建订单
 	order := &models.Order{
 		OrderNo:               orderNo,
 		UserID:                shopUser.ID,
-		TotalAmount:           totalAmount,
-		PayAmount:             totalAmount,
+		TotalAmount:           cacheData.GoodsAmount,
+		PayAmount:             cacheData.PayAmount,
+		FreightAmount:         cacheData.FreightAmount,
+		DiscountAmount:        cacheData.DiscountAmount,
 		Status:                models.OrderStatusPending,
-		ReceiverName:          req.ReceiverName,
-		ReceiverPhone:         req.ReceiverPhone,
-		ReceiverProvince:      req.ReceiverProvince,
-		ReceiverCity:          req.ReceiverCity,
-		ReceiverDistrict:      req.ReceiverDistrict,
-		ReceiverDetailAddress: req.ReceiverDetailAddress,
+		ReceiverName:          address.ReceiverName,
+		ReceiverPhone:         address.ReceiverMobile,
+		ReceiverProvince:      address.ProvinceName,
+		ReceiverCity:          address.CityName,
+		ReceiverDistrict:      address.DistrictName,
+		ReceiverDetailAddress: address.DetailAddress,
 		Remark:                req.Remark,
 		Version:               0,
 	}
 
-	// 开启事务
-	db := c.Value("db").(*gorm.DB)
-	tx := db.WithContext(c).Begin()
-	c.Set("db", tx)
-
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
+	var createdOrder *models.Order
+	if s.db == nil {
+		return nil, errors.New("数据库连接不存在")
+	}
+	err = s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		c.Set("db", tx)
+		if err := s.skuDao.DeductStock(c, cacheData.Item.SkuID, cacheData.Item.Quantity); err != nil {
+			return fmt.Errorf("扣减库存失败: %v", err)
 		}
-	}()
 
-	// 保存订单
-	createdOrder, err := s.orderDao.Create(c, order)
+		createdOrder, err = s.orderDao.Create(c, order)
+		if err != nil {
+			return fmt.Errorf("创建订单失败: %v", err)
+		}
+
+		orderItem := &models.OrderItem{
+			OrderID:     createdOrder.ID,
+			OrderNo:     orderNo,
+			GoodsID:     fmt.Sprintf("%d", cacheData.Item.GoodsID),
+			SkuID:       fmt.Sprintf("%d", cacheData.Item.SkuID),
+			GoodsName:   cacheData.Item.GoodsName,
+			SkuName:     cacheData.Item.SkuName,
+			ImageURL:    cacheData.Item.ImageURL,
+			Price:       cacheData.Item.Price,
+			Quantity:    int32(cacheData.Item.Quantity),
+			TotalAmount: cacheData.Item.TotalAmount,
+		}
+
+		if err := s.orderItemDao.BatchCreate(c, []*models.OrderItem{orderItem}); err != nil {
+			return fmt.Errorf("保存订单商品失败: %v", err)
+		}
+		return nil
+	})
 	if err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("创建订单失败: %v", err)
+		return nil, err
 	}
 
-	// 填充订单号到商品明细
-	for _, item := range orderItems {
-		item.OrderID = createdOrder.ID
-		item.OrderNo = orderNo
-	}
-
-	// 保存订单商品明细
-	if err := s.orderItemDao.BatchCreate(c, orderItems); err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("保存订单商品失败: %v", err)
-	}
-
-	tx.Commit()
+	s.cache.Del(context.Background(), s.buildOrderCacheKey(req.OrderKey))
 	return createdOrder, nil
 }
 
@@ -277,4 +411,359 @@ func (s *IApiShopOrderServiceImpl) isValidStatusTransition(from, to int32) bool 
 		}
 	}
 	return false
+}
+
+func (s *IApiShopOrderServiceImpl) buildOrderCacheKey(orderKey string) string {
+	return orderCachePrefix + orderKey
+}
+
+func (s *IApiShopOrderServiceImpl) saveOrderCache(c *gin.Context, data *models.OrderCacheData) error {
+	body, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	s.cache.Set(context.Background(), s.buildOrderCacheKey(data.OrderKey), string(body), orderCacheTTL)
+	return nil
+}
+
+func (s *IApiShopOrderServiceImpl) getOrderCache(c *gin.Context, orderKey string) (*models.OrderCacheData, error) {
+	val, err := s.cache.Get(context.Background(), s.buildOrderCacheKey(orderKey))
+	if err != nil {
+		return nil, errors.New("预订单已失效，请重新确认商品")
+	}
+	var data models.OrderCacheData
+	if err := json.Unmarshal([]byte(val), &data); err != nil {
+		return nil, errors.New("预订单数据异常")
+	}
+	return &data, nil
+}
+
+func (s *IApiShopOrderServiceImpl) buildCacheItems(c *gin.Context, req *models.OrderCacheReq) (*models.OrderCacheItem, error) {
+	if req == nil {
+		return nil, errors.New("参数不能为空")
+	}
+	if req.Quantity <= 0 {
+		return nil, errors.New("商品数量必须大于0")
+	}
+
+	// 秒杀商品下单时通过活动商品ID读取活动价和所属商品信息。
+	if req.SecKillId > 0 {
+		item, err := s.buildSeckillCacheItem(c, req.SecKillId, req.SkuID, req.Quantity)
+		if err != nil {
+			return nil, err
+		}
+		return item, nil
+	}
+
+	if req.CombinationId > 0 {
+		item, err := s.buildCombinationCacheItem(c, req.CombinationId, req.SkuID, req.Quantity)
+		if err != nil {
+			return nil, err
+		}
+		return item, nil
+	}
+
+	if req.SkuID > 0 {
+		item, err := s.buildDirectCacheItem(c, req.SkuID, req.Quantity)
+		if err != nil {
+			return nil, err
+		}
+		return item, nil
+	}
+
+	return nil, errors.New("请选择需要下单的商品")
+}
+
+// buildSeckillCacheItem 构建秒杀商品预下单快照。
+func (s *IApiShopOrderServiceImpl) buildSeckillCacheItem(c *gin.Context, secKillID int64, skuID int64, quantity int64) (*models.OrderCacheItem, error) {
+	if skuID <= 0 {
+		return nil, errors.New("商品规格不能为空")
+	}
+	seckill, err := s.seckillDao.GetByID(c, secKillID)
+	if err != nil {
+		return nil, errors.New("读取秒杀商品失败")
+	}
+	if seckill == nil {
+		return nil, errors.New("秒杀商品不存在")
+	}
+	if seckill.IsShow != 1 || seckill.Status != 1 {
+		return nil, errors.New("秒杀商品已下架")
+	}
+	if quantity > seckill.Stock {
+		return nil, errors.New("秒杀库存不足")
+	}
+	if seckill.OnceNum > 0 && quantity > int64(seckill.OnceNum) {
+		return nil, errors.New("超过秒杀单次限购数量")
+	}
+
+	goods, sku, err := s.loadGoodsAndSkuByGoodsID(c, seckill.ProductID, skuID)
+	if err != nil {
+		return nil, err
+	}
+	goodsName := strings.TrimSpace(seckill.Title)
+	if goodsName == "" {
+		goodsName = goods.GoodsName
+	}
+	imageURL := strings.TrimSpace(seckill.Image)
+	item := s.assembleCacheItem(c, goods, sku, quantity, seckill.Price, goodsName, imageURL)
+	item.SecKillId = secKillID
+	item.SeckillInfo = models2.FromatSeckillMainInfo(seckill)
+	return item, nil
+}
+
+// buildCombinationCacheItem 构建拼团商品预下单快照。
+func (s *IApiShopOrderServiceImpl) buildCombinationCacheItem(c *gin.Context, combinationID int64, skuID int64, quantity int64) (*models.OrderCacheItem, error) {
+	if skuID <= 0 {
+		return nil, errors.New("商品规格不能为空")
+	}
+	combination, err := s.combDao.GetByID(c, combinationID)
+	if err != nil {
+		return nil, errors.New("读取拼团商品失败")
+	}
+	if combination == nil {
+		return nil, errors.New("拼团商品不存在")
+	}
+	if combination.IsShow != 1 {
+		return nil, errors.New("拼团商品已下架")
+	}
+	if quantity > combination.Stock {
+		return nil, errors.New("拼团库存不足")
+	}
+	if combination.OnceNum > 0 && quantity > combination.OnceNum {
+		return nil, errors.New("超过拼团单次限购数量")
+	}
+
+	goods, sku, err := s.loadGoodsAndSkuByGoodsCode(c, strings.TrimSpace(combination.ProductID), skuID)
+	if err != nil {
+		return nil, err
+	}
+	goodsName := strings.TrimSpace(combination.Title)
+	if goodsName == "" {
+		goodsName = goods.GoodsName
+	}
+	imageURL := strings.TrimSpace(combination.Image)
+	item := s.assembleCacheItem(c, goods, sku, quantity, combination.Price, goodsName, imageURL)
+	item.CombinationId = combinationID
+	item.CombinationInfo = models2.FormatCombinationMainInfo(combination)
+	return item, nil
+}
+
+// buildDirectCacheItem 构建普通立即购买商品预下单快照。
+func (s *IApiShopOrderServiceImpl) buildDirectCacheItem(c *gin.Context, skuID int64, quantity int64) (*models.OrderCacheItem, error) {
+	if skuID <= 0 {
+		return nil, errors.New("商品规格不能为空")
+	}
+	sku, err := s.skuDao.GetByID(c, skuID)
+	if err != nil {
+		return nil, errors.New("读取商品规格失败")
+	}
+	if sku == nil {
+		return nil, errors.New("商品规格不存在")
+	}
+	goods, err := s.goodsDao.GetByGoodsID(c, sku.GoodsID)
+	if err != nil {
+		return nil, errors.New("读取商品信息失败")
+	}
+	if goods == nil {
+		return nil, errors.New("商品不存在")
+	}
+	if quantity > sku.Quantity {
+		return nil, errors.New("库存不足")
+	}
+	return s.assembleCacheItem(c, goods, sku, quantity, sku.RetailPrice, goods.GoodsName, ""), nil
+}
+
+// loadGoodsAndSkuByGoodsID 按商品主键和规格ID加载商品快照所需数据。
+func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsID(c *gin.Context, goodsID int64, skuID int64) (*models.Goods, *shopmodels.GoodsSku, error) {
+	goods, err := s.goodsDao.GetByID(c, goodsID)
+	if err != nil {
+		return nil, nil, errors.New("读取商品信息失败")
+	}
+	if goods == nil {
+		return nil, nil, errors.New("商品不存在")
+	}
+	sku, err := s.skuDao.GetByID(c, skuID)
+	if err != nil {
+		return nil, nil, errors.New("读取商品规格失败")
+	}
+	if sku == nil {
+		return nil, nil, errors.New("商品规格不存在")
+	}
+	if sku.GoodsID != goods.GoodsID {
+		return nil, nil, errors.New("商品规格与活动商品不匹配")
+	}
+	if goods.IsOnSale != 1 {
+		return nil, nil, errors.New("商品已下架")
+	}
+	if goods.Quantity <= 0 || sku.Quantity <= 0 {
+		return nil, nil, errors.New("库存不足")
+	}
+	return goods, sku, nil
+}
+
+// loadGoodsAndSkuByGoodsCode 按商品业务ID和规格ID加载商品快照所需数据。
+func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsCode(c *gin.Context, goodsCode string, skuID int64) (*models.Goods, *shopmodels.GoodsSku, error) {
+	if goodsCode == "" {
+		return nil, nil, errors.New("活动商品数据异常")
+	}
+	goods, err := s.goodsDao.GetByGoodsID(c, goodsCode)
+	if err != nil {
+		return nil, nil, errors.New("读取商品信息失败")
+	}
+	if goods == nil {
+		return nil, nil, errors.New("商品不存在")
+	}
+	sku, err := s.skuDao.GetByID(c, skuID)
+	if err != nil {
+		return nil, nil, errors.New("读取商品规格失败")
+	}
+	if sku == nil {
+		return nil, nil, errors.New("商品规格不存在")
+	}
+	if sku.GoodsID != goods.GoodsID {
+		return nil, nil, errors.New("商品规格与活动商品不匹配")
+	}
+	if goods.IsOnSale != 1 {
+		return nil, nil, errors.New("商品已下架")
+	}
+	if goods.Quantity <= 0 || sku.Quantity <= 0 {
+		return nil, nil, errors.New("库存不足")
+	}
+	return goods, sku, nil
+}
+
+// assembleCacheItem 统一组装预下单缓存项，优先保留活动价和活动展示信息。
+func (s *IApiShopOrderServiceImpl) assembleCacheItem(
+	c *gin.Context,
+	goods *models.Goods,
+	sku *shopmodels.GoodsSku,
+	quantity int64,
+	price float64,
+	goodsName string,
+	imageURL string,
+) *models.OrderCacheItem {
+	finalGoodsName := strings.TrimSpace(goodsName)
+	if finalGoodsName == "" {
+		finalGoodsName = goods.GoodsName
+	}
+	finalImageURL := strings.TrimSpace(imageURL)
+
+	if finalImageURL == "" {
+		finalImageURL = strings.TrimSpace(goods.ImageURL)
+	}
+
+	if finalImageURL == "" {
+		finalImageURL = strings.TrimSpace(sku.ImageURL)
+	}
+	return &models.OrderCacheItem{
+		GoodsID:     goods.ID,
+		SkuID:       int64(sku.ID),
+		GoodsName:   finalGoodsName,
+		SkuName:     sku.SkuName,
+		ImageURL:    fileUtils.BuildAbsoluteURL(c, finalImageURL),
+		Price:       price,
+		Quantity:    quantity,
+		TotalAmount: price * float64(quantity),
+	}
+}
+
+func (s *IApiShopOrderServiceImpl) buildCacheItemsFromRequest(c *gin.Context, reqs []*models.OrderCacheItemReq) ([]*models.OrderCacheItem, error) {
+	if len(reqs) == 0 {
+		return nil, errors.New("订单商品不能为空")
+	}
+	items := make([]*models.OrderCacheItem, 0, len(reqs))
+	for _, req := range reqs {
+		if req == nil {
+			continue
+		}
+		if req.Quantity <= 0 {
+			return nil, errors.New("商品数量必须大于0")
+		}
+		item, err := s.buildSingleCacheItem(c, req.GoodsID, req.SkuID, req.Quantity)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, nil
+}
+
+func (s *IApiShopOrderServiceImpl) buildSingleCacheItem(c *gin.Context, goodsID int64, skuID int64, quantity int64) (*models.OrderCacheItem, error) {
+	goods, err := s.goodsDao.GetByID(c, goodsID)
+	if err != nil {
+		return nil, errors.New("读取商品信息失败")
+	}
+	if goods == nil {
+		return nil, errors.New("商品不存在")
+	}
+	sku, err := s.skuDao.GetByID(c, skuID)
+	if err != nil {
+		return nil, errors.New("读取商品规格失败")
+	}
+	if sku == nil {
+		return nil, errors.New("商品规格不存在")
+	}
+	if quantity > sku.Quantity {
+		return nil, errors.New("库存不足")
+	}
+	item := &models.OrderCacheItem{
+		GoodsID:     goodsID,
+		SkuID:       skuID,
+		GoodsName:   goods.GoodsName,
+		SkuName:     sku.SkuName,
+		ImageURL:    fileUtils.BuildAbsoluteURL(c, sku.ImageURL),
+		Price:       sku.RetailPrice,
+		Quantity:    quantity,
+		TotalAmount: sku.RetailPrice * float64(quantity),
+	}
+	return item, nil
+}
+
+func (s *IApiShopOrderServiceImpl) resolveConfirmAddress(c *gin.Context, userID int64, addressID int64) (*models.ShopUserAddressApp, error) {
+	if addressID > 0 {
+		address, err := s.addressDao.GetByID(c, addressID)
+		if err != nil {
+			return nil, err
+		}
+		if address == nil || address.UserID != userID {
+			return nil, errors.New("收货地址不存在")
+		}
+		return address, nil
+	}
+	list, err := s.addressDao.List(c, userID)
+	if err != nil {
+		return nil, err
+	}
+	if list == nil || len(list.Rows) == 0 {
+		return nil, nil
+	}
+	for _, address := range list.Rows {
+		if address != nil && address.IsDefault == 1 {
+			return address, nil
+		}
+	}
+	return list.Rows[0], nil
+}
+
+func (s *IApiShopOrderServiceImpl) recalculateOrderAmounts(data *models.OrderCacheData) {
+	data.GoodsAmount = sumCacheItems([]*models.OrderCacheItem{data.Item})
+	if data.DeliveryType == "" {
+		data.DeliveryType = defaultDeliveryType
+	}
+	data.FreightAmount = 0
+	data.DiscountAmount = 0
+	data.PayAmount = data.GoodsAmount + data.FreightAmount - data.DiscountAmount
+	if data.PayAmount < 0 {
+		data.PayAmount = 0
+	}
+}
+
+func sumCacheItems(items []*models.OrderCacheItem) float64 {
+	var total float64
+	for _, item := range items {
+		if item != nil {
+			total += item.TotalAmount
+		}
+	}
+	return total
 }
