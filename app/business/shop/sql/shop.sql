@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `shop_goods_sku` (
 
 CREATE TABLE IF NOT EXISTS `shop_user` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `username` VARCHAR(64) NOT NULL COMMENT '用户名',
+  `username` VARCHAR(64) DEFAULT NULL COMMENT '用户名',
   `nickname` VARCHAR(128) DEFAULT NULL COMMENT '用户昵称',
   `mobile` VARCHAR(32) DEFAULT NULL COMMENT '手机号',
   `email` VARCHAR(128) DEFAULT NULL COMMENT '邮箱',
@@ -106,7 +106,6 @@ CREATE TABLE IF NOT EXISTS `shop_user` (
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_username` (`username`),
   KEY `idx_mobile` (`mobile`),
   KEY `idx_user_type` (`user_type`),
   KEY `idx_status` (`status`),
@@ -170,6 +169,21 @@ CREATE TABLE IF NOT EXISTS `shop_user_cart` (
     KEY `idx_selected` (`selected`),
     KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商城用户购物车表';
+
+
+
+CREATE TABLE IF NOT EXISTS `shop_user_goods_favorite` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `user_id` BIGINT(20) NOT NULL COMMENT '用户ID，对应shop_user.id',
+    `goods_id` VARCHAR(64) NOT NULL COMMENT '商品业务ID，对应shop_goods.goods_id',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` datetime DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_goods` (`user_id`, `goods_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_goods_id` (`goods_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商城用户商品收藏表';
 
 
 
