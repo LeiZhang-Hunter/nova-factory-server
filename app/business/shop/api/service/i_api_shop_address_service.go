@@ -10,6 +10,7 @@ import (
 type IApiShopAddressService interface {
 	Set(c *gin.Context, req *models.AddressSetReq) (*models.ShopUserAddressApp, error)
 	GetByID(c *gin.Context, id int64) (*models.ShopUserAddressApp, error)
+	Default(c *gin.Context, userId int64) (*models.ShopUserAddressApp, error)
 	List(c *gin.Context, userId int64) (*models.AddressListData, error)
 	Remove(c *gin.Context, ids []int64) error
 }

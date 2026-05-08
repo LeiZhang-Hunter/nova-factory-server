@@ -68,6 +68,14 @@ func (s *IApiShopAddressServiceImpl) GetByID(c *gin.Context, id int64) (*models.
 	return s.dao.GetByID(c, id)
 }
 
+// Default 查询用户默认地址
+func (s *IApiShopAddressServiceImpl) Default(c *gin.Context, userId int64) (*models.ShopUserAddressApp, error) {
+	if userId == 0 {
+		return nil, errors.New("用户ID不能为空")
+	}
+	return s.dao.Default(c, userId)
+}
+
 // List 查询用户地址列表
 func (s *IApiShopAddressServiceImpl) List(c *gin.Context, userId int64) (*models.AddressListData, error) {
 	if userId == 0 {

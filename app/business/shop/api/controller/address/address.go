@@ -26,6 +26,7 @@ func NewAddress(service service.IApiShopAddressService) *Address {
 func (s *Address) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop/address")
 	group.GET("/list", s.List)
+	group.GET("/default", s.Default)
 	group.GET("/info/:id", s.GetByID)
 	group.POST("/set", s.Set)
 	group.DELETE("/remove/:ids", s.Remove)
@@ -175,4 +176,23 @@ func regionLevelName(level int) string {
 	default:
 		return ""
 	}
+}
+
+// Default 获取默认收货地址
+// @Summary 获取默认收货地址
+// @Description 获取当前用户的默认收货地址
+// @Tags 商城/用户地址
+// @Param userId query int true "用户ID"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /api/v1/app/shop/address/default [get]
+func (s *Address) Default(c *gin.Context) {
+	userId := baizeContext.GetUserId(c)
+	data, err := s.service.Default(c, userId)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
 }
