@@ -39,7 +39,7 @@ func (s *IApiShopGoodsDaoImpl) GetByID(c *gin.Context, id int64) (*models.Goods,
 	return &item, nil
 }
 
-// GetByGoodsID 根据商品业务ID查询。
+// GetByGoodsID 根据商品业务ID查询
 func (s *IApiShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID string) (*models.Goods, error) {
 	var item models.Goods
 	if err := s.db.WithContext(c).Table(s.tableName).
@@ -50,7 +50,7 @@ func (s *IApiShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID string) (*mo
 		}
 		return nil, err
 	}
-	s.normalizeMediaURLs(&item)
+	item.ImageURL = fileUtils.BuildAbsoluteURL(c, item.ImageURL)
 	return &item, nil
 }
 
