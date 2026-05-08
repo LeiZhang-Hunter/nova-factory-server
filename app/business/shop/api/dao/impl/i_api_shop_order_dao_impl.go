@@ -90,10 +90,32 @@ func (d *IApiShopOrderDaoImpl) List(c *gin.Context, query *models.OrderQuery) (*
 		return nil, err
 	}
 
+	// 批量获取订单商品明细
+	orderIDs := make([]int64, len(orders))
+	for i, order := range orders {
+		orderIDs[i] = order.ID
+	}
+	itemsMap, err := d.getItemsByOrderIDs(c, orderIDs)
+	if err != nil {
+		return nil, err
+	}
+
 	return &models.OrderListData{
-		Rows:  d.toOrderVOList(orders),
+		Rows:  d.toOrderVOListWithItems(orders, itemsMap),
 		Total: total,
 	}, nil
+}
+
+// toOrderVOListWithItems 将订单列表转换为带商品明细的视图对象列表。
+func (d *IApiShopOrderDaoImpl) toOrderVOListWithItems(orders []*models.Order, itemsMap map[int64][]*models.OrderItem) []*models.OrderVO {
+	result := make([]*models.OrderVO, len(orders))
+	for i, order := range orders {
+		result[i] = &models.OrderVO{
+			Order: *order,
+			Items: itemsMap[order.ID],
+		}
+	}
+	return result
 }
 
 // toOrderVOList 将订单列表转换为视图对象列表。
@@ -103,6 +125,25 @@ func (d *IApiShopOrderDaoImpl) toOrderVOList(orders []*models.Order) []*models.O
 		result[i] = &models.OrderVO{Order: *order}
 	}
 	return result
+}
+
+// getItemsByOrderIDs 批量获取订单商品明细，按订单ID分组。
+func (d *IApiShopOrderDaoImpl) getItemsByOrderIDs(c *gin.Context, orderIDs []int64) (map[int64][]*models.OrderItem, error) {
+	if len(orderIDs) == 0 {
+		return make(map[int64][]*models.OrderItem), nil
+	}
+	var items []*models.OrderItem
+	err := d.db.WithContext(c).Table("shop_order_item").
+		Where("order_id IN ? AND state = 0", orderIDs).
+		Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[int64][]*models.OrderItem)
+	for _, item := range items {
+		result[item.OrderID] = append(result[item.OrderID], item)
+	}
+	return result, nil
 }
 
 // UpdateStatus 更新订单状态，使用乐观锁版本号控制并发。

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
-	"strings"
+	"nova-factory-server/app/utils/fileUtils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -35,7 +35,7 @@ func (s *IApiShopGoodsDaoImpl) GetByID(c *gin.Context, id int64) (*models.Goods,
 		}
 		return nil, err
 	}
-	s.normalizeMediaURLs(&item)
+	item.ImageURL = fileUtils.BuildAbsoluteURL(c, item.ImageURL)
 	return &item, nil
 }
 
@@ -90,7 +90,7 @@ func (s *IApiShopGoodsDaoImpl) List(c *gin.Context, query *models.GoodsQuery) (*
 
 	for _, row := range rows {
 		if row != nil {
-			s.normalizeMediaURLs(row)
+			row.ImageURL = fileUtils.BuildAbsoluteURL(c, row.ImageURL)
 		}
 	}
 
@@ -98,29 +98,4 @@ func (s *IApiShopGoodsDaoImpl) List(c *gin.Context, query *models.GoodsQuery) (*
 		Rows:  rows,
 		Total: total,
 	}, nil
-}
-
-// normalizeMediaURLs 规范化媒体URL
-func (s *IApiShopGoodsDaoImpl) normalizeMediaURLs(item *models.Goods) {
-	if item == nil {
-		return
-	}
-	item.GalleryImagesArr = splitGalleryImages(item.GalleryImages)
-}
-
-// splitGalleryImages 分割图集字符串
-func splitGalleryImages(gallery string) []string {
-	gallery = strings.TrimSpace(gallery)
-	if gallery == "" {
-		return []string{}
-	}
-	parts := strings.Split(gallery, ",")
-	urls := make([]string, 0, len(parts))
-	for _, part := range parts {
-		part = strings.TrimSpace(part)
-		if part != "" {
-			urls = append(urls, part)
-		}
-	}
-	return urls
 }
