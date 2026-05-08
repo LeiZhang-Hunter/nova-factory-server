@@ -2,48 +2,116 @@ package models
 
 import "nova-factory-server/app/baize"
 
+type SeckillMainInfo struct {
+	ID           int64   `json:"id,string" gorm:"column:id"`                  // 秒杀商品ID
+	ActivityID   int64   `json:"activityId,string" gorm:"column:activity_id"` // 活动ID
+	ProductID    int64   `json:"productId,string" gorm:"column:product_id"`   // 商品ID
+	Price        float64 `json:"price" gorm:"column:price"`                   // 秒杀价
+	Cost         float64 `json:"cost" gorm:"column:cost"`                     // 成本价
+	OtPrice      float64 `json:"otPrice" gorm:"column:ot_price"`              // 原价
+	Stock        int64   `json:"stock" gorm:"column:stock"`                   // 库存
+	StartTime    string  `json:"startTime" gorm:"column:start_time"`          // 开始时间
+	StopTime     string  `json:"stopTime" gorm:"column:stop_time"`            // 结束时间
+	AddTime      string  `json:"addTime" gorm:"column:add_time"`              // 添加时间
+	Status       int32   `json:"status" gorm:"column:status"`                 // 商品状态
+	IsPostage    int32   `json:"isPostage" gorm:"column:is_postage"`          // 是否包邮
+	IsHot        int32   `json:"isHot" gorm:"column:is_hot"`                  // 是否热门推荐
+	IsDel        int32   `json:"isDel" gorm:"column:is_del"`                  // 是否删除
+	Num          int32   `json:"num" gorm:"column:num"`                       // 最多秒杀数量
+	IsShow       int32   `json:"isShow" gorm:"column:is_show"`                // 是否显示
+	TimeID       string  `json:"timeId" gorm:"column:time_id"`                // 时间段ID
+	TempID       int32   `json:"tempId" gorm:"column:temp_id"`                // 运费模板ID
+	Weight       float64 `json:"weight" gorm:"column:weight"`                 // 商品重量
+	Volume       float64 `json:"volume" gorm:"column:volume"`                 // 商品体积
+	Quota        int64   `json:"quota" gorm:"column:quota"`                   // 限购总数
+	QuotaShow    int64   `json:"quotaShow" gorm:"column:quota_show"`          // 限购总数显示
+	OnceNum      int32   `json:"onceNum" gorm:"column:once_num"`              // 单次购买数量
+	Logistics    string  `json:"logistics" gorm:"column:logistics"`           // 物流类型
+	Freight      int32   `json:"freight" gorm:"column:freight"`               // 运费设置
+	CustomForm   string  `json:"customForm" gorm:"column:custom_form"`        // 自定义表单
+	VirtualType  int32   `json:"virtualType" gorm:"column:virtual_type"`      // 商品类型
+	IsCommission int32   `json:"isCommission" gorm:"column:is_commission"`    // 是否参与返佣
+}
+
+// FromatSeckillMainInfo 提取秒杀商品主信息。
+func FromatSeckillMainInfo(sec *Seckill) *SeckillMainInfo {
+	if sec == nil {
+		return nil
+	}
+	return &SeckillMainInfo{
+		ID:           sec.ID,
+		ActivityID:   sec.ActivityID,
+		ProductID:    sec.ProductID,
+		Price:        sec.Price,
+		Cost:         sec.Cost,
+		OtPrice:      sec.OtPrice,
+		Stock:        sec.Stock,
+		StartTime:    sec.StartTime,
+		StopTime:     sec.StopTime,
+		AddTime:      sec.AddTime,
+		Status:       sec.Status,
+		IsPostage:    sec.IsPostage,
+		IsHot:        sec.IsHot,
+		IsDel:        sec.IsDel,
+		Num:          sec.Num,
+		IsShow:       sec.IsShow,
+		TimeID:       sec.TimeID,
+		TempID:       sec.TempID,
+		Weight:       sec.Weight,
+		Volume:       sec.Volume,
+		Quota:        sec.Quota,
+		QuotaShow:    sec.QuotaShow,
+		OnceNum:      sec.OnceNum,
+		Logistics:    sec.Logistics,
+		Freight:      sec.Freight,
+		CustomForm:   sec.CustomForm,
+		VirtualType:  sec.VirtualType,
+		IsCommission: sec.IsCommission,
+	}
+}
+
 // Seckill 秒杀商品
 type Seckill struct {
-	ID           int64   `json:"id,string" db:"id"`                  // 秒杀商品ID
-	ActivityID   int64   `json:"activityId,string" db:"activity_id"` // 活动ID
-	ProductID    int64   `json:"productId,string" db:"product_id"`   // 商品ID
-	Image        string  `json:"image" db:"image"`                   // 推荐图
-	Images       string  `json:"images" db:"images"`                 // 轮播图，逗号分隔
-	Title        string  `json:"title" db:"title"`                   // 活动标题
-	Info         string  `json:"info" db:"info"`                     // 简介
-	Price        float64 `json:"price" db:"price"`                   // 秒杀价
-	Cost         float64 `json:"cost" db:"cost"`                     // 成本价
-	OtPrice      float64 `json:"otPrice" db:"ot_price"`              // 原价
-	GiveIntegral float64 `json:"giveIntegral" db:"give_integral"`    // 赠送积分
-	Sort         int64   `json:"sort" db:"sort"`                     // 排序值
-	Stock        int64   `json:"stock" db:"stock"`                   // 库存
-	Sales        int64   `json:"sales" db:"sales"`                   // 销量
-	UnitName     string  `json:"unitName" db:"unit_name"`            // 单位名称
-	Postage      float64 `json:"postage" db:"postage"`               // 邮费
-	StartTime    string  `json:"startTime" db:"start_time"`          // 开始时间
-	StopTime     string  `json:"stopTime" db:"stop_time"`            // 结束时间
-	AddTime      string  `json:"addTime" db:"add_time"`              // 添加时间
-	Status       int32   `json:"status" db:"status"`                 // 商品状态
-	IsPostage    int32   `json:"isPostage" db:"is_postage"`          // 是否包邮
-	IsHot        int32   `json:"isHot" db:"is_hot"`                  // 是否热门推荐
-	IsDel        int32   `json:"isDel" db:"is_del"`                  // 是否删除
-	Num          int32   `json:"num" db:"num"`                       // 最多秒杀数量
-	IsShow       int32   `json:"isShow" db:"is_show"`                // 是否显示
-	TimeID       string  `json:"timeId" db:"time_id"`                // 时间段ID
-	TempID       int32   `json:"tempId" db:"temp_id"`                // 运费模板ID
-	Weight       float64 `json:"weight" db:"weight"`                 // 商品重量
-	Volume       float64 `json:"volume" db:"volume"`                 // 商品体积
-	Quota        int64   `json:"quota" db:"quota"`                   // 限购总数
-	QuotaShow    int64   `json:"quotaShow" db:"quota_show"`          // 限购总数显示
-	OnceNum      int32   `json:"onceNum" db:"once_num"`              // 单次购买数量
-	Logistics    string  `json:"logistics" db:"logistics"`           // 物流类型
-	Freight      int32   `json:"freight" db:"freight"`               // 运费设置
-	CustomForm   string  `json:"customForm" db:"custom_form"`        // 自定义表单
-	VirtualType  int32   `json:"virtualType" db:"virtual_type"`      // 商品类型
-	IsCommission int32   `json:"isCommission" db:"is_commission"`    // 是否参与返佣
-	DeptID       int64   `json:"deptId" db:"dept_id"`                // 部门ID
+	ID           int64   `json:"id,string" gorm:"column:id"`                  // 秒杀商品ID
+	ActivityID   int64   `json:"activityId,string" gorm:"column:activity_id"` // 活动ID
+	ProductID    int64   `json:"productId,string" gorm:"column:product_id"`   // 商品ID
+	Image        string  `json:"image" gorm:"column:image"`                   // 推荐图
+	Images       string  `json:"images" gorm:"column:images"`                 // 轮播图，逗号分隔
+	Title        string  `json:"title" gorm:"column:title"`                   // 活动标题
+	Info         string  `json:"info" gorm:"column:info"`                     // 简介
+	Price        float64 `json:"price" gorm:"column:price"`                   // 秒杀价
+	Cost         float64 `json:"cost" gorm:"column:cost"`                     // 成本价
+	OtPrice      float64 `json:"otPrice" gorm:"column:ot_price"`              // 原价
+	GiveIntegral float64 `json:"giveIntegral" gorm:"column:give_integral"`    // 赠送积分
+	Sort         int64   `json:"sort" gorm:"column:sort"`                     // 排序值
+	Stock        int64   `json:"stock" gorm:"column:stock"`                   // 库存
+	Sales        int64   `json:"sales" gorm:"column:sales"`                   // 销量
+	UnitName     string  `json:"unitName" gorm:"column:unit_name"`            // 单位名称
+	Postage      float64 `json:"postage" gorm:"column:postage"`               // 邮费
+	StartTime    string  `json:"startTime" gorm:"column:start_time"`          // 开始时间
+	StopTime     string  `json:"stopTime" gorm:"column:stop_time"`            // 结束时间
+	AddTime      string  `json:"addTime" gorm:"column:add_time"`              // 添加时间
+	Status       int32   `json:"status" gorm:"column:status"`                 // 商品状态
+	IsPostage    int32   `json:"isPostage" gorm:"column:is_postage"`          // 是否包邮
+	IsHot        int32   `json:"isHot" gorm:"column:is_hot"`                  // 是否热门推荐
+	IsDel        int32   `json:"isDel" gorm:"column:is_del"`                  // 是否删除
+	Num          int32   `json:"num" gorm:"column:num"`                       // 最多秒杀数量
+	IsShow       int32   `json:"isShow" gorm:"column:is_show"`                // 是否显示
+	TimeID       string  `json:"timeId" gorm:"column:time_id"`                // 时间段ID
+	TempID       int32   `json:"tempId" gorm:"column:temp_id"`                // 运费模板ID
+	Weight       float64 `json:"weight" gorm:"column:weight"`                 // 商品重量
+	Volume       float64 `json:"volume" gorm:"column:volume"`                 // 商品体积
+	Quota        int64   `json:"quota" gorm:"column:quota"`                   // 限购总数
+	QuotaShow    int64   `json:"quotaShow" gorm:"column:quota_show"`          // 限购总数显示
+	OnceNum      int32   `json:"onceNum" gorm:"column:once_num"`              // 单次购买数量
+	Logistics    string  `json:"logistics" gorm:"column:logistics"`           // 物流类型
+	Freight      int32   `json:"freight" gorm:"column:freight"`               // 运费设置
+	CustomForm   string  `json:"customForm" gorm:"column:custom_form"`        // 自定义表单
+	VirtualType  int32   `json:"virtualType" gorm:"column:virtual_type"`      // 商品类型
+	IsCommission int32   `json:"isCommission" gorm:"column:is_commission"`    // 是否参与返佣
+	DeptID       int64   `json:"deptId" gorm:"column:dept_id"`                // 部门ID
 	baize.BaseEntity
-	State int32 `json:"state" db:"state"` // 操作状态
+	State int32 `json:"state" gorm:"column:state"` // 操作状态
 }
 
 // SeckillSet 秒杀商品保存参数

@@ -26,7 +26,7 @@ func NewIApiShopOrderDaoImpl(db *gorm.DB) dao.IApiShopOrderDao {
 
 // Create 新增订单记录。
 func (d *IApiShopOrderDaoImpl) Create(c *gin.Context, order *models.Order) (*models.Order, error) {
-	if err := d.db.WithContext(c).Table(d.tableName).Create(order).Error; err != nil {
+	if err := getCurrentDB(c, d.db).WithContext(c).Table(d.tableName).Create(order).Error; err != nil {
 		return nil, err
 	}
 	return order, nil

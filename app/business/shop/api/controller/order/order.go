@@ -24,6 +24,8 @@ func (s *Order) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", s.List)
 	group.GET("/info/:id", s.GetByID)
 	group.GET("/count", s.GetStatistics)
+	group.POST("/cache", s.Cache)
+	group.POST("/confirm", s.Confirm)
 	group.POST("/create", s.Create)
 	group.POST("/status", s.UpdateStatus)
 	group.POST("/cancel/:id", s.Cancel)
@@ -77,18 +79,66 @@ func (s *Order) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
+// Cache 固化本次下单商品快照
+// @Summary 缓存预下单商品
+// @Description 固化本次立即购买商品快照
+// @Tags app接口/商城/App订单
+// @Param object body models.OrderCacheReq true "预下单缓存参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "缓存成功"
+// @Router /api/v1/app/shop/order/cache [post]
+func (s *Order) Cache(c *gin.Context) {
+	userID := baizeContext.GetUserId(c)
+	req := new(models.OrderCacheReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.Cache(c, userID, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// Confirm 获取确认单数据
+// @Summary 获取确认单数据
+// @Description 根据当前地址、配送方式等信息实时试算确认单
+// @Tags app接口/商城/App订单
+// @Param object body models.OrderConfirmReq true "确认单参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /api/v1/app/shop/order/confirm [post]
+func (s *Order) Confirm(c *gin.Context) {
+	userID := baizeContext.GetUserId(c)
+	req := new(models.OrderConfirmReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.Confirm(c, userID, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
 // Create 创建订单
 // @Summary 创建订单
-// @Description 创建新订单
-// @Tags 商城/用户订单
-// @Param object body models.OrderSetReq true "订单创建参数"
+// @Description 根据预订单 orderKey 正式落订单
+// @Tags app接口/商城/App订单
+// @Param object body models.OrderCreateReq true "订单创建参数"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "创建成功"
-// @Router /shop/user/order/create [post]
+// @Router /api/v1/app/shop/order/create [post]
 func (s *Order) Create(c *gin.Context) {
 	userID := baizeContext.GetUserId(c)
-	req := new(models.OrderSetReq)
+	req := new(models.OrderCreateReq)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
