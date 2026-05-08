@@ -31,3 +31,4 @@ nova-factory-server
 nova-factory-otel
 mcp_gen_exec
 wire_gen.go
+*.exe
