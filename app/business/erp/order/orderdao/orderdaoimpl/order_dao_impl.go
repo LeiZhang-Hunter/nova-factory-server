@@ -108,9 +108,7 @@ func (o *OrderDaoImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.Order, e
 
 // List 分页查询 ERP 订单。
 func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*ordermodels.OrderListData, error) {
-	db := o.db.WithContext(c).Table(o.table).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Where("state = ?", commonStatus.NORMAL)
+	db := o.db.WithContext(c).Table(o.table)
 	if req != nil {
 		if strings.TrimSpace(req.Tid) != "" {
 			db = db.Where("tid LIKE ?", "%"+strings.TrimSpace(req.Tid)+"%")
@@ -125,6 +123,7 @@ func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*order
 			db = db.Where("receiver_name LIKE ?", "%"+strings.TrimSpace(req.ReceiverName)+"%")
 		}
 	}
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	page := int64(1)
 	size := int64(20)
 	if req != nil && req.Page > 0 {
@@ -138,7 +137,7 @@ func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*order
 		return nil, err
 	}
 	rows := make([]*ordermodels.Order, 0)
-	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
+	if err := db.Debug().Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	if err := o.attachChildren(c, rows); err != nil {
