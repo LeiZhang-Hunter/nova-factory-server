@@ -44,7 +44,6 @@ func NewGinEngine(
 		productController.Category.PublicRoutes(group)
 		productController.Home.PublicRoutes(group)
 		productController.Product.PublicRoutes(group)
-		productController.Cart.PublicRoutes(group)
 	}
 
 	appGroup := group.Group("")
@@ -55,6 +54,7 @@ func NewGinEngine(
 		productController.Category.PrivateRoutes(appGroup)
 		orderController.PrivateRoutes(appGroup)
 		addressController.PrivateRoutes(appGroup)
+		productController.Cart.PrivateRoutes(appGroup)
 	}
 
 	adminGroup := group.Group("")
