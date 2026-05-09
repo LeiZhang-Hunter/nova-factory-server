@@ -33,3 +33,16 @@ func (s *IApiShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodel
 func (s *IApiShopGoodsServiceImpl) List(c *gin.Context, query *models.GoodsQuery) (*models.GoodsListData, error) {
 	return s.dao.List(c, query)
 }
+
+// ListRepurchase 获取用户复购商品列表
+func (s *IApiShopGoodsServiceImpl) ListRepurchase(c *gin.Context, userID int64, query *models.GoodsQuery) (*models.GoodsListData, error) {
+	page := query.Page
+	if page <= 0 {
+		page = 1
+	}
+	size := query.Size
+	if size <= 0 {
+		size = 20
+	}
+	return s.dao.ListByUserPurchased(c, userID, query.CategoryId, page, size)
+}

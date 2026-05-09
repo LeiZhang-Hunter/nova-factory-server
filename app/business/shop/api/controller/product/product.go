@@ -23,7 +23,8 @@ func (p *Product) PublicRoutes(router *gin.RouterGroup) {
 }
 
 func (p *Product) PrivateRoutes(router *gin.RouterGroup) {
-
+	goods := router.Group("/api/v1/app/shop/goods")
+	goods.GET("/repurchase", p.Repurchase)
 }
 
 // Info 读取商品详情
@@ -66,6 +67,35 @@ func (p *Product) List(c *gin.Context) {
 		return
 	}
 	data, err := p.service.List(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// Repurchase 获取用户复购商品列表
+// @Summary 获取用户复购商品列表
+// @Description 获取用户历史购买过的商品列表
+// @Tags app接口/商城/App商品
+// @Produce application/json
+// @Param categoryId query int false "商品分类ID"
+// @Param page query int false "页码"
+// @Param size query int false "每页数量"
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /api/v1/app/shop/goods/repurchase [get]
+func (p *Product) Repurchase(c *gin.Context) {
+	userID := baizeContext.GetUserId(c)
+	if userID == 0 {
+		baizeContext.InvalidToken(c)
+		return
+	}
+	req := new(models.GoodsQuery)
+	if err := c.ShouldBindQuery(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := p.service.ListRepurchase(c, userID, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
