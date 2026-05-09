@@ -1,51 +1,54 @@
 package models
 
-import "nova-factory-server/app/baize"
+import (
+	"nova-factory-server/app/baize"
+	"time"
+)
 
 // Order 订单主表
 type Order struct {
-	ID                    int64   `json:"id,string" db:"id"`                                  // 主键ID
-	OrderNo               string  `json:"orderNo" db:"order_no"`                              // 订单号
-	UserID                int64   `json:"userId,string" db:"user_id"`                         // 用户ID
-	TotalAmount           float64 `json:"totalAmount" db:"total_amount"`                      // 订单总金额
-	PayAmount             float64 `json:"payAmount" db:"pay_amount"`                          // 实付金额
-	FreightAmount         float64 `json:"freightAmount" db:"freight_amount"`                  // 运费金额
-	DiscountAmount        float64 `json:"discountAmount" db:"discount_amount"`                // 优惠金额
-	Status                int32   `json:"status" db:"status"`                                 // 订单状态：0待支付，1已支付，2已发货，3已完成，4已取消
-	PayTime               string  `json:"payTime" db:"pay_time"`                              // 支付时间
-	ShipTime              string  `json:"shipTime" db:"ship_time"`                            // 发货时间
-	CompleteTime          string  `json:"completeTime" db:"complete_time"`                    // 完成时间
-	CancelTime            string  `json:"cancelTime" db:"cancel_time"`                        // 取消时间
-	CancelReason          string  `json:"cancelReason" db:"cancel_reason"`                    // 取消原因
-	ReceiverName          string  `json:"receiverName" db:"receiver_name"`                    // 收货人姓名
-	ReceiverPhone         string  `json:"receiverPhone" db:"receiver_phone"`                  // 收货人手机号
-	ReceiverProvince      string  `json:"receiverProvince" db:"receiver_province"`            // 省份
-	ReceiverCity          string  `json:"receiverCity" db:"receiver_city"`                    // 城市
-	ReceiverDistrict      string  `json:"receiverDistrict" db:"receiver_district"`            // 区县
-	ReceiverDetailAddress string  `json:"receiverDetailAddress" db:"receiver_detail_address"` // 详细地址
-	Remark                string  `json:"remark" db:"remark"`                                 // 订单备注
-	Version               int32   `json:"version" db:"version"`                               // 乐观锁版本号
-	DeptID                int64   `json:"deptId" db:"dept_id"`                                // 部门ID
+	ID                    int64      `json:"id,string" gorm:"column:id"`                                  // 主键ID
+	OrderNo               string     `json:"orderNo" gorm:"column:order_no"`                              // 订单号
+	UserID                int64      `json:"userId,string" gorm:"column:user_id"`                         // 用户ID
+	TotalAmount           float64    `json:"totalAmount" gorm:"column:total_amount"`                      // 订单总金额
+	PayAmount             float64    `json:"payAmount" gorm:"column:pay_amount"`                          // 实付金额
+	FreightAmount         float64    `json:"freightAmount" gorm:"column:freight_amount"`                  // 运费金额
+	DiscountAmount        float64    `json:"discountAmount" gorm:"column:discount_amount"`                // 优惠金额
+	Status                int32      `json:"status" gorm:"column:status"`                                 // 订单状态：0待支付，1已支付，2已发货，3已完成，4已取消
+	PayTime               *time.Time `json:"payTime" gorm:"column:pay_time"`                              // 支付时间
+	ShipTime              *time.Time `json:"shipTime" gorm:"column:ship_time"`                            // 发货时间
+	CompleteTime          *time.Time `json:"completeTime" gorm:"column:complete_time"`                    // 完成时间
+	CancelTime            *time.Time `json:"cancelTime" gorm:"column:cancel_time"`                        // 取消时间
+	CancelReason          string     `json:"cancelReason" gorm:"column:cancel_reason"`                    // 取消原因
+	ReceiverName          string     `json:"receiverName" gorm:"column:receiver_name"`                    // 收货人姓名
+	ReceiverPhone         string     `json:"receiverPhone" gorm:"column:receiver_phone"`                  // 收货人手机号
+	ReceiverProvince      string     `json:"receiverProvince" gorm:"column:receiver_province"`            // 省份
+	ReceiverCity          string     `json:"receiverCity" gorm:"column:receiver_city"`                    // 城市
+	ReceiverDistrict      string     `json:"receiverDistrict" gorm:"column:receiver_district"`            // 区县
+	ReceiverDetailAddress string     `json:"receiverDetailAddress" gorm:"column:receiver_detail_address"` // 详细地址
+	Remark                string     `json:"remark" gorm:"column:remark"`                                 // 订单备注
+	Version               int32      `json:"version" gorm:"column:version"`                               // 乐观锁版本号
+	DeptID                int64      `json:"deptId" gorm:"column:dept_id"`                                // 部门ID
 	baize.BaseEntity
-	State int32 `json:"state" db:"state"` // 操作状态
+	State int32 `json:"state" gorm:"column:state"` // 操作状态
 }
 
 // OrderItem 订单商品明细
 type OrderItem struct {
-	ID          int64   `json:"id,string" db:"id"`             // 主键ID
-	OrderID     int64   `json:"orderId,string" db:"order_id"`  // 订单ID
-	OrderNo     string  `json:"orderNo" db:"order_no"`         // 订单号
-	GoodsID     string  `json:"goodsId" db:"goods_id"`         // 商品ID
-	SkuID       string  `json:"skuId" db:"sku_id"`             // SKU ID
-	GoodsName   string  `json:"goodsName" db:"goods_name"`     // 商品名称快照
-	SkuName     string  `json:"skuName" db:"sku_name"`         // SKU名称快照
-	ImageURL    string  `json:"imageUrl" db:"image_url"`       // 商品图片快照
-	Price       float64 `json:"price" db:"price"`              // 商品单价快照
-	Quantity    int32   `json:"quantity" db:"quantity"`        // 购买数量
-	TotalAmount float64 `json:"totalAmount" db:"total_amount"` // 商品小计金额
-	DeptID      int64   `json:"deptId" db:"dept_id"`           // 部门ID
+	ID          int64   `json:"id,string" gorm:"column:id"`             // 主键ID
+	OrderID     int64   `json:"orderId,string" gorm:"column:order_id"`  // 订单ID
+	OrderNo     string  `json:"orderNo" gorm:"column:order_no"`         // 订单号
+	GoodsID     string  `json:"goodsId" gorm:"column:goods_id"`         // 商品ID
+	SkuID       string  `json:"skuId" gorm:"column:sku_id"`             // SKU ID
+	GoodsName   string  `json:"goodsName" gorm:"column:goods_name"`     // 商品名称快照
+	SkuName     string  `json:"skuName" gorm:"column:sku_name"`         // SKU名称快照
+	ImageURL    string  `json:"imageUrl" gorm:"column:image_url"`       // 商品图片快照
+	Price       float64 `json:"price" gorm:"column:price"`              // 商品单价快照
+	Quantity    int32   `json:"quantity" gorm:"column:quantity"`        // 购买数量
+	TotalAmount float64 `json:"totalAmount" gorm:"column:total_amount"` // 商品小计金额
+	DeptID      int64   `json:"deptId" gorm:"column:dept_id"`           // 部门ID
 	baize.BaseEntity
-	State int32 `json:"state" db:"state"` // 操作状态
+	State int32 `json:"state" gorm:"column:state"` // 操作状态
 }
 
 // OrderSetReq 订单创建/更新请求
