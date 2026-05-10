@@ -20,12 +20,13 @@ func NewCart(shopCartService service.IApiShopCartService) *Cart {
 }
 
 func (c *Cart) PublicRoutes(router *gin.RouterGroup) {
-	group := router.Group("/api/v1/app/shop/cart")
-	group.POST("/add", c.Add)
-	group.GET("/list", c.List)
+
 }
 
 func (c *Cart) PrivateRoutes(router *gin.RouterGroup) {
+	group := router.Group("/api/v1/app/shop/cart")
+	group.POST("/add", c.Add)
+	group.GET("/list", c.List)
 }
 
 // Add 加入购物车
