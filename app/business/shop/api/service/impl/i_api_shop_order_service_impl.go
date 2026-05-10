@@ -264,13 +264,7 @@ func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *mod
 	if err != nil {
 		return nil, err
 	}
-	for _, order := range list.Rows {
-		for _, item := range order.Items {
-			item.ImageURL = fileUtils.BuildAbsoluteURL(c, item.ImageURL)
-		}
-
-	}
-	return list, nil
+	return s.listERPOrders(c, shopUser, query)
 }
 
 // UpdateStatus 更新订单状态，验证状态流转合法性。
