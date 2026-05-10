@@ -2,10 +2,11 @@ package orderdaoimpl
 
 import (
 	"errors"
-	"fmt"
+	"nova-factory-server/app/utils/snowflake"
 	"strings"
 	"time"
 
+	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/erp/order/orderdao"
 	"nova-factory-server/app/business/erp/order/ordermodels"
 	"nova-factory-server/app/constant/commonStatus"
@@ -17,19 +18,66 @@ import (
 
 // OrderDaoImpl ERP订单数据访问实现。
 type OrderDaoImpl struct {
-	db           *gorm.DB
-	table        string
-	detailTable  string
-	accountTable string
+	db         *gorm.DB
+	table      string
+	detailDao  *OrderDetailDaoImpl
+	accountDao *OrderAccountDaoImpl
+}
+
+// erpOrderRow ERP 订单主表行模型，显式绑定真实表字段名。
+type erpOrderRow struct {
+	ID                   uint64     `gorm:"column:id"`
+	Tid                  string     `gorm:"column:tid"`
+	Weight               float64    `gorm:"column:weight"`
+	Size                 float64    `gorm:"column:size"`
+	BuyerNick            string     `gorm:"column:buyernick"`
+	BuyerMessage         string     `gorm:"column:buyermessage"`
+	SellerMemo           string     `gorm:"column:sellermemo"`
+	Total                float64    `gorm:"column:total"`
+	Privilege            float64    `gorm:"column:privilege"`
+	PostFee              float64    `gorm:"column:postfee"`
+	ReceiverName         string     `gorm:"column:receivername"`
+	ReceiverProvince     string     `gorm:"column:receiverstate"`
+	ReceiverProvinceName string     `gorm:"column:receiverstate_name"`
+	ReceiverCity         string     `gorm:"column:receivercity"`
+	ReceiverCityName     string     `gorm:"column:receivercity_name"`
+	ReceiverDistrict     string     `gorm:"column:receiverdistrict"`
+	ReceiverDistrictName string     `gorm:"column:receiverdistrict_name"`
+	ReceiverStreet       string     `gorm:"column:receiverstree"`
+	ReceiverStreetName   string     `gorm:"column:receiverstree_name"`
+	ReceiverAddress      string     `gorm:"column:receiveraddress"`
+	ReceiverPhone        string     `gorm:"column:receiverphone"`
+	ReceiverMobile       string     `gorm:"column:receivermobile"`
+	ReceiverZip          string     `gorm:"column:receiverzip"`
+	Status               string     `gorm:"column:status"`
+	Type                 string     `gorm:"column:type"`
+	InvoiceName          string     `gorm:"column:invoicename"`
+	SellerFlag           string     `gorm:"column:sellerflag"`
+	PayTime              *time.Time `gorm:"column:paytime"`
+	LogistBTypeCode      string     `gorm:"column:logistbtypecode"`
+	LogistBillCode       string     `gorm:"column:logistbillcode"`
+	BTypeCode            string     `gorm:"column:btypecode"`
+	DetailsJSON          string     `gorm:"column:details_json"`
+	AccountsJSON         string     `gorm:"column:accounts_json"`
+	BillCode             string     `gorm:"column:billcode"`
+	SyncMessage          string     `gorm:"column:sync_message"`
+	SyncStatus           int32      `gorm:"column:sync_status"`
+	SyncTime             *time.Time `gorm:"column:sync_time"`
+	DeptID               int64      `gorm:"column:dept_id"`
+	CreateBy             int64      `gorm:"column:create_by"`
+	CreateTime           *time.Time `gorm:"column:create_time"`
+	UpdateBy             int64      `gorm:"column:update_by"`
+	UpdateTime           *time.Time `gorm:"column:update_time"`
+	State                int32      `gorm:"column:state"`
 }
 
 // NewOrderDao 创建 ERP 订单 DAO。
 func NewOrderDao(db *gorm.DB) orderdao.IOrderDao {
 	return &OrderDaoImpl{
-		db:           db,
-		table:        "erp_order",
-		detailTable:  "erp_order_detail",
-		accountTable: "erp_order_account",
+		db:         db,
+		table:      "erp_order",
+		detailDao:  NewOrderDetailDao(db),
+		accountDao: NewOrderAccountDao(db),
 	}
 }
 
@@ -46,37 +94,38 @@ func (o *OrderDaoImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*ordermod
 		if parseErr != nil {
 			return parseErr
 		}
+		row := buildOrderRow(data)
 		if exists == nil {
-			if err := tx.Table(o.table).Create(data).Error; err != nil {
+			row.ID = uint64(snowflake.GenID())
+			if err := tx.Table(o.table).Create(row).Error; err != nil {
 				return err
 			}
-			resultID = data.ID
+			resultID = row.ID
 		} else {
 			data.ID = exists.ID
+			row.ID = exists.ID
 			data.SetUpdateBy(baizeContext.GetUserId(c))
+			row.UpdateBy = data.UpdateBy
+			row.UpdateTime = data.UpdateTime
 			if err := tx.Table(o.table).
 				Where("id = ?", exists.ID).
-				Where("dept_id = ?", baizeContext.GetDeptId(c)).
+				//Where("dept_id = ?", baizeContext.GetDeptId(c)).
 				Where("state = ?", commonStatus.NORMAL).
-				Select("tid", "weight", "size", "buyer_nick", "buyer_message", "seller_memo", "total", "privilege",
-					"post_fee", "receiver_name", "receiver_province", "receiver_province_name", "receiver_city",
-					"receiver_city_name", "receiver_district", "receiver_district_name", "receiver_street",
-					"receiver_street_name", "receiver_address", "receiver_phone", "receiver_mobile", "receiver_zip",
-					"status", "order_type", "invoice_name", "seller_flag", "pay_time", "logist_b_type_code",
-					"logist_bill_code", "b_type_code", "bill_code",
-					"sync_message", "sync_status", "sync_time", "update_by", "update_time").
-				Updates(data).Error; err != nil {
+				Updates(buildOrderUpdateMap(row)).Error; err != nil {
 				return err
 			}
 			resultID = exists.ID
-			if err := o.softDeleteChildren(tx, c, resultID); err != nil {
+			if err := o.detailDao.DeleteByOrderID(tx, resultID); err != nil {
+				return err
+			}
+			if err := o.accountDao.DeleteByOrderID(tx, resultID); err != nil {
 				return err
 			}
 		}
-		if err := o.createDetails(tx, c, resultID, data.Tid, req.Details); err != nil {
+		if err := o.detailDao.BatchCreate(tx, c, resultID, data.Tid, req.Details); err != nil {
 			return err
 		}
-		if err := o.createAccounts(tx, c, resultID, data.Tid, req.Accounts); err != nil {
+		if err := o.accountDao.BatchCreate(tx, c, resultID, data.Tid, req.Accounts); err != nil {
 			return err
 		}
 		return nil
@@ -89,17 +138,18 @@ func (o *OrderDaoImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*ordermod
 
 // GetByID 查询 ERP 订单详情。
 func (o *OrderDaoImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.Order, error) {
-	var item ordermodels.Order
+	var row erpOrderRow
 	if err := o.db.WithContext(c).Table(o.table).
 		Where("id = ?", id).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		//Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
-		First(&item).Error; err != nil {
+		First(&row).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
 	}
+	item := row.toModel()
 	if err := o.attachChildren(c, []*ordermodels.Order{&item}); err != nil {
 		return nil, err
 	}
@@ -108,7 +158,9 @@ func (o *OrderDaoImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.Order, e
 
 // List 分页查询 ERP 订单。
 func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*ordermodels.OrderListData, error) {
-	db := o.db.WithContext(c).Table(o.table)
+	db := o.db.WithContext(c).Table(o.table).
+		//Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL)
 	if req != nil {
 		if strings.TrimSpace(req.Tid) != "" {
 			db = db.Where("tid LIKE ?", "%"+strings.TrimSpace(req.Tid)+"%")
@@ -120,10 +172,9 @@ func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*order
 			db = db.Where("sync_status = ?", *req.SyncStatus)
 		}
 		if strings.TrimSpace(req.ReceiverName) != "" {
-			db = db.Where("receiver_name LIKE ?", "%"+strings.TrimSpace(req.ReceiverName)+"%")
+			db = db.Where("receivername LIKE ?", "%"+strings.TrimSpace(req.ReceiverName)+"%")
 		}
 	}
-	db = db.Where("state = ?", commonStatus.NORMAL)
 	page := int64(1)
 	size := int64(20)
 	if req != nil && req.Page > 0 {
@@ -136,9 +187,17 @@ func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*order
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
-	rows := make([]*ordermodels.Order, 0)
-	if err := db.Debug().Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
+	rowList := make([]*erpOrderRow, 0)
+	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rowList).Error; err != nil {
 		return nil, err
+	}
+	rows := make([]*ordermodels.Order, 0, len(rowList))
+	for _, row := range rowList {
+		if row == nil {
+			continue
+		}
+		item := row.toModel()
+		rows = append(rows, &item)
 	}
 	if err := o.attachChildren(c, rows); err != nil {
 		return nil, err
@@ -155,7 +214,7 @@ func (o *OrderDaoImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 	return o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Table(o.table).
 			Where("id IN ?", ids).
-			Where("dept_id = ?", baizeContext.GetDeptId(c)).
+			//Where("dept_id = ?", baizeContext.GetDeptId(c)).
 			Where("state = ?", commonStatus.NORMAL).
 			Updates(map[string]interface{}{
 				"state":       commonStatus.DELETE,
@@ -166,20 +225,16 @@ func (o *OrderDaoImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 		}
 		orderIDs := make([]uint64, 0, len(ids))
 		orderIDs = append(orderIDs, ids...)
-		if err := tx.Table(o.detailTable).
-			Where("order_id IN ?", orderIDs).
-			Delete(nil).Error; err != nil {
+		if err := o.detailDao.DeleteByOrderIDs(tx, orderIDs); err != nil {
 			return err
 		}
-		return tx.Table(o.accountTable).
-			Where("order_id IN ?", orderIDs).
-			Delete(nil).Error
+		return o.accountDao.DeleteByOrderIDs(tx, orderIDs)
 	})
 }
 
 // findExists 根据订单ID或订单编号查询当前部门下的有效订单。
 func (o *OrderDaoImpl) findExists(tx *gorm.DB, c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Order, error) {
-	var item ordermodels.Order
+	var row erpOrderRow
 	db := tx.Table(o.table)
 	if req.ID > 0 {
 		db = db.Where("id = ?", req.ID)
@@ -187,12 +242,13 @@ func (o *OrderDaoImpl) findExists(tx *gorm.DB, c *gin.Context, req *ordermodels.
 		db = db.Where("tid = ?", req.Tid)
 	}
 	db = db.Where("state = ?", commonStatus.NORMAL)
-	if err := db.First(&item).Error; err != nil {
+	if err := db.First(&row).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
 	}
+	item := row.toModel()
 	return &item, nil
 }
 
@@ -241,11 +297,158 @@ func buildOrderModel(c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Or
 		SyncMessage:          req.SyncMessage,
 		SyncStatus:           req.SyncStatus,
 		SyncTime:             syncTime,
-		DeptID:               baizeContext.GetDeptId(c),
-		State:                commonStatus.NORMAL,
+		//DeptID:               baizeContext.GetDeptId(c),
+		State: commonStatus.NORMAL,
 	}
 	data.SetCreateBy(baizeContext.GetUserId(c))
 	return data, nil
+}
+
+// buildOrderRow 将领域模型转换为真实表结构行模型。
+func buildOrderRow(data *ordermodels.Order) *erpOrderRow {
+	if data == nil {
+		return nil
+	}
+	return &erpOrderRow{
+		ID:                   data.ID,
+		Tid:                  data.Tid,
+		Weight:               data.Weight,
+		Size:                 data.Size,
+		BuyerNick:            data.BuyerNick,
+		BuyerMessage:         data.BuyerMessage,
+		SellerMemo:           data.SellerMemo,
+		Total:                data.Total,
+		Privilege:            data.Privilege,
+		PostFee:              data.PostFee,
+		ReceiverName:         data.ReceiverName,
+		ReceiverProvince:     data.ReceiverProvince,
+		ReceiverProvinceName: data.ReceiverProvinceName,
+		ReceiverCity:         data.ReceiverCity,
+		ReceiverCityName:     data.ReceiverCityName,
+		ReceiverDistrict:     data.ReceiverDistrict,
+		ReceiverDistrictName: data.ReceiverDistrictName,
+		ReceiverStreet:       data.ReceiverStreet,
+		ReceiverStreetName:   data.ReceiverStreetName,
+		ReceiverAddress:      data.ReceiverAddress,
+		ReceiverPhone:        data.ReceiverPhone,
+		ReceiverMobile:       data.ReceiverMobile,
+		ReceiverZip:          data.ReceiverZip,
+		Status:               data.Status,
+		Type:                 data.Type,
+		InvoiceName:          data.InvoiceName,
+		SellerFlag:           data.SellerFlag,
+		PayTime:              data.PayTime,
+		LogistBTypeCode:      data.LogistBTypeCode,
+		LogistBillCode:       data.LogistBillCode,
+		BTypeCode:            data.BTypeCode,
+		BillCode:             data.BillCode,
+		SyncMessage:          data.SyncMessage,
+		SyncStatus:           data.SyncStatus,
+		SyncTime:             data.SyncTime,
+		DeptID:               data.DeptID,
+		CreateBy:             data.CreateBy,
+		CreateTime:           data.CreateTime,
+		UpdateBy:             data.UpdateBy,
+		UpdateTime:           data.UpdateTime,
+		State:                data.State,
+	}
+}
+
+// toModel 将真实表结构行模型转换为领域模型。
+func (r *erpOrderRow) toModel() ordermodels.Order {
+	if r == nil {
+		return ordermodels.Order{}
+	}
+	return ordermodels.Order{
+		ID:                   r.ID,
+		Tid:                  r.Tid,
+		Weight:               r.Weight,
+		Size:                 r.Size,
+		BuyerNick:            r.BuyerNick,
+		BuyerMessage:         r.BuyerMessage,
+		SellerMemo:           r.SellerMemo,
+		Total:                r.Total,
+		Privilege:            r.Privilege,
+		PostFee:              r.PostFee,
+		ReceiverName:         r.ReceiverName,
+		ReceiverProvince:     r.ReceiverProvince,
+		ReceiverProvinceName: r.ReceiverProvinceName,
+		ReceiverCity:         r.ReceiverCity,
+		ReceiverCityName:     r.ReceiverCityName,
+		ReceiverDistrict:     r.ReceiverDistrict,
+		ReceiverDistrictName: r.ReceiverDistrictName,
+		ReceiverStreet:       r.ReceiverStreet,
+		ReceiverStreetName:   r.ReceiverStreetName,
+		ReceiverAddress:      r.ReceiverAddress,
+		ReceiverPhone:        r.ReceiverPhone,
+		ReceiverMobile:       r.ReceiverMobile,
+		ReceiverZip:          r.ReceiverZip,
+		Status:               r.Status,
+		Type:                 r.Type,
+		InvoiceName:          r.InvoiceName,
+		SellerFlag:           r.SellerFlag,
+		PayTime:              r.PayTime,
+		LogistBTypeCode:      r.LogistBTypeCode,
+		LogistBillCode:       r.LogistBillCode,
+		BTypeCode:            r.BTypeCode,
+		BillCode:             r.BillCode,
+		SyncMessage:          r.SyncMessage,
+		SyncStatus:           r.SyncStatus,
+		SyncTime:             r.SyncTime,
+		DeptID:               r.DeptID,
+		BaseEntity: baize.BaseEntity{
+			CreateBy:   r.CreateBy,
+			CreateTime: r.CreateTime,
+			UpdateBy:   r.UpdateBy,
+			UpdateTime: r.UpdateTime,
+		},
+		State: r.State,
+	}
+}
+
+// buildOrderUpdateMap 构建 ERP 订单更新字段映射。
+func buildOrderUpdateMap(row *erpOrderRow) map[string]interface{} {
+	if row == nil {
+		return map[string]interface{}{}
+	}
+	return map[string]interface{}{
+		"tid":                   row.Tid,
+		"weight":                row.Weight,
+		"size":                  row.Size,
+		"buyernick":             row.BuyerNick,
+		"buyermessage":          row.BuyerMessage,
+		"sellermemo":            row.SellerMemo,
+		"total":                 row.Total,
+		"privilege":             row.Privilege,
+		"postfee":               row.PostFee,
+		"receivername":          row.ReceiverName,
+		"receiverstate":         row.ReceiverProvince,
+		"receiverstate_name":    row.ReceiverProvinceName,
+		"receivercity":          row.ReceiverCity,
+		"receivercity_name":     row.ReceiverCityName,
+		"receiverdistrict":      row.ReceiverDistrict,
+		"receiverdistrict_name": row.ReceiverDistrictName,
+		"receiverstree":         row.ReceiverStreet,
+		"receiverstree_name":    row.ReceiverStreetName,
+		"receiveraddress":       row.ReceiverAddress,
+		"receiverphone":         row.ReceiverPhone,
+		"receivermobile":        row.ReceiverMobile,
+		"receiverzip":           row.ReceiverZip,
+		"status":                row.Status,
+		"type":                  row.Type,
+		"invoicename":           row.InvoiceName,
+		"sellerflag":            row.SellerFlag,
+		"paytime":               row.PayTime,
+		"logistbtypecode":       row.LogistBTypeCode,
+		"logistbillcode":        row.LogistBillCode,
+		"btypecode":             row.BTypeCode,
+		"billcode":              row.BillCode,
+		"sync_message":          row.SyncMessage,
+		"sync_status":           row.SyncStatus,
+		"sync_time":             row.SyncTime,
+		"update_by":             row.UpdateBy,
+		"update_time":           row.UpdateTime,
+	}
 }
 
 // parseOrderTime 解析必填的订单时间字段。
@@ -266,124 +469,6 @@ func parseOrderTimePtr(value string) (*time.Time, error) {
 	return parseOrderTime(value)
 }
 
-// softDeleteChildren 在订单更新前清理旧的明细和账户子表数据。
-func (o *OrderDaoImpl) softDeleteChildren(tx *gorm.DB, c *gin.Context, orderID uint64) error {
-	if err := tx.Table(o.detailTable).
-		Where("order_id = ?", orderID).
-		Delete(&ordermodels.OrderDetail{}).Error; err != nil {
-		return err
-	}
-	return tx.Table(o.accountTable).
-		Where("order_id = ?", orderID).
-		Delete(&ordermodels.OrderAccount{}).Error
-}
-
-// createDetails 批量创建订单明细记录。
-func (o *OrderDaoImpl) createDetails(tx *gorm.DB, c *gin.Context, orderID uint64, tid string, details []*ordermodels.OrderDetailSet) error {
-	if len(details) == 0 {
-		return nil
-	}
-	if err := o.validateDetailOIDs(tx, orderID, details); err != nil {
-		return err
-	}
-	rows := make([]*ordermodels.OrderDetail, 0, len(details))
-	for _, item := range details {
-		if item == nil {
-			continue
-		}
-		row := &ordermodels.OrderDetail{
-			OrderID:        orderID,
-			Tid:            tid,
-			OID:            item.OID,
-			Barcode:        item.Barcode,
-			EShopGoodsID:   item.EShopGoodsID,
-			OuterIID:       item.OuterIID,
-			EShopGoodsName: item.EShopGoodsName,
-			EShopSkuID:     item.EShopSkuID,
-			EShopSkuName:   item.EShopSkuName,
-			NumIID:         item.NumIID,
-			SkuID:          item.SkuID,
-			Num:            item.Num,
-			Payment:        item.Payment,
-			PicPath:        item.PicPath,
-			Weight:         item.Weight,
-			Size:           item.Size,
-			UnitID:         item.UnitID,
-			UnitQty:        item.UnitQty,
-			DeptID:         baizeContext.GetDeptId(c),
-			State:          commonStatus.NORMAL,
-		}
-		row.SetCreateBy(baizeContext.GetUserId(c))
-		rows = append(rows, row)
-	}
-	if len(rows) == 0 {
-		return nil
-	}
-	return tx.Table(o.detailTable).Create(&rows).Error
-}
-
-func (o *OrderDaoImpl) validateDetailOIDs(tx *gorm.DB, orderID uint64, details []*ordermodels.OrderDetailSet) error {
-	oidSet := make(map[string]struct{}, len(details))
-	oids := make([]string, 0, len(details))
-	for _, item := range details {
-		if item == nil {
-			continue
-		}
-		oid := strings.TrimSpace(item.OID)
-		if oid == "" {
-			continue
-		}
-		if _, exists := oidSet[oid]; exists {
-			return fmt.Errorf("订单明细oid重复: %s", oid)
-		}
-		oidSet[oid] = struct{}{}
-		oids = append(oids, oid)
-	}
-	if len(oids) == 0 {
-		return nil
-	}
-
-	var exists ordermodels.OrderDetail
-	db := tx.Table(o.detailTable).Where("oid IN ?", oids)
-	if orderID > 0 {
-		db = db.Where("order_id <> ?", orderID)
-	}
-	if err := db.First(&exists).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil
-		}
-		return err
-	}
-	return fmt.Errorf("订单明细oid已存在: %s", exists.OID)
-}
-
-// createAccounts 批量创建订单账户记录。
-func (o *OrderDaoImpl) createAccounts(tx *gorm.DB, c *gin.Context, orderID uint64, tid string, accounts []*ordermodels.OrderAccountSet) error {
-	if len(accounts) == 0 {
-		return nil
-	}
-	rows := make([]*ordermodels.OrderAccount, 0, len(accounts))
-	for _, item := range accounts {
-		if item == nil {
-			continue
-		}
-		row := &ordermodels.OrderAccount{
-			OrderID:     orderID,
-			Tid:         tid,
-			FinanceCode: item.FinanceCode,
-			Total:       item.Total,
-			DeptID:      baizeContext.GetDeptId(c),
-			State:       commonStatus.NORMAL,
-		}
-		row.SetCreateBy(baizeContext.GetUserId(c))
-		rows = append(rows, row)
-	}
-	if len(rows) == 0 {
-		return nil
-	}
-	return tx.Table(o.accountTable).Create(&rows).Error
-}
-
 // attachChildren 为订单结果批量挂载明细与账户列表。
 func (o *OrderDaoImpl) attachChildren(c *gin.Context, orders []*ordermodels.Order) error {
 	if len(orders) == 0 {
@@ -399,20 +484,12 @@ func (o *OrderDaoImpl) attachChildren(c *gin.Context, orders []*ordermodels.Orde
 	if len(orderIDs) == 0 {
 		return nil
 	}
-	details := make([]*ordermodels.OrderDetail, 0)
-	if err := o.db.WithContext(c).Table(o.detailTable).
-		Where("order_id IN ?", orderIDs).
-		Where("state = ?", commonStatus.NORMAL).
-		Order("id ASC").
-		Find(&details).Error; err != nil {
+	details, err := o.detailDao.ListByOrderIDs(c, orderIDs)
+	if err != nil {
 		return err
 	}
-	accounts := make([]*ordermodels.OrderAccount, 0)
-	if err := o.db.WithContext(c).Table(o.accountTable).
-		Where("order_id IN ?", orderIDs).
-		Where("state = ?", commonStatus.NORMAL).
-		Order("id ASC").
-		Find(&accounts).Error; err != nil {
+	accounts, err := o.accountDao.ListByOrderIDs(c, orderIDs)
+	if err != nil {
 		return err
 	}
 	detailMap := make(map[uint64][]*ordermodels.OrderDetail)
