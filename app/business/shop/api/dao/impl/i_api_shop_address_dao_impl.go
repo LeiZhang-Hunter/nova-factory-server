@@ -138,3 +138,19 @@ func (s *IApiShopAddressDaoImpl) ClearDefault(c *gin.Context, userId int64, excl
 	}
 	return db.Update("is_default", 0).Error
 }
+
+// Default 查询用户默认地址
+func (s *IApiShopAddressDaoImpl) Default(c *gin.Context, userId int64) (*models.ShopUserAddressApp, error) {
+	var item models.ShopUserAddressApp
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("user_id = ?", userId).
+		Where("is_default = ?", 1).
+		Order("id DESC").
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}

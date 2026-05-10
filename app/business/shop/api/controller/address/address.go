@@ -176,3 +176,22 @@ func regionLevelName(level int) string {
 		return ""
 	}
 }
+
+// Default 获取默认收货地址
+// @Summary 获取默认收货地址
+// @Description 获取当前用户的默认收货地址
+// @Tags 商城/用户地址
+// @Param userId query int true "用户ID"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /api/v1/app/shop/address/default [get]
+func (s *Address) Default(c *gin.Context) {
+	userId := baizeContext.GetUserId(c)
+	data, err := s.service.Default(c, userId)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}

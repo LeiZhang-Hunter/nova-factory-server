@@ -12,4 +12,5 @@ type IApiShopAddressService interface {
 	GetByID(c *gin.Context, id int64) (*models.ShopUserAddressApp, error)
 	List(c *gin.Context, userId int64) (*models.AddressListData, error)
 	Remove(c *gin.Context, ids []int64) error
+	Default(c *gin.Context, userId int64) (*models.ShopUserAddressApp, error)
 }
