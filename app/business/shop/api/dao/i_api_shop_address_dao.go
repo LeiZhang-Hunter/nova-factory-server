@@ -13,4 +13,5 @@ type IApiShopAddressDao interface {
 	List(c *gin.Context, userId int64) (*models.AddressListData, error)
 	Remove(c *gin.Context, ids []int64) error
 	ClearDefault(c *gin.Context, userId int64, excludeId int64) error
+	Default(c *gin.Context, userId int64) (*models.ShopUserAddressApp, error)
 }

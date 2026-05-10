@@ -87,3 +87,11 @@ func (s *IApiShopAddressServiceImpl) Remove(c *gin.Context, ids []int64) error {
 func isValidPhone(phone string) bool {
 	return len(phone) == 11 && phone[0] == '1'
 }
+
+// Default 查询用户默认地址
+func (s *IApiShopAddressServiceImpl) Default(c *gin.Context, userId int64) (*models.ShopUserAddressApp, error) {
+	if userId == 0 {
+		return nil, errors.New("用户ID不能为空")
+	}
+	return s.dao.Default(c, userId)
+}

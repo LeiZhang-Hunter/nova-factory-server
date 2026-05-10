@@ -141,9 +141,7 @@ func (s *ShopUserDaoImpl) GetByMobile(c *gin.Context, mobile string) (*models.Us
 }
 
 func (s *ShopUserDaoImpl) List(c *gin.Context, req *models.UserQuery) (*models.UserListData, error) {
-	db := s.db.WithContext(c).Table(s.tableName).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Where("state = ?", commonStatus.NORMAL)
+	db := s.db.WithContext(c).Table(s.tableName)
 	if req.Username != "" {
 		db = db.Where("username LIKE ? OR nickname LIKE ?", "%"+req.Username+"%", "%"+req.Username+"%")
 	}
@@ -162,6 +160,7 @@ func (s *ShopUserDaoImpl) List(c *gin.Context, req *models.UserQuery) (*models.U
 	if req.Size <= 0 {
 		req.Size = 20
 	}
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
