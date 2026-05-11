@@ -108,7 +108,7 @@ func (s *IApiShopAddressDaoImpl) GetByID(c *gin.Context, id int64) (*models.Shop
 
 // List 查询用户地址列表
 func (s *IApiShopAddressDaoImpl) List(c *gin.Context, userId int64) (*models.AddressListData, error) {
-	db := s.db.WithContext(c).Table(s.tableName).Where("user_id = ?", userId)
+	db := s.db.WithContext(c).Table(s.tableName).Debug().Where("user_id = ?", userId)
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {

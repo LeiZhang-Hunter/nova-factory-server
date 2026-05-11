@@ -136,3 +136,7 @@ func (s *IApiShopCartServiceImpl) List(c *gin.Context) ([]*api.CartDto, error) {
 	}
 	return ret, nil
 }
+
+func (s *IApiShopCartServiceImpl) Remove(c *gin.Context, ids []string) error {
+	return s.iShopCartDao.Remove(c, ids)
+}

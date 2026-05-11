@@ -117,6 +117,24 @@ func (s *IApiShopCartDaoImpl) List(c *gin.Context, userID int64) ([]*models.Cart
 	return rows, nil
 }
 
+// ListByIDs 按购物车ID列表查询当前用户的购物车商品。
+func (s *IApiShopCartDaoImpl) ListByIDs(c *gin.Context, userID int64, ids []int64) ([]*models.CartDto, error) {
+	if len(ids) == 0 {
+		return make([]*models.CartDto, 0), nil
+	}
+
+	rows := make([]*models.CartDto, 0)
+	if err := s.db.WithContext(c).
+		Table(s.tableName).
+		Where("user_id = ?", userID).
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func (s *IApiShopCartDaoImpl) getByUserIDAndSkuIDTx(c *gin.Context, tx *gorm.DB, userID int64, skuID uint64) (*models.CartDto, error) {
 	var item models.CartDto
 	if err := tx.WithContext(c).Table(s.tableName).
@@ -154,4 +172,14 @@ func (s *IApiShopCartDaoImpl) getByIDTx(c *gin.Context, tx *gorm.DB, id int64) (
 		return nil, err
 	}
 	return &item, nil
+}
+
+// Remove 软删除商城用户购物车项。
+func (s *IApiShopCartDaoImpl) Remove(c *gin.Context, ids []string) error {
+	return s.db.WithContext(c).Table(s.tableName).
+		Where("id IN ?", ids).
+		Updates(map[string]interface{}{
+			"state":       commonStatus.DELETE,
+			"update_time": gorm.Expr("NOW()"),
+		}).Error
 }
