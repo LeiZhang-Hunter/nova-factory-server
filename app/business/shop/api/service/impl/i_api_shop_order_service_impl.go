@@ -170,15 +170,17 @@ func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *mo
 
 // fillOrderItemsStock 填充确认单商品的实时库存，并标记是否库存不足。
 func (s *IApiShopOrderServiceImpl) fillOrderItemsStock(c *gin.Context, items []*models.OrderCacheItem) error {
+	skuMap, err := s.loadOrderItemSkuMap(c, items)
+	if err != nil {
+		return err
+	}
+
 	for _, item := range items {
 		if item == nil {
 			continue
 		}
 
-		availableStock, err := s.getItemAvailableStock(c, item)
-		if err != nil {
-			return err
-		}
+		availableStock := s.calcItemAvailableStock(item, skuMap[item.SkuID])
 		item.AvailableStock = availableStock
 		item.StockInsufficient = item.Quantity > availableStock
 	}
@@ -204,18 +206,32 @@ func (s *IApiShopOrderServiceImpl) validateCreateItemsStock(c *gin.Context, item
 	return nil
 }
 
-// getItemAvailableStock 读取商品当前可用库存，活动商品按活动库存与 SKU 库存的较小值返回。
-func (s *IApiShopOrderServiceImpl) getItemAvailableStock(c *gin.Context, item *models.OrderCacheItem) (int64, error) {
-	if item == nil || item.SkuID <= 0 {
-		return 0, nil
+// loadOrderItemSkuMap 批量读取订单商品对应的 SKU 数据。
+func (s *IApiShopOrderServiceImpl) loadOrderItemSkuMap(c *gin.Context, items []*models.OrderCacheItem) (map[int64]*shopmodels.GoodsSku, error) {
+	skuIDs := collectOrderItemSkuIDs(items)
+	if len(skuIDs) == 0 {
+		return map[int64]*shopmodels.GoodsSku{}, nil
 	}
 
-	sku, err := s.skuDao.GetByID(c, item.SkuID)
+	skuList, err := s.skuDao.ListByIDs(c, skuIDs)
 	if err != nil {
-		return 0, errors.New("读取商品库存失败")
+		return nil, errors.New("读取商品库存失败")
 	}
-	if sku == nil {
-		return 0, nil
+
+	skuMap := make(map[int64]*shopmodels.GoodsSku, len(skuList))
+	for _, sku := range skuList {
+		if sku == nil {
+			continue
+		}
+		skuMap[int64(sku.ID)] = sku
+	}
+	return skuMap, nil
+}
+
+// calcItemAvailableStock 计算单个商品当前可用库存，活动商品按活动库存与 SKU 库存的较小值返回。
+func (s *IApiShopOrderServiceImpl) calcItemAvailableStock(item *models.OrderCacheItem, sku *shopmodels.GoodsSku) int64 {
+	if item == nil || sku == nil {
+		return 0
 	}
 
 	availableStock := sku.Quantity
@@ -226,9 +242,9 @@ func (s *IApiShopOrderServiceImpl) getItemAvailableStock(c *gin.Context, item *m
 		availableStock = minInt64(availableStock, item.CombinationInfo.Stock)
 	}
 	if availableStock < 0 {
-		return 0, nil
+		return 0
 	}
-	return availableStock, nil
+	return availableStock
 }
 
 // buildStockInsufficientMessage 组装单个商品的库存不足提示。
@@ -965,6 +981,23 @@ func sumCacheItems(items []*models.OrderCacheItem) float64 {
 		}
 	}
 	return total
+}
+
+// collectOrderItemSkuIDs 收集订单商品中的 SKU ID 并去重。
+func collectOrderItemSkuIDs(items []*models.OrderCacheItem) []int64 {
+	result := make([]int64, 0, len(items))
+	seen := make(map[int64]struct{}, len(items))
+	for _, item := range items {
+		if item == nil || item.SkuID <= 0 {
+			continue
+		}
+		if _, ok := seen[item.SkuID]; ok {
+			continue
+		}
+		seen[item.SkuID] = struct{}{}
+		result = append(result, item.SkuID)
+	}
+	return result
 }
 
 // minInt64 返回两个 int64 中的较小值。
