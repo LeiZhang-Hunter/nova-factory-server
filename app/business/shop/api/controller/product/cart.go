@@ -73,6 +73,14 @@ func (c *Cart) List(ctx *gin.Context) {
 	baizeContext.SuccessData(ctx, data)
 }
 
+// Remove 删除购物车商品
+// @Summary 删除购物车商品
+// @Description 根据购物车ID列表删除当前用户的购物车商品
+// @Tags app接口/商城/App购物车
+// @Produce application/json
+// @Param ids path string true "购物车ID列表，多个逗号分隔"
+// @Success 200 {object} response.ResponseData "删除成功"
+// @Router /api/v1/app/shop/cart/remove/{ids} [delete]
 func (c *Cart) Remove(ctx *gin.Context) {
 	ids := baizeContext.ParamStringArray(ctx, "ids")
 	if len(ids) == 0 {

@@ -131,8 +131,36 @@ func (s *IApiShopCartServiceImpl) List(c *gin.Context) ([]*api.CartDto, error) {
 		return nil, err
 	}
 
+	skuIDs := make([]int64, 0, len(ret))
+	skuIDSet := make(map[int64]struct{}, len(ret))
+	for _, item := range ret {
+		if _, ok := skuIDSet[item.SkuID]; ok {
+			continue
+		}
+		skuIDSet[item.SkuID] = struct{}{}
+		skuIDs = append(skuIDs, item.SkuID)
+	}
+
+	skuQuantityMap := make(map[int64]int64, len(skuIDs))
+	if len(skuIDs) > 0 {
+		skuList, skuErr := s.goodsSkuDao.ListByIDs(c, skuIDs)
+		if skuErr != nil {
+			zap.L().Error("batch get sku list failed", zap.Error(skuErr))
+			return nil, errors.New("读取商品库存失败")
+		}
+		for _, skuInfo := range skuList {
+			skuQuantityMap[int64(skuInfo.ID)] = skuInfo.Quantity
+		}
+	}
+
 	for k, v := range ret {
 		ret[k].ImageURL = fileUtils.BuildAbsoluteURL(c, v.ImageURL)
+		skuQuantity, ok := skuQuantityMap[v.SkuID]
+		if !ok {
+			ret[k].IsStockEnough = false
+			continue
+		}
+		ret[k].IsStockEnough = skuQuantity >= v.Quantity
 	}
 	return ret, nil
 }

@@ -350,6 +350,10 @@ func (m *mockShopSkuDao) GetByID(c *gin.Context, id int64) (*shopmodels.GoodsSku
 	return nil, nil
 }
 
+func (m *mockShopSkuDao) ListByIDs(c *gin.Context, ids []int64) ([]*shopmodels.GoodsSku, error) {
+	return []*shopmodels.GoodsSku{}, nil
+}
+
 func (m *mockShopSkuDao) GetBySkuID(c *gin.Context, skuID string) (*shopmodels.GoodsSku, error) {
 	if item, ok := m.bySkuID[skuID]; ok {
 		return item, nil
