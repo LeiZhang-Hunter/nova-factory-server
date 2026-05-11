@@ -2,6 +2,7 @@ package models
 
 import (
 	"nova-factory-server/app/baize"
+	shopConstant "nova-factory-server/app/constant/shop"
 	"time"
 )
 
@@ -104,27 +105,18 @@ type OrderStatusReq struct {
 	Reason string `json:"reason"`                       // 变更原因（如取消原因）
 }
 
-// 订单状态常量
-const (
-	OrderStatusPending   int32 = 0 // 待支付
-	OrderStatusPaid      int32 = 1 // 已支付
-	OrderStatusShipped   int32 = 2 // 已发货
-	OrderStatusCompleted int32 = 3 // 已完成
-	OrderStatusCancelled int32 = 4 // 已取消
-)
-
 // GetStatusText 获取状态文本
 func GetStatusText(status int32) string {
 	switch status {
-	case OrderStatusPending:
+	case shopConstant.OrderStatusPending:
 		return "待支付"
-	case OrderStatusPaid:
+	case shopConstant.OrderStatusPaid:
 		return "已支付"
-	case OrderStatusShipped:
+	case shopConstant.OrderStatusShipped:
 		return "已发货"
-	case OrderStatusCompleted:
+	case shopConstant.OrderStatusCompleted:
 		return "已完成"
-	case OrderStatusCancelled:
+	case shopConstant.OrderStatusCancelled:
 		return "已取消"
 	default:
 		return "未知"
