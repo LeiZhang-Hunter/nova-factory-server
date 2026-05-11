@@ -63,7 +63,7 @@ func (s *ShopCartServiceImpl) Set(c *gin.Context, req *models.CartSetReq) (*mode
 		return nil, errors.New("读取用户不存在")
 	}
 
-	user, err := s.userDao.GetByID(c, info.ID)
+	user, err := s.userDao.GetByUserID(c, info.ID)
 	if err != nil {
 		return nil, err
 	}
