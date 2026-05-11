@@ -54,6 +54,7 @@ func NewGinEngine(
 	{
 		authController.Auth.PrivateRoutes(appGroup)
 		productController.Category.PrivateRoutes(appGroup)
+		productController.Product.PrivateRoutes(appGroup)
 		orderController.PrivateRoutes(appGroup)
 		addressController.PrivateRoutes(appGroup)
 		favoriteController.PrivateRoutes(appGroup)

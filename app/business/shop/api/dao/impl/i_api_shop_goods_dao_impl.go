@@ -4,6 +4,7 @@ import (
 	"errors"
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
+	orderConstant "nova-factory-server/app/constant/order"
 	"nova-factory-server/app/utils/fileUtils"
 
 	"github.com/gin-gonic/gin"
@@ -85,6 +86,52 @@ func (s *IApiShopGoodsDaoImpl) List(c *gin.Context, query *models.GoodsQuery) (*
 		orderClause = "retail_price " + query.SortOrder
 	}
 	if err := db.Offset(int((query.Page - 1) * query.Size)).Limit(int(query.Size)).Order(orderClause).Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	for _, row := range rows {
+		if row != nil {
+			row.ImageURL = fileUtils.BuildAbsoluteURL(c, row.ImageURL)
+		}
+	}
+
+	return &models.GoodsListData{
+		Rows:  rows,
+		Total: total,
+	}, nil
+}
+
+// ListByUserPurchased 查询用户已购买的商品（用于复购）
+func (s *IApiShopGoodsDaoImpl) ListByUserPurchased(c *gin.Context, userID int64, categoryID int64, page, size int64) (*models.GoodsListData, error) {
+	// 子查询：获取用户已完成订单的商品ID列表
+	subQuery := s.db.Table("shop_order_item").
+		Select("DISTINCT goods_id").
+		Joins("JOIN shop_order ON shop_order.id = shop_order_item.order_id").
+		Where("shop_order.user_id = ?", userID).
+		Where("shop_order.status = ?", orderConstant.OrderStatusCompleted) // 已完成订单
+
+	if page <= 0 {
+		page = 1
+	}
+	if size <= 0 {
+		size = 20
+	}
+
+	db := s.db.WithContext(c).Table(s.tableName).
+		Where("goods_id IN (?)", subQuery)
+
+	if categoryID > 0 {
+		db = db.Where("shop_category_id = ?", categoryID)
+	}
+
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		return nil, err
+	}
+
+	rows := make([]*models.Goods, 0)
+	offset := int((page - 1) * size)
+	if err := db.Offset(offset).Limit(int(size)).Order("id DESC").Find(&rows).Error; err != nil {
 		return nil, err
 	}
 
