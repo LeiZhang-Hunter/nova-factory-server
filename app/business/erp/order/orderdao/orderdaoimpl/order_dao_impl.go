@@ -30,36 +30,36 @@ type erpOrderRow struct {
 	Tid                  string     `gorm:"column:tid"`
 	Weight               float64    `gorm:"column:weight"`
 	Size                 float64    `gorm:"column:size"`
-	BuyerNick            string     `gorm:"column:buyernick"`
-	BuyerMessage         string     `gorm:"column:buyermessage"`
-	SellerMemo           string     `gorm:"column:sellermemo"`
+	BuyerNick            string     `gorm:"column:buyer_nick"`
+	BuyerMessage         string     `gorm:"column:buyer_message"`
+	SellerMemo           string     `gorm:"column:seller_memo"`
 	Total                float64    `gorm:"column:total"`
 	Privilege            float64    `gorm:"column:privilege"`
-	PostFee              float64    `gorm:"column:postfee"`
-	ReceiverName         string     `gorm:"column:receivername"`
-	ReceiverProvince     string     `gorm:"column:receiverstate"`
-	ReceiverProvinceName string     `gorm:"column:receiverstate_name"`
-	ReceiverCity         string     `gorm:"column:receivercity"`
-	ReceiverCityName     string     `gorm:"column:receivercity_name"`
-	ReceiverDistrict     string     `gorm:"column:receiverdistrict"`
-	ReceiverDistrictName string     `gorm:"column:receiverdistrict_name"`
-	ReceiverStreet       string     `gorm:"column:receiverstree"`
-	ReceiverStreetName   string     `gorm:"column:receiverstree_name"`
-	ReceiverAddress      string     `gorm:"column:receiveraddress"`
-	ReceiverPhone        string     `gorm:"column:receiverphone"`
-	ReceiverMobile       string     `gorm:"column:receivermobile"`
-	ReceiverZip          string     `gorm:"column:receiverzip"`
+	PostFee              float64    `gorm:"column:post_fee"`
+	ReceiverName         string     `gorm:"column:receiver_name"`
+	ReceiverProvince     string     `gorm:"column:receiver_province"`
+	ReceiverProvinceName string     `gorm:"column:receiver_province_name"`
+	ReceiverCity         string     `gorm:"column:receiver_city"`
+	ReceiverCityName     string     `gorm:"column:receiver_city_name"`
+	ReceiverDistrict     string     `gorm:"column:receiver_district"`
+	ReceiverDistrictName string     `gorm:"column:receiver_district_name"`
+	ReceiverStreet       string     `gorm:"column:receiver_street"`
+	ReceiverStreetName   string     `gorm:"column:receiver_street_name"`
+	ReceiverAddress      string     `gorm:"column:receiver_address"`
+	ReceiverPhone        string     `gorm:"column:receiver_phone"`
+	ReceiverMobile       string     `gorm:"column:receiver_mobile"`
+	ReceiverZip          string     `gorm:"column:receiver_zip"`
 	Status               string     `gorm:"column:status"`
-	Type                 string     `gorm:"column:type"`
-	InvoiceName          string     `gorm:"column:invoicename"`
-	SellerFlag           string     `gorm:"column:sellerflag"`
-	PayTime              *time.Time `gorm:"column:paytime"`
-	LogistBTypeCode      string     `gorm:"column:logistbtypecode"`
-	LogistBillCode       string     `gorm:"column:logistbillcode"`
-	BTypeCode            string     `gorm:"column:btypecode"`
+	Type                 string     `gorm:"column:order_type"`
+	InvoiceName          string     `gorm:"column:invoice_name"`
+	SellerFlag           string     `gorm:"column:seller_flag"`
+	PayTime              *time.Time `gorm:"column:pay_time"`
+	LogistBTypeCode      string     `gorm:"column:logist_b_type_code"`
+	LogistBillCode       string     `gorm:"column:logist_bill_code"`
+	BTypeCode            string     `gorm:"column:b_type_code"`
 	DetailsJSON          string     `gorm:"column:details_json"`
 	AccountsJSON         string     `gorm:"column:accounts_json"`
-	BillCode             string     `gorm:"column:billcode"`
+	BillCode             string     `gorm:"column:bill_code"`
 	SyncMessage          string     `gorm:"column:sync_message"`
 	SyncStatus           int32      `gorm:"column:sync_status"`
 	SyncTime             *time.Time `gorm:"column:sync_time"`
@@ -412,42 +412,42 @@ func buildOrderUpdateMap(row *erpOrderRow) map[string]interface{} {
 		return map[string]interface{}{}
 	}
 	return map[string]interface{}{
-		"tid":                   row.Tid,
-		"weight":                row.Weight,
-		"size":                  row.Size,
-		"buyernick":             row.BuyerNick,
-		"buyermessage":          row.BuyerMessage,
-		"sellermemo":            row.SellerMemo,
-		"total":                 row.Total,
-		"privilege":             row.Privilege,
-		"postfee":               row.PostFee,
-		"receivername":          row.ReceiverName,
-		"receiverstate":         row.ReceiverProvince,
-		"receiverstate_name":    row.ReceiverProvinceName,
-		"receivercity":          row.ReceiverCity,
-		"receivercity_name":     row.ReceiverCityName,
-		"receiverdistrict":      row.ReceiverDistrict,
-		"receiverdistrict_name": row.ReceiverDistrictName,
-		"receiverstree":         row.ReceiverStreet,
-		"receiverstree_name":    row.ReceiverStreetName,
-		"receiveraddress":       row.ReceiverAddress,
-		"receiverphone":         row.ReceiverPhone,
-		"receivermobile":        row.ReceiverMobile,
-		"receiverzip":           row.ReceiverZip,
-		"status":                row.Status,
-		"type":                  row.Type,
-		"invoicename":           row.InvoiceName,
-		"sellerflag":            row.SellerFlag,
-		"paytime":               row.PayTime,
-		"logistbtypecode":       row.LogistBTypeCode,
-		"logistbillcode":        row.LogistBillCode,
-		"btypecode":             row.BTypeCode,
-		"billcode":              row.BillCode,
-		"sync_message":          row.SyncMessage,
-		"sync_status":           row.SyncStatus,
-		"sync_time":             row.SyncTime,
-		"update_by":             row.UpdateBy,
-		"update_time":           row.UpdateTime,
+		"tid":                    row.Tid,
+		"weight":                 row.Weight,
+		"size":                   row.Size,
+		"buyer_nick":             row.BuyerNick,
+		"buyer_message":          row.BuyerMessage,
+		"seller_memo":            row.SellerMemo,
+		"total":                  row.Total,
+		"privilege":              row.Privilege,
+		"post_fee":               row.PostFee,
+		"receiver_name":          row.ReceiverName,
+		"receiver_province":      row.ReceiverProvince,
+		"receiver_province_name": row.ReceiverProvinceName,
+		"receiver_city":          row.ReceiverCity,
+		"receiver_city_name":     row.ReceiverCityName,
+		"receiver_district":      row.ReceiverDistrict,
+		"receiver_district_name": row.ReceiverDistrictName,
+		"receiver_street":        row.ReceiverStreet,
+		"receiver_street_name":   row.ReceiverStreetName,
+		"receiver_address":       row.ReceiverAddress,
+		"receiver_phone":         row.ReceiverPhone,
+		"receiver_mobile":        row.ReceiverMobile,
+		"receiver_zip":           row.ReceiverZip,
+		"status":                 row.Status,
+		"order_type":             row.Type,
+		"invoice_name":           row.InvoiceName,
+		"seller_flag":            row.SellerFlag,
+		"pay_time":               row.PayTime,
+		"logist_b_type_code":     row.LogistBTypeCode,
+		"logist_bill_code":       row.LogistBillCode,
+		"b_type_code":            row.BTypeCode,
+		"bill_code":              row.BillCode,
+		"sync_message":           row.SyncMessage,
+		"sync_status":            row.SyncStatus,
+		"sync_time":              row.SyncTime,
+		"update_by":              row.UpdateBy,
+		"update_time":            row.UpdateTime,
 	}
 }
 

@@ -9,4 +9,5 @@ import (
 type IApiShopCartService interface {
 	GenCart(c *gin.Context, req *api.CartSetDataReq) (*api.CartDto, error)
 	List(c *gin.Context) ([]*api.CartDto, error)
+	Remove(c *gin.Context, ids []string) error
 }
