@@ -11,6 +11,7 @@ import (
 	models2 "nova-factory-server/app/business/shop/activity/models"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/constant/commonStatus"
+	"strconv"
 	orderConstant "nova-factory-server/app/constant/order"
 	"strconv"
 	"strings"
@@ -37,16 +38,16 @@ const (
 
 // IApiShopOrderServiceImpl 提供订单相关的业务实现。
 type IApiShopOrderServiceImpl struct {
-	cache      cache.Cache
-	db         *gorm.DB
-	orderDao   erporderdao.IOrderDao
-	userDao    dao.IApiShopWechatUserDao
-	addressDao dao.IApiShopAddressDao
-	cartDao    dao.IApiShopCartDao
-	seckillDao activityDao.IShopSeckillDao
-	combDao    activityDao.IShopCombinationDao
-	goodsDao   dao.IApiShopGoodsDao
-	skuDao     dao.IApiShopSkuDao
+	cache        cache.Cache
+	db           *gorm.DB
+	orderDao     erporderdao.IOrderDao
+	userDao      dao.IApiShopWechatUserDao
+	addressDao   dao.IApiShopAddressDao
+	cartDao      dao.IApiShopCartDao
+	seckillDao   activityDao.IShopSeckillDao
+	combDao      activityDao.IShopCombinationDao
+	goodsDao     dao.IApiShopGoodsDao
+	skuDao       dao.IApiShopSkuDao
 }
 
 // NewIApiShopOrderServiceImpl 创建订单服务实现。
@@ -63,16 +64,17 @@ func NewIApiShopOrderServiceImpl(
 	skuDao dao.IApiShopSkuDao,
 ) service.IApiShopOrderService {
 	return &IApiShopOrderServiceImpl{
-		cache:      cache,
-		db:         db,
-		orderDao:   orderDao,
-		userDao:    userDao,
-		addressDao: addressDao,
-		cartDao:    cartDao,
-		seckillDao: seckillDao,
-		combDao:    combDao,
-		goodsDao:   goodsDao,
-		skuDao:     skuDao,
+		cache:        cache,
+		db:           db,
+		orderDao:     orderDao,
+		orderItemDao: orderItemDao,
+		userDao:      userDao,
+		addressDao:   addressDao,
+		cartDao:      cartDao,
+		seckillDao:   seckillDao,
+		combDao:      combDao,
+		goodsDao:     goodsDao,
+		skuDao:       skuDao,
 	}
 }
 
@@ -166,6 +168,86 @@ func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *mo
 		DeliveryType:   cacheData.DeliveryType,
 		ExpireSeconds:  int64(orderCacheTTL / time.Second),
 	}, nil
+}
+
+// fillOrderItemsStock 填充确认单商品的实时库存，并标记是否库存不足。
+func (s *IApiShopOrderServiceImpl) fillOrderItemsStock(c *gin.Context, items []*models.OrderCacheItem) error {
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+
+		availableStock, err := s.getItemAvailableStock(c, item)
+		if err != nil {
+			return err
+		}
+		item.AvailableStock = availableStock
+		item.StockInsufficient = item.Quantity > availableStock
+	}
+	return nil
+}
+
+// validateCreateItemsStock 在正式扣减库存前统一校验商品库存，并返回明确的不足提示。
+func (s *IApiShopOrderServiceImpl) validateCreateItemsStock(c *gin.Context, items []*models.OrderCacheItem) error {
+	if err := s.fillOrderItemsStock(c, items); err != nil {
+		return err
+	}
+
+	insufficientItems := make([]string, 0)
+	for _, item := range items {
+		if item == nil || !item.StockInsufficient {
+			continue
+		}
+		insufficientItems = append(insufficientItems, s.buildStockInsufficientMessage(item))
+	}
+	if len(insufficientItems) > 0 {
+		return errors.New("下单失败，库存不足: " + strings.Join(insufficientItems, "；"))
+	}
+	return nil
+}
+
+// getItemAvailableStock 读取商品当前可用库存，活动商品按活动库存与 SKU 库存的较小值返回。
+func (s *IApiShopOrderServiceImpl) getItemAvailableStock(c *gin.Context, item *models.OrderCacheItem) (int64, error) {
+	if item == nil || item.SkuID <= 0 {
+		return 0, nil
+	}
+
+	sku, err := s.skuDao.GetByID(c, item.SkuID)
+	if err != nil {
+		return 0, errors.New("读取商品库存失败")
+	}
+	if sku == nil {
+		return 0, nil
+	}
+
+	availableStock := sku.Quantity
+	if item.SeckillInfo != nil {
+		availableStock = minInt64(availableStock, item.SeckillInfo.Stock)
+	}
+	if item.CombinationInfo != nil {
+		availableStock = minInt64(availableStock, item.CombinationInfo.Stock)
+	}
+	if availableStock < 0 {
+		return 0, nil
+	}
+	return availableStock, nil
+}
+
+// buildStockInsufficientMessage 组装单个商品的库存不足提示。
+func (s *IApiShopOrderServiceImpl) buildStockInsufficientMessage(item *models.OrderCacheItem) string {
+	if item == nil {
+		return ""
+	}
+
+	name := strings.TrimSpace(item.GoodsName)
+	if skuName := strings.TrimSpace(item.SkuName); skuName != "" {
+		name = strings.TrimSpace(name + " " + skuName)
+	}
+	if name == "" {
+		name = fmt.Sprintf("SKU:%d", item.SkuID)
+	}
+
+	return fmt.Sprintf("%s(购买%d，剩余%d)", name, item.Quantity, item.AvailableStock)
 }
 
 // fillOrderItemsStock 填充确认单商品的实时库存，并标记是否库存不足。
@@ -981,6 +1063,14 @@ func sumCacheItems(items []*models.OrderCacheItem) float64 {
 		}
 	}
 	return total
+}
+
+// minInt64 返回两个 int64 中的较小值。
+func minInt64(a, b int64) int64 {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 // collectOrderItemSkuIDs 收集订单商品中的 SKU ID 并去重。
