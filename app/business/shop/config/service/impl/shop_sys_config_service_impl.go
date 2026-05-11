@@ -14,6 +14,10 @@ const (
 	KeyWechatAppSecret      = "wechat_mini_program_app_secret"
 	KeyWechatToken          = "wechat_mini_program_token"
 	KeyWechatEncodingAESKey = "wechat_mini_program_encoding_aes_key"
+	KeyWechatPayMchID       = "wechat_pay_mch_id"
+	KeyWechatPayMchKey      = "wechat_pay_mch_key"
+	KeyWechatPayNotifyURL   = "wechat_pay_notify_url"
+	KeyWechatPayCertPath    = "wechat_pay_cert_path"
 )
 
 type ShopSysConfigServiceImpl struct {
@@ -39,6 +43,18 @@ func (s *ShopSysConfigServiceImpl) GetWechatConfig(c *gin.Context) (*models.Wech
 	if config, err := s.dao.GetByConfigKey(c, KeyWechatEncodingAESKey); err == nil {
 		resp.EncodingAESKey = config.ConfigValue
 	}
+	if config, err := s.dao.GetByConfigKey(c, KeyWechatPayMchID); err == nil {
+		resp.MchID = config.ConfigValue
+	}
+	if config, err := s.dao.GetByConfigKey(c, KeyWechatPayMchKey); err == nil {
+		resp.MchKey = maskString(config.ConfigValue)
+	}
+	if config, err := s.dao.GetByConfigKey(c, KeyWechatPayNotifyURL); err == nil {
+		resp.NotifyURL = config.ConfigValue
+	}
+	if config, err := s.dao.GetByConfigKey(c, KeyWechatPayCertPath); err == nil {
+		resp.CertPath = config.ConfigValue
+	}
 
 	return resp, nil
 }
@@ -61,6 +77,26 @@ func (s *ShopSysConfigServiceImpl) UpdateWechatConfig(c *gin.Context, req *model
 	}
 	if req.EncodingAESKey != "" {
 		if err := s.dao.UpdateByConfigKey(c, KeyWechatEncodingAESKey, req.EncodingAESKey); err != nil {
+			return err
+		}
+	}
+	if req.MchID != "" {
+		if err := s.dao.UpdateByConfigKey(c, KeyWechatPayMchID, req.MchID); err != nil {
+			return err
+		}
+	}
+	if req.MchKey != "" {
+		if err := s.dao.UpdateByConfigKey(c, KeyWechatPayMchKey, req.MchKey); err != nil {
+			return err
+		}
+	}
+	if req.NotifyURL != "" {
+		if err := s.dao.UpdateByConfigKey(c, KeyWechatPayNotifyURL, req.NotifyURL); err != nil {
+			return err
+		}
+	}
+	if req.CertPath != "" {
+		if err := s.dao.UpdateByConfigKey(c, KeyWechatPayCertPath, req.CertPath); err != nil {
 			return err
 		}
 	}

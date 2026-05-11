@@ -451,3 +451,10 @@ INSERT INTO `shop_sys_config` (`config_key`, `config_value`, `config_type`, `rem
 ('wechat_mini_program_app_secret', '', 'N', '微信小程序应用密钥'),
 ('wechat_mini_program_token', '', 'N', '微信令牌'),
 ('wechat_mini_program_encoding_aes_key', '', 'N', '消息加密密钥');
+
+-- 初始化微信支付配置
+INSERT INTO `shop_sys_config` (`config_key`, `config_value`, `config_type`, `remark`) VALUES
+('wechat_pay_mch_id', '', 'N', '微信支付商户号'),
+('wechat_pay_mch_key', '', 'N', '微信支付商户密钥'),
+('wechat_pay_notify_url', '', 'N', '微信支付回调地址'),
+('wechat_pay_cert_path', '', 'N', '微信支付证书路径');
