@@ -88,7 +88,7 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 
 	userId := baizeContext.GetUserId(c)
 
-	userInfo, err := s.shopUserDao.GetByID(c, userId)
+	userInfo, err := s.shopUserDao.GetByUserID(c, userId)
 	if err != nil {
 		zap.L().Error("get user info failed", zap.Error(err))
 		return nil, errors.New("读取用户信息失败")

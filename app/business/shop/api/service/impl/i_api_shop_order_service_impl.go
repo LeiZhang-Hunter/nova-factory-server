@@ -91,7 +91,7 @@ func (s *IApiShopOrderServiceImpl) Cache(c *gin.Context, userID int64, req *mode
 		return nil, errors.New("订单商品不能为空")
 	}
 
-	if _, err := s.userDao.GetByID(c, userID); err != nil {
+	if _, err := s.userDao.GetByUserID(c, userID); err != nil {
 		return nil, errors.New("读取用户信息失败")
 	}
 
@@ -256,7 +256,7 @@ func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *mod
 
 	query.UserID = userID
 
-	shopUser, err := s.userDao.GetByID(c, userID)
+	shopUser, err := s.userDao.GetByUserID(c, userID)
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
@@ -283,7 +283,7 @@ func (s *IApiShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, re
 	}
 
 	// 验证用户权限
-	shopUser, err := s.userDao.GetByID(c, userID)
+	shopUser, err := s.userDao.GetByUserID(c, userID)
 	if err != nil || shopUser == nil {
 		return errors.New("商城用户不存在")
 	}
@@ -325,7 +325,7 @@ func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64
 		return errors.New("订单ID不能为空")
 	}
 
-	shopUser, err := s.userDao.GetByID(c, userID)
+	shopUser, err := s.userDao.GetByUserID(c, userID)
 	if err != nil || shopUser == nil {
 		return errors.New("商城用户不存在")
 	}
@@ -365,7 +365,7 @@ func (s *IApiShopOrderServiceImpl) ConfirmReceive(c *gin.Context, userID int64, 
 		return errors.New("订单ID不能为空")
 	}
 
-	shopUser, err := s.userDao.GetByID(c, userID)
+	shopUser, err := s.userDao.GetByUserID(c, userID)
 	if err != nil || shopUser == nil {
 		return errors.New("商城用户不存在")
 	}
@@ -401,7 +401,7 @@ func (s *IApiShopOrderServiceImpl) GetStatistics(c *gin.Context, userID int64) (
 	if userID == 0 {
 		return nil, errors.New("用户未登录")
 	}
-	shopUser, err := s.userDao.GetByID(c, userID)
+	shopUser, err := s.userDao.GetByUserID(c, userID)
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
