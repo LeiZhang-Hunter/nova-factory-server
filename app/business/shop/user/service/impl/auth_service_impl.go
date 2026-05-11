@@ -81,7 +81,7 @@ func (s *ShopAuthServiceImpl) Login(c *gin.Context, req *models.ShopLoginReq) (*
 // GetInfo 获取当前商城登录用户信息。
 func (s *ShopAuthServiceImpl) GetInfo(c *gin.Context) (*models.ShopGetInfoResp, error) {
 	userID := baizeContext.GetUserId(c)
-	user, err := s.userDao.GetByID(c, userID)
+	user, err := s.userDao.GetByUserID(c, userID)
 	if err != nil {
 		return nil, err
 	}
