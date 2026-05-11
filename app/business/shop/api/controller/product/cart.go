@@ -27,6 +27,7 @@ func (c *Cart) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop/cart")
 	group.POST("/add", c.Add)
 	group.GET("/list", c.List)
+	group.DELETE("/remove/:ids", c.Remove)
 }
 
 // Add 加入购物车
@@ -70,4 +71,19 @@ func (c *Cart) List(ctx *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(ctx, data)
+}
+
+func (c *Cart) Remove(ctx *gin.Context) {
+	ids := baizeContext.ParamStringArray(ctx, "ids")
+	if len(ids) == 0 {
+		baizeContext.ParameterError(ctx)
+		return
+	}
+	err := c.shopCartService.Remove(ctx, ids)
+	if err != nil {
+		zap.L().Error("list cart error", zap.Error(err))
+		baizeContext.Waring(ctx, err.Error())
+		return
+	}
+	baizeContext.Success(ctx)
 }

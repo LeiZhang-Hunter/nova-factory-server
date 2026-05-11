@@ -233,8 +233,6 @@ func (s *ShopCartDaoImpl) List(c *gin.Context, req *models.CartQuery) (*models.C
 func (s *ShopCartDaoImpl) Remove(c *gin.Context, ids []int64) error {
 	return s.db.WithContext(c).Table(s.tableName).
 		Where("id IN ?", ids).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Where("state = ?", commonStatus.NORMAL).
 		Updates(map[string]interface{}{
 			"state":       commonStatus.DELETE,
 			"update_by":   baizeContext.GetUserId(c),

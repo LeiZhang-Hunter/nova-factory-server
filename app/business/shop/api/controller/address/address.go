@@ -30,6 +30,7 @@ func (s *Address) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", s.Set)
 	group.DELETE("/remove/:ids", s.Remove)
 	group.GET("/region", s.Region)
+	group.GET("/default", s.Default)
 }
 
 // List 获取地址列表
