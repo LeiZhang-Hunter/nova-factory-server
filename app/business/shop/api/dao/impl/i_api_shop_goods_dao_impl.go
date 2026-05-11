@@ -4,7 +4,7 @@ import (
 	"errors"
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
-	shopConstant "nova-factory-server/app/constant/shop"
+	orderConstant "nova-factory-server/app/constant/order"
 	"nova-factory-server/app/utils/fileUtils"
 
 	"github.com/gin-gonic/gin"
@@ -108,7 +108,7 @@ func (s *IApiShopGoodsDaoImpl) ListByUserPurchased(c *gin.Context, userID int64,
 		Select("DISTINCT goods_id").
 		Joins("JOIN shop_order ON shop_order.id = shop_order_item.order_id").
 		Where("shop_order.user_id = ?", userID).
-		Where("shop_order.status = ?", shopConstant.OrderStatusCompleted) // 已完成订单
+		Where("shop_order.status = ?", orderConstant.OrderStatusCompleted) // 已完成订单
 
 	if page <= 0 {
 		page = 1

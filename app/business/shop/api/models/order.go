@@ -2,7 +2,7 @@ package models
 
 import (
 	"nova-factory-server/app/baize"
-	shopConstant "nova-factory-server/app/constant/shop"
+	orderConstant "nova-factory-server/app/constant/order"
 	"time"
 )
 
@@ -108,15 +108,17 @@ type OrderStatusReq struct {
 // GetStatusText 获取状态文本
 func GetStatusText(status int32) string {
 	switch status {
-	case shopConstant.OrderStatusPending:
+	case orderConstant.OrderStatusPending:
 		return "待支付"
-	case shopConstant.OrderStatusPaid:
+	case orderConstant.OrderStatusPaid:
 		return "已支付"
-	case shopConstant.OrderStatusShipped:
+	case orderConstant.OrderStatusShipped:
 		return "已发货"
-	case shopConstant.OrderStatusCompleted:
+	case orderConstant.OrderStatusPartShipped:
+		return "部分发货"
+	case orderConstant.OrderStatusCompleted:
 		return "已完成"
-	case shopConstant.OrderStatusCancelled:
+	case orderConstant.OrderStatusCancelled:
 		return "已取消"
 	default:
 		return "未知"

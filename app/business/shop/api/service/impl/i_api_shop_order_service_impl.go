@@ -11,6 +11,7 @@ import (
 	models2 "nova-factory-server/app/business/shop/activity/models"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/constant/commonStatus"
+	orderConstant "nova-factory-server/app/constant/order"
 	"strings"
 	"time"
 
@@ -18,7 +19,6 @@ import (
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/datasource/cache"
-	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/fileUtils"
 	order2 "nova-factory-server/app/utils/order"
 
@@ -36,16 +36,15 @@ const (
 
 // IApiShopOrderServiceImpl 提供订单相关的业务实现。
 type IApiShopOrderServiceImpl struct {
-	cache        cache.Cache
-	db           *gorm.DB
-	orderDao     erporderdao.IOrderDao
-	orderItemDao dao.IApiShopOrderItemDao
-	userDao      dao.IApiShopWechatUserDao
-	addressDao   dao.IApiShopAddressDao
-	seckillDao   activityDao.IShopSeckillDao
-	combDao      activityDao.IShopCombinationDao
-	goodsDao     dao.IApiShopGoodsDao
-	skuDao       dao.IApiShopSkuDao
+	cache      cache.Cache
+	db         *gorm.DB
+	orderDao   erporderdao.IOrderDao
+	userDao    dao.IApiShopWechatUserDao
+	addressDao dao.IApiShopAddressDao
+	seckillDao activityDao.IShopSeckillDao
+	combDao    activityDao.IShopCombinationDao
+	goodsDao   dao.IApiShopGoodsDao
+	skuDao     dao.IApiShopSkuDao
 }
 
 // NewIApiShopOrderServiceImpl 创建订单服务实现。
@@ -53,7 +52,6 @@ func NewIApiShopOrderServiceImpl(
 	cache cache.Cache,
 	db *gorm.DB,
 	orderDao erporderdao.IOrderDao,
-	orderItemDao dao.IApiShopOrderItemDao,
 	userDao dao.IApiShopWechatUserDao,
 	addressDao dao.IApiShopAddressDao,
 	seckillDao activityDao.IShopSeckillDao,
@@ -62,16 +60,15 @@ func NewIApiShopOrderServiceImpl(
 	skuDao dao.IApiShopSkuDao,
 ) service.IApiShopOrderService {
 	return &IApiShopOrderServiceImpl{
-		cache:        cache,
-		db:           db,
-		orderDao:     orderDao,
-		orderItemDao: orderItemDao,
-		userDao:      userDao,
-		addressDao:   addressDao,
-		seckillDao:   seckillDao,
-		combDao:      combDao,
-		goodsDao:     goodsDao,
-		skuDao:       skuDao,
+		cache:      cache,
+		db:         db,
+		orderDao:   orderDao,
+		userDao:    userDao,
+		addressDao: addressDao,
+		seckillDao: seckillDao,
+		combDao:    combDao,
+		goodsDao:   goodsDao,
+		skuDao:     skuDao,
 	}
 }
 
@@ -341,7 +338,7 @@ func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64
 		return errors.New("无权操作此订单")
 	}
 
-	if s.erpStatusToShopStatus(order.Status) != models.OrderStatusPending {
+	if s.erpStatusToShopStatus(order.Status) != orderConstant.OrderStatusPending {
 		return errors.New("只能取消待支付的订单")
 	}
 
@@ -381,11 +378,11 @@ func (s *IApiShopOrderServiceImpl) ConfirmReceive(c *gin.Context, userID int64, 
 		return errors.New("无权操作此订单")
 	}
 
-	if s.erpStatusToShopStatus(order.Status) != models.OrderStatusShipped {
+	if s.erpStatusToShopStatus(order.Status) != orderConstant.OrderStatusShipped {
 		return errors.New("只能确认已发货的订单")
 	}
 
-	rowsAffected, err := s.updateERPOrderStatus(c, id, shopUser, models.OrderStatusCompleted)
+	rowsAffected, err := s.updateERPOrderStatus(c, id, shopUser, orderConstant.OrderStatusCompleted)
 	if err != nil {
 		return fmt.Errorf("确认收货失败: %v", err)
 	}
@@ -411,11 +408,11 @@ func (s *IApiShopOrderServiceImpl) GetStatistics(c *gin.Context, userID int64) (
 // isValidStatusTransition 验证订单状态流转是否合法。
 func (s *IApiShopOrderServiceImpl) isValidStatusTransition(from, to int32) bool {
 	validTransitions := map[int32][]int32{
-		models.OrderStatusPending:   {models.OrderStatusPaid, models.OrderStatusCancelled},
-		models.OrderStatusPaid:      {models.OrderStatusShipped, models.OrderStatusCancelled},
-		models.OrderStatusShipped:   {models.OrderStatusCompleted},
-		models.OrderStatusCompleted: {},
-		models.OrderStatusCancelled: {},
+		orderConstant.OrderStatusPending:   {orderConstant.OrderStatusPaid, orderConstant.OrderStatusCancelled},
+		orderConstant.OrderStatusPaid:      {orderConstant.OrderStatusShipped, orderConstant.OrderStatusCancelled},
+		orderConstant.OrderStatusShipped:   {orderConstant.OrderStatusCompleted},
+		orderConstant.OrderStatusCompleted: {},
+		orderConstant.OrderStatusCancelled: {},
 	}
 
 	allowed, exists := validTransitions[from]
@@ -812,7 +809,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 		ReceiverAddress:      address.DetailAddress,
 		ReceiverPhone:        address.ReceiverMobile,
 		ReceiverMobile:       address.ReceiverMobile,
-		Status:               s.shopStatusToERPStatus(models.OrderStatusPending),
+		Status:               s.shopStatusToERPStatus(orderConstant.OrderStatusPending),
 		OrderType:            "shop",
 		Details: []*erpordermodels.OrderDetailSet{
 			{
@@ -911,7 +908,7 @@ func (s *IApiShopOrderServiceImpl) toShopOrderItem(detail *erpordermodels.OrderD
 
 // listERPOrders 查询当前商城用户在 ERP 表中的订单列表。
 func (s *IApiShopOrderServiceImpl) listERPOrders(c *gin.Context, shopUser *models.User, query *models.OrderQuery) (*models.OrderListData, error) {
-	db := s.erpOrderBaseQuery(c).Where("buyer_nick IN ?", s.buildOrderOwnerCandidates(shopUser))
+	db := s.erpOrderBaseQuery(c).Where("buyernick = ?", s.buildOrderBuyerNick(shopUser))
 	if query.Status != nil {
 		db = db.Where("status = ?", s.shopStatusToERPStatus(*query.Status))
 	}
@@ -957,7 +954,7 @@ func (s *IApiShopOrderServiceImpl) listERPOrders(c *gin.Context, shopUser *model
 func (s *IApiShopOrderServiceImpl) updateERPOrderStatus(c *gin.Context, id int64, shopUser *models.User, status int32) (int64, error) {
 	result := s.erpOrderBaseQuery(c).
 		Where("id = ?", id).
-		Where("buyer_nick IN ?", s.buildOrderOwnerCandidates(shopUser)).
+		Where("buyernick = ?", s.buildOrderBuyerNick(shopUser)).
 		Updates(map[string]interface{}{
 			"status":      s.shopStatusToERPStatus(status),
 			"update_time": gorm.Expr("NOW()"),
@@ -969,9 +966,9 @@ func (s *IApiShopOrderServiceImpl) updateERPOrderStatus(c *gin.Context, id int64
 func (s *IApiShopOrderServiceImpl) cancelERPOrder(c *gin.Context, id int64, shopUser *models.User, reason string) (int64, error) {
 	result := s.erpOrderBaseQuery(c).
 		Where("id = ?", id).
-		Where("buyer_nick IN ?", s.buildOrderOwnerCandidates(shopUser)).
+		Where("buyernick = ?", s.buildOrderBuyerNick(shopUser)).
 		Updates(map[string]interface{}{
-			"status":      s.shopStatusToERPStatus(models.OrderStatusCancelled),
+			"status":      s.shopStatusToERPStatus(orderConstant.OrderStatusCancelled),
 			"seller_memo": strings.TrimSpace(reason),
 			"update_time": gorm.Expr("NOW()"),
 		})
@@ -981,29 +978,29 @@ func (s *IApiShopOrderServiceImpl) cancelERPOrder(c *gin.Context, id int64, shop
 // getERPOrderStatistics 统计当前商城用户在 ERP 表中的订单状态数量。
 func (s *IApiShopOrderServiceImpl) getERPOrderStatistics(c *gin.Context, shopUser *models.User) (*models.OrderStatistics, error) {
 	stats := &models.OrderStatistics{}
-	baseQuery := s.erpOrderBaseQuery(c).Where("buyer_nick IN ?", s.buildOrderOwnerCandidates(shopUser))
+	baseQuery := s.erpOrderBaseQuery(c).Where("buyernick = ?", s.buildOrderBuyerNick(shopUser))
 	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(models.OrderStatusPending)).
+		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusPending)).
 		Count(&stats.PendingPay).Error; err != nil {
 		return nil, err
 	}
 	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(models.OrderStatusPaid)).
+		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusPaid)).
 		Count(&stats.PendingSend).Error; err != nil {
 		return nil, err
 	}
 	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(models.OrderStatusShipped)).
+		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusShipped)).
 		Count(&stats.PendingReceive).Error; err != nil {
 		return nil, err
 	}
 	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(models.OrderStatusCompleted)).
+		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusCompleted)).
 		Count(&stats.Completed).Error; err != nil {
 		return nil, err
 	}
 	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(models.OrderStatusCancelled)).
+		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusCancelled)).
 		Count(&stats.Cancelled).Error; err != nil {
 		return nil, err
 	}
@@ -1054,7 +1051,6 @@ func (s *IApiShopOrderServiceImpl) attachERPOrderDetails(c *gin.Context, orders 
 func (s *IApiShopOrderServiceImpl) erpOrderBaseQuery(c *gin.Context) *gorm.DB {
 	return s.db.WithContext(c).
 		Table("erp_order").
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL)
 }
 
@@ -1063,7 +1059,7 @@ func (s *IApiShopOrderServiceImpl) buildOrderBuyerNick(shopUser *models.User) st
 	if shopUser == nil {
 		return ""
 	}
-	return fmt.Sprintf("shop-user-%d", shopUser.ID)
+	return fmt.Sprintf("shop-user-%s", shopUser.UserID)
 }
 
 // buildOrderOwnerCandidates 构造商城用户在 ERP 订单中的可能归属标识。
@@ -1111,22 +1107,41 @@ func (s *IApiShopOrderServiceImpl) isOrderOwnedByUser(order *erpordermodels.Orde
 
 // shopStatusToERPStatus 将商城订单状态转换为 ERP 状态值。
 func (s *IApiShopOrderServiceImpl) shopStatusToERPStatus(status int32) string {
-	return models.GetStatusText(status)
+	switch status {
+	case orderConstant.OrderStatusPending:
+		return orderConstant.ERPStatusNoPay
+	case orderConstant.OrderStatusPaid:
+		return orderConstant.ERPStatusPayed
+	case orderConstant.OrderStatusShipped:
+		return orderConstant.ERPStatusSended
+	case orderConstant.OrderStatusPartShipped:
+		return orderConstant.ERPStatusPartSend
+	case orderConstant.OrderStatusCompleted:
+		return orderConstant.ERPStatusTradeSuccess
+	case orderConstant.OrderStatusCancelled:
+		return orderConstant.ERPStatusTradeClosed
+	default:
+		return orderConstant.ERPStatusNoPay
+	}
 }
 
 // erpStatusToShopStatus 将 ERP 状态值转换为商城订单状态。
 func (s *IApiShopOrderServiceImpl) erpStatusToShopStatus(status string) int32 {
 	switch strings.TrimSpace(status) {
-	case models.GetStatusText(models.OrderStatusPaid):
-		return models.OrderStatusPaid
-	case models.GetStatusText(models.OrderStatusShipped):
-		return models.OrderStatusShipped
-	case models.GetStatusText(models.OrderStatusCompleted):
-		return models.OrderStatusCompleted
-	case models.GetStatusText(models.OrderStatusCancelled):
-		return models.OrderStatusCancelled
+	case orderConstant.ERPStatusNoPay:
+		return orderConstant.OrderStatusPending
+	case orderConstant.ERPStatusPayed:
+		return orderConstant.OrderStatusPaid
+	case orderConstant.ERPStatusSended:
+		return orderConstant.OrderStatusShipped
+	case orderConstant.ERPStatusPartSend:
+		return orderConstant.OrderStatusPartShipped
+	case orderConstant.ERPStatusTradeSuccess:
+		return orderConstant.OrderStatusCompleted
+	case orderConstant.ERPStatusTradeClosed:
+		return orderConstant.OrderStatusCancelled
 	default:
-		return models.OrderStatusPending
+		return orderConstant.OrderStatusPending
 	}
 }
 
