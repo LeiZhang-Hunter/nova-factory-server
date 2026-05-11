@@ -37,16 +37,16 @@ const (
 
 // IApiShopOrderServiceImpl 提供订单相关的业务实现。
 type IApiShopOrderServiceImpl struct {
-	cache        cache.Cache
-	db           *gorm.DB
-	orderDao     erporderdao.IOrderDao
-	userDao      dao.IApiShopWechatUserDao
-	addressDao   dao.IApiShopAddressDao
-	cartDao      dao.IApiShopCartDao
-	seckillDao   activityDao.IShopSeckillDao
-	combDao      activityDao.IShopCombinationDao
-	goodsDao     dao.IApiShopGoodsDao
-	skuDao       dao.IApiShopSkuDao
+	cache      cache.Cache
+	db         *gorm.DB
+	orderDao   erporderdao.IOrderDao
+	userDao    dao.IApiShopWechatUserDao
+	addressDao dao.IApiShopAddressDao
+	cartDao    dao.IApiShopCartDao
+	seckillDao activityDao.IShopSeckillDao
+	combDao    activityDao.IShopCombinationDao
+	goodsDao   dao.IApiShopGoodsDao
+	skuDao     dao.IApiShopSkuDao
 }
 
 // NewIApiShopOrderServiceImpl 创建订单服务实现。
@@ -63,16 +63,16 @@ func NewIApiShopOrderServiceImpl(
 	skuDao dao.IApiShopSkuDao,
 ) service.IApiShopOrderService {
 	return &IApiShopOrderServiceImpl{
-		cache:        cache,
-		db:           db,
-		orderDao:     orderDao,
-		userDao:      userDao,
-		addressDao:   addressDao,
-		cartDao:      cartDao,
-		seckillDao:   seckillDao,
-		combDao:      combDao,
-		goodsDao:     goodsDao,
-		skuDao:       skuDao,
+		cache:      cache,
+		db:         db,
+		orderDao:   orderDao,
+		userDao:    userDao,
+		addressDao: addressDao,
+		cartDao:    cartDao,
+		seckillDao: seckillDao,
+		combDao:    combDao,
+		goodsDao:   goodsDao,
+		skuDao:     skuDao,
 	}
 }
 
@@ -1106,7 +1106,7 @@ func (s *IApiShopOrderServiceImpl) toShopOrderItem(detail *erpordermodels.OrderD
 
 // listERPOrders 查询当前商城用户在 ERP 表中的订单列表。
 func (s *IApiShopOrderServiceImpl) listERPOrders(c *gin.Context, shopUser *models.User, query *models.OrderQuery) (*models.OrderListData, error) {
-	db := s.erpOrderBaseQuery(c).Where("buyernick = ?", s.buildOrderBuyerNick(shopUser))
+	db := s.erpOrderBaseQuery(c).Where("buyer_nick = ?", s.buildOrderBuyerNick(shopUser))
 	if query.Status != nil {
 		db = db.Where("status = ?", s.shopStatusToERPStatus(*query.Status))
 	}
@@ -1152,7 +1152,7 @@ func (s *IApiShopOrderServiceImpl) listERPOrders(c *gin.Context, shopUser *model
 func (s *IApiShopOrderServiceImpl) updateERPOrderStatus(c *gin.Context, id int64, shopUser *models.User, status int32) (int64, error) {
 	result := s.erpOrderBaseQuery(c).
 		Where("id = ?", id).
-		Where("buyernick = ?", s.buildOrderBuyerNick(shopUser)).
+		Where("buyer_nick = ?", s.buildOrderBuyerNick(shopUser)).
 		Updates(map[string]interface{}{
 			"status":      s.shopStatusToERPStatus(status),
 			"update_time": gorm.Expr("NOW()"),
@@ -1164,7 +1164,7 @@ func (s *IApiShopOrderServiceImpl) updateERPOrderStatus(c *gin.Context, id int64
 func (s *IApiShopOrderServiceImpl) cancelERPOrder(c *gin.Context, id int64, shopUser *models.User, reason string) (int64, error) {
 	result := s.erpOrderBaseQuery(c).
 		Where("id = ?", id).
-		Where("buyernick = ?", s.buildOrderBuyerNick(shopUser)).
+		Where("buyer_nick = ?", s.buildOrderBuyerNick(shopUser)).
 		Updates(map[string]interface{}{
 			"status":      s.shopStatusToERPStatus(orderConstant.OrderStatusCancelled),
 			"seller_memo": strings.TrimSpace(reason),
@@ -1176,7 +1176,7 @@ func (s *IApiShopOrderServiceImpl) cancelERPOrder(c *gin.Context, id int64, shop
 // getERPOrderStatistics 统计当前商城用户在 ERP 表中的订单状态数量。
 func (s *IApiShopOrderServiceImpl) getERPOrderStatistics(c *gin.Context, shopUser *models.User) (*models.OrderStatistics, error) {
 	stats := &models.OrderStatistics{}
-	baseQuery := s.erpOrderBaseQuery(c).Where("buyernick = ?", s.buildOrderBuyerNick(shopUser))
+	baseQuery := s.erpOrderBaseQuery(c).Where("buyer_nick = ?", s.buildOrderBuyerNick(shopUser))
 	if err := baseQuery.Session(&gorm.Session{}).
 		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusPending)).
 		Count(&stats.PendingPay).Error; err != nil {
