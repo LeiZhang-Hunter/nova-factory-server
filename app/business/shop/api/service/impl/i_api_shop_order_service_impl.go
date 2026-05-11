@@ -168,42 +168,6 @@ func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *mo
 	}, nil
 }
 
-// fillOrderItemsStock 填充确认单商品的实时库存，并标记是否库存不足。
-func (s *IApiShopOrderServiceImpl) fillOrderItemsStock(c *gin.Context, items []*models.OrderCacheItem) error {
-	for _, item := range items {
-		if item == nil {
-			continue
-		}
-
-		availableStock, err := s.getItemAvailableStock(c, item)
-		if err != nil {
-			return err
-		}
-		item.AvailableStock = availableStock
-		item.StockInsufficient = item.Quantity > availableStock
-	}
-	return nil
-}
-
-// validateCreateItemsStock 在正式扣减库存前统一校验商品库存，并返回明确的不足提示。
-func (s *IApiShopOrderServiceImpl) validateCreateItemsStock(c *gin.Context, items []*models.OrderCacheItem) error {
-	if err := s.fillOrderItemsStock(c, items); err != nil {
-		return err
-	}
-
-	insufficientItems := make([]string, 0)
-	for _, item := range items {
-		if item == nil || !item.StockInsufficient {
-			continue
-		}
-		insufficientItems = append(insufficientItems, s.buildStockInsufficientMessage(item))
-	}
-	if len(insufficientItems) > 0 {
-		return errors.New("下单失败，库存不足: " + strings.Join(insufficientItems, "；"))
-	}
-	return nil
-}
-
 // getItemAvailableStock 读取商品当前可用库存，活动商品按活动库存与 SKU 库存的较小值返回。
 func (s *IApiShopOrderServiceImpl) getItemAvailableStock(c *gin.Context, item *models.OrderCacheItem) (int64, error) {
 	if item == nil || item.SkuID <= 0 {
@@ -229,6 +193,85 @@ func (s *IApiShopOrderServiceImpl) getItemAvailableStock(c *gin.Context, item *m
 		return 0, nil
 	}
 	return availableStock, nil
+}
+
+// fillOrderItemsStock 填充确认单商品的实时库存，并标记是否库存不足。
+func (s *IApiShopOrderServiceImpl) fillOrderItemsStock(c *gin.Context, items []*models.OrderCacheItem) error {
+	skuMap, err := s.loadOrderItemSkuMap(c, items)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+
+		availableStock := s.calcItemAvailableStock(item, skuMap[item.SkuID])
+		item.AvailableStock = availableStock
+		item.StockInsufficient = item.Quantity > availableStock
+	}
+	return nil
+}
+
+// validateCreateItemsStock 在正式扣减库存前统一校验商品库存，并返回明确的不足提示。
+func (s *IApiShopOrderServiceImpl) validateCreateItemsStock(c *gin.Context, items []*models.OrderCacheItem) error {
+	if err := s.fillOrderItemsStock(c, items); err != nil {
+		return err
+	}
+
+	insufficientItems := make([]string, 0)
+	for _, item := range items {
+		if item == nil || !item.StockInsufficient {
+			continue
+		}
+		insufficientItems = append(insufficientItems, s.buildStockInsufficientMessage(item))
+	}
+	if len(insufficientItems) > 0 {
+		return errors.New("下单失败，库存不足: " + strings.Join(insufficientItems, "；"))
+	}
+	return nil
+}
+
+// loadOrderItemSkuMap 批量读取订单商品对应的 SKU 数据。
+func (s *IApiShopOrderServiceImpl) loadOrderItemSkuMap(c *gin.Context, items []*models.OrderCacheItem) (map[int64]*shopmodels.GoodsSku, error) {
+	skuIDs := collectOrderItemSkuIDs(items)
+	if len(skuIDs) == 0 {
+		return map[int64]*shopmodels.GoodsSku{}, nil
+	}
+
+	skuList, err := s.skuDao.ListByIDs(c, skuIDs)
+	if err != nil {
+		return nil, errors.New("读取商品库存失败")
+	}
+
+	skuMap := make(map[int64]*shopmodels.GoodsSku, len(skuList))
+	for _, sku := range skuList {
+		if sku == nil {
+			continue
+		}
+		skuMap[int64(sku.ID)] = sku
+	}
+	return skuMap, nil
+}
+
+// calcItemAvailableStock 计算单个商品当前可用库存，活动商品按活动库存与 SKU 库存的较小值返回。
+func (s *IApiShopOrderServiceImpl) calcItemAvailableStock(item *models.OrderCacheItem, sku *shopmodels.GoodsSku) int64 {
+	if item == nil || sku == nil {
+		return 0
+	}
+
+	availableStock := sku.Quantity
+	if item.SeckillInfo != nil {
+		availableStock = minInt64(availableStock, item.SeckillInfo.Stock)
+	}
+	if item.CombinationInfo != nil {
+		availableStock = minInt64(availableStock, item.CombinationInfo.Stock)
+	}
+	if availableStock < 0 {
+		return 0
+	}
+	return availableStock
 }
 
 // buildStockInsufficientMessage 组装单个商品的库存不足提示。
@@ -688,20 +731,20 @@ func (s *IApiShopOrderServiceImpl) buildSeckillCacheItem(c *gin.Context, secKill
 	if seckill.IsShow != 1 || seckill.Status != 1 {
 		return nil, errors.New("秒杀商品已下架")
 	}
-	if quantity > seckill.Stock {
-		return nil, errors.New("秒杀库存不足")
-	}
 	if seckill.OnceNum > 0 && quantity > int64(seckill.OnceNum) {
 		return nil, errors.New("超过秒杀单次限购数量")
 	}
 
-	goods, sku, err := s.loadGoodsAndSkuByGoodsID(c, seckill.ProductID, skuID)
+	goods, sku, err := s.loadGoodsAndSkuByGoodsID(c, seckill.ProductID, skuID, quantity)
 	if err != nil {
 		return nil, err
 	}
 	goodsName := strings.TrimSpace(seckill.Title)
 	if goodsName == "" {
 		goodsName = goods.GoodsName
+	}
+	if err := s.validateCacheItemStock(goodsName, sku.SkuName, quantity, minInt64(seckill.Stock, sku.Quantity), "秒杀商品"); err != nil {
+		return nil, err
 	}
 	imageURL := strings.TrimSpace(seckill.Image)
 	item := s.assembleCacheItem(c, goods, sku, quantity, seckill.Price, goodsName, imageURL)
@@ -725,20 +768,20 @@ func (s *IApiShopOrderServiceImpl) buildCombinationCacheItem(c *gin.Context, com
 	if combination.IsShow != 1 {
 		return nil, errors.New("拼团商品已下架")
 	}
-	if quantity > combination.Stock {
-		return nil, errors.New("拼团库存不足")
-	}
 	if combination.OnceNum > 0 && quantity > combination.OnceNum {
 		return nil, errors.New("超过拼团单次限购数量")
 	}
 
-	goods, sku, err := s.loadGoodsAndSkuByGoodsCode(c, strings.TrimSpace(combination.ProductID), skuID)
+	goods, sku, err := s.loadGoodsAndSkuByGoodsCode(c, strings.TrimSpace(combination.ProductID), skuID, quantity)
 	if err != nil {
 		return nil, err
 	}
 	goodsName := strings.TrimSpace(combination.Title)
 	if goodsName == "" {
 		goodsName = goods.GoodsName
+	}
+	if err := s.validateCacheItemStock(goodsName, sku.SkuName, quantity, minInt64(combination.Stock, sku.Quantity), "拼团商品"); err != nil {
+		return nil, err
 	}
 	imageURL := strings.TrimSpace(combination.Image)
 	item := s.assembleCacheItem(c, goods, sku, quantity, combination.Price, goodsName, imageURL)
@@ -766,14 +809,14 @@ func (s *IApiShopOrderServiceImpl) buildDirectCacheItem(c *gin.Context, skuID in
 	if goods == nil {
 		return nil, errors.New("商品不存在")
 	}
-	if quantity > sku.Quantity {
-		return nil, errors.New("库存不足")
+	if err := s.validateCacheItemStock(goods.GoodsName, sku.SkuName, quantity, sku.Quantity, ""); err != nil {
+		return nil, err
 	}
 	return s.assembleCacheItem(c, goods, sku, quantity, sku.RetailPrice, goods.GoodsName, ""), nil
 }
 
 // loadGoodsAndSkuByGoodsID 按商品主键和规格ID加载商品快照所需数据。
-func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsID(c *gin.Context, goodsID int64, skuID int64) (*models.Goods, *shopmodels.GoodsSku, error) {
+func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsID(c *gin.Context, goodsID int64, skuID int64, quantity int64) (*models.Goods, *shopmodels.GoodsSku, error) {
 	goods, err := s.goodsDao.GetByID(c, goodsID)
 	if err != nil {
 		return nil, nil, errors.New("读取商品信息失败")
@@ -795,13 +838,13 @@ func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsID(c *gin.Context, good
 		return nil, nil, errors.New("商品已下架")
 	}
 	if goods.Quantity <= 0 || sku.Quantity <= 0 {
-		return nil, nil, errors.New("库存不足")
+		return nil, nil, s.newStockInsufficientError(goods.GoodsName, sku.SkuName, quantity, 0, "")
 	}
 	return goods, sku, nil
 }
 
 // loadGoodsAndSkuByGoodsCode 按商品业务ID和规格ID加载商品快照所需数据。
-func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsCode(c *gin.Context, goodsCode string, skuID int64) (*models.Goods, *shopmodels.GoodsSku, error) {
+func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsCode(c *gin.Context, goodsCode string, skuID int64, quantity int64) (*models.Goods, *shopmodels.GoodsSku, error) {
 	if goodsCode == "" {
 		return nil, nil, errors.New("活动商品数据异常")
 	}
@@ -826,7 +869,7 @@ func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsCode(c *gin.Context, go
 		return nil, nil, errors.New("商品已下架")
 	}
 	if goods.Quantity <= 0 || sku.Quantity <= 0 {
-		return nil, nil, errors.New("库存不足")
+		return nil, nil, s.newStockInsufficientError(goods.GoodsName, sku.SkuName, quantity, 0, "")
 	}
 	return goods, sku, nil
 }
@@ -902,8 +945,8 @@ func (s *IApiShopOrderServiceImpl) buildSingleCacheItem(c *gin.Context, goodsID 
 	if sku == nil {
 		return nil, errors.New("商品规格不存在")
 	}
-	if quantity > sku.Quantity {
-		return nil, errors.New("库存不足")
+	if err := s.validateCacheItemStock(goods.GoodsName, sku.SkuName, quantity, sku.Quantity, ""); err != nil {
+		return nil, err
 	}
 	item := &models.OrderCacheItem{
 		GoodsID:     goodsID,
@@ -916,6 +959,35 @@ func (s *IApiShopOrderServiceImpl) buildSingleCacheItem(c *gin.Context, goodsID 
 		TotalAmount: sku.RetailPrice * float64(quantity),
 	}
 	return item, nil
+}
+
+// validateCacheItemStock 校验缓存商品的库存是否满足本次购买数量。
+func (s *IApiShopOrderServiceImpl) validateCacheItemStock(goodsName string, skuName string, quantity int64, availableStock int64, scene string) error {
+	if quantity <= availableStock {
+		return nil
+	}
+	return s.newStockInsufficientError(goodsName, skuName, quantity, availableStock, scene)
+}
+
+// newStockInsufficientError 组装带商品信息的库存不足错误提示。
+func (s *IApiShopOrderServiceImpl) newStockInsufficientError(goodsName string, skuName string, quantity int64, availableStock int64, scene string) error {
+	message := s.buildStockInsufficientDetail(goodsName, skuName, quantity, availableStock)
+	if scene != "" {
+		return errors.New(scene + "库存不足: " + message)
+	}
+	return errors.New("库存不足: " + message)
+}
+
+// buildStockInsufficientDetail 组装库存不足明细，包含商品名、规格、购买数和剩余库存。
+func (s *IApiShopOrderServiceImpl) buildStockInsufficientDetail(goodsName string, skuName string, quantity int64, availableStock int64) string {
+	name := strings.TrimSpace(goodsName)
+	if currentSkuName := strings.TrimSpace(skuName); currentSkuName != "" {
+		name = strings.TrimSpace(name + " " + currentSkuName)
+	}
+	if name == "" {
+		name = "商品"
+	}
+	return fmt.Sprintf("%s(购买%d，剩余%d)", name, quantity, availableStock)
 }
 
 func (s *IApiShopOrderServiceImpl) resolveConfirmAddress(c *gin.Context, userID int64, addressID int64) (*models.ShopUserAddressApp, error) {
@@ -973,6 +1045,23 @@ func minInt64(a, b int64) int64 {
 		return a
 	}
 	return b
+}
+
+// collectOrderItemSkuIDs 收集订单商品中的 SKU ID 并去重。
+func collectOrderItemSkuIDs(items []*models.OrderCacheItem) []int64 {
+	result := make([]int64, 0, len(items))
+	seen := make(map[int64]struct{}, len(items))
+	for _, item := range items {
+		if item == nil || item.SkuID <= 0 {
+			continue
+		}
+		if _, ok := seen[item.SkuID]; ok {
+			continue
+		}
+		seen[item.SkuID] = struct{}{}
+		result = append(result, item.SkuID)
+	}
+	return result
 }
 
 // buildERPOrderSet 将商城订单请求转换为 ERP 订单保存参数。

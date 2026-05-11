@@ -38,6 +38,22 @@ func (s *IApiShopSkuDaoImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Good
 	return &item, nil
 }
 
+// ListByIDs 根据主键列表批量查询 SKU。
+func (s *IApiShopSkuDaoImpl) ListByIDs(c *gin.Context, ids []int64) ([]*shopmodels.GoodsSku, error) {
+	if len(ids) == 0 {
+		return make([]*shopmodels.GoodsSku, 0), nil
+	}
+
+	rows := make([]*shopmodels.GoodsSku, 0, len(ids))
+	if err := getCurrentDB(c, s.db).WithContext(c).
+		Table(s.tableName).
+		Where("id IN ?", ids).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 // DeductStock 原子扣减 SKU 库存。
 func (s *IApiShopSkuDaoImpl) DeductStock(c *gin.Context, id int64, quantity int64) error {
 	if quantity <= 0 {
