@@ -95,6 +95,18 @@ func (s *ShopSkuDaoImpl) GetByID(c *gin.Context, id int64) (*shopmodels.GoodsSku
 	return &item, nil
 }
 
+// ListByIDs 根据主键ID批量查询商品规格
+func (s *ShopSkuDaoImpl) ListByIDs(c *gin.Context, ids []int64) ([]*shopmodels.GoodsSku, error) {
+	if len(ids) == 0 {
+		return []*shopmodels.GoodsSku{}, nil
+	}
+	rows := make([]*shopmodels.GoodsSku, 0, len(ids))
+	if err := s.db.WithContext(c).Table(s.tableName).Where("id IN ?", ids).Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 // GetBySkuID 根据规格业务ID查询商品规格
 func (s *ShopSkuDaoImpl) GetBySkuID(c *gin.Context, skuID string) (*shopmodels.GoodsSku, error) {
 	var item shopmodels.GoodsSku

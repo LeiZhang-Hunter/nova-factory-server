@@ -178,8 +178,5 @@ func (s *IApiShopCartDaoImpl) getByIDTx(c *gin.Context, tx *gorm.DB, id int64) (
 func (s *IApiShopCartDaoImpl) Remove(c *gin.Context, ids []string) error {
 	return s.db.WithContext(c).Table(s.tableName).
 		Where("id IN ?", ids).
-		Updates(map[string]interface{}{
-			"state":       commonStatus.DELETE,
-			"update_time": gorm.Expr("NOW()"),
-		}).Error
+		Delete(&models.CartDto{}).Error
 }
