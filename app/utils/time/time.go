@@ -157,3 +157,15 @@ func FormatDateFromSecond(second int64) string {
 	dateTimeStr := t.Format("2006-01-02 15:04:05")
 	return dateTimeStr
 }
+
+// ParseDateTime 解析 "2006-01-02 15:04:05" 格式的时间字符串
+func ParseDateTime(s string) (*time.Time, error) {
+	if s == "" {
+		return nil, nil
+	}
+	t, err := time.Parse("2006-01-02 15:04:05", s)
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
