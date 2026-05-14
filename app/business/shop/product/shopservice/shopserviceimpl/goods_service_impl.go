@@ -32,7 +32,8 @@ const importBatchSize = 100
 const goodsExportBatchSize int64 = 500
 
 // NewShopGoodsService 创建商品服务
-func NewShopGoodsService(dao shopdao.IShopGoodsDao, vectorDao shopdao.IShopGoodsVectorDao, skuDao shopdao.IShopSkuDao, categoryDao shopdao.IShopCategoryDao) shopservice.IShopGoodsService {
+func NewShopGoodsService(dao shopdao.IShopGoodsDao, vectorDao shopdao.IShopGoodsVectorDao,
+	skuDao shopdao.IShopSkuDao, categoryDao shopdao.IShopCategoryDao) shopservice.IShopGoodsService {
 	return &ShopGoodsServiceImpl{
 		dao:         dao,
 		vectorDao:   vectorDao,

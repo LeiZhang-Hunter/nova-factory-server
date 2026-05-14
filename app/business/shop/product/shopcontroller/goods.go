@@ -27,7 +27,7 @@ func NewGoods(service shopservice.IShopGoodsService) *Goods {
 func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/goods")
 	group.GET("/list", middlewares.HasPermission("shop:goods:list"), s.List)
-	group.GET("/export/csv", middlewares.HasPermission("shop:goods:list"), s.ExportCSV)
+	group.GET("/export/csv", middlewares.HasPermission("shop:goods:export:csv"), s.ExportCSV)
 	group.GET("/info/:id", middlewares.HasPermission("shop:goods:info"), s.GetByID)
 	group.POST("/add", middlewares.HasPermission("shop:goods:add"), s.Create)
 	group.PUT("/edit", middlewares.HasPermission("shop:goods:edit"), s.Update)
@@ -195,12 +195,18 @@ func (s *Goods) Import(c *gin.Context) {
 // @Router /shop/goods/vector/generate/{id} [post]
 func (s *Goods) Generate(c *gin.Context) {
 	id := baizeContext.ParamInt64(c, "id")
-	if id <= 0 {
+	req := new(shopmodels.GenVectorReq)
+	if req.ID <= 0 {
 		zap.L().Error("invalid goods id", zap.Int64("id", id))
 		baizeContext.ParameterError(c)
 		return
 	}
-	data, err := s.service.GenerateVector(c, id)
+	if req.Embedding == nil {
+		zap.L().Error("invalid goods embedding")
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.GenerateVector(c, req)
 	if err != nil {
 		zap.L().Error("generate goods vector fail", zap.Int64("id", id), zap.Error(err))
 		baizeContext.Waring(c, err.Error())

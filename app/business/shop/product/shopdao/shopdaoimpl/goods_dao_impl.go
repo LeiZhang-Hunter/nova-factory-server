@@ -262,6 +262,12 @@ func buildGoodsUpdates(c *gin.Context, req *shopmodels.GoodsUpsert) map[string]i
 	if err != nil {
 		zap.L().Error("normalizeResourcePath error", zap.Error(err))
 	}
+
+	videoUrl, err := fileUtils.NormalizeResourcePath(req.ImageURL)
+	if err != nil {
+		zap.L().Error("normalizeResourcePath error", zap.Error(err))
+	}
+
 	return map[string]interface{}{
 		"goods_id":        req.GoodsID,
 		"goods_name":      req.GoodsName,
@@ -270,7 +276,7 @@ func buildGoodsUpdates(c *gin.Context, req *shopmodels.GoodsUpsert) map[string]i
 		"image_url":       imageURL,
 		"retail_price":    req.RetailPrice,
 		"gallery_images":  galleryImagesStr,
-		"video_url":       req.VideoURL,
+		"video_url":       videoUrl,
 		"description":     req.Description,
 		"weight":          req.Weight,
 		"weight_unit":     req.WeightUnit,

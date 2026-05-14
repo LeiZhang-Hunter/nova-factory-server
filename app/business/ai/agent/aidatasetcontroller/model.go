@@ -27,6 +27,7 @@ func NewModel(service aidatasetservice.IAiModelProviderService, settingService a
 func (m *Model) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/ai/model")
 	group.GET("/provider/list", middlewares.HasPermission("ai:model:provider:list"), m.ProviderList)
+	group.GET("/provider/embedding/config", middlewares.HasPermission("ai:model:provider:embedding:config"), m.EmbeddingConfig)
 	group.GET("/provider/setting/get", middlewares.HasPermission("ai:model:provider:setting:get"), m.GetSetting)
 	group.POST("/provider/setting/set", middlewares.HasPermission("ai:model:provider:setting:set"), m.SetSetting)
 	group.GET("/provider/global/get", middlewares.HasPermission("ai:model:provider:global:get"), m.GetGlobalModel)
@@ -164,4 +165,26 @@ func (m *Model) RemoveGlobalModel(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// EmbeddingConfig embedding模型信息
+// @Summary embedding模型信息
+// @Description 读取支持embedding的模型供应商及其下级embedding模型信息
+// @Tags 工业智能体/模型配置
+// @Param  object query aidatasetmodels.SysAiModelProviderListReq true "embedding模型信息参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /ai/model/provider/embedding/config [get]
+func (m *Model) EmbeddingConfig(c *gin.Context) {
+	req := new(aidatasetmodels.EmbeddingModelConfigRequest)
+	if err := c.ShouldBindQuery(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	list, err := m.service.EmbeddingWithLLM(c)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, list)
 }

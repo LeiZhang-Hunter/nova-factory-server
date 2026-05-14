@@ -21,3 +21,8 @@ type ModelResponse struct {
 	CompletionTokens int    `json:"completionTokens"`
 	TotalTokens      int    `json:"totalTokens"`
 }
+
+type EmbeddingModelConfigRequest struct {
+	ProviderID string `json:"providerId"`
+	ModelID    string `json:"modelId"`
+}

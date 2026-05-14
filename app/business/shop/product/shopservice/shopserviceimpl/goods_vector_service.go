@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	embeddingutil "nova-factory-server/app/utils/llm/embedding"
@@ -19,8 +18,8 @@ type goodsVectorConfig struct {
 	Embedding embeddingutil.ProviderConfig `mapstructure:"embedding"`
 }
 
-func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, id int64) (*shopmodels.GoodsVectorResult, error) {
-	goods, err := s.GetByID(c, id)
+func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.GenVectorReq) (*shopmodels.GoodsVectorResult, error) {
+	goods, err := s.dao.GetByID(c, req.ID)
 	if err != nil {
 		return nil, fmt.Errorf("查询商品失败: %w", err)
 	}
@@ -28,7 +27,11 @@ func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, id int64) (*shopmo
 		return nil, errors.New("商品不存在")
 	}
 
-	cfg, err := loadGoodsVectorConfig()
+	if err = s.attachSkus(c, []*shopmodels.Goods{goods}); err != nil {
+		return nil, err
+	}
+
+	cfg, err := s.loadGoodsVectorConfig(c, req)
 	if err != nil {
 		return nil, err
 	}
@@ -55,20 +58,15 @@ func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, id int64) (*shopmo
 	return s.vectorDao.Upsert(c, goods, content, float64ToFloat32(vectors[0]))
 }
 
-func loadGoodsVectorConfig() (*goodsVectorConfig, error) {
+func (s *ShopGoodsServiceImpl) loadGoodsVectorConfig(c *gin.Context,
+	req *shopmodels.GenVectorReq) (*goodsVectorConfig, error) {
+
 	cfg := &goodsVectorConfig{}
-	_ = viper.UnmarshalKey("shop.goods_vector", cfg)
 
-	if cfg.Embedding.ModelID == "" && viper.IsSet("embedding") {
-		if err := viper.UnmarshalKey("embedding", &cfg.Embedding); err != nil {
-			return nil, fmt.Errorf("读取 embedding 配置失败: %w", err)
-		}
-	}
-
-	cfg.Embedding.ProviderType = strings.TrimSpace(cfg.Embedding.ProviderType)
-	cfg.Embedding.ProviderID = strings.TrimSpace(cfg.Embedding.ProviderID)
-	cfg.Embedding.APIEndpoint = strings.TrimSpace(cfg.Embedding.APIEndpoint)
-	cfg.Embedding.ModelID = strings.TrimSpace(cfg.Embedding.ModelID)
+	cfg.Embedding.ProviderType = req.Embedding.ProviderType
+	cfg.Embedding.ProviderID = req.Embedding.ProviderID
+	cfg.Embedding.APIEndpoint = req.Embedding.APIEndpoint
+	cfg.Embedding.ModelID = req.Embedding.ModelID
 
 	if cfg.Embedding.ProviderType == "" {
 		cfg.Embedding.ProviderType = "openai"

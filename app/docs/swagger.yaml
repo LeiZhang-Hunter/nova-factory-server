@@ -2700,6 +2700,31 @@ definitions:
       param:
         type: string
     type: object
+  models.BatchDiscountRuleCreate:
+    properties:
+      discountRate:
+        description: 折扣率
+        type: number
+      targetIds:
+        description: 商品ID或分类ID列表
+        items:
+          type: string
+        type: array
+      targetType:
+        description: goods=商品, category=分类
+        type: string
+      userIds:
+        description: 用户ID列表
+        items:
+          type: integer
+        type: array
+      validFrom:
+        description: 有效期开始
+        type: string
+      validTo:
+        description: 有效期结束
+        type: string
+    type: object
   models.CartSetDataReq:
     properties:
       goodsId:
@@ -3271,6 +3296,32 @@ definitions:
         type: string
       name:
         description: 智能预警名称
+        type: string
+    type: object
+  models.UserDiscountRuleUpsert:
+    properties:
+      discountRate:
+        description: 折扣率
+        type: integer
+      id:
+        description: 主键ID
+        example: "0"
+        type: string
+      targetId:
+        description: 商品ID或分类ID
+        type: string
+      targetType:
+        description: goods=商品, category=分类
+        type: string
+      userId:
+        description: 用户ID
+        example: "0"
+        type: string
+      validFrom:
+        description: '有效期开始 (格式: 2006-01-02 15:04:05)'
+        type: string
+      validTo:
+        description: '有效期结束 (格式: 2006-01-02 15:04:05)'
         type: string
     type: object
   models.UserUpsert:
@@ -6312,6 +6363,32 @@ paths:
       summary: 保存MCP服务配置
       tags:
       - 工业智能体/MCP服务配置
+  /ai/model/provider/embedding/config:
+    get:
+      description: 读取支持embedding的模型供应商及其下级embedding模型信息
+      parameters:
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: embedding模型信息
+      tags:
+      - 工业智能体/模型配置
   /ai/model/provider/global/get:
     get:
       description: 读取SetGlobalModel保存的用户模型配置
@@ -13593,6 +13670,180 @@ paths:
       summary: 新增或修改商城用户购物车
       tags:
       - 商城/用户购物车
+  /shop/user/discount/add:
+    post:
+      description: 新增折扣规则
+      parameters:
+      - description: 折扣规则新增参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserDiscountRuleUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 新增成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增折扣规则
+      tags:
+      - 商城/用户管理/折扣规则
+  /shop/user/discount/batch:
+    post:
+      description: 批量创建折扣规则
+      parameters:
+      - description: 批量创建参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.BatchDiscountRuleCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 批量创建折扣规则
+      tags:
+      - 商城/用户管理/折扣规则
+  /shop/user/discount/ids/{userId}:
+    get:
+      description: 获取用户所有折扣规则关联的商品ID和分类ID列表
+      parameters:
+      - description: 用户ID
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  additionalProperties:
+                    items:
+                      type: integer
+                    type: array
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取用户已使用目标ID
+      tags:
+      - 商城/用户管理/折扣规则
+  /shop/user/discount/info/{id}:
+    get:
+      description: 根据ID获取折扣规则详情
+      parameters:
+      - description: 折扣规则ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取折扣规则详情
+      tags:
+      - 商城/用户管理/折扣规则
+  /shop/user/discount/list:
+    get:
+      description: 获取折扣规则列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 商品ID或分类ID
+        in: query
+        name: targetId
+        type: string
+      - description: '类型: goods, category'
+        in: query
+        name: targetType
+        type: string
+      - description: 用户ID
+        in: query
+        name: userId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取折扣规则列表
+      tags:
+      - 商城/用户管理/折扣规则
+  /shop/user/discount/remove/{ids}:
+    delete:
+      description: 根据ID删除折扣规则
+      parameters:
+      - description: 折扣规则ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除折扣规则
+      tags:
+      - 商城/用户管理/折扣规则
+  /shop/user/discount/update:
+    put:
+      description: 修改折扣规则
+      parameters:
+      - description: 折扣规则修改参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserDiscountRuleUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 修改成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 修改折扣规则
+      tags:
+      - 商城/用户管理/折扣规则
   /shop/user/list:
     get:
       description: 获取商城用户列表

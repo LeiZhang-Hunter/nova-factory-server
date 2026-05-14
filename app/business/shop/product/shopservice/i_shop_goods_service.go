@@ -16,5 +16,5 @@ type IShopGoodsService interface {
 	List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error)
 	ExportCSV(c *gin.Context, req *shopmodels.GoodsQuery, csvWriter *csv.Writer, flush func()) error
 	Import(c *gin.Context, records []shopmodels.ImportGoodsRecord) error
-	GenerateVector(c *gin.Context, id int64) (*shopmodels.GoodsVectorResult, error)
+	GenerateVector(c *gin.Context, req *shopmodels.GenVectorReq) (*shopmodels.GoodsVectorResult, error)
 }

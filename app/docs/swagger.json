@@ -2223,6 +2223,48 @@
                 }
             }
         },
+        "/ai/model/provider/embedding/config": {
+            "get": {
+                "description": "读取支持embedding的模型供应商及其下级embedding模型信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "embedding模型信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/model/provider/global/get": {
             "get": {
                 "description": "读取SetGlobalModel保存的用户模型配置",
@@ -13726,6 +13768,291 @@
                 }
             }
         },
+        "/shop/user/discount/add": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增折扣规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "新增折扣规则",
+                "parameters": [
+                    {
+                        "description": "折扣规则新增参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserDiscountRuleUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/batch": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "批量创建折扣规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "批量创建折扣规则",
+                "parameters": [
+                    {
+                        "description": "批量创建参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BatchDiscountRuleCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/ids/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取用户所有折扣规则关联的商品ID和分类ID列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "获取用户已使用目标ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "integer"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取折扣规则详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "获取折扣规则详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "折扣规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取折扣规则列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "获取折扣规则列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "商品ID或分类ID",
+                        "name": "targetId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "类型: goods, category",
+                        "name": "targetType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除折扣规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "删除折扣规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "折扣规则ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改折扣规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "修改折扣规则",
+                "parameters": [
+                    {
+                        "description": "折扣规则修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserDiscountRuleUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/user/list": {
             "get": {
                 "security": [
@@ -22057,6 +22384,41 @@
                 }
             }
         },
+        "models.BatchDiscountRuleCreate": {
+            "type": "object",
+            "properties": {
+                "discountRate": {
+                    "description": "折扣率",
+                    "type": "number"
+                },
+                "targetIds": {
+                    "description": "商品ID或分类ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "targetType": {
+                    "description": "goods=商品, category=分类",
+                    "type": "string"
+                },
+                "userIds": {
+                    "description": "用户ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "validFrom": {
+                    "description": "有效期开始",
+                    "type": "string"
+                },
+                "validTo": {
+                    "description": "有效期结束",
+                    "type": "string"
+                }
+            }
+        },
         "models.CartSetDataReq": {
             "type": "object",
             "required": [
@@ -22854,6 +23216,41 @@
                 },
                 "name": {
                     "description": "智能预警名称",
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserDiscountRuleUpsert": {
+            "type": "object",
+            "properties": {
+                "discountRate": {
+                    "description": "折扣率",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "targetId": {
+                    "description": "商品ID或分类ID",
+                    "type": "string"
+                },
+                "targetType": {
+                    "description": "goods=商品, category=分类",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "validFrom": {
+                    "description": "有效期开始 (格式: 2006-01-02 15:04:05)",
+                    "type": "string"
+                },
+                "validTo": {
+                    "description": "有效期结束 (格式: 2006-01-02 15:04:05)",
                     "type": "string"
                 }
             }

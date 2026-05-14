@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/snowflake"
+	"strin
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -51,11 +52,74 @@ func (i *IAiModelProviderDaoImpl) ListWithLLM(c *gin.Context, req *aidatasetmode
 	for _, item := range rows {
 		names = append(names, item.Name)
 	}
+	llms, err := i.llmDao.ListByFIDs(c, names)
+	if err != nil {
+		return nil, err
+	}
+	attachLLMs(rows, llms)
 
 	return &aidatasetmodels.SysAiModelProviderListData{
 		Rows:  rows,
-		Total: 0,
+		Total: int64(len(rows)),
 	}, nil
+}
+
+func (i *IAiModelProviderDaoImpl) ListEmbeddingWithLLM(c *gin.Context, req *aidatasetmodels.SysAiModelProviderListReq) (*aidatasetmodels.SysAiModelProviderListData, error) {
+	data, err := i.ListWithLLM(c, req)
+	if err != nil {
+		return nil, err
+	}
+	if data == nil || len(data.Rows) == 0 {
+		return data, nil
+	}
+	filtered := filterEmbeddingProviders(data.Rows)
+	return &aidatasetmodels.SysAiModelProviderListData{
+		Rows:  filtered,
+		Total: int64(len(filtered)),
+	}, nil
+}
+
+func attachLLMs(rows []*aidatasetmodels.SysAiModelProvider, llms []*aidatasetmodels.SysAiLLM) {
+	llmMap := make(map[string][]*aidatasetmodels.SysAiLLM, len(rows))
+	for _, llm := range llms {
+		if llm == nil {
+			continue
+		}
+		llmMap[llm.Fid] = append(llmMap[llm.Fid], llm)
+	}
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		row.LLMs = llmMap[row.Name]
+		if row.LLMs == nil {
+			row.LLMs = make([]*aidatasetmodels.SysAiLLM, 0)
+		}
+	}
+}
+
+func filterEmbeddingProviders(rows []*aidatasetmodels.SysAiModelProvider) []*aidatasetmodels.SysAiModelProvider {
+	filtered := make([]*aidatasetmodels.SysAiModelProvider, 0, len(rows))
+	for _, provider := range rows {
+		if provider == nil {
+			continue
+		}
+		llms := make([]*aidatasetmodels.SysAiLLM, 0, len(provider.LLMs))
+		for _, llm := range provider.LLMs {
+			if llm == nil {
+				continue
+			}
+			if strings.EqualFold(strings.TrimSpace(llm.ModelType), "embedding") {
+				llms = append(llms, llm)
+			}
+		}
+		if len(llms) == 0 {
+			continue
+		}
+		provider.LLMs = llms
+		filtered = append(filtered, provider)
+	}
+	return filtered
 }
 
 func (i *IAiModelProviderDaoImpl) UpsertFactoryProvider(tx *gorm.DB, item *aidatasetmodels.FactoryProviderUpsert, status int32, rank int32, now time.Time) (int64, error) {
