@@ -2700,60 +2700,23 @@ definitions:
       param:
         type: string
     type: object
-  models.AddressSetReq:
+  models.CartSetDataReq:
     properties:
-      addressLabel:
-        description: 地址标签
-        type: string
-      cityCode:
-        description: 市编码
-        type: string
-      cityName:
-        description: 市名称
-        type: string
-      detailAddress:
-        description: 详细地址
-        type: string
-      districtCode:
-        description: 区编码
-        type: string
-      districtName:
-        description: 区名称
-        type: string
-      id:
-        description: 主键ID
+      goodsId:
+        description: 商品ID
         example: "0"
         type: string
-      isDefault:
-        description: 是否默认地址
-        type: boolean
-      postalCode:
-        description: 邮政编码
-        type: string
-      provinceCode:
-        description: 省编码
-        type: string
-      provinceName:
-        description: 省名称
-        type: string
-      receiverMobile:
-        description: 收货人手机号
-        type: string
-      receiverName:
-        description: 收货人姓名
-        type: string
-      status:
-        description: 状态
+      quantity:
+        description: 数量
         type: integer
-      streetCode:
-        description: 街道编码
-        type: string
-      streetName:
-        description: 街道名称
+      skuId:
+        description: SKU ID
+        example: "0"
         type: string
     required:
-    - detailAddress
-    - receiverMobile
+    - goodsId
+    - quantity
+    - skuId
     type: object
   models.CartSetReq:
     properties:
@@ -2797,12 +2760,92 @@ definitions:
     - quantity
     - skuId
     type: object
+  models.CombinationSet:
+    properties:
+      attr:
+        type: string
+      browse:
+        type: integer
+      effectiveTime:
+        type: integer
+      homeModuleIds:
+        items:
+          type: string
+        type: array
+      id:
+        example: "0"
+        type: string
+      image:
+        type: string
+      images:
+        type: string
+      info:
+        type: string
+      isHost:
+        type: integer
+      isPostage:
+        type: integer
+      isShow:
+        type: integer
+      merId:
+        example: "0"
+        type: string
+      num:
+        type: integer
+      onceNum:
+        type: integer
+      people:
+        type: integer
+      postage:
+        type: number
+      price:
+        type: number
+      productId:
+        type: string
+      quota:
+        type: integer
+      quotaShow:
+        type: integer
+      sales:
+        type: integer
+      sort:
+        type: integer
+      startTime:
+        type: integer
+      stock:
+        type: integer
+      stopTime:
+        type: integer
+      title:
+        type: string
+      unitName:
+        type: string
+      virtual:
+        type: integer
+      volume:
+        type: number
+      weight:
+        type: number
+    required:
+    - image
+    - people
+    - productId
+    - title
+    type: object
   models.Expression:
     properties:
       rules:
         items:
           $ref: '#/definitions/models.Rule'
         type: array
+    type: object
+  models.FavoriteAddReq:
+    properties:
+      goodsId:
+        description: 商品ID (VARCHAR)
+        type: string
+    required:
+    - goodsId
     type: object
   models.Group:
     properties:
@@ -2817,6 +2860,157 @@ definitions:
       value:
         type: string
     type: object
+  models.HomeModuleItemSet:
+    properties:
+      businessType:
+        type: string
+      extJson:
+        type: string
+      id:
+        description: 主键ID，更新时传
+        example: "0"
+        type: string
+      itemImage:
+        type: string
+      itemName:
+        type: string
+      itemSubTitle:
+        type: string
+      linkId:
+        example: "0"
+        type: string
+      moduleId:
+        description: 模块ID
+        example: "0"
+        type: string
+      sort:
+        type: integer
+      status:
+        type: integer
+    type: object
+  models.HomeModuleSet:
+    properties:
+      endTime:
+        type: integer
+      extJson:
+        type: string
+      id:
+        description: 主键ID，更新时传
+        example: "0"
+        type: string
+      limitNum:
+        type: integer
+      moduleName:
+        type: string
+      moduleType:
+        type: string
+      moreLink:
+        type: string
+      pageKey:
+        description: 页面标识
+        type: string
+      ruleJson:
+        type: string
+      showMore:
+        type: integer
+      sort:
+        type: integer
+      sourceType:
+        type: integer
+      startTime:
+        type: integer
+      status:
+        type: integer
+      styleJson:
+        type: string
+      subTitle:
+        type: string
+      title:
+        type: string
+    type: object
+  models.OrderCacheReq:
+    properties:
+      cartId:
+        description: 购物车ID列表
+        items:
+          type: string
+        type: array
+      combinationId:
+        description: 拼团活动ID
+        example: "0"
+        type: string
+      pinkId:
+        description: 拼团记录ID
+        example: "0"
+        type: string
+      quantity:
+        description: 购买数量
+        type: integer
+      secKillId:
+        description: 秒杀活动ID
+        example: "0"
+        type: string
+      skuId:
+        description: 立即购买商品规格ID
+        example: "0"
+        type: string
+    type: object
+  models.OrderConfirmReq:
+    properties:
+      addressId:
+        description: 地址ID
+        example: "0"
+        type: string
+      couponCode:
+        description: 优惠券编码
+        type: string
+      deliveryType:
+        description: 配送方式
+        type: string
+      orderKey:
+        description: 预订单 key
+        type: string
+      usePoints:
+        description: 是否使用积分
+        type: boolean
+    required:
+    - orderKey
+    type: object
+  models.OrderCreateReq:
+    properties:
+      orderKey:
+        description: 预订单 key
+        type: string
+      remark:
+        description: 订单备注
+        type: string
+    required:
+    - orderKey
+    type: object
+  models.OrderStatusReq:
+    properties:
+      id:
+        description: 订单ID
+        example: "0"
+        type: string
+      reason:
+        description: 变更原因（如取消原因）
+        type: string
+      status:
+        description: 目标状态
+        type: integer
+    required:
+    - id
+    - status
+    type: object
+  models.RefreshTokenReq:
+    properties:
+      token:
+        description: 有效的JWT token
+        type: string
+    required:
+    - token
+    type: object
   models.Rule:
     properties:
       groups:
@@ -2829,17 +3023,237 @@ definitions:
         example: "0"
         type: string
     type: object
-  models.ShopLoginReq:
+  models.SeckillActivityProductInfo:
     properties:
-      account:
-        description: 登录账号，支持用户名或手机号
+      attrs:
+        description: 商品规格活动信息
+        items:
+          $ref: '#/definitions/models.SeckillActivityProductInfoAttr'
+        type: array
+      id:
+        description: 商品主键ID
+        example: "0"
         type: string
-      password:
-        description: 登录密码
+      isHot:
+        description: 是否热门推荐
+        type: integer
+      sort:
+        description: 排序值
+        type: integer
+      status:
+        description: 商品状态
+        type: integer
+    type: object
+  models.SeckillActivityProductInfoAttr:
+    properties:
+      cost:
+        description: 成本价
+        type: number
+      otPrice:
+        description: 原价
+        type: number
+      price:
+        description: 活动价
+        type: number
+      quota:
+        description: 限量
+        type: integer
+      skuId:
+        description: 规格业务ID
         type: string
+      status:
+        description: 是否参与活动
+        type: integer
+    type: object
+  models.SeckillActivitySet:
+    properties:
+      endDay:
+        description: 结束日期
+        type: integer
+      homeModuleIds:
+        description: 推荐首页模块ID集合
+        items:
+          type: string
+        type: array
+      id:
+        description: 活动ID，更新时传
+        example: "0"
+        type: string
+      isCommission:
+        description: 是否参与分佣
+        type: integer
+      linkId:
+        description: 关联ID，保留字段
+        type: integer
+      num:
+        description: 活动期间总购买数量限制
+        type: integer
+      onceNum:
+        description: 每人每日购买数量限制
+        type: integer
+      productInfos:
+        description: 参与活动的商品列表
+        items:
+          $ref: '#/definitions/models.SeckillActivityProductInfo'
+        type: array
+      startDay:
+        description: 开始日期
+        type: integer
+      status:
+        description: 是否显示
+        type: integer
+      timeIds:
+        description: 时间段ID，多个逗号分隔
+        items:
+          type: string
+        type: array
+      title:
+        description: 活动名称
+        type: string
+      type:
+        description: 活动类型
+        type: integer
     required:
-    - account
-    - password
+    - endDay
+    - startDay
+    - timeIds
+    - title
+    type: object
+  models.SeckillConfigSet:
+    properties:
+      beginClock:
+        description: 开启时间
+        type: integer
+      continueClock:
+        description: 持续时间
+        type: integer
+      id:
+        description: 秒杀配置ID，更新时传
+        example: "0"
+        type: string
+      images:
+        description: 轮播图
+        type: string
+      sort:
+        description: 排序值
+        type: integer
+      status:
+        type: boolean
+    type: object
+  models.SeckillSet:
+    properties:
+      activityId:
+        description: 活动ID
+        example: "0"
+        type: string
+      cost:
+        description: 成本价
+        type: number
+      customForm:
+        description: 自定义表单
+        type: string
+      freight:
+        description: 运费设置
+        type: integer
+      giveIntegral:
+        description: 赠送积分
+        type: number
+      id:
+        description: 秒杀商品ID，更新时传
+        example: "0"
+        type: string
+      image:
+        description: 推荐图
+        type: string
+      images:
+        description: 轮播图，逗号分隔
+        type: string
+      info:
+        description: 简介
+        type: string
+      isCommission:
+        description: 是否参与返佣
+        type: integer
+      isHot:
+        description: 是否热门推荐
+        type: integer
+      isPostage:
+        description: 是否包邮
+        type: integer
+      isShow:
+        description: 是否显示
+        type: integer
+      logistics:
+        description: 物流类型
+        type: string
+      num:
+        description: 最多秒杀数量
+        type: integer
+      onceNum:
+        description: 单次购买数量
+        type: integer
+      otPrice:
+        description: 原价
+        type: number
+      postage:
+        description: 邮费
+        type: number
+      price:
+        description: 秒杀价
+        type: number
+      productId:
+        description: 商品ID
+        example: "0"
+        type: string
+      quota:
+        description: 限购总数
+        type: integer
+      quotaShow:
+        description: 限购总数显示
+        type: integer
+      sales:
+        description: 销量
+        type: integer
+      sort:
+        description: 排序值
+        type: integer
+      startTime:
+        description: 开始时间
+        type: string
+      status:
+        description: 商品状态
+        type: integer
+      stock:
+        description: 库存
+        type: integer
+      stopTime:
+        description: 结束时间
+        type: string
+      tempId:
+        description: 运费模板ID
+        type: integer
+      timeId:
+        description: 时间段ID
+        type: string
+      title:
+        description: 活动标题
+        type: string
+      unitName:
+        description: 单位名称
+        type: string
+      virtualType:
+        description: 商品类型
+        type: integer
+      volume:
+        description: 商品体积
+        type: number
+      weight:
+        description: 商品重量
+        type: number
+    required:
+    - image
+    - productId
+    - title
     type: object
   models.SysDeviceElectricSettingVO:
     properties:
@@ -2901,6 +3315,47 @@ definitions:
     required:
     - userType
     - username
+    type: object
+  models.WechatConfigReq:
+    properties:
+      appId:
+        description: 微信小程序应用ID
+        type: string
+      appSecret:
+        description: 微信小程序应用密钥
+        type: string
+      certPath:
+        description: 微信支付证书路径
+        type: string
+      encodingAESKey:
+        description: 消息加密密钥
+        type: string
+      mchId:
+        description: 微信支付商户号
+        type: string
+      mchKey:
+        description: 微信支付商户密钥
+        type: string
+      notifyUrl:
+        description: 微信支付回调地址
+        type: string
+      token:
+        description: 微信令牌
+        type: string
+    type: object
+  models.WechatLoginReq:
+    properties:
+      avatar:
+        description: 用户头像
+        type: string
+      code:
+        description: 微信登录code
+        type: string
+      nickname:
+        description: 用户昵称
+        type: string
+    required:
+    - code
     type: object
   monitormodels.JobDML:
     properties:
@@ -3007,6 +3462,97 @@ definitions:
         type: string
       userName:
         type: string
+    type: object
+  nova-factory-server_app_business_shop_api_models.AddressSetReq:
+    properties:
+      addressLabel:
+        type: string
+      cityCode:
+        type: string
+      cityName:
+        type: string
+      detailAddress:
+        type: string
+      districtCode:
+        type: string
+      districtName:
+        type: string
+      id:
+        example: "0"
+        type: string
+      isDefault:
+        type: boolean
+      provinceCode:
+        type: string
+      provinceName:
+        type: string
+      receiverMobile:
+        type: string
+      receiverName:
+        type: string
+    required:
+    - cityCode
+    - cityName
+    - detailAddress
+    - provinceCode
+    - provinceName
+    - receiverMobile
+    - receiverName
+    type: object
+  nova-factory-server_app_business_shop_user_models.AddressSetReq:
+    properties:
+      addressLabel:
+        description: 地址标签
+        type: string
+      cityCode:
+        description: 市编码
+        type: string
+      cityName:
+        description: 市名称
+        type: string
+      detailAddress:
+        description: 详细地址
+        type: string
+      districtCode:
+        description: 区编码
+        type: string
+      districtName:
+        description: 区名称
+        type: string
+      id:
+        description: 主键ID
+        example: "0"
+        type: string
+      isDefault:
+        description: 是否默认地址
+        type: boolean
+      postalCode:
+        description: 邮政编码
+        type: string
+      provinceCode:
+        description: 省编码
+        type: string
+      provinceName:
+        description: 省名称
+        type: string
+      receiverMobile:
+        description: 收货人手机号
+        type: string
+      receiverName:
+        description: 收货人姓名
+        type: string
+      status:
+        description: 状态
+        type: integer
+      streetCode:
+        description: 街道编码
+        type: string
+      streetName:
+        description: 街道名称
+        type: string
+    required:
+    - detailAddress
+    - receiverMobile
     type: object
   ordermodels.OrderAccountSet:
     properties:
@@ -3453,9 +3999,15 @@ definitions:
       categoryName:
         description: 分类名称
         type: string
+      description:
+        description: 分类描述
+        type: string
       id:
         description: 主键ID
         example: "0"
+        type: string
+      imageUrl:
+        description: 分类图片
         type: string
       parentId:
         description: 父级分类ID
@@ -3485,14 +4037,16 @@ definitions:
         description: 规格描述
         type: string
       galleryImages:
-        description: 图集
-        type: string
+        items:
+          type: string
+        type: array
       goodsId:
         description: 商品业务ID
         type: string
       id:
         description: 主键ID
-        type: integer
+        example: "0"
+        type: string
       imageUrl:
         description: 主图地址
         type: string
@@ -3549,7 +4103,9 @@ definitions:
         type: string
       galleryImages:
         description: 图集
-        type: string
+        items:
+          type: string
+        type: array
       goodsCode:
         description: 商品编码
         type: string
@@ -3559,6 +4115,11 @@ definitions:
       goodsName:
         description: 商品名称
         type: string
+      homeModuleIds:
+        description: 推荐首页模块ID集合
+        items:
+          type: string
+        type: array
       id:
         description: 主键ID
         example: "0"
@@ -6520,6 +7081,228 @@ paths:
       summary: 读取调度任务
       tags:
       - 工艺管理/生产任务管理
+  /api/v1/app/shop/address/default:
+    get:
+      description: 获取当前用户的默认收货地址
+      parameters:
+      - description: 用户ID
+        in: query
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取默认收货地址
+      tags:
+      - 商城/用户地址
+  /api/v1/app/shop/address/info/{id}:
+    get:
+      description: 根据ID获取地址详情
+      parameters:
+      - description: 地址ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取地址详情
+      tags:
+      - 商城/用户地址
+  /api/v1/app/shop/address/list:
+    get:
+      description: 获取当前用户的地址列表
+      parameters:
+      - description: 用户ID
+        in: query
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取地址列表
+      tags:
+      - 商城/用户地址
+  /api/v1/app/shop/address/region:
+    get:
+      description: 不传 parentCode 返回省级列表，传省编码返回市级，传市编码返回区级
+      parameters:
+      - description: 父级行政区编码
+        in: query
+        name: parentCode
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取省市区列表
+      tags:
+      - 商城/用户地址
+  /api/v1/app/shop/address/remove/{ids}:
+    delete:
+      description: 根据ID删除地址
+      parameters:
+      - description: 地址ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除地址
+      tags:
+      - 商城/用户地址
+  /api/v1/app/shop/address/set:
+    post:
+      description: 新增或修改地址
+      parameters:
+      - description: 地址设置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/nova-factory-server_app_business_shop_api_models.AddressSetReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 设置成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 新增或修改地址
+      tags:
+      - 商城/用户地址
+  /api/v1/app/shop/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 用有效JWT换取新Token
+      parameters:
+      - description: 刷新Token参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RefreshTokenReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 刷新成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 刷新JWT Token
+      tags:
+      - 商城/App鉴权
+  /api/v1/app/shop/auth/wechat-login:
+    post:
+      consumes:
+      - application/json
+      description: 微信小程序授权登录，code换openid并生成JWT token
+      parameters:
+      - description: 微信登录参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.WechatLoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 微信小程序授权登录
+      tags:
+      - 商城/App鉴权
+  /api/v1/app/shop/cart/add:
+    post:
+      description: 加入购物车（同一 SKU 重复加入会累加数量）
+      parameters:
+      - description: 购物车新增修改参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.CartSetDataReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 加入成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 加入购物车
+      tags:
+      - app接口/商城/App购物车
+  /api/v1/app/shop/cart/list:
+    get:
+      description: 查询当前登录用户购物车列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 查询用户购物车列表
+      tags:
+      - app接口/商城/App购物车
+  /api/v1/app/shop/cart/remove/{ids}:
+    delete:
+      description: 根据购物车ID列表删除当前用户的购物车商品
+      parameters:
+      - description: 购物车ID列表，多个逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 删除购物车商品
+      tags:
+      - app接口/商城/App购物车
   /api/v1/app/shop/category/all:
     get:
       description: 读取商城全部商品分类，并按父子关系返回树形结构
@@ -6535,6 +7318,283 @@ paths:
       summary: 读取全部商品分类
       tags:
       - app接口/商城/App商品分类
+  /api/v1/app/shop/favorite:
+    post:
+      description: 添加商品到收藏列表
+      parameters:
+      - description: 收藏参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.FavoriteAddReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 添加成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 添加收藏
+      tags:
+      - 商城/用户收藏
+  /api/v1/app/shop/favorite/{goodsId}:
+    delete:
+      description: 从收藏列表移除商品
+      parameters:
+      - description: 商品ID
+        in: path
+        name: goodsId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 移除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 移除收藏
+      tags:
+      - 商城/用户收藏
+  /api/v1/app/shop/favorite/{goodsId}/status:
+    get:
+      description: 查询指定商品是否被收藏
+      parameters:
+      - description: 商品ID
+        in: path
+        name: goodsId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询收藏状态
+      tags:
+      - 商城/用户收藏
+  /api/v1/app/shop/favorite/favorites:
+    get:
+      description: 获取当前用户的商品收藏列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取收藏列表
+      tags:
+      - 商城/用户收藏
+  /api/v1/app/shop/getInfo:
+    get:
+      description: 获取当前商城登录用户信息及权限
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取当前商城登录用户信息
+      tags:
+      - 商城/App鉴权
+  /api/v1/app/shop/goods/repurchase:
+    get:
+      description: 获取用户历史购买过的商品列表
+      parameters:
+      - description: 商品分类ID
+        in: query
+        name: categoryId
+        type: integer
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 获取用户复购商品列表
+      tags:
+      - app接口/商城/App商品
+  /api/v1/app/shop/home/list:
+    get:
+      description: 读取前台首页可展示的模块及其明细项
+      parameters:
+      - description: 页面标识，默认 index
+        in: query
+        name: pageKey
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 获取前台首页模块列表
+      tags:
+      - app接口/商城/App首页
+  /api/v1/app/shop/logout:
+    post:
+      description: 退出当前商城登录会话
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 退出成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 退出当前商城登录会话
+      tags:
+      - 商城/App鉴权
+  /api/v1/app/shop/order/cache:
+    post:
+      description: 固化本次立即购买商品快照
+      parameters:
+      - description: 预下单缓存参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.OrderCacheReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 缓存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 缓存预下单商品
+      tags:
+      - app接口/商城/App订单
+  /api/v1/app/shop/order/confirm:
+    post:
+      description: 根据当前地址、配送方式等信息实时试算确认单
+      parameters:
+      - description: 确认单参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.OrderConfirmReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取确认单数据
+      tags:
+      - app接口/商城/App订单
+  /api/v1/app/shop/order/create:
+    post:
+      description: 根据预订单 orderKey 正式落订单
+      parameters:
+      - description: 订单创建参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.OrderCreateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 创建订单
+      tags:
+      - app接口/商城/App订单
+  /api/v1/app/shop/product/info/{id}:
+    get:
+      description: 根据ID读取商品详情
+      parameters:
+      - description: 商品ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 读取商品详情
+      tags:
+      - app接口/商城/App商品
+  /api/v1/app/shop/product/list:
+    get:
+      description: 根据分类ID获取商品列表
+      parameters:
+      - description: 商品分类ID
+        in: query
+        name: categoryId
+        type: integer
+      - description: 商品名称
+        in: query
+        name: goodsName
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 获取商品列表
+      tags:
+      - app接口/商城/App商品
   /api/v1/building/list:
     get:
       description: 读取建筑物以及楼层详情列表
@@ -7105,6 +8165,12 @@ paths:
       - in: query
         name: brand
         type: string
+      - in: query
+        name: enable
+        type: boolean
+      - in: query
+        name: gateway_id
+        type: integer
       - in: query
         name: ip_address
         type: string
@@ -11004,9 +12070,15 @@ paths:
       summary: 用户登录
       tags:
       - 登录
-  /shop/app/getInfo:
+  /shop/activity/combination/info/{id}:
     get:
-      description: 获取当前商城登录用户信息及权限
+      description: 根据ID获取拼团商品详情
+      parameters:
+      - description: 拼团商品ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -11016,46 +12088,442 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 获取当前商城登录用户信息
+      summary: 获取拼团商品详情
       tags:
-      - 商城/App鉴权
-  /shop/app/login:
-    post:
-      consumes:
-      - application/json
-      description: 使用 shop_user 账号登录商城
+      - 商城/活动管理/拼团商品
+  /shop/activity/combination/list:
+    get:
+      description: 分页查询拼团商品列表
       parameters:
-      - description: 商城用户登录参数
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/models.ShopLoginReq'
+      - in: query
+        name: isHost
+        type: integer
+      - in: query
+        name: isShow
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: productId
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: title
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: 登录成功
-          schema:
-            $ref: '#/definitions/response.ResponseData'
-      summary: 商城用户登录
-      tags:
-      - 商城/App鉴权
-  /shop/app/logout:
-    post:
-      description: 退出当前商城登录会话
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 退出成功
+          description: 获取成功
           schema:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 退出当前商城登录会话
+      summary: 获取拼团商品列表
       tags:
-      - 商城/App鉴权
+      - 商城/活动管理/拼团商品
+  /shop/activity/combination/remove/{ids}:
+    delete:
+      description: 根据ID删除拼团商品
+      parameters:
+      - description: 拼团商品ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除拼团商品
+      tags:
+      - 商城/活动管理/拼团商品
+  /shop/activity/combination/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改拼团商品
+      parameters:
+      - description: 拼团商品保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CombinationSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存拼团商品
+      tags:
+      - 商城/活动管理/拼团商品
+  /shop/activity/pink/info/{id}:
+    get:
+      description: 根据ID获取拼团开团记录详情
+      parameters:
+      - description: 拼团记录ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取拼团详情
+      tags:
+      - 商城/活动管理/拼团记录
+  /shop/activity/pink/list:
+    get:
+      description: 分页查询拼团开团记录
+      parameters:
+      - in: query
+        name: cid
+        type: integer
+      - in: query
+        name: isRefund
+        type: integer
+      - in: query
+        name: orderId
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: status
+        type: integer
+      - in: query
+        name: uid
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取拼团列表
+      tags:
+      - 商城/活动管理/拼团记录
+  /shop/activity/seckill/list:
+    get:
+      description: 分页查询秒杀商品列表
+      parameters:
+      - description: 活动ID
+        in: query
+        name: activityId
+        type: integer
+      - description: 是否热门推荐
+        in: query
+        name: isHot
+        type: integer
+      - description: 是否显示
+        in: query
+        name: isShow
+        type: integer
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 商品ID
+        in: query
+        name: productId
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 商品状态
+        in: query
+        name: status
+        type: integer
+      - description: 活动标题
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取秒杀商品列表
+      tags:
+      - 商城/活动管理/秒杀商品
+  /shop/activity/seckill/remove/{ids}:
+    delete:
+      description: 根据ID删除秒杀商品
+      parameters:
+      - description: 秒杀商品ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除秒杀商品
+      tags:
+      - 商城/活动管理/秒杀商品
+  /shop/activity/seckill/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改秒杀商品
+      parameters:
+      - description: 秒杀商品保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.SeckillSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存秒杀商品
+      tags:
+      - 商城/活动管理/秒杀商品
+  /shop/activity/seckill_activity/info/{id}:
+    get:
+      description: 根据ID获取秒杀活动详情
+      parameters:
+      - description: 秒杀活动ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取秒杀活动详情
+      tags:
+      - 商城/活动管理/秒杀活动
+  /shop/activity/seckill_activity/list:
+    get:
+      description: 分页查询秒杀活动列表
+      parameters:
+      - description: 关联ID
+        in: query
+        name: linkId
+        type: integer
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 显示状态
+        in: query
+        name: status
+        type: integer
+      - description: 活动名称
+        in: query
+        name: title
+        type: string
+      - description: 活动类型
+        in: query
+        name: type
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取秒杀活动列表
+      tags:
+      - 商城/活动管理/秒杀活动
+  /shop/activity/seckill_activity/remove/{ids}:
+    delete:
+      description: 根据ID删除秒杀活动
+      parameters:
+      - description: 秒杀活动ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除秒杀活动
+      tags:
+      - 商城/活动管理/秒杀活动
+  /shop/activity/seckill_activity/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改秒杀活动
+      parameters:
+      - description: 秒杀活动保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.SeckillActivitySet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存秒杀活动
+      tags:
+      - 商城/活动管理/秒杀活动
+  /shop/activity/seckill_config/info/{id}:
+    get:
+      description: 根据ID获取商品秒杀配置详情
+      parameters:
+      - description: 商品秒杀配置ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商品秒杀配置详情
+      tags:
+      - 商城/活动管理/秒杀配置
+  /shop/activity/seckill_config/list:
+    get:
+      description: 分页查询商品秒杀配置列表
+      parameters:
+      - description: 开启时间
+        in: query
+        name: beginClock
+        type: integer
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - in: query
+        name: status
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取商品秒杀配置列表
+      tags:
+      - 商城/活动管理/秒杀配置
+  /shop/activity/seckill_config/remove/{ids}:
+    delete:
+      description: 根据ID删除商品秒杀配置
+      parameters:
+      - description: 商品秒杀配置ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除商品秒杀配置
+      tags:
+      - 商城/活动管理/秒杀配置
+  /shop/activity/seckill_config/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改商品秒杀配置
+      parameters:
+      - description: 商品秒杀配置保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.SeckillConfigSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存商品秒杀配置
+      tags:
+      - 商城/活动管理/秒杀配置
   /shop/category:
     post:
       description: 新增商品分类
@@ -11177,6 +12645,43 @@ paths:
       summary: 获取商品分类列表
       tags:
       - 商城/商品分类
+  /shop/config/wechat/get:
+    get:
+      description: 获取微信小程序配置
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取微信小程序配置
+      tags:
+      - 商城/系统配置
+  /shop/config/wechat/update:
+    put:
+      description: 更新微信小程序配置
+      parameters:
+      - description: 微信小程序配置参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.WechatConfigReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 更新微信小程序配置
+      tags:
+      - 商城/系统配置
   /shop/goods:
     post:
       description: 新增商品
@@ -11262,6 +12767,58 @@ paths:
       summary: 删除商品
       tags:
       - 商城/商品管理
+  /shop/goods/export/csv:
+    get:
+      description: 按查询条件导出商品CSV文件
+      parameters:
+      - description: 商品分类ID
+        in: query
+        name: categoryId
+        type: integer
+      - description: 商品编码
+        in: query
+        name: goodsCode
+        type: string
+      - description: 商品名称
+        in: query
+        name: goodsName
+        type: string
+      - description: 是否上架
+        in: query
+        name: isOnSale
+        type: boolean
+      - description: 外部系统ID
+        in: query
+        name: outerId
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 排序字段
+        in: query
+        name: sortBy
+        type: string
+      - description: 排序方向 asc/desc
+        in: query
+        name: sortOrder
+        type: string
+      produces:
+      - text/csv
+      responses:
+        "200":
+          description: 导出成功
+          schema:
+            type: file
+      security:
+      - BearerAuth: []
+      summary: 导出商品CSV
+      tags:
+      - 商城/商品管理
   /shop/goods/import:
     post:
       description: 导入商品
@@ -11288,6 +12845,10 @@ paths:
     get:
       description: 获取商品列表
       parameters:
+      - description: 商品分类ID
+        in: query
+        name: categoryId
+        type: integer
       - description: 商品编码
         in: query
         name: goodsCode
@@ -11312,6 +12873,14 @@ paths:
         in: query
         name: size
         type: integer
+      - description: 排序字段
+        in: query
+        name: sortBy
+        type: string
+      - description: 排序方向 asc/desc
+        in: query
+        name: sortOrder
+        type: string
       produces:
       - application/json
       responses:
@@ -11324,6 +12893,239 @@ paths:
       summary: 获取商品列表
       tags:
       - 商城/商品管理
+  /shop/goods/vector/generate/{id}:
+    post:
+      description: 根据商品ID生成商品向量
+      parameters:
+      - description: 商品ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 生成成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 生成商品向量
+      tags:
+      - 商城/商品管理
+  /shop/home/module/info/{id}:
+    get:
+      description: 根据ID获取首页模块详情
+      parameters:
+      - description: 首页模块ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取首页模块详情
+      tags:
+      - 商城/首页装修/模块管理
+  /shop/home/module/list:
+    get:
+      description: 分页查询首页模块列表
+      parameters:
+      - description: 模块类型
+        in: query
+        name: moduleType
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 页面标识
+        in: query
+        name: pageKey
+        type: string
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      - description: 标题
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取首页模块列表
+      tags:
+      - 商城/首页装修/模块管理
+  /shop/home/module/remove/{ids}:
+    delete:
+      description: 根据ID删除首页模块
+      parameters:
+      - description: 首页模块ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除首页模块
+      tags:
+      - 商城/首页装修/模块管理
+  /shop/home/module/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改首页模块
+      parameters:
+      - description: 首页模块保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.HomeModuleSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存首页模块
+      tags:
+      - 商城/首页装修/模块管理
+  /shop/home/module_item/info/{id}:
+    get:
+      description: 根据ID获取首页模块明细详情
+      parameters:
+      - description: 首页模块明细ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取首页模块明细详情
+      tags:
+      - 商城/首页装修/模块明细管理
+  /shop/home/module_item/list:
+    get:
+      description: 分页查询首页模块明细列表
+      parameters:
+      - description: 业务类型
+        in: query
+        name: businessType
+        type: string
+      - description: 内容项名称
+        in: query
+        name: itemName
+        type: string
+      - description: 模块ID
+        in: query
+        name: moduleId
+        type: integer
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 状态
+        in: query
+        name: status
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取首页模块明细列表
+      tags:
+      - 商城/首页装修/模块明细管理
+  /shop/home/module_item/remove/{ids}:
+    delete:
+      description: 根据ID删除首页模块明细
+      parameters:
+      - description: 首页模块明细ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除首页模块明细
+      tags:
+      - 商城/首页装修/模块明细管理
+  /shop/home/module_item/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改首页模块明细
+      parameters:
+      - description: 首页模块明细保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.HomeModuleItemSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存首页模块明细
+      tags:
+      - 商城/首页装修/模块明细管理
   /shop/sku:
     post:
       description: 新增商品规格
@@ -11670,7 +13472,7 @@ paths:
         name: object
         required: true
         schema:
-          $ref: '#/definitions/models.AddressSetReq'
+          $ref: '#/definitions/nova-factory-server_app_business_shop_user_models.AddressSetReq'
       produces:
       - application/json
       responses:
@@ -11831,6 +13633,142 @@ paths:
       summary: 获取商城用户列表
       tags:
       - 商城/用户管理
+  /shop/user/order/cancel/{id}:
+    post:
+      description: 取消待支付订单
+      parameters:
+      - description: 订单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 取消成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 取消订单
+      tags:
+      - 商城/用户订单
+  /shop/user/order/confirm/{id}:
+    post:
+      description: 确认已发货订单收货
+      parameters:
+      - description: 订单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 确认成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 确认收货
+      tags:
+      - 商城/用户订单
+  /shop/user/order/count:
+    get:
+      description: 获取用户各状态订单数量统计
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取订单统计
+      tags:
+      - 商城/用户订单
+  /shop/user/order/info/{id}:
+    get:
+      description: 根据ID获取订单详情
+      parameters:
+      - description: 订单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取订单详情
+      tags:
+      - 商城/用户订单
+  /shop/user/order/list:
+    get:
+      description: 获取当前用户的订单列表
+      parameters:
+      - description: 订单号
+        in: query
+        name: orderNo
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 订单状态
+        in: query
+        name: status
+        type: integer
+      - description: 用户ID
+        in: query
+        name: userId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取订单列表
+      tags:
+      - 商城/用户订单
+  /shop/user/order/status:
+    post:
+      description: 更新订单状态
+      parameters:
+      - description: 订单状态更新参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.OrderStatusReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 更新订单状态
+      tags:
+      - 商城/用户订单
   /system/Config:
     post:
       description: 添加配置

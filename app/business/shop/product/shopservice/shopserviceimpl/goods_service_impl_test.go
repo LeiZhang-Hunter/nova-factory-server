@@ -1,6 +1,8 @@
 package shopserviceimpl
 
 import (
+	"bytes"
+	"encoding/csv"
 	"testing"
 	"time"
 
@@ -189,6 +191,106 @@ func TestGetByIDAttachSkus(t *testing.T) {
 	}
 	if data.ShopCategoryName != "分类A" {
 		t.Fatalf("unexpected category name: %s", data.ShopCategoryName)
+	}
+}
+
+func TestWriteGoodsCSVRowsIncludesSkuDetails(t *testing.T) {
+	now := time.Date(2026, 5, 14, 12, 0, 0, 0, time.UTC)
+	rows := []*shopmodels.Goods{
+		{
+			ID:               1,
+			GoodsID:          "g-1",
+			GoodsName:        "商品1",
+			GoodsCode:        "code-1",
+			OuterID:          "outer-1",
+			ShopCategoryId:   101,
+			ShopCategoryName: "分类A",
+			RetailPrice:      99.5,
+			IsOnSale:         1,
+			Quantity:         30,
+			Unit:             "件",
+			Weight:           2.5,
+			WeightUnit:       "kg",
+			ImageURL:         "https://example.com/goods.png",
+			VideoURL:         "https://example.com/goods.mp4",
+			GalleryImagesArray: []string{
+				"https://example.com/g1.png",
+				"https://example.com/g2.png",
+			},
+			HomeModuleIDs: "home-1",
+			Description:   "商品描述",
+			BaseEntity:    shopmodels.Goods{}.BaseEntity,
+			Skus: []*shopmodels.GoodsSku{
+				{
+					SkuID:              "sku-1",
+					SkuName:            "规格1",
+					SkuCode:            "sku-code-1",
+					OuterID:            "sku-outer-1",
+					Barcode:            "barcode-1",
+					RetailPrice:        19.9,
+					Quantity:           10,
+					Unit:               "盒",
+					Weight:             1.1,
+					WeightUnit:         "kg",
+					ImageURL:           "https://example.com/sku1.png",
+					VideoURL:           "https://example.com/sku1.mp4",
+					GalleryImagesArray: []string{"https://example.com/sku1-g1.png"},
+					Description:        "规格1描述",
+				},
+				{
+					SkuID:       "sku-2",
+					SkuName:     "规格2",
+					SkuCode:     "sku-code-2",
+					RetailPrice: 29.9,
+					Quantity:    20,
+				},
+			},
+		},
+		{
+			ID:         2,
+			GoodsID:    "g-2",
+			GoodsName:  "商品2",
+			Quantity:   5,
+			BaseEntity: shopmodels.Goods{}.BaseEntity,
+		},
+	}
+	rows[0].CreateTime = &now
+	rows[0].UpdateTime = &now
+	rows[1].CreateTime = &now
+	rows[1].UpdateTime = &now
+
+	var buf bytes.Buffer
+	writer := csv.NewWriter(&buf)
+	if err := writer.Write(goodsCSVHeader()); err != nil {
+		t.Fatalf("write header err: %v", err)
+	}
+	if err := writeGoodsCSVRows(writer, rows); err != nil {
+		t.Fatalf("write rows err: %v", err)
+	}
+	writer.Flush()
+	if err := writer.Error(); err != nil {
+		t.Fatalf("flush err: %v", err)
+	}
+
+	reader := csv.NewReader(bytes.NewReader(buf.Bytes()))
+	records, err := reader.ReadAll()
+	if err != nil {
+		t.Fatalf("read csv err: %v", err)
+	}
+	if len(records) != 4 {
+		t.Fatalf("unexpected record count: %d", len(records))
+	}
+	if records[1][18] != "sku-1" || records[1][19] != "规格1" {
+		t.Fatalf("unexpected first sku columns: %v", records[1][18:20])
+	}
+	if records[2][18] != "sku-2" || records[2][19] != "规格2" {
+		t.Fatalf("unexpected second sku columns: %v", records[2][18:20])
+	}
+	if records[3][1] != "g-2" {
+		t.Fatalf("unexpected goods id for goods without sku: %s", records[3][1])
+	}
+	if records[3][18] != "" || records[3][19] != "" {
+		t.Fatalf("expected empty sku columns for goods without sku: %v", records[3][18:20])
 	}
 }
 

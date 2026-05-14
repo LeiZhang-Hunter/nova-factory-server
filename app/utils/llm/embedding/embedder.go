@@ -1,0 +1,117 @@
+package embedding
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	ollamaembed "github.com/cloudwego/eino-ext/components/embedding/ollama"
+	openaiembed "github.com/cloudwego/eino-ext/components/embedding/openai"
+	"github.com/cloudwego/eino/components/embedding"
+	"time"
+)
+
+const (
+	// DefaultBatchSize is the default batch size for embedding operations.
+	// Some embedding APIs (e.g. Qwen) limit batch size to 10.
+	DefaultBatchSize = 10
+)
+
+// NewEmbedder 根据供应商配置创建新的 Embedder
+func NewEmbedder(ctx context.Context, cfg *ProviderConfig) (embedding.Embedder, error) {
+	if cfg.Timeout == 0 {
+		cfg.Timeout = 60 * time.Second
+	}
+
+	switch cfg.ProviderType {
+	case "openai":
+		emb, err := newOpenAIEmbedder(ctx, cfg)
+		if err != nil {
+			return nil, err
+		}
+		return WrapWithBatchLimit(emb, DefaultBatchSize), nil
+	case "azure":
+		emb, err := newAzureEmbedder(ctx, cfg)
+		if err != nil {
+			return nil, err
+		}
+		return WrapWithBatchLimit(emb, DefaultBatchSize), nil
+	case "ollama":
+		emb, err := newOllamaEmbedder(ctx, cfg)
+		if err != nil {
+			return nil, err
+		}
+		return WrapWithBatchLimit(emb, DefaultBatchSize), nil
+	default:
+		// 默认使用 OpenAI 兼容 API
+		emb, err := newOpenAIEmbedder(ctx, cfg)
+		if err != nil {
+			return nil, err
+		}
+		return WrapWithBatchLimit(emb, DefaultBatchSize), nil
+	}
+}
+
+// newOpenAIEmbedder 创建 OpenAI Embedder
+func newOpenAIEmbedder(ctx context.Context, cfg *ProviderConfig) (embedding.Embedder, error) {
+	if cfg.ProviderID == "chatwiki" {
+		return newChatWikiEmbedder(cfg), nil
+	}
+	config := &openaiembed.EmbeddingConfig{
+		APIKey:  cfg.APIKey,
+		Model:   cfg.ModelID,
+		Timeout: cfg.Timeout,
+	}
+	if cfg.APIEndpoint != "" {
+		config.BaseURL = cfg.APIEndpoint
+	}
+	// 设置向量维度（某些模型如 text-embedding-v4、text-embedding-3-large 支持）
+	if cfg.Dimension > 0 {
+		dim := cfg.Dimension
+		config.Dimensions = &dim
+	}
+	return openaiembed.NewEmbedder(ctx, config)
+}
+
+// newAzureEmbedder 创建 Azure OpenAI Embedder
+func newAzureEmbedder(ctx context.Context, cfg *ProviderConfig) (embedding.Embedder, error) {
+	// 解析 Azure 特定的额外配置
+	var extraConfig struct {
+		APIVersion string `json:"api_version"`
+	}
+	if cfg.ExtraConfig != "" {
+		if err := json.Unmarshal([]byte(cfg.ExtraConfig), &extraConfig); err != nil {
+			return nil, err
+		}
+	}
+	if cfg.APIEndpoint == "" {
+		return nil, fmt.Errorf("azure api endpoint is required")
+	}
+	if extraConfig.APIVersion == "" {
+		return nil, fmt.Errorf("azure api version is required")
+	}
+
+	config := &openaiembed.EmbeddingConfig{
+		APIKey:     cfg.APIKey,
+		Model:      cfg.ModelID,
+		BaseURL:    cfg.APIEndpoint,
+		ByAzure:    true,
+		APIVersion: extraConfig.APIVersion,
+		Timeout:    cfg.Timeout,
+	}
+	return openaiembed.NewEmbedder(ctx, config)
+}
+
+// newOllamaEmbedder 创建 Ollama Embedder
+func newOllamaEmbedder(ctx context.Context, cfg *ProviderConfig) (embedding.Embedder, error) {
+	baseURL := cfg.APIEndpoint
+	if baseURL == "" {
+		baseURL = "http://localhost:11434"
+	}
+
+	config := &ollamaembed.EmbeddingConfig{
+		BaseURL: baseURL,
+		Model:   cfg.ModelID,
+		Timeout: cfg.Timeout,
+	}
+	return ollamaembed.NewEmbedder(ctx, config)
+}
