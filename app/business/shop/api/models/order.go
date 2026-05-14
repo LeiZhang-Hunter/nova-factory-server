@@ -120,6 +120,8 @@ func GetStatusText(status int32) string {
 		return "已完成"
 	case orderConstant.OrderStatusCancelled:
 		return "已取消"
+	case orderConstant.OrderStatusAftersale:
+		return "售后"
 	default:
 		return "未知"
 	}

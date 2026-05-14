@@ -39,13 +39,15 @@ func NewGinEngine(
 ) *Shop {
 	group := app.Engine.Group("")
 
-	//不做鉴权的
+	//不做鉴权的（可选认证：携带有效token时自动提取用户信息，用于折扣计算等场景）
+	publicGroup := group.Group("")
+	publicGroup.Use(middlewares.NewOptionalShopSessionAuthMiddlewareBuilder(cache).Build())
 	{
-		controller.Goods.PublicRoutes(group)
-		authController.Auth.PublicRoutes(group)
-		productController.Category.PublicRoutes(group)
-		productController.Home.PublicRoutes(group)
-		productController.Product.PublicRoutes(group)
+		controller.Goods.PublicRoutes(publicGroup)
+		authController.Auth.PublicRoutes(publicGroup)
+		productController.Category.PublicRoutes(publicGroup)
+		productController.Home.PublicRoutes(publicGroup)
+		productController.Product.PublicRoutes(publicGroup)
 	}
 
 	appGroup := group.Group("")
@@ -77,6 +79,7 @@ func NewGinEngine(
 		controller.Category.PrivateRoutes(adminGroup)
 		controller.Goods.PrivateRoutes(adminGroup)
 		controller.Sku.PrivateRoutes(adminGroup)
+		userController.DiscountRule.PrivateRoutes(adminGroup)
 		userController.User.PrivateRoutes(adminGroup)
 	}
 
