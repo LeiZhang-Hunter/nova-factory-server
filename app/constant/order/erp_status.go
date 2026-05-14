@@ -7,4 +7,5 @@ const (
 	ERPStatusPartSend     string = "PartSend"     // 部分发货
 	ERPStatusTradeSuccess string = "TradeSuccess" // 交易成功
 	ERPStatusTradeClosed  string = "TradeClosed"  // 交易关闭
+	ERPStatusAftersale    string = "Aftersale"    // 售后/退款
 )

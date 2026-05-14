@@ -62,6 +62,26 @@ func GetUserId(c *gin.Context) int64 {
 	}
 	return i
 }
+
+func GetUserIdSafe(c *gin.Context) int64 {
+	val, ok := c.Get(sessionStatus.SessionKey)
+	if !ok {
+		return 0
+	}
+	session, ok := val.(*sessionCache.Session)
+	if !ok {
+		return 0
+	}
+	idStr := session.Get(c, sessionStatus.UserId)
+	if idStr == "" {
+		return 0
+	}
+	i, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return i
+}
 func GetDeptId(c *gin.Context) int64 {
 	i, err := strconv.ParseInt(GetSession(c).Get(c, sessionStatus.DeptId), 10, 64)
 	if err != nil {

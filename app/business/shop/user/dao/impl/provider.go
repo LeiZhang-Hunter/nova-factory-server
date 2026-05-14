@@ -2,4 +2,4 @@ package impl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewShopAddressDao, NewShopCartDao, NewShopUserDao)
+var ProviderSet = wire.NewSet(NewShopAddressDao, NewShopCartDao, NewShopUserDao, NewShopUserDiscountRuleDao)
