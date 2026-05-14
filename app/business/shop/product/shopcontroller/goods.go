@@ -1,6 +1,11 @@
 package shopcontroller
 
 import (
+	"encoding/csv"
+	"fmt"
+	"net/http"
+	"time"
+
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
@@ -22,10 +27,12 @@ func NewGoods(service shopservice.IShopGoodsService) *Goods {
 func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/goods")
 	group.GET("/list", middlewares.HasPermission("shop:goods:list"), s.List)
+	group.GET("/export/csv", middlewares.HasPermission("shop:goods:list"), s.ExportCSV)
 	group.GET("/info/:id", middlewares.HasPermission("shop:goods:info"), s.GetByID)
 	group.POST("/add", middlewares.HasPermission("shop:goods:add"), s.Create)
 	group.PUT("/edit", middlewares.HasPermission("shop:goods:edit"), s.Update)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:goods:remove"), s.Delete)
+	group.POST("/vector/generate/:id", middlewares.HasPermission("shop:goods:vector:generate"), s.Generate)
 }
 
 // PublicRoutes 导入接口注册
@@ -175,4 +182,68 @@ func (s *Goods) Import(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// Generate 生成商品向量
+// @Summary 生成商品向量
+// @Description 根据商品ID生成商品向量
+// @Tags 商城/商品管理
+// @Param id path int true "商品ID"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "生成成功"
+// @Router /shop/goods/vector/generate/{id} [post]
+func (s *Goods) Generate(c *gin.Context) {
+	id := baizeContext.ParamInt64(c, "id")
+	if id <= 0 {
+		zap.L().Error("invalid goods id", zap.Int64("id", id))
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.GenerateVector(c, id)
+	if err != nil {
+		zap.L().Error("generate goods vector fail", zap.Int64("id", id), zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// ExportCSV 导出商品CSV
+// @Summary 导出商品CSV
+// @Description 按查询条件导出商品CSV文件
+// @Tags 商城/商品管理
+// @Param object query shopmodels.GoodsQuery true "商品查询参数"
+// @Security BearerAuth
+// @Produce text/csv
+// @Success 200 {file} file "导出成功"
+// @Router /shop/goods/export/csv [get]
+func (s *Goods) ExportCSV(c *gin.Context) {
+	req := new(shopmodels.GoodsQuery)
+	if err := c.ShouldBindQuery(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	fileName := fmt.Sprintf("goods_%s.csv", time.Now().Format("20060102150405"))
+	c.Header("Content-Type", "text/csv; charset=utf-8")
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fileName))
+	c.Header("Cache-Control", "no-store")
+	c.Status(http.StatusOK)
+
+	var err error
+	if _, err = c.Writer.Write([]byte("\xEF\xBB\xBF")); err != nil {
+		zap.L().Error("write csv bom fail", zap.Error(err))
+		return
+	}
+
+	csvWriter := csv.NewWriter(c.Writer)
+	flusher, _ := c.Writer.(http.Flusher)
+	if err = s.service.ExportCSV(c, req, csvWriter, func() {
+		if flusher != nil {
+			flusher.Flush()
+		}
+	}); err != nil {
+		zap.L().Error("export goods csv fail", zap.Error(err))
+	}
 }

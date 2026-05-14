@@ -3439,6 +3439,359 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/app/shop/address/default": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的默认收货地址",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取默认收货地址",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取地址详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取地址详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "地址ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的地址列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取地址列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/region": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "不传 parentCode 返回省级列表，传省编码返回市级，传市编码返回区级",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取省市区列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "父级行政区编码",
+                        "name": "parentCode",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除地址",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "删除地址",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "地址ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改地址",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "新增或修改地址",
+                "parameters": [
+                    {
+                        "description": "地址设置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nova-factory-server_app_business_shop_api_models.AddressSetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/auth/refresh": {
+            "post": {
+                "description": "用有效JWT换取新Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "刷新JWT Token",
+                "parameters": [
+                    {
+                        "description": "刷新Token参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RefreshTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "刷新成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/auth/wechat-login": {
+            "post": {
+                "description": "微信小程序授权登录，code换openid并生成JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "微信小程序授权登录",
+                "parameters": [
+                    {
+                        "description": "微信登录参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WechatLoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/cart/add": {
+            "post": {
+                "description": "加入购物车（同一 SKU 重复加入会累加数量）",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App购物车"
+                ],
+                "summary": "加入购物车",
+                "parameters": [
+                    {
+                        "description": "购物车新增修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CartSetDataReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "加入成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/cart/list": {
+            "get": {
+                "description": "查询当前登录用户购物车列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App购物车"
+                ],
+                "summary": "查询用户购物车列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/cart/remove/{ids}": {
+            "delete": {
+                "description": "根据购物车ID列表删除当前用户的购物车商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App购物车"
+                ],
+                "summary": "删除购物车商品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "购物车ID列表，多个逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/app/shop/category/all": {
             "get": {
                 "security": [
@@ -3454,6 +3807,450 @@ const docTemplate = `{
                     "app接口/商城/App商品分类"
                 ],
                 "summary": "读取全部商品分类",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/favorite": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "添加商品到收藏列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户收藏"
+                ],
+                "summary": "添加收藏",
+                "parameters": [
+                    {
+                        "description": "收藏参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FavoriteAddReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "添加成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/favorite/favorites": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的商品收藏列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户收藏"
+                ],
+                "summary": "获取收藏列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/favorite/{goodsId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "从收藏列表移除商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户收藏"
+                ],
+                "summary": "移除收藏",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品ID",
+                        "name": "goodsId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "移除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/favorite/{goodsId}/status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询指定商品是否被收藏",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户收藏"
+                ],
+                "summary": "查询收藏状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品ID",
+                        "name": "goodsId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/getInfo": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前商城登录用户信息及权限",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "获取当前商城登录用户信息",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/goods/repurchase": {
+            "get": {
+                "description": "获取用户历史购买过的商品列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App商品"
+                ],
+                "summary": "获取用户复购商品列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品分类ID",
+                        "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/home/list": {
+            "get": {
+                "description": "读取前台首页可展示的模块及其明细项",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App首页"
+                ],
+                "summary": "获取前台首页模块列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "页面标识，默认 index",
+                        "name": "pageKey",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "退出当前商城登录会话",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "退出当前商城登录会话",
+                "responses": {
+                    "200": {
+                        "description": "退出成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/order/cache": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "固化本次立即购买商品快照",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App订单"
+                ],
+                "summary": "缓存预下单商品",
+                "parameters": [
+                    {
+                        "description": "预下单缓存参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.OrderCacheReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "缓存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/order/confirm": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据当前地址、配送方式等信息实时试算确认单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App订单"
+                ],
+                "summary": "获取确认单数据",
+                "parameters": [
+                    {
+                        "description": "确认单参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.OrderConfirmReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/order/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据预订单 orderKey 正式落订单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App订单"
+                ],
+                "summary": "创建订单",
+                "parameters": [
+                    {
+                        "description": "订单创建参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.OrderCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/product/info/{id}": {
+            "get": {
+                "description": "根据ID读取商品详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App商品"
+                ],
+                "summary": "读取商品详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/product/list": {
+            "get": {
+                "description": "根据分类ID获取商品列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App商品"
+                ],
+                "summary": "获取商品列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品分类ID",
+                        "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "商品名称",
+                        "name": "goodsName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "获取成功",
@@ -4377,6 +5174,16 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "brand",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "enable",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "gateway_id",
                         "in": "query"
                     },
                     {
@@ -10542,21 +11349,30 @@ const docTemplate = `{
                 }
             }
         },
-        "/shop/app/getInfo": {
+        "/shop/activity/combination/info/{id}": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取当前商城登录用户信息及权限",
+                "description": "根据ID获取拼团商品详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "商城/App鉴权"
+                    "商城/活动管理/拼团商品"
                 ],
-                "summary": "获取当前商城登录用户信息",
+                "summary": "获取拼团商品详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "拼团商品ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "获取成功",
@@ -10567,33 +11383,56 @@ const docTemplate = `{
                 }
             }
         },
-        "/shop/app/login": {
-            "post": {
-                "description": "使用 shop_user 账号登录商城",
-                "consumes": [
-                    "application/json"
+        "/shop/activity/combination/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
+                "description": "分页查询拼团商品列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "商城/App鉴权"
+                    "商城/活动管理/拼团商品"
                 ],
-                "summary": "商城用户登录",
+                "summary": "获取拼团商品列表",
                 "parameters": [
                     {
-                        "description": "商城用户登录参数",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.ShopLoginReq"
-                        }
+                        "type": "integer",
+                        "name": "isHost",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "isShow",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "title",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "登录成功",
+                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -10601,24 +11440,643 @@ const docTemplate = `{
                 }
             }
         },
-        "/shop/app/logout": {
+        "/shop/activity/combination/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除拼团商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/拼团商品"
+                ],
+                "summary": "删除拼团商品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "拼团商品ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/combination/set": {
             "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "退出当前商城登录会话",
+                "description": "新增或修改拼团商品",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "商城/App鉴权"
+                    "商城/活动管理/拼团商品"
                 ],
-                "summary": "退出当前商城登录会话",
+                "summary": "保存拼团商品",
+                "parameters": [
+                    {
+                        "description": "拼团商品保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CombinationSet"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "退出成功",
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/pink/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取拼团开团记录详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/拼团记录"
+                ],
+                "summary": "获取拼团详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "拼团记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/pink/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询拼团开团记录",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/拼团记录"
+                ],
+                "summary": "获取拼团列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "cid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "isRefund",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "orderId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "uid",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询秒杀商品列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀商品"
+                ],
+                "summary": "获取秒杀商品列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "活动ID",
+                        "name": "activityId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "是否热门推荐",
+                        "name": "isHot",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "是否显示",
+                        "name": "isShow",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "商品ID",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "商品状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "活动标题",
+                        "name": "title",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除秒杀商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀商品"
+                ],
+                "summary": "删除秒杀商品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "秒杀商品ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改秒杀商品",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀商品"
+                ],
+                "summary": "保存秒杀商品",
+                "parameters": [
+                    {
+                        "description": "秒杀商品保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SeckillSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_activity/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取秒杀活动详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀活动"
+                ],
+                "summary": "获取秒杀活动详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "秒杀活动ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_activity/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询秒杀活动列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀活动"
+                ],
+                "summary": "获取秒杀活动列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "关联ID",
+                        "name": "linkId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "显示状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "活动名称",
+                        "name": "title",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "活动类型",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_activity/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除秒杀活动",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀活动"
+                ],
+                "summary": "删除秒杀活动",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "秒杀活动ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_activity/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改秒杀活动",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀活动"
+                ],
+                "summary": "保存秒杀活动",
+                "parameters": [
+                    {
+                        "description": "秒杀活动保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SeckillActivitySet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_config/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取商品秒杀配置详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀配置"
+                ],
+                "summary": "获取商品秒杀配置详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品秒杀配置ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_config/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询商品秒杀配置列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀配置"
+                ],
+                "summary": "获取商品秒杀配置列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "开启时间",
+                        "name": "beginClock",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_config/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除商品秒杀配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀配置"
+                ],
+                "summary": "删除商品秒杀配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品秒杀配置ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_config/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改商品秒杀配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀配置"
+                ],
+                "summary": "保存商品秒杀配置",
+                "parameters": [
+                    {
+                        "description": "商品秒杀配置保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SeckillConfigSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -10821,6 +12279,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/config/wechat/get": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取微信小程序配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/系统配置"
+                ],
+                "summary": "获取微信小程序配置",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/config/wechat/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新微信小程序配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/系统配置"
+                ],
+                "summary": "更新微信小程序配置",
+                "parameters": [
+                    {
+                        "description": "微信小程序配置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WechatConfigReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/goods": {
             "put": {
                 "security": [
@@ -10891,6 +12410,87 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/goods/export/csv": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按查询条件导出商品CSV文件",
+                "produces": [
+                    "text/csv"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "导出商品CSV",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品分类ID",
+                        "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "商品编码",
+                        "name": "goodsCode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "商品名称",
+                        "name": "goodsName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否上架",
+                        "name": "isOnSale",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "外部系统ID",
+                        "name": "outerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序方向 asc/desc",
+                        "name": "sortOrder",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "导出成功",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/goods/import": {
             "post": {
                 "security": [
@@ -10944,6 +12544,12 @@ const docTemplate = `{
                 "summary": "获取商品列表",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "商品分类ID",
+                        "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "description": "商品编码",
                         "name": "goodsCode",
@@ -10978,11 +12584,57 @@ const docTemplate = `{
                         "description": "每页数量",
                         "name": "size",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序方向 asc/desc",
+                        "name": "sortOrder",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/vector/generate/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据商品ID生成商品向量",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "生成商品向量",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "生成成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -11051,6 +12703,346 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取首页模块详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块管理"
+                ],
+                "summary": "获取首页模块详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "首页模块ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询首页模块列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块管理"
+                ],
+                "summary": "获取首页模块列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模块类型",
+                        "name": "moduleType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "页面标识",
+                        "name": "pageKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "标题",
+                        "name": "title",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除首页模块",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块管理"
+                ],
+                "summary": "删除首页模块",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "首页模块ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改首页模块",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块管理"
+                ],
+                "summary": "保存首页模块",
+                "parameters": [
+                    {
+                        "description": "首页模块保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.HomeModuleSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module_item/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取首页模块明细详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块明细管理"
+                ],
+                "summary": "获取首页模块明细详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "首页模块明细ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module_item/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询首页模块明细列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块明细管理"
+                ],
+                "summary": "获取首页模块明细列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "业务类型",
+                        "name": "businessType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "内容项名称",
+                        "name": "itemName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "模块ID",
+                        "name": "moduleId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module_item/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除首页模块明细",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块明细管理"
+                ],
+                "summary": "删除首页模块明细",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "首页模块明细ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module_item/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改首页模块明细",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块明细管理"
+                ],
+                "summary": "保存首页模块明细",
+                "parameters": [
+                    {
+                        "description": "首页模块明细保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.HomeModuleItemSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -11555,7 +13547,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.AddressSetReq"
+                            "$ref": "#/definitions/nova-factory-server_app_business_shop_user_models.AddressSetReq"
                         }
                     }
                 ],
@@ -11798,6 +13790,226 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/cancel/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "取消待支付订单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "取消订单",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "取消成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/confirm/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "确认已发货订单收货",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "确认收货",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "确认成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/count": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取用户各状态订单数量统计",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "获取订单统计",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取订单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "获取订单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的订单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "获取订单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "订单号",
+                        "name": "orderNo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "订单状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/status": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新订单状态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "更新订单状态",
+                "parameters": [
+                    {
+                        "description": "订单状态更新参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.OrderStatusReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -19853,77 +22065,27 @@ const docTemplate = `{
                 }
             }
         },
-        "models.AddressSetReq": {
+        "models.CartSetDataReq": {
             "type": "object",
             "required": [
-                "detailAddress",
-                "receiverMobile"
+                "goodsId",
+                "quantity",
+                "skuId"
             ],
             "properties": {
-                "addressLabel": {
-                    "description": "地址标签",
-                    "type": "string"
-                },
-                "cityCode": {
-                    "description": "市编码",
-                    "type": "string"
-                },
-                "cityName": {
-                    "description": "市名称",
-                    "type": "string"
-                },
-                "detailAddress": {
-                    "description": "详细地址",
-                    "type": "string"
-                },
-                "districtCode": {
-                    "description": "区编码",
-                    "type": "string"
-                },
-                "districtName": {
-                    "description": "区名称",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "主键ID",
+                "goodsId": {
+                    "description": "商品ID",
                     "type": "string",
                     "example": "0"
                 },
-                "isDefault": {
-                    "description": "是否默认地址",
-                    "type": "boolean"
-                },
-                "postalCode": {
-                    "description": "邮政编码",
-                    "type": "string"
-                },
-                "provinceCode": {
-                    "description": "省编码",
-                    "type": "string"
-                },
-                "provinceName": {
-                    "description": "省名称",
-                    "type": "string"
-                },
-                "receiverMobile": {
-                    "description": "收货人手机号",
-                    "type": "string"
-                },
-                "receiverName": {
-                    "description": "收货人姓名",
-                    "type": "string"
-                },
-                "status": {
-                    "description": "状态",
+                "quantity": {
+                    "description": "数量",
                     "type": "integer"
                 },
-                "streetCode": {
-                    "description": "街道编码",
-                    "type": "string"
-                },
-                "streetName": {
-                    "description": "街道名称",
-                    "type": "string"
+                "skuId": {
+                    "description": "SKU ID",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -19983,6 +22145,112 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CombinationSet": {
+            "type": "object",
+            "required": [
+                "image",
+                "people",
+                "productId",
+                "title"
+            ],
+            "properties": {
+                "attr": {
+                    "type": "string"
+                },
+                "browse": {
+                    "type": "integer"
+                },
+                "effectiveTime": {
+                    "type": "integer"
+                },
+                "homeModuleIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "images": {
+                    "type": "string"
+                },
+                "info": {
+                    "type": "string"
+                },
+                "isHost": {
+                    "type": "integer"
+                },
+                "isPostage": {
+                    "type": "integer"
+                },
+                "isShow": {
+                    "type": "integer"
+                },
+                "merId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "num": {
+                    "type": "integer"
+                },
+                "onceNum": {
+                    "type": "integer"
+                },
+                "people": {
+                    "type": "integer"
+                },
+                "postage": {
+                    "type": "number"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "productId": {
+                    "type": "string"
+                },
+                "quota": {
+                    "type": "integer"
+                },
+                "quotaShow": {
+                    "type": "integer"
+                },
+                "sales": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "integer"
+                },
+                "stock": {
+                    "type": "integer"
+                },
+                "stopTime": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "unitName": {
+                    "type": "string"
+                },
+                "virtual": {
+                    "type": "integer"
+                },
+                "volume": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
         "models.Expression": {
             "type": "object",
             "properties": {
@@ -19991,6 +22259,18 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.Rule"
                     }
+                }
+            }
+        },
+        "models.FavoriteAddReq": {
+            "type": "object",
+            "required": [
+                "goodsId"
+            ],
+            "properties": {
+                "goodsId": {
+                    "description": "商品ID (VARCHAR)",
+                    "type": "string"
                 }
             }
         },
@@ -20014,6 +22294,220 @@ const docTemplate = `{
                 }
             }
         },
+        "models.HomeModuleItemSet": {
+            "type": "object",
+            "properties": {
+                "businessType": {
+                    "type": "string"
+                },
+                "extJson": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "itemImage": {
+                    "type": "string"
+                },
+                "itemName": {
+                    "type": "string"
+                },
+                "itemSubTitle": {
+                    "type": "string"
+                },
+                "linkId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "moduleId": {
+                    "description": "模块ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.HomeModuleSet": {
+            "type": "object",
+            "properties": {
+                "endTime": {
+                    "type": "integer"
+                },
+                "extJson": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "limitNum": {
+                    "type": "integer"
+                },
+                "moduleName": {
+                    "type": "string"
+                },
+                "moduleType": {
+                    "type": "string"
+                },
+                "moreLink": {
+                    "type": "string"
+                },
+                "pageKey": {
+                    "description": "页面标识",
+                    "type": "string"
+                },
+                "ruleJson": {
+                    "type": "string"
+                },
+                "showMore": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "sourceType": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "styleJson": {
+                    "type": "string"
+                },
+                "subTitle": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.OrderCacheReq": {
+            "type": "object",
+            "properties": {
+                "cartId": {
+                    "description": "购物车ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "combinationId": {
+                    "description": "拼团活动ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "pinkId": {
+                    "description": "拼团记录ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "quantity": {
+                    "description": "购买数量",
+                    "type": "integer"
+                },
+                "secKillId": {
+                    "description": "秒杀活动ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "skuId": {
+                    "description": "立即购买商品规格ID",
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "models.OrderConfirmReq": {
+            "type": "object",
+            "required": [
+                "orderKey"
+            ],
+            "properties": {
+                "addressId": {
+                    "description": "地址ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "couponCode": {
+                    "description": "优惠券编码",
+                    "type": "string"
+                },
+                "deliveryType": {
+                    "description": "配送方式",
+                    "type": "string"
+                },
+                "orderKey": {
+                    "description": "预订单 key",
+                    "type": "string"
+                },
+                "usePoints": {
+                    "description": "是否使用积分",
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.OrderCreateReq": {
+            "type": "object",
+            "required": [
+                "orderKey"
+            ],
+            "properties": {
+                "orderKey": {
+                    "description": "预订单 key",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "订单备注",
+                    "type": "string"
+                }
+            }
+        },
+        "models.OrderStatusReq": {
+            "type": "object",
+            "required": [
+                "id",
+                "status"
+            ],
+            "properties": {
+                "id": {
+                    "description": "订单ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "reason": {
+                    "description": "变更原因（如取消原因）",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "目标状态",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.RefreshTokenReq": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "description": "有效的JWT token",
+                    "type": "string"
+                }
+            }
+        },
         "models.Rule": {
             "type": "object",
             "properties": {
@@ -20032,20 +22526,316 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ShopLoginReq": {
+        "models.SeckillActivityProductInfo": {
             "type": "object",
-            "required": [
-                "account",
-                "password"
-            ],
             "properties": {
-                "account": {
-                    "description": "登录账号，支持用户名或手机号",
+                "attrs": {
+                    "description": "商品规格活动信息",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SeckillActivityProductInfoAttr"
+                    }
+                },
+                "id": {
+                    "description": "商品主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "isHot": {
+                    "description": "是否热门推荐",
+                    "type": "integer"
+                },
+                "sort": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "商品状态",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.SeckillActivityProductInfoAttr": {
+            "type": "object",
+            "properties": {
+                "cost": {
+                    "description": "成本价",
+                    "type": "number"
+                },
+                "otPrice": {
+                    "description": "原价",
+                    "type": "number"
+                },
+                "price": {
+                    "description": "活动价",
+                    "type": "number"
+                },
+                "quota": {
+                    "description": "限量",
+                    "type": "integer"
+                },
+                "skuId": {
+                    "description": "规格业务ID",
                     "type": "string"
                 },
-                "password": {
-                    "description": "登录密码",
+                "status": {
+                    "description": "是否参与活动",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.SeckillActivitySet": {
+            "type": "object",
+            "required": [
+                "endDay",
+                "startDay",
+                "timeIds",
+                "title"
+            ],
+            "properties": {
+                "endDay": {
+                    "description": "结束日期",
+                    "type": "integer"
+                },
+                "homeModuleIds": {
+                    "description": "推荐首页模块ID集合",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "description": "活动ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "isCommission": {
+                    "description": "是否参与分佣",
+                    "type": "integer"
+                },
+                "linkId": {
+                    "description": "关联ID，保留字段",
+                    "type": "integer"
+                },
+                "num": {
+                    "description": "活动期间总购买数量限制",
+                    "type": "integer"
+                },
+                "onceNum": {
+                    "description": "每人每日购买数量限制",
+                    "type": "integer"
+                },
+                "productInfos": {
+                    "description": "参与活动的商品列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SeckillActivityProductInfo"
+                    }
+                },
+                "startDay": {
+                    "description": "开始日期",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "是否显示",
+                    "type": "integer"
+                },
+                "timeIds": {
+                    "description": "时间段ID，多个逗号分隔",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "description": "活动名称",
                     "type": "string"
+                },
+                "type": {
+                    "description": "活动类型",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.SeckillConfigSet": {
+            "type": "object",
+            "properties": {
+                "beginClock": {
+                    "description": "开启时间",
+                    "type": "integer"
+                },
+                "continueClock": {
+                    "description": "持续时间",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "秒杀配置ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "images": {
+                    "description": "轮播图",
+                    "type": "string"
+                },
+                "sort": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.SeckillSet": {
+            "type": "object",
+            "required": [
+                "image",
+                "productId",
+                "title"
+            ],
+            "properties": {
+                "activityId": {
+                    "description": "活动ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "cost": {
+                    "description": "成本价",
+                    "type": "number"
+                },
+                "customForm": {
+                    "description": "自定义表单",
+                    "type": "string"
+                },
+                "freight": {
+                    "description": "运费设置",
+                    "type": "integer"
+                },
+                "giveIntegral": {
+                    "description": "赠送积分",
+                    "type": "number"
+                },
+                "id": {
+                    "description": "秒杀商品ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "image": {
+                    "description": "推荐图",
+                    "type": "string"
+                },
+                "images": {
+                    "description": "轮播图，逗号分隔",
+                    "type": "string"
+                },
+                "info": {
+                    "description": "简介",
+                    "type": "string"
+                },
+                "isCommission": {
+                    "description": "是否参与返佣",
+                    "type": "integer"
+                },
+                "isHot": {
+                    "description": "是否热门推荐",
+                    "type": "integer"
+                },
+                "isPostage": {
+                    "description": "是否包邮",
+                    "type": "integer"
+                },
+                "isShow": {
+                    "description": "是否显示",
+                    "type": "integer"
+                },
+                "logistics": {
+                    "description": "物流类型",
+                    "type": "string"
+                },
+                "num": {
+                    "description": "最多秒杀数量",
+                    "type": "integer"
+                },
+                "onceNum": {
+                    "description": "单次购买数量",
+                    "type": "integer"
+                },
+                "otPrice": {
+                    "description": "原价",
+                    "type": "number"
+                },
+                "postage": {
+                    "description": "邮费",
+                    "type": "number"
+                },
+                "price": {
+                    "description": "秒杀价",
+                    "type": "number"
+                },
+                "productId": {
+                    "description": "商品ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "quota": {
+                    "description": "限购总数",
+                    "type": "integer"
+                },
+                "quotaShow": {
+                    "description": "限购总数显示",
+                    "type": "integer"
+                },
+                "sales": {
+                    "description": "销量",
+                    "type": "integer"
+                },
+                "sort": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "startTime": {
+                    "description": "开始时间",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "商品状态",
+                    "type": "integer"
+                },
+                "stock": {
+                    "description": "库存",
+                    "type": "integer"
+                },
+                "stopTime": {
+                    "description": "结束时间",
+                    "type": "string"
+                },
+                "tempId": {
+                    "description": "运费模板ID",
+                    "type": "integer"
+                },
+                "timeId": {
+                    "description": "时间段ID",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "活动标题",
+                    "type": "string"
+                },
+                "unitName": {
+                    "description": "单位名称",
+                    "type": "string"
+                },
+                "virtualType": {
+                    "description": "商品类型",
+                    "type": "integer"
+                },
+                "volume": {
+                    "description": "商品体积",
+                    "type": "number"
+                },
+                "weight": {
+                    "description": "商品重量",
+                    "type": "number"
                 }
             }
         },
@@ -20130,6 +22920,63 @@ const docTemplate = `{
                 },
                 "username": {
                     "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
+        "models.WechatConfigReq": {
+            "type": "object",
+            "properties": {
+                "appId": {
+                    "description": "微信小程序应用ID",
+                    "type": "string"
+                },
+                "appSecret": {
+                    "description": "微信小程序应用密钥",
+                    "type": "string"
+                },
+                "certPath": {
+                    "description": "微信支付证书路径",
+                    "type": "string"
+                },
+                "encodingAESKey": {
+                    "description": "消息加密密钥",
+                    "type": "string"
+                },
+                "mchId": {
+                    "description": "微信支付商户号",
+                    "type": "string"
+                },
+                "mchKey": {
+                    "description": "微信支付商户密钥",
+                    "type": "string"
+                },
+                "notifyUrl": {
+                    "description": "微信支付回调地址",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "微信令牌",
+                    "type": "string"
+                }
+            }
+        },
+        "models.WechatLoginReq": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "avatar": {
+                    "description": "用户头像",
+                    "type": "string"
+                },
+                "code": {
+                    "description": "微信登录code",
+                    "type": "string"
+                },
+                "nickname": {
+                    "description": "用户昵称",
                     "type": "string"
                 }
             }
@@ -20285,6 +23132,131 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "nova-factory-server_app_business_shop_api_models.AddressSetReq": {
+            "type": "object",
+            "required": [
+                "cityCode",
+                "cityName",
+                "detailAddress",
+                "provinceCode",
+                "provinceName",
+                "receiverMobile",
+                "receiverName"
+            ],
+            "properties": {
+                "addressLabel": {
+                    "type": "string"
+                },
+                "cityCode": {
+                    "type": "string"
+                },
+                "cityName": {
+                    "type": "string"
+                },
+                "detailAddress": {
+                    "type": "string"
+                },
+                "districtCode": {
+                    "type": "string"
+                },
+                "districtName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "isDefault": {
+                    "type": "boolean"
+                },
+                "provinceCode": {
+                    "type": "string"
+                },
+                "provinceName": {
+                    "type": "string"
+                },
+                "receiverMobile": {
+                    "type": "string"
+                },
+                "receiverName": {
+                    "type": "string"
+                }
+            }
+        },
+        "nova-factory-server_app_business_shop_user_models.AddressSetReq": {
+            "type": "object",
+            "required": [
+                "detailAddress",
+                "receiverMobile"
+            ],
+            "properties": {
+                "addressLabel": {
+                    "description": "地址标签",
+                    "type": "string"
+                },
+                "cityCode": {
+                    "description": "市编码",
+                    "type": "string"
+                },
+                "cityName": {
+                    "description": "市名称",
+                    "type": "string"
+                },
+                "detailAddress": {
+                    "description": "详细地址",
+                    "type": "string"
+                },
+                "districtCode": {
+                    "description": "区编码",
+                    "type": "string"
+                },
+                "districtName": {
+                    "description": "区名称",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "isDefault": {
+                    "description": "是否默认地址",
+                    "type": "boolean"
+                },
+                "postalCode": {
+                    "description": "邮政编码",
+                    "type": "string"
+                },
+                "provinceCode": {
+                    "description": "省编码",
+                    "type": "string"
+                },
+                "provinceName": {
+                    "description": "省名称",
+                    "type": "string"
+                },
+                "receiverMobile": {
+                    "description": "收货人手机号",
+                    "type": "string"
+                },
+                "receiverName": {
+                    "description": "收货人姓名",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "状态",
+                    "type": "integer"
+                },
+                "streetCode": {
+                    "description": "街道编码",
+                    "type": "string"
+                },
+                "streetName": {
+                    "description": "街道名称",
                     "type": "string"
                 }
             }
@@ -20938,10 +23910,18 @@ const docTemplate = `{
                     "description": "分类名称",
                     "type": "string"
                 },
+                "description": {
+                    "description": "分类描述",
+                    "type": "string"
+                },
                 "id": {
                     "description": "主键ID",
                     "type": "string",
                     "example": "0"
+                },
+                "imageUrl": {
+                    "description": "分类图片",
+                    "type": "string"
                 },
                 "parentId": {
                     "description": "父级分类ID",
@@ -20982,8 +23962,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "galleryImages": {
-                    "description": "图集",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "goodsId": {
                     "description": "商品业务ID",
@@ -20991,7 +23973,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "主键ID",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "imageUrl": {
                     "description": "主图地址",
@@ -21068,7 +24051,10 @@ const docTemplate = `{
                 },
                 "galleryImages": {
                     "description": "图集",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "goodsCode": {
                     "description": "商品编码",
@@ -21081,6 +24067,13 @@ const docTemplate = `{
                 "goodsName": {
                     "description": "商品名称",
                     "type": "string"
+                },
+                "homeModuleIds": {
+                    "description": "推荐首页模块ID集合",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "id": {
                     "description": "主键ID",
