@@ -181,10 +181,10 @@ func (m *Model) EmbeddingConfig(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	list, err := m.service.EmbeddingWithLLM(c)
+	info, err := m.service.EmbeddingWithLLM(c)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
-	baizeContext.SuccessData(c, list)
+	baizeContext.SuccessData(c, info)
 }

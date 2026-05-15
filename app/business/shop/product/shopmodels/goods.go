@@ -77,6 +77,7 @@ type GoodsVectorResult struct {
 	GoodsID    string `json:"goodsId"`
 	Collection string `json:"collection"`
 	Dimension  int    `json:"dimension"`
+	SkuCount   int    `json:"skuCount"`
 }
 
 // ImportGoodsList 商品导入列表

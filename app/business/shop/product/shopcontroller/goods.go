@@ -33,6 +33,7 @@ func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 	group.PUT("/edit", middlewares.HasPermission("shop:goods:edit"), s.Update)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:goods:remove"), s.Delete)
 	group.POST("/vector/generate/:id", middlewares.HasPermission("shop:goods:vector:generate"), s.Generate)
+	group.POST("/vector/search", middlewares.HasPermission("shop:goods:vector:search"), s.Search)
 }
 
 // PublicRoutes 导入接口注册
@@ -194,10 +195,14 @@ func (s *Goods) Import(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "生成成功"
 // @Router /shop/goods/vector/generate/{id} [post]
 func (s *Goods) Generate(c *gin.Context) {
-	id := baizeContext.ParamInt64(c, "id")
 	req := new(shopmodels.GenVectorReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
 	if req.ID <= 0 {
-		zap.L().Error("invalid goods id", zap.Int64("id", id))
+		zap.L().Error("invalid goods id", zap.Int64("id", req.ID))
 		baizeContext.ParameterError(c)
 		return
 	}
@@ -208,7 +213,36 @@ func (s *Goods) Generate(c *gin.Context) {
 	}
 	data, err := s.service.GenerateVector(c, req)
 	if err != nil {
-		zap.L().Error("generate goods vector fail", zap.Int64("id", id), zap.Error(err))
+		zap.L().Error("generate goods vector fail", zap.Int64("id", req.ID), zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// Search 近似搜索商品向量
+// @Summary 近似搜索商品向量
+// @Description 根据检索文本生成查询向量并近似搜索商品SKU数据
+// @Tags 商城/商品管理
+// @Param object body shopmodels.GoodsVectorSearchReq true "商品向量搜索参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "搜索成功"
+// @Router /shop/goods/vector/search [post]
+func (s *Goods) Search(c *gin.Context) {
+	req := new(shopmodels.GoodsVectorSearchReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil {
+		zap.L().Error("invalid goods search embedding")
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.SearchVector(c, req)
+	if err != nil {
+		zap.L().Error("search goods vector fail", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}

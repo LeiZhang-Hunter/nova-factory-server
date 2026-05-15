@@ -62,3 +62,9 @@ iotdb:
 mcp:
   path: /home/zhanglei/project/zhanglei/nova-factory-server/config/mcp.json
   operationsPath: /home/zhanglei/project/zhanglei/nova-factory-server/config/operations.json
+milvus:
+  enabled: true
+  address: 192.168.2.2:19530
+  username: ""
+  password: ""
+  db_name: "nova"

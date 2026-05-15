@@ -13,9 +13,18 @@ import (
 )
 
 const goodsVectorContentMaxLength = 16384
+const (
+	defaultGoodsVectorSearchLimit = 10
+	maxGoodsVectorSearchLimit     = 50
+)
 
 type goodsVectorConfig struct {
 	Embedding embeddingutil.ProviderConfig `mapstructure:"embedding"`
+}
+
+type goodsEmbeddingPayload struct {
+	sku     *shopmodels.GoodsSku
+	content string
 }
 
 func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.GenVectorReq) (*shopmodels.GoodsVectorResult, error) {
@@ -26,8 +35,15 @@ func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.Ge
 	if goods == nil {
 		return nil, errors.New("商品不存在")
 	}
+	if goods.IsOnSale <= 0 {
+		return nil, errors.New("商品未上架，不能生成向量")
+	}
 
 	if err = s.attachSkus(c, []*shopmodels.Goods{goods}); err != nil {
+		return nil, err
+	}
+
+	if err = s.attachCategoryNames(c, []*shopmodels.Goods{goods}); err != nil {
 		return nil, err
 	}
 
@@ -42,42 +58,121 @@ func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.Ge
 		return nil, fmt.Errorf("初始化向量模型失败: %w", err)
 	}
 
-	content := trimRunes(buildGoodsEmbeddingText(goods), goodsVectorContentMaxLength)
-	if strings.TrimSpace(content) == "" {
+	payloads := buildGoodsEmbeddingPayloads(goods)
+	if len(payloads) == 0 {
 		return nil, errors.New("商品内容为空，无法生成向量")
 	}
 
-	vectors, err := embedder.EmbedStrings(requestCtx, []string{content})
+	texts := make([]string, 0, len(payloads))
+	for _, payload := range payloads {
+		texts = append(texts, payload.content)
+	}
+
+	vectors, err := embedder.EmbedStrings(requestCtx, texts)
 	if err != nil {
 		return nil, fmt.Errorf("生成商品向量失败: %w", err)
+	}
+	if len(vectors) != len(payloads) {
+		return nil, fmt.Errorf("向量模型返回结果数量不匹配，expected=%d actual=%d", len(payloads), len(vectors))
 	}
 	if len(vectors) == 0 || len(vectors[0]) == 0 {
 		return nil, errors.New("向量模型未返回有效结果")
 	}
 
-	return s.vectorDao.Upsert(c, goods, content, float64ToFloat32(vectors[0]))
+	items := make([]*shopmodels.GoodsVectorUpsertItem, 0, len(payloads))
+	for idx, payload := range payloads {
+		if len(vectors[idx]) == 0 {
+			return nil, fmt.Errorf("第%d条SKU向量为空", idx+1)
+		}
+		item := &shopmodels.GoodsVectorUpsertItem{
+			Content: payload.content,
+			Vector:  float64ToFloat32(vectors[idx]),
+		}
+		if payload.sku != nil {
+			item.SkuID = int64(payload.sku.ID)
+			item.SkuName = payload.sku.SkuName
+			item.SkuDescription = payload.sku.Description
+			item.RetailPrice = payload.sku.RetailPrice
+			item.Weight = payload.sku.Weight
+			item.Quantity = payload.sku.Quantity
+		}
+		items = append(items, item)
+	}
+	result, err := s.vectorDao.Upsert(c, goods, items)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, errors.New("未生成有效的商品向量数据")
+	}
+	return result, nil
+}
+
+func (s *ShopGoodsServiceImpl) SearchVector(c *gin.Context, req *shopmodels.GoodsVectorSearchReq) (*shopmodels.GoodsVectorSearchData, error) {
+	if req == nil {
+		return nil, errors.New("搜索参数不能为空")
+	}
+	req.Query = strings.TrimSpace(req.Query)
+	if req.Query == "" {
+		return nil, errors.New("搜索内容不能为空")
+	}
+	cfg, err := loadEmbeddingProviderConfig(req.Embedding)
+	if err != nil {
+		return nil, err
+	}
+
+	requestCtx := buildRequestContext(c)
+	embedder, err := embeddingutil.NewEmbedder(requestCtx, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("初始化向量模型失败: %w", err)
+	}
+
+	vectors, err := embedder.EmbedStrings(requestCtx, []string{req.Query})
+	if err != nil {
+		return nil, fmt.Errorf("生成搜索向量失败: %w", err)
+	}
+	if len(vectors) == 0 || len(vectors[0]) == 0 {
+		return nil, errors.New("向量模型未返回有效结果")
+	}
+
+	searchReq := &shopmodels.GoodsVectorSearchReq{
+		Query: req.Query,
+		Limit: normalizeGoodsVectorSearchLimit(req.Limit),
+	}
+	return s.vectorDao.Search(c, searchReq, float64ToFloat32(vectors[0]))
 }
 
 func (s *ShopGoodsServiceImpl) loadGoodsVectorConfig(c *gin.Context,
 	req *shopmodels.GenVectorReq) (*goodsVectorConfig, error) {
-
 	cfg := &goodsVectorConfig{}
-
-	cfg.Embedding.ProviderType = req.Embedding.ProviderType
-	cfg.Embedding.ProviderID = req.Embedding.ProviderID
-	cfg.Embedding.APIEndpoint = req.Embedding.APIEndpoint
-	cfg.Embedding.ModelID = req.Embedding.ModelID
-
-	if cfg.Embedding.ProviderType == "" {
-		cfg.Embedding.ProviderType = "openai"
+	embeddingCfg, err := loadEmbeddingProviderConfig(req.Embedding)
+	if err != nil {
+		return nil, err
 	}
-	if cfg.Embedding.ProviderID == "" {
-		cfg.Embedding.ProviderID = cfg.Embedding.ProviderType
-	}
-	if cfg.Embedding.ModelID == "" {
+	cfg.Embedding = *embeddingCfg
+	return cfg, nil
+}
+
+func loadEmbeddingProviderConfig(req *shopmodels.EmbeddingConfig) (*embeddingutil.ProviderConfig, error) {
+	if req == nil {
 		return nil, errors.New("未配置 embedding.model_id 或 shop.goods_vector.embedding.model_id")
 	}
-
+	cfg := &embeddingutil.ProviderConfig{
+		ProviderType: req.ProviderType,
+		ProviderID:   req.ProviderID,
+		APIEndpoint:  req.APIEndpoint,
+		ModelID:      req.ModelID,
+		APIKey:       req.ApiKey,
+	}
+	if cfg.ProviderType == "" {
+		cfg.ProviderType = "openai"
+	}
+	if cfg.ProviderID == "" {
+		cfg.ProviderID = cfg.ProviderType
+	}
+	if cfg.ModelID == "" {
+		return nil, errors.New("未配置 embedding.model_id 或 shop.goods_vector.embedding.model_id")
+	}
 	return cfg, nil
 }
 
@@ -108,72 +203,96 @@ func trimRunes(value string, max int) string {
 	return string(runes[:max])
 }
 
-func buildGoodsEmbeddingText(goods *shopmodels.Goods) string {
+func buildGoodsEmbeddingPayloads(goods *shopmodels.Goods) []goodsEmbeddingPayload {
 	if goods == nil {
-		return ""
+		return nil
 	}
 
-	lines := make([]string, 0, 8+len(goods.Skus))
+	baseLines := make([]string, 0, 9)
 	appendLine := func(label, value string) {
 		value = strings.TrimSpace(value)
 		if value == "" {
 			return
 		}
-		lines = append(lines, label+": "+value)
+		baseLines = append(baseLines, label+": "+value)
 	}
 
 	appendLine("商品名称", goods.GoodsName)
-	appendLine("商品编码", goods.GoodsCode)
 	appendLine("商品分类", goods.ShopCategoryName)
 	appendLine("商品描述", goods.Description)
-	if goods.RetailPrice > 0 {
-		lines = append(lines, fmt.Sprintf("零售价: %.2f", goods.RetailPrice))
-	}
-	if goods.Weight > 0 {
-		lines = append(lines, fmt.Sprintf("重量: %.2f%s", goods.Weight, strings.TrimSpace(goods.WeightUnit)))
-	}
+	//if goods.RetailPrice > 0 {
+	//	baseLines = append(baseLines, fmt.Sprintf("零售价: %.2f", goods.RetailPrice))
+	//}
+	//if goods.Weight > 0 {
+	//	baseLines = append(baseLines, fmt.Sprintf("重量: %.2f%s", goods.Weight, strings.TrimSpace(goods.WeightUnit)))
+	//}
 	if goods.Unit != "" {
-		lines = append(lines, "销售单位: "+strings.TrimSpace(goods.Unit))
+		baseLines = append(baseLines, "销售单位: "+strings.TrimSpace(goods.Unit))
 	}
-	lines = append(lines, fmt.Sprintf("库存: %d", goods.Quantity))
-	if goods.IsOnSale > 0 {
-		lines = append(lines, "上架状态: 上架")
-	} else {
-		lines = append(lines, "上架状态: 下架")
-	}
+	//baseLines = append(baseLines, fmt.Sprintf("库存: %d", goods.Quantity))
+	//if goods.IsOnSale > 0 {
+	//	baseLines = append(baseLines, "上架状态: 上架")
+	//} else {
+	//	baseLines = append(baseLines, "上架状态: 下架")
+	//}
 
-	for idx, sku := range goods.Skus {
+	payloads := make([]goodsEmbeddingPayload, 0, maxInt(len(goods.Skus), 1))
+	for _, sku := range goods.Skus {
 		if sku == nil {
 			continue
 		}
-		parts := make([]string, 0, 8)
-		if sku.SkuName != "" {
-			parts = append(parts, "名称="+strings.TrimSpace(sku.SkuName))
-		}
-		if sku.SkuCode != "" {
-			parts = append(parts, "编码="+strings.TrimSpace(sku.SkuCode))
-		}
-		if sku.Barcode != "" {
-			parts = append(parts, "条码="+strings.TrimSpace(sku.Barcode))
-		}
-		if sku.Description != "" {
-			parts = append(parts, "描述="+strings.TrimSpace(sku.Description))
-		}
-		if sku.RetailPrice > 0 {
-			parts = append(parts, fmt.Sprintf("价格=%.2f", sku.RetailPrice))
-		}
-		if sku.Weight > 0 {
-			parts = append(parts, fmt.Sprintf("重量=%.2f%s", sku.Weight, strings.TrimSpace(sku.WeightUnit)))
-		}
-		if sku.Unit != "" {
-			parts = append(parts, "单位="+strings.TrimSpace(sku.Unit))
-		}
-		parts = append(parts, fmt.Sprintf("库存=%d", sku.Quantity))
-		if len(parts) == 0 {
+		lines := append([]string{}, baseLines...)
+		appendSkuLines(&lines, sku)
+		content := trimRunes(strings.Join(lines, "\n"), goodsVectorContentMaxLength)
+		if strings.TrimSpace(content) == "" {
 			continue
 		}
-		lines = append(lines, fmt.Sprintf("规格%d: %s", idx+1, strings.Join(parts, "，")))
+		payloads = append(payloads, goodsEmbeddingPayload{
+			sku:     sku,
+			content: content,
+		})
 	}
+	if len(payloads) > 0 {
+		return payloads
+	}
+	content := trimRunes(strings.Join(baseLines, "\n"), goodsVectorContentMaxLength)
+	if strings.TrimSpace(content) == "" {
+		return nil
+	}
+	return []goodsEmbeddingPayload{{content: content}}
+}
 
-	return strings.Join(lines, "\n")
+func appendSkuLines(lines *[]string, sku *shopmodels.GoodsSku) {
+	if sku == nil {
+		return
+	}
+	appendLine := func(label, value string) {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			return
+		}
+		*lines = append(*lines, label+": "+value)
+	}
+	appendLine("SKU名称", sku.SkuName)
+	appendLine("SKU描述", sku.Description)
+	if sku.Unit != "" {
+		*lines = append(*lines, "SKU单位: "+strings.TrimSpace(sku.Unit))
+	}
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func normalizeGoodsVectorSearchLimit(limit int) int {
+	if limit <= 0 {
+		return defaultGoodsVectorSearchLimit
+	}
+	if limit > maxGoodsVectorSearchLimit {
+		return maxGoodsVectorSearchLimit
+	}
+	return limit
 }

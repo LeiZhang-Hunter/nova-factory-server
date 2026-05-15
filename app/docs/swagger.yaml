@@ -4073,6 +4073,19 @@ definitions:
     required:
     - categoryName
     type: object
+  shopmodels.EmbeddingConfig:
+    properties:
+      api_endpoint:
+        type: string
+      api_key:
+        type: string
+      model_id:
+        type: string
+      provider_id:
+        type: string
+      provider_type:
+        type: string
+    type: object
   shopmodels.GoodsSkuUpsert:
     properties:
       barcode:
@@ -4211,6 +4224,21 @@ definitions:
     required:
     - goodsId
     - goodsName
+    type: object
+  shopmodels.GoodsVectorSearchReq:
+    properties:
+      embedding:
+        allOf:
+        - $ref: '#/definitions/shopmodels.EmbeddingConfig'
+        description: 向量模型配置
+      limit:
+        description: 返回条数
+        type: integer
+      query:
+        description: 检索文本
+        type: string
+    required:
+    - query
     type: object
   systemmodels.Accredit:
     properties:
@@ -12989,6 +13017,28 @@ paths:
       security:
       - BearerAuth: []
       summary: 生成商品向量
+      tags:
+      - 商城/商品管理
+  /shop/goods/vector/search:
+    post:
+      description: 根据检索文本生成查询向量并近似搜索商品SKU数据
+      parameters:
+      - description: 商品向量搜索参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.GoodsVectorSearchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 搜索成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 近似搜索商品向量
       tags:
       - 商城/商品管理
   /shop/home/module/info/{id}:

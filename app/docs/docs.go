@@ -12684,6 +12684,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/goods/vector/search": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据检索文本生成查询向量并近似搜索商品SKU数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "近似搜索商品向量",
+                "parameters": [
+                    {
+                        "description": "商品向量搜索参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsVectorSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/goods/{ids}": {
             "delete": {
                 "security": [
@@ -24335,6 +24371,26 @@ const docTemplate = `{
                 }
             }
         },
+        "shopmodels.EmbeddingConfig": {
+            "type": "object",
+            "properties": {
+                "api_endpoint": {
+                    "type": "string"
+                },
+                "api_key": {
+                    "type": "string"
+                },
+                "model_id": {
+                    "type": "string"
+                },
+                "provider_id": {
+                    "type": "string"
+                },
+                "provider_type": {
+                    "type": "string"
+                }
+            }
+        },
         "shopmodels.GoodsSkuUpsert": {
             "type": "object",
             "required": [
@@ -24519,6 +24575,30 @@ const docTemplate = `{
                 },
                 "weightUnit": {
                     "description": "重量单位",
+                    "type": "string"
+                }
+            }
+        },
+        "shopmodels.GoodsVectorSearchReq": {
+            "type": "object",
+            "required": [
+                "query"
+            ],
+            "properties": {
+                "embedding": {
+                    "description": "向量模型配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/shopmodels.EmbeddingConfig"
+                        }
+                    ]
+                },
+                "limit": {
+                    "description": "返回条数",
+                    "type": "integer"
+                },
+                "query": {
+                    "description": "检索文本",
                     "type": "string"
                 }
             }
