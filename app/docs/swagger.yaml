@@ -4225,6 +4225,23 @@ definitions:
     - goodsId
     - goodsName
     type: object
+  shopmodels.GoodsVectorBatchSearchReq:
+    properties:
+      embedding:
+        allOf:
+        - $ref: '#/definitions/shopmodels.EmbeddingConfig'
+        description: 向量模型配置
+      limit:
+        description: 每条返回条数
+        type: integer
+      queries:
+        description: 检索文本列表
+        items:
+          type: string
+        type: array
+    required:
+    - queries
+    type: object
   shopmodels.GoodsVectorSearchReq:
     properties:
       embedding:
@@ -13039,6 +13056,28 @@ paths:
       security:
       - BearerAuth: []
       summary: 近似搜索商品向量
+      tags:
+      - 商城/商品管理
+  /shop/goods/vector/search/batch:
+    post:
+      description: 根据多条检索文本批量生成查询向量并近似搜索商品SKU数据
+      parameters:
+      - description: 商品批量向量搜索参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/shopmodels.GoodsVectorBatchSearchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 搜索成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 批量近似搜索商品向量
       tags:
       - 商城/商品管理
   /shop/home/module/info/{id}:

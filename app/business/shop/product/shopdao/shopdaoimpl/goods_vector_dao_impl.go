@@ -163,6 +163,36 @@ func (d *ShopGoodsVectorDaoImpl) Search(c *gin.Context, req *shopmodels.GoodsVec
 	if len(vector) == 0 {
 		return nil, errors.New("商品搜索向量为空")
 	}
+	data, err := d.BatchSearch(c, &shopmodels.GoodsVectorBatchSearchReq{
+		Queries: []string{req.Query},
+		Limit:   req.Limit,
+	}, [][]float32{vector})
+	if err != nil {
+		return nil, err
+	}
+	if data == nil || len(data.Rows) == 0 || data.Rows[0] == nil {
+		return &shopmodels.GoodsVectorSearchData{
+			Rows:  make([]*shopmodels.GoodsVectorSearchItem, 0),
+			Total: 0,
+		}, nil
+	}
+	return &shopmodels.GoodsVectorSearchData{
+		Rows:  data.Rows[0].Rows,
+		Total: data.Rows[0].Total,
+	}, nil
+}
+
+func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.GoodsVectorBatchSearchReq,
+	vectors [][]float32) (*shopmodels.GoodsVectorBatchSearchData, error) {
+	if req == nil {
+		return nil, errors.New("商品批量向量搜索参数为空")
+	}
+	if len(vectors) == 0 {
+		return nil, errors.New("商品批量搜索向量为空")
+	}
+	if len(req.Queries) != len(vectors) {
+		return nil, fmt.Errorf("商品批量搜索参数数量不匹配，expected=%d actual=%d", len(req.Queries), len(vectors))
+	}
 
 	cfg, err := loadGoodsVectorConfig()
 	if err != nil {
@@ -180,14 +210,19 @@ func (d *ShopGoodsVectorDaoImpl) Search(c *gin.Context, req *shopmodels.GoodsVec
 		return nil, fmt.Errorf("检查 Milvus collection 失败: %w", err)
 	}
 	if !has {
-		return &shopmodels.GoodsVectorSearchData{
-			Rows:  make([]*shopmodels.GoodsVectorSearchItem, 0),
-			Total: 0,
-		}, nil
+		return buildEmptyGoodsVectorBatchSearchData(req.Queries), nil
+	}
+
+	searchVectors := make([]entity.Vector, 0, len(vectors))
+	for idx, vector := range vectors {
+		if len(vector) == 0 {
+			return nil, fmt.Errorf("第%d条商品搜索向量为空", idx+1)
+		}
+		searchVectors = append(searchVectors, entity.FloatVector(vector))
 	}
 
 	resultSets, err := client.Search(requestCtx, milvusclient.NewSearchOption(cfg.Collection, req.Limit,
-		[]entity.Vector{entity.FloatVector(vector)}).
+		searchVectors).
 		WithANNSField(goodsVectorEmbeddingField).
 		WithOutputFields(
 			goodsVectorDBIDField,
@@ -207,12 +242,47 @@ func (d *ShopGoodsVectorDaoImpl) Search(c *gin.Context, req *shopmodels.GoodsVec
 		return nil, fmt.Errorf("搜索 Milvus 商品向量失败: %w", err)
 	}
 	if len(resultSets) == 0 {
-		return &shopmodels.GoodsVectorSearchData{
+		return buildEmptyGoodsVectorBatchSearchData(req.Queries), nil
+	}
+	if len(resultSets) != len(req.Queries) {
+		return nil, fmt.Errorf("Milvus 批量搜索结果数量不匹配，expected=%d actual=%d", len(req.Queries), len(resultSets))
+	}
+
+	rows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(resultSets))
+	for idx, resultSet := range resultSets {
+		data, parseErr := parseGoodsVectorSearchResultSet(resultSet)
+		if parseErr != nil {
+			return nil, fmt.Errorf("解析第%d条商品向量搜索结果失败: %w", idx+1, parseErr)
+		}
+		rows = append(rows, &shopmodels.GoodsVectorBatchSearchItem{
+			Query: req.Queries[idx],
+			Rows:  data.Rows,
+			Total: data.Total,
+		})
+	}
+
+	return &shopmodels.GoodsVectorBatchSearchData{
+		Rows:  rows,
+		Total: int64(len(rows)),
+	}, nil
+}
+
+func buildEmptyGoodsVectorBatchSearchData(queries []string) *shopmodels.GoodsVectorBatchSearchData {
+	rows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(queries))
+	for _, query := range queries {
+		rows = append(rows, &shopmodels.GoodsVectorBatchSearchItem{
+			Query: query,
 			Rows:  make([]*shopmodels.GoodsVectorSearchItem, 0),
 			Total: 0,
-		}, nil
+		})
 	}
-	resultSet := resultSets[0]
+	return &shopmodels.GoodsVectorBatchSearchData{
+		Rows:  rows,
+		Total: int64(len(rows)),
+	}
+}
+
+func parseGoodsVectorSearchResultSet(resultSet milvusclient.ResultSet) (*shopmodels.GoodsVectorSearchData, error) {
 	if resultSet.Err != nil {
 		return nil, resultSet.Err
 	}
@@ -222,6 +292,7 @@ func (d *ShopGoodsVectorDaoImpl) Search(c *gin.Context, req *shopmodels.GoodsVec
 		item := &shopmodels.GoodsVectorSearchItem{
 			Score: resultSet.Scores[i],
 		}
+		var err error
 		if item.GoodsDBID, err = getInt64ColumnValue(&resultSet, goodsVectorDBIDField, i); err != nil {
 			return nil, err
 		}

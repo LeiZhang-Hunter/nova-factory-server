@@ -34,6 +34,7 @@ func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:goods:remove"), s.Delete)
 	group.POST("/vector/generate/:id", middlewares.HasPermission("shop:goods:vector:generate"), s.Generate)
 	group.POST("/vector/search", middlewares.HasPermission("shop:goods:vector:search"), s.Search)
+	group.POST("/vector/search/batch", middlewares.HasPermission("shop:goods:vector:batch_search"), s.BatchSearch)
 }
 
 // PublicRoutes 导入接口注册
@@ -243,6 +244,35 @@ func (s *Goods) Search(c *gin.Context) {
 	data, err := s.service.SearchVector(c, req)
 	if err != nil {
 		zap.L().Error("search goods vector fail", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// BatchSearch 批量近似搜索商品向量
+// @Summary 批量近似搜索商品向量
+// @Description 根据多条检索文本批量生成查询向量并近似搜索商品SKU数据
+// @Tags 商城/商品管理
+// @Param object body shopmodels.GoodsVectorBatchSearchReq true "商品批量向量搜索参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "搜索成功"
+// @Router /shop/goods/vector/search/batch [post]
+func (s *Goods) BatchSearch(c *gin.Context) {
+	req := new(shopmodels.GoodsVectorBatchSearchReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil || len(req.Queries) == 0 {
+		zap.L().Error("invalid goods batch search request")
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.BatchSearchVector(c, req)
+	if err != nil {
+		zap.L().Error("batch search goods vector fail", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}

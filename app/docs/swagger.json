@@ -12712,6 +12712,42 @@
                 }
             }
         },
+        "/shop/goods/vector/search/batch": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据多条检索文本批量生成查询向量并近似搜索商品SKU数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "批量近似搜索商品向量",
+                "parameters": [
+                    {
+                        "description": "商品批量向量搜索参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsVectorBatchSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/goods/{ids}": {
             "delete": {
                 "security": [
@@ -24568,6 +24604,33 @@
                 "weightUnit": {
                     "description": "重量单位",
                     "type": "string"
+                }
+            }
+        },
+        "shopmodels.GoodsVectorBatchSearchReq": {
+            "type": "object",
+            "required": [
+                "queries"
+            ],
+            "properties": {
+                "embedding": {
+                    "description": "向量模型配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/shopmodels.EmbeddingConfig"
+                        }
+                    ]
+                },
+                "limit": {
+                    "description": "每条返回条数",
+                    "type": "integer"
+                },
+                "queries": {
+                    "description": "检索文本列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

@@ -112,11 +112,48 @@ func (s *ShopGoodsServiceImpl) SearchVector(c *gin.Context, req *shopmodels.Good
 	if req == nil {
 		return nil, errors.New("搜索参数不能为空")
 	}
-	req.Query = strings.TrimSpace(req.Query)
-	if req.Query == "" {
-		return nil, errors.New("搜索内容不能为空")
+	queries, err := normalizeGoodsVectorSearchQueries([]string{req.Query})
+	if err != nil {
+		return nil, err
 	}
-	cfg, err := loadEmbeddingProviderConfig(req.Embedding)
+	items, err := s.batchSearchVector(c, queries, req.Limit, req.Embedding)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return &shopmodels.GoodsVectorSearchData{
+			Rows:  make([]*shopmodels.GoodsVectorSearchItem, 0),
+			Total: 0,
+		}, nil
+	}
+	return &shopmodels.GoodsVectorSearchData{
+		Rows:  items[0].Rows,
+		Total: items[0].Total,
+	}, nil
+}
+
+func (s *ShopGoodsServiceImpl) BatchSearchVector(c *gin.Context,
+	req *shopmodels.GoodsVectorBatchSearchReq) (*shopmodels.GoodsVectorBatchSearchData, error) {
+	if req == nil {
+		return nil, errors.New("批量搜索参数不能为空")
+	}
+	queries, err := normalizeGoodsVectorSearchQueries(req.Queries)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := s.batchSearchVector(c, queries, req.Limit, req.Embedding)
+	if err != nil {
+		return nil, err
+	}
+	return &shopmodels.GoodsVectorBatchSearchData{
+		Rows:  rows,
+		Total: int64(len(rows)),
+	}, nil
+}
+
+func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queries []string, limit int,
+	embedding *shopmodels.EmbeddingConfig) ([]*shopmodels.GoodsVectorBatchSearchItem, error) {
+	cfg, err := loadEmbeddingProviderConfig(embedding)
 	if err != nil {
 		return nil, err
 	}
@@ -127,19 +164,32 @@ func (s *ShopGoodsServiceImpl) SearchVector(c *gin.Context, req *shopmodels.Good
 		return nil, fmt.Errorf("初始化向量模型失败: %w", err)
 	}
 
-	vectors, err := embedder.EmbedStrings(requestCtx, []string{req.Query})
+	vectors, err := embedder.EmbedStrings(requestCtx, queries)
 	if err != nil {
 		return nil, fmt.Errorf("生成搜索向量失败: %w", err)
 	}
-	if len(vectors) == 0 || len(vectors[0]) == 0 {
-		return nil, errors.New("向量模型未返回有效结果")
+	if len(vectors) != len(queries) {
+		return nil, fmt.Errorf("向量模型返回结果数量不匹配，expected=%d actual=%d", len(queries), len(vectors))
 	}
 
-	searchReq := &shopmodels.GoodsVectorSearchReq{
-		Query: req.Query,
-		Limit: normalizeGoodsVectorSearchLimit(req.Limit),
+	normalizedVectors := make([][]float32, 0, len(vectors))
+	for idx := range queries {
+		if len(vectors[idx]) == 0 {
+			return nil, fmt.Errorf("第%d条搜索向量为空", idx+1)
+		}
+		normalizedVectors = append(normalizedVectors, float64ToFloat32(vectors[idx]))
 	}
-	return s.vectorDao.Search(c, searchReq, float64ToFloat32(vectors[0]))
+	data, err := s.vectorDao.BatchSearch(c, &shopmodels.GoodsVectorBatchSearchReq{
+		Queries: queries,
+		Limit:   normalizeGoodsVectorSearchLimit(limit),
+	}, normalizedVectors)
+	if err != nil {
+		return nil, err
+	}
+	if data == nil || data.Rows == nil {
+		return make([]*shopmodels.GoodsVectorBatchSearchItem, 0), nil
+	}
+	return data.Rows, nil
 }
 
 func (s *ShopGoodsServiceImpl) loadGoodsVectorConfig(c *gin.Context,
@@ -201,6 +251,21 @@ func trimRunes(value string, max int) string {
 		return value
 	}
 	return string(runes[:max])
+}
+
+func normalizeGoodsVectorSearchQueries(queries []string) ([]string, error) {
+	result := make([]string, 0, len(queries))
+	for _, query := range queries {
+		query = strings.TrimSpace(query)
+		if query == "" {
+			continue
+		}
+		result = append(result, query)
+	}
+	if len(result) == 0 {
+		return nil, errors.New("搜索内容不能为空")
+	}
+	return result, nil
 }
 
 func buildGoodsEmbeddingPayloads(goods *shopmodels.Goods) []goodsEmbeddingPayload {

@@ -21,6 +21,13 @@ type GoodsVectorSearchReq struct {
 	Embedding *EmbeddingConfig `json:"embedding"`                // 向量模型配置
 }
 
+// GoodsVectorBatchSearchReq 商品批量向量检索请求
+type GoodsVectorBatchSearchReq struct {
+	Queries   []string         `json:"queries" binding:"required"` // 检索文本列表
+	Limit     int              `json:"limit"`                      // 每条返回条数
+	Embedding *EmbeddingConfig `json:"embedding"`                  // 向量模型配置
+}
+
 // GoodsVectorSearchItem 商品向量检索结果
 type GoodsVectorSearchItem struct {
 	GoodsDBID      int64   `json:"goodsDbId"`
@@ -42,6 +49,19 @@ type GoodsVectorSearchItem struct {
 type GoodsVectorSearchData struct {
 	Rows  []*GoodsVectorSearchItem `json:"rows"`
 	Total int64                    `json:"total"`
+}
+
+// GoodsVectorBatchSearchItem 商品批量向量检索结果
+type GoodsVectorBatchSearchItem struct {
+	Query string                   `json:"query"`
+	Rows  []*GoodsVectorSearchItem `json:"rows"`
+	Total int64                    `json:"total"`
+}
+
+// GoodsVectorBatchSearchData 商品批量向量检索结果集
+type GoodsVectorBatchSearchData struct {
+	Rows  []*GoodsVectorBatchSearchItem `json:"rows"`
+	Total int64                         `json:"total"`
 }
 
 // GoodsVectorUpsertItem 商品向量写入项
