@@ -1,4 +1,4 @@
-package orderserviceimpl
+package saleserviceimpl
 
 import (
 	"errors"
@@ -8,9 +8,9 @@ import (
 
 	"nova-factory-server/app/business/erp/core/integration"
 	"nova-factory-server/app/business/erp/core/integration/grasp"
-	"nova-factory-server/app/business/erp/order/orderdao"
-	"nova-factory-server/app/business/erp/order/ordermodels"
-	"nova-factory-server/app/business/erp/order/orderservice"
+	"nova-factory-server/app/business/erp/sale/saledao"
+	"nova-factory-server/app/business/erp/sale/salemodels"
+	"nova-factory-server/app/business/erp/sale/saleservice"
 	"nova-factory-server/app/datasource/cache"
 
 	"github.com/gin-gonic/gin"
@@ -18,13 +18,13 @@ import (
 
 // OrderServiceImpl 提供 ERP 订单的业务实现与同步能力。
 type OrderServiceImpl struct {
-	dao                  orderdao.IOrderDao
+	dao                  saledao.IOrderDao
 	integrationConfigDao settingdao.IIntegrationConfigDao
 	cache                cache.Cache
 }
 
 // NewOrderService 创建 ERP 订单服务。
-func NewOrderService(dao orderdao.IOrderDao, integrationConfigDao settingdao.IIntegrationConfigDao, cache cache.Cache) orderservice.IOrderService {
+func NewOrderService(dao saledao.IOrderDao, integrationConfigDao settingdao.IIntegrationConfigDao, cache cache.Cache) saleservice.IOrderService {
 	return &OrderServiceImpl{
 		dao:                  dao,
 		cache:                cache,
@@ -33,7 +33,7 @@ func NewOrderService(dao orderdao.IOrderDao, integrationConfigDao settingdao.IIn
 }
 
 // Set 新增或修改 ERP 订单。
-func (o *OrderServiceImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Order, error) {
+func (o *OrderServiceImpl) Set(c *gin.Context, req *salemodels.OrderSet) (*salemodels.Order, error) {
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
@@ -123,7 +123,7 @@ func (o *OrderServiceImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*orde
 }
 
 // GetByID 查询 ERP 订单详情。
-func (o *OrderServiceImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.Order, error) {
+func (o *OrderServiceImpl) GetByID(c *gin.Context, id uint64) (*salemodels.Order, error) {
 	if id == 0 {
 		return nil, errors.New("id不能为空")
 	}
@@ -131,9 +131,9 @@ func (o *OrderServiceImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.Orde
 }
 
 // List 分页查询 ERP 订单。
-func (o *OrderServiceImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*ordermodels.OrderListData, error) {
+func (o *OrderServiceImpl) List(c *gin.Context, req *salemodels.OrderQuery) (*salemodels.OrderListData, error) {
 	if req == nil {
-		req = new(ordermodels.OrderQuery)
+		req = new(salemodels.OrderQuery)
 	}
 	req.Tid = strings.TrimSpace(req.Tid)
 	req.Status = strings.TrimSpace(req.Status)
@@ -149,7 +149,7 @@ func (o *OrderServiceImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 	return o.dao.DeleteByIDs(c, ids)
 }
 
-func (o *OrderServiceImpl) CheckLoginState(c *gin.Context, req *ordermodels.CheckLoginStateReq) (*ordermodels.CheckLoginStateResp, error) {
+func (o *OrderServiceImpl) CheckLoginState(c *gin.Context, req *salemodels.CheckLoginStateReq) (*salemodels.CheckLoginStateResp, error) {
 	// CheckLoginState 检查当前 ERP 集成客户端的登录状态。
 	cfg, err := o.integrationConfigDao.GetEnabled(c)
 	if err != nil {
@@ -167,7 +167,7 @@ func (o *OrderServiceImpl) CheckLoginState(c *gin.Context, req *ordermodels.Chec
 	if err != nil {
 		return nil, err
 	}
-	return &ordermodels.CheckLoginStateResp{
+	return &salemodels.CheckLoginStateResp{
 		Online:   state.Online,
 		Message:  state.Message,
 		Type:     state.Type,

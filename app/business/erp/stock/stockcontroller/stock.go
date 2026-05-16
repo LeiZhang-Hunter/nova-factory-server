@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Stock ERP 产品库存控制器
+// Stock 产品库存控制器
 type Stock struct {
 	service stockservice.IStockService
 }
 
-// NewStock 创建 ERP 产品库存控制器。
+// NewStock 创建产品库存控制器。
 func NewStock(service stockservice.IStockService) *Stock {
 	return &Stock{service: service}
 }
 
-// PrivateRoutes 注册 ERP 产品库存私有路由。
+// PrivateRoutes 注册产品库存私有路由。
 func (o *Stock) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/stock/stock")
 	group.GET("/list", middlewares.HasPermission("erp:stock:stock:list"), o.List)
@@ -28,9 +28,9 @@ func (o *Stock) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:stock:stock:remove"), o.Delete)
 }
 
-// List 查询 ERP 产品库存列表。
-// @Summary 查询 ERP 产品库存列表
-// @Description 按条件分页查询 ERP 产品库存列表
+// List 查询产品库存列表。
+// @Summary 查询产品库存列表
+// @Description 按条件分页查询产品库存列表
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param object query stockmodels.StockQuery true "ERP 产品库存查询参数"
@@ -51,9 +51,9 @@ func (o *Stock) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 产品库存详情。
-// @Summary 查询 ERP 产品库存详情
-// @Description 根据ID查询 ERP 产品库存详情
+// GetByID 查询产品库存详情。
+// @Summary 查询产品库存详情
+// @Description 根据ID查询产品库存详情
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *Stock) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 产品库存。
-// @Summary 新增或修改 ERP 产品库存
-// @Description 新增或修改 ERP 产品库存
+// Set 新增或修改产品库存。
+// @Summary 新增或修改产品库存
+// @Description 新增或修改产品库存
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *Stock) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 产品库存。
-// @Summary 删除 ERP 产品库存
-// @Description 根据ID删除 ERP 产品库存，多个ID用逗号分隔
+// Delete 删除产品库存。
+// @Summary 删除产品库存
+// @Description 根据ID删除产品库存，多个ID用逗号分隔
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

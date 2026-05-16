@@ -1,4 +1,4 @@
-package ordermodels
+package salemodels
 
 import (
 	"nova-factory-server/app/baize"

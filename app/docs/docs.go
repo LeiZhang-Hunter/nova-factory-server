@@ -10549,7 +10549,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核通过",
                 "parameters": [
@@ -10559,7 +10559,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderAuditAction"
+                            "$ref": "#/definitions/salemodels.OrderAuditAction"
                         }
                     }
                 ],
@@ -10588,7 +10588,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核批量导入",
                 "parameters": [
@@ -10598,7 +10598,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderAuditImportReq"
+                            "$ref": "#/definitions/salemodels.OrderAuditImportReq"
                         }
                     }
                 ],
@@ -10624,7 +10624,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核列表",
                 "parameters": [
@@ -10687,7 +10687,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核详情",
                 "parameters": [
@@ -10724,7 +10724,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核驳回",
                 "parameters": [
@@ -10734,7 +10734,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderAuditAction"
+                            "$ref": "#/definitions/salemodels.OrderAuditAction"
                         }
                     }
                 ],
@@ -10760,7 +10760,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核删除",
                 "parameters": [
@@ -10797,7 +10797,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核保存",
                 "parameters": [
@@ -10807,7 +10807,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderAuditSet"
+                            "$ref": "#/definitions/salemodels.OrderAuditSet"
                         }
                     }
                 ],
@@ -10833,7 +10833,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "检查管家婆登录状态",
                 "parameters": [
@@ -10866,7 +10866,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单列表",
                 "parameters": [
@@ -10929,7 +10929,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单详情",
                 "parameters": [
@@ -10963,7 +10963,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单删除",
                 "parameters": [
@@ -11000,7 +11000,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单保存",
                 "parameters": [
@@ -11010,7 +11010,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderSet"
+                            "$ref": "#/definitions/salemodels.OrderSet"
                         }
                     }
                 ],
@@ -11039,7 +11039,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "同步销售订单",
                 "parameters": [
@@ -11070,14 +11070,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 采购入库项列表",
+                "description": "按条件分页查询采购入库项列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "查询 ERP 采购入库项列表",
+                "summary": "查询采购入库项列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -11122,14 +11122,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 采购入库项详情",
+                "description": "根据ID查询采购入库项详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "查询 ERP 采购入库项详情",
+                "summary": "查询采购入库项详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -11156,14 +11156,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 采购入库项，多个ID用逗号分隔",
+                "description": "根据ID删除采购入库项，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "删除 ERP 采购入库项",
+                "summary": "删除采购入库项",
                 "parameters": [
                     {
                         "type": "string",
@@ -11190,7 +11190,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 采购入库项",
+                "description": "新增或修改采购入库项",
                 "consumes": [
                     "application/json"
                 ],
@@ -11200,7 +11200,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "新增或修改 ERP 采购入库项",
+                "summary": "新增或修改采购入库项",
                 "parameters": [
                     {
                         "description": "ERP 采购入库项参数",
@@ -11755,14 +11755,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 采购退货项列表",
+                "description": "按条件分页查询采购退货项列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "查询 ERP 采购退货项列表",
+                "summary": "查询采购退货项列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -11807,14 +11807,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 采购退货项详情",
+                "description": "根据ID查询采购退货项详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "查询 ERP 采购退货项详情",
+                "summary": "查询采购退货项详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -11841,14 +11841,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 采购退货项，多个ID用逗号分隔",
+                "description": "根据ID删除采购退货项，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "删除 ERP 采购退货项",
+                "summary": "删除采购退货项",
                 "parameters": [
                     {
                         "type": "string",
@@ -11875,7 +11875,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 采购退货项",
+                "description": "新增或修改采购退货项",
                 "consumes": [
                     "application/json"
                 ],
@@ -11885,7 +11885,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "新增或修改 ERP 采购退货项",
+                "summary": "新增或修改采购退货项",
                 "parameters": [
                     {
                         "description": "ERP 采购退货项参数",
@@ -11914,14 +11914,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 采购退货列表",
+                "description": "按条件分页查询采购退货列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "查询 ERP 采购退货列表",
+                "summary": "查询采购退货列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -11976,14 +11976,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 采购退货详情",
+                "description": "根据ID查询采购退货详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "查询 ERP 采购退货详情",
+                "summary": "查询采购退货详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -12010,14 +12010,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 采购退货，多个ID用逗号分隔",
+                "description": "根据ID删除采购退货，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "删除 ERP 采购退货",
+                "summary": "删除采购退货",
                 "parameters": [
                     {
                         "type": "string",
@@ -12044,7 +12044,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 采购退货",
+                "description": "新增或修改采购退货",
                 "consumes": [
                     "application/json"
                 ],
@@ -12054,7 +12054,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/采购管理"
                 ],
-                "summary": "新增或修改 ERP 采购退货",
+                "summary": "新增或修改采购退货",
                 "parameters": [
                     {
                         "description": "ERP 采购退货参数",
@@ -13228,14 +13228,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 库存盘点单项列表",
+                "description": "按条件分页查询库存盘点单项列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 库存盘点单项列表",
+                "summary": "查询库存盘点单项列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -13280,14 +13280,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 库存盘点单项详情",
+                "description": "根据ID查询库存盘点单项详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 库存盘点单项详情",
+                "summary": "查询库存盘点单项详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -13314,14 +13314,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 库存盘点单项，多个ID用逗号分隔",
+                "description": "根据ID删除库存盘点单项，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 库存盘点单项",
+                "summary": "删除库存盘点单项",
                 "parameters": [
                     {
                         "type": "string",
@@ -13348,7 +13348,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 库存盘点单项",
+                "description": "新增或修改库存盘点单项",
                 "consumes": [
                     "application/json"
                 ],
@@ -13358,7 +13358,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 库存盘点单项",
+                "summary": "新增或修改库存盘点单项",
                 "parameters": [
                     {
                         "description": "ERP 库存盘点单项参数",
@@ -13387,14 +13387,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 库存盘点单列表",
+                "description": "按条件分页查询库存盘点单列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 库存盘点单列表",
+                "summary": "查询库存盘点单列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -13434,14 +13434,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 库存盘点单详情",
+                "description": "根据ID查询库存盘点单详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 库存盘点单详情",
+                "summary": "查询库存盘点单详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -13468,14 +13468,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 库存盘点单，多个ID用逗号分隔",
+                "description": "根据ID删除库存盘点单，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 库存盘点单",
+                "summary": "删除库存盘点单",
                 "parameters": [
                     {
                         "type": "string",
@@ -13502,7 +13502,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 库存盘点单",
+                "description": "新增或修改库存盘点单",
                 "consumes": [
                     "application/json"
                 ],
@@ -13512,7 +13512,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 库存盘点单",
+                "summary": "新增或修改库存盘点单",
                 "parameters": [
                     {
                         "description": "ERP 库存盘点单参数",
@@ -13541,14 +13541,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 其它入库单项列表",
+                "description": "按条件分页查询其它入库单项列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 其它入库单项列表",
+                "summary": "查询其它入库单项列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -13593,14 +13593,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 其它入库单项详情",
+                "description": "根据ID查询其它入库单项详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 其它入库单项详情",
+                "summary": "查询其它入库单项详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -13627,14 +13627,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 其它入库单项，多个ID用逗号分隔",
+                "description": "根据ID删除其它入库单项，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 其它入库单项",
+                "summary": "删除其它入库单项",
                 "parameters": [
                     {
                         "type": "string",
@@ -13661,7 +13661,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 其它入库单项",
+                "description": "新增或修改其它入库单项",
                 "consumes": [
                     "application/json"
                 ],
@@ -13671,7 +13671,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 其它入库单项",
+                "summary": "新增或修改其它入库单项",
                 "parameters": [
                     {
                         "description": "ERP 其它入库单项参数",
@@ -13700,14 +13700,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 其它入库单列表",
+                "description": "按条件分页查询其它入库单列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 其它入库单列表",
+                "summary": "查询其它入库单列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -13752,14 +13752,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 其它入库单详情",
+                "description": "根据ID查询其它入库单详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 其它入库单详情",
+                "summary": "查询其它入库单详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -13786,14 +13786,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 其它入库单，多个ID用逗号分隔",
+                "description": "根据ID删除其它入库单，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 其它入库单",
+                "summary": "删除其它入库单",
                 "parameters": [
                     {
                         "type": "string",
@@ -13820,7 +13820,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 其它入库单",
+                "description": "新增或修改其它入库单",
                 "consumes": [
                     "application/json"
                 ],
@@ -13830,7 +13830,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 其它入库单",
+                "summary": "新增或修改其它入库单",
                 "parameters": [
                     {
                         "description": "ERP 其它入库单参数",
@@ -13859,14 +13859,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 库存调拨单项列表",
+                "description": "按条件分页查询库存调拨单项列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 库存调拨单项列表",
+                "summary": "查询库存调拨单项列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -13906,14 +13906,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 库存调拨单项详情",
+                "description": "根据ID查询库存调拨单项详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 库存调拨单项详情",
+                "summary": "查询库存调拨单项详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -13940,14 +13940,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 库存调拨单项，多个ID用逗号分隔",
+                "description": "根据ID删除库存调拨单项，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 库存调拨单项",
+                "summary": "删除库存调拨单项",
                 "parameters": [
                     {
                         "type": "string",
@@ -13974,7 +13974,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 库存调拨单项",
+                "description": "新增或修改库存调拨单项",
                 "consumes": [
                     "application/json"
                 ],
@@ -13984,7 +13984,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 库存调拨单项",
+                "summary": "新增或修改库存调拨单项",
                 "parameters": [
                     {
                         "description": "ERP 库存调拨单项参数",
@@ -14013,14 +14013,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 库存调拨单列表",
+                "description": "按条件分页查询库存调拨单列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 库存调拨单列表",
+                "summary": "查询库存调拨单列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -14060,14 +14060,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 库存调拨单详情",
+                "description": "根据ID查询库存调拨单详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 库存调拨单详情",
+                "summary": "查询库存调拨单详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -14094,14 +14094,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 库存调拨单，多个ID用逗号分隔",
+                "description": "根据ID删除库存调拨单，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 库存调拨单",
+                "summary": "删除库存调拨单",
                 "parameters": [
                     {
                         "type": "string",
@@ -14128,7 +14128,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 库存调拨单",
+                "description": "新增或修改库存调拨单",
                 "consumes": [
                     "application/json"
                 ],
@@ -14138,7 +14138,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 库存调拨单",
+                "summary": "新增或修改库存调拨单",
                 "parameters": [
                     {
                         "description": "ERP 库存调拨单参数",
@@ -14167,14 +14167,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 其它出库单项列表",
+                "description": "按条件分页查询其它出库单项列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 其它出库单项列表",
+                "summary": "查询其它出库单项列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -14219,14 +14219,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 其它出库单项详情",
+                "description": "根据ID查询其它出库单项详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 其它出库单项详情",
+                "summary": "查询其它出库单项详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -14253,14 +14253,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 其它出库单项，多个ID用逗号分隔",
+                "description": "根据ID删除其它出库单项，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 其它出库单项",
+                "summary": "删除其它出库单项",
                 "parameters": [
                     {
                         "type": "string",
@@ -14287,7 +14287,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 其它出库单项",
+                "description": "新增或修改其它出库单项",
                 "consumes": [
                     "application/json"
                 ],
@@ -14297,7 +14297,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 其它出库单项",
+                "summary": "新增或修改其它出库单项",
                 "parameters": [
                     {
                         "description": "ERP 其它出库单项参数",
@@ -14326,14 +14326,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 其它出库单列表",
+                "description": "按条件分页查询其它出库单列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 其它出库单列表",
+                "summary": "查询其它出库单列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -14378,14 +14378,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 其它出库单详情",
+                "description": "根据ID查询其它出库单详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 其它出库单详情",
+                "summary": "查询其它出库单详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -14412,14 +14412,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 其它出库单，多个ID用逗号分隔",
+                "description": "根据ID删除其它出库单，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 其它出库单",
+                "summary": "删除其它出库单",
                 "parameters": [
                     {
                         "type": "string",
@@ -14446,7 +14446,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 其它出库单",
+                "description": "新增或修改其它出库单",
                 "consumes": [
                     "application/json"
                 ],
@@ -14456,7 +14456,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 其它出库单",
+                "summary": "新增或修改其它出库单",
                 "parameters": [
                     {
                         "description": "ERP 其它出库单参数",
@@ -14485,14 +14485,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 产品库存明细列表",
+                "description": "按条件分页查询产品库存明细列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 产品库存明细列表",
+                "summary": "查询产品库存明细列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -14537,14 +14537,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 产品库存明细详情",
+                "description": "根据ID查询产品库存明细详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 产品库存明细详情",
+                "summary": "查询产品库存明细详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -14571,14 +14571,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 产品库存明细，多个ID用逗号分隔",
+                "description": "根据ID删除产品库存明细，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 产品库存明细",
+                "summary": "删除产品库存明细",
                 "parameters": [
                     {
                         "type": "string",
@@ -14605,7 +14605,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 产品库存明细",
+                "description": "新增或修改产品库存明细",
                 "consumes": [
                     "application/json"
                 ],
@@ -14615,7 +14615,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 产品库存明细",
+                "summary": "新增或修改产品库存明细",
                 "parameters": [
                     {
                         "description": "ERP 产品库存明细参数",
@@ -14644,14 +14644,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 产品库存列表",
+                "description": "按条件分页查询产品库存列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 产品库存列表",
+                "summary": "查询产品库存列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -14691,14 +14691,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 产品库存详情",
+                "description": "根据ID查询产品库存详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "查询 ERP 产品库存详情",
+                "summary": "查询产品库存详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -14725,14 +14725,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 产品库存，多个ID用逗号分隔",
+                "description": "根据ID删除产品库存，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "删除 ERP 产品库存",
+                "summary": "删除产品库存",
                 "parameters": [
                     {
                         "type": "string",
@@ -14759,7 +14759,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 产品库存",
+                "description": "新增或修改产品库存",
                 "consumes": [
                     "application/json"
                 ],
@@ -14769,7 +14769,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/库存管理"
                 ],
-                "summary": "新增或修改 ERP 产品库存",
+                "summary": "新增或修改产品库存",
                 "parameters": [
                     {
                         "description": "ERP 产品库存参数",
@@ -29227,330 +29227,6 @@ const docTemplate = `{
                 }
             }
         },
-        "ordermodels.OrderAccountSet": {
-            "type": "object",
-            "properties": {
-                "finance_code": {
-                    "type": "string"
-                },
-                "total": {
-                    "type": "number"
-                }
-            }
-        },
-        "ordermodels.OrderAuditAction": {
-            "type": "object",
-            "properties": {
-                "audit_remark": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "0"
-                }
-            }
-        },
-        "ordermodels.OrderAuditImportReq": {
-            "type": "object",
-            "properties": {
-                "records": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderAuditSet"
-                    }
-                }
-            }
-        },
-        "ordermodels.OrderAuditSet": {
-            "type": "object",
-            "properties": {
-                "accounts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderAccountSet"
-                    }
-                },
-                "b_type_code": {
-                    "type": "string"
-                },
-                "buyer_message": {
-                    "type": "string"
-                },
-                "buyer_nick": {
-                    "type": "string"
-                },
-                "details": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderDetailSet"
-                    }
-                },
-                "id": {
-                    "type": "string",
-                    "example": "0"
-                },
-                "invoice_name": {
-                    "type": "string"
-                },
-                "logist_b_type_code": {
-                    "type": "string"
-                },
-                "logist_bill_code": {
-                    "type": "string"
-                },
-                "order_type": {
-                    "type": "string"
-                },
-                "pay_time": {
-                    "type": "string"
-                },
-                "post_fee": {
-                    "type": "number"
-                },
-                "privilege": {
-                    "type": "number"
-                },
-                "receiver_address": {
-                    "type": "string"
-                },
-                "receiver_city": {
-                    "type": "string"
-                },
-                "receiver_city_name": {
-                    "type": "string"
-                },
-                "receiver_district": {
-                    "type": "string"
-                },
-                "receiver_district_name": {
-                    "type": "string"
-                },
-                "receiver_mobile": {
-                    "type": "string"
-                },
-                "receiver_name": {
-                    "type": "string"
-                },
-                "receiver_phone": {
-                    "type": "string"
-                },
-                "receiver_province": {
-                    "type": "string"
-                },
-                "receiver_province_name": {
-                    "type": "string"
-                },
-                "receiver_street": {
-                    "type": "string"
-                },
-                "receiver_street_name": {
-                    "type": "string"
-                },
-                "receiver_zip": {
-                    "type": "string"
-                },
-                "seller_flag": {
-                    "type": "string"
-                },
-                "seller_memo": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "number"
-                },
-                "source_json": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "tid": {
-                    "type": "string"
-                },
-                "total": {
-                    "type": "number"
-                },
-                "weight": {
-                    "type": "number"
-                }
-            }
-        },
-        "ordermodels.OrderDetailSet": {
-            "type": "object",
-            "properties": {
-                "barcode": {
-                    "type": "string"
-                },
-                "eshop_goods_id": {
-                    "type": "string"
-                },
-                "eshop_goods_name": {
-                    "type": "string"
-                },
-                "eshop_sku_id": {
-                    "type": "string"
-                },
-                "eshop_sku_name": {
-                    "type": "string"
-                },
-                "num": {
-                    "type": "number"
-                },
-                "numiid": {
-                    "type": "integer"
-                },
-                "oid": {
-                    "type": "string"
-                },
-                "outeriid": {
-                    "type": "string"
-                },
-                "payment": {
-                    "type": "number"
-                },
-                "pic_path": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "number"
-                },
-                "skuid": {
-                    "type": "integer"
-                },
-                "unit_id": {
-                    "type": "integer"
-                },
-                "unit_qty": {
-                    "type": "number"
-                },
-                "weight": {
-                    "type": "number"
-                }
-            }
-        },
-        "ordermodels.OrderSet": {
-            "type": "object",
-            "properties": {
-                "accounts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderAccountSet"
-                    }
-                },
-                "b_type_code": {
-                    "type": "string"
-                },
-                "bill_code": {
-                    "type": "string"
-                },
-                "buyer_message": {
-                    "type": "string"
-                },
-                "buyer_nick": {
-                    "type": "string"
-                },
-                "details": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderDetailSet"
-                    }
-                },
-                "id": {
-                    "type": "string",
-                    "example": "0"
-                },
-                "invoice_name": {
-                    "type": "string"
-                },
-                "logist_b_type_code": {
-                    "type": "string"
-                },
-                "logist_bill_code": {
-                    "type": "string"
-                },
-                "order_type": {
-                    "type": "string"
-                },
-                "pay_time": {
-                    "type": "string"
-                },
-                "post_fee": {
-                    "type": "number"
-                },
-                "privilege": {
-                    "type": "number"
-                },
-                "receiver_address": {
-                    "type": "string"
-                },
-                "receiver_city": {
-                    "type": "string"
-                },
-                "receiver_city_name": {
-                    "type": "string"
-                },
-                "receiver_district": {
-                    "type": "string"
-                },
-                "receiver_district_name": {
-                    "type": "string"
-                },
-                "receiver_mobile": {
-                    "type": "string"
-                },
-                "receiver_name": {
-                    "type": "string"
-                },
-                "receiver_phone": {
-                    "type": "string"
-                },
-                "receiver_province": {
-                    "type": "string"
-                },
-                "receiver_province_name": {
-                    "type": "string"
-                },
-                "receiver_street": {
-                    "type": "string"
-                },
-                "receiver_street_name": {
-                    "type": "string"
-                },
-                "receiver_zip": {
-                    "type": "string"
-                },
-                "seller_flag": {
-                    "type": "string"
-                },
-                "seller_memo": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "number"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "sync_message": {
-                    "type": "string"
-                },
-                "sync_status": {
-                    "type": "integer"
-                },
-                "sync_time": {
-                    "type": "string"
-                },
-                "tid": {
-                    "type": "string"
-                },
-                "total": {
-                    "type": "number"
-                },
-                "weight": {
-                    "type": "number"
-                }
-            }
-        },
         "productmodels.SysProductLaboratoryVo": {
             "type": "object",
             "required": [
@@ -30058,6 +29734,330 @@ const docTemplate = `{
                 "msg": {
                     "description": "提示信息",
                     "type": "string"
+                }
+            }
+        },
+        "salemodels.OrderAccountSet": {
+            "type": "object",
+            "properties": {
+                "finance_code": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "salemodels.OrderAuditAction": {
+            "type": "object",
+            "properties": {
+                "audit_remark": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "salemodels.OrderAuditImportReq": {
+            "type": "object",
+            "properties": {
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderAuditSet"
+                    }
+                }
+            }
+        },
+        "salemodels.OrderAuditSet": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderAccountSet"
+                    }
+                },
+                "b_type_code": {
+                    "type": "string"
+                },
+                "buyer_message": {
+                    "type": "string"
+                },
+                "buyer_nick": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderDetailSet"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "invoice_name": {
+                    "type": "string"
+                },
+                "logist_b_type_code": {
+                    "type": "string"
+                },
+                "logist_bill_code": {
+                    "type": "string"
+                },
+                "order_type": {
+                    "type": "string"
+                },
+                "pay_time": {
+                    "type": "string"
+                },
+                "post_fee": {
+                    "type": "number"
+                },
+                "privilege": {
+                    "type": "number"
+                },
+                "receiver_address": {
+                    "type": "string"
+                },
+                "receiver_city": {
+                    "type": "string"
+                },
+                "receiver_city_name": {
+                    "type": "string"
+                },
+                "receiver_district": {
+                    "type": "string"
+                },
+                "receiver_district_name": {
+                    "type": "string"
+                },
+                "receiver_mobile": {
+                    "type": "string"
+                },
+                "receiver_name": {
+                    "type": "string"
+                },
+                "receiver_phone": {
+                    "type": "string"
+                },
+                "receiver_province": {
+                    "type": "string"
+                },
+                "receiver_province_name": {
+                    "type": "string"
+                },
+                "receiver_street": {
+                    "type": "string"
+                },
+                "receiver_street_name": {
+                    "type": "string"
+                },
+                "receiver_zip": {
+                    "type": "string"
+                },
+                "seller_flag": {
+                    "type": "string"
+                },
+                "seller_memo": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "source_json": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tid": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "salemodels.OrderDetailSet": {
+            "type": "object",
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "eshop_goods_id": {
+                    "type": "string"
+                },
+                "eshop_goods_name": {
+                    "type": "string"
+                },
+                "eshop_sku_id": {
+                    "type": "string"
+                },
+                "eshop_sku_name": {
+                    "type": "string"
+                },
+                "num": {
+                    "type": "number"
+                },
+                "numiid": {
+                    "type": "integer"
+                },
+                "oid": {
+                    "type": "string"
+                },
+                "outeriid": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "number"
+                },
+                "pic_path": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "skuid": {
+                    "type": "integer"
+                },
+                "unit_id": {
+                    "type": "integer"
+                },
+                "unit_qty": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "salemodels.OrderSet": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderAccountSet"
+                    }
+                },
+                "b_type_code": {
+                    "type": "string"
+                },
+                "bill_code": {
+                    "type": "string"
+                },
+                "buyer_message": {
+                    "type": "string"
+                },
+                "buyer_nick": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderDetailSet"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "invoice_name": {
+                    "type": "string"
+                },
+                "logist_b_type_code": {
+                    "type": "string"
+                },
+                "logist_bill_code": {
+                    "type": "string"
+                },
+                "order_type": {
+                    "type": "string"
+                },
+                "pay_time": {
+                    "type": "string"
+                },
+                "post_fee": {
+                    "type": "number"
+                },
+                "privilege": {
+                    "type": "number"
+                },
+                "receiver_address": {
+                    "type": "string"
+                },
+                "receiver_city": {
+                    "type": "string"
+                },
+                "receiver_city_name": {
+                    "type": "string"
+                },
+                "receiver_district": {
+                    "type": "string"
+                },
+                "receiver_district_name": {
+                    "type": "string"
+                },
+                "receiver_mobile": {
+                    "type": "string"
+                },
+                "receiver_name": {
+                    "type": "string"
+                },
+                "receiver_phone": {
+                    "type": "string"
+                },
+                "receiver_province": {
+                    "type": "string"
+                },
+                "receiver_province_name": {
+                    "type": "string"
+                },
+                "receiver_street": {
+                    "type": "string"
+                },
+                "receiver_street_name": {
+                    "type": "string"
+                },
+                "receiver_zip": {
+                    "type": "string"
+                },
+                "seller_flag": {
+                    "type": "string"
+                },
+                "seller_memo": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "sync_message": {
+                    "type": "string"
+                },
+                "sync_status": {
+                    "type": "integer"
+                },
+                "sync_time": {
+                    "type": "string"
+                },
+                "tid": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
                 }
             }
         },

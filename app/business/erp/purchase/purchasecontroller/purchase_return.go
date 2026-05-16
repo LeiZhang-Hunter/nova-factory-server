@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// PurchaseReturn ERP 采购退货控制器
+// PurchaseReturn 采购退货控制器
 type PurchaseReturn struct {
 	service purchaseservice.IPurchaseReturnService
 }
 
-// NewPurchaseReturn 创建 ERP 采购退货控制器。
+// NewPurchaseReturn 创建采购退货控制器。
 func NewPurchaseReturn(service purchaseservice.IPurchaseReturnService) *PurchaseReturn {
 	return &PurchaseReturn{service: service}
 }
 
-// PrivateRoutes 注册 ERP 采购退货私有路由。
+// PrivateRoutes 注册采购退货私有路由。
 func (o *PurchaseReturn) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/purchase/return")
 	group.GET("/list", middlewares.HasPermission("erp:purchase:return:list"), o.List)
@@ -28,9 +28,9 @@ func (o *PurchaseReturn) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:purchase:return:remove"), o.Delete)
 }
 
-// List 查询 ERP 采购退货列表。
-// @Summary 查询 ERP 采购退货列表
-// @Description 按条件分页查询 ERP 采购退货列表
+// List 查询采购退货列表。
+// @Summary 查询采购退货列表
+// @Description 按条件分页查询采购退货列表
 // @Tags ERP/采购管理
 // @Security BearerAuth
 // @Param object query purchasemodels.PurchaseReturnQuery true "ERP 采购退货查询参数"
@@ -51,9 +51,9 @@ func (o *PurchaseReturn) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 采购退货详情。
-// @Summary 查询 ERP 采购退货详情
-// @Description 根据ID查询 ERP 采购退货详情
+// GetByID 查询采购退货详情。
+// @Summary 查询采购退货详情
+// @Description 根据ID查询采购退货详情
 // @Tags ERP/采购管理
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *PurchaseReturn) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 采购退货。
-// @Summary 新增或修改 ERP 采购退货
-// @Description 新增或修改 ERP 采购退货
+// Set 新增或修改采购退货。
+// @Summary 新增或修改采购退货
+// @Description 新增或修改采购退货
 // @Tags ERP/采购管理
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *PurchaseReturn) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 采购退货。
-// @Summary 删除 ERP 采购退货
-// @Description 根据ID删除 ERP 采购退货，多个ID用逗号分隔
+// Delete 删除采购退货。
+// @Summary 删除采购退货
+// @Description 根据ID删除采购退货，多个ID用逗号分隔
 // @Tags ERP/采购管理
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

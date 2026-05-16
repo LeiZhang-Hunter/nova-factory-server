@@ -3892,221 +3892,6 @@ definitions:
     - detailAddress
     - receiverMobile
     type: object
-  ordermodels.OrderAccountSet:
-    properties:
-      finance_code:
-        type: string
-      total:
-        type: number
-    type: object
-  ordermodels.OrderAuditAction:
-    properties:
-      audit_remark:
-        type: string
-      id:
-        example: "0"
-        type: string
-    type: object
-  ordermodels.OrderAuditImportReq:
-    properties:
-      records:
-        items:
-          $ref: '#/definitions/ordermodels.OrderAuditSet'
-        type: array
-    type: object
-  ordermodels.OrderAuditSet:
-    properties:
-      accounts:
-        items:
-          $ref: '#/definitions/ordermodels.OrderAccountSet'
-        type: array
-      b_type_code:
-        type: string
-      buyer_message:
-        type: string
-      buyer_nick:
-        type: string
-      details:
-        items:
-          $ref: '#/definitions/ordermodels.OrderDetailSet'
-        type: array
-      id:
-        example: "0"
-        type: string
-      invoice_name:
-        type: string
-      logist_b_type_code:
-        type: string
-      logist_bill_code:
-        type: string
-      order_type:
-        type: string
-      pay_time:
-        type: string
-      post_fee:
-        type: number
-      privilege:
-        type: number
-      receiver_address:
-        type: string
-      receiver_city:
-        type: string
-      receiver_city_name:
-        type: string
-      receiver_district:
-        type: string
-      receiver_district_name:
-        type: string
-      receiver_mobile:
-        type: string
-      receiver_name:
-        type: string
-      receiver_phone:
-        type: string
-      receiver_province:
-        type: string
-      receiver_province_name:
-        type: string
-      receiver_street:
-        type: string
-      receiver_street_name:
-        type: string
-      receiver_zip:
-        type: string
-      seller_flag:
-        type: string
-      seller_memo:
-        type: string
-      size:
-        type: number
-      source_json:
-        type: string
-      status:
-        type: string
-      tid:
-        type: string
-      total:
-        type: number
-      weight:
-        type: number
-    type: object
-  ordermodels.OrderDetailSet:
-    properties:
-      barcode:
-        type: string
-      eshop_goods_id:
-        type: string
-      eshop_goods_name:
-        type: string
-      eshop_sku_id:
-        type: string
-      eshop_sku_name:
-        type: string
-      num:
-        type: number
-      numiid:
-        type: integer
-      oid:
-        type: string
-      outeriid:
-        type: string
-      payment:
-        type: number
-      pic_path:
-        type: string
-      size:
-        type: number
-      skuid:
-        type: integer
-      unit_id:
-        type: integer
-      unit_qty:
-        type: number
-      weight:
-        type: number
-    type: object
-  ordermodels.OrderSet:
-    properties:
-      accounts:
-        items:
-          $ref: '#/definitions/ordermodels.OrderAccountSet'
-        type: array
-      b_type_code:
-        type: string
-      bill_code:
-        type: string
-      buyer_message:
-        type: string
-      buyer_nick:
-        type: string
-      details:
-        items:
-          $ref: '#/definitions/ordermodels.OrderDetailSet'
-        type: array
-      id:
-        example: "0"
-        type: string
-      invoice_name:
-        type: string
-      logist_b_type_code:
-        type: string
-      logist_bill_code:
-        type: string
-      order_type:
-        type: string
-      pay_time:
-        type: string
-      post_fee:
-        type: number
-      privilege:
-        type: number
-      receiver_address:
-        type: string
-      receiver_city:
-        type: string
-      receiver_city_name:
-        type: string
-      receiver_district:
-        type: string
-      receiver_district_name:
-        type: string
-      receiver_mobile:
-        type: string
-      receiver_name:
-        type: string
-      receiver_phone:
-        type: string
-      receiver_province:
-        type: string
-      receiver_province_name:
-        type: string
-      receiver_street:
-        type: string
-      receiver_street_name:
-        type: string
-      receiver_zip:
-        type: string
-      seller_flag:
-        type: string
-      seller_memo:
-        type: string
-      size:
-        type: number
-      status:
-        type: string
-      sync_message:
-        type: string
-      sync_status:
-        type: integer
-      sync_time:
-        type: string
-      tid:
-        type: string
-      total:
-        type: number
-      weight:
-        type: number
-    type: object
   productmodels.SysProductLaboratoryVo:
     properties:
       address:
@@ -4459,6 +4244,221 @@ definitions:
       msg:
         description: 提示信息
         type: string
+    type: object
+  salemodels.OrderAccountSet:
+    properties:
+      finance_code:
+        type: string
+      total:
+        type: number
+    type: object
+  salemodels.OrderAuditAction:
+    properties:
+      audit_remark:
+        type: string
+      id:
+        example: "0"
+        type: string
+    type: object
+  salemodels.OrderAuditImportReq:
+    properties:
+      records:
+        items:
+          $ref: '#/definitions/salemodels.OrderAuditSet'
+        type: array
+    type: object
+  salemodels.OrderAuditSet:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/salemodels.OrderAccountSet'
+        type: array
+      b_type_code:
+        type: string
+      buyer_message:
+        type: string
+      buyer_nick:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/salemodels.OrderDetailSet'
+        type: array
+      id:
+        example: "0"
+        type: string
+      invoice_name:
+        type: string
+      logist_b_type_code:
+        type: string
+      logist_bill_code:
+        type: string
+      order_type:
+        type: string
+      pay_time:
+        type: string
+      post_fee:
+        type: number
+      privilege:
+        type: number
+      receiver_address:
+        type: string
+      receiver_city:
+        type: string
+      receiver_city_name:
+        type: string
+      receiver_district:
+        type: string
+      receiver_district_name:
+        type: string
+      receiver_mobile:
+        type: string
+      receiver_name:
+        type: string
+      receiver_phone:
+        type: string
+      receiver_province:
+        type: string
+      receiver_province_name:
+        type: string
+      receiver_street:
+        type: string
+      receiver_street_name:
+        type: string
+      receiver_zip:
+        type: string
+      seller_flag:
+        type: string
+      seller_memo:
+        type: string
+      size:
+        type: number
+      source_json:
+        type: string
+      status:
+        type: string
+      tid:
+        type: string
+      total:
+        type: number
+      weight:
+        type: number
+    type: object
+  salemodels.OrderDetailSet:
+    properties:
+      barcode:
+        type: string
+      eshop_goods_id:
+        type: string
+      eshop_goods_name:
+        type: string
+      eshop_sku_id:
+        type: string
+      eshop_sku_name:
+        type: string
+      num:
+        type: number
+      numiid:
+        type: integer
+      oid:
+        type: string
+      outeriid:
+        type: string
+      payment:
+        type: number
+      pic_path:
+        type: string
+      size:
+        type: number
+      skuid:
+        type: integer
+      unit_id:
+        type: integer
+      unit_qty:
+        type: number
+      weight:
+        type: number
+    type: object
+  salemodels.OrderSet:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/salemodels.OrderAccountSet'
+        type: array
+      b_type_code:
+        type: string
+      bill_code:
+        type: string
+      buyer_message:
+        type: string
+      buyer_nick:
+        type: string
+      details:
+        items:
+          $ref: '#/definitions/salemodels.OrderDetailSet'
+        type: array
+      id:
+        example: "0"
+        type: string
+      invoice_name:
+        type: string
+      logist_b_type_code:
+        type: string
+      logist_bill_code:
+        type: string
+      order_type:
+        type: string
+      pay_time:
+        type: string
+      post_fee:
+        type: number
+      privilege:
+        type: number
+      receiver_address:
+        type: string
+      receiver_city:
+        type: string
+      receiver_city_name:
+        type: string
+      receiver_district:
+        type: string
+      receiver_district_name:
+        type: string
+      receiver_mobile:
+        type: string
+      receiver_name:
+        type: string
+      receiver_phone:
+        type: string
+      receiver_province:
+        type: string
+      receiver_province_name:
+        type: string
+      receiver_street:
+        type: string
+      receiver_street_name:
+        type: string
+      receiver_zip:
+        type: string
+      seller_flag:
+        type: string
+      seller_memo:
+        type: string
+      size:
+        type: number
+      status:
+        type: string
+      sync_message:
+        type: string
+      sync_status:
+        type: integer
+      sync_time:
+        type: string
+      tid:
+        type: string
+      total:
+        type: number
+      weight:
+        type: number
     type: object
   salemodels.SaleOutItemUpsert:
     properties:
@@ -12553,7 +12553,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/ordermodels.OrderAuditAction'
+          $ref: '#/definitions/salemodels.OrderAuditAction'
       produces:
       - application/json
       responses:
@@ -12565,7 +12565,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单审核通过
       tags:
-      - ERP/订单审核
+      - ERP/销售管理
   /erp/order-audit/import:
     post:
       consumes:
@@ -12577,7 +12577,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/ordermodels.OrderAuditImportReq'
+          $ref: '#/definitions/salemodels.OrderAuditImportReq'
       produces:
       - application/json
       responses:
@@ -12589,7 +12589,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单审核批量导入
       tags:
-      - ERP/订单审核
+      - ERP/销售管理
   /erp/order-audit/list:
     get:
       description: 按条件分页查询ERP订单审核记录
@@ -12629,7 +12629,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单审核列表
       tags:
-      - ERP/订单审核
+      - ERP/销售管理
   /erp/order-audit/query/{id}:
     get:
       description: 根据ID查询ERP订单审核详情
@@ -12650,7 +12650,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单审核详情
       tags:
-      - ERP/订单审核
+      - ERP/销售管理
   /erp/order-audit/reject:
     post:
       consumes:
@@ -12662,7 +12662,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/ordermodels.OrderAuditAction'
+          $ref: '#/definitions/salemodels.OrderAuditAction'
       produces:
       - application/json
       responses:
@@ -12674,7 +12674,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单审核驳回
       tags:
-      - ERP/订单审核
+      - ERP/销售管理
   /erp/order-audit/remove/{ids}:
     delete:
       description: 根据ID删除ERP订单审核记录
@@ -12695,7 +12695,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单审核删除
       tags:
-      - ERP/订单审核
+      - ERP/销售管理
   /erp/order-audit/set:
     post:
       consumes:
@@ -12707,7 +12707,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/ordermodels.OrderAuditSet'
+          $ref: '#/definitions/salemodels.OrderAuditSet'
       produces:
       - application/json
       responses:
@@ -12719,7 +12719,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单审核保存
       tags:
-      - ERP/订单审核
+      - ERP/销售管理
   /erp/order/check-login-state:
     get:
       description: 检查当前启用 ERP 集成配置的登录状态
@@ -12739,7 +12739,7 @@ paths:
       - BearerAuth: []
       summary: 检查管家婆登录状态
       tags:
-      - ERP/订单管理
+      - ERP/销售管理
   /erp/order/list:
     get:
       description: 按条件分页查询ERP订单
@@ -12779,7 +12779,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单列表
       tags:
-      - ERP/订单管理
+      - ERP/销售管理
   /erp/order/query/{id}:
     get:
       description: 根据ID查询ERP订单详情
@@ -12800,7 +12800,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单详情
       tags:
-      - ERP/订单管理
+      - ERP/销售管理
   /erp/order/remove/{ids}:
     delete:
       description: 根据ID删除ERP订单
@@ -12821,7 +12821,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单删除
       tags:
-      - ERP/订单管理
+      - ERP/销售管理
   /erp/order/set:
     post:
       consumes:
@@ -12833,7 +12833,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/ordermodels.OrderSet'
+          $ref: '#/definitions/salemodels.OrderSet'
       produces:
       - application/json
       responses:
@@ -12845,7 +12845,7 @@ paths:
       - BearerAuth: []
       summary: ERP订单保存
       tags:
-      - ERP/订单管理
+      - ERP/销售管理
   /erp/order/synchronize-sales-orders:
     post:
       consumes:
@@ -12869,10 +12869,10 @@ paths:
       - BearerAuth: []
       summary: 同步销售订单
       tags:
-      - ERP/订单管理
+      - ERP/销售管理
   /erp/purchase/in-items/list:
     get:
-      description: 按条件分页查询 ERP 采购入库项列表
+      description: 按条件分页查询采购入库项列表
       parameters:
       - in: query
         name: inId
@@ -12898,12 +12898,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 采购入库项列表
+      summary: 查询采购入库项列表
       tags:
       - ERP/采购管理
   /erp/purchase/in-items/query/{id}:
     get:
-      description: 根据ID查询 ERP 采购入库项详情
+      description: 根据ID查询采购入库项详情
       parameters:
       - description: 主键ID
         in: path
@@ -12919,12 +12919,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 采购入库项详情
+      summary: 查询采购入库项详情
       tags:
       - ERP/采购管理
   /erp/purchase/in-items/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 采购入库项，多个ID用逗号分隔
+      description: 根据ID删除采购入库项，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -12940,14 +12940,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 采购入库项
+      summary: 删除采购入库项
       tags:
       - ERP/采购管理
   /erp/purchase/in-items/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 采购入库项
+      description: 新增或修改采购入库项
       parameters:
       - description: ERP 采购入库项参数
         in: body
@@ -12964,7 +12964,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 采购入库项
+      summary: 新增或修改采购入库项
       tags:
       - ERP/采购管理
   /erp/purchase/in/list:
@@ -13290,7 +13290,7 @@ paths:
       - ERP/采购管理
   /erp/purchase/return-items/list:
     get:
-      description: 按条件分页查询 ERP 采购退货项列表
+      description: 按条件分页查询采购退货项列表
       parameters:
       - in: query
         name: page
@@ -13316,12 +13316,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 采购退货项列表
+      summary: 查询采购退货项列表
       tags:
       - ERP/采购管理
   /erp/purchase/return-items/query/{id}:
     get:
-      description: 根据ID查询 ERP 采购退货项详情
+      description: 根据ID查询采购退货项详情
       parameters:
       - description: 主键ID
         in: path
@@ -13337,12 +13337,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 采购退货项详情
+      summary: 查询采购退货项详情
       tags:
       - ERP/采购管理
   /erp/purchase/return-items/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 采购退货项，多个ID用逗号分隔
+      description: 根据ID删除采购退货项，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -13358,14 +13358,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 采购退货项
+      summary: 删除采购退货项
       tags:
       - ERP/采购管理
   /erp/purchase/return-items/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 采购退货项
+      description: 新增或修改采购退货项
       parameters:
       - description: ERP 采购退货项参数
         in: body
@@ -13382,12 +13382,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 采购退货项
+      summary: 新增或修改采购退货项
       tags:
       - ERP/采购管理
   /erp/purchase/return/list:
     get:
-      description: 按条件分页查询 ERP 采购退货列表
+      description: 按条件分页查询采购退货列表
       parameters:
       - in: query
         name: accountId
@@ -13419,12 +13419,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 采购退货列表
+      summary: 查询采购退货列表
       tags:
       - ERP/采购管理
   /erp/purchase/return/query/{id}:
     get:
-      description: 根据ID查询 ERP 采购退货详情
+      description: 根据ID查询采购退货详情
       parameters:
       - description: 主键ID
         in: path
@@ -13440,12 +13440,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 采购退货详情
+      summary: 查询采购退货详情
       tags:
       - ERP/采购管理
   /erp/purchase/return/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 采购退货，多个ID用逗号分隔
+      description: 根据ID删除采购退货，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -13461,14 +13461,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 采购退货
+      summary: 删除采购退货
       tags:
       - ERP/采购管理
   /erp/purchase/return/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 采购退货
+      description: 新增或修改采购退货
       parameters:
       - description: ERP 采购退货参数
         in: body
@@ -13485,7 +13485,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 采购退货
+      summary: 新增或修改采购退货
       tags:
       - ERP/采购管理
   /erp/sale/out-items/list:
@@ -14192,7 +14192,7 @@ paths:
       - ERP/系统配置
   /erp/stock/check-item/list:
     get:
-      description: 按条件分页查询 ERP 库存盘点单项列表
+      description: 按条件分页查询库存盘点单项列表
       parameters:
       - in: query
         name: checkId
@@ -14218,12 +14218,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 库存盘点单项列表
+      summary: 查询库存盘点单项列表
       tags:
       - ERP/库存管理
   /erp/stock/check-item/query/{id}:
     get:
-      description: 根据ID查询 ERP 库存盘点单项详情
+      description: 根据ID查询库存盘点单项详情
       parameters:
       - description: 主键ID
         in: path
@@ -14239,12 +14239,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 库存盘点单项详情
+      summary: 查询库存盘点单项详情
       tags:
       - ERP/库存管理
   /erp/stock/check-item/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 库存盘点单项，多个ID用逗号分隔
+      description: 根据ID删除库存盘点单项，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -14260,14 +14260,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 库存盘点单项
+      summary: 删除库存盘点单项
       tags:
       - ERP/库存管理
   /erp/stock/check-item/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 库存盘点单项
+      description: 新增或修改库存盘点单项
       parameters:
       - description: ERP 库存盘点单项参数
         in: body
@@ -14284,12 +14284,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 库存盘点单项
+      summary: 新增或修改库存盘点单项
       tags:
       - ERP/库存管理
   /erp/stock/check/list:
     get:
-      description: 按条件分页查询 ERP 库存盘点单列表
+      description: 按条件分页查询库存盘点单列表
       parameters:
       - in: query
         name: "no"
@@ -14312,12 +14312,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 库存盘点单列表
+      summary: 查询库存盘点单列表
       tags:
       - ERP/库存管理
   /erp/stock/check/query/{id}:
     get:
-      description: 根据ID查询 ERP 库存盘点单详情
+      description: 根据ID查询库存盘点单详情
       parameters:
       - description: 主键ID
         in: path
@@ -14333,12 +14333,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 库存盘点单详情
+      summary: 查询库存盘点单详情
       tags:
       - ERP/库存管理
   /erp/stock/check/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 库存盘点单，多个ID用逗号分隔
+      description: 根据ID删除库存盘点单，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -14354,14 +14354,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 库存盘点单
+      summary: 删除库存盘点单
       tags:
       - ERP/库存管理
   /erp/stock/check/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 库存盘点单
+      description: 新增或修改库存盘点单
       parameters:
       - description: ERP 库存盘点单参数
         in: body
@@ -14378,12 +14378,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 库存盘点单
+      summary: 新增或修改库存盘点单
       tags:
       - ERP/库存管理
   /erp/stock/in-item/list:
     get:
-      description: 按条件分页查询 ERP 其它入库单项列表
+      description: 按条件分页查询其它入库单项列表
       parameters:
       - in: query
         name: inId
@@ -14409,12 +14409,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 其它入库单项列表
+      summary: 查询其它入库单项列表
       tags:
       - ERP/库存管理
   /erp/stock/in-item/query/{id}:
     get:
-      description: 根据ID查询 ERP 其它入库单项详情
+      description: 根据ID查询其它入库单项详情
       parameters:
       - description: 主键ID
         in: path
@@ -14430,12 +14430,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 其它入库单项详情
+      summary: 查询其它入库单项详情
       tags:
       - ERP/库存管理
   /erp/stock/in-item/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 其它入库单项，多个ID用逗号分隔
+      description: 根据ID删除其它入库单项，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -14451,14 +14451,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 其它入库单项
+      summary: 删除其它入库单项
       tags:
       - ERP/库存管理
   /erp/stock/in-item/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 其它入库单项
+      description: 新增或修改其它入库单项
       parameters:
       - description: ERP 其它入库单项参数
         in: body
@@ -14475,12 +14475,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 其它入库单项
+      summary: 新增或修改其它入库单项
       tags:
       - ERP/库存管理
   /erp/stock/in/list:
     get:
-      description: 按条件分页查询 ERP 其它入库单列表
+      description: 按条件分页查询其它入库单列表
       parameters:
       - in: query
         name: "no"
@@ -14506,12 +14506,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 其它入库单列表
+      summary: 查询其它入库单列表
       tags:
       - ERP/库存管理
   /erp/stock/in/query/{id}:
     get:
-      description: 根据ID查询 ERP 其它入库单详情
+      description: 根据ID查询其它入库单详情
       parameters:
       - description: 主键ID
         in: path
@@ -14527,12 +14527,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 其它入库单详情
+      summary: 查询其它入库单详情
       tags:
       - ERP/库存管理
   /erp/stock/in/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 其它入库单，多个ID用逗号分隔
+      description: 根据ID删除其它入库单，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -14548,14 +14548,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 其它入库单
+      summary: 删除其它入库单
       tags:
       - ERP/库存管理
   /erp/stock/in/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 其它入库单
+      description: 新增或修改其它入库单
       parameters:
       - description: ERP 其它入库单参数
         in: body
@@ -14572,12 +14572,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 其它入库单
+      summary: 新增或修改其它入库单
       tags:
       - ERP/库存管理
   /erp/stock/move-item/list:
     get:
-      description: 按条件分页查询 ERP 库存调拨单项列表
+      description: 按条件分页查询库存调拨单项列表
       parameters:
       - in: query
         name: moveId
@@ -14600,12 +14600,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 库存调拨单项列表
+      summary: 查询库存调拨单项列表
       tags:
       - ERP/库存管理
   /erp/stock/move-item/query/{id}:
     get:
-      description: 根据ID查询 ERP 库存调拨单项详情
+      description: 根据ID查询库存调拨单项详情
       parameters:
       - description: 主键ID
         in: path
@@ -14621,12 +14621,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 库存调拨单项详情
+      summary: 查询库存调拨单项详情
       tags:
       - ERP/库存管理
   /erp/stock/move-item/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 库存调拨单项，多个ID用逗号分隔
+      description: 根据ID删除库存调拨单项，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -14642,14 +14642,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 库存调拨单项
+      summary: 删除库存调拨单项
       tags:
       - ERP/库存管理
   /erp/stock/move-item/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 库存调拨单项
+      description: 新增或修改库存调拨单项
       parameters:
       - description: ERP 库存调拨单项参数
         in: body
@@ -14666,12 +14666,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 库存调拨单项
+      summary: 新增或修改库存调拨单项
       tags:
       - ERP/库存管理
   /erp/stock/move/list:
     get:
-      description: 按条件分页查询 ERP 库存调拨单列表
+      description: 按条件分页查询库存调拨单列表
       parameters:
       - in: query
         name: "no"
@@ -14694,12 +14694,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 库存调拨单列表
+      summary: 查询库存调拨单列表
       tags:
       - ERP/库存管理
   /erp/stock/move/query/{id}:
     get:
-      description: 根据ID查询 ERP 库存调拨单详情
+      description: 根据ID查询库存调拨单详情
       parameters:
       - description: 主键ID
         in: path
@@ -14715,12 +14715,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 库存调拨单详情
+      summary: 查询库存调拨单详情
       tags:
       - ERP/库存管理
   /erp/stock/move/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 库存调拨单，多个ID用逗号分隔
+      description: 根据ID删除库存调拨单，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -14736,14 +14736,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 库存调拨单
+      summary: 删除库存调拨单
       tags:
       - ERP/库存管理
   /erp/stock/move/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 库存调拨单
+      description: 新增或修改库存调拨单
       parameters:
       - description: ERP 库存调拨单参数
         in: body
@@ -14760,12 +14760,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 库存调拨单
+      summary: 新增或修改库存调拨单
       tags:
       - ERP/库存管理
   /erp/stock/out-item/list:
     get:
-      description: 按条件分页查询 ERP 其它出库单项列表
+      description: 按条件分页查询其它出库单项列表
       parameters:
       - in: query
         name: outId
@@ -14791,12 +14791,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 其它出库单项列表
+      summary: 查询其它出库单项列表
       tags:
       - ERP/库存管理
   /erp/stock/out-item/query/{id}:
     get:
-      description: 根据ID查询 ERP 其它出库单项详情
+      description: 根据ID查询其它出库单项详情
       parameters:
       - description: 主键ID
         in: path
@@ -14812,12 +14812,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 其它出库单项详情
+      summary: 查询其它出库单项详情
       tags:
       - ERP/库存管理
   /erp/stock/out-item/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 其它出库单项，多个ID用逗号分隔
+      description: 根据ID删除其它出库单项，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -14833,14 +14833,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 其它出库单项
+      summary: 删除其它出库单项
       tags:
       - ERP/库存管理
   /erp/stock/out-item/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 其它出库单项
+      description: 新增或修改其它出库单项
       parameters:
       - description: ERP 其它出库单项参数
         in: body
@@ -14857,12 +14857,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 其它出库单项
+      summary: 新增或修改其它出库单项
       tags:
       - ERP/库存管理
   /erp/stock/out/list:
     get:
-      description: 按条件分页查询 ERP 其它出库单列表
+      description: 按条件分页查询其它出库单列表
       parameters:
       - in: query
         name: customerId
@@ -14888,12 +14888,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 其它出库单列表
+      summary: 查询其它出库单列表
       tags:
       - ERP/库存管理
   /erp/stock/out/query/{id}:
     get:
-      description: 根据ID查询 ERP 其它出库单详情
+      description: 根据ID查询其它出库单详情
       parameters:
       - description: 主键ID
         in: path
@@ -14909,12 +14909,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 其它出库单详情
+      summary: 查询其它出库单详情
       tags:
       - ERP/库存管理
   /erp/stock/out/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 其它出库单，多个ID用逗号分隔
+      description: 根据ID删除其它出库单，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -14930,14 +14930,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 其它出库单
+      summary: 删除其它出库单
       tags:
       - ERP/库存管理
   /erp/stock/out/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 其它出库单
+      description: 新增或修改其它出库单
       parameters:
       - description: ERP 其它出库单参数
         in: body
@@ -14954,12 +14954,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 其它出库单
+      summary: 新增或修改其它出库单
       tags:
       - ERP/库存管理
   /erp/stock/record/list:
     get:
-      description: 按条件分页查询 ERP 产品库存明细列表
+      description: 按条件分页查询产品库存明细列表
       parameters:
       - in: query
         name: bizType
@@ -14985,12 +14985,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 产品库存明细列表
+      summary: 查询产品库存明细列表
       tags:
       - ERP/库存管理
   /erp/stock/record/query/{id}:
     get:
-      description: 根据ID查询 ERP 产品库存明细详情
+      description: 根据ID查询产品库存明细详情
       parameters:
       - description: 主键ID
         in: path
@@ -15006,12 +15006,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 产品库存明细详情
+      summary: 查询产品库存明细详情
       tags:
       - ERP/库存管理
   /erp/stock/record/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 产品库存明细，多个ID用逗号分隔
+      description: 根据ID删除产品库存明细，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -15027,14 +15027,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 产品库存明细
+      summary: 删除产品库存明细
       tags:
       - ERP/库存管理
   /erp/stock/record/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 产品库存明细
+      description: 新增或修改产品库存明细
       parameters:
       - description: ERP 产品库存明细参数
         in: body
@@ -15051,12 +15051,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 产品库存明细
+      summary: 新增或修改产品库存明细
       tags:
       - ERP/库存管理
   /erp/stock/stock/list:
     get:
-      description: 按条件分页查询 ERP 产品库存列表
+      description: 按条件分页查询产品库存列表
       parameters:
       - in: query
         name: page
@@ -15079,12 +15079,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 产品库存列表
+      summary: 查询产品库存列表
       tags:
       - ERP/库存管理
   /erp/stock/stock/query/{id}:
     get:
-      description: 根据ID查询 ERP 产品库存详情
+      description: 根据ID查询产品库存详情
       parameters:
       - description: 主键ID
         in: path
@@ -15100,12 +15100,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 产品库存详情
+      summary: 查询产品库存详情
       tags:
       - ERP/库存管理
   /erp/stock/stock/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 产品库存，多个ID用逗号分隔
+      description: 根据ID删除产品库存，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -15121,14 +15121,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 产品库存
+      summary: 删除产品库存
       tags:
       - ERP/库存管理
   /erp/stock/stock/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 产品库存
+      description: 新增或修改产品库存
       parameters:
       - description: ERP 产品库存参数
         in: body
@@ -15145,7 +15145,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 产品库存
+      summary: 新增或修改产品库存
       tags:
       - ERP/库存管理
   /file/downloadPrivateFile:

@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SaleReturnItem ERP 销售退货项控制器
+// SaleReturnItem 销售退货项控制器
 type SaleReturnItem struct {
 	service saleservice.ISaleReturnItemService
 }
 
-// NewSaleReturnItem 创建 ERP 销售退货项控制器。
+// NewSaleReturnItem 创建销售退货项控制器。
 func NewSaleReturnItem(service saleservice.ISaleReturnItemService) *SaleReturnItem {
 	return &SaleReturnItem{service: service}
 }
 
-// PrivateRoutes 注册 ERP 销售退货项私有路由。
+// PrivateRoutes 注册销售退货项私有路由。
 func (o *SaleReturnItem) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/sale/return-items")
 	group.GET("/list", middlewares.HasPermission("erp:sale:returnItems:list"), o.List)
@@ -28,9 +28,9 @@ func (o *SaleReturnItem) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:sale:returnItems:remove"), o.Delete)
 }
 
-// List 查询 ERP 销售退货项列表。
-// @Summary 查询 ERP 销售退货项列表
-// @Description 按条件分页查询 ERP 销售退货项列表
+// List 查询销售退货项列表。
+// @Summary 查询销售退货项列表
+// @Description 按条件分页查询销售退货项列表
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param object query salemodels.SaleReturnItemQuery true "ERP 销售退货项查询参数"
@@ -51,9 +51,9 @@ func (o *SaleReturnItem) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 销售退货项详情。
-// @Summary 查询 ERP 销售退货项详情
-// @Description 根据ID查询 ERP 销售退货项详情
+// GetByID 查询销售退货项详情。
+// @Summary 查询销售退货项详情
+// @Description 根据ID查询销售退货项详情
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *SaleReturnItem) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 销售退货项。
-// @Summary 新增或修改 ERP 销售退货项
-// @Description 新增或修改 ERP 销售退货项
+// Set 新增或修改销售退货项。
+// @Summary 新增或修改销售退货项
+// @Description 新增或修改销售退货项
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *SaleReturnItem) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 销售退货项。
-// @Summary 删除 ERP 销售退货项
-// @Description 根据ID删除 ERP 销售退货项，多个ID用逗号分隔
+// Delete 删除销售退货项。
+// @Summary 删除销售退货项
+// @Description 根据ID删除销售退货项，多个ID用逗号分隔
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

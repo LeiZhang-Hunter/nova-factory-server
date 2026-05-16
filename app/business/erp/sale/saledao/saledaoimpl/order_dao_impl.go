@@ -1,4 +1,4 @@
-package orderdaoimpl
+package saledaoimpl
 
 import (
 	"errors"
@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"nova-factory-server/app/baize"
-	"nova-factory-server/app/business/erp/order/orderdao"
-	"nova-factory-server/app/business/erp/order/ordermodels"
+	"nova-factory-server/app/business/erp/sale/saledao"
+	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -72,7 +72,7 @@ type erpOrderRow struct {
 }
 
 // NewOrderDao 创建 ERP 订单 DAO。
-func NewOrderDao(db *gorm.DB) orderdao.IOrderDao {
+func NewOrderDao(db *gorm.DB) saledao.IOrderDao {
 	return &OrderDaoImpl{
 		db:         db,
 		table:      "erp_order",
@@ -82,7 +82,7 @@ func NewOrderDao(db *gorm.DB) orderdao.IOrderDao {
 }
 
 // Set 新增或修改 ERP 订单。
-func (o *OrderDaoImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Order, error) {
+func (o *OrderDaoImpl) Set(c *gin.Context, req *salemodels.OrderSet) (*salemodels.Order, error) {
 
 	var resultID uint64
 	err := o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
@@ -137,7 +137,7 @@ func (o *OrderDaoImpl) Set(c *gin.Context, req *ordermodels.OrderSet) (*ordermod
 }
 
 // GetByID 查询 ERP 订单详情。
-func (o *OrderDaoImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.Order, error) {
+func (o *OrderDaoImpl) GetByID(c *gin.Context, id uint64) (*salemodels.Order, error) {
 	var row erpOrderRow
 	if err := o.db.WithContext(c).Table(o.table).
 		Where("id = ?", id).
@@ -150,14 +150,14 @@ func (o *OrderDaoImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.Order, e
 		return nil, err
 	}
 	item := row.toModel()
-	if err := o.attachChildren(c, []*ordermodels.Order{&item}); err != nil {
+	if err := o.attachChildren(c, []*salemodels.Order{&item}); err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
 // List 分页查询 ERP 订单。
-func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*ordermodels.OrderListData, error) {
+func (o *OrderDaoImpl) List(c *gin.Context, req *salemodels.OrderQuery) (*salemodels.OrderListData, error) {
 	db := o.db.WithContext(c).Table(o.table).
 		//Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL)
@@ -191,7 +191,7 @@ func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*order
 	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rowList).Error; err != nil {
 		return nil, err
 	}
-	rows := make([]*ordermodels.Order, 0, len(rowList))
+	rows := make([]*salemodels.Order, 0, len(rowList))
 	for _, row := range rowList {
 		if row == nil {
 			continue
@@ -202,7 +202,7 @@ func (o *OrderDaoImpl) List(c *gin.Context, req *ordermodels.OrderQuery) (*order
 	if err := o.attachChildren(c, rows); err != nil {
 		return nil, err
 	}
-	return &ordermodels.OrderListData{
+	return &salemodels.OrderListData{
 		Rows:  rows,
 		Total: total,
 	}, nil
@@ -233,7 +233,7 @@ func (o *OrderDaoImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 }
 
 // findExists 根据订单ID或订单编号查询当前部门下的有效订单。
-func (o *OrderDaoImpl) findExists(tx *gorm.DB, c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Order, error) {
+func (o *OrderDaoImpl) findExists(tx *gorm.DB, c *gin.Context, req *salemodels.OrderSet) (*salemodels.Order, error) {
 	var row erpOrderRow
 	db := tx.Table(o.table)
 	if req.ID > 0 {
@@ -253,7 +253,7 @@ func (o *OrderDaoImpl) findExists(tx *gorm.DB, c *gin.Context, req *ordermodels.
 }
 
 // buildOrderModel 将保存参数转换为订单主表模型，并完成时间字段解析。
-func buildOrderModel(c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Order, error) {
+func buildOrderModel(c *gin.Context, req *salemodels.OrderSet) (*salemodels.Order, error) {
 	payTime, err := parseOrderTimePtr(req.PayTime)
 	if err != nil {
 		return nil, errors.New("paytime时间格式错误，要求: 2006-01-02 15:04:05")
@@ -262,7 +262,7 @@ func buildOrderModel(c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Or
 	if err != nil {
 		return nil, errors.New("syncTime时间格式错误，要求: 2006-01-02 15:04:05")
 	}
-	data := &ordermodels.Order{
+	data := &salemodels.Order{
 		Tid:                  req.Tid,
 		Weight:               req.Weight,
 		Size:                 req.Size,
@@ -305,7 +305,7 @@ func buildOrderModel(c *gin.Context, req *ordermodels.OrderSet) (*ordermodels.Or
 }
 
 // buildOrderRow 将领域模型转换为真实表结构行模型。
-func buildOrderRow(data *ordermodels.Order) *erpOrderRow {
+func buildOrderRow(data *salemodels.Order) *erpOrderRow {
 	if data == nil {
 		return nil
 	}
@@ -355,11 +355,11 @@ func buildOrderRow(data *ordermodels.Order) *erpOrderRow {
 }
 
 // toModel 将真实表结构行模型转换为领域模型。
-func (r *erpOrderRow) toModel() ordermodels.Order {
+func (r *erpOrderRow) toModel() salemodels.Order {
 	if r == nil {
-		return ordermodels.Order{}
+		return salemodels.Order{}
 	}
-	return ordermodels.Order{
+	return salemodels.Order{
 		ID:                   r.ID,
 		Tid:                  r.Tid,
 		Weight:               r.Weight,
@@ -470,7 +470,7 @@ func parseOrderTimePtr(value string) (*time.Time, error) {
 }
 
 // attachChildren 为订单结果批量挂载明细与账户列表。
-func (o *OrderDaoImpl) attachChildren(c *gin.Context, orders []*ordermodels.Order) error {
+func (o *OrderDaoImpl) attachChildren(c *gin.Context, orders []*salemodels.Order) error {
 	if len(orders) == 0 {
 		return nil
 	}
@@ -492,11 +492,11 @@ func (o *OrderDaoImpl) attachChildren(c *gin.Context, orders []*ordermodels.Orde
 	if err != nil {
 		return err
 	}
-	detailMap := make(map[uint64][]*ordermodels.OrderDetail)
+	detailMap := make(map[uint64][]*salemodels.OrderDetail)
 	for _, detail := range details {
 		detailMap[detail.OrderID] = append(detailMap[detail.OrderID], detail)
 	}
-	accountMap := make(map[uint64][]*ordermodels.OrderAccount)
+	accountMap := make(map[uint64][]*salemodels.OrderAccount)
 	for _, account := range accounts {
 		accountMap[account.OrderID] = append(accountMap[account.OrderID], account)
 	}

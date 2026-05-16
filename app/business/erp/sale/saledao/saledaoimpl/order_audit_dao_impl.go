@@ -1,4 +1,4 @@
-package orderdaoimpl
+package saledaoimpl
 
 import (
 	"encoding/json"
@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/order/orderdao"
-	"nova-factory-server/app/business/erp/order/ordermodels"
+	"nova-factory-server/app/business/erp/sale/saledao"
+	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -22,14 +22,14 @@ type OrderAuditDaoImpl struct {
 }
 
 // NewOrderAuditDao 创建 ERP 订单审核 DAO。
-func NewOrderAuditDao(db *gorm.DB) orderdao.IOrderAuditDao {
+func NewOrderAuditDao(db *gorm.DB) saledao.IOrderAuditDao {
 	return &OrderAuditDaoImpl{
 		db:    db,
 		table: "erp_order_audit",
 	}
 }
 
-func (o *OrderAuditDaoImpl) Set(c *gin.Context, req *ordermodels.OrderAuditSet) (*ordermodels.OrderAudit, error) {
+func (o *OrderAuditDaoImpl) Set(c *gin.Context, req *salemodels.OrderAuditSet) (*salemodels.OrderAudit, error) {
 	var resultID uint64
 	err := o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
 		exists, err := o.findExists(tx, req)
@@ -73,8 +73,8 @@ func (o *OrderAuditDaoImpl) Set(c *gin.Context, req *ordermodels.OrderAuditSet) 
 	return o.GetByID(c, resultID)
 }
 
-func (o *OrderAuditDaoImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.OrderAudit, error) {
-	var item ordermodels.OrderAudit
+func (o *OrderAuditDaoImpl) GetByID(c *gin.Context, id uint64) (*salemodels.OrderAudit, error) {
+	var item salemodels.OrderAudit
 	if err := o.db.WithContext(c).Table(o.table).
 		Where("id = ?", id).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
@@ -89,7 +89,7 @@ func (o *OrderAuditDaoImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.Ord
 	return &item, nil
 }
 
-func (o *OrderAuditDaoImpl) List(c *gin.Context, req *ordermodels.OrderAuditQuery) (*ordermodels.OrderAuditListData, error) {
+func (o *OrderAuditDaoImpl) List(c *gin.Context, req *salemodels.OrderAuditQuery) (*salemodels.OrderAuditListData, error) {
 	db := o.db.WithContext(c).Table(o.table)
 	if req != nil {
 		if strings.TrimSpace(req.Tid) != "" {
@@ -119,14 +119,14 @@ func (o *OrderAuditDaoImpl) List(c *gin.Context, req *ordermodels.OrderAuditQuer
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
-	rows := make([]*ordermodels.OrderAudit, 0)
+	rows := make([]*salemodels.OrderAudit, 0)
 	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	for _, row := range rows {
 		decodeOrderAudit(row)
 	}
-	return &ordermodels.OrderAuditListData{Rows: rows, Total: total}, nil
+	return &salemodels.OrderAuditListData{Rows: rows, Total: total}, nil
 }
 
 func (o *OrderAuditDaoImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
@@ -178,8 +178,8 @@ func (o *OrderAuditDaoImpl) Reject(c *gin.Context, id uint64, remark string) err
 		}).Error
 }
 
-func (o *OrderAuditDaoImpl) findExists(tx *gorm.DB, req *ordermodels.OrderAuditSet) (*ordermodels.OrderAudit, error) {
-	var item ordermodels.OrderAudit
+func (o *OrderAuditDaoImpl) findExists(tx *gorm.DB, req *salemodels.OrderAuditSet) (*salemodels.OrderAudit, error) {
+	var item salemodels.OrderAudit
 	db := tx.Table(o.table)
 	if req.ID > 0 {
 		db = db.Where("id = ?", req.ID)
@@ -195,7 +195,7 @@ func (o *OrderAuditDaoImpl) findExists(tx *gorm.DB, req *ordermodels.OrderAuditS
 	return &item, nil
 }
 
-func buildOrderAuditModel(c *gin.Context, req *ordermodels.OrderAuditSet) (*ordermodels.OrderAudit, error) {
+func buildOrderAuditModel(c *gin.Context, req *salemodels.OrderAuditSet) (*salemodels.OrderAudit, error) {
 	payTime, err := parseOrderTimePtr(req.PayTime)
 	if err != nil {
 		return nil, errors.New("paytime时间格式错误，要求: 2006-01-02 15:04:05")
@@ -216,7 +216,7 @@ func buildOrderAuditModel(c *gin.Context, req *ordermodels.OrderAuditSet) (*orde
 		}
 		sourceJSON = string(raw)
 	}
-	data := &ordermodels.OrderAudit{
+	data := &salemodels.OrderAudit{
 		Tid:                  req.Tid,
 		Weight:               req.Weight,
 		Size:                 req.Size,
@@ -259,7 +259,7 @@ func buildOrderAuditModel(c *gin.Context, req *ordermodels.OrderAuditSet) (*orde
 	return data, nil
 }
 
-func decodeOrderAudit(item *ordermodels.OrderAudit) {
+func decodeOrderAudit(item *salemodels.OrderAudit) {
 	if item == nil {
 		return
 	}
@@ -270,20 +270,20 @@ func decodeOrderAudit(item *ordermodels.OrderAudit) {
 		_ = json.Unmarshal([]byte(item.AccountsJSON), &item.Accounts)
 	}
 	if item.Details == nil {
-		item.Details = make([]*ordermodels.OrderDetail, 0)
+		item.Details = make([]*salemodels.OrderDetail, 0)
 	}
 	if item.Accounts == nil {
-		item.Accounts = make([]*ordermodels.OrderAccount, 0)
+		item.Accounts = make([]*salemodels.OrderAccount, 0)
 	}
 }
 
-func convertDetailSets(items []*ordermodels.OrderDetailSet) []*ordermodels.OrderDetail {
-	result := make([]*ordermodels.OrderDetail, 0, len(items))
+func convertDetailSets(items []*salemodels.OrderDetailSet) []*salemodels.OrderDetail {
+	result := make([]*salemodels.OrderDetail, 0, len(items))
 	for _, item := range items {
 		if item == nil {
 			continue
 		}
-		result = append(result, &ordermodels.OrderDetail{
+		result = append(result, &salemodels.OrderDetail{
 			OID:            item.OID,
 			Barcode:        item.Barcode,
 			EShopGoodsID:   item.EShopGoodsID,
@@ -305,13 +305,13 @@ func convertDetailSets(items []*ordermodels.OrderDetailSet) []*ordermodels.Order
 	return result
 }
 
-func convertAccountSets(items []*ordermodels.OrderAccountSet) []*ordermodels.OrderAccount {
-	result := make([]*ordermodels.OrderAccount, 0, len(items))
+func convertAccountSets(items []*salemodels.OrderAccountSet) []*salemodels.OrderAccount {
+	result := make([]*salemodels.OrderAccount, 0, len(items))
 	for _, item := range items {
 		if item == nil {
 			continue
 		}
-		result = append(result, &ordermodels.OrderAccount{
+		result = append(result, &salemodels.OrderAccount{
 			FinanceCode: item.FinanceCode,
 			Total:       item.Total,
 		})

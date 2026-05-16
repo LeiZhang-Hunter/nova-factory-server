@@ -1,8 +1,8 @@
-package ordercontroller
+package salecontroller
 
 import (
-	"nova-factory-server/app/business/erp/order/ordermodels"
-	"nova-factory-server/app/business/erp/order/orderservice"
+	"nova-factory-server/app/business/erp/sale/salemodels"
+	"nova-factory-server/app/business/erp/sale/saleservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/gin_mcp"
@@ -12,34 +12,34 @@ import (
 
 // OrderAudit ERP订单审核控制器。
 type OrderAudit struct {
-	service orderservice.IOrderAuditService
+	service saleservice.IOrderAuditService
 }
 
 // NewOrderAudit 创建 ERP订单审核控制器。
-func NewOrderAudit(service orderservice.IOrderAuditService) *OrderAudit {
+func NewOrderAudit(service saleservice.IOrderAuditService) *OrderAudit {
 	return &OrderAudit{service: service}
 }
 
 // PrivateRoutes 注册 ERP订单审核私有路由。
 func (o *OrderAudit) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/erp/order-audit")
-	group.GET("/list", middlewares.HasPermission("erp:orderAudit:list"), o.List)
-	group.GET("/query/:id", middlewares.HasPermission("erp:orderAudit:query"), o.GetByID)
-	group.POST("/set", middlewares.HasPermission("erp:orderAudit:set"), o.Set)
-	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:orderAudit:remove"), o.Delete)
-	group.POST("/approve", middlewares.HasPermission("erp:orderAudit:approve"), o.Approve)
-	group.POST("/reject", middlewares.HasPermission("erp:orderAudit:reject"), o.Reject)
-	group.POST("/import", middlewares.HasPermission("erp:orderAudit:import"), o.Import)
+	group := router.Group("/erp/sale/order-audit")
+	group.GET("/list", middlewares.HasPermission("erp:sale:orderAudit:list"), o.List)
+	group.GET("/query/:id", middlewares.HasPermission("erp:sale:orderAudit:query"), o.GetByID)
+	group.POST("/set", middlewares.HasPermission("erp:sale:orderAudit:set"), o.Set)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:sale:orderAudit:remove"), o.Delete)
+	group.POST("/approve", middlewares.HasPermission("erp:sale:orderAudit:approve"), o.Approve)
+	group.POST("/reject", middlewares.HasPermission("erp:sale:orderAudit:reject"), o.Reject)
+	group.POST("/import", middlewares.HasPermission("erp:sale:orderAudit:import"), o.Import)
 }
 
 func (o *OrderAudit) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
-	router.RegisterSchema("POST", "/erp/order-audit/import", nil, ordermodels.OrderAuditImportReq{})
+	router.RegisterSchema("POST", "/erp/order-audit/import", nil, salemodels.OrderAuditImportReq{})
 }
 
 // List ERP订单审核列表
 // @Summary ERP订单审核列表
 // @Description 按条件分页查询ERP订单审核记录
-// @Tags ERP/订单审核
+// @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param tid query string false "网店订单编号"
 // @Param auditStatus query int false "审核状态"
@@ -51,7 +51,7 @@ func (o *OrderAudit) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Success 200 {object} response.ResponseData "查询成功"
 // @Router /erp/order-audit/list [get]
 func (o *OrderAudit) List(c *gin.Context) {
-	req := new(ordermodels.OrderAuditQuery)
+	req := new(salemodels.OrderAuditQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -67,7 +67,7 @@ func (o *OrderAudit) List(c *gin.Context) {
 // GetByID ERP订单审核详情
 // @Summary ERP订单审核详情
 // @Description 根据ID查询ERP订单审核详情
-// @Tags ERP/订单审核
+// @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param id path int true "订单审核ID"
 // @Produce application/json
@@ -90,15 +90,15 @@ func (o *OrderAudit) GetByID(c *gin.Context) {
 // Set ERP订单审核保存
 // @Summary ERP订单审核保存
 // @Description 新增或修改ERP订单审核记录
-// @Tags ERP/订单审核
+// @Tags ERP/销售管理
 // @Security BearerAuth
 // @Accept application/json
-// @Param body body ordermodels.OrderAuditSet true "ERP订单审核保存参数"
+// @Param body body salemodels.OrderAuditSet true "ERP订单审核保存参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "保存成功"
 // @Router /erp/order-audit/set [post]
 func (o *OrderAudit) Set(c *gin.Context) {
-	req := new(ordermodels.OrderAuditSet)
+	req := new(salemodels.OrderAuditSet)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -114,15 +114,15 @@ func (o *OrderAudit) Set(c *gin.Context) {
 // Import ERP订单审核批量导入
 // @Summary ERP订单审核批量导入
 // @Description 批量导入订单审核记录
-// @Tags ERP/订单审核
+// @Tags ERP/销售管理
 // @Security BearerAuth
 // @Accept application/json
-// @Param body body ordermodels.OrderAuditImportReq true "ERP订单审核批量导入参数"
+// @Param body body salemodels.OrderAuditImportReq true "ERP订单审核批量导入参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "导入成功"
 // @Router /erp/order-audit/import [post]
 func (o *OrderAudit) Import(c *gin.Context) {
-	req := new(ordermodels.OrderAuditImportReq)
+	req := new(salemodels.OrderAuditImportReq)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -138,7 +138,7 @@ func (o *OrderAudit) Import(c *gin.Context) {
 // Delete ERP订单审核删除
 // @Summary ERP订单审核删除
 // @Description 根据ID删除ERP订单审核记录
-// @Tags ERP/订单审核
+// @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param ids path string true "订单审核ID，多个以逗号分隔"
 // @Produce application/json
@@ -171,15 +171,15 @@ func (o *OrderAudit) Delete(c *gin.Context) {
 // Approve ERP订单审核通过
 // @Summary ERP订单审核通过
 // @Description 审核通过订单审核记录并转入正式ERP订单
-// @Tags ERP/订单审核
+// @Tags ERP/销售管理
 // @Security BearerAuth
 // @Accept application/json
-// @Param body body ordermodels.OrderAuditAction true "订单审核动作参数"
+// @Param body body salemodels.OrderAuditAction true "订单审核动作参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "审核通过成功"
 // @Router /erp/order-audit/approve [post]
 func (o *OrderAudit) Approve(c *gin.Context) {
-	req := new(ordermodels.OrderAuditAction)
+	req := new(salemodels.OrderAuditAction)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -195,15 +195,15 @@ func (o *OrderAudit) Approve(c *gin.Context) {
 // Reject ERP订单审核驳回
 // @Summary ERP订单审核驳回
 // @Description 驳回订单审核记录
-// @Tags ERP/订单审核
+// @Tags ERP/销售管理
 // @Security BearerAuth
 // @Accept application/json
-// @Param body body ordermodels.OrderAuditAction true "订单审核动作参数"
+// @Param body body salemodels.OrderAuditAction true "订单审核动作参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "驳回成功"
 // @Router /erp/order-audit/reject [post]
 func (o *OrderAudit) Reject(c *gin.Context) {
-	req := new(ordermodels.OrderAuditAction)
+	req := new(salemodels.OrderAuditAction)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return

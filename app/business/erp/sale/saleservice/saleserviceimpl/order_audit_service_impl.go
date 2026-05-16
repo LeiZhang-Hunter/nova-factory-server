@@ -1,48 +1,48 @@
-package orderserviceimpl
+package saleserviceimpl
 
 import (
 	"errors"
 	"strings"
 
-	"nova-factory-server/app/business/erp/order/orderdao"
-	"nova-factory-server/app/business/erp/order/ordermodels"
-	"nova-factory-server/app/business/erp/order/orderservice"
+	"nova-factory-server/app/business/erp/sale/saledao"
+	"nova-factory-server/app/business/erp/sale/salemodels"
+	"nova-factory-server/app/business/erp/sale/saleservice"
 
 	"github.com/gin-gonic/gin"
 )
 
 // OrderAuditServiceImpl ERP订单审核服务实现。
 type OrderAuditServiceImpl struct {
-	dao      orderdao.IOrderAuditDao
-	orderDao orderdao.IOrderDao
+	dao      saledao.IOrderAuditDao
+	orderDao saledao.IOrderDao
 }
 
 // NewOrderAuditService 创建 ERP 订单审核服务。
-func NewOrderAuditService(dao orderdao.IOrderAuditDao, orderDao orderdao.IOrderDao) orderservice.IOrderAuditService {
+func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao) saleservice.IOrderAuditService {
 	return &OrderAuditServiceImpl{dao: dao, orderDao: orderDao}
 }
 
-func (o *OrderAuditServiceImpl) Set(c *gin.Context, req *ordermodels.OrderAuditSet) (*ordermodels.OrderAudit, error) {
+func (o *OrderAuditServiceImpl) Set(c *gin.Context, req *salemodels.OrderAuditSet) (*salemodels.OrderAudit, error) {
 	if err := o.validateSet(req); err != nil {
 		return nil, err
 	}
 	return o.dao.Set(c, req)
 }
 
-func (o *OrderAuditServiceImpl) ImportData(c *gin.Context, req *ordermodels.OrderAuditSet) (*ordermodels.OrderAudit, error) {
+func (o *OrderAuditServiceImpl) ImportData(c *gin.Context, req *salemodels.OrderAuditSet) (*salemodels.OrderAudit, error) {
 
 	return o.dao.Set(c, req)
 }
-func (o *OrderAuditServiceImpl) Import(c *gin.Context, req *ordermodels.OrderAuditImportReq) (*ordermodels.OrderAuditImportResult, error) {
+func (o *OrderAuditServiceImpl) Import(c *gin.Context, req *salemodels.OrderAuditImportReq) (*salemodels.OrderAuditImportResult, error) {
 	if req == nil || len(req.Records) == 0 {
 		return nil, errors.New("导入记录不能为空")
 	}
-	result := &ordermodels.OrderAuditImportResult{
+	result := &salemodels.OrderAuditImportResult{
 		Total: len(req.Records),
-		Items: make([]*ordermodels.OrderAuditImportItem, 0, len(req.Records)),
+		Items: make([]*salemodels.OrderAuditImportItem, 0, len(req.Records)),
 	}
 	for index, record := range req.Records {
-		item := &ordermodels.OrderAuditImportItem{
+		item := &salemodels.OrderAuditImportItem{
 			Index: index,
 		}
 		if record != nil {
@@ -70,16 +70,16 @@ func (o *OrderAuditServiceImpl) Import(c *gin.Context, req *ordermodels.OrderAud
 	return result, nil
 }
 
-func (o *OrderAuditServiceImpl) GetByID(c *gin.Context, id uint64) (*ordermodels.OrderAudit, error) {
+func (o *OrderAuditServiceImpl) GetByID(c *gin.Context, id uint64) (*salemodels.OrderAudit, error) {
 	if id == 0 {
 		return nil, errors.New("id不能为空")
 	}
 	return o.dao.GetByID(c, id)
 }
 
-func (o *OrderAuditServiceImpl) List(c *gin.Context, req *ordermodels.OrderAuditQuery) (*ordermodels.OrderAuditListData, error) {
+func (o *OrderAuditServiceImpl) List(c *gin.Context, req *salemodels.OrderAuditQuery) (*salemodels.OrderAuditListData, error) {
 	if req == nil {
-		req = new(ordermodels.OrderAuditQuery)
+		req = new(salemodels.OrderAuditQuery)
 	}
 	req.Tid = strings.TrimSpace(req.Tid)
 	req.ReceiverName = strings.TrimSpace(req.ReceiverName)
@@ -93,7 +93,7 @@ func (o *OrderAuditServiceImpl) DeleteByIDs(c *gin.Context, ids []uint64) error 
 	return o.dao.DeleteByIDs(c, ids)
 }
 
-func (o *OrderAuditServiceImpl) Approve(c *gin.Context, req *ordermodels.OrderAuditAction) (*ordermodels.OrderAudit, error) {
+func (o *OrderAuditServiceImpl) Approve(c *gin.Context, req *salemodels.OrderAuditAction) (*salemodels.OrderAudit, error) {
 	if req == nil || req.ID == 0 {
 		return nil, errors.New("id不能为空")
 	}
@@ -117,7 +117,7 @@ func (o *OrderAuditServiceImpl) Approve(c *gin.Context, req *ordermodels.OrderAu
 	return o.dao.GetByID(c, req.ID)
 }
 
-func (o *OrderAuditServiceImpl) Reject(c *gin.Context, req *ordermodels.OrderAuditAction) (*ordermodels.OrderAudit, error) {
+func (o *OrderAuditServiceImpl) Reject(c *gin.Context, req *salemodels.OrderAuditAction) (*salemodels.OrderAudit, error) {
 	if req == nil || req.ID == 0 {
 		return nil, errors.New("id不能为空")
 	}
@@ -134,7 +134,7 @@ func (o *OrderAuditServiceImpl) Reject(c *gin.Context, req *ordermodels.OrderAud
 	return o.dao.GetByID(c, req.ID)
 }
 
-func (o *OrderAuditServiceImpl) validateSet(req *ordermodels.OrderAuditSet) error {
+func (o *OrderAuditServiceImpl) validateSet(req *salemodels.OrderAuditSet) error {
 	if req == nil {
 		return errors.New("参数不能为空")
 	}
@@ -180,13 +180,13 @@ func (o *OrderAuditServiceImpl) validateSet(req *ordermodels.OrderAuditSet) erro
 	return nil
 }
 
-func (o *OrderAuditServiceImpl) toOrderSet(item *ordermodels.OrderAudit) *ordermodels.OrderSet {
-	details := make([]*ordermodels.OrderDetailSet, 0, len(item.Details))
+func (o *OrderAuditServiceImpl) toOrderSet(item *salemodels.OrderAudit) *salemodels.OrderSet {
+	details := make([]*salemodels.OrderDetailSet, 0, len(item.Details))
 	for _, detail := range item.Details {
 		if detail == nil {
 			continue
 		}
-		details = append(details, &ordermodels.OrderDetailSet{
+		details = append(details, &salemodels.OrderDetailSet{
 			OID:            detail.OID,
 			Barcode:        detail.Barcode,
 			EShopGoodsID:   detail.EShopGoodsID,
@@ -205,12 +205,12 @@ func (o *OrderAuditServiceImpl) toOrderSet(item *ordermodels.OrderAudit) *orderm
 			UnitQty:        detail.UnitQty,
 		})
 	}
-	accounts := make([]*ordermodels.OrderAccountSet, 0, len(item.Accounts))
+	accounts := make([]*salemodels.OrderAccountSet, 0, len(item.Accounts))
 	for _, account := range item.Accounts {
 		if account == nil {
 			continue
 		}
-		accounts = append(accounts, &ordermodels.OrderAccountSet{
+		accounts = append(accounts, &salemodels.OrderAccountSet{
 			FinanceCode: account.FinanceCode,
 			Total:       account.Total,
 		})
@@ -219,7 +219,7 @@ func (o *OrderAuditServiceImpl) toOrderSet(item *ordermodels.OrderAudit) *orderm
 	if item.PayTime != nil {
 		payTime = item.PayTime.Format("2006-01-02 15:04:05")
 	}
-	return &ordermodels.OrderSet{
+	return &salemodels.OrderSet{
 		Tid:                  item.Tid,
 		Weight:               item.Weight,
 		Size:                 item.Size,
