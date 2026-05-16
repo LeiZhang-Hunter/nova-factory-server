@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// StockCheckItem ERP 库存盘点单项控制器
+// StockCheckItem 库存盘点单项控制器
 type StockCheckItem struct {
 	service stockservice.IStockCheckItemService
 }
 
-// NewStockCheckItem 创建 ERP 库存盘点单项控制器。
+// NewStockCheckItem 创建库存盘点单项控制器。
 func NewStockCheckItem(service stockservice.IStockCheckItemService) *StockCheckItem {
 	return &StockCheckItem{service: service}
 }
 
-// PrivateRoutes 注册 ERP 库存盘点单项私有路由。
+// PrivateRoutes 注册库存盘点单项私有路由。
 func (o *StockCheckItem) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/stock/check-item")
 	group.GET("/list", middlewares.HasPermission("erp:stock:checkItem:list"), o.List)
@@ -28,9 +28,9 @@ func (o *StockCheckItem) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:stock:checkItem:remove"), o.Delete)
 }
 
-// List 查询 ERP 库存盘点单项列表。
-// @Summary 查询 ERP 库存盘点单项列表
-// @Description 按条件分页查询 ERP 库存盘点单项列表
+// List 查询库存盘点单项列表。
+// @Summary 查询库存盘点单项列表
+// @Description 按条件分页查询库存盘点单项列表
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param object query stockmodels.StockCheckItemQuery true "ERP 库存盘点单项查询参数"
@@ -51,9 +51,9 @@ func (o *StockCheckItem) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 库存盘点单项详情。
-// @Summary 查询 ERP 库存盘点单项详情
-// @Description 根据ID查询 ERP 库存盘点单项详情
+// GetByID 查询库存盘点单项详情。
+// @Summary 查询库存盘点单项详情
+// @Description 根据ID查询库存盘点单项详情
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *StockCheckItem) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 库存盘点单项。
-// @Summary 新增或修改 ERP 库存盘点单项
-// @Description 新增或修改 ERP 库存盘点单项
+// Set 新增或修改库存盘点单项。
+// @Summary 新增或修改库存盘点单项
+// @Description 新增或修改库存盘点单项
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *StockCheckItem) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 库存盘点单项。
-// @Summary 删除 ERP 库存盘点单项
-// @Description 根据ID删除 ERP 库存盘点单项，多个ID用逗号分隔
+// Delete 删除库存盘点单项。
+// @Summary 删除库存盘点单项
+// @Description 根据ID删除库存盘点单项，多个ID用逗号分隔
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

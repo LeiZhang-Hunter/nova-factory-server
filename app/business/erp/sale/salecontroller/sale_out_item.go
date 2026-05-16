@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SaleOutItem ERP 销售出库项控制器
+// SaleOutItem 销售出库项控制器
 type SaleOutItem struct {
 	service saleservice.ISaleOutItemService
 }
 
-// NewSaleOutItem 创建 ERP 销售出库项控制器。
+// NewSaleOutItem 创建销售出库项控制器。
 func NewSaleOutItem(service saleservice.ISaleOutItemService) *SaleOutItem {
 	return &SaleOutItem{service: service}
 }
 
-// PrivateRoutes 注册 ERP 销售出库项私有路由。
+// PrivateRoutes 注册销售出库项私有路由。
 func (o *SaleOutItem) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/sale/out-items")
 	group.GET("/list", middlewares.HasPermission("erp:sale:outItems:list"), o.List)
@@ -28,9 +28,9 @@ func (o *SaleOutItem) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:sale:outItems:remove"), o.Delete)
 }
 
-// List 查询 ERP 销售出库项列表。
-// @Summary 查询 ERP 销售出库项列表
-// @Description 按条件分页查询 ERP 销售出库项列表
+// List 查询销售出库项列表。
+// @Summary 查询销售出库项列表
+// @Description 按条件分页查询销售出库项列表
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param object query salemodels.SaleOutItemQuery true "ERP 销售出库项查询参数"
@@ -51,9 +51,9 @@ func (o *SaleOutItem) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 销售出库项详情。
-// @Summary 查询 ERP 销售出库项详情
-// @Description 根据ID查询 ERP 销售出库项详情
+// GetByID 查询销售出库项详情。
+// @Summary 查询销售出库项详情
+// @Description 根据ID查询销售出库项详情
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *SaleOutItem) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 销售出库项。
-// @Summary 新增或修改 ERP 销售出库项
-// @Description 新增或修改 ERP 销售出库项
+// Set 新增或修改销售出库项。
+// @Summary 新增或修改销售出库项
+// @Description 新增或修改销售出库项
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *SaleOutItem) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 销售出库项。
-// @Summary 删除 ERP 销售出库项
-// @Description 根据ID删除 ERP 销售出库项，多个ID用逗号分隔
+// Delete 删除销售出库项。
+// @Summary 删除销售出库项
+// @Description 根据ID删除销售出库项，多个ID用逗号分隔
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

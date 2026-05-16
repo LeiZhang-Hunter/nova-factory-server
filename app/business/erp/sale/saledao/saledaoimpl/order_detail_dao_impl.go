@@ -1,4 +1,4 @@
-package orderdaoimpl
+package saledaoimpl
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"nova-factory-server/app/baize"
-	"nova-factory-server/app/business/erp/order/ordermodels"
+	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -59,7 +59,7 @@ func NewOrderDetailDao(db *gorm.DB) *OrderDetailDaoImpl {
 }
 
 // BatchCreate 批量创建订单明细记录。
-func (d *OrderDetailDaoImpl) BatchCreate(tx *gorm.DB, c *gin.Context, orderID uint64, tid string, details []*ordermodels.OrderDetailSet) error {
+func (d *OrderDetailDaoImpl) BatchCreate(tx *gorm.DB, c *gin.Context, orderID uint64, tid string, details []*salemodels.OrderDetailSet) error {
 	if len(details) == 0 {
 		return nil
 	}
@@ -123,11 +123,11 @@ func (d *OrderDetailDaoImpl) DeleteByOrderIDs(tx *gorm.DB, orderIDs []uint64) er
 }
 
 // ListByOrderIDs 按订单ID集合查询明细记录。
-func (d *OrderDetailDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) ([]*ordermodels.OrderDetail, error) {
+func (d *OrderDetailDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) ([]*salemodels.OrderDetail, error) {
 	if len(orderIDs) == 0 {
-		return []*ordermodels.OrderDetail{}, nil
+		return []*salemodels.OrderDetail{}, nil
 	}
-	rows := make([]*ordermodels.OrderDetail, 0)
+	rows := make([]*salemodels.OrderDetail, 0)
 	rowList := make([]*erpOrderDetailRow, 0)
 	if err := d.db.WithContext(c).Table(d.table).
 		Where("order_id IN ?", orderIDs).
@@ -147,7 +147,7 @@ func (d *OrderDetailDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) (
 }
 
 // validateOIDs 校验订单明细 OID 的唯一性。
-func (d *OrderDetailDaoImpl) validateOIDs(tx *gorm.DB, orderID uint64, details []*ordermodels.OrderDetailSet) error {
+func (d *OrderDetailDaoImpl) validateOIDs(tx *gorm.DB, orderID uint64, details []*salemodels.OrderDetailSet) error {
 	oidSet := make(map[string]struct{}, len(details))
 	oids := make([]string, 0, len(details))
 	for _, item := range details {
@@ -183,11 +183,11 @@ func (d *OrderDetailDaoImpl) validateOIDs(tx *gorm.DB, orderID uint64, details [
 }
 
 // toModel 将真实表结构行模型转换为领域模型。
-func (r *erpOrderDetailRow) toModel() ordermodels.OrderDetail {
+func (r *erpOrderDetailRow) toModel() salemodels.OrderDetail {
 	if r == nil {
-		return ordermodels.OrderDetail{}
+		return salemodels.OrderDetail{}
 	}
-	return ordermodels.OrderDetail{
+	return salemodels.OrderDetail{
 		ID:             r.ID,
 		OrderID:        r.OrderID,
 		Tid:            r.Tid,

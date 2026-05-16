@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// PurchaseInItem ERP 采购入库项控制器
+// PurchaseInItem采购入库项控制器
 type PurchaseInItem struct {
 	service purchaseservice.IPurchaseInItemService
 }
 
-// NewPurchaseInItem 创建 ERP 采购入库项控制器。
+// NewPurchaseInItem 创建采购入库项控制器。
 func NewPurchaseInItem(service purchaseservice.IPurchaseInItemService) *PurchaseInItem {
 	return &PurchaseInItem{service: service}
 }
 
-// PrivateRoutes 注册 ERP 采购入库项私有路由。
+// PrivateRoutes 注册采购入库项私有路由。
 func (o *PurchaseInItem) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/purchase/in-items")
 	group.GET("/list", middlewares.HasPermission("erp:purchase:inItems:list"), o.List)
@@ -28,9 +28,9 @@ func (o *PurchaseInItem) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:purchase:inItems:remove"), o.Delete)
 }
 
-// List 查询 ERP 采购入库项列表。
-// @Summary 查询 ERP 采购入库项列表
-// @Description 按条件分页查询 ERP 采购入库项列表
+// List 查询采购入库项列表。
+// @Summary 查询采购入库项列表
+// @Description 按条件分页查询采购入库项列表
 // @Tags ERP/采购管理
 // @Security BearerAuth
 // @Param object query purchasemodels.PurchaseInItemQuery true "ERP 采购入库项查询参数"
@@ -51,9 +51,9 @@ func (o *PurchaseInItem) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 采购入库项详情。
-// @Summary 查询 ERP 采购入库项详情
-// @Description 根据ID查询 ERP 采购入库项详情
+// GetByID 查询采购入库项详情。
+// @Summary 查询采购入库项详情
+// @Description 根据ID查询采购入库项详情
 // @Tags ERP/采购管理
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *PurchaseInItem) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 采购入库项。
-// @Summary 新增或修改 ERP 采购入库项
-// @Description 新增或修改 ERP 采购入库项
+// Set 新增或修改采购入库项。
+// @Summary 新增或修改采购入库项
+// @Description 新增或修改采购入库项
 // @Tags ERP/采购管理
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *PurchaseInItem) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 采购入库项。
-// @Summary 删除 ERP 采购入库项
-// @Description 根据ID删除 ERP 采购入库项，多个ID用逗号分隔
+// Delete 删除采购入库项。
+// @Summary 删除采购入库项
+// @Description 根据ID删除采购入库项，多个ID用逗号分隔
 // @Tags ERP/采购管理
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

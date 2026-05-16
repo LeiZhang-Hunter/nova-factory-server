@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// StockIn ERP 其它入库单控制器
+// StockIn 其它入库单控制器
 type StockIn struct {
 	service stockservice.IStockInService
 }
 
-// NewStockIn 创建 ERP 其它入库单控制器。
+// NewStockIn 创建其它入库单控制器。
 func NewStockIn(service stockservice.IStockInService) *StockIn {
 	return &StockIn{service: service}
 }
 
-// PrivateRoutes 注册 ERP 其它入库单私有路由。
+// PrivateRoutes 注册其它入库单私有路由。
 func (o *StockIn) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/stock/in")
 	group.GET("/list", middlewares.HasPermission("erp:stock:in:list"), o.List)
@@ -28,9 +28,9 @@ func (o *StockIn) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:stock:in:remove"), o.Delete)
 }
 
-// List 查询 ERP 其它入库单列表。
-// @Summary 查询 ERP 其它入库单列表
-// @Description 按条件分页查询 ERP 其它入库单列表
+// List 查询其它入库单列表。
+// @Summary 查询其它入库单列表
+// @Description 按条件分页查询其它入库单列表
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param object query stockmodels.StockInQuery true "ERP 其它入库单查询参数"
@@ -51,9 +51,9 @@ func (o *StockIn) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 其它入库单详情。
-// @Summary 查询 ERP 其它入库单详情
-// @Description 根据ID查询 ERP 其它入库单详情
+// GetByID 查询其它入库单详情。
+// @Summary 查询其它入库单详情
+// @Description 根据ID查询其它入库单详情
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *StockIn) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 其它入库单。
-// @Summary 新增或修改 ERP 其它入库单
-// @Description 新增或修改 ERP 其它入库单
+// Set 新增或修改其它入库单。
+// @Summary 新增或修改其它入库单
+// @Description 新增或修改其它入库单
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *StockIn) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 其它入库单。
-// @Summary 删除 ERP 其它入库单
-// @Description 根据ID删除 ERP 其它入库单，多个ID用逗号分隔
+// Delete 删除其它入库单。
+// @Summary 删除其它入库单
+// @Description 根据ID删除其它入库单，多个ID用逗号分隔
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

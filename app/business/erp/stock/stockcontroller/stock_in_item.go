@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// StockInItem ERP 其它入库单项控制器
+// StockInItem 其它入库单项控制器
 type StockInItem struct {
 	service stockservice.IStockInItemService
 }
 
-// NewStockInItem 创建 ERP 其它入库单项控制器。
+// NewStockInItem 创建其它入库单项控制器。
 func NewStockInItem(service stockservice.IStockInItemService) *StockInItem {
 	return &StockInItem{service: service}
 }
 
-// PrivateRoutes 注册 ERP 其它入库单项私有路由。
+// PrivateRoutes 注册其它入库单项私有路由。
 func (o *StockInItem) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/stock/in-item")
 	group.GET("/list", middlewares.HasPermission("erp:stock:inItem:list"), o.List)
@@ -28,9 +28,9 @@ func (o *StockInItem) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:stock:inItem:remove"), o.Delete)
 }
 
-// List 查询 ERP 其它入库单项列表。
-// @Summary 查询 ERP 其它入库单项列表
-// @Description 按条件分页查询 ERP 其它入库单项列表
+// List 查询其它入库单项列表。
+// @Summary 查询其它入库单项列表
+// @Description 按条件分页查询其它入库单项列表
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param object query stockmodels.StockInItemQuery true "ERP 其它入库单项查询参数"
@@ -51,9 +51,9 @@ func (o *StockInItem) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 其它入库单项详情。
-// @Summary 查询 ERP 其它入库单项详情
-// @Description 根据ID查询 ERP 其它入库单项详情
+// GetByID 查询其它入库单项详情。
+// @Summary 查询其它入库单项详情
+// @Description 根据ID查询其它入库单项详情
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *StockInItem) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 其它入库单项。
-// @Summary 新增或修改 ERP 其它入库单项
-// @Description 新增或修改 ERP 其它入库单项
+// Set 新增或修改其它入库单项。
+// @Summary 新增或修改其它入库单项
+// @Description 新增或修改其它入库单项
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *StockInItem) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 其它入库单项。
-// @Summary 删除 ERP 其它入库单项
-// @Description 根据ID删除 ERP 其它入库单项，多个ID用逗号分隔
+// Delete 删除其它入库单项。
+// @Summary 删除其它入库单项
+// @Description 根据ID删除其它入库单项，多个ID用逗号分隔
 // @Tags ERP/库存管理
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

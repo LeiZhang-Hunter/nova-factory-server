@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SaleReturn ERP 销售退货控制器
+// SaleReturn 销售退货控制器
 type SaleReturn struct {
 	service saleservice.ISaleReturnService
 }
 
-// NewSaleReturn 创建 ERP 销售退货控制器。
+// NewSaleReturn 创建销售退货控制器。
 func NewSaleReturn(service saleservice.ISaleReturnService) *SaleReturn {
 	return &SaleReturn{service: service}
 }
 
-// PrivateRoutes 注册 ERP 销售退货私有路由。
+// PrivateRoutes 注册销售退货私有路由。
 func (o *SaleReturn) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/sale/return")
 	group.GET("/list", middlewares.HasPermission("erp:sale:return:list"), o.List)
@@ -28,9 +28,9 @@ func (o *SaleReturn) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:sale:return:remove"), o.Delete)
 }
 
-// List 查询 ERP 销售退货列表。
-// @Summary 查询 ERP 销售退货列表
-// @Description 按条件分页查询 ERP 销售退货列表
+// List 查询销售退货列表。
+// @Summary 查询销售退货列表
+// @Description 按条件分页查询销售退货列表
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param object query salemodels.SaleReturnQuery true "ERP 销售退货查询参数"
@@ -51,9 +51,9 @@ func (o *SaleReturn) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 销售退货详情。
-// @Summary 查询 ERP 销售退货详情
-// @Description 根据ID查询 ERP 销售退货详情
+// GetByID 查询销售退货详情。
+// @Summary 查询销售退货详情
+// @Description 根据ID查询销售退货详情
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *SaleReturn) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 销售退货。
-// @Summary 新增或修改 ERP 销售退货
-// @Description 新增或修改 ERP 销售退货
+// Set 新增或修改销售退货。
+// @Summary 新增或修改销售退货
+// @Description 新增或修改销售退货
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *SaleReturn) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 销售退货。
-// @Summary 删除 ERP 销售退货
-// @Description 根据ID删除 ERP 销售退货，多个ID用逗号分隔
+// Delete 删除销售退货。
+// @Summary 删除销售退货
+// @Description 根据ID删除销售退货，多个ID用逗号分隔
 // @Tags ERP/销售管理
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

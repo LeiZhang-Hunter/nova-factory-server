@@ -1,10 +1,10 @@
-package orderdaoimpl
+package saledaoimpl
 
 import (
 	"time"
 
 	"nova-factory-server/app/baize"
-	"nova-factory-server/app/business/erp/order/ordermodels"
+	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -42,7 +42,7 @@ func NewOrderAccountDao(db *gorm.DB) *OrderAccountDaoImpl {
 }
 
 // BatchCreate 批量创建订单账户记录。
-func (d *OrderAccountDaoImpl) BatchCreate(tx *gorm.DB, c *gin.Context, orderID uint64, tid string, accounts []*ordermodels.OrderAccountSet) error {
+func (d *OrderAccountDaoImpl) BatchCreate(tx *gorm.DB, c *gin.Context, orderID uint64, tid string, accounts []*salemodels.OrderAccountSet) error {
 	if len(accounts) == 0 {
 		return nil
 	}
@@ -89,11 +89,11 @@ func (d *OrderAccountDaoImpl) DeleteByOrderIDs(tx *gorm.DB, orderIDs []uint64) e
 }
 
 // ListByOrderIDs 按订单ID集合查询账户记录。
-func (d *OrderAccountDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) ([]*ordermodels.OrderAccount, error) {
+func (d *OrderAccountDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) ([]*salemodels.OrderAccount, error) {
 	if len(orderIDs) == 0 {
-		return []*ordermodels.OrderAccount{}, nil
+		return []*salemodels.OrderAccount{}, nil
 	}
-	rows := make([]*ordermodels.OrderAccount, 0)
+	rows := make([]*salemodels.OrderAccount, 0)
 	rowList := make([]*erpOrderAccountRow, 0)
 	if err := d.db.WithContext(c).Table(d.table).
 		Where("order_id IN ?", orderIDs).
@@ -113,11 +113,11 @@ func (d *OrderAccountDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) 
 }
 
 // toModel 将真实表结构行模型转换为领域模型。
-func (r *erpOrderAccountRow) toModel() ordermodels.OrderAccount {
+func (r *erpOrderAccountRow) toModel() salemodels.OrderAccount {
 	if r == nil {
-		return ordermodels.OrderAccount{}
+		return salemodels.OrderAccount{}
 	}
-	return ordermodels.OrderAccount{
+	return salemodels.OrderAccount{
 		ID:          r.ID,
 		OrderID:     r.OrderID,
 		Tid:         r.Tid,
