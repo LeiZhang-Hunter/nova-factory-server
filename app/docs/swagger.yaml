@@ -13490,7 +13490,7 @@ paths:
       - ERP/采购管理
   /erp/sale/out-items/list:
     get:
-      description: 按条件分页查询 ERP 销售出库项列表
+      description: 按条件分页查询销售出库项列表
       parameters:
       - in: query
         name: outId
@@ -13516,12 +13516,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 销售出库项列表
+      summary: 查询销售出库项列表
       tags:
       - ERP/销售管理
   /erp/sale/out-items/query/{id}:
     get:
-      description: 根据ID查询 ERP 销售出库项详情
+      description: 根据ID查询销售出库项详情
       parameters:
       - description: 主键ID
         in: path
@@ -13537,12 +13537,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 销售出库项详情
+      summary: 查询销售出库项详情
       tags:
       - ERP/销售管理
   /erp/sale/out-items/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 销售出库项，多个ID用逗号分隔
+      description: 根据ID删除销售出库项，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -13558,14 +13558,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 销售出库项
+      summary: 删除销售出库项
       tags:
       - ERP/销售管理
   /erp/sale/out-items/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 销售出库项
+      description: 新增或修改销售出库项
       parameters:
       - description: ERP 销售出库项参数
         in: body
@@ -13582,12 +13582,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 销售出库项
+      summary: 新增或修改销售出库项
       tags:
       - ERP/销售管理
   /erp/sale/out/list:
     get:
-      description: 按条件分页查询 ERP 销售出库列表
+      description: 按条件分页查询销售出库列表
       parameters:
       - in: query
         name: accountId
@@ -13619,12 +13619,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 销售出库列表
+      summary: 查询销售出库列表
       tags:
       - ERP/销售管理
   /erp/sale/out/query/{id}:
     get:
-      description: 根据ID查询 ERP 销售出库详情
+      description: 根据ID查询销售出库详情
       parameters:
       - description: 主键ID
         in: path
@@ -13640,12 +13640,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 销售出库详情
+      summary: 查询销售出库详情
       tags:
       - ERP/销售管理
   /erp/sale/out/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 销售出库，多个ID用逗号分隔
+      description: 根据ID删除销售出库，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -13661,14 +13661,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 销售出库
+      summary: 删除销售出库
       tags:
       - ERP/销售管理
   /erp/sale/out/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 销售出库
+      description: 新增或修改销售出库
       parameters:
       - description: ERP 销售出库参数
         in: body
@@ -13685,12 +13685,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 销售出库
+      summary: 新增或修改销售出库
       tags:
       - ERP/销售管理
   /erp/sale/return-items/list:
     get:
-      description: 按条件分页查询 ERP 销售退货项列表
+      description: 按条件分页查询销售退货项列表
       parameters:
       - in: query
         name: page
@@ -13716,12 +13716,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 销售退货项列表
+      summary: 查询销售退货项列表
       tags:
       - ERP/销售管理
   /erp/sale/return-items/query/{id}:
     get:
-      description: 根据ID查询 ERP 销售退货项详情
+      description: 根据ID查询销售退货项详情
       parameters:
       - description: 主键ID
         in: path
@@ -13737,12 +13737,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 销售退货项详情
+      summary: 查询销售退货项详情
       tags:
       - ERP/销售管理
   /erp/sale/return-items/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 销售退货项，多个ID用逗号分隔
+      description: 根据ID删除销售退货项，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -13758,14 +13758,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 销售退货项
+      summary: 删除销售退货项
       tags:
       - ERP/销售管理
   /erp/sale/return-items/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 销售退货项
+      description: 新增或修改销售退货项
       parameters:
       - description: ERP 销售退货项参数
         in: body
@@ -13782,12 +13782,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 销售退货项
+      summary: 新增或修改销售退货项
       tags:
       - ERP/销售管理
   /erp/sale/return/list:
     get:
-      description: 按条件分页查询 ERP 销售退货列表
+      description: 按条件分页查询销售退货列表
       parameters:
       - in: query
         name: accountId
@@ -13819,12 +13819,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 销售退货列表
+      summary: 查询销售退货列表
       tags:
       - ERP/销售管理
   /erp/sale/return/query/{id}:
     get:
-      description: 根据ID查询 ERP 销售退货详情
+      description: 根据ID查询销售退货详情
       parameters:
       - description: 主键ID
         in: path
@@ -13840,12 +13840,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 销售退货详情
+      summary: 查询销售退货详情
       tags:
       - ERP/销售管理
   /erp/sale/return/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 销售退货，多个ID用逗号分隔
+      description: 根据ID删除销售退货，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -13861,14 +13861,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 销售退货
+      summary: 删除销售退货
       tags:
       - ERP/销售管理
   /erp/sale/return/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 销售退货
+      description: 新增或修改销售退货
       parameters:
       - description: ERP 销售退货参数
         in: body
@@ -13885,7 +13885,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 销售退货
+      summary: 新增或修改销售退货
       tags:
       - ERP/销售管理
   /erp/setting/integration-config/check-login-state:

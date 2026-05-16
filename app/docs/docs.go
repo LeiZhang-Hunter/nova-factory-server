@@ -12083,14 +12083,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 销售出库项列表",
+                "description": "按条件分页查询销售出库项列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "查询 ERP 销售出库项列表",
+                "summary": "查询销售出库项列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -12135,14 +12135,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 销售出库项详情",
+                "description": "根据ID查询销售出库项详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "查询 ERP 销售出库项详情",
+                "summary": "查询销售出库项详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -12169,14 +12169,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 销售出库项，多个ID用逗号分隔",
+                "description": "根据ID删除销售出库项，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "删除 ERP 销售出库项",
+                "summary": "删除销售出库项",
                 "parameters": [
                     {
                         "type": "string",
@@ -12203,7 +12203,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 销售出库项",
+                "description": "新增或修改销售出库项",
                 "consumes": [
                     "application/json"
                 ],
@@ -12213,7 +12213,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "新增或修改 ERP 销售出库项",
+                "summary": "新增或修改销售出库项",
                 "parameters": [
                     {
                         "description": "ERP 销售出库项参数",
@@ -12242,14 +12242,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 销售出库列表",
+                "description": "按条件分页查询销售出库列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "查询 ERP 销售出库列表",
+                "summary": "查询销售出库列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -12304,14 +12304,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 销售出库详情",
+                "description": "根据ID查询销售出库详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "查询 ERP 销售出库详情",
+                "summary": "查询销售出库详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -12338,14 +12338,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 销售出库，多个ID用逗号分隔",
+                "description": "根据ID删除销售出库，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "删除 ERP 销售出库",
+                "summary": "删除销售出库",
                 "parameters": [
                     {
                         "type": "string",
@@ -12372,7 +12372,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 销售出库",
+                "description": "新增或修改销售出库",
                 "consumes": [
                     "application/json"
                 ],
@@ -12382,7 +12382,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "新增或修改 ERP 销售出库",
+                "summary": "新增或修改销售出库",
                 "parameters": [
                     {
                         "description": "ERP 销售出库参数",
@@ -12411,14 +12411,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 销售退货项列表",
+                "description": "按条件分页查询销售退货项列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "查询 ERP 销售退货项列表",
+                "summary": "查询销售退货项列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -12463,14 +12463,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 销售退货项详情",
+                "description": "根据ID查询销售退货项详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "查询 ERP 销售退货项详情",
+                "summary": "查询销售退货项详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -12497,14 +12497,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 销售退货项，多个ID用逗号分隔",
+                "description": "根据ID删除销售退货项，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "删除 ERP 销售退货项",
+                "summary": "删除销售退货项",
                 "parameters": [
                     {
                         "type": "string",
@@ -12531,7 +12531,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 销售退货项",
+                "description": "新增或修改销售退货项",
                 "consumes": [
                     "application/json"
                 ],
@@ -12541,7 +12541,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "新增或修改 ERP 销售退货项",
+                "summary": "新增或修改销售退货项",
                 "parameters": [
                     {
                         "description": "ERP 销售退货项参数",
@@ -12570,14 +12570,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 销售退货列表",
+                "description": "按条件分页查询销售退货列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "查询 ERP 销售退货列表",
+                "summary": "查询销售退货列表",
                 "parameters": [
                     {
                         "type": "integer",
@@ -12632,14 +12632,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 销售退货详情",
+                "description": "根据ID查询销售退货详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "查询 ERP 销售退货详情",
+                "summary": "查询销售退货详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -12666,14 +12666,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 销售退货，多个ID用逗号分隔",
+                "description": "根据ID删除销售退货，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "删除 ERP 销售退货",
+                "summary": "删除销售退货",
                 "parameters": [
                     {
                         "type": "string",
@@ -12700,7 +12700,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 销售退货",
+                "description": "新增或修改销售退货",
                 "consumes": [
                     "application/json"
                 ],
@@ -12710,7 +12710,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/销售管理"
                 ],
-                "summary": "新增或修改 ERP 销售退货",
+                "summary": "新增或修改销售退货",
                 "parameters": [
                     {
                         "description": "ERP 销售退货参数",
