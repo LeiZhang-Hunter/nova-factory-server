@@ -20,7 +20,7 @@ type ProductCategory struct {
 // ProductCategoryUpsert ERP 产品分类新增修改参数
 type ProductCategoryUpsert struct {
 	ID       int64  `json:"id,string"`
-	ParentID int64  `json:"parentId"`
+	ParentID int64  `json:"parentId,string"`
 	Name     string `json:"name" binding:"required" label:"分类名称"`
 	Code     string `json:"code"`
 	Sort     int32  `json:"sort"`
