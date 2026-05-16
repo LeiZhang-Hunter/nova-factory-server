@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/milvus-io/milvus/client/v2/column"
 	"github.com/milvus-io/milvus/client/v2/entity"
 	"github.com/milvus-io/milvus/client/v2/index"
 	"github.com/milvus-io/milvus/client/v2/milvusclient"
@@ -21,18 +22,28 @@ import (
 const (
 	defaultGoodsVectorCollection = "shop_goods_vectors"
 
-	goodsVectorPKField           = "goods_id"
-	goodsVectorDBIDField         = "goods_db_id"
-	goodsVectorNameField         = "goods_name"
-	goodsVectorCodeField         = "goods_code"
-	goodsVectorCategoryField     = "category_name"
-	goodsVectorDescriptionField  = "description"
+	goodsVectorPKField          = "goods_id"
+	goodsVectorDBIDField        = "goods_db_id"
+	goodsVectorNameField        = "goods_name"
+	goodsVectorCodeField        = "goods_code"
+	goodsVectorCategoryField    = "category_name"
+	goodsVectorDescriptionField = "description"
+
+	goodsVectorSkuIdField          = "sku_id"
+	goodsVectorSkuNameField        = "sku_name"
+	goodsVectorSkuDescriptionField = "sku_description"
+
+	goodsVectorRetailPriceField   = "retail_price"
+	goodsVectorWeightPriceField   = "weight"
+	goodsVectorQuantityPriceField = "quantity"
+
 	goodsVectorContentField      = "content"
 	goodsVectorEmbeddingField    = "vector"
 	goodsVectorPKMaxLength       = 128
 	goodsVectorNameMaxLength     = 512
 	goodsVectorCodeMaxLength     = 128
 	goodsVectorCategoryMaxLength = 256
+	goodsVectorSkuNameMaxLength  = 512
 	goodsVectorDescMaxLength     = 4096
 	goodsVectorContentMaxLength  = 16384
 )
@@ -43,20 +54,54 @@ type goodsVectorConfig struct {
 	Collection string `mapstructure:"collection"`
 }
 
+type goodsVectorRows struct {
+	pks             []int64
+	goodsDBIDs      []int64
+	goodsNames      []string
+	goodsCodes      []string
+	categorys       []string
+	descriptions    []string
+	contents        []string
+	skuIDs          []int64
+	skuNames        []string
+	skuDescriptions []string
+	retailPrices    []float64
+	weights         []float64
+	quantities      []int64
+	vectors         [][]float32
+}
+
 func NewShopGoodsVectorDao() shopdao.IShopGoodsVectorDao {
 	return &ShopGoodsVectorDaoImpl{}
 }
 
-func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods, content string, vector []float32) (*shopmodels.GoodsVectorResult, error) {
+func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods, items []*shopmodels.GoodsVectorUpsertItem) (*shopmodels.GoodsVectorResult, error) {
 	if goods == nil {
 		return nil, errors.New("商品不存在")
 	}
-	content = trimRunes(content, goodsVectorContentMaxLength)
-	if strings.TrimSpace(content) == "" {
-		return nil, errors.New("商品内容为空")
+	if len(items) == 0 {
+		return nil, errors.New("商品向量写入项为空")
 	}
-	if len(vector) == 0 {
-		return nil, errors.New("商品向量为空")
+
+	dim := 0
+	for idx, item := range items {
+		if item == nil {
+			return nil, fmt.Errorf("第%d条商品向量写入项为空", idx+1)
+		}
+		item.Content = trimRunes(item.Content, goodsVectorContentMaxLength)
+		if strings.TrimSpace(item.Content) == "" {
+			return nil, fmt.Errorf("第%d条商品内容为空", idx+1)
+		}
+		if len(item.Vector) == 0 {
+			return nil, fmt.Errorf("第%d条商品向量为空", idx+1)
+		}
+		if dim == 0 {
+			dim = len(item.Vector)
+			continue
+		}
+		if len(item.Vector) != dim {
+			return nil, fmt.Errorf("第%d条商品向量维度不一致，expected=%d actual=%d", idx+1, dim, len(item.Vector))
+		}
 	}
 
 	cfg, err := loadGoodsVectorConfig()
@@ -70,8 +115,31 @@ func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods,
 		return nil, fmt.Errorf("初始化 Milvus 客户端失败: %w", err)
 	}
 
-	if err = ensureGoodsVectorCollection(requestCtx, client, cfg.Collection, len(vector)); err != nil {
+	if err = ensureGoodsVectorCollection(requestCtx, client, cfg.Collection, dim); err != nil {
 		return nil, err
+	}
+
+	rows := buildGoodsVectorRows(goods, items)
+	_, err = client.Upsert(requestCtx, milvusclient.NewColumnBasedInsertOption(cfg.Collection).
+		WithInt64Column(goodsVectorPKField, rows.pks).
+		WithInt64Column(goodsVectorDBIDField, rows.goodsDBIDs).
+		WithVarcharColumn(goodsVectorNameField, rows.goodsNames).
+		WithVarcharColumn(goodsVectorCodeField, rows.goodsCodes).
+		WithVarcharColumn(goodsVectorCategoryField, rows.categorys).
+		WithVarcharColumn(goodsVectorDescriptionField, rows.descriptions).
+		WithVarcharColumn(goodsVectorContentField, rows.contents).
+		WithInt64Column(goodsVectorSkuIdField, rows.skuIDs).
+		WithVarcharColumn(goodsVectorSkuNameField, rows.skuNames).
+		WithVarcharColumn(goodsVectorSkuDescriptionField, rows.skuDescriptions).
+		WithColumns(
+			column.NewColumnDouble(goodsVectorRetailPriceField, rows.retailPrices),
+			column.NewColumnDouble(goodsVectorWeightPriceField, rows.weights),
+		).
+		WithInt64Column(goodsVectorQuantityPriceField, rows.quantities).
+		WithFloatVectorColumn(goodsVectorEmbeddingField, dim, rows.vectors),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("写入 Milvus 失败: %w", err)
 	}
 
 	goodsPK := strings.TrimSpace(goods.GoodsID)
@@ -79,25 +147,194 @@ func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods,
 		goodsPK = strconv.FormatInt(goods.ID, 10)
 	}
 
-	_, err = client.Upsert(requestCtx, milvusclient.NewColumnBasedInsertOption(cfg.Collection).
-		WithVarcharColumn(goodsVectorPKField, []string{trimRunes(goodsPK, goodsVectorPKMaxLength)}).
-		WithInt64Column(goodsVectorDBIDField, []int64{goods.ID}).
-		WithVarcharColumn(goodsVectorNameField, []string{trimRunes(goods.GoodsName, goodsVectorNameMaxLength)}).
-		WithVarcharColumn(goodsVectorCodeField, []string{trimRunes(goods.GoodsCode, goodsVectorCodeMaxLength)}).
-		WithVarcharColumn(goodsVectorCategoryField, []string{trimRunes(goods.ShopCategoryName, goodsVectorCategoryMaxLength)}).
-		WithVarcharColumn(goodsVectorDescriptionField, []string{trimRunes(goods.Description, goodsVectorDescMaxLength)}).
-		WithVarcharColumn(goodsVectorContentField, []string{content}).
-		WithFloatVectorColumn(goodsVectorEmbeddingField, len(vector), [][]float32{vector}),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("写入 Milvus 失败: %w", err)
-	}
-
 	return &shopmodels.GoodsVectorResult{
 		GoodsDBID:  goods.ID,
 		GoodsID:    goodsPK,
 		Collection: cfg.Collection,
-		Dimension:  len(vector),
+		Dimension:  dim,
+		SkuCount:   len(rows.pks),
+	}, nil
+}
+
+func (d *ShopGoodsVectorDaoImpl) Search(c *gin.Context, req *shopmodels.GoodsVectorSearchReq, vector []float32) (*shopmodels.GoodsVectorSearchData, error) {
+	if req == nil {
+		return nil, errors.New("商品向量搜索参数为空")
+	}
+	if len(vector) == 0 {
+		return nil, errors.New("商品搜索向量为空")
+	}
+	data, err := d.BatchSearch(c, &shopmodels.GoodsVectorBatchSearchReq{
+		Queries: []string{req.Query},
+		Limit:   req.Limit,
+	}, [][]float32{vector})
+	if err != nil {
+		return nil, err
+	}
+	if data == nil || len(data.Rows) == 0 || data.Rows[0] == nil {
+		return &shopmodels.GoodsVectorSearchData{
+			Rows:  make([]*shopmodels.GoodsVectorSearchItem, 0),
+			Total: 0,
+		}, nil
+	}
+	return &shopmodels.GoodsVectorSearchData{
+		Rows:  data.Rows[0].Rows,
+		Total: data.Rows[0].Total,
+	}, nil
+}
+
+func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.GoodsVectorBatchSearchReq,
+	vectors [][]float32) (*shopmodels.GoodsVectorBatchSearchData, error) {
+	if req == nil {
+		return nil, errors.New("商品批量向量搜索参数为空")
+	}
+	if len(vectors) == 0 {
+		return nil, errors.New("商品批量搜索向量为空")
+	}
+	if len(req.Queries) != len(vectors) {
+		return nil, fmt.Errorf("商品批量搜索参数数量不匹配，expected=%d actual=%d", len(req.Queries), len(vectors))
+	}
+
+	cfg, err := loadGoodsVectorConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	requestCtx := buildRequestContext(c)
+	client, err := milvus.GetClient(requestCtx)
+	if err != nil {
+		return nil, fmt.Errorf("初始化 Milvus 客户端失败: %w", err)
+	}
+
+	has, err := client.HasCollection(requestCtx, milvusclient.NewHasCollectionOption(cfg.Collection))
+	if err != nil {
+		return nil, fmt.Errorf("检查 Milvus collection 失败: %w", err)
+	}
+	if !has {
+		return buildEmptyGoodsVectorBatchSearchData(req.Queries), nil
+	}
+
+	searchVectors := make([]entity.Vector, 0, len(vectors))
+	for idx, vector := range vectors {
+		if len(vector) == 0 {
+			return nil, fmt.Errorf("第%d条商品搜索向量为空", idx+1)
+		}
+		searchVectors = append(searchVectors, entity.FloatVector(vector))
+	}
+
+	resultSets, err := client.Search(requestCtx, milvusclient.NewSearchOption(cfg.Collection, req.Limit,
+		searchVectors).
+		WithANNSField(goodsVectorEmbeddingField).
+		WithOutputFields(
+			goodsVectorDBIDField,
+			goodsVectorNameField,
+			goodsVectorCodeField,
+			goodsVectorCategoryField,
+			goodsVectorDescriptionField,
+			goodsVectorSkuIdField,
+			goodsVectorSkuNameField,
+			goodsVectorSkuDescriptionField,
+			goodsVectorRetailPriceField,
+			goodsVectorWeightPriceField,
+			goodsVectorQuantityPriceField,
+			goodsVectorContentField,
+		))
+	if err != nil {
+		return nil, fmt.Errorf("搜索 Milvus 商品向量失败: %w", err)
+	}
+	if len(resultSets) == 0 {
+		return buildEmptyGoodsVectorBatchSearchData(req.Queries), nil
+	}
+	if len(resultSets) != len(req.Queries) {
+		return nil, fmt.Errorf("Milvus 批量搜索结果数量不匹配，expected=%d actual=%d", len(req.Queries), len(resultSets))
+	}
+
+	rows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(resultSets))
+	for idx, resultSet := range resultSets {
+		data, parseErr := parseGoodsVectorSearchResultSet(resultSet)
+		if parseErr != nil {
+			return nil, fmt.Errorf("解析第%d条商品向量搜索结果失败: %w", idx+1, parseErr)
+		}
+		rows = append(rows, &shopmodels.GoodsVectorBatchSearchItem{
+			Query: req.Queries[idx],
+			Rows:  data.Rows,
+			Total: data.Total,
+		})
+	}
+
+	return &shopmodels.GoodsVectorBatchSearchData{
+		Rows:  rows,
+		Total: int64(len(rows)),
+	}, nil
+}
+
+func buildEmptyGoodsVectorBatchSearchData(queries []string) *shopmodels.GoodsVectorBatchSearchData {
+	rows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(queries))
+	for _, query := range queries {
+		rows = append(rows, &shopmodels.GoodsVectorBatchSearchItem{
+			Query: query,
+			Rows:  make([]*shopmodels.GoodsVectorSearchItem, 0),
+			Total: 0,
+		})
+	}
+	return &shopmodels.GoodsVectorBatchSearchData{
+		Rows:  rows,
+		Total: int64(len(rows)),
+	}
+}
+
+func parseGoodsVectorSearchResultSet(resultSet milvusclient.ResultSet) (*shopmodels.GoodsVectorSearchData, error) {
+	if resultSet.Err != nil {
+		return nil, resultSet.Err
+	}
+
+	rows := make([]*shopmodels.GoodsVectorSearchItem, 0, resultSet.ResultCount)
+	for i := 0; i < resultSet.ResultCount; i++ {
+		item := &shopmodels.GoodsVectorSearchItem{
+			Score: resultSet.Scores[i],
+		}
+		var err error
+		if item.GoodsDBID, err = getInt64ColumnValue(&resultSet, goodsVectorDBIDField, i); err != nil {
+			return nil, err
+		}
+		if item.GoodsName, err = getStringColumnValue(&resultSet, goodsVectorNameField, i); err != nil {
+			return nil, err
+		}
+		if item.GoodsCode, err = getStringColumnValue(&resultSet, goodsVectorCodeField, i); err != nil {
+			return nil, err
+		}
+		if item.CategoryName, err = getStringColumnValue(&resultSet, goodsVectorCategoryField, i); err != nil {
+			return nil, err
+		}
+		if item.Description, err = getStringColumnValue(&resultSet, goodsVectorDescriptionField, i); err != nil {
+			return nil, err
+		}
+		if item.SkuID, err = getInt64ColumnValue(&resultSet, goodsVectorSkuIdField, i); err != nil {
+			return nil, err
+		}
+		if item.SkuName, err = getStringColumnValue(&resultSet, goodsVectorSkuNameField, i); err != nil {
+			return nil, err
+		}
+		if item.SkuDescription, err = getStringColumnValue(&resultSet, goodsVectorSkuDescriptionField, i); err != nil {
+			return nil, err
+		}
+		if item.RetailPrice, err = getFloat64ColumnValue(&resultSet, goodsVectorRetailPriceField, i); err != nil {
+			return nil, err
+		}
+		if item.Weight, err = getFloat64ColumnValue(&resultSet, goodsVectorWeightPriceField, i); err != nil {
+			return nil, err
+		}
+		if item.Quantity, err = getInt64ColumnValue(&resultSet, goodsVectorQuantityPriceField, i); err != nil {
+			return nil, err
+		}
+		if item.Content, err = getStringColumnValue(&resultSet, goodsVectorContentField, i); err != nil {
+			return nil, err
+		}
+		rows = append(rows, item)
+	}
+
+	return &shopmodels.GoodsVectorSearchData{
+		Rows:  rows,
+		Total: int64(len(rows)),
 	}, nil
 }
 
@@ -123,13 +360,19 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 
 	if !has {
 		schema := entity.NewSchema().
-			WithField(entity.NewField().WithName(goodsVectorPKField).WithDataType(entity.FieldTypeVarChar).WithIsPrimaryKey(true).WithMaxLength(goodsVectorPKMaxLength)).
+			WithField(entity.NewField().WithName(goodsVectorPKField).WithDataType(entity.FieldTypeInt64).WithIsPrimaryKey(true).WithMaxLength(goodsVectorPKMaxLength)).
 			WithField(entity.NewField().WithName(goodsVectorDBIDField).WithDataType(entity.FieldTypeInt64)).
 			WithField(entity.NewField().WithName(goodsVectorNameField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorNameMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
 			WithField(entity.NewField().WithName(goodsVectorCodeField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorCodeMaxLength)).
 			WithField(entity.NewField().WithName(goodsVectorCategoryField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorCategoryMaxLength)).
 			WithField(entity.NewField().WithName(goodsVectorDescriptionField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorDescMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
 			WithField(entity.NewField().WithName(goodsVectorContentField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorContentMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
+			WithField(entity.NewField().WithName(goodsVectorSkuIdField).WithDataType(entity.FieldTypeInt64)).
+			WithField(entity.NewField().WithName(goodsVectorSkuNameField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorSkuNameMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
+			WithField(entity.NewField().WithName(goodsVectorSkuDescriptionField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorSkuNameMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
+			WithField(entity.NewField().WithName(goodsVectorRetailPriceField).WithDataType(entity.FieldTypeDouble)).
+			WithField(entity.NewField().WithName(goodsVectorWeightPriceField).WithDataType(entity.FieldTypeDouble)).
+			WithField(entity.NewField().WithName(goodsVectorQuantityPriceField).WithDataType(entity.FieldTypeInt64)).
 			WithField(entity.NewField().WithName(goodsVectorEmbeddingField).WithDataType(entity.FieldTypeFloatVector).WithDim(int64(dim)))
 
 		err = client.CreateCollection(ctx, milvusclient.NewCreateCollectionOption(collectionName, schema).WithIndexOptions(
@@ -149,8 +392,30 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 		return fmt.Errorf("Milvus collection %s 缺少 schema", collectionName)
 	}
 
+	requiredFields := map[string]bool{
+		goodsVectorPKField:             false,
+		goodsVectorDBIDField:           false,
+		goodsVectorNameField:           false,
+		goodsVectorCodeField:           false,
+		goodsVectorCategoryField:       false,
+		goodsVectorDescriptionField:    false,
+		goodsVectorContentField:        false,
+		goodsVectorSkuIdField:          false,
+		goodsVectorSkuNameField:        false,
+		goodsVectorSkuDescriptionField: false,
+		goodsVectorRetailPriceField:    false,
+		goodsVectorWeightPriceField:    false,
+		goodsVectorQuantityPriceField:  false,
+		goodsVectorEmbeddingField:      false,
+	}
 	for _, field := range collection.Schema.Fields {
-		if field == nil || field.Name != goodsVectorEmbeddingField {
+		if field == nil {
+			continue
+		}
+		if _, ok := requiredFields[field.Name]; ok {
+			requiredFields[field.Name] = true
+		}
+		if field.Name != goodsVectorEmbeddingField {
 			continue
 		}
 		existingDim, dimErr := field.GetDim()
@@ -160,10 +425,13 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 		if int(existingDim) != dim {
 			return fmt.Errorf("Milvus collection %s 向量维度不匹配，现有=%d，请求=%d", collectionName, existingDim, dim)
 		}
-		return nil
 	}
-
-	return fmt.Errorf("Milvus collection %s 缺少 %s 字段", collectionName, goodsVectorEmbeddingField)
+	for fieldName, exists := range requiredFields {
+		if !exists {
+			return fmt.Errorf("Milvus collection %s 缺少 %s 字段", collectionName, fieldName)
+		}
+	}
+	return nil
 }
 
 func buildRequestContext(c *gin.Context) context.Context {
@@ -173,6 +441,7 @@ func buildRequestContext(c *gin.Context) context.Context {
 	return context.Background()
 }
 
+// trimRunes 将字符串截断到指定最大字符数（按 Unicode 码点计算），超过则截断并返回
 func trimRunes(value string, max int) string {
 	value = strings.TrimSpace(value)
 	if max <= 0 {
@@ -183,4 +452,71 @@ func trimRunes(value string, max int) string {
 		return value
 	}
 	return string(runes[:max])
+}
+
+func getInt64ColumnValue(resultSet *milvusclient.ResultSet, fieldName string, idx int) (int64, error) {
+	if resultSet == nil {
+		return 0, fmt.Errorf("搜索结果为空")
+	}
+	col := resultSet.GetColumn(fieldName)
+	if col == nil {
+		return 0, fmt.Errorf("搜索结果缺少字段 %s", fieldName)
+	}
+	return col.GetAsInt64(idx)
+}
+
+func getStringColumnValue(resultSet *milvusclient.ResultSet, fieldName string, idx int) (string, error) {
+	if resultSet == nil {
+		return "", fmt.Errorf("搜索结果为空")
+	}
+	col := resultSet.GetColumn(fieldName)
+	if col == nil {
+		return "", fmt.Errorf("搜索结果缺少字段 %s", fieldName)
+	}
+	return col.GetAsString(idx)
+}
+
+func getFloat64ColumnValue(resultSet *milvusclient.ResultSet, fieldName string, idx int) (float64, error) {
+	if resultSet == nil {
+		return 0, fmt.Errorf("搜索结果为空")
+	}
+	col := resultSet.GetColumn(fieldName)
+	if col == nil {
+		return 0, fmt.Errorf("搜索结果缺少字段 %s", fieldName)
+	}
+	return col.GetAsDouble(idx)
+}
+
+func buildGoodsVectorRows(goods *shopmodels.Goods, items []*shopmodels.GoodsVectorUpsertItem) *goodsVectorRows {
+	goodsPK := strings.TrimSpace(goods.GoodsID)
+	if goodsPK == "" {
+		goodsPK = strconv.FormatInt(goods.ID, 10)
+	}
+
+	rows := &goodsVectorRows{}
+	appendRow := func(item *shopmodels.GoodsVectorUpsertItem) {
+		rows.pks = append(rows.pks, item.SkuID)
+		rows.goodsDBIDs = append(rows.goodsDBIDs, goods.ID)
+		rows.goodsNames = append(rows.goodsNames, trimRunes(goods.GoodsName, goodsVectorNameMaxLength))
+		rows.goodsCodes = append(rows.goodsCodes, trimRunes(goods.GoodsCode, goodsVectorCodeMaxLength))
+		rows.categorys = append(rows.categorys, trimRunes(goods.ShopCategoryName, goodsVectorCategoryMaxLength))
+		rows.descriptions = append(rows.descriptions, trimRunes(goods.Description, goodsVectorDescMaxLength))
+		rows.contents = append(rows.contents, item.Content)
+		rows.skuIDs = append(rows.skuIDs, item.SkuID)
+		rows.skuDescriptions = append(rows.skuDescriptions, item.SkuDescription)
+		rows.skuNames = append(rows.skuNames, trimRunes(item.SkuName, goodsVectorSkuNameMaxLength))
+		rows.retailPrices = append(rows.retailPrices, item.RetailPrice)
+		rows.weights = append(rows.weights, item.Weight)
+		rows.quantities = append(rows.quantities, item.Quantity)
+		rows.vectors = append(rows.vectors, item.Vector)
+	}
+
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+		appendRow(item)
+	}
+
+	return rows
 }

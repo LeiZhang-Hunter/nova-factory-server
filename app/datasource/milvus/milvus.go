@@ -9,7 +9,6 @@ import (
 
 	"github.com/milvus-io/milvus/client/v2/milvusclient"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 type Config struct {
@@ -27,16 +26,6 @@ var (
 	client   *milvusclient.Client
 	clientMu sync.RWMutex
 )
-
-func NewMilvus() (func(), error) {
-	// 只注册资源释放逻辑，不在应用启动时主动初始化 Milvus。
-	// 这样没有业务真正使用时，不会建立连接或阻塞启动流程。
-	return func() {
-		if err := closeClient(); err != nil {
-			zap.L().Warn("close milvus failed", zap.Error(err))
-		}
-	}, nil
-}
 
 func GetClient(ctx context.Context) (*milvusclient.Client, error) {
 	clientMu.RLock()

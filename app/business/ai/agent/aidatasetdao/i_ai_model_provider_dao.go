@@ -10,5 +10,6 @@ import (
 
 type IAiModelProviderDao interface {
 	ListWithLLM(c *gin.Context, req *aidatasetmodels.SysAiModelProviderListReq) (*aidatasetmodels.SysAiModelProviderListData, error)
+	ListEmbeddingWithLLM(c *gin.Context, req *aidatasetmodels.SysAiModelProviderListReq) (*aidatasetmodels.SysAiModelProviderListData, error)
 	UpsertFactoryProvider(tx *gorm.DB, item *aidatasetmodels.FactoryProviderUpsert, status int32, rank int32, now time.Time) (int64, error)
 }

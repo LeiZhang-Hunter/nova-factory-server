@@ -7,4 +7,5 @@ import (
 
 type IAiModelProviderService interface {
 	ListWithLLM(c *gin.Context, req *aidatasetmodels.SysAiModelProviderListReq) (*aidatasetmodels.SysAiModelProviderListData, error)
+	EmbeddingWithLLM(c *gin.Context) (*aidatasetmodels.SysUserLLM, error)
 }

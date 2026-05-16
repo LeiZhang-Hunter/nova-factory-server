@@ -109,3 +109,18 @@ func (i *IAiUserLLMDaoImpl) Remove(c *gin.Context, req *aidatasetmodels.GetSysUs
 	}
 	return db.Delete(&aidatasetmodels.SysUserLLM{}).Error
 }
+
+// GetByFidAndLlm 读取用户的llm配置信息
+func (u *IAiUserLLMDaoImpl) GetByFidAndLlm(factory string, llm string) (*aidatasetmodels.SysUserLLM, error) {
+	var data *aidatasetmodels.SysUserLLM
+	ret := u.db.Table(u.table).Where("llm_factory = ? AND llm_name = ?", factory, llm).
+		Where("user_id = 0").
+		First(&data)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+	return data, nil
+}
