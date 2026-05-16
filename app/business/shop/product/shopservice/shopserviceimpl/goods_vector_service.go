@@ -2,20 +2,35 @@ package shopserviceimpl
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/cloudwego/eino/components/embedding"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 
 	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/datasource/cache/cacheError"
+	"nova-factory-server/app/utils/baizeContext"
 	embeddingutil "nova-factory-server/app/utils/llm/embedding"
+	"nova-factory-server/app/utils/snowflake"
 )
 
 const goodsVectorContentMaxLength = 16384
 const (
 	defaultGoodsVectorSearchLimit = 10
 	maxGoodsVectorSearchLimit     = 50
+	defaultGoodsVectorBatchSize   = 20
+	maxGoodsVectorBatchSize       = 100
+	goodsVectorTaskTTL            = 24 * time.Hour
+	goodsVectorTaskStatusPending  = "pending"
+	goodsVectorTaskStatusRunning  = "running"
+	goodsVectorTaskStatusDone     = "completed"
+	goodsVectorTaskStatusFailed   = "failed"
 )
 
 type goodsVectorConfig struct {
@@ -47,7 +62,7 @@ func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.Ge
 		return nil, err
 	}
 
-	cfg, err := s.loadGoodsVectorConfig(c, req)
+	cfg, err := s.loadGoodsVectorConfig(req)
 	if err != nil {
 		return nil, err
 	}
@@ -58,47 +73,7 @@ func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.Ge
 		return nil, fmt.Errorf("初始化向量模型失败: %w", err)
 	}
 
-	payloads := buildGoodsEmbeddingPayloads(goods)
-	if len(payloads) == 0 {
-		return nil, errors.New("商品内容为空，无法生成向量")
-	}
-
-	texts := make([]string, 0, len(payloads))
-	for _, payload := range payloads {
-		texts = append(texts, payload.content)
-	}
-
-	vectors, err := embedder.EmbedStrings(requestCtx, texts)
-	if err != nil {
-		return nil, fmt.Errorf("生成商品向量失败: %w", err)
-	}
-	if len(vectors) != len(payloads) {
-		return nil, fmt.Errorf("向量模型返回结果数量不匹配，expected=%d actual=%d", len(payloads), len(vectors))
-	}
-	if len(vectors) == 0 || len(vectors[0]) == 0 {
-		return nil, errors.New("向量模型未返回有效结果")
-	}
-
-	items := make([]*shopmodels.GoodsVectorUpsertItem, 0, len(payloads))
-	for idx, payload := range payloads {
-		if len(vectors[idx]) == 0 {
-			return nil, fmt.Errorf("第%d条SKU向量为空", idx+1)
-		}
-		item := &shopmodels.GoodsVectorUpsertItem{
-			Content: payload.content,
-			Vector:  float64ToFloat32(vectors[idx]),
-		}
-		if payload.sku != nil {
-			item.SkuID = int64(payload.sku.ID)
-			item.SkuName = payload.sku.SkuName
-			item.SkuDescription = payload.sku.Description
-			item.RetailPrice = payload.sku.RetailPrice
-			item.Weight = payload.sku.Weight
-			item.Quantity = payload.sku.Quantity
-		}
-		items = append(items, item)
-	}
-	result, err := s.vectorDao.Upsert(c, goods, items)
+	result, err := s.generateGoodsVectorWithEmbedder(c, requestCtx, embedder, goods)
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +81,56 @@ func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.Ge
 		return nil, errors.New("未生成有效的商品向量数据")
 	}
 	return result, nil
+}
+
+func (s *ShopGoodsServiceImpl) GenerateAllOnSaleVectors(c *gin.Context,
+	req *shopmodels.GenAllVectorReq) (*shopmodels.GoodsVectorTaskData, error) {
+	if req == nil {
+		return nil, errors.New("全量生成参数不能为空")
+	}
+	if _, err := loadEmbeddingProviderConfig(req.Embedding); err != nil {
+		return nil, err
+	}
+
+	taskID := strconv.FormatInt(snowflake.GenID(), 10)
+	progress := &shopmodels.GoodsVectorTaskProgress{
+		TaskID:     taskID,
+		Status:     goodsVectorTaskStatusPending,
+		Message:    "任务已创建，等待执行",
+		OperatorID: baizeContext.GetUserIdSafe(c),
+		Operator:   baizeContext.GetUserName(c),
+		StartedAt:  time.Now().Format(time.DateTime),
+		UpdatedAt:  time.Now().Format(time.DateTime),
+	}
+	if err := s.saveGoodsVectorTaskProgress(taskID, progress); err != nil {
+		return nil, err
+	}
+
+	copiedReq := *req
+	backgroundCtx := cloneGinContext(c)
+	go s.runGenerateAllOnSaleVectors(backgroundCtx, taskID, &copiedReq, progress.OperatorID, progress.Operator)
+
+	return &shopmodels.GoodsVectorTaskData{
+		TaskID:      taskID,
+		ProgressKey: goodsVectorTaskCacheKey(taskID),
+		Status:      goodsVectorTaskStatusPending,
+	}, nil
+}
+
+func (s *ShopGoodsServiceImpl) GetGenerateAllOnSaleVectorsProgress(c *gin.Context,
+	taskID string) (*shopmodels.GoodsVectorTaskProgress, error) {
+	taskID = strings.TrimSpace(taskID)
+	if taskID == "" {
+		return nil, errors.New("任务ID不能为空")
+	}
+	progress, err := s.loadGoodsVectorTaskProgress(taskID)
+	if err != nil {
+		if errors.Is(err, cacheError.Nil) {
+			return nil, errors.New("任务不存在或已过期")
+		}
+		return nil, err
+	}
+	return progress, nil
 }
 
 func (s *ShopGoodsServiceImpl) SearchVector(c *gin.Context, req *shopmodels.GoodsVectorSearchReq) (*shopmodels.GoodsVectorSearchData, error) {
@@ -192,8 +217,7 @@ func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queries []strin
 	return data.Rows, nil
 }
 
-func (s *ShopGoodsServiceImpl) loadGoodsVectorConfig(c *gin.Context,
-	req *shopmodels.GenVectorReq) (*goodsVectorConfig, error) {
+func (s *ShopGoodsServiceImpl) loadGoodsVectorConfig(req *shopmodels.GenVectorReq) (*goodsVectorConfig, error) {
 	cfg := &goodsVectorConfig{}
 	embeddingCfg, err := loadEmbeddingProviderConfig(req.Embedding)
 	if err != nil {
@@ -201,6 +225,227 @@ func (s *ShopGoodsServiceImpl) loadGoodsVectorConfig(c *gin.Context,
 	}
 	cfg.Embedding = *embeddingCfg
 	return cfg, nil
+}
+
+func (s *ShopGoodsServiceImpl) generateGoodsVectorWithEmbedder(c *gin.Context, requestCtx context.Context,
+	embedder embedding.Embedder, goods *shopmodels.Goods) (*shopmodels.GoodsVectorResult, error) {
+	payloads := buildGoodsEmbeddingPayloads(goods)
+	if len(payloads) == 0 {
+		return nil, errors.New("商品内容为空，无法生成向量")
+	}
+
+	texts := make([]string, 0, len(payloads))
+	for _, payload := range payloads {
+		texts = append(texts, payload.content)
+	}
+
+	vectors, err := embedder.EmbedStrings(requestCtx, texts)
+	if err != nil {
+		return nil, fmt.Errorf("生成商品向量失败: %w", err)
+	}
+	if len(vectors) != len(payloads) {
+		return nil, fmt.Errorf("向量模型返回结果数量不匹配，expected=%d actual=%d", len(payloads), len(vectors))
+	}
+	if len(vectors) == 0 || len(vectors[0]) == 0 {
+		return nil, errors.New("向量模型未返回有效结果")
+	}
+
+	items := make([]*shopmodels.GoodsVectorUpsertItem, 0, len(payloads))
+	for idx, payload := range payloads {
+		if len(vectors[idx]) == 0 {
+			return nil, fmt.Errorf("第%d条SKU向量为空", idx+1)
+		}
+		item := &shopmodels.GoodsVectorUpsertItem{
+			Content: payload.content,
+			Vector:  float64ToFloat32(vectors[idx]),
+		}
+		if payload.sku != nil {
+			item.SkuID = int64(payload.sku.ID)
+			item.SkuName = payload.sku.SkuName
+			item.SkuDescription = payload.sku.Description
+			item.RetailPrice = payload.sku.RetailPrice
+			item.Weight = payload.sku.Weight
+			item.Quantity = payload.sku.Quantity
+		}
+		items = append(items, item)
+	}
+	result, err := s.vectorDao.Upsert(c, goods, items)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, errors.New("未生成有效的商品向量数据")
+	}
+	return result, nil
+}
+
+func (s *ShopGoodsServiceImpl) runGenerateAllOnSaleVectors(c *gin.Context, taskID string,
+	req *shopmodels.GenAllVectorReq, operatorID int64, operator string) {
+	progress := &shopmodels.GoodsVectorTaskProgress{
+		TaskID:     taskID,
+		Status:     goodsVectorTaskStatusRunning,
+		Message:    "正在初始化向量模型",
+		OperatorID: operatorID,
+		Operator:   operator,
+		StartedAt:  time.Now().Format(time.DateTime),
+		UpdatedAt:  time.Now().Format(time.DateTime),
+	}
+	if err := s.saveGoodsVectorTaskProgress(taskID, progress); err != nil {
+		zap.L().Error("save goods vector task progress fail", zap.String("taskId", taskID), zap.Error(err))
+		return
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			progress.Status = goodsVectorTaskStatusFailed
+			progress.Message = fmt.Sprintf("任务执行异常: %v", r)
+			progress.UpdatedAt = time.Now().Format(time.DateTime)
+			progress.FinishedAt = progress.UpdatedAt
+			if err := s.saveGoodsVectorTaskProgress(taskID, progress); err != nil {
+				zap.L().Error("save goods vector task progress after panic fail", zap.String("taskId", taskID), zap.Error(err))
+			}
+		}
+	}()
+
+	cfg, err := loadEmbeddingProviderConfig(req.Embedding)
+	if err != nil {
+		s.failGoodsVectorTask(taskID, progress, err)
+		return
+	}
+	requestCtx := buildRequestContext(c)
+	embedder, err := embeddingutil.NewEmbedder(requestCtx, cfg)
+	if err != nil {
+		s.failGoodsVectorTask(taskID, progress, fmt.Errorf("初始化向量模型失败: %w", err))
+		return
+	}
+
+	page := int64(1)
+	size := int64(normalizeGoodsVectorBatchSize(req.BatchSize))
+	isOnSale := true
+
+	for {
+		listReq := &shopmodels.GoodsQuery{
+			IsOnSale: &isOnSale,
+			Page:     page,
+			Size:     size,
+		}
+		data, listErr := s.List(c, listReq)
+		if listErr != nil {
+			s.failGoodsVectorTask(taskID, progress, fmt.Errorf("查询上架商品失败: %w", listErr))
+			return
+		}
+		if data == nil {
+			data = &shopmodels.GoodsListData{}
+		}
+		if progress.Total == 0 {
+			progress.Total = data.Total
+			if data.Total == 0 {
+				progress.Status = goodsVectorTaskStatusDone
+				progress.Progress = 100
+				progress.Message = "没有可生成向量的上架商品"
+				progress.UpdatedAt = time.Now().Format(time.DateTime)
+				progress.FinishedAt = progress.UpdatedAt
+				_ = s.saveGoodsVectorTaskProgress(taskID, progress)
+				return
+			}
+		}
+
+		for _, goods := range data.Rows {
+			if goods == nil {
+				continue
+			}
+			progress.CurrentID = goods.ID
+			progress.CurrentName = goods.GoodsName
+			progress.Message = "正在生成商品向量"
+			progress.UpdatedAt = time.Now().Format(time.DateTime)
+			progress.Progress = calcGoodsVectorTaskProgress(progress.Processed, progress.Total)
+			_ = s.saveGoodsVectorTaskProgress(taskID, progress)
+
+			_, generateErr := s.generateGoodsVectorWithEmbedder(c, requestCtx, embedder, goods)
+			progress.Processed++
+			if generateErr != nil {
+				progress.Failed++
+				progress.Message = fmt.Sprintf("商品[%d-%s]生成失败: %v", goods.ID, goods.GoodsName, generateErr)
+				zap.L().Error("generate goods vector in batch fail",
+					zap.String("taskId", taskID),
+					zap.Int64("goodsId", goods.ID),
+					zap.String("goodsName", goods.GoodsName),
+					zap.Error(generateErr))
+			} else {
+				progress.Success++
+				progress.Message = fmt.Sprintf("商品[%d-%s]生成成功", goods.ID, goods.GoodsName)
+			}
+			progress.Progress = calcGoodsVectorTaskProgress(progress.Processed, progress.Total)
+			progress.UpdatedAt = time.Now().Format(time.DateTime)
+			_ = s.saveGoodsVectorTaskProgress(taskID, progress)
+		}
+
+		if len(data.Rows) == 0 || progress.Processed >= progress.Total {
+			break
+		}
+		page++
+	}
+
+	progress.Status = goodsVectorTaskStatusDone
+	progress.Progress = 100
+	progress.Message = fmt.Sprintf("任务完成，成功%d，失败%d", progress.Success, progress.Failed)
+	progress.UpdatedAt = time.Now().Format(time.DateTime)
+	progress.FinishedAt = progress.UpdatedAt
+	if err = s.saveGoodsVectorTaskProgress(taskID, progress); err != nil {
+		zap.L().Error("save completed goods vector task progress fail", zap.String("taskId", taskID), zap.Error(err))
+	}
+}
+
+func (s *ShopGoodsServiceImpl) failGoodsVectorTask(taskID string, progress *shopmodels.GoodsVectorTaskProgress, err error) {
+	if progress == nil {
+		return
+	}
+	progress.Status = goodsVectorTaskStatusFailed
+	progress.Message = err.Error()
+	progress.UpdatedAt = time.Now().Format(time.DateTime)
+	progress.FinishedAt = progress.UpdatedAt
+	if saveErr := s.saveGoodsVectorTaskProgress(taskID, progress); saveErr != nil {
+		zap.L().Error("save failed goods vector task progress fail",
+			zap.String("taskId", taskID),
+			zap.Error(saveErr))
+	}
+}
+
+func (s *ShopGoodsServiceImpl) saveGoodsVectorTaskProgress(taskID string,
+	progress *shopmodels.GoodsVectorTaskProgress) error {
+	if s.cache == nil {
+		return errors.New("缓存未初始化")
+	}
+	if progress == nil {
+		return errors.New("任务进度不能为空")
+	}
+	if progress.TaskID == "" {
+		progress.TaskID = taskID
+	}
+	if progress.UpdatedAt == "" {
+		progress.UpdatedAt = time.Now().Format(time.DateTime)
+	}
+	body, err := json.Marshal(progress)
+	if err != nil {
+		return err
+	}
+	s.cache.Set(context.Background(), goodsVectorTaskCacheKey(taskID), string(body), goodsVectorTaskTTL)
+	return nil
+}
+
+func (s *ShopGoodsServiceImpl) loadGoodsVectorTaskProgress(taskID string) (*shopmodels.GoodsVectorTaskProgress, error) {
+	if s.cache == nil {
+		return nil, errors.New("缓存未初始化")
+	}
+	val, err := s.cache.Get(context.Background(), goodsVectorTaskCacheKey(taskID))
+	if err != nil {
+		return nil, err
+	}
+	progress := &shopmodels.GoodsVectorTaskProgress{}
+	if err = json.Unmarshal([]byte(val), progress); err != nil {
+		return nil, err
+	}
+	return progress, nil
 }
 
 func loadEmbeddingProviderConfig(req *shopmodels.EmbeddingConfig) (*embeddingutil.ProviderConfig, error) {
@@ -266,6 +511,44 @@ func normalizeGoodsVectorSearchQueries(queries []string) ([]string, error) {
 		return nil, errors.New("搜索内容不能为空")
 	}
 	return result, nil
+}
+
+func cloneGinContext(c *gin.Context) *gin.Context {
+	if c == nil {
+		return nil
+	}
+	clone := c.Copy()
+	if c.Request != nil {
+		clone.Request = c.Request.Clone(context.Background())
+	}
+	return clone
+}
+
+func goodsVectorTaskCacheKey(taskID string) string {
+	return "shop:goods:vector:task:" + strings.TrimSpace(taskID)
+}
+
+func calcGoodsVectorTaskProgress(processed, total int64) int {
+	if total <= 0 {
+		return 0
+	}
+	if processed <= 0 {
+		return 0
+	}
+	if processed >= total {
+		return 100
+	}
+	return int(processed * 100 / total)
+}
+
+func normalizeGoodsVectorBatchSize(batchSize int) int {
+	if batchSize <= 0 {
+		return defaultGoodsVectorBatchSize
+	}
+	if batchSize > maxGoodsVectorBatchSize {
+		return maxGoodsVectorBatchSize
+	}
+	return batchSize
 }
 
 func buildGoodsEmbeddingPayloads(goods *shopmodels.Goods) []goodsEmbeddingPayload {

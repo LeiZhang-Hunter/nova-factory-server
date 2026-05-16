@@ -35,6 +35,10 @@ func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/vector/generate/:id", middlewares.HasPermission("shop:goods:vector:generate"), s.Generate)
 	group.POST("/vector/search", middlewares.HasPermission("shop:goods:vector:search"), s.Search)
 	group.POST("/vector/search/batch", middlewares.HasPermission("shop:goods:vector:batch_search"), s.BatchSearch)
+
+	group.POST("/vector/generate/all", middlewares.HasPermission("shop:goods:vector:generate:all"), s.GenerateAllOnSale)
+	group.GET("/vector/generate/all/progress/:taskId",
+		middlewares.HasPermission("shop:goods:vector:generate:all:progress"), s.GetGenerateAllProgress)
 }
 
 // PublicRoutes 导入接口注册
@@ -215,6 +219,59 @@ func (s *Goods) Generate(c *gin.Context) {
 	data, err := s.service.GenerateVector(c, req)
 	if err != nil {
 		zap.L().Error("generate goods vector fail", zap.Int64("id", req.ID), zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// GenerateAllOnSale 全量生成上架商品向量
+// @Summary 全量生成上架商品向量
+// @Description 异步将全部上架商品写入向量数据库，并将任务进度记录到 Redis
+// @Tags 商城/商品管理
+// @Param object body shopmodels.GenAllVectorReq true "全量生成商品向量参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "任务已启动"
+// @Router /shop/goods/vector/generate/all [post]
+func (s *Goods) GenerateAllOnSale(c *gin.Context) {
+	req := new(shopmodels.GenAllVectorReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil {
+		zap.L().Error("invalid goods full vector embedding")
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.GenerateAllOnSaleVectors(c, req)
+	if err != nil {
+		zap.L().Error("generate all on-sale goods vector fail", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// GetGenerateAllProgress 查询全量生成上架商品向量任务进度
+// @Summary 查询全量生成上架商品向量任务进度
+// @Description 根据任务ID读取 Redis 中的全量生成任务进度
+// @Tags 商城/商品管理
+// @Param taskId path string true "任务ID"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "查询成功"
+// @Router /shop/goods/vector/generate/all/progress/{taskId} [get]
+func (s *Goods) GetGenerateAllProgress(c *gin.Context) {
+	taskID := c.Param("taskId")
+	if taskID == "" {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.GetGenerateAllOnSaleVectorsProgress(c, taskID)
+	if err != nil {
+		zap.L().Error("get goods full vector progress fail", zap.String("taskId", taskID), zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}

@@ -16,6 +16,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
+	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/fileUtils"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,7 @@ type ShopGoodsServiceImpl struct {
 	vectorDao   shopdao.IShopGoodsVectorDao
 	skuDao      shopdao.IShopSkuDao
 	categoryDao shopdao.IShopCategoryDao
+	cache       cache.Cache
 }
 
 const importBatchSize = 100
@@ -33,12 +35,13 @@ const goodsExportBatchSize int64 = 500
 
 // NewShopGoodsService 创建商品服务
 func NewShopGoodsService(dao shopdao.IShopGoodsDao, vectorDao shopdao.IShopGoodsVectorDao,
-	skuDao shopdao.IShopSkuDao, categoryDao shopdao.IShopCategoryDao) shopservice.IShopGoodsService {
+	skuDao shopdao.IShopSkuDao, categoryDao shopdao.IShopCategoryDao, cache cache.Cache) shopservice.IShopGoodsService {
 	return &ShopGoodsServiceImpl{
 		dao:         dao,
 		vectorDao:   vectorDao,
 		skuDao:      skuDao,
 		categoryDao: categoryDao,
+		cache:       cache,
 	}
 }
 
