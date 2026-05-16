@@ -41,6 +41,17 @@ description: "根据 Service 接口定义自动生成对应的 ServiceImpl、DAO
     - 实现基础的 CRUD 逻辑，使用 `baizeContext` 获取用户和部门信息。
     - DAO 实现类型、构造函数、CRUD 方法都要带注释。
 
+### 4. 代码风格规范
+
+#### GO 规范
+- 使用 Restful 接口设计
+- 代码分层清晰，注释简洁
+- 4空格缩进，禁止制表符
+
+#### 整体架构
+- **设计模式**: 单例、工厂、依赖注入等
+- **缓存**: Redis (推荐)
+
 ## 示例模板
 
 ### ServiceImpl 模板
