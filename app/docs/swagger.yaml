@@ -3012,6 +3012,31 @@ definitions:
         description: 有效期结束
         type: string
     type: object
+  models.BatchDiscountRuleCreate:
+    properties:
+      discountRate:
+        description: 折扣率
+        type: number
+      targetIds:
+        description: 商品ID或分类ID列表
+        items:
+          type: string
+        type: array
+      targetType:
+        description: goods=商品, category=分类
+        type: string
+      userIds:
+        description: 用户ID列表
+        items:
+          type: integer
+        type: array
+      validFrom:
+        description: 有效期开始
+        type: string
+      validTo:
+        description: 有效期结束
+        type: string
+    type: object
   models.CartSetDataReq:
     properties:
       goodsId:
@@ -3583,6 +3608,32 @@ definitions:
         type: string
       name:
         description: 智能预警名称
+        type: string
+    type: object
+  models.UserDiscountRuleUpsert:
+    properties:
+      discountRate:
+        description: 折扣率
+        type: integer
+      id:
+        description: 主键ID
+        example: "0"
+        type: string
+      targetId:
+        description: 商品ID或分类ID
+        type: string
+      targetType:
+        description: goods=商品, category=分类
+        type: string
+      userId:
+        description: 用户ID
+        example: "0"
+        type: string
+      validFrom:
+        description: '有效期开始 (格式: 2006-01-02 15:04:05)'
+        type: string
+      validTo:
+        description: '有效期结束 (格式: 2006-01-02 15:04:05)'
         type: string
     type: object
   models.UserDiscountRuleUpsert:

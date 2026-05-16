@@ -17816,6 +17816,78 @@
                 }
             }
         },
+        "/shop/goods/vector/search": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据检索文本生成查询向量并近似搜索商品SKU数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "近似搜索商品向量",
+                "parameters": [
+                    {
+                        "description": "商品向量搜索参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsVectorSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/vector/search/batch": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据多条检索文本批量生成查询向量并近似搜索商品SKU数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "批量近似搜索商品向量",
+                "parameters": [
+                    {
+                        "description": "商品批量向量搜索参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsVectorBatchSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/goods/{ids}": {
             "delete": {
                 "security": [
@@ -27988,6 +28060,41 @@
                 }
             }
         },
+        "models.BatchDiscountRuleCreate": {
+            "type": "object",
+            "properties": {
+                "discountRate": {
+                    "description": "折扣率",
+                    "type": "number"
+                },
+                "targetIds": {
+                    "description": "商品ID或分类ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "targetType": {
+                    "description": "goods=商品, category=分类",
+                    "type": "string"
+                },
+                "userIds": {
+                    "description": "用户ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "validFrom": {
+                    "description": "有效期开始",
+                    "type": "string"
+                },
+                "validTo": {
+                    "description": "有效期结束",
+                    "type": "string"
+                }
+            }
+        },
         "models.CartSetDataReq": {
             "type": "object",
             "required": [
@@ -28785,6 +28892,41 @@
                 },
                 "name": {
                     "description": "智能预警名称",
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserDiscountRuleUpsert": {
+            "type": "object",
+            "properties": {
+                "discountRate": {
+                    "description": "折扣率",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "targetId": {
+                    "description": "商品ID或分类ID",
+                    "type": "string"
+                },
+                "targetType": {
+                    "description": "goods=商品, category=分类",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "validFrom": {
+                    "description": "有效期开始 (格式: 2006-01-02 15:04:05)",
+                    "type": "string"
+                },
+                "validTo": {
+                    "description": "有效期结束 (格式: 2006-01-02 15:04:05)",
                     "type": "string"
                 }
             }
