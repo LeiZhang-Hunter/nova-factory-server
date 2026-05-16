@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Customer ERP 客户控制器
+// Customer 客户控制器
 type Customer struct {
 	service masterservice.ICustomerService
 }
 
-// NewCustomer 创建 ERP 客户控制器。
+// NewCustomer 创建客户控制器。
 func NewCustomer(service masterservice.ICustomerService) *Customer {
 	return &Customer{service: service}
 }
 
-// PrivateRoutes 注册 ERP 客户私有路由。
+// PrivateRoutes 注册客户私有路由。
 func (o *Customer) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/master/customer")
 	group.GET("/list", middlewares.HasPermission("erp:master:customer:list"), o.List)
@@ -28,9 +28,9 @@ func (o *Customer) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:customer:remove"), o.Delete)
 }
 
-// List 查询 ERP 客户列表。
-// @Summary 查询 ERP 客户列表
-// @Description 按条件分页查询 ERP 客户列表
+// List 查询客户列表。
+// @Summary 查询客户列表
+// @Description 按条件分页查询客户列表
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param object query mastermodels.CustomerQuery true "ERP 客户查询参数"
@@ -51,9 +51,9 @@ func (o *Customer) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 客户详情。
-// @Summary 查询 ERP 客户详情
-// @Description 根据ID查询 ERP 客户详情
+// GetByID 查询客户详情。
+// @Summary 查询客户详情
+// @Description 根据ID查询客户详情
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *Customer) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 客户。
-// @Summary 新增或修改 ERP 客户
-// @Description 新增或修改 ERP 客户
+// Set 新增或修改客户。
+// @Summary 新增或修改客户
+// @Description 新增或修改客户
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *Customer) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 客户。
-// @Summary 删除 ERP 客户
-// @Description 根据ID删除 ERP 客户，多个ID用逗号分隔
+// Delete 删除客户。
+// @Summary 删除客户
+// @Description 根据ID删除客户，多个ID用逗号分隔
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"
