@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Warehouse ERP 仓库控制器
+// Warehouse 仓库控制器
 type Warehouse struct {
 	service masterservice.IWarehouseService
 }
 
-// NewWarehouse 创建 ERP 仓库控制器。
+// NewWarehouse 创建仓库控制器。
 func NewWarehouse(service masterservice.IWarehouseService) *Warehouse {
 	return &Warehouse{service: service}
 }
 
-// PrivateRoutes 注册 ERP 仓库私有路由。
+// PrivateRoutes 注册仓库私有路由。
 func (o *Warehouse) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/master/warehouse")
 	group.GET("/list", middlewares.HasPermission("erp:master:warehouse:list"), o.List)
@@ -28,9 +28,9 @@ func (o *Warehouse) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:warehouse:remove"), o.Delete)
 }
 
-// List 查询 ERP 仓库列表。
-// @Summary 查询 ERP 仓库列表
-// @Description 按条件分页查询 ERP 仓库列表
+// List 查询仓库列表。
+// @Summary 查询仓库列表
+// @Description 按条件分页查询仓库列表
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param object query mastermodels.WarehouseQuery true "ERP 仓库查询参数"
@@ -51,9 +51,9 @@ func (o *Warehouse) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 仓库详情。
-// @Summary 查询 ERP 仓库详情
-// @Description 根据ID查询 ERP 仓库详情
+// GetByID 查询仓库详情。
+// @Summary 查询仓库详情
+// @Description 根据ID查询仓库详情
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *Warehouse) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 仓库。
-// @Summary 新增或修改 ERP 仓库
-// @Description 新增或修改 ERP 仓库
+// Set 新增或修改仓库。
+// @Summary 新增或修改仓库
+// @Description 新增或修改仓库
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *Warehouse) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 仓库。
-// @Summary 删除 ERP 仓库
-// @Description 根据ID删除 ERP 仓库，多个ID用逗号分隔
+// Delete 删除仓库。
+// @Summary 删除仓库
+// @Description 根据ID删除仓库，多个ID用逗号分隔
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

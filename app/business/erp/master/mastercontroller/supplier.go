@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Supplier ERP 供应商控制器
+// Supplier 供应商控制器
 type Supplier struct {
 	service masterservice.ISupplierService
 }
 
-// NewSupplier 创建 ERP 供应商控制器。
+// NewSupplier 创建供应商控制器。
 func NewSupplier(service masterservice.ISupplierService) *Supplier {
 	return &Supplier{service: service}
 }
 
-// PrivateRoutes 注册 ERP 供应商私有路由。
+// PrivateRoutes 注册供应商私有路由。
 func (o *Supplier) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/master/supplier")
 	group.GET("/list", middlewares.HasPermission("erp:master:supplier:list"), o.List)
@@ -28,9 +28,9 @@ func (o *Supplier) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:supplier:remove"), o.Delete)
 }
 
-// List 查询 ERP 供应商列表。
-// @Summary 查询 ERP 供应商列表
-// @Description 按条件分页查询 ERP 供应商列表
+// List 查询供应商列表。
+// @Summary 查询供应商列表
+// @Description 按条件分页查询供应商列表
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param object query mastermodels.SupplierQuery true "ERP 供应商查询参数"
@@ -51,9 +51,9 @@ func (o *Supplier) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 供应商详情。
-// @Summary 查询 ERP 供应商详情
-// @Description 根据ID查询 ERP 供应商详情
+// GetByID 查询供应商详情。
+// @Summary 查询供应商详情
+// @Description 根据ID查询供应商详情
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *Supplier) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 供应商。
-// @Summary 新增或修改 ERP 供应商
-// @Description 新增或修改 ERP 供应商
+// Set 新增或修改供应商。
+// @Summary 新增或修改供应商
+// @Description 新增或修改供应商
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *Supplier) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 供应商。
-// @Summary 删除 ERP 供应商
-// @Description 根据ID删除 ERP 供应商，多个ID用逗号分隔
+// Delete 删除供应商。
+// @Summary 删除供应商
+// @Description 根据ID删除供应商，多个ID用逗号分隔
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"

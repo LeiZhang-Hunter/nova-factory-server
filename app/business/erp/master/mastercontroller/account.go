@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Account ERP 结算账户控制器
+// Account 结算账户控制器
 type Account struct {
 	service masterservice.IAccountService
 }
 
-// NewAccount 创建 ERP 结算账户控制器。
+// NewAccount 创建结算账户控制器。
 func NewAccount(service masterservice.IAccountService) *Account {
 	return &Account{service: service}
 }
 
-// PrivateRoutes 注册 ERP 结算账户私有路由。
+// PrivateRoutes 注册结算账户私有路由。
 func (o *Account) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/erp/master/account")
 	group.GET("/list", middlewares.HasPermission("erp:master:account:list"), o.List)
@@ -28,9 +28,9 @@ func (o *Account) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:account:remove"), o.Delete)
 }
 
-// List 查询 ERP 结算账户列表。
-// @Summary 查询 ERP 结算账户列表
-// @Description 按条件分页查询 ERP 结算账户列表
+// List 查询结算账户列表。
+// @Summary 查询结算账户列表
+// @Description 按条件分页查询结算账户列表
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param object query mastermodels.AccountQuery true "ERP 结算账户查询参数"
@@ -51,9 +51,9 @@ func (o *Account) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP 结算账户详情。
-// @Summary 查询 ERP 结算账户详情
-// @Description 根据ID查询 ERP 结算账户详情
+// GetByID 查询结算账户详情。
+// @Summary 查询结算账户详情
+// @Description 根据ID查询结算账户详情
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param id path int true "主键ID"
@@ -74,9 +74,9 @@ func (o *Account) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP 结算账户。
-// @Summary 新增或修改 ERP 结算账户
-// @Description 新增或修改 ERP 结算账户
+// Set 新增或修改结算账户。
+// @Summary 新增或修改结算账户
+// @Description 新增或修改结算账户
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Accept application/json
@@ -106,9 +106,9 @@ func (o *Account) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP 结算账户。
-// @Summary 删除 ERP 结算账户
-// @Description 根据ID删除 ERP 结算账户，多个ID用逗号分隔
+// Delete 删除结算账户。
+// @Summary 删除结算账户
+// @Description 根据ID删除结算账户，多个ID用逗号分隔
 // @Tags ERP/基础资料
 // @Security BearerAuth
 // @Param ids path string true "主键ID，多个用逗号分隔"
