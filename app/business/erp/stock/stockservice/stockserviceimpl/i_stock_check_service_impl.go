@@ -2,9 +2,9 @@ package stockserviceimpl
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/stock/stockdao"
 	"nova-factory-server/app/business/erp/stock/stockmodels"
 	"nova-factory-server/app/business/erp/stock/stockservice"
@@ -15,14 +15,14 @@ import (
 // StockCheckServiceImpl 提供业务实现。
 type StockCheckServiceImpl struct {
 	dao          stockdao.IStockCheckDao
-	uniqueFields []erpbiz.UniqueField
+	uniqueFields []stockCheckUniqueField
 }
 
 // NewStockCheckService 创建服务。
 func NewStockCheckService(dao stockdao.IStockCheckDao) stockservice.IStockCheckService {
 	return &StockCheckServiceImpl{
 		dao:          dao,
-		uniqueFields: []erpbiz.UniqueField{{Field: "No", Column: "no", Label: "盘点单号"}},
+		uniqueFields: []stockCheckUniqueField{{Field: "No", Column: "no", Label: "盘点单号"}},
 	}
 }
 
@@ -30,8 +30,8 @@ func (s *StockCheckServiceImpl) create(c *gin.Context, req *stockmodels.StockChe
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.TrimStringFields(req)
-	if err := erpbiz.ValidateRequiredFields(req); err != nil {
+	stockCheckTrimStringFields(req)
+	if err := stockCheckValidateRequiredFields(req); err != nil {
 		return nil, err
 	}
 	if err := s.validateUniqueFields(c, req, 0); err != nil {
@@ -44,12 +44,12 @@ func (s *StockCheckServiceImpl) update(c *gin.Context, req *stockmodels.StockChe
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
-	id := erpbiz.GetIntField(req, "ID")
+	id := stockCheckGetIntField(req, "ID")
 	if id <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	erpbiz.TrimStringFields(req)
-	if err := erpbiz.ValidateRequiredFields(req); err != nil {
+	stockCheckTrimStringFields(req)
+	if err := stockCheckValidateRequiredFields(req); err != nil {
 		return nil, err
 	}
 	if err := s.validateUniqueFields(c, req, id); err != nil {
@@ -80,9 +80,9 @@ func (s *StockCheckServiceImpl) GetByID(c *gin.Context, id int64) (*stockmodels.
 	return s.dao.GetByID(c, id)
 }
 
-func (s *StockCheckServiceImpl) ListPage(c *gin.Context, req *stockmodels.StockCheckQuery) (*erpbiz.PageResult[stockmodels.StockCheck], error) {
+func (s *StockCheckServiceImpl) ListPage(c *gin.Context, req *stockmodels.StockCheckQuery) (*stockmodels.StockCheckListData, error) {
 	if req != nil {
-		erpbiz.TrimStringFields(req)
+		stockCheckTrimStringFields(req)
 	}
 	return s.dao.ListPage(c, req)
 }
@@ -92,11 +92,11 @@ func (s *StockCheckServiceImpl) validateUniqueFields(c *gin.Context, req *stockm
 		return nil
 	}
 	for _, field := range s.uniqueFields {
-		value, ok := erpbiz.GetFieldValue(req, field.Field)
+		value, ok := stockCheckGetFieldValue(req, field.Field)
 		if !ok {
 			continue
 		}
-		normalized, empty := erpbiz.NormalizeValue(value)
+		normalized, empty := stockCheckNormalizeValue(value)
 		if empty {
 			continue
 		}
@@ -107,7 +107,7 @@ func (s *StockCheckServiceImpl) validateUniqueFields(c *gin.Context, req *stockm
 		if exists == nil {
 			continue
 		}
-		if erpbiz.GetIntField(exists, "ID") != currentID {
+		if stockCheckGetIntField(exists, "ID") != currentID {
 			label := strings.TrimSpace(field.Label)
 			if label == "" {
 				label = field.Column
@@ -124,4 +124,155 @@ func (s *StockCheckServiceImpl) List(c *gin.Context, req *stockmodels.StockCheck
 		return nil, err
 	}
 	return &stockmodels.StockCheckListData{Rows: result.Rows, Total: result.Total}, nil
+}
+
+type stockCheckUniqueField struct {
+	Field  string
+	Column string
+	Label  string
+}
+
+func stockCheckTrimStringFields(target any) {
+	if target == nil {
+		return
+	}
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return
+	}
+	stockCheckTrimStruct(value)
+}
+
+func stockCheckValidateRequiredFields(target any) error {
+	if target == nil {
+		return nil
+	}
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return nil
+	}
+	valueType := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		structField := valueType.Field(i)
+		if structField.PkgPath != "" || structField.Anonymous {
+			continue
+		}
+		if !strings.Contains(structField.Tag.Get("binding"), "required") {
+			continue
+		}
+		label := structField.Tag.Get("label")
+		if label == "" {
+			label = structField.Name
+		}
+		switch field.Kind() {
+		case reflect.String:
+			if strings.TrimSpace(field.String()) == "" {
+				return errors.New(label + "不能为空")
+			}
+		case reflect.Pointer:
+			if field.IsNil() {
+				return errors.New(label + "不能为空")
+			}
+		default:
+			if field.IsZero() {
+				return errors.New(label + "不能为空")
+			}
+		}
+	}
+	return nil
+}
+
+func stockCheckNormalizeValue(value reflect.Value) (any, bool) {
+	if !value.IsValid() {
+		return nil, true
+	}
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil, true
+		}
+		return stockCheckNormalizeValue(value.Elem())
+	}
+	switch value.Kind() {
+	case reflect.String:
+		trimmed := strings.TrimSpace(value.String())
+		return trimmed, trimmed == ""
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		current := value.Int()
+		return current, current == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		current := value.Uint()
+		return current, current == 0
+	case reflect.Bool:
+		return value.Bool(), false
+	default:
+		if value.IsZero() {
+			return nil, true
+		}
+		return value.Interface(), false
+	}
+}
+
+func stockCheckGetFieldValue(target any, name string) (reflect.Value, bool) {
+	value := stockCheckFieldValue(target, name)
+	return value, value.IsValid()
+}
+
+func stockCheckGetIntField(target any, name string) int64 {
+	value := stockCheckFieldValue(target, name)
+	if !value.IsValid() {
+		return 0
+	}
+	switch value.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return value.Int()
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return int64(value.Uint())
+	}
+	return 0
+}
+
+func stockCheckTrimStruct(value reflect.Value) {
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		structField := value.Type().Field(i)
+		if structField.PkgPath != "" {
+			continue
+		}
+		if structField.Anonymous {
+			if field.Kind() == reflect.Struct {
+				stockCheckTrimStruct(field)
+			}
+			continue
+		}
+		if field.Kind() == reflect.String && field.CanSet() {
+			field.SetString(strings.TrimSpace(field.String()))
+		}
+	}
+}
+
+func stockCheckFieldValue(target any, name string) reflect.Value {
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return reflect.Value{}
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return reflect.Value{}
+	}
+	return value.FieldByName(name)
 }

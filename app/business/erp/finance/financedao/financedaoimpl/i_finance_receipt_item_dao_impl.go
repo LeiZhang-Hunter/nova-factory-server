@@ -3,35 +3,38 @@ package financedaoimpl
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/finance/financedao"
 	"nova-factory-server/app/business/erp/finance/financemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// FinanceReceiptItemDaoImpl 提供数据访问能力。
 type FinanceReceiptItemDaoImpl struct {
 	db *gorm.DB
 }
 
-// NewFinanceReceiptItemDao 创建 DAO。
 func NewFinanceReceiptItemDao(db *gorm.DB) financedao.IFinanceReceiptItemDao {
 	return &FinanceReceiptItemDaoImpl{db: db}
 }
 
 func (d *FinanceReceiptItemDaoImpl) Create(c *gin.Context, req *financemodels.FinanceReceiptItemUpsert) (*financemodels.FinanceReceiptItem, error) {
-	model := new(financemodels.FinanceReceiptItem)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	if req == nil {
+		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.PrepareCreate(model, c)
+	model := financemodels.FinanceReceiptItemUpsertToEntity(req)
+	if model == nil {
+		return nil, errors.New("参数不能为空")
+	}
+	model.ID = snowflake.GenID()
+	model.DeptID = baizeContext.GetDeptId(c)
+	model.State = commonStatus.NORMAL
+	model.SetCreateBy(baizeContext.GetUserId(c))
 	if err := d.db.WithContext(c).Table("erp_finance_receipt_item").Create(model).Error; err != nil {
 		return nil, err
 	}
@@ -39,37 +42,47 @@ func (d *FinanceReceiptItemDaoImpl) Create(c *gin.Context, req *financemodels.Fi
 }
 
 func (d *FinanceReceiptItemDaoImpl) Update(c *gin.Context, req *financemodels.FinanceReceiptItemUpsert) (*financemodels.FinanceReceiptItem, error) {
-	id := erpbiz.GetIntField(req, "ID")
-	if id <= 0 {
+	if req == nil || req.ID <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	model := new(financemodels.FinanceReceiptItem)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	updates := make(map[string]any)
+	if req.ReceiptID > 0 {
+		updates["receipt_id"] = req.ReceiptID
 	}
-	if err := erpbiz.PrepareUpdate(model, c); err != nil {
-		return nil, err
+	updates["biz_type"] = req.BizType
+	if req.BizID > 0 {
+		updates["biz_id"] = req.BizID
 	}
-	updates := erpbiz.BuildUpdateMap(model)
-	db := d.db.WithContext(c).Table("erp_finance_receipt_item").Where("id = ?", id)
-	if erpbiz.HasField(model, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
+	if req.BizNo != "" {
+		updates["biz_no"] = req.BizNo
 	}
+	if req.TotalPrice != 0 {
+		updates["total_price"] = req.TotalPrice
+	}
+	if req.ReceiptedPrice != 0 {
+		updates["receipted_price"] = req.ReceiptedPrice
+	}
+	if req.ReceiptPrice != 0 {
+		updates["receipt_price"] = req.ReceiptPrice
+	}
+	if req.Remark != "" {
+		updates["remark"] = req.Remark
+	}
+	updates["update_by"] = baizeContext.GetUserId(c)
+	updates["update_time"] = time.Now()
+	db := d.db.WithContext(c).Table("erp_finance_receipt_item").Where("id = ?", req.ID)
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Updates(updates).Error; err != nil {
 		return nil, err
 	}
-	return d.GetByID(c, id)
+	return d.GetByID(c, req.ID)
 }
 
 func (d *FinanceReceiptItemDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	db := d.db.WithContext(c).Table("erp_finance_receipt_item").Where("id IN ?", ids)
-	if erpbiz.HasField(new(financemodels.FinanceReceiptItem), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	return db.Updates(map[string]any{
+	return d.db.WithContext(c).Table("erp_finance_receipt_item").Where("id IN ?", ids).Where("state = ?", commonStatus.NORMAL).Updates(map[string]any{
 		"state":       commonStatus.DELETE,
 		"update_by":   baizeContext.GetUserId(c),
 		"update_time": time.Now(),
@@ -78,11 +91,7 @@ func (d *FinanceReceiptItemDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) err
 
 func (d *FinanceReceiptItemDaoImpl) GetByID(c *gin.Context, id int64) (*financemodels.FinanceReceiptItem, error) {
 	item := new(financemodels.FinanceReceiptItem)
-	db := d.db.WithContext(c).Table("erp_finance_receipt_item").Where("id = ?", id)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_finance_receipt_item").Where("id = ?", id).Where("state = ?", commonStatus.NORMAL).First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -96,11 +105,7 @@ func (d *FinanceReceiptItemDaoImpl) GetByColumn(c *gin.Context, column string, v
 		return nil, nil
 	}
 	item := new(financemodels.FinanceReceiptItem)
-	db := d.db.WithContext(c).Table("erp_finance_receipt_item").Where(fmt.Sprintf("%s = ?", column), value)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_finance_receipt_item").Where(fmt.Sprintf("%s = ?", column), value).Where("state = ?", commonStatus.NORMAL).First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -109,26 +114,19 @@ func (d *FinanceReceiptItemDaoImpl) GetByColumn(c *gin.Context, column string, v
 	return item, nil
 }
 
-func (d *FinanceReceiptItemDaoImpl) ListPage(c *gin.Context, req *financemodels.FinanceReceiptItemQuery) (*erpbiz.PageResult[financemodels.FinanceReceiptItem], error) {
+func (d *FinanceReceiptItemDaoImpl) ListPage(c *gin.Context, req *financemodels.FinanceReceiptItemQuery) (*financemodels.FinanceReceiptItemListData, error) {
 	if req == nil {
 		req = new(financemodels.FinanceReceiptItemQuery)
 	}
-	db := d.db.WithContext(c).Table("erp_finance_receipt_item")
-	if erpbiz.HasField(new(financemodels.FinanceReceiptItem), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	db = erpbiz.ApplyFilters(db, req)
-	page, size := erpbiz.GetPageSize(req)
+	db := d.db.WithContext(c).Table("erp_finance_receipt_item").Where("state = ?", commonStatus.NORMAL)
+	db = applyFinanceReceiptItemFilters(db, req)
+	page, size := getPageSize(req.Page, req.Size)
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
 	rows := make([]financemodels.FinanceReceiptItem, 0)
-	orderBy := strings.TrimSpace("id DESC")
-	if orderBy == "" {
-		orderBy = "id DESC"
-	}
-	if err := db.Order(orderBy).Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
+	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	result := make([]*financemodels.FinanceReceiptItem, 0, len(rows))
@@ -136,7 +134,7 @@ func (d *FinanceReceiptItemDaoImpl) ListPage(c *gin.Context, req *financemodels.
 		item := rows[i]
 		result = append(result, &item)
 	}
-	return &erpbiz.PageResult[financemodels.FinanceReceiptItem]{Rows: result, Total: total}, nil
+	return &financemodels.FinanceReceiptItemListData{Rows: result, Total: total}, nil
 }
 
 func (d *FinanceReceiptItemDaoImpl) List(c *gin.Context, req *financemodels.FinanceReceiptItemQuery) (*financemodels.FinanceReceiptItemListData, error) {

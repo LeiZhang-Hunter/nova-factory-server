@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/master/mastermodels"
 
 	"github.com/gin-gonic/gin"
@@ -100,8 +99,8 @@ func (d *productCategoryServiceTestDAO) GetByColumn(c *gin.Context, column strin
 	return nil, nil
 }
 
-func (d *productCategoryServiceTestDAO) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*erpbiz.PageResult[mastermodels.ProductCategory], error) {
-	return &erpbiz.PageResult[mastermodels.ProductCategory]{}, nil
+func (d *productCategoryServiceTestDAO) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*mastermodels.ProductCategoryListData, error) {
+	return &mastermodels.ProductCategoryListData{}, nil
 }
 
 func (d *productCategoryServiceTestDAO) List(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*mastermodels.ProductCategoryListData, error) {

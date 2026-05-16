@@ -3,16 +3,18 @@ package purchaseserviceimpl
 import (
 	"errors"
 	"fmt"
+	"math"
+	"reflect"
 	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/purchase/purchasedao"
 	"nova-factory-server/app/business/erp/purchase/purchasemodels"
 	"nova-factory-server/app/business/erp/purchase/purchaseservice"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -54,7 +56,7 @@ func (s *PurchaseOrderServiceImpl) Create(c *gin.Context, req *purchasemodels.Pu
 	if err := s.validateSaveReq(c, req); err != nil {
 		return nil, err
 	}
-	orderTime, err := erpbiz.ParseTime(req.OrderTime)
+	orderTime, err := parseTimeValue(req.OrderTime)
 	if err != nil {
 		return nil, err
 	}
@@ -68,17 +70,20 @@ func (s *PurchaseOrderServiceImpl) Create(c *gin.Context, req *purchasemodels.Pu
 	}
 	order := &purchasemodels.PurchaseOrder{
 		No:              no,
-		Status:          erpbiz.AuditStatusProcess,
+		Status:          auditStatusProcess,
 		SupplierID:      req.SupplierID,
 		AccountID:       req.AccountID,
 		OrderTime:       orderTime,
-		DiscountPercent: erpbiz.RoundAmount(req.DiscountPercent),
-		DepositPrice:    erpbiz.RoundAmount(req.DepositPrice),
+		DiscountPercent: roundAmount(req.DiscountPercent),
+		DepositPrice:    roundAmount(req.DepositPrice),
 		FileURL:         strings.TrimSpace(req.FileURL),
 		Remark:          strings.TrimSpace(req.Remark),
 	}
 	s.calculateTotals(order, items)
-	erpbiz.PrepareCreate(order, c)
+	order.ID = snowflake.GenID()
+	order.DeptID = baizeContext.GetDeptId(c)
+	order.State = commonStatus.NORMAL
+	order.SetCreateBy(baizeContext.GetUserId(c))
 
 	tx := s.db.WithContext(c).Begin()
 	if tx.Error != nil {
@@ -112,13 +117,13 @@ func (s *PurchaseOrderServiceImpl) Update(c *gin.Context, req *purchasemodels.Pu
 	if err != nil {
 		return nil, err
 	}
-	if exists.Status == erpbiz.AuditStatusApprove {
+	if exists.Status == auditStatusApprove {
 		return nil, fmt.Errorf("采购订单[%s]已审核，不能修改", exists.No)
 	}
 	if err := s.validateSaveReq(c, req); err != nil {
 		return nil, err
 	}
-	orderTime, err := erpbiz.ParseTime(req.OrderTime)
+	orderTime, err := parseTimeValue(req.OrderTime)
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +138,8 @@ func (s *PurchaseOrderServiceImpl) Update(c *gin.Context, req *purchasemodels.Pu
 		SupplierID:      req.SupplierID,
 		AccountID:       req.AccountID,
 		OrderTime:       orderTime,
-		DiscountPercent: erpbiz.RoundAmount(req.DiscountPercent),
-		DepositPrice:    erpbiz.RoundAmount(req.DepositPrice),
+		DiscountPercent: roundAmount(req.DiscountPercent),
+		DepositPrice:    roundAmount(req.DepositPrice),
 		FileURL:         strings.TrimSpace(req.FileURL),
 		Remark:          strings.TrimSpace(req.Remark),
 		InCount:         exists.InCount,
@@ -142,7 +147,7 @@ func (s *PurchaseOrderServiceImpl) Update(c *gin.Context, req *purchasemodels.Pu
 		State:           exists.State,
 	}
 	s.calculateTotals(order, items)
-	if err := erpbiz.PrepareUpdate(order, c); err != nil {
+	if err := prepareOrderUpdate(order, c); err != nil {
 		return nil, err
 	}
 
@@ -174,7 +179,7 @@ func (s *PurchaseOrderServiceImpl) Update(c *gin.Context, req *purchasemodels.Pu
 	for _, item := range items {
 		item.OrderID = order.ID
 	}
-	if err := erpbiz.ReplaceChildren(tx, c, purchaseOrderItemTable, "order_id", order.ID, items); err != nil {
+	if err := replaceChildren(tx, c, purchaseOrderItemTable, "order_id", order.ID, items); err != nil {
 		tx.Rollback()
 		return nil, err
 	}
@@ -189,7 +194,7 @@ func (s *PurchaseOrderServiceImpl) UpdateStatus(c *gin.Context, req *purchasemod
 	if req == nil || req.ID <= 0 {
 		return errors.New("id不能为空")
 	}
-	if req.Status != erpbiz.AuditStatusProcess && req.Status != erpbiz.AuditStatusApprove {
+	if req.Status != auditStatusProcess && req.Status != auditStatusApprove {
 		return errors.New("状态不正确")
 	}
 	order, err := s.mustGetOrder(c, req.ID)
@@ -197,12 +202,12 @@ func (s *PurchaseOrderServiceImpl) UpdateStatus(c *gin.Context, req *purchasemod
 		return err
 	}
 	if order.Status == req.Status {
-		if req.Status == erpbiz.AuditStatusApprove {
+		if req.Status == auditStatusApprove {
 			return errors.New("采购订单已审核")
 		}
 		return errors.New("采购订单已是未审核状态")
 	}
-	if req.Status == erpbiz.AuditStatusProcess {
+	if req.Status == auditStatusProcess {
 		if order.InCount > 0 {
 			return errors.New("采购订单已存在入库记录，不能反审核")
 		}
@@ -234,7 +239,7 @@ func (s *PurchaseOrderServiceImpl) DeleteByIDs(c *gin.Context, ids []int64) erro
 		return err
 	}
 	for _, order := range orders {
-		if order.Status == erpbiz.AuditStatusApprove {
+		if order.Status == auditStatusApprove {
 			return fmt.Errorf("采购订单[%s]已审核，不能删除", order.No)
 		}
 	}
@@ -350,14 +355,17 @@ func (s *PurchaseOrderServiceImpl) buildOrderItems(c *gin.Context, reqItems []*p
 		item := &purchasemodels.PurchaseOrderItem{
 			ProductID:     reqItem.ProductID,
 			ProductUnitID: product.UnitId,
-			ProductPrice:  erpbiz.RoundAmount(reqItem.ProductPrice),
+			ProductPrice:  roundAmount(reqItem.ProductPrice),
 			Count:         reqItem.Count,
-			TaxPercent:    erpbiz.RoundAmount(reqItem.TaxPercent),
+			TaxPercent:    roundAmount(reqItem.TaxPercent),
 			Remark:        strings.TrimSpace(reqItem.Remark),
 		}
-		item.TotalPrice = erpbiz.RoundAmount(item.ProductPrice * item.Count)
-		item.TaxPrice = erpbiz.CalculatePercentAmount(item.TotalPrice, item.TaxPercent)
-		erpbiz.PrepareCreate(item, c)
+		item.TotalPrice = roundAmount(item.ProductPrice * item.Count)
+		item.TaxPrice = calculatePercentAmount(item.TotalPrice, item.TaxPercent)
+		item.ID = snowflake.GenID()
+		item.DeptID = baizeContext.GetDeptId(c)
+		item.State = commonStatus.NORMAL
+		item.SetCreateBy(baizeContext.GetUserId(c))
 		items = append(items, item)
 	}
 	return items, nil
@@ -372,17 +380,17 @@ func (s *PurchaseOrderServiceImpl) calculateTotals(order *purchasemodels.Purchas
 		order.TotalProductPrice += item.TotalPrice
 		order.TotalTaxPrice += item.TaxPrice
 	}
-	order.TotalCount = erpbiz.RoundAmount(order.TotalCount)
-	order.TotalProductPrice = erpbiz.RoundAmount(order.TotalProductPrice)
-	order.TotalTaxPrice = erpbiz.RoundAmount(order.TotalTaxPrice)
-	totalBeforeDiscount := erpbiz.RoundAmount(order.TotalProductPrice + order.TotalTaxPrice)
-	order.DiscountPrice = erpbiz.CalculatePercentAmount(totalBeforeDiscount, order.DiscountPercent)
-	order.TotalPrice = erpbiz.RoundAmount(totalBeforeDiscount - order.DiscountPrice)
+	order.TotalCount = roundAmount(order.TotalCount)
+	order.TotalProductPrice = roundAmount(order.TotalProductPrice)
+	order.TotalTaxPrice = roundAmount(order.TotalTaxPrice)
+	totalBeforeDiscount := roundAmount(order.TotalProductPrice + order.TotalTaxPrice)
+	order.DiscountPrice = calculatePercentAmount(totalBeforeDiscount, order.DiscountPercent)
+	order.TotalPrice = roundAmount(totalBeforeDiscount - order.DiscountPrice)
 }
 
 func (s *PurchaseOrderServiceImpl) generateOrderNo(c *gin.Context) (string, error) {
 	for i := 0; i < 5; i++ {
-		no := erpbiz.GenerateNo(erpbiz.PrefixPurchaseOrder)
+		no := generateNo(prefixPurchaseOrder)
 		exists, err := s.dao.GetByColumn(c, "no", no)
 		if err != nil {
 			return "", err
@@ -403,4 +411,73 @@ func (s *PurchaseOrderServiceImpl) mustGetOrder(c *gin.Context, id int64) (*purc
 		return nil, errors.New("采购订单不存在")
 	}
 	return order, nil
+}
+
+const (
+	auditStatusProcess  int32 = 10
+	auditStatusApprove  int32 = 20
+	prefixPurchaseOrder       = "CGDD"
+)
+
+func generateNo(prefix string) string {
+	suffix := snowflake.GenID()
+	if suffix < 0 {
+		suffix = -suffix
+	}
+	return strings.TrimSpace(prefix) + time.Now().Format("20060102") + fmt.Sprintf("%06d", suffix%1000000)
+}
+
+func parseTimeValue(value string) (*time.Time, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil, nil
+	}
+	layouts := []string{time.DateTime, "2006-01-02 15:04", "2006-01-02", time.RFC3339}
+	for _, layout := range layouts {
+		if parsed, err := time.ParseInLocation(layout, value, time.Local); err == nil {
+			return &parsed, nil
+		}
+	}
+	return nil, errors.New("时间格式不正确")
+}
+
+func roundAmount(value float64) float64 {
+	return math.Round(value*100) / 100
+}
+
+func calculatePercentAmount(total, percent float64) float64 {
+	if total == 0 || percent == 0 {
+		return 0
+	}
+	return roundAmount(total * percent / 100)
+}
+
+func prepareOrderUpdate(order *purchasemodels.PurchaseOrder, c *gin.Context) error {
+	if order == nil || order.ID <= 0 {
+		return errors.New("id不能为空")
+	}
+	order.SetUpdateBy(baizeContext.GetUserId(c))
+	return nil
+}
+
+func replaceChildren(tx *gorm.DB, c *gin.Context, table string, parentColumn string, parentID int64, children any) error {
+	if parentID <= 0 {
+		return errors.New("主表ID不能为空")
+	}
+	now := time.Now()
+	if err := tx.WithContext(c).
+		Table(table).
+		Where(parentColumn+" = ? AND state = ?", parentID, commonStatus.NORMAL).
+		Updates(map[string]any{
+			"state":       commonStatus.DELETE,
+			"update_by":   baizeContext.GetUserId(c),
+			"update_time": &now,
+		}).Error; err != nil {
+		return err
+	}
+	rv := reflect.ValueOf(children)
+	if rv.Kind() != reflect.Slice || rv.Len() == 0 {
+		return nil
+	}
+	return tx.WithContext(c).Table(table).Create(children).Error
 }

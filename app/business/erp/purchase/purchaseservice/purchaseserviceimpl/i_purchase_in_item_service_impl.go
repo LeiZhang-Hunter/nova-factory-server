@@ -2,9 +2,9 @@ package purchaseserviceimpl
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/purchase/purchasedao"
 	"nova-factory-server/app/business/erp/purchase/purchasemodels"
 	"nova-factory-server/app/business/erp/purchase/purchaseservice"
@@ -15,14 +15,14 @@ import (
 // PurchaseInItemServiceImpl 提供业务实现。
 type PurchaseInItemServiceImpl struct {
 	dao          purchasedao.IPurchaseInItemDao
-	uniqueFields []erpbiz.UniqueField
+	uniqueFields []purchaseInItemUniqueField
 }
 
 // NewPurchaseInItemService 创建服务。
 func NewPurchaseInItemService(dao purchasedao.IPurchaseInItemDao) purchaseservice.IPurchaseInItemService {
 	return &PurchaseInItemServiceImpl{
 		dao:          dao,
-		uniqueFields: []erpbiz.UniqueField{},
+		uniqueFields: []purchaseInItemUniqueField{},
 	}
 }
 
@@ -30,8 +30,8 @@ func (s *PurchaseInItemServiceImpl) create(c *gin.Context, req *purchasemodels.P
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.TrimStringFields(req)
-	if err := erpbiz.ValidateRequiredFields(req); err != nil {
+	purchaseInItemTrimStringFields(req)
+	if err := purchaseInItemValidateRequiredFields(req); err != nil {
 		return nil, err
 	}
 	if err := s.validateUniqueFields(c, req, 0); err != nil {
@@ -44,12 +44,12 @@ func (s *PurchaseInItemServiceImpl) update(c *gin.Context, req *purchasemodels.P
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
-	id := erpbiz.GetIntField(req, "ID")
+	id := purchaseInItemGetIntField(req, "ID")
 	if id <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	erpbiz.TrimStringFields(req)
-	if err := erpbiz.ValidateRequiredFields(req); err != nil {
+	purchaseInItemTrimStringFields(req)
+	if err := purchaseInItemValidateRequiredFields(req); err != nil {
 		return nil, err
 	}
 	if err := s.validateUniqueFields(c, req, id); err != nil {
@@ -80,9 +80,9 @@ func (s *PurchaseInItemServiceImpl) GetByID(c *gin.Context, id int64) (*purchase
 	return s.dao.GetByID(c, id)
 }
 
-func (s *PurchaseInItemServiceImpl) ListPage(c *gin.Context, req *purchasemodels.PurchaseInItemQuery) (*erpbiz.PageResult[purchasemodels.PurchaseInItem], error) {
+func (s *PurchaseInItemServiceImpl) ListPage(c *gin.Context, req *purchasemodels.PurchaseInItemQuery) (*purchasemodels.PurchaseInItemListData, error) {
 	if req != nil {
-		erpbiz.TrimStringFields(req)
+		purchaseInItemTrimStringFields(req)
 	}
 	return s.dao.ListPage(c, req)
 }
@@ -92,11 +92,11 @@ func (s *PurchaseInItemServiceImpl) validateUniqueFields(c *gin.Context, req *pu
 		return nil
 	}
 	for _, field := range s.uniqueFields {
-		value, ok := erpbiz.GetFieldValue(req, field.Field)
+		value, ok := purchaseInItemGetFieldValue(req, field.Field)
 		if !ok {
 			continue
 		}
-		normalized, empty := erpbiz.NormalizeValue(value)
+		normalized, empty := purchaseInItemNormalizeValue(value)
 		if empty {
 			continue
 		}
@@ -107,7 +107,7 @@ func (s *PurchaseInItemServiceImpl) validateUniqueFields(c *gin.Context, req *pu
 		if exists == nil {
 			continue
 		}
-		if erpbiz.GetIntField(exists, "ID") != currentID {
+		if purchaseInItemGetIntField(exists, "ID") != currentID {
 			label := strings.TrimSpace(field.Label)
 			if label == "" {
 				label = field.Column
@@ -124,4 +124,155 @@ func (s *PurchaseInItemServiceImpl) List(c *gin.Context, req *purchasemodels.Pur
 		return nil, err
 	}
 	return &purchasemodels.PurchaseInItemListData{Rows: result.Rows, Total: result.Total}, nil
+}
+
+type purchaseInItemUniqueField struct {
+	Field  string
+	Column string
+	Label  string
+}
+
+func purchaseInItemTrimStringFields(target any) {
+	if target == nil {
+		return
+	}
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return
+	}
+	purchaseInItemTrimStruct(value)
+}
+
+func purchaseInItemValidateRequiredFields(target any) error {
+	if target == nil {
+		return nil
+	}
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return nil
+	}
+	valueType := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		structField := valueType.Field(i)
+		if structField.PkgPath != "" || structField.Anonymous {
+			continue
+		}
+		if !strings.Contains(structField.Tag.Get("binding"), "required") {
+			continue
+		}
+		label := structField.Tag.Get("label")
+		if label == "" {
+			label = structField.Name
+		}
+		switch field.Kind() {
+		case reflect.String:
+			if strings.TrimSpace(field.String()) == "" {
+				return errors.New(label + "不能为空")
+			}
+		case reflect.Pointer:
+			if field.IsNil() {
+				return errors.New(label + "不能为空")
+			}
+		default:
+			if field.IsZero() {
+				return errors.New(label + "不能为空")
+			}
+		}
+	}
+	return nil
+}
+
+func purchaseInItemNormalizeValue(value reflect.Value) (any, bool) {
+	if !value.IsValid() {
+		return nil, true
+	}
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil, true
+		}
+		return purchaseInItemNormalizeValue(value.Elem())
+	}
+	switch value.Kind() {
+	case reflect.String:
+		trimmed := strings.TrimSpace(value.String())
+		return trimmed, trimmed == ""
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		current := value.Int()
+		return current, current == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		current := value.Uint()
+		return current, current == 0
+	case reflect.Bool:
+		return value.Bool(), false
+	default:
+		if value.IsZero() {
+			return nil, true
+		}
+		return value.Interface(), false
+	}
+}
+
+func purchaseInItemGetFieldValue(target any, name string) (reflect.Value, bool) {
+	value := purchaseInItemFieldValue(target, name)
+	return value, value.IsValid()
+}
+
+func purchaseInItemGetIntField(target any, name string) int64 {
+	value := purchaseInItemFieldValue(target, name)
+	if !value.IsValid() {
+		return 0
+	}
+	switch value.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return value.Int()
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return int64(value.Uint())
+	}
+	return 0
+}
+
+func purchaseInItemTrimStruct(value reflect.Value) {
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		structField := value.Type().Field(i)
+		if structField.PkgPath != "" {
+			continue
+		}
+		if structField.Anonymous {
+			if field.Kind() == reflect.Struct {
+				purchaseInItemTrimStruct(field)
+			}
+			continue
+		}
+		if field.Kind() == reflect.String && field.CanSet() {
+			field.SetString(strings.TrimSpace(field.String()))
+		}
+	}
+}
+
+func purchaseInItemFieldValue(target any, name string) reflect.Value {
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return reflect.Value{}
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return reflect.Value{}
+	}
+	return value.FieldByName(name)
 }

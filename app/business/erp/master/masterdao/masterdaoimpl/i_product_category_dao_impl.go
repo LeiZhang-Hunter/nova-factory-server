@@ -3,35 +3,38 @@ package masterdaoimpl
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/master/mastermodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// ProductCategoryDaoImpl 提供数据访问能力。
 type ProductCategoryDaoImpl struct {
 	db *gorm.DB
 }
 
-// NewProductCategoryDao 创建 DAO。
 func NewProductCategoryDao(db *gorm.DB) masterdao.IProductCategoryDao {
 	return &ProductCategoryDaoImpl{db: db}
 }
 
 func (d *ProductCategoryDaoImpl) Create(c *gin.Context, req *mastermodels.ProductCategoryUpsert) (*mastermodels.ProductCategory, error) {
-	model := new(mastermodels.ProductCategory)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	if req == nil {
+		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.PrepareCreate(model, c)
+	model := mastermodels.ProductCategoryUpsertToEntity(req)
+	if model == nil {
+		return nil, errors.New("参数不能为空")
+	}
+	model.ID = snowflake.GenID()
+	model.DeptID = baizeContext.GetDeptId(c)
+	model.State = commonStatus.NORMAL
+	model.SetCreateBy(baizeContext.GetUserId(c))
 	if err := d.db.WithContext(c).Table("erp_product_category").Create(model).Error; err != nil {
 		return nil, err
 	}
@@ -39,50 +42,51 @@ func (d *ProductCategoryDaoImpl) Create(c *gin.Context, req *mastermodels.Produc
 }
 
 func (d *ProductCategoryDaoImpl) Update(c *gin.Context, req *mastermodels.ProductCategoryUpsert) (*mastermodels.ProductCategory, error) {
-	id := erpbiz.GetIntField(req, "ID")
-	if id <= 0 {
+	if req == nil || req.ID <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	model := new(mastermodels.ProductCategory)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	updates := make(map[string]any)
+	if req.ParentID > 0 {
+		updates["parent_id"] = req.ParentID
 	}
-	if err := erpbiz.PrepareUpdate(model, c); err != nil {
-		return nil, err
+	if req.Name != "" {
+		updates["name"] = req.Name
 	}
-	updates := erpbiz.BuildUpdateMap(model)
-	db := d.db.WithContext(c).Table("erp_product_category").Where("id = ?", id)
-	if erpbiz.HasField(model, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
+	if req.Code != "" {
+		updates["code"] = req.Code
 	}
+	updates["sort"] = req.Sort
+	updates["status"] = req.Status
+	updates["update_by"] = baizeContext.GetUserId(c)
+	updates["update_time"] = time.Now()
+	db := d.db.WithContext(c).Table("erp_product_category").Where("id = ?", req.ID)
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Updates(updates).Error; err != nil {
 		return nil, err
 	}
-	return d.GetByID(c, id)
+	return d.GetByID(c, req.ID)
 }
 
 func (d *ProductCategoryDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	db := d.db.WithContext(c).Table("erp_product_category").Where("id IN ?", ids)
-	if erpbiz.HasField(new(mastermodels.ProductCategory), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	return db.Updates(map[string]any{
-		"state":       commonStatus.DELETE,
-		"update_by":   baizeContext.GetUserId(c),
-		"update_time": time.Now(),
-	}).Error
+	return d.db.WithContext(c).Table("erp_product_category").
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(map[string]any{
+			"state":       commonStatus.DELETE,
+			"update_by":   baizeContext.GetUserId(c),
+			"update_time": time.Now(),
+		}).Error
 }
 
 func (d *ProductCategoryDaoImpl) GetByID(c *gin.Context, id int64) (*mastermodels.ProductCategory, error) {
 	item := new(mastermodels.ProductCategory)
-	db := d.db.WithContext(c).Table("erp_product_category").Where("id = ?", id)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_product_category").
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -96,11 +100,10 @@ func (d *ProductCategoryDaoImpl) GetByColumn(c *gin.Context, column string, valu
 		return nil, nil
 	}
 	item := new(mastermodels.ProductCategory)
-	db := d.db.WithContext(c).Table("erp_product_category").Where(fmt.Sprintf("%s = ?", column), value)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_product_category").
+		Where(fmt.Sprintf("%s = ?", column), value).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -109,26 +112,19 @@ func (d *ProductCategoryDaoImpl) GetByColumn(c *gin.Context, column string, valu
 	return item, nil
 }
 
-func (d *ProductCategoryDaoImpl) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*erpbiz.PageResult[mastermodels.ProductCategory], error) {
+func (d *ProductCategoryDaoImpl) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*mastermodels.ProductCategoryListData, error) {
 	if req == nil {
 		req = new(mastermodels.ProductCategoryQuery)
 	}
-	db := d.db.WithContext(c).Table("erp_product_category")
-	if erpbiz.HasField(new(mastermodels.ProductCategory), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	db = erpbiz.ApplyFilters(db, req)
-	page, size := erpbiz.GetPageSize(req)
+	db := d.db.WithContext(c).Table("erp_product_category").Where("state = ?", commonStatus.NORMAL)
+	db = applyProductCategoryFilters(db, req)
+	page, size := getPageSize(req.Page, req.Size)
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
 	rows := make([]mastermodels.ProductCategory, 0)
-	orderBy := strings.TrimSpace("sort ASC, id DESC")
-	if orderBy == "" {
-		orderBy = "id DESC"
-	}
-	if err := db.Order(orderBy).Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
+	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	result := make([]*mastermodels.ProductCategory, 0, len(rows))
@@ -136,7 +132,7 @@ func (d *ProductCategoryDaoImpl) ListPage(c *gin.Context, req *mastermodels.Prod
 		item := rows[i]
 		result = append(result, &item)
 	}
-	return &erpbiz.PageResult[mastermodels.ProductCategory]{Rows: result, Total: total}, nil
+	return &mastermodels.ProductCategoryListData{Rows: result, Total: total}, nil
 }
 
 func (d *ProductCategoryDaoImpl) List(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*mastermodels.ProductCategoryListData, error) {

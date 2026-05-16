@@ -3,14 +3,13 @@ package stockdaoimpl
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/stock/stockdao"
 	"nova-factory-server/app/business/erp/stock/stockmodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -27,11 +26,17 @@ func NewStockCheckItemDao(db *gorm.DB) stockdao.IStockCheckItemDao {
 }
 
 func (d *StockCheckItemDaoImpl) Create(c *gin.Context, req *stockmodels.StockCheckItemUpsert) (*stockmodels.StockCheckItem, error) {
-	model := new(stockmodels.StockCheckItem)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	if req == nil {
+		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.PrepareCreate(model, c)
+	model := stockmodels.StockCheckItemUpsertToEntity(req)
+	if model == nil {
+		return nil, errors.New("参数不能为空")
+	}
+	model.ID = snowflake.GenID()
+	model.DeptID = baizeContext.GetDeptId(c)
+	model.State = commonStatus.NORMAL
+	model.SetCreateBy(baizeContext.GetUserId(c))
 	if err := d.db.WithContext(c).Table("erp_stock_check_item").Create(model).Error; err != nil {
 		return nil, err
 	}
@@ -39,50 +44,70 @@ func (d *StockCheckItemDaoImpl) Create(c *gin.Context, req *stockmodels.StockChe
 }
 
 func (d *StockCheckItemDaoImpl) Update(c *gin.Context, req *stockmodels.StockCheckItemUpsert) (*stockmodels.StockCheckItem, error) {
-	id := erpbiz.GetIntField(req, "ID")
-	if id <= 0 {
+	if req == nil || req.ID <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	model := new(stockmodels.StockCheckItem)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	updates := make(map[string]any)
+	if req.CheckID > 0 {
+		updates["check_id"] = req.CheckID
 	}
-	if err := erpbiz.PrepareUpdate(model, c); err != nil {
-		return nil, err
+	if req.WarehouseID > 0 {
+		updates["warehouse_id"] = req.WarehouseID
 	}
-	updates := erpbiz.BuildUpdateMap(model)
-	db := d.db.WithContext(c).Table("erp_stock_check_item").Where("id = ?", id)
-	if erpbiz.HasField(model, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
+	if req.ProductID > 0 {
+		updates["product_id"] = req.ProductID
 	}
+	if req.ProductUnitID > 0 {
+		updates["product_unit_id"] = req.ProductUnitID
+	}
+	if req.ProductPrice != 0 {
+		updates["product_price"] = req.ProductPrice
+	}
+	if req.StockCount != 0 {
+		updates["stock_count"] = req.StockCount
+	}
+	if req.ActualCount != 0 {
+		updates["actual_count"] = req.ActualCount
+	}
+	if req.Count != 0 {
+		updates["count"] = req.Count
+	}
+	if req.TotalPrice != 0 {
+		updates["total_price"] = req.TotalPrice
+	}
+	if req.Remark != "" {
+		updates["remark"] = req.Remark
+	}
+	updates["update_by"] = baizeContext.GetUserId(c)
+	updates["update_time"] = time.Now()
+	db := d.db.WithContext(c).Table("erp_stock_check_item").Where("id = ?", req.ID)
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Updates(updates).Error; err != nil {
 		return nil, err
 	}
-	return d.GetByID(c, id)
+	return d.GetByID(c, req.ID)
 }
 
 func (d *StockCheckItemDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	db := d.db.WithContext(c).Table("erp_stock_check_item").Where("id IN ?", ids)
-	if erpbiz.HasField(new(stockmodels.StockCheckItem), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	return db.Updates(map[string]any{
-		"state":       commonStatus.DELETE,
-		"update_by":   baizeContext.GetUserId(c),
-		"update_time": time.Now(),
-	}).Error
+	return d.db.WithContext(c).Table("erp_stock_check_item").
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(map[string]any{
+			"state":       commonStatus.DELETE,
+			"update_by":   baizeContext.GetUserId(c),
+			"update_time": time.Now(),
+		}).Error
 }
 
 func (d *StockCheckItemDaoImpl) GetByID(c *gin.Context, id int64) (*stockmodels.StockCheckItem, error) {
 	item := new(stockmodels.StockCheckItem)
-	db := d.db.WithContext(c).Table("erp_stock_check_item").Where("id = ?", id)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_stock_check_item").
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -96,11 +121,10 @@ func (d *StockCheckItemDaoImpl) GetByColumn(c *gin.Context, column string, value
 		return nil, nil
 	}
 	item := new(stockmodels.StockCheckItem)
-	db := d.db.WithContext(c).Table("erp_stock_check_item").Where(fmt.Sprintf("%s = ?", column), value)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_stock_check_item").
+		Where(fmt.Sprintf("%s = ?", column), value).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -109,26 +133,19 @@ func (d *StockCheckItemDaoImpl) GetByColumn(c *gin.Context, column string, value
 	return item, nil
 }
 
-func (d *StockCheckItemDaoImpl) ListPage(c *gin.Context, req *stockmodels.StockCheckItemQuery) (*erpbiz.PageResult[stockmodels.StockCheckItem], error) {
+func (d *StockCheckItemDaoImpl) ListPage(c *gin.Context, req *stockmodels.StockCheckItemQuery) (*stockmodels.StockCheckItemListData, error) {
 	if req == nil {
 		req = new(stockmodels.StockCheckItemQuery)
 	}
-	db := d.db.WithContext(c).Table("erp_stock_check_item")
-	if erpbiz.HasField(new(stockmodels.StockCheckItem), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	db = erpbiz.ApplyFilters(db, req)
-	page, size := erpbiz.GetPageSize(req)
+	db := d.db.WithContext(c).Table("erp_stock_check_item").Where("state = ?", commonStatus.NORMAL)
+	db = applyStockCheckItemFilters(db, req)
+	page, size := getPageSize(req.Page, req.Size)
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
 	rows := make([]stockmodels.StockCheckItem, 0)
-	orderBy := strings.TrimSpace("id DESC")
-	if orderBy == "" {
-		orderBy = "id DESC"
-	}
-	if err := db.Order(orderBy).Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
+	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	result := make([]*stockmodels.StockCheckItem, 0, len(rows))
@@ -136,7 +153,7 @@ func (d *StockCheckItemDaoImpl) ListPage(c *gin.Context, req *stockmodels.StockC
 		item := rows[i]
 		result = append(result, &item)
 	}
-	return &erpbiz.PageResult[stockmodels.StockCheckItem]{Rows: result, Total: total}, nil
+	return &stockmodels.StockCheckItemListData{Rows: result, Total: total}, nil
 }
 
 func (d *StockCheckItemDaoImpl) List(c *gin.Context, req *stockmodels.StockCheckItemQuery) (*stockmodels.StockCheckItemListData, error) {

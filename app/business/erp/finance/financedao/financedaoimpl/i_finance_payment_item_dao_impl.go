@@ -3,35 +3,38 @@ package financedaoimpl
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/finance/financedao"
 	"nova-factory-server/app/business/erp/finance/financemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// FinancePaymentItemDaoImpl 提供数据访问能力。
 type FinancePaymentItemDaoImpl struct {
 	db *gorm.DB
 }
 
-// NewFinancePaymentItemDao 创建 DAO。
 func NewFinancePaymentItemDao(db *gorm.DB) financedao.IFinancePaymentItemDao {
 	return &FinancePaymentItemDaoImpl{db: db}
 }
 
 func (d *FinancePaymentItemDaoImpl) Create(c *gin.Context, req *financemodels.FinancePaymentItemUpsert) (*financemodels.FinancePaymentItem, error) {
-	model := new(financemodels.FinancePaymentItem)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	if req == nil {
+		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.PrepareCreate(model, c)
+	model := financemodels.FinancePaymentItemUpsertToEntity(req)
+	if model == nil {
+		return nil, errors.New("参数不能为空")
+	}
+	model.ID = snowflake.GenID()
+	model.DeptID = baizeContext.GetDeptId(c)
+	model.State = commonStatus.NORMAL
+	model.SetCreateBy(baizeContext.GetUserId(c))
 	if err := d.db.WithContext(c).Table("erp_finance_payment_item").Create(model).Error; err != nil {
 		return nil, err
 	}
@@ -39,37 +42,47 @@ func (d *FinancePaymentItemDaoImpl) Create(c *gin.Context, req *financemodels.Fi
 }
 
 func (d *FinancePaymentItemDaoImpl) Update(c *gin.Context, req *financemodels.FinancePaymentItemUpsert) (*financemodels.FinancePaymentItem, error) {
-	id := erpbiz.GetIntField(req, "ID")
-	if id <= 0 {
+	if req == nil || req.ID <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	model := new(financemodels.FinancePaymentItem)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	updates := make(map[string]any)
+	if req.PaymentID > 0 {
+		updates["payment_id"] = req.PaymentID
 	}
-	if err := erpbiz.PrepareUpdate(model, c); err != nil {
-		return nil, err
+	updates["biz_type"] = req.BizType
+	if req.BizID > 0 {
+		updates["biz_id"] = req.BizID
 	}
-	updates := erpbiz.BuildUpdateMap(model)
-	db := d.db.WithContext(c).Table("erp_finance_payment_item").Where("id = ?", id)
-	if erpbiz.HasField(model, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
+	if req.BizNo != "" {
+		updates["biz_no"] = req.BizNo
 	}
+	if req.TotalPrice != 0 {
+		updates["total_price"] = req.TotalPrice
+	}
+	if req.PaidPrice != 0 {
+		updates["paid_price"] = req.PaidPrice
+	}
+	if req.PaymentPrice != 0 {
+		updates["payment_price"] = req.PaymentPrice
+	}
+	if req.Remark != "" {
+		updates["remark"] = req.Remark
+	}
+	updates["update_by"] = baizeContext.GetUserId(c)
+	updates["update_time"] = time.Now()
+	db := d.db.WithContext(c).Table("erp_finance_payment_item").Where("id = ?", req.ID)
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Updates(updates).Error; err != nil {
 		return nil, err
 	}
-	return d.GetByID(c, id)
+	return d.GetByID(c, req.ID)
 }
 
 func (d *FinancePaymentItemDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	db := d.db.WithContext(c).Table("erp_finance_payment_item").Where("id IN ?", ids)
-	if erpbiz.HasField(new(financemodels.FinancePaymentItem), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	return db.Updates(map[string]any{
+	return d.db.WithContext(c).Table("erp_finance_payment_item").Where("id IN ?", ids).Where("state = ?", commonStatus.NORMAL).Updates(map[string]any{
 		"state":       commonStatus.DELETE,
 		"update_by":   baizeContext.GetUserId(c),
 		"update_time": time.Now(),
@@ -78,11 +91,7 @@ func (d *FinancePaymentItemDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) err
 
 func (d *FinancePaymentItemDaoImpl) GetByID(c *gin.Context, id int64) (*financemodels.FinancePaymentItem, error) {
 	item := new(financemodels.FinancePaymentItem)
-	db := d.db.WithContext(c).Table("erp_finance_payment_item").Where("id = ?", id)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_finance_payment_item").Where("id = ?", id).Where("state = ?", commonStatus.NORMAL).First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -96,11 +105,7 @@ func (d *FinancePaymentItemDaoImpl) GetByColumn(c *gin.Context, column string, v
 		return nil, nil
 	}
 	item := new(financemodels.FinancePaymentItem)
-	db := d.db.WithContext(c).Table("erp_finance_payment_item").Where(fmt.Sprintf("%s = ?", column), value)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_finance_payment_item").Where(fmt.Sprintf("%s = ?", column), value).Where("state = ?", commonStatus.NORMAL).First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -109,26 +114,19 @@ func (d *FinancePaymentItemDaoImpl) GetByColumn(c *gin.Context, column string, v
 	return item, nil
 }
 
-func (d *FinancePaymentItemDaoImpl) ListPage(c *gin.Context, req *financemodels.FinancePaymentItemQuery) (*erpbiz.PageResult[financemodels.FinancePaymentItem], error) {
+func (d *FinancePaymentItemDaoImpl) ListPage(c *gin.Context, req *financemodels.FinancePaymentItemQuery) (*financemodels.FinancePaymentItemListData, error) {
 	if req == nil {
 		req = new(financemodels.FinancePaymentItemQuery)
 	}
-	db := d.db.WithContext(c).Table("erp_finance_payment_item")
-	if erpbiz.HasField(new(financemodels.FinancePaymentItem), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	db = erpbiz.ApplyFilters(db, req)
-	page, size := erpbiz.GetPageSize(req)
+	db := d.db.WithContext(c).Table("erp_finance_payment_item").Where("state = ?", commonStatus.NORMAL)
+	db = applyFinancePaymentItemFilters(db, req)
+	page, size := getPageSize(req.Page, req.Size)
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
 	rows := make([]financemodels.FinancePaymentItem, 0)
-	orderBy := strings.TrimSpace("id DESC")
-	if orderBy == "" {
-		orderBy = "id DESC"
-	}
-	if err := db.Order(orderBy).Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
+	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	result := make([]*financemodels.FinancePaymentItem, 0, len(rows))
@@ -136,7 +134,7 @@ func (d *FinancePaymentItemDaoImpl) ListPage(c *gin.Context, req *financemodels.
 		item := rows[i]
 		result = append(result, &item)
 	}
-	return &erpbiz.PageResult[financemodels.FinancePaymentItem]{Rows: result, Total: total}, nil
+	return &financemodels.FinancePaymentItemListData{Rows: result, Total: total}, nil
 }
 
 func (d *FinancePaymentItemDaoImpl) List(c *gin.Context, req *financemodels.FinancePaymentItemQuery) (*financemodels.FinancePaymentItemListData, error) {

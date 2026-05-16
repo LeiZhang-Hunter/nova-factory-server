@@ -2,9 +2,9 @@ package masterserviceimpl
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/master/mastermodels"
 	"nova-factory-server/app/business/erp/master/masterservice"
@@ -15,14 +15,14 @@ import (
 // ProductUnitServiceImpl 提供业务实现。
 type ProductUnitServiceImpl struct {
 	dao          masterdao.IProductUnitDao
-	uniqueFields []erpbiz.UniqueField
+	uniqueFields []productUnitUniqueField
 }
 
 // NewProductUnitService 创建服务。
 func NewProductUnitService(dao masterdao.IProductUnitDao) masterservice.IProductUnitService {
 	return &ProductUnitServiceImpl{
 		dao:          dao,
-		uniqueFields: []erpbiz.UniqueField{},
+		uniqueFields: []productUnitUniqueField{},
 	}
 }
 
@@ -30,8 +30,8 @@ func (s *ProductUnitServiceImpl) create(c *gin.Context, req *mastermodels.Produc
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.TrimStringFields(req)
-	if err := erpbiz.ValidateRequiredFields(req); err != nil {
+	productUnitTrimStringFields(req)
+	if err := productUnitValidateRequiredFields(req); err != nil {
 		return nil, err
 	}
 	if err := s.validateUniqueFields(c, req, 0); err != nil {
@@ -44,12 +44,12 @@ func (s *ProductUnitServiceImpl) update(c *gin.Context, req *mastermodels.Produc
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
-	id := erpbiz.GetIntField(req, "ID")
+	id := productUnitGetIntField(req, "ID")
 	if id <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	erpbiz.TrimStringFields(req)
-	if err := erpbiz.ValidateRequiredFields(req); err != nil {
+	productUnitTrimStringFields(req)
+	if err := productUnitValidateRequiredFields(req); err != nil {
 		return nil, err
 	}
 	if err := s.validateUniqueFields(c, req, id); err != nil {
@@ -80,9 +80,9 @@ func (s *ProductUnitServiceImpl) GetByID(c *gin.Context, id int64) (*mastermodel
 	return s.dao.GetByID(c, id)
 }
 
-func (s *ProductUnitServiceImpl) ListPage(c *gin.Context, req *mastermodels.ProductUnitQuery) (*erpbiz.PageResult[mastermodels.ProductUnit], error) {
+func (s *ProductUnitServiceImpl) ListPage(c *gin.Context, req *mastermodels.ProductUnitQuery) (*mastermodels.ProductUnitListData, error) {
 	if req != nil {
-		erpbiz.TrimStringFields(req)
+		productUnitTrimStringFields(req)
 	}
 	return s.dao.ListPage(c, req)
 }
@@ -92,11 +92,11 @@ func (s *ProductUnitServiceImpl) validateUniqueFields(c *gin.Context, req *maste
 		return nil
 	}
 	for _, field := range s.uniqueFields {
-		value, ok := erpbiz.GetFieldValue(req, field.Field)
+		value, ok := productUnitGetFieldValue(req, field.Field)
 		if !ok {
 			continue
 		}
-		normalized, empty := erpbiz.NormalizeValue(value)
+		normalized, empty := productUnitNormalizeValue(value)
 		if empty {
 			continue
 		}
@@ -107,7 +107,7 @@ func (s *ProductUnitServiceImpl) validateUniqueFields(c *gin.Context, req *maste
 		if exists == nil {
 			continue
 		}
-		if erpbiz.GetIntField(exists, "ID") != currentID {
+		if productUnitGetIntField(exists, "ID") != currentID {
 			label := strings.TrimSpace(field.Label)
 			if label == "" {
 				label = field.Column
@@ -124,4 +124,155 @@ func (s *ProductUnitServiceImpl) List(c *gin.Context, req *mastermodels.ProductU
 		return nil, err
 	}
 	return &mastermodels.ProductUnitListData{Rows: result.Rows, Total: result.Total}, nil
+}
+
+type productUnitUniqueField struct {
+	Field  string
+	Column string
+	Label  string
+}
+
+func productUnitTrimStringFields(target any) {
+	if target == nil {
+		return
+	}
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return
+	}
+	productUnitTrimStruct(value)
+}
+
+func productUnitValidateRequiredFields(target any) error {
+	if target == nil {
+		return nil
+	}
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return nil
+	}
+	valueType := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		structField := valueType.Field(i)
+		if structField.PkgPath != "" || structField.Anonymous {
+			continue
+		}
+		if !strings.Contains(structField.Tag.Get("binding"), "required") {
+			continue
+		}
+		label := structField.Tag.Get("label")
+		if label == "" {
+			label = structField.Name
+		}
+		switch field.Kind() {
+		case reflect.String:
+			if strings.TrimSpace(field.String()) == "" {
+				return errors.New(label + "不能为空")
+			}
+		case reflect.Pointer:
+			if field.IsNil() {
+				return errors.New(label + "不能为空")
+			}
+		default:
+			if field.IsZero() {
+				return errors.New(label + "不能为空")
+			}
+		}
+	}
+	return nil
+}
+
+func productUnitNormalizeValue(value reflect.Value) (any, bool) {
+	if !value.IsValid() {
+		return nil, true
+	}
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil, true
+		}
+		return productUnitNormalizeValue(value.Elem())
+	}
+	switch value.Kind() {
+	case reflect.String:
+		trimmed := strings.TrimSpace(value.String())
+		return trimmed, trimmed == ""
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		current := value.Int()
+		return current, current == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		current := value.Uint()
+		return current, current == 0
+	case reflect.Bool:
+		return value.Bool(), false
+	default:
+		if value.IsZero() {
+			return nil, true
+		}
+		return value.Interface(), false
+	}
+}
+
+func productUnitGetFieldValue(target any, name string) (reflect.Value, bool) {
+	value := productUnitFieldValue(target, name)
+	return value, value.IsValid()
+}
+
+func productUnitGetIntField(target any, name string) int64 {
+	value := productUnitFieldValue(target, name)
+	if !value.IsValid() {
+		return 0
+	}
+	switch value.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return value.Int()
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return int64(value.Uint())
+	}
+	return 0
+}
+
+func productUnitTrimStruct(value reflect.Value) {
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		structField := value.Type().Field(i)
+		if structField.PkgPath != "" {
+			continue
+		}
+		if structField.Anonymous {
+			if field.Kind() == reflect.Struct {
+				productUnitTrimStruct(field)
+			}
+			continue
+		}
+		if field.Kind() == reflect.String && field.CanSet() {
+			field.SetString(strings.TrimSpace(field.String()))
+		}
+	}
+}
+
+func productUnitFieldValue(target any, name string) reflect.Value {
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return reflect.Value{}
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return reflect.Value{}
+	}
+	return value.FieldByName(name)
 }

@@ -2,9 +2,9 @@ package masterserviceimpl
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/master/mastermodels"
 	"nova-factory-server/app/business/erp/master/masterservice"
@@ -16,14 +16,14 @@ import (
 // ProductCategoryServiceImpl 提供业务实现。
 type ProductCategoryServiceImpl struct {
 	dao          masterdao.IProductCategoryDao
-	uniqueFields []erpbiz.UniqueField
+	uniqueFields []productCategoryUniqueField
 }
 
 // NewProductCategoryService 创建服务。
 func NewProductCategoryService(dao masterdao.IProductCategoryDao) masterservice.IProductCategoryService {
 	return &ProductCategoryServiceImpl{
 		dao:          dao,
-		uniqueFields: []erpbiz.UniqueField{},
+		uniqueFields: []productCategoryUniqueField{},
 	}
 }
 
@@ -31,8 +31,8 @@ func (s *ProductCategoryServiceImpl) create(c *gin.Context, req *mastermodels.Pr
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.TrimStringFields(req)
-	if err := erpbiz.ValidateRequiredFields(req); err != nil {
+	productCategoryTrimStringFields(req)
+	if err := productCategoryValidateRequiredFields(req); err != nil {
 		return nil, err
 	}
 	if err := s.validateUniqueFields(c, req, 0); err != nil {
@@ -45,12 +45,12 @@ func (s *ProductCategoryServiceImpl) update(c *gin.Context, req *mastermodels.Pr
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
-	id := erpbiz.GetIntField(req, "ID")
+	id := productCategoryGetIntField(req, "ID")
 	if id <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	erpbiz.TrimStringFields(req)
-	if err := erpbiz.ValidateRequiredFields(req); err != nil {
+	productCategoryTrimStringFields(req)
+	if err := productCategoryValidateRequiredFields(req); err != nil {
 		return nil, err
 	}
 	if err := s.validateUniqueFields(c, req, id); err != nil {
@@ -85,9 +85,9 @@ func (s *ProductCategoryServiceImpl) GetByID(c *gin.Context, id int64) (*masterm
 	return s.dao.GetByID(c, id)
 }
 
-func (s *ProductCategoryServiceImpl) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*erpbiz.PageResult[mastermodels.ProductCategory], error) {
+func (s *ProductCategoryServiceImpl) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*mastermodels.ProductCategoryListData, error) {
 	if req != nil {
-		erpbiz.TrimStringFields(req)
+		productCategoryTrimStringFields(req)
 	}
 	return s.dao.ListPage(c, req)
 }
@@ -97,11 +97,11 @@ func (s *ProductCategoryServiceImpl) validateUniqueFields(c *gin.Context, req *m
 		return nil
 	}
 	for _, field := range s.uniqueFields {
-		value, ok := erpbiz.GetFieldValue(req, field.Field)
+		value, ok := productCategoryGetFieldValue(req, field.Field)
 		if !ok {
 			continue
 		}
-		normalized, empty := erpbiz.NormalizeValue(value)
+		normalized, empty := productCategoryNormalizeValue(value)
 		if empty {
 			continue
 		}
@@ -112,7 +112,7 @@ func (s *ProductCategoryServiceImpl) validateUniqueFields(c *gin.Context, req *m
 		if exists == nil {
 			continue
 		}
-		if erpbiz.GetIntField(exists, "ID") != currentID {
+		if productCategoryGetIntField(exists, "ID") != currentID {
 			label := strings.TrimSpace(field.Label)
 			if label == "" {
 				label = field.Column
@@ -140,4 +140,155 @@ func (s *ProductCategoryServiceImpl) ensureCode(req *mastermodels.ProductCategor
 	if req.Code == "" {
 		req.Code = category.GenerateProductCategoryCode()
 	}
+}
+
+type productCategoryUniqueField struct {
+	Field  string
+	Column string
+	Label  string
+}
+
+func productCategoryTrimStringFields(target any) {
+	if target == nil {
+		return
+	}
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return
+	}
+	productCategoryTrimStruct(value)
+}
+
+func productCategoryValidateRequiredFields(target any) error {
+	if target == nil {
+		return nil
+	}
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return nil
+	}
+	valueType := value.Type()
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		structField := valueType.Field(i)
+		if structField.PkgPath != "" || structField.Anonymous {
+			continue
+		}
+		if !strings.Contains(structField.Tag.Get("binding"), "required") {
+			continue
+		}
+		label := structField.Tag.Get("label")
+		if label == "" {
+			label = structField.Name
+		}
+		switch field.Kind() {
+		case reflect.String:
+			if strings.TrimSpace(field.String()) == "" {
+				return errors.New(label + "不能为空")
+			}
+		case reflect.Pointer:
+			if field.IsNil() {
+				return errors.New(label + "不能为空")
+			}
+		default:
+			if field.IsZero() {
+				return errors.New(label + "不能为空")
+			}
+		}
+	}
+	return nil
+}
+
+func productCategoryNormalizeValue(value reflect.Value) (any, bool) {
+	if !value.IsValid() {
+		return nil, true
+	}
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil, true
+		}
+		return productCategoryNormalizeValue(value.Elem())
+	}
+	switch value.Kind() {
+	case reflect.String:
+		trimmed := strings.TrimSpace(value.String())
+		return trimmed, trimmed == ""
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		current := value.Int()
+		return current, current == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		current := value.Uint()
+		return current, current == 0
+	case reflect.Bool:
+		return value.Bool(), false
+	default:
+		if value.IsZero() {
+			return nil, true
+		}
+		return value.Interface(), false
+	}
+}
+
+func productCategoryGetFieldValue(target any, name string) (reflect.Value, bool) {
+	value := productCategoryFieldValue(target, name)
+	return value, value.IsValid()
+}
+
+func productCategoryGetIntField(target any, name string) int64 {
+	value := productCategoryFieldValue(target, name)
+	if !value.IsValid() {
+		return 0
+	}
+	switch value.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return value.Int()
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return int64(value.Uint())
+	}
+	return 0
+}
+
+func productCategoryTrimStruct(value reflect.Value) {
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i)
+		structField := value.Type().Field(i)
+		if structField.PkgPath != "" {
+			continue
+		}
+		if structField.Anonymous {
+			if field.Kind() == reflect.Struct {
+				productCategoryTrimStruct(field)
+			}
+			continue
+		}
+		if field.Kind() == reflect.String && field.CanSet() {
+			field.SetString(strings.TrimSpace(field.String()))
+		}
+	}
+}
+
+func productCategoryFieldValue(target any, name string) reflect.Value {
+	value := reflect.ValueOf(target)
+	if value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return reflect.Value{}
+		}
+		value = value.Elem()
+	}
+	if value.Kind() != reflect.Struct {
+		return reflect.Value{}
+	}
+	return value.FieldByName(name)
 }

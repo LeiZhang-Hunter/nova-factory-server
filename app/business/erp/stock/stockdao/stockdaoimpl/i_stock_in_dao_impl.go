@@ -3,35 +3,38 @@ package stockdaoimpl
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/stock/stockdao"
 	"nova-factory-server/app/business/erp/stock/stockmodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// StockInDaoImpl 提供数据访问能力。
 type StockInDaoImpl struct {
 	db *gorm.DB
 }
 
-// NewStockInDao 创建 DAO。
 func NewStockInDao(db *gorm.DB) stockdao.IStockInDao {
 	return &StockInDaoImpl{db: db}
 }
 
 func (d *StockInDaoImpl) Create(c *gin.Context, req *stockmodels.StockInUpsert) (*stockmodels.StockIn, error) {
-	model := new(stockmodels.StockIn)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	if req == nil {
+		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.PrepareCreate(model, c)
+	model := stockmodels.StockInUpsertToEntity(req)
+	if model == nil {
+		return nil, errors.New("参数不能为空")
+	}
+	model.ID = snowflake.GenID()
+	model.DeptID = baizeContext.GetDeptId(c)
+	model.State = commonStatus.NORMAL
+	model.SetCreateBy(baizeContext.GetUserId(c))
 	if err := d.db.WithContext(c).Table("erp_stock_in").Create(model).Error; err != nil {
 		return nil, err
 	}
@@ -39,50 +42,64 @@ func (d *StockInDaoImpl) Create(c *gin.Context, req *stockmodels.StockInUpsert) 
 }
 
 func (d *StockInDaoImpl) Update(c *gin.Context, req *stockmodels.StockInUpsert) (*stockmodels.StockIn, error) {
-	id := erpbiz.GetIntField(req, "ID")
-	if id <= 0 {
+	if req == nil || req.ID <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	model := new(stockmodels.StockIn)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	updates := make(map[string]any)
+	if req.No != "" {
+		updates["no"] = req.No
 	}
-	if err := erpbiz.PrepareUpdate(model, c); err != nil {
-		return nil, err
+	if req.SupplierID > 0 {
+		updates["supplier_id"] = req.SupplierID
 	}
-	updates := erpbiz.BuildUpdateMap(model)
-	db := d.db.WithContext(c).Table("erp_stock_in").Where("id = ?", id)
-	if erpbiz.HasField(model, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
+	if req.InTime != "" {
+		if t, err := parseTime(req.InTime); err == nil {
+			updates["in_time"] = t
+		}
 	}
+	if req.TotalCount != 0 {
+		updates["total_count"] = req.TotalCount
+	}
+	if req.TotalPrice != 0 {
+		updates["total_price"] = req.TotalPrice
+	}
+	updates["status"] = req.Status
+	if req.Remark != "" {
+		updates["remark"] = req.Remark
+	}
+	if req.FileURL != "" {
+		updates["file_url"] = req.FileURL
+	}
+	updates["update_by"] = baizeContext.GetUserId(c)
+	updates["update_time"] = time.Now()
+	db := d.db.WithContext(c).Table("erp_stock_in").Where("id = ?", req.ID)
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Updates(updates).Error; err != nil {
 		return nil, err
 	}
-	return d.GetByID(c, id)
+	return d.GetByID(c, req.ID)
 }
 
 func (d *StockInDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	db := d.db.WithContext(c).Table("erp_stock_in").Where("id IN ?", ids)
-	if erpbiz.HasField(new(stockmodels.StockIn), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	return db.Updates(map[string]any{
-		"state":       commonStatus.DELETE,
-		"update_by":   baizeContext.GetUserId(c),
-		"update_time": time.Now(),
-	}).Error
+	return d.db.WithContext(c).Table("erp_stock_in").
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(map[string]any{
+			"state":       commonStatus.DELETE,
+			"update_by":   baizeContext.GetUserId(c),
+			"update_time": time.Now(),
+		}).Error
 }
 
 func (d *StockInDaoImpl) GetByID(c *gin.Context, id int64) (*stockmodels.StockIn, error) {
 	item := new(stockmodels.StockIn)
-	db := d.db.WithContext(c).Table("erp_stock_in").Where("id = ?", id)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_stock_in").
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -96,11 +113,10 @@ func (d *StockInDaoImpl) GetByColumn(c *gin.Context, column string, value any) (
 		return nil, nil
 	}
 	item := new(stockmodels.StockIn)
-	db := d.db.WithContext(c).Table("erp_stock_in").Where(fmt.Sprintf("%s = ?", column), value)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_stock_in").
+		Where(fmt.Sprintf("%s = ?", column), value).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -109,26 +125,19 @@ func (d *StockInDaoImpl) GetByColumn(c *gin.Context, column string, value any) (
 	return item, nil
 }
 
-func (d *StockInDaoImpl) ListPage(c *gin.Context, req *stockmodels.StockInQuery) (*erpbiz.PageResult[stockmodels.StockIn], error) {
+func (d *StockInDaoImpl) ListPage(c *gin.Context, req *stockmodels.StockInQuery) (*stockmodels.StockInListData, error) {
 	if req == nil {
 		req = new(stockmodels.StockInQuery)
 	}
-	db := d.db.WithContext(c).Table("erp_stock_in")
-	if erpbiz.HasField(new(stockmodels.StockIn), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	db = erpbiz.ApplyFilters(db, req)
-	page, size := erpbiz.GetPageSize(req)
+	db := d.db.WithContext(c).Table("erp_stock_in").Where("state = ?", commonStatus.NORMAL)
+	db = applyStockInFilters(db, req)
+	page, size := getPageSize(req.Page, req.Size)
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
 	rows := make([]stockmodels.StockIn, 0)
-	orderBy := strings.TrimSpace("id DESC")
-	if orderBy == "" {
-		orderBy = "id DESC"
-	}
-	if err := db.Order(orderBy).Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
+	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	result := make([]*stockmodels.StockIn, 0, len(rows))
@@ -136,7 +145,7 @@ func (d *StockInDaoImpl) ListPage(c *gin.Context, req *stockmodels.StockInQuery)
 		item := rows[i]
 		result = append(result, &item)
 	}
-	return &erpbiz.PageResult[stockmodels.StockIn]{Rows: result, Total: total}, nil
+	return &stockmodels.StockInListData{Rows: result, Total: total}, nil
 }
 
 func (d *StockInDaoImpl) List(c *gin.Context, req *stockmodels.StockInQuery) (*stockmodels.StockInListData, error) {

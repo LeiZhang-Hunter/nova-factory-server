@@ -3,35 +3,38 @@ package masterdaoimpl
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/master/mastermodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// SupplierDaoImpl 提供数据访问能力。
 type SupplierDaoImpl struct {
 	db *gorm.DB
 }
 
-// NewSupplierDao 创建 DAO。
 func NewSupplierDao(db *gorm.DB) masterdao.ISupplierDao {
 	return &SupplierDaoImpl{db: db}
 }
 
 func (d *SupplierDaoImpl) Create(c *gin.Context, req *mastermodels.SupplierUpsert) (*mastermodels.Supplier, error) {
-	model := new(mastermodels.Supplier)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	if req == nil {
+		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.PrepareCreate(model, c)
+	model := mastermodels.SupplierUpsertToEntity(req)
+	if model == nil {
+		return nil, errors.New("参数不能为空")
+	}
+	model.ID = snowflake.GenID()
+	model.DeptID = baizeContext.GetDeptId(c)
+	model.State = commonStatus.NORMAL
+	model.SetCreateBy(baizeContext.GetUserId(c))
 	if err := d.db.WithContext(c).Table("erp_supplier").Create(model).Error; err != nil {
 		return nil, err
 	}
@@ -39,50 +42,81 @@ func (d *SupplierDaoImpl) Create(c *gin.Context, req *mastermodels.SupplierUpser
 }
 
 func (d *SupplierDaoImpl) Update(c *gin.Context, req *mastermodels.SupplierUpsert) (*mastermodels.Supplier, error) {
-	id := erpbiz.GetIntField(req, "ID")
-	if id <= 0 {
+	if req == nil || req.ID <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	model := new(mastermodels.Supplier)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	updates := make(map[string]any)
+	if req.Name != "" {
+		updates["name"] = req.Name
 	}
-	if err := erpbiz.PrepareUpdate(model, c); err != nil {
-		return nil, err
+	if req.Code != "" {
+		updates["code"] = req.Code
 	}
-	updates := erpbiz.BuildUpdateMap(model)
-	db := d.db.WithContext(c).Table("erp_supplier").Where("id = ?", id)
-	if erpbiz.HasField(model, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
+	if req.Contact != "" {
+		updates["contact"] = req.Contact
 	}
+	if req.Mobile != "" {
+		updates["mobile"] = req.Mobile
+	}
+	if req.Telephone != "" {
+		updates["telephone"] = req.Telephone
+	}
+	if req.Email != "" {
+		updates["email"] = req.Email
+	}
+	if req.Fax != "" {
+		updates["fax"] = req.Fax
+	}
+	if req.Remark != "" {
+		updates["remark"] = req.Remark
+	}
+	updates["status"] = req.Status
+	updates["sort"] = req.Sort
+	if req.TaxNo != "" {
+		updates["tax_no"] = req.TaxNo
+	}
+	if req.TaxPercent != 0 {
+		updates["tax_percent"] = req.TaxPercent
+	}
+	if req.BankName != "" {
+		updates["bank_name"] = req.BankName
+	}
+	if req.BankAccount != "" {
+		updates["bank_account"] = req.BankAccount
+	}
+	if req.BankAddress != "" {
+		updates["bank_address"] = req.BankAddress
+	}
+	updates["update_by"] = baizeContext.GetUserId(c)
+	updates["update_time"] = time.Now()
+	db := d.db.WithContext(c).Table("erp_supplier").Where("id = ?", req.ID)
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Updates(updates).Error; err != nil {
 		return nil, err
 	}
-	return d.GetByID(c, id)
+	return d.GetByID(c, req.ID)
 }
 
 func (d *SupplierDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	db := d.db.WithContext(c).Table("erp_supplier").Where("id IN ?", ids)
-	if erpbiz.HasField(new(mastermodels.Supplier), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	return db.Updates(map[string]any{
-		"state":       commonStatus.DELETE,
-		"update_by":   baizeContext.GetUserId(c),
-		"update_time": time.Now(),
-	}).Error
+	return d.db.WithContext(c).Table("erp_supplier").
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(map[string]any{
+			"state":       commonStatus.DELETE,
+			"update_by":   baizeContext.GetUserId(c),
+			"update_time": time.Now(),
+		}).Error
 }
 
 func (d *SupplierDaoImpl) GetByID(c *gin.Context, id int64) (*mastermodels.Supplier, error) {
 	item := new(mastermodels.Supplier)
-	db := d.db.WithContext(c).Table("erp_supplier").Where("id = ?", id)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_supplier").
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -96,11 +130,10 @@ func (d *SupplierDaoImpl) GetByColumn(c *gin.Context, column string, value any) 
 		return nil, nil
 	}
 	item := new(mastermodels.Supplier)
-	db := d.db.WithContext(c).Table("erp_supplier").Where(fmt.Sprintf("%s = ?", column), value)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_supplier").
+		Where(fmt.Sprintf("%s = ?", column), value).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -109,26 +142,19 @@ func (d *SupplierDaoImpl) GetByColumn(c *gin.Context, column string, value any) 
 	return item, nil
 }
 
-func (d *SupplierDaoImpl) ListPage(c *gin.Context, req *mastermodels.SupplierQuery) (*erpbiz.PageResult[mastermodels.Supplier], error) {
+func (d *SupplierDaoImpl) ListPage(c *gin.Context, req *mastermodels.SupplierQuery) (*mastermodels.SupplierListData, error) {
 	if req == nil {
 		req = new(mastermodels.SupplierQuery)
 	}
-	db := d.db.WithContext(c).Table("erp_supplier")
-	if erpbiz.HasField(new(mastermodels.Supplier), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	db = erpbiz.ApplyFilters(db, req)
-	page, size := erpbiz.GetPageSize(req)
+	db := d.db.WithContext(c).Table("erp_supplier").Where("state = ?", commonStatus.NORMAL)
+	db = applySupplierFilters(db, req)
+	page, size := getPageSize(req.Page, req.Size)
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
 	rows := make([]mastermodels.Supplier, 0)
-	orderBy := strings.TrimSpace("sort ASC, id DESC")
-	if orderBy == "" {
-		orderBy = "id DESC"
-	}
-	if err := db.Order(orderBy).Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
+	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	result := make([]*mastermodels.Supplier, 0, len(rows))
@@ -136,7 +162,7 @@ func (d *SupplierDaoImpl) ListPage(c *gin.Context, req *mastermodels.SupplierQue
 		item := rows[i]
 		result = append(result, &item)
 	}
-	return &erpbiz.PageResult[mastermodels.Supplier]{Rows: result, Total: total}, nil
+	return &mastermodels.SupplierListData{Rows: result, Total: total}, nil
 }
 
 func (d *SupplierDaoImpl) List(c *gin.Context, req *mastermodels.SupplierQuery) (*mastermodels.SupplierListData, error) {

@@ -3,86 +3,112 @@ package purchasedaoimpl
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/erpbiz"
 	"nova-factory-server/app/business/erp/purchase/purchasedao"
 	"nova-factory-server/app/business/erp/purchase/purchasemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/snowflake"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// PurchaseOrderItemDaoImpl 提供数据访问能力。
 type PurchaseOrderItemDaoImpl struct {
 	db *gorm.DB
 }
 
-// NewPurchaseOrderItemDao 创建 DAO。
 func NewPurchaseOrderItemDao(db *gorm.DB) purchasedao.IPurchaseOrderItemDao {
 	return &PurchaseOrderItemDaoImpl{db: db}
 }
 
 func (d *PurchaseOrderItemDaoImpl) Create(c *gin.Context, req *purchasemodels.PurchaseOrderItemUpsert) (*purchasemodels.PurchaseOrderItem, error) {
-	model := new(purchasemodels.PurchaseOrderItem)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	if req == nil {
+		return nil, errors.New("参数不能为空")
 	}
-	erpbiz.PrepareCreate(model, c)
-	if err := d.db.WithContext(c).Table("erp_purchase_order_items").Create(model).Error; err != nil {
+	model := purchasemodels.PurchaseOrderItemUpsertToEntity(req)
+	if model == nil {
+		return nil, errors.New("参数不能为空")
+	}
+	model.ID = snowflake.GenID()
+	model.DeptID = baizeContext.GetDeptId(c)
+	model.State = commonStatus.NORMAL
+	model.SetCreateBy(baizeContext.GetUserId(c))
+	if err := d.db.WithContext(c).Table("erp_purchase_order_item").Create(model).Error; err != nil {
 		return nil, err
 	}
 	return model, nil
 }
 
 func (d *PurchaseOrderItemDaoImpl) Update(c *gin.Context, req *purchasemodels.PurchaseOrderItemUpsert) (*purchasemodels.PurchaseOrderItem, error) {
-	id := erpbiz.GetIntField(req, "ID")
-	if id <= 0 {
+	if req == nil || req.ID <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	model := new(purchasemodels.PurchaseOrderItem)
-	if err := erpbiz.CopyStruct(model, req); err != nil {
-		return nil, err
+	updates := make(map[string]any)
+	if req.OrderID > 0 {
+		updates["order_id"] = req.OrderID
 	}
-	if err := erpbiz.PrepareUpdate(model, c); err != nil {
-		return nil, err
+	if req.ProductID > 0 {
+		updates["product_id"] = req.ProductID
 	}
-	updates := erpbiz.BuildUpdateMap(model)
-	db := d.db.WithContext(c).Table("erp_purchase_order_items").Where("id = ?", id)
-	if erpbiz.HasField(model, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
+	if req.ProductUnitID > 0 {
+		updates["product_unit_id"] = req.ProductUnitID
 	}
+	if req.ProductPrice != 0 {
+		updates["product_price"] = req.ProductPrice
+	}
+	if req.Count != 0 {
+		updates["count"] = req.Count
+	}
+	if req.TotalPrice != 0 {
+		updates["total_price"] = req.TotalPrice
+	}
+	if req.TaxPercent != 0 {
+		updates["tax_percent"] = req.TaxPercent
+	}
+	if req.TaxPrice != 0 {
+		updates["tax_price"] = req.TaxPrice
+	}
+	if req.Remark != "" {
+		updates["remark"] = req.Remark
+	}
+	if req.InCount != 0 {
+		updates["in_count"] = req.InCount
+	}
+	if req.ReturnCount != 0 {
+		updates["return_count"] = req.ReturnCount
+	}
+	updates["update_by"] = baizeContext.GetUserId(c)
+	updates["update_time"] = time.Now()
+	db := d.db.WithContext(c).Table("erp_purchase_order_item").Where("id = ?", req.ID)
+	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Updates(updates).Error; err != nil {
 		return nil, err
 	}
-	return d.GetByID(c, id)
+	return d.GetByID(c, req.ID)
 }
 
 func (d *PurchaseOrderItemDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	db := d.db.WithContext(c).Table("erp_purchase_order_items").Where("id IN ?", ids)
-	if erpbiz.HasField(new(purchasemodels.PurchaseOrderItem), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	return db.Updates(map[string]any{
-		"state":       commonStatus.DELETE,
-		"update_by":   baizeContext.GetUserId(c),
-		"update_time": time.Now(),
-	}).Error
+	return d.db.WithContext(c).Table("erp_purchase_order_item").
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(map[string]any{
+			"state":       commonStatus.DELETE,
+			"update_by":   baizeContext.GetUserId(c),
+			"update_time": time.Now(),
+		}).Error
 }
 
 func (d *PurchaseOrderItemDaoImpl) GetByID(c *gin.Context, id int64) (*purchasemodels.PurchaseOrderItem, error) {
 	item := new(purchasemodels.PurchaseOrderItem)
-	db := d.db.WithContext(c).Table("erp_purchase_order_items").Where("id = ?", id)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_purchase_order_item").
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -96,11 +122,10 @@ func (d *PurchaseOrderItemDaoImpl) GetByColumn(c *gin.Context, column string, va
 		return nil, nil
 	}
 	item := new(purchasemodels.PurchaseOrderItem)
-	db := d.db.WithContext(c).Table("erp_purchase_order_items").Where(fmt.Sprintf("%s = ?", column), value)
-	if erpbiz.HasField(item, "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	if err := db.First(item).Error; err != nil {
+	if err := d.db.WithContext(c).Table("erp_purchase_order_item").
+		Where(fmt.Sprintf("%s = ?", column), value).
+		Where("state = ?", commonStatus.NORMAL).
+		First(item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -109,26 +134,19 @@ func (d *PurchaseOrderItemDaoImpl) GetByColumn(c *gin.Context, column string, va
 	return item, nil
 }
 
-func (d *PurchaseOrderItemDaoImpl) ListPage(c *gin.Context, req *purchasemodels.PurchaseOrderItemQuery) (*erpbiz.PageResult[purchasemodels.PurchaseOrderItem], error) {
+func (d *PurchaseOrderItemDaoImpl) ListPage(c *gin.Context, req *purchasemodels.PurchaseOrderItemQuery) (*purchasemodels.PurchaseOrderItemListData, error) {
 	if req == nil {
 		req = new(purchasemodels.PurchaseOrderItemQuery)
 	}
-	db := d.db.WithContext(c).Table("erp_purchase_order_items")
-	if erpbiz.HasField(new(purchasemodels.PurchaseOrderItem), "State") {
-		db = db.Where("state = ?", commonStatus.NORMAL)
-	}
-	db = erpbiz.ApplyFilters(db, req)
-	page, size := erpbiz.GetPageSize(req)
+	db := d.db.WithContext(c).Table("erp_purchase_order_item").Where("state = ?", commonStatus.NORMAL)
+	db = applyPurchaseOrderItemFilters(db, req)
+	page, size := getPageSize(req.Page, req.Size)
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
 	rows := make([]purchasemodels.PurchaseOrderItem, 0)
-	orderBy := strings.TrimSpace("id DESC")
-	if orderBy == "" {
-		orderBy = "id DESC"
-	}
-	if err := db.Order(orderBy).Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
+	if err := db.Order("id DESC").Offset(int((page - 1) * size)).Limit(int(size)).Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	result := make([]*purchasemodels.PurchaseOrderItem, 0, len(rows))
@@ -136,7 +154,7 @@ func (d *PurchaseOrderItemDaoImpl) ListPage(c *gin.Context, req *purchasemodels.
 		item := rows[i]
 		result = append(result, &item)
 	}
-	return &erpbiz.PageResult[purchasemodels.PurchaseOrderItem]{Rows: result, Total: total}, nil
+	return &purchasemodels.PurchaseOrderItemListData{Rows: result, Total: total}, nil
 }
 
 func (d *PurchaseOrderItemDaoImpl) List(c *gin.Context, req *purchasemodels.PurchaseOrderItemQuery) (*purchasemodels.PurchaseOrderItemListData, error) {
