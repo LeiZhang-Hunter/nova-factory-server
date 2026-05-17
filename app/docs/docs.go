@@ -2231,6 +2231,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/model/provider/embedding/config": {
+            "get": {
+                "description": "读取支持embedding的模型供应商及其下级embedding模型信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/模型配置"
+                ],
+                "summary": "embedding模型信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/model/provider/global/get": {
             "get": {
                 "description": "读取SetGlobalModel保存的用户模型配置",
@@ -3439,6 +3481,359 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/app/shop/address/default": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的默认收货地址",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取默认收货地址",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取地址详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取地址详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "地址ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的地址列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取地址列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/region": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "不传 parentCode 返回省级列表，传省编码返回市级，传市编码返回区级",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "获取省市区列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "父级行政区编码",
+                        "name": "parentCode",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除地址",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "删除地址",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "地址ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/address/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改地址",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户地址"
+                ],
+                "summary": "新增或修改地址",
+                "parameters": [
+                    {
+                        "description": "地址设置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nova-factory-server_app_business_shop_api_models.AddressSetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/auth/refresh": {
+            "post": {
+                "description": "用有效JWT换取新Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "刷新JWT Token",
+                "parameters": [
+                    {
+                        "description": "刷新Token参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RefreshTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "刷新成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/auth/wechat-login": {
+            "post": {
+                "description": "微信小程序授权登录，code换openid并生成JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "微信小程序授权登录",
+                "parameters": [
+                    {
+                        "description": "微信登录参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WechatLoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/cart/add": {
+            "post": {
+                "description": "加入购物车（同一 SKU 重复加入会累加数量）",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App购物车"
+                ],
+                "summary": "加入购物车",
+                "parameters": [
+                    {
+                        "description": "购物车新增修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CartSetDataReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "加入成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/cart/list": {
+            "get": {
+                "description": "查询当前登录用户购物车列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App购物车"
+                ],
+                "summary": "查询用户购物车列表",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/cart/remove/{ids}": {
+            "delete": {
+                "description": "根据购物车ID列表删除当前用户的购物车商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App购物车"
+                ],
+                "summary": "删除购物车商品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "购物车ID列表，多个逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/app/shop/category/all": {
             "get": {
                 "security": [
@@ -3454,6 +3849,450 @@ const docTemplate = `{
                     "app接口/商城/App商品分类"
                 ],
                 "summary": "读取全部商品分类",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/favorite": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "添加商品到收藏列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户收藏"
+                ],
+                "summary": "添加收藏",
+                "parameters": [
+                    {
+                        "description": "收藏参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FavoriteAddReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "添加成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/favorite/favorites": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的商品收藏列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户收藏"
+                ],
+                "summary": "获取收藏列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/favorite/{goodsId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "从收藏列表移除商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户收藏"
+                ],
+                "summary": "移除收藏",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品ID",
+                        "name": "goodsId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "移除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/favorite/{goodsId}/status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询指定商品是否被收藏",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户收藏"
+                ],
+                "summary": "查询收藏状态",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品ID",
+                        "name": "goodsId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/getInfo": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前商城登录用户信息及权限",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "获取当前商城登录用户信息",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/goods/repurchase": {
+            "get": {
+                "description": "获取用户历史购买过的商品列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App商品"
+                ],
+                "summary": "获取用户复购商品列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品分类ID",
+                        "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/home/list": {
+            "get": {
+                "description": "读取前台首页可展示的模块及其明细项",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App首页"
+                ],
+                "summary": "获取前台首页模块列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "页面标识，默认 index",
+                        "name": "pageKey",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "退出当前商城登录会话",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/App鉴权"
+                ],
+                "summary": "退出当前商城登录会话",
+                "responses": {
+                    "200": {
+                        "description": "退出成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/order/cache": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "固化本次立即购买商品快照",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App订单"
+                ],
+                "summary": "缓存预下单商品",
+                "parameters": [
+                    {
+                        "description": "预下单缓存参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.OrderCacheReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "缓存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/order/confirm": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据当前地址、配送方式等信息实时试算确认单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App订单"
+                ],
+                "summary": "获取确认单数据",
+                "parameters": [
+                    {
+                        "description": "确认单参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.OrderConfirmReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/order/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据预订单 orderKey 正式落订单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App订单"
+                ],
+                "summary": "创建订单",
+                "parameters": [
+                    {
+                        "description": "订单创建参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.OrderCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/product/info/{id}": {
+            "get": {
+                "description": "根据ID读取商品详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App商品"
+                ],
+                "summary": "读取商品详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/product/list": {
+            "get": {
+                "description": "根据分类ID获取商品列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App商品"
+                ],
+                "summary": "获取商品列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品分类ID",
+                        "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "商品名称",
+                        "name": "goodsName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "获取成功",
@@ -4377,6 +5216,16 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "brand",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "enable",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "gateway_id",
                         "in": "query"
                     },
                     {
@@ -7926,6 +8775,1765 @@ const docTemplate = `{
                 }
             }
         },
+        "/erp/finance/payment-item/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 付款项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "查询 ERP 付款项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "bizType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "paymentId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/payment-item/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 付款项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "查询 ERP 付款项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/payment-item/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 付款项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "删除 ERP 付款项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/payment-item/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 付款项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "新增或修改 ERP 付款项",
+                "parameters": [
+                    {
+                        "description": "ERP 付款项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/financemodels.FinancePaymentItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/payment/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 付款单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "查询 ERP 付款单列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "financeUserId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "supplierId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/payment/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 付款单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "查询 ERP 付款单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/payment/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 付款单，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "删除 ERP 付款单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/payment/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 付款单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "新增或修改 ERP 付款单",
+                "parameters": [
+                    {
+                        "description": "ERP 付款单参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/financemodels.FinancePaymentUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/receipt-item/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 收款项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "查询 ERP 收款项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "bizType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "receiptId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/receipt-item/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 收款项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "查询 ERP 收款项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/receipt-item/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 收款项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "删除 ERP 收款项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/receipt-item/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 收款项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "新增或修改 ERP 收款项",
+                "parameters": [
+                    {
+                        "description": "ERP 收款项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/financemodels.FinanceReceiptItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/receipt/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 收款单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "查询 ERP 收款单列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "customerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "financeUserId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/receipt/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 收款单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "查询 ERP 收款单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/receipt/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 收款单，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "删除 ERP 收款单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/finance/receipt/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 收款单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/财务管理"
+                ],
+                "summary": "新增或修改 ERP 收款单",
+                "parameters": [
+                    {
+                        "description": "ERP 收款单参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/financemodels.FinanceReceiptUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/account/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 结算账户列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 结算账户列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "name": "defaultStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/account/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 结算账户详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 结算账户详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/account/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 结算账户，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "删除 ERP 结算账户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/account/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 结算账户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "新增或修改 ERP 结算账户",
+                "parameters": [
+                    {
+                        "description": "ERP 结算账户参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.AccountUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/customer/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 客户列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 客户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/customer/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 客户详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 客户详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/customer/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 客户，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "删除 ERP 客户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/customer/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 客户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "新增或修改 ERP 客户",
+                "parameters": [
+                    {
+                        "description": "ERP 客户参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.CustomerUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product-category/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 产品分类列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 产品分类列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "parentId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product-category/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 产品分类详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 产品分类详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product-category/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 产品分类，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "删除 ERP 产品分类",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product-category/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 产品分类",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "新增或修改 ERP 产品分类",
+                "parameters": [
+                    {
+                        "description": "ERP 产品分类参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductCategoryUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product-unit/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 产品单位列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 产品单位列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product-unit/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 产品单位详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 产品单位详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product-unit/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 产品单位，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "删除 ERP 产品单位",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product-unit/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 产品单位",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "新增或修改 ERP 产品单位",
+                "parameters": [
+                    {
+                        "description": "ERP 产品单位参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductUnitUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 产品列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 产品列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 产品详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 产品详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 产品，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "删除 ERP 产品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 产品",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "新增或修改 ERP 产品",
+                "parameters": [
+                    {
+                        "description": "ERP 产品参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/supplier/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 供应商列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 供应商列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/supplier/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 供应商详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 供应商详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/supplier/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 供应商，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "删除 ERP 供应商",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/supplier/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 供应商",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "新增或修改 ERP 供应商",
+                "parameters": [
+                    {
+                        "description": "ERP 供应商参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.SupplierUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/warehouse/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 仓库列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 仓库列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "name": "defaultStatus",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/warehouse/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 仓库详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询 ERP 仓库详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/warehouse/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 仓库，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "删除 ERP 仓库",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/warehouse/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 仓库",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "新增或修改 ERP 仓库",
+                "parameters": [
+                    {
+                        "description": "ERP 仓库参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.WarehouseUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/erp/order-audit/approve": {
             "post": {
                 "security": [
@@ -7941,7 +10549,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核通过",
                 "parameters": [
@@ -7951,7 +10559,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderAuditAction"
+                            "$ref": "#/definitions/salemodels.OrderAuditAction"
                         }
                     }
                 ],
@@ -7980,7 +10588,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核批量导入",
                 "parameters": [
@@ -7990,7 +10598,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderAuditImportReq"
+                            "$ref": "#/definitions/salemodels.OrderAuditImportReq"
                         }
                     }
                 ],
@@ -8016,7 +10624,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核列表",
                 "parameters": [
@@ -8079,7 +10687,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核详情",
                 "parameters": [
@@ -8116,7 +10724,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核驳回",
                 "parameters": [
@@ -8126,7 +10734,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderAuditAction"
+                            "$ref": "#/definitions/salemodels.OrderAuditAction"
                         }
                     }
                 ],
@@ -8152,7 +10760,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核删除",
                 "parameters": [
@@ -8189,7 +10797,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单审核"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单审核保存",
                 "parameters": [
@@ -8199,7 +10807,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderAuditSet"
+                            "$ref": "#/definitions/salemodels.OrderAuditSet"
                         }
                     }
                 ],
@@ -8225,7 +10833,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "检查管家婆登录状态",
                 "parameters": [
@@ -8258,7 +10866,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单列表",
                 "parameters": [
@@ -8321,7 +10929,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单详情",
                 "parameters": [
@@ -8355,7 +10963,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单删除",
                 "parameters": [
@@ -8392,7 +11000,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "ERP订单保存",
                 "parameters": [
@@ -8402,7 +11010,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ordermodels.OrderSet"
+                            "$ref": "#/definitions/salemodels.OrderSet"
                         }
                     }
                 ],
@@ -8431,7 +11039,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "ERP/订单管理"
+                    "ERP/销售管理"
                 ],
                 "summary": "同步销售订单",
                 "parameters": [
@@ -8448,6 +11056,1675 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "同步成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/in-items/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询采购入库项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询采购入库项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "inId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/in-items/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询采购入库项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询采购入库项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/in-items/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除采购入库项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "删除采购入库项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/in-items/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改采购入库项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "新增或修改采购入库项",
+                "parameters": [
+                    {
+                        "description": "ERP 采购入库项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/purchasemodels.PurchaseInItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/in/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 采购入库列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询 ERP 采购入库列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "orderId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "supplierId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/in/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 采购入库详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询 ERP 采购入库详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/in/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 采购入库，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "删除 ERP 采购入库",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/in/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 采购入库",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "新增或修改 ERP 采购入库",
+                "parameters": [
+                    {
+                        "description": "ERP 采购入库参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/purchasemodels.PurchaseInUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/order-items/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 采购订单项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询 ERP 采购订单项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "orderId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/order-items/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 采购订单项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询 ERP 采购订单项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/order-items/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 采购订单项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "删除 ERP 采购订单项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/order-items/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 采购订单项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "新增或修改 ERP 采购订单项",
+                "parameters": [
+                    {
+                        "description": "ERP 采购订单项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/purchasemodels.PurchaseOrderItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/order/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 ERP 采购订单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询 ERP 采购订单列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "supplierId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/order/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 ERP 采购订单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询 ERP 采购订单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/order/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 ERP 采购订单，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "删除 ERP 采购订单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/order/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 ERP 采购订单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "新增或修改 ERP 采购订单",
+                "parameters": [
+                    {
+                        "description": "ERP 采购订单及明细参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/purchasemodels.PurchaseOrderUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/order/update-status": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "审核或反审核 ERP 采购订单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "更新 ERP 采购订单状态",
+                "parameters": [
+                    {
+                        "description": "ERP 采购订单状态参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/purchasemodels.PurchaseOrderStatusReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/return-items/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询采购退货项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询采购退货项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "returnId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/return-items/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询采购退货项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询采购退货项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/return-items/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除采购退货项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "删除采购退货项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/return-items/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改采购退货项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "新增或修改采购退货项",
+                "parameters": [
+                    {
+                        "description": "ERP 采购退货项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/purchasemodels.PurchaseReturnItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/return/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询采购退货列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询采购退货列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "orderId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "supplierId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/return/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询采购退货详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "查询采购退货详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/return/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除采购退货，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "删除采购退货",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/purchase/return/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改采购退货",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/采购管理"
+                ],
+                "summary": "新增或修改采购退货",
+                "parameters": [
+                    {
+                        "description": "ERP 采购退货参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/purchasemodels.PurchaseReturnUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/out-items/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询销售出库项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "查询销售出库项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "outId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/out-items/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询销售出库项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "查询销售出库项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/out-items/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除销售出库项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "删除销售出库项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/out-items/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改销售出库项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "新增或修改销售出库项",
+                "parameters": [
+                    {
+                        "description": "ERP 销售出库项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/salemodels.SaleOutItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/out/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询销售出库列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "查询销售出库列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "customerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "orderId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/out/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询销售出库详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "查询销售出库详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/out/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除销售出库，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "删除销售出库",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/out/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改销售出库",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "新增或修改销售出库",
+                "parameters": [
+                    {
+                        "description": "ERP 销售出库参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/salemodels.SaleOutUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/return-items/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询销售退货项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "查询销售退货项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "returnId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/return-items/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询销售退货项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "查询销售退货项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/return-items/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除销售退货项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "删除销售退货项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/return-items/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改销售退货项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "新增或修改销售退货项",
+                "parameters": [
+                    {
+                        "description": "ERP 销售退货项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/salemodels.SaleReturnItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/return/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询销售退货列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "查询销售退货列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "accountId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "customerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "orderId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/return/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询销售退货详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "查询销售退货详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/return/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除销售退货，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "删除销售退货",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/return/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改销售退货",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "新增或修改销售退货",
+                "parameters": [
+                    {
+                        "description": "ERP 销售退货参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/salemodels.SaleReturnUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -8937,6 +13214,1576 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/check-item/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询库存盘点单项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询库存盘点单项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "checkId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/check-item/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询库存盘点单项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询库存盘点单项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/check-item/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除库存盘点单项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除库存盘点单项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/check-item/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改库存盘点单项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改库存盘点单项",
+                "parameters": [
+                    {
+                        "description": "ERP 库存盘点单项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockCheckItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/check/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询库存盘点单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询库存盘点单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/check/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询库存盘点单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询库存盘点单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/check/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除库存盘点单，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除库存盘点单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/check/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改库存盘点单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改库存盘点单",
+                "parameters": [
+                    {
+                        "description": "ERP 库存盘点单参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockCheckUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/in-item/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询其它入库单项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询其它入库单项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "inId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/in-item/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询其它入库单项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询其它入库单项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/in-item/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除其它入库单项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除其它入库单项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/in-item/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改其它入库单项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改其它入库单项",
+                "parameters": [
+                    {
+                        "description": "ERP 其它入库单项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockInItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/in/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询其它入库单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询其它入库单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "supplierId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/in/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询其它入库单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询其它入库单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/in/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除其它入库单，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除其它入库单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/in/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改其它入库单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改其它入库单",
+                "parameters": [
+                    {
+                        "description": "ERP 其它入库单参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockInUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/move-item/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询库存调拨单项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询库存调拨单项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "moveId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/move-item/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询库存调拨单项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询库存调拨单项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/move-item/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除库存调拨单项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除库存调拨单项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/move-item/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改库存调拨单项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改库存调拨单项",
+                "parameters": [
+                    {
+                        "description": "ERP 库存调拨单项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockMoveItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/move/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询库存调拨单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询库存调拨单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/move/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询库存调拨单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询库存调拨单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/move/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除库存调拨单，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除库存调拨单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/move/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改库存调拨单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改库存调拨单",
+                "parameters": [
+                    {
+                        "description": "ERP 库存调拨单参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockMoveUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/out-item/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询其它出库单项列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询其它出库单项列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "outId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/out-item/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询其它出库单项详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询其它出库单项详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/out-item/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除其它出库单项，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除其它出库单项",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/out-item/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改其它出库单项",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改其它出库单项",
+                "parameters": [
+                    {
+                        "description": "ERP 其它出库单项参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockOutItemUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/out/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询其它出库单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询其它出库单列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "customerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "no",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/out/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询其它出库单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询其它出库单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/out/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除其它出库单，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除其它出库单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/out/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改其它出库单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改其它出库单",
+                "parameters": [
+                    {
+                        "description": "ERP 其它出库单参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockOutUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/record/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询产品库存明细列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询产品库存明细列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "bizType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/record/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询产品库存明细详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询产品库存明细详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/record/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除产品库存明细，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除产品库存明细",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/record/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改产品库存明细",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改产品库存明细",
+                "parameters": [
+                    {
+                        "description": "ERP 产品库存明细参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockRecordUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/stock/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询产品库存列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询产品库存列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/stock/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询产品库存详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "查询产品库存详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/stock/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除产品库存，多个ID用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "删除产品库存",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "主键ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/stock/stock/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改产品库存",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/库存管理"
+                ],
+                "summary": "新增或修改产品库存",
+                "parameters": [
+                    {
+                        "description": "ERP 产品库存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/stockmodels.StockUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "设置成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -10542,21 +16389,30 @@ const docTemplate = `{
                 }
             }
         },
-        "/shop/app/getInfo": {
+        "/shop/activity/combination/info/{id}": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "获取当前商城登录用户信息及权限",
+                "description": "根据ID获取拼团商品详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "商城/App鉴权"
+                    "商城/活动管理/拼团商品"
                 ],
-                "summary": "获取当前商城登录用户信息",
+                "summary": "获取拼团商品详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "拼团商品ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "获取成功",
@@ -10567,33 +16423,56 @@ const docTemplate = `{
                 }
             }
         },
-        "/shop/app/login": {
-            "post": {
-                "description": "使用 shop_user 账号登录商城",
-                "consumes": [
-                    "application/json"
+        "/shop/activity/combination/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
+                "description": "分页查询拼团商品列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "商城/App鉴权"
+                    "商城/活动管理/拼团商品"
                 ],
-                "summary": "商城用户登录",
+                "summary": "获取拼团商品列表",
                 "parameters": [
                     {
-                        "description": "商城用户登录参数",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.ShopLoginReq"
-                        }
+                        "type": "integer",
+                        "name": "isHost",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "isShow",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "title",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "登录成功",
+                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -10601,24 +16480,643 @@ const docTemplate = `{
                 }
             }
         },
-        "/shop/app/logout": {
+        "/shop/activity/combination/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除拼团商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/拼团商品"
+                ],
+                "summary": "删除拼团商品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "拼团商品ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/combination/set": {
             "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "退出当前商城登录会话",
+                "description": "新增或修改拼团商品",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "商城/App鉴权"
+                    "商城/活动管理/拼团商品"
                 ],
-                "summary": "退出当前商城登录会话",
+                "summary": "保存拼团商品",
+                "parameters": [
+                    {
+                        "description": "拼团商品保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CombinationSet"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "退出成功",
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/pink/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取拼团开团记录详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/拼团记录"
+                ],
+                "summary": "获取拼团详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "拼团记录ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/pink/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询拼团开团记录",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/拼团记录"
+                ],
+                "summary": "获取拼团列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "cid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "isRefund",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "orderId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "uid",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询秒杀商品列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀商品"
+                ],
+                "summary": "获取秒杀商品列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "活动ID",
+                        "name": "activityId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "是否热门推荐",
+                        "name": "isHot",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "是否显示",
+                        "name": "isShow",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "商品ID",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "商品状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "活动标题",
+                        "name": "title",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除秒杀商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀商品"
+                ],
+                "summary": "删除秒杀商品",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "秒杀商品ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改秒杀商品",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀商品"
+                ],
+                "summary": "保存秒杀商品",
+                "parameters": [
+                    {
+                        "description": "秒杀商品保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SeckillSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_activity/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取秒杀活动详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀活动"
+                ],
+                "summary": "获取秒杀活动详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "秒杀活动ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_activity/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询秒杀活动列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀活动"
+                ],
+                "summary": "获取秒杀活动列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "关联ID",
+                        "name": "linkId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "显示状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "活动名称",
+                        "name": "title",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "活动类型",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_activity/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除秒杀活动",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀活动"
+                ],
+                "summary": "删除秒杀活动",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "秒杀活动ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_activity/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改秒杀活动",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀活动"
+                ],
+                "summary": "保存秒杀活动",
+                "parameters": [
+                    {
+                        "description": "秒杀活动保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SeckillActivitySet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_config/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取商品秒杀配置详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀配置"
+                ],
+                "summary": "获取商品秒杀配置详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品秒杀配置ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_config/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询商品秒杀配置列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀配置"
+                ],
+                "summary": "获取商品秒杀配置列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "开启时间",
+                        "name": "beginClock",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_config/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除商品秒杀配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀配置"
+                ],
+                "summary": "删除商品秒杀配置",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "商品秒杀配置ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/activity/seckill_config/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改商品秒杀配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/活动管理/秒杀配置"
+                ],
+                "summary": "保存商品秒杀配置",
+                "parameters": [
+                    {
+                        "description": "商品秒杀配置保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SeckillConfigSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -10821,6 +17319,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/config/wechat/get": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取微信小程序配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/系统配置"
+                ],
+                "summary": "获取微信小程序配置",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/config/wechat/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新微信小程序配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/系统配置"
+                ],
+                "summary": "更新微信小程序配置",
+                "parameters": [
+                    {
+                        "description": "微信小程序配置参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WechatConfigReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/goods": {
             "put": {
                 "security": [
@@ -10891,6 +17450,87 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/goods/export/csv": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按查询条件导出商品CSV文件",
+                "produces": [
+                    "text/csv"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "导出商品CSV",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品分类ID",
+                        "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "商品编码",
+                        "name": "goodsCode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "商品名称",
+                        "name": "goodsName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否上架",
+                        "name": "isOnSale",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "外部系统ID",
+                        "name": "outerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序方向 asc/desc",
+                        "name": "sortOrder",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "导出成功",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/goods/import": {
             "post": {
                 "security": [
@@ -10944,6 +17584,12 @@ const docTemplate = `{
                 "summary": "获取商品列表",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "商品分类ID",
+                        "name": "categoryId",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "description": "商品编码",
                         "name": "goodsCode",
@@ -10978,11 +17624,199 @@ const docTemplate = `{
                         "description": "每页数量",
                         "name": "size",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序方向 asc/desc",
+                        "name": "sortOrder",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/vector/generate/all": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "异步将全部上架商品写入向量数据库，并将任务进度记录到 Redis",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "全量生成上架商品向量",
+                "parameters": [
+                    {
+                        "description": "全量生成商品向量参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GenAllVectorReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "任务已启动",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/vector/generate/all/progress/{taskId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据任务ID读取 Redis 中的全量生成任务进度",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "查询全量生成上架商品向量任务进度",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/vector/generate/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据商品ID生成商品向量",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "生成商品向量",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "商品ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "生成成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/vector/search": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据检索文本生成查询向量并近似搜索商品SKU数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "近似搜索商品向量",
+                "parameters": [
+                    {
+                        "description": "商品向量搜索参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsVectorSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/vector/search/batch": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据多条检索文本批量生成查询向量并近似搜索商品SKU数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "批量近似搜索商品向量",
+                "parameters": [
+                    {
+                        "description": "商品批量向量搜索参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsVectorBatchSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -11051,6 +17885,346 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取首页模块详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块管理"
+                ],
+                "summary": "获取首页模块详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "首页模块ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询首页模块列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块管理"
+                ],
+                "summary": "获取首页模块列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模块类型",
+                        "name": "moduleType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "页面标识",
+                        "name": "pageKey",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "标题",
+                        "name": "title",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除首页模块",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块管理"
+                ],
+                "summary": "删除首页模块",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "首页模块ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改首页模块",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块管理"
+                ],
+                "summary": "保存首页模块",
+                "parameters": [
+                    {
+                        "description": "首页模块保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.HomeModuleSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module_item/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取首页模块明细详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块明细管理"
+                ],
+                "summary": "获取首页模块明细详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "首页模块明细ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module_item/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询首页模块明细列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块明细管理"
+                ],
+                "summary": "获取首页模块明细列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "业务类型",
+                        "name": "businessType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "内容项名称",
+                        "name": "itemName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "模块ID",
+                        "name": "moduleId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module_item/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除首页模块明细",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块明细管理"
+                ],
+                "summary": "删除首页模块明细",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "首页模块明细ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/home/module_item/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改首页模块明细",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/首页装修/模块明细管理"
+                ],
+                "summary": "保存首页模块明细",
+                "parameters": [
+                    {
+                        "description": "首页模块明细保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.HomeModuleItemSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -11555,7 +18729,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.AddressSetReq"
+                            "$ref": "#/definitions/nova-factory-server_app_business_shop_user_models.AddressSetReq"
                         }
                     }
                 ],
@@ -11742,6 +18916,291 @@ const docTemplate = `{
                 }
             }
         },
+        "/shop/user/discount/add": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增折扣规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "新增折扣规则",
+                "parameters": [
+                    {
+                        "description": "折扣规则新增参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserDiscountRuleUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/batch": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "批量创建折扣规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "批量创建折扣规则",
+                "parameters": [
+                    {
+                        "description": "批量创建参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BatchDiscountRuleCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/ids/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取用户所有折扣规则关联的商品ID和分类ID列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "获取用户已使用目标ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "integer"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取折扣规则详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "获取折扣规则详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "折扣规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取折扣规则列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "获取折扣规则列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "商品ID或分类ID",
+                        "name": "targetId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "类型: goods, category",
+                        "name": "targetType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除折扣规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "删除折扣规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "折扣规则ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/discount/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改折扣规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户管理/折扣规则"
+                ],
+                "summary": "修改折扣规则",
+                "parameters": [
+                    {
+                        "description": "折扣规则修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserDiscountRuleUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/shop/user/list": {
             "get": {
                 "security": [
@@ -11798,6 +19257,226 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/cancel/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "取消待支付订单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "取消订单",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "取消成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/confirm/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "确认已发货订单收货",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "确认收货",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "确认成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/count": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取用户各状态订单数量统计",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "获取订单统计",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取订单详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "获取订单详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前用户的订单列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "获取订单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "订单号",
+                        "name": "orderNo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "订单状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/user/order/status": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新订单状态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "更新订单状态",
+                "parameters": [
+                    {
+                        "description": "订单状态更新参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.OrderStatusReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -19117,6 +26796,156 @@ const docTemplate = `{
                 }
             }
         },
+        "financemodels.FinancePaymentItemUpsert": {
+            "type": "object",
+            "properties": {
+                "bizId": {
+                    "type": "integer"
+                },
+                "bizNo": {
+                    "type": "string"
+                },
+                "bizType": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "paidPrice": {
+                    "type": "number"
+                },
+                "paymentId": {
+                    "type": "integer"
+                },
+                "paymentPrice": {
+                    "type": "number"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "financemodels.FinancePaymentUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "discountPrice": {
+                    "type": "number"
+                },
+                "financeUserId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "paymentPrice": {
+                    "type": "number"
+                },
+                "paymentTime": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "supplierId": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "financemodels.FinanceReceiptItemUpsert": {
+            "type": "object",
+            "properties": {
+                "bizId": {
+                    "type": "integer"
+                },
+                "bizNo": {
+                    "type": "string"
+                },
+                "bizType": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "receiptId": {
+                    "type": "integer"
+                },
+                "receiptPrice": {
+                    "type": "number"
+                },
+                "receiptedPrice": {
+                    "type": "number"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "financemodels.FinanceReceiptUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "customerId": {
+                    "type": "integer"
+                },
+                "discountPrice": {
+                    "type": "number"
+                },
+                "financeUserId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "receiptPrice": {
+                    "type": "number"
+                },
+                "receiptTime": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
         "gatewaymodels.AIAgentMessage": {
             "type": "object",
             "properties": {
@@ -19617,6 +27446,285 @@ const docTemplate = `{
                 }
             }
         },
+        "mastermodels.AccountUpsert": {
+            "type": "object",
+            "required": [
+                "name",
+                "no"
+            ],
+            "properties": {
+                "defaultStatus": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "mastermodels.CustomerUpsert": {
+            "type": "object",
+            "required": [
+                "code",
+                "name"
+            ],
+            "properties": {
+                "bankAccount": {
+                    "type": "string"
+                },
+                "bankAddress": {
+                    "type": "string"
+                },
+                "bankName": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "contact": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fax": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "taxNo": {
+                    "type": "string"
+                },
+                "taxPercent": {
+                    "type": "number"
+                },
+                "telephone": {
+                    "type": "string"
+                }
+            }
+        },
+        "mastermodels.ProductCategoryUpsert": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "mastermodels.ProductUnitUpsert": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "mastermodels.ProductUpsert": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "barCode": {
+                    "type": "string"
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "expiryDay": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "minPrice": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "purchasePrice": {
+                    "type": "number"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "salePrice": {
+                    "type": "number"
+                },
+                "standard": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "unitId": {
+                    "type": "integer"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "mastermodels.SupplierUpsert": {
+            "type": "object",
+            "required": [
+                "code",
+                "name"
+            ],
+            "properties": {
+                "bankAccount": {
+                    "type": "string"
+                },
+                "bankAddress": {
+                    "type": "string"
+                },
+                "bankName": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "contact": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fax": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "taxNo": {
+                    "type": "string"
+                },
+                "taxPercent": {
+                    "type": "number"
+                },
+                "telephone": {
+                    "type": "string"
+                }
+            }
+        },
+        "mastermodels.WarehouseUpsert": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "defaultStatus": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "principal": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "truckagePrice": {
+                    "type": "number"
+                },
+                "warehousePrice": {
+                    "type": "number"
+                }
+            }
+        },
         "materialmodels.InboundInfo": {
             "type": "object",
             "properties": {
@@ -19853,77 +27961,62 @@ const docTemplate = `{
                 }
             }
         },
-        "models.AddressSetReq": {
+        "models.BatchDiscountRuleCreate": {
+            "type": "object",
+            "properties": {
+                "discountRate": {
+                    "description": "折扣率",
+                    "type": "number"
+                },
+                "targetIds": {
+                    "description": "商品ID或分类ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "targetType": {
+                    "description": "goods=商品, category=分类",
+                    "type": "string"
+                },
+                "userIds": {
+                    "description": "用户ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "validFrom": {
+                    "description": "有效期开始",
+                    "type": "string"
+                },
+                "validTo": {
+                    "description": "有效期结束",
+                    "type": "string"
+                }
+            }
+        },
+        "models.CartSetDataReq": {
             "type": "object",
             "required": [
-                "detailAddress",
-                "receiverMobile"
+                "goodsId",
+                "quantity",
+                "skuId"
             ],
             "properties": {
-                "addressLabel": {
-                    "description": "地址标签",
-                    "type": "string"
-                },
-                "cityCode": {
-                    "description": "市编码",
-                    "type": "string"
-                },
-                "cityName": {
-                    "description": "市名称",
-                    "type": "string"
-                },
-                "detailAddress": {
-                    "description": "详细地址",
-                    "type": "string"
-                },
-                "districtCode": {
-                    "description": "区编码",
-                    "type": "string"
-                },
-                "districtName": {
-                    "description": "区名称",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "主键ID",
+                "goodsId": {
+                    "description": "商品ID",
                     "type": "string",
                     "example": "0"
                 },
-                "isDefault": {
-                    "description": "是否默认地址",
-                    "type": "boolean"
-                },
-                "postalCode": {
-                    "description": "邮政编码",
-                    "type": "string"
-                },
-                "provinceCode": {
-                    "description": "省编码",
-                    "type": "string"
-                },
-                "provinceName": {
-                    "description": "省名称",
-                    "type": "string"
-                },
-                "receiverMobile": {
-                    "description": "收货人手机号",
-                    "type": "string"
-                },
-                "receiverName": {
-                    "description": "收货人姓名",
-                    "type": "string"
-                },
-                "status": {
-                    "description": "状态",
+                "quantity": {
+                    "description": "数量",
                     "type": "integer"
                 },
-                "streetCode": {
-                    "description": "街道编码",
-                    "type": "string"
-                },
-                "streetName": {
-                    "description": "街道名称",
-                    "type": "string"
+                "skuId": {
+                    "description": "SKU ID",
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -19983,6 +28076,112 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CombinationSet": {
+            "type": "object",
+            "required": [
+                "image",
+                "people",
+                "productId",
+                "title"
+            ],
+            "properties": {
+                "attr": {
+                    "type": "string"
+                },
+                "browse": {
+                    "type": "integer"
+                },
+                "effectiveTime": {
+                    "type": "integer"
+                },
+                "homeModuleIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "images": {
+                    "type": "string"
+                },
+                "info": {
+                    "type": "string"
+                },
+                "isHost": {
+                    "type": "integer"
+                },
+                "isPostage": {
+                    "type": "integer"
+                },
+                "isShow": {
+                    "type": "integer"
+                },
+                "merId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "num": {
+                    "type": "integer"
+                },
+                "onceNum": {
+                    "type": "integer"
+                },
+                "people": {
+                    "type": "integer"
+                },
+                "postage": {
+                    "type": "number"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "productId": {
+                    "type": "string"
+                },
+                "quota": {
+                    "type": "integer"
+                },
+                "quotaShow": {
+                    "type": "integer"
+                },
+                "sales": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "integer"
+                },
+                "stock": {
+                    "type": "integer"
+                },
+                "stopTime": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "unitName": {
+                    "type": "string"
+                },
+                "virtual": {
+                    "type": "integer"
+                },
+                "volume": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
         "models.Expression": {
             "type": "object",
             "properties": {
@@ -19991,6 +28190,18 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.Rule"
                     }
+                }
+            }
+        },
+        "models.FavoriteAddReq": {
+            "type": "object",
+            "required": [
+                "goodsId"
+            ],
+            "properties": {
+                "goodsId": {
+                    "description": "商品ID (VARCHAR)",
+                    "type": "string"
                 }
             }
         },
@@ -20014,6 +28225,220 @@ const docTemplate = `{
                 }
             }
         },
+        "models.HomeModuleItemSet": {
+            "type": "object",
+            "properties": {
+                "businessType": {
+                    "type": "string"
+                },
+                "extJson": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "itemImage": {
+                    "type": "string"
+                },
+                "itemName": {
+                    "type": "string"
+                },
+                "itemSubTitle": {
+                    "type": "string"
+                },
+                "linkId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "moduleId": {
+                    "description": "模块ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.HomeModuleSet": {
+            "type": "object",
+            "properties": {
+                "endTime": {
+                    "type": "integer"
+                },
+                "extJson": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "主键ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "limitNum": {
+                    "type": "integer"
+                },
+                "moduleName": {
+                    "type": "string"
+                },
+                "moduleType": {
+                    "type": "string"
+                },
+                "moreLink": {
+                    "type": "string"
+                },
+                "pageKey": {
+                    "description": "页面标识",
+                    "type": "string"
+                },
+                "ruleJson": {
+                    "type": "string"
+                },
+                "showMore": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "integer"
+                },
+                "sourceType": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "styleJson": {
+                    "type": "string"
+                },
+                "subTitle": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.OrderCacheReq": {
+            "type": "object",
+            "properties": {
+                "cartId": {
+                    "description": "购物车ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "combinationId": {
+                    "description": "拼团活动ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "pinkId": {
+                    "description": "拼团记录ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "quantity": {
+                    "description": "购买数量",
+                    "type": "integer"
+                },
+                "secKillId": {
+                    "description": "秒杀活动ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "skuId": {
+                    "description": "立即购买商品规格ID",
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "models.OrderConfirmReq": {
+            "type": "object",
+            "required": [
+                "orderKey"
+            ],
+            "properties": {
+                "addressId": {
+                    "description": "地址ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "couponCode": {
+                    "description": "优惠券编码",
+                    "type": "string"
+                },
+                "deliveryType": {
+                    "description": "配送方式",
+                    "type": "string"
+                },
+                "orderKey": {
+                    "description": "预订单 key",
+                    "type": "string"
+                },
+                "usePoints": {
+                    "description": "是否使用积分",
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.OrderCreateReq": {
+            "type": "object",
+            "required": [
+                "orderKey"
+            ],
+            "properties": {
+                "orderKey": {
+                    "description": "预订单 key",
+                    "type": "string"
+                },
+                "remark": {
+                    "description": "订单备注",
+                    "type": "string"
+                }
+            }
+        },
+        "models.OrderStatusReq": {
+            "type": "object",
+            "required": [
+                "id",
+                "status"
+            ],
+            "properties": {
+                "id": {
+                    "description": "订单ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "reason": {
+                    "description": "变更原因（如取消原因）",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "目标状态",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.RefreshTokenReq": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "description": "有效的JWT token",
+                    "type": "string"
+                }
+            }
+        },
         "models.Rule": {
             "type": "object",
             "properties": {
@@ -20032,20 +28457,316 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ShopLoginReq": {
+        "models.SeckillActivityProductInfo": {
             "type": "object",
-            "required": [
-                "account",
-                "password"
-            ],
             "properties": {
-                "account": {
-                    "description": "登录账号，支持用户名或手机号",
+                "attrs": {
+                    "description": "商品规格活动信息",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SeckillActivityProductInfoAttr"
+                    }
+                },
+                "id": {
+                    "description": "商品主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "isHot": {
+                    "description": "是否热门推荐",
+                    "type": "integer"
+                },
+                "sort": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "商品状态",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.SeckillActivityProductInfoAttr": {
+            "type": "object",
+            "properties": {
+                "cost": {
+                    "description": "成本价",
+                    "type": "number"
+                },
+                "otPrice": {
+                    "description": "原价",
+                    "type": "number"
+                },
+                "price": {
+                    "description": "活动价",
+                    "type": "number"
+                },
+                "quota": {
+                    "description": "限量",
+                    "type": "integer"
+                },
+                "skuId": {
+                    "description": "规格业务ID",
                     "type": "string"
                 },
-                "password": {
-                    "description": "登录密码",
+                "status": {
+                    "description": "是否参与活动",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.SeckillActivitySet": {
+            "type": "object",
+            "required": [
+                "endDay",
+                "startDay",
+                "timeIds",
+                "title"
+            ],
+            "properties": {
+                "endDay": {
+                    "description": "结束日期",
+                    "type": "integer"
+                },
+                "homeModuleIds": {
+                    "description": "推荐首页模块ID集合",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "description": "活动ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "isCommission": {
+                    "description": "是否参与分佣",
+                    "type": "integer"
+                },
+                "linkId": {
+                    "description": "关联ID，保留字段",
+                    "type": "integer"
+                },
+                "num": {
+                    "description": "活动期间总购买数量限制",
+                    "type": "integer"
+                },
+                "onceNum": {
+                    "description": "每人每日购买数量限制",
+                    "type": "integer"
+                },
+                "productInfos": {
+                    "description": "参与活动的商品列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SeckillActivityProductInfo"
+                    }
+                },
+                "startDay": {
+                    "description": "开始日期",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "是否显示",
+                    "type": "integer"
+                },
+                "timeIds": {
+                    "description": "时间段ID，多个逗号分隔",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "description": "活动名称",
                     "type": "string"
+                },
+                "type": {
+                    "description": "活动类型",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.SeckillConfigSet": {
+            "type": "object",
+            "properties": {
+                "beginClock": {
+                    "description": "开启时间",
+                    "type": "integer"
+                },
+                "continueClock": {
+                    "description": "持续时间",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "秒杀配置ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "images": {
+                    "description": "轮播图",
+                    "type": "string"
+                },
+                "sort": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.SeckillSet": {
+            "type": "object",
+            "required": [
+                "image",
+                "productId",
+                "title"
+            ],
+            "properties": {
+                "activityId": {
+                    "description": "活动ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "cost": {
+                    "description": "成本价",
+                    "type": "number"
+                },
+                "customForm": {
+                    "description": "自定义表单",
+                    "type": "string"
+                },
+                "freight": {
+                    "description": "运费设置",
+                    "type": "integer"
+                },
+                "giveIntegral": {
+                    "description": "赠送积分",
+                    "type": "number"
+                },
+                "id": {
+                    "description": "秒杀商品ID，更新时传",
+                    "type": "string",
+                    "example": "0"
+                },
+                "image": {
+                    "description": "推荐图",
+                    "type": "string"
+                },
+                "images": {
+                    "description": "轮播图，逗号分隔",
+                    "type": "string"
+                },
+                "info": {
+                    "description": "简介",
+                    "type": "string"
+                },
+                "isCommission": {
+                    "description": "是否参与返佣",
+                    "type": "integer"
+                },
+                "isHot": {
+                    "description": "是否热门推荐",
+                    "type": "integer"
+                },
+                "isPostage": {
+                    "description": "是否包邮",
+                    "type": "integer"
+                },
+                "isShow": {
+                    "description": "是否显示",
+                    "type": "integer"
+                },
+                "logistics": {
+                    "description": "物流类型",
+                    "type": "string"
+                },
+                "num": {
+                    "description": "最多秒杀数量",
+                    "type": "integer"
+                },
+                "onceNum": {
+                    "description": "单次购买数量",
+                    "type": "integer"
+                },
+                "otPrice": {
+                    "description": "原价",
+                    "type": "number"
+                },
+                "postage": {
+                    "description": "邮费",
+                    "type": "number"
+                },
+                "price": {
+                    "description": "秒杀价",
+                    "type": "number"
+                },
+                "productId": {
+                    "description": "商品ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "quota": {
+                    "description": "限购总数",
+                    "type": "integer"
+                },
+                "quotaShow": {
+                    "description": "限购总数显示",
+                    "type": "integer"
+                },
+                "sales": {
+                    "description": "销量",
+                    "type": "integer"
+                },
+                "sort": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "startTime": {
+                    "description": "开始时间",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "商品状态",
+                    "type": "integer"
+                },
+                "stock": {
+                    "description": "库存",
+                    "type": "integer"
+                },
+                "stopTime": {
+                    "description": "结束时间",
+                    "type": "string"
+                },
+                "tempId": {
+                    "description": "运费模板ID",
+                    "type": "integer"
+                },
+                "timeId": {
+                    "description": "时间段ID",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "活动标题",
+                    "type": "string"
+                },
+                "unitName": {
+                    "description": "单位名称",
+                    "type": "string"
+                },
+                "virtualType": {
+                    "description": "商品类型",
+                    "type": "integer"
+                },
+                "volume": {
+                    "description": "商品体积",
+                    "type": "number"
+                },
+                "weight": {
+                    "description": "商品重量",
+                    "type": "number"
                 }
             }
         },
@@ -20072,6 +28793,41 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "智能预警名称",
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserDiscountRuleUpsert": {
+            "type": "object",
+            "properties": {
+                "discountRate": {
+                    "description": "折扣率",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "主键ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "targetId": {
+                    "description": "商品ID或分类ID",
+                    "type": "string"
+                },
+                "targetType": {
+                    "description": "goods=商品, category=分类",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "validFrom": {
+                    "description": "有效期开始 (格式: 2006-01-02 15:04:05)",
+                    "type": "string"
+                },
+                "validTo": {
+                    "description": "有效期结束 (格式: 2006-01-02 15:04:05)",
                     "type": "string"
                 }
             }
@@ -20130,6 +28886,63 @@ const docTemplate = `{
                 },
                 "username": {
                     "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
+        "models.WechatConfigReq": {
+            "type": "object",
+            "properties": {
+                "appId": {
+                    "description": "微信小程序应用ID",
+                    "type": "string"
+                },
+                "appSecret": {
+                    "description": "微信小程序应用密钥",
+                    "type": "string"
+                },
+                "certPath": {
+                    "description": "微信支付证书路径",
+                    "type": "string"
+                },
+                "encodingAESKey": {
+                    "description": "消息加密密钥",
+                    "type": "string"
+                },
+                "mchId": {
+                    "description": "微信支付商户号",
+                    "type": "string"
+                },
+                "mchKey": {
+                    "description": "微信支付商户密钥",
+                    "type": "string"
+                },
+                "notifyUrl": {
+                    "description": "微信支付回调地址",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "微信令牌",
+                    "type": "string"
+                }
+            }
+        },
+        "models.WechatLoginReq": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "properties": {
+                "avatar": {
+                    "description": "用户头像",
+                    "type": "string"
+                },
+                "code": {
+                    "description": "微信登录code",
+                    "type": "string"
+                },
+                "nickname": {
+                    "description": "用户昵称",
                     "type": "string"
                 }
             }
@@ -20289,327 +29102,128 @@ const docTemplate = `{
                 }
             }
         },
-        "ordermodels.OrderAccountSet": {
+        "nova-factory-server_app_business_shop_api_models.AddressSetReq": {
             "type": "object",
+            "required": [
+                "cityCode",
+                "cityName",
+                "detailAddress",
+                "provinceCode",
+                "provinceName",
+                "receiverMobile",
+                "receiverName"
+            ],
             "properties": {
-                "finance_code": {
+                "addressLabel": {
                     "type": "string"
                 },
-                "total": {
-                    "type": "number"
-                }
-            }
-        },
-        "ordermodels.OrderAuditAction": {
-            "type": "object",
-            "properties": {
-                "audit_remark": {
+                "cityCode": {
+                    "type": "string"
+                },
+                "cityName": {
+                    "type": "string"
+                },
+                "detailAddress": {
+                    "type": "string"
+                },
+                "districtCode": {
+                    "type": "string"
+                },
+                "districtName": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string",
                     "example": "0"
+                },
+                "isDefault": {
+                    "type": "boolean"
+                },
+                "provinceCode": {
+                    "type": "string"
+                },
+                "provinceName": {
+                    "type": "string"
+                },
+                "receiverMobile": {
+                    "type": "string"
+                },
+                "receiverName": {
+                    "type": "string"
                 }
             }
         },
-        "ordermodels.OrderAuditImportReq": {
+        "nova-factory-server_app_business_shop_user_models.AddressSetReq": {
             "type": "object",
+            "required": [
+                "detailAddress",
+                "receiverMobile"
+            ],
             "properties": {
-                "records": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderAuditSet"
-                    }
-                }
-            }
-        },
-        "ordermodels.OrderAuditSet": {
-            "type": "object",
-            "properties": {
-                "accounts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderAccountSet"
-                    }
-                },
-                "b_type_code": {
+                "addressLabel": {
+                    "description": "地址标签",
                     "type": "string"
                 },
-                "buyer_message": {
+                "cityCode": {
+                    "description": "市编码",
                     "type": "string"
                 },
-                "buyer_nick": {
+                "cityName": {
+                    "description": "市名称",
                     "type": "string"
                 },
-                "details": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderDetailSet"
-                    }
+                "detailAddress": {
+                    "description": "详细地址",
+                    "type": "string"
+                },
+                "districtCode": {
+                    "description": "区编码",
+                    "type": "string"
+                },
+                "districtName": {
+                    "description": "区名称",
+                    "type": "string"
                 },
                 "id": {
+                    "description": "主键ID",
                     "type": "string",
                     "example": "0"
                 },
-                "invoice_name": {
+                "isDefault": {
+                    "description": "是否默认地址",
+                    "type": "boolean"
+                },
+                "postalCode": {
+                    "description": "邮政编码",
                     "type": "string"
                 },
-                "logist_b_type_code": {
+                "provinceCode": {
+                    "description": "省编码",
                     "type": "string"
                 },
-                "logist_bill_code": {
+                "provinceName": {
+                    "description": "省名称",
                     "type": "string"
                 },
-                "order_type": {
+                "receiverMobile": {
+                    "description": "收货人手机号",
                     "type": "string"
                 },
-                "pay_time": {
-                    "type": "string"
-                },
-                "post_fee": {
-                    "type": "number"
-                },
-                "privilege": {
-                    "type": "number"
-                },
-                "receiver_address": {
-                    "type": "string"
-                },
-                "receiver_city": {
-                    "type": "string"
-                },
-                "receiver_city_name": {
-                    "type": "string"
-                },
-                "receiver_district": {
-                    "type": "string"
-                },
-                "receiver_district_name": {
-                    "type": "string"
-                },
-                "receiver_mobile": {
-                    "type": "string"
-                },
-                "receiver_name": {
-                    "type": "string"
-                },
-                "receiver_phone": {
-                    "type": "string"
-                },
-                "receiver_province": {
-                    "type": "string"
-                },
-                "receiver_province_name": {
-                    "type": "string"
-                },
-                "receiver_street": {
-                    "type": "string"
-                },
-                "receiver_street_name": {
-                    "type": "string"
-                },
-                "receiver_zip": {
-                    "type": "string"
-                },
-                "seller_flag": {
-                    "type": "string"
-                },
-                "seller_memo": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "number"
-                },
-                "source_json": {
+                "receiverName": {
+                    "description": "收货人姓名",
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
-                },
-                "tid": {
-                    "type": "string"
-                },
-                "total": {
-                    "type": "number"
-                },
-                "weight": {
-                    "type": "number"
-                }
-            }
-        },
-        "ordermodels.OrderDetailSet": {
-            "type": "object",
-            "properties": {
-                "barcode": {
-                    "type": "string"
-                },
-                "eshop_goods_id": {
-                    "type": "string"
-                },
-                "eshop_goods_name": {
-                    "type": "string"
-                },
-                "eshop_sku_id": {
-                    "type": "string"
-                },
-                "eshop_sku_name": {
-                    "type": "string"
-                },
-                "num": {
-                    "type": "number"
-                },
-                "numiid": {
+                    "description": "状态",
                     "type": "integer"
                 },
-                "oid": {
+                "streetCode": {
+                    "description": "街道编码",
                     "type": "string"
                 },
-                "outeriid": {
+                "streetName": {
+                    "description": "街道名称",
                     "type": "string"
-                },
-                "payment": {
-                    "type": "number"
-                },
-                "pic_path": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "number"
-                },
-                "skuid": {
-                    "type": "integer"
-                },
-                "unit_id": {
-                    "type": "integer"
-                },
-                "unit_qty": {
-                    "type": "number"
-                },
-                "weight": {
-                    "type": "number"
-                }
-            }
-        },
-        "ordermodels.OrderSet": {
-            "type": "object",
-            "properties": {
-                "accounts": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderAccountSet"
-                    }
-                },
-                "b_type_code": {
-                    "type": "string"
-                },
-                "bill_code": {
-                    "type": "string"
-                },
-                "buyer_message": {
-                    "type": "string"
-                },
-                "buyer_nick": {
-                    "type": "string"
-                },
-                "details": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ordermodels.OrderDetailSet"
-                    }
-                },
-                "id": {
-                    "type": "string",
-                    "example": "0"
-                },
-                "invoice_name": {
-                    "type": "string"
-                },
-                "logist_b_type_code": {
-                    "type": "string"
-                },
-                "logist_bill_code": {
-                    "type": "string"
-                },
-                "order_type": {
-                    "type": "string"
-                },
-                "pay_time": {
-                    "type": "string"
-                },
-                "post_fee": {
-                    "type": "number"
-                },
-                "privilege": {
-                    "type": "number"
-                },
-                "receiver_address": {
-                    "type": "string"
-                },
-                "receiver_city": {
-                    "type": "string"
-                },
-                "receiver_city_name": {
-                    "type": "string"
-                },
-                "receiver_district": {
-                    "type": "string"
-                },
-                "receiver_district_name": {
-                    "type": "string"
-                },
-                "receiver_mobile": {
-                    "type": "string"
-                },
-                "receiver_name": {
-                    "type": "string"
-                },
-                "receiver_phone": {
-                    "type": "string"
-                },
-                "receiver_province": {
-                    "type": "string"
-                },
-                "receiver_province_name": {
-                    "type": "string"
-                },
-                "receiver_street": {
-                    "type": "string"
-                },
-                "receiver_street_name": {
-                    "type": "string"
-                },
-                "receiver_zip": {
-                    "type": "string"
-                },
-                "seller_flag": {
-                    "type": "string"
-                },
-                "seller_memo": {
-                    "type": "string"
-                },
-                "size": {
-                    "type": "number"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "sync_message": {
-                    "type": "string"
-                },
-                "sync_status": {
-                    "type": "integer"
-                },
-                "sync_time": {
-                    "type": "string"
-                },
-                "tid": {
-                    "type": "string"
-                },
-                "total": {
-                    "type": "number"
-                },
-                "weight": {
-                    "type": "number"
                 }
             }
         },
@@ -20666,6 +29280,323 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "purchasemodels.PurchaseInItemUpsert": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "inId": {
+                    "type": "integer"
+                },
+                "orderItemId": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productPrice": {
+                    "type": "number"
+                },
+                "productUnitId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "taxPercent": {
+                    "type": "number"
+                },
+                "taxPrice": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "warehouseId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "purchasemodels.PurchaseInUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "discountPercent": {
+                    "type": "number"
+                },
+                "discountPrice": {
+                    "type": "number"
+                },
+                "fileUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "inTime": {
+                    "type": "string"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "orderId": {
+                    "type": "integer"
+                },
+                "orderNo": {
+                    "type": "string"
+                },
+                "otherPrice": {
+                    "type": "number"
+                },
+                "paymentPrice": {
+                    "type": "number"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "supplierId": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "totalProductPrice": {
+                    "type": "number"
+                },
+                "totalTaxPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "purchasemodels.PurchaseOrderItemUpsert": {
+            "type": "object",
+            "required": [
+                "count",
+                "productId",
+                "productPrice"
+            ],
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "inCount": {
+                    "type": "number"
+                },
+                "orderId": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productPrice": {
+                    "type": "number"
+                },
+                "productUnitId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "returnCount": {
+                    "type": "number"
+                },
+                "taxPercent": {
+                    "type": "number"
+                },
+                "taxPrice": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "purchasemodels.PurchaseOrderStatusReq": {
+            "type": "object",
+            "required": [
+                "id",
+                "status"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "purchasemodels.PurchaseOrderUpsert": {
+            "type": "object",
+            "required": [
+                "items",
+                "orderTime",
+                "supplierId"
+            ],
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "depositPrice": {
+                    "type": "number"
+                },
+                "discountPercent": {
+                    "type": "number"
+                },
+                "fileUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/purchasemodels.PurchaseOrderItemUpsert"
+                    }
+                },
+                "no": {
+                    "type": "string"
+                },
+                "orderTime": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "supplierId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "purchasemodels.PurchaseReturnItemUpsert": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "orderItemId": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productPrice": {
+                    "type": "number"
+                },
+                "productUnitId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "returnId": {
+                    "type": "integer"
+                },
+                "taxPercent": {
+                    "type": "number"
+                },
+                "taxPrice": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "warehouseId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "purchasemodels.PurchaseReturnUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "discountPercent": {
+                    "type": "number"
+                },
+                "discountPrice": {
+                    "type": "number"
+                },
+                "fileUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "orderId": {
+                    "type": "integer"
+                },
+                "orderNo": {
+                    "type": "string"
+                },
+                "otherPrice": {
+                    "type": "number"
+                },
+                "refundPrice": {
+                    "type": "number"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "returnTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "supplierId": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "totalProductPrice": {
+                    "type": "number"
+                },
+                "totalTaxPrice": {
                     "type": "number"
                 }
             }
@@ -20806,6 +29737,546 @@ const docTemplate = `{
                 }
             }
         },
+        "salemodels.OrderAccountSet": {
+            "type": "object",
+            "properties": {
+                "finance_code": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "salemodels.OrderAuditAction": {
+            "type": "object",
+            "properties": {
+                "audit_remark": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "salemodels.OrderAuditImportReq": {
+            "type": "object",
+            "properties": {
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderAuditSet"
+                    }
+                }
+            }
+        },
+        "salemodels.OrderAuditSet": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderAccountSet"
+                    }
+                },
+                "b_type_code": {
+                    "type": "string"
+                },
+                "buyer_message": {
+                    "type": "string"
+                },
+                "buyer_nick": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderDetailSet"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "invoice_name": {
+                    "type": "string"
+                },
+                "logist_b_type_code": {
+                    "type": "string"
+                },
+                "logist_bill_code": {
+                    "type": "string"
+                },
+                "order_type": {
+                    "type": "string"
+                },
+                "pay_time": {
+                    "type": "string"
+                },
+                "post_fee": {
+                    "type": "number"
+                },
+                "privilege": {
+                    "type": "number"
+                },
+                "receiver_address": {
+                    "type": "string"
+                },
+                "receiver_city": {
+                    "type": "string"
+                },
+                "receiver_city_name": {
+                    "type": "string"
+                },
+                "receiver_district": {
+                    "type": "string"
+                },
+                "receiver_district_name": {
+                    "type": "string"
+                },
+                "receiver_mobile": {
+                    "type": "string"
+                },
+                "receiver_name": {
+                    "type": "string"
+                },
+                "receiver_phone": {
+                    "type": "string"
+                },
+                "receiver_province": {
+                    "type": "string"
+                },
+                "receiver_province_name": {
+                    "type": "string"
+                },
+                "receiver_street": {
+                    "type": "string"
+                },
+                "receiver_street_name": {
+                    "type": "string"
+                },
+                "receiver_zip": {
+                    "type": "string"
+                },
+                "seller_flag": {
+                    "type": "string"
+                },
+                "seller_memo": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "source_json": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "tid": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "salemodels.OrderDetailSet": {
+            "type": "object",
+            "properties": {
+                "barcode": {
+                    "type": "string"
+                },
+                "eshop_goods_id": {
+                    "type": "string"
+                },
+                "eshop_goods_name": {
+                    "type": "string"
+                },
+                "eshop_sku_id": {
+                    "type": "string"
+                },
+                "eshop_sku_name": {
+                    "type": "string"
+                },
+                "num": {
+                    "type": "number"
+                },
+                "numiid": {
+                    "type": "integer"
+                },
+                "oid": {
+                    "type": "string"
+                },
+                "outeriid": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "number"
+                },
+                "pic_path": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "skuid": {
+                    "type": "integer"
+                },
+                "unit_id": {
+                    "type": "integer"
+                },
+                "unit_qty": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "salemodels.OrderSet": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderAccountSet"
+                    }
+                },
+                "b_type_code": {
+                    "type": "string"
+                },
+                "bill_code": {
+                    "type": "string"
+                },
+                "buyer_message": {
+                    "type": "string"
+                },
+                "buyer_nick": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/salemodels.OrderDetailSet"
+                    }
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "invoice_name": {
+                    "type": "string"
+                },
+                "logist_b_type_code": {
+                    "type": "string"
+                },
+                "logist_bill_code": {
+                    "type": "string"
+                },
+                "order_type": {
+                    "type": "string"
+                },
+                "pay_time": {
+                    "type": "string"
+                },
+                "post_fee": {
+                    "type": "number"
+                },
+                "privilege": {
+                    "type": "number"
+                },
+                "receiver_address": {
+                    "type": "string"
+                },
+                "receiver_city": {
+                    "type": "string"
+                },
+                "receiver_city_name": {
+                    "type": "string"
+                },
+                "receiver_district": {
+                    "type": "string"
+                },
+                "receiver_district_name": {
+                    "type": "string"
+                },
+                "receiver_mobile": {
+                    "type": "string"
+                },
+                "receiver_name": {
+                    "type": "string"
+                },
+                "receiver_phone": {
+                    "type": "string"
+                },
+                "receiver_province": {
+                    "type": "string"
+                },
+                "receiver_province_name": {
+                    "type": "string"
+                },
+                "receiver_street": {
+                    "type": "string"
+                },
+                "receiver_street_name": {
+                    "type": "string"
+                },
+                "receiver_zip": {
+                    "type": "string"
+                },
+                "seller_flag": {
+                    "type": "string"
+                },
+                "seller_memo": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "sync_message": {
+                    "type": "string"
+                },
+                "sync_status": {
+                    "type": "integer"
+                },
+                "sync_time": {
+                    "type": "string"
+                },
+                "tid": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "salemodels.SaleOutItemUpsert": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "orderItemId": {
+                    "type": "integer"
+                },
+                "outId": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productPrice": {
+                    "type": "number"
+                },
+                "productUnitId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "taxPercent": {
+                    "type": "number"
+                },
+                "taxPrice": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "warehouseId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "salemodels.SaleOutUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "customerId": {
+                    "type": "integer"
+                },
+                "discountPercent": {
+                    "type": "number"
+                },
+                "discountPrice": {
+                    "type": "number"
+                },
+                "fileUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "orderId": {
+                    "type": "integer"
+                },
+                "orderNo": {
+                    "type": "string"
+                },
+                "otherPrice": {
+                    "type": "number"
+                },
+                "outTime": {
+                    "type": "string"
+                },
+                "receiptPrice": {
+                    "type": "number"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "saleUserId": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "totalProductPrice": {
+                    "type": "number"
+                },
+                "totalTaxPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "salemodels.SaleReturnItemUpsert": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "orderItemId": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productPrice": {
+                    "type": "number"
+                },
+                "productUnitId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "returnId": {
+                    "type": "integer"
+                },
+                "taxPercent": {
+                    "type": "number"
+                },
+                "taxPrice": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "warehouseId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "salemodels.SaleReturnUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "customerId": {
+                    "type": "integer"
+                },
+                "discountPercent": {
+                    "type": "number"
+                },
+                "discountPrice": {
+                    "type": "number"
+                },
+                "fileUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "orderId": {
+                    "type": "integer"
+                },
+                "orderNo": {
+                    "type": "string"
+                },
+                "otherPrice": {
+                    "type": "number"
+                },
+                "refundPrice": {
+                    "type": "number"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "returnTime": {
+                    "type": "string"
+                },
+                "saleUserId": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "totalProductPrice": {
+                    "type": "number"
+                },
+                "totalTaxPrice": {
+                    "type": "number"
+                }
+            }
+        },
         "settingmodels.AgentConfigUpsert": {
             "type": "object",
             "required": [
@@ -20938,10 +30409,18 @@ const docTemplate = `{
                     "description": "分类名称",
                     "type": "string"
                 },
+                "description": {
+                    "description": "分类描述",
+                    "type": "string"
+                },
                 "id": {
                     "description": "主键ID",
                     "type": "string",
                     "example": "0"
+                },
+                "imageUrl": {
+                    "description": "分类图片",
+                    "type": "string"
                 },
                 "parentId": {
                     "description": "父级分类ID",
@@ -20955,6 +30434,38 @@ const docTemplate = `{
                 "status": {
                     "description": "状态",
                     "type": "boolean"
+                }
+            }
+        },
+        "shopmodels.EmbeddingConfig": {
+            "type": "object",
+            "properties": {
+                "api_endpoint": {
+                    "type": "string"
+                },
+                "api_key": {
+                    "type": "string"
+                },
+                "model_id": {
+                    "type": "string"
+                },
+                "provider_id": {
+                    "type": "string"
+                },
+                "provider_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "shopmodels.GenAllVectorReq": {
+            "type": "object",
+            "properties": {
+                "batchSize": {
+                    "description": "每批处理商品数",
+                    "type": "integer"
+                },
+                "embedding": {
+                    "$ref": "#/definitions/shopmodels.EmbeddingConfig"
                 }
             }
         },
@@ -20982,8 +30493,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "galleryImages": {
-                    "description": "图集",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "goodsId": {
                     "description": "商品业务ID",
@@ -20991,7 +30504,8 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "主键ID",
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "imageUrl": {
                     "description": "主图地址",
@@ -21068,7 +30582,10 @@ const docTemplate = `{
                 },
                 "galleryImages": {
                     "description": "图集",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "goodsCode": {
                     "description": "商品编码",
@@ -21081,6 +30598,13 @@ const docTemplate = `{
                 "goodsName": {
                     "description": "商品名称",
                     "type": "string"
+                },
+                "homeModuleIds": {
+                    "description": "推荐首页模块ID集合",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "id": {
                     "description": "主键ID",
@@ -21130,6 +30654,387 @@ const docTemplate = `{
                 "weightUnit": {
                     "description": "重量单位",
                     "type": "string"
+                }
+            }
+        },
+        "shopmodels.GoodsVectorBatchSearchReq": {
+            "type": "object",
+            "required": [
+                "queries"
+            ],
+            "properties": {
+                "embedding": {
+                    "description": "向量模型配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/shopmodels.EmbeddingConfig"
+                        }
+                    ]
+                },
+                "limit": {
+                    "description": "每条返回条数",
+                    "type": "integer"
+                },
+                "queries": {
+                    "description": "检索文本列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "shopmodels.GoodsVectorSearchReq": {
+            "type": "object",
+            "required": [
+                "query"
+            ],
+            "properties": {
+                "embedding": {
+                    "description": "向量模型配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/shopmodels.EmbeddingConfig"
+                        }
+                    ]
+                },
+                "limit": {
+                    "description": "返回条数",
+                    "type": "integer"
+                },
+                "query": {
+                    "description": "检索文本",
+                    "type": "string"
+                }
+            }
+        },
+        "stockmodels.StockCheckItemUpsert": {
+            "type": "object",
+            "properties": {
+                "actualCount": {
+                    "type": "number"
+                },
+                "checkId": {
+                    "type": "integer"
+                },
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productPrice": {
+                    "type": "number"
+                },
+                "productUnitId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "stockCount": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "warehouseId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "stockmodels.StockCheckUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "checkTime": {
+                    "type": "string"
+                },
+                "fileUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "stockmodels.StockInItemUpsert": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "inId": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productPrice": {
+                    "type": "number"
+                },
+                "productUnitId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "warehouseId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "stockmodels.StockInUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "fileUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "inTime": {
+                    "type": "string"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "supplierId": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "stockmodels.StockMoveItemUpsert": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "fromWarehouseID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "moveId": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productPrice": {
+                    "type": "number"
+                },
+                "productUnitId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "toWarehouseID": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "stockmodels.StockMoveUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "fileUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "moveTime": {
+                    "type": "string"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "stockmodels.StockOutItemUpsert": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "outId": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productPrice": {
+                    "type": "number"
+                },
+                "productUnitId": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "totalPrice": {
+                    "type": "number"
+                },
+                "warehouseId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "stockmodels.StockOutUpsert": {
+            "type": "object",
+            "required": [
+                "no"
+            ],
+            "properties": {
+                "customerId": {
+                    "type": "integer"
+                },
+                "fileUrl": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "no": {
+                    "type": "string"
+                },
+                "outTime": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "number"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "stockmodels.StockRecordUpsert": {
+            "type": "object",
+            "properties": {
+                "bizId": {
+                    "type": "integer"
+                },
+                "bizItemId": {
+                    "type": "integer"
+                },
+                "bizNo": {
+                    "type": "string"
+                },
+                "bizType": {
+                    "type": "integer"
+                },
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "number"
+                },
+                "warehouseId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "stockmodels.StockUpsert": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "warehouseId": {
+                    "type": "integer"
                 }
             }
         },

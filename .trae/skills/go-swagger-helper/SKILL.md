@@ -1,6 +1,6 @@
 ---
 name: "go-swagger-helper"
-description: "维护 Go 项目的 Swagger 注解与生成流程。Invoke when user asks to add/update Swagger comments, routes, docs generation, or swag init troubleshooting."
+description: "维护 Go 项目的 Swagger 注解与生成流程。Invoke when writing or modifying Go controllers by default, or when user asks about Swagger comments/docs/routes/swag init."
 ---
 
 # Go Swagger Helper
@@ -9,6 +9,7 @@ description: "维护 Go 项目的 Swagger 注解与生成流程。Invoke when us
 
 ## 何时调用
 
+- 只要新增或修改 Go controller、handler、路由方法，默认调用并同步补齐/更新 Swagger 注解，不需要等用户明确提及
 - 用户要求为 Go 接口补充或修改 Swagger 注解
 - 用户要求排查 `swag init` 生成失败
 - 用户要求补充 `@Summary`、`@Param`、`@Success`、`@Router` 等注解
@@ -37,6 +38,7 @@ http://localhost:8080/swagger/doc.json
 
 ### 1. 识别 Swagger 入口与注解风格
 
+- 只要本次任务涉及 controller 代码新增或修改，默认检查对应函数是否需要新增、补齐或更新 Swagger 注解
 - 先检查控制器函数上方是否已有 Swagger 注解
 - 保持现有中文注释风格
 - 保持如下常见结构：
@@ -54,6 +56,8 @@ http://localhost:8080/swagger/doc.json
 
 ### 2. 修改或补全注解
 
+- 对新增 controller 方法，默认补齐完整 Swagger 注解
+- 对已有 controller 方法，如果签名、路由、请求参数、响应结构有变化，默认同步更新 Swagger 注解
 - 优先复用现有请求/响应模型
 - `@Param` 要与 `ShouldBindJSON`、`ShouldBindQuery`、路径参数方式一致
 - `@Router` 要与真实路由一致

@@ -72,6 +72,14 @@ type GoodsListData struct {
 	Total int64    `json:"total"` // 总数
 }
 
+type GoodsVectorResult struct {
+	GoodsDBID  int64  `json:"goodsDbId"`
+	GoodsID    string `json:"goodsId"`
+	Collection string `json:"collection"`
+	Dimension  int    `json:"dimension"`
+	SkuCount   int    `json:"skuCount"`
+}
+
 // ImportGoodsList 商品导入列表
 type ImportGoodsList struct {
 	Count   int                 `json:"count"`

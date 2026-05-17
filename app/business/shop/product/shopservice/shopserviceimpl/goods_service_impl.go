@@ -1,11 +1,13 @@
 package shopserviceimpl
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/snowflake"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,6 +16,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
+	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/fileUtils"
 
 	"github.com/gin-gonic/gin"
@@ -21,18 +24,24 @@ import (
 
 type ShopGoodsServiceImpl struct {
 	dao         shopdao.IShopGoodsDao
+	vectorDao   shopdao.IShopGoodsVectorDao
 	skuDao      shopdao.IShopSkuDao
 	categoryDao shopdao.IShopCategoryDao
+	cache       cache.Cache
 }
 
 const importBatchSize = 100
+const goodsExportBatchSize int64 = 500
 
 // NewShopGoodsService 创建商品服务
-func NewShopGoodsService(dao shopdao.IShopGoodsDao, skuDao shopdao.IShopSkuDao, categoryDao shopdao.IShopCategoryDao) shopservice.IShopGoodsService {
+func NewShopGoodsService(dao shopdao.IShopGoodsDao, vectorDao shopdao.IShopGoodsVectorDao,
+	skuDao shopdao.IShopSkuDao, categoryDao shopdao.IShopCategoryDao, cache cache.Cache) shopservice.IShopGoodsService {
 	return &ShopGoodsServiceImpl{
 		dao:         dao,
+		vectorDao:   vectorDao,
 		skuDao:      skuDao,
 		categoryDao: categoryDao,
+		cache:       cache,
 	}
 }
 
@@ -82,6 +91,199 @@ func (s *ShopGoodsServiceImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) 
 	}
 	s.normalizeGoodsMediaURLs(c, data.Rows)
 	return data, nil
+}
+
+func (s *ShopGoodsServiceImpl) ExportCSV(c *gin.Context, req *shopmodels.GoodsQuery, csvWriter *csv.Writer, flush func()) error {
+	exportReq := &shopmodels.GoodsQuery{}
+	if req != nil {
+		*exportReq = *req
+	}
+	exportReq.Page = 1
+	exportReq.Size = goodsExportBatchSize
+
+	firstBatch, err := s.List(c, exportReq)
+	if err != nil {
+		return err
+	}
+
+	if err = csvWriter.Write(goodsCSVHeader()); err != nil {
+		return err
+	}
+	csvWriter.Flush()
+	if err = csvWriter.Error(); err != nil {
+		return err
+	}
+	if flush != nil {
+		flush()
+	}
+
+	if err = writeGoodsCSVRows(csvWriter, firstBatch.Rows); err != nil {
+		return err
+	}
+	csvWriter.Flush()
+	if err = csvWriter.Error(); err != nil {
+		return err
+	}
+	if flush != nil {
+		flush()
+	}
+
+	written := int64(len(firstBatch.Rows))
+	total := firstBatch.Total
+	for exportReq.Page++; written < total; exportReq.Page++ {
+		if c.Request.Context().Err() != nil {
+			zap.L().Warn("goods csv export canceled by client", zap.Error(c.Request.Context().Err()))
+			return c.Request.Context().Err()
+		}
+
+		batch, listErr := s.List(c, exportReq)
+		if listErr != nil {
+			zap.L().Error("query goods export batch fail", zap.Int64("page", exportReq.Page), zap.Error(listErr))
+			return listErr
+		}
+		if batch == nil || len(batch.Rows) == 0 {
+			break
+		}
+
+		if err = writeGoodsCSVRows(csvWriter, batch.Rows); err != nil {
+			return err
+		}
+		csvWriter.Flush()
+		if err = csvWriter.Error(); err != nil {
+			return err
+		}
+		if flush != nil {
+			flush()
+		}
+		written += int64(len(batch.Rows))
+	}
+
+	return nil
+}
+
+func goodsCSVHeader() []string {
+	return []string{
+		"ID",
+		"商品业务ID",
+		"商品名称",
+		"商品编码",
+		"外部ID",
+		"分类ID",
+		"分类名称",
+		"零售价",
+		"是否上架",
+		"库存数量",
+		"销售单位",
+		"重量",
+		"重量单位",
+		"主图",
+		"视频",
+		"图集",
+		"首页模块ID",
+		"SKU数量",
+		"SKUID",
+		"SKU业务ID",
+		"SKU名称",
+		"SKU编码",
+		"SKU外部ID",
+		"SKU条码",
+		"SKU零售价",
+		"SKU库存数量",
+		"SKU销售单位",
+		"SKU重量",
+		"SKU重量单位",
+		"SKU主图",
+		"SKU视频",
+		"SKU图集",
+		"SKU描述",
+		"描述",
+		"创建时间",
+		"更新时间",
+	}
+}
+
+func writeGoodsCSVRows(csvWriter *csv.Writer, rows []*shopmodels.Goods) error {
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		if len(row.Skus) == 0 {
+			if err := csvWriter.Write(buildGoodsCSVRecord(row, nil)); err != nil {
+				return err
+			}
+			continue
+		}
+		for _, sku := range row.Skus {
+			if err := csvWriter.Write(buildGoodsCSVRecord(row, sku)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func buildGoodsCSVRecord(row *shopmodels.Goods, sku *shopmodels.GoodsSku) []string {
+	record := []string{
+		strconv.FormatInt(row.ID, 10),
+		row.GoodsID,
+		row.GoodsName,
+		row.GoodsCode,
+		row.OuterID,
+		strconv.FormatInt(row.ShopCategoryId, 10),
+		row.ShopCategoryName,
+		strconv.FormatFloat(row.RetailPrice, 'f', -1, 64),
+		formatGoodsOnSale(row.IsOnSale),
+		strconv.FormatInt(row.Quantity, 10),
+		row.Unit,
+		strconv.FormatFloat(row.Weight, 'f', -1, 64),
+		row.WeightUnit,
+		row.ImageURL,
+		row.VideoURL,
+		strings.Join(row.GalleryImagesArray, " | "),
+		row.HomeModuleIDs,
+		strconv.Itoa(len(row.Skus)),
+	}
+	if sku == nil {
+		record = append(record, make([]string, 14)...)
+	} else {
+		record = append(record,
+			strconv.FormatUint(sku.ID, 10),
+			sku.SkuID,
+			sku.SkuName,
+			sku.SkuCode,
+			sku.OuterID,
+			sku.Barcode,
+			strconv.FormatFloat(sku.RetailPrice, 'f', -1, 64),
+			strconv.FormatInt(sku.Quantity, 10),
+			sku.Unit,
+			strconv.FormatFloat(sku.Weight, 'f', -1, 64),
+			sku.WeightUnit,
+			sku.ImageURL,
+			sku.VideoURL,
+			strings.Join(sku.GalleryImagesArray, " | "),
+			sku.Description,
+		)
+	}
+	record = append(record,
+		row.Description,
+		formatCSVTime(row.CreateTime),
+		formatCSVTime(row.UpdateTime),
+	)
+	return record
+}
+
+func formatGoodsOnSale(status int32) string {
+	if status == 1 {
+		return "是"
+	}
+	return "否"
+}
+
+func formatCSVTime(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return t.Format("2006-01-02 15:04:05")
 }
 
 func (s *ShopGoodsServiceImpl) attachCategoryNames(c *gin.Context, goodsRows []*shopmodels.Goods) error {

@@ -1,6 +1,11 @@
 package shopcontroller
 
 import (
+	"encoding/csv"
+	"fmt"
+	"net/http"
+	"time"
+
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
@@ -22,10 +27,18 @@ func NewGoods(service shopservice.IShopGoodsService) *Goods {
 func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/goods")
 	group.GET("/list", middlewares.HasPermission("shop:goods:list"), s.List)
+	group.GET("/export/csv", middlewares.HasPermission("shop:goods:export:csv"), s.ExportCSV)
 	group.GET("/info/:id", middlewares.HasPermission("shop:goods:info"), s.GetByID)
 	group.POST("/add", middlewares.HasPermission("shop:goods:add"), s.Create)
 	group.PUT("/edit", middlewares.HasPermission("shop:goods:edit"), s.Update)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:goods:remove"), s.Delete)
+	group.POST("/vector/generate/:id", middlewares.HasPermission("shop:goods:vector:generate"), s.Generate)
+	group.POST("/vector/search", middlewares.HasPermission("shop:goods:vector:search"), s.Search)
+	group.POST("/vector/search/batch", middlewares.HasPermission("shop:goods:vector:batch_search"), s.BatchSearch)
+
+	group.POST("/vector/generate/all", middlewares.HasPermission("shop:goods:vector:generate:all"), s.GenerateAllOnSale)
+	group.GET("/vector/generate/all/progress/:taskId",
+		middlewares.HasPermission("shop:goods:vector:generate:all:progress"), s.GetGenerateAllProgress)
 }
 
 // PublicRoutes 导入接口注册
@@ -175,4 +188,189 @@ func (s *Goods) Import(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// Generate 生成商品向量
+// @Summary 生成商品向量
+// @Description 根据商品ID生成商品向量
+// @Tags 商城/商品管理
+// @Param id path int true "商品ID"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "生成成功"
+// @Router /shop/goods/vector/generate/{id} [post]
+func (s *Goods) Generate(c *gin.Context) {
+	req := new(shopmodels.GenVectorReq)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.ID <= 0 {
+		zap.L().Error("invalid goods id", zap.Int64("id", req.ID))
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil {
+		zap.L().Error("invalid goods embedding")
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.GenerateVector(c, req)
+	if err != nil {
+		zap.L().Error("generate goods vector fail", zap.Int64("id", req.ID), zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// GenerateAllOnSale 全量生成上架商品向量
+// @Summary 全量生成上架商品向量
+// @Description 异步将全部上架商品写入向量数据库，并将任务进度记录到 Redis
+// @Tags 商城/商品管理
+// @Param object body shopmodels.GenAllVectorReq true "全量生成商品向量参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "任务已启动"
+// @Router /shop/goods/vector/generate/all [post]
+func (s *Goods) GenerateAllOnSale(c *gin.Context) {
+	req := new(shopmodels.GenAllVectorReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil {
+		zap.L().Error("invalid goods full vector embedding")
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.GenerateAllOnSaleVectors(c, req)
+	if err != nil {
+		zap.L().Error("generate all on-sale goods vector fail", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// GetGenerateAllProgress 查询全量生成上架商品向量任务进度
+// @Summary 查询全量生成上架商品向量任务进度
+// @Description 根据任务ID读取 Redis 中的全量生成任务进度
+// @Tags 商城/商品管理
+// @Param taskId path string true "任务ID"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "查询成功"
+// @Router /shop/goods/vector/generate/all/progress/{taskId} [get]
+func (s *Goods) GetGenerateAllProgress(c *gin.Context) {
+	taskID := c.Param("taskId")
+	if taskID == "" {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.GetGenerateAllOnSaleVectorsProgress(c, taskID)
+	if err != nil {
+		zap.L().Error("get goods full vector progress fail", zap.String("taskId", taskID), zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// Search 近似搜索商品向量
+// @Summary 近似搜索商品向量
+// @Description 根据检索文本生成查询向量并近似搜索商品SKU数据
+// @Tags 商城/商品管理
+// @Param object body shopmodels.GoodsVectorSearchReq true "商品向量搜索参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "搜索成功"
+// @Router /shop/goods/vector/search [post]
+func (s *Goods) Search(c *gin.Context) {
+	req := new(shopmodels.GoodsVectorSearchReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil {
+		zap.L().Error("invalid goods search embedding")
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.SearchVector(c, req)
+	if err != nil {
+		zap.L().Error("search goods vector fail", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// BatchSearch 批量近似搜索商品向量
+// @Summary 批量近似搜索商品向量
+// @Description 根据多条检索文本批量生成查询向量并近似搜索商品SKU数据
+// @Tags 商城/商品管理
+// @Param object body shopmodels.GoodsVectorBatchSearchReq true "商品批量向量搜索参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "搜索成功"
+// @Router /shop/goods/vector/search/batch [post]
+func (s *Goods) BatchSearch(c *gin.Context) {
+	req := new(shopmodels.GoodsVectorBatchSearchReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil || len(req.Queries) == 0 {
+		zap.L().Error("invalid goods batch search request")
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.service.BatchSearchVector(c, req)
+	if err != nil {
+		zap.L().Error("batch search goods vector fail", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// ExportCSV 导出商品CSV
+// @Summary 导出商品CSV
+// @Description 按查询条件导出商品CSV文件
+// @Tags 商城/商品管理
+// @Param object query shopmodels.GoodsQuery true "商品查询参数"
+// @Security BearerAuth
+// @Produce text/csv
+// @Success 200 {file} file "导出成功"
+// @Router /shop/goods/export/csv [get]
+func (s *Goods) ExportCSV(c *gin.Context) {
+	req := new(shopmodels.GoodsQuery)
+	if err := c.ShouldBindQuery(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	fileName := fmt.Sprintf("goods_%s.csv", time.Now().Format("20060102150405"))
+	c.Header("Content-Type", "text/csv; charset=utf-8")
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fileName))
+	c.Header("Cache-Control", "no-store")
+	c.Status(http.StatusOK)
+
+	var err error
+	if _, err = c.Writer.Write([]byte("\xEF\xBB\xBF")); err != nil {
+		zap.L().Error("write csv bom fail", zap.Error(err))
+		return
+	}
+
+	csvWriter := csv.NewWriter(c.Writer)
+	flusher, _ := c.Writer.(http.Flusher)
+	if err = s.service.ExportCSV(c, req, csvWriter, func() {
+		if flusher != nil {
+			flusher.Flush()
+		}
+	}); err != nil {
+		zap.L().Error("export goods csv fail", zap.Error(err))
+	}
 }
