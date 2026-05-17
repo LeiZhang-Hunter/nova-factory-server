@@ -16,6 +16,7 @@ type IProductService interface {
 	GenerateVector(c *gin.Context, req *mastermodels.ProductGenVectorReq) (*mastermodels.ProductVectorResult, error)
 	GenerateAllVectors(c *gin.Context, req *mastermodels.ProductGenAllVectorReq) (*mastermodels.ProductVectorTaskData, error)
 	GetGenerateAllVectorsProgress(c *gin.Context, taskID string) (*mastermodels.ProductVectorTaskProgress, error)
+	ListGenerateAllVectorTasks(c *gin.Context) (*mastermodels.ProductVectorTaskListData, error)
 	SearchVector(c *gin.Context, req *mastermodels.ProductVectorSearchReq) (*mastermodels.ProductVectorSearchData, error)
 	BatchSearchVector(c *gin.Context, req *mastermodels.ProductVectorBatchSearchReq) (*mastermodels.ProductVectorBatchSearchData, error)
 }

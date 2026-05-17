@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -27,7 +28,7 @@ const (
 	maxProductVectorSearchLimit     = 50
 	defaultProductVectorBatchSize   = 20
 	maxProductVectorBatchSize       = 100
-	productVectorTaskTTL            = 24 * time.Hour
+	productVectorTaskTTL            = 0 * time.Hour
 
 	productVectorTaskStatusPending = "pending"
 	productVectorTaskStatusRunning = "running"
@@ -78,28 +79,105 @@ func (s *ProductServiceImpl) GenerateAllVectors(c *gin.Context, req *mastermodel
 		return nil, err
 	}
 
-	taskID := strconv.FormatInt(snowflake.GenID(), 10)
-	progress := &mastermodels.ProductVectorTaskProgress{
-		TaskID:     taskID,
-		Status:     productVectorTaskStatusPending,
-		Message:    "任务已创建，等待执行",
-		OperatorID: baizeContext.GetUserIdSafe(c),
-		Operator:   baizeContext.GetUserName(c),
-		StartedAt:  time.Now().Format(time.DateTime),
-		UpdatedAt:  time.Now().Format(time.DateTime),
-	}
-	if err := s.saveProductVectorTaskProgress(taskID, progress); err != nil {
-		return nil, err
+	operatorID := baizeContext.GetUserIdSafe(c)
+	operator := baizeContext.GetUserName(c)
+	batchSize := resolveProductVectorTaskBatchSize(req.BatchSize, 0)
+	taskID := strings.TrimSpace(req.TaskID)
+	if s.cache == nil {
+		return nil, errors.New("缓存未初始化")
 	}
 
+	var (
+		progress *mastermodels.ProductVectorTaskProgress
+		err      error
+	)
+	if taskID != "" {
+		progress, err = s.loadProductVectorTaskProgress(taskID)
+		if err != nil {
+			if errors.Is(err, cacheError.Nil) {
+				return nil, errors.New("续跑任务不存在或已过期")
+			}
+			return nil, err
+		}
+		if progress != nil && progress.OperatorID > 0 && operatorID > 0 && progress.OperatorID != operatorID {
+			return nil, errors.New("该任务不属于当前操作人")
+		}
+		if progress != nil && !isProductVectorTaskUnfinished(progress) {
+			return nil, errors.New("该任务已执行完成，请重新创建新任务")
+		}
+		if progress != nil && progress.Processed > 0 {
+			batchSize = resolveProductVectorTaskBatchSize(0, progress.BatchSize)
+		}
+	} else {
+		progress, err = s.loadLatestUnfinishedProductVectorTask(operatorID)
+		if err != nil {
+			return nil, err
+		}
+		if progress != nil {
+			taskID = progress.TaskID
+			if progress.Processed > 0 {
+				batchSize = resolveProductVectorTaskBatchSize(0, progress.BatchSize)
+			} else {
+				batchSize = resolveProductVectorTaskBatchSize(req.BatchSize, progress.BatchSize)
+			}
+		}
+	}
+
+	if progress == nil {
+		taskID = strconv.FormatInt(snowflake.GenID(), 10)
+		now := time.Now().Format(time.DateTime)
+		progress = &mastermodels.ProductVectorTaskProgress{
+			TaskID:     taskID,
+			Status:     productVectorTaskStatusPending,
+			BatchSize:  batchSize,
+			Message:    "任务已创建，等待执行",
+			OperatorID: operatorID,
+			Operator:   operator,
+			StartedAt:  now,
+			UpdatedAt:  now,
+		}
+	} else {
+		progress.Status = productVectorTaskStatusPending
+		progress.BatchSize = batchSize
+		progress.OperatorID = operatorID
+		progress.Operator = operator
+		progress.UpdatedAt = time.Now().Format(time.DateTime)
+		progress.FinishedAt = ""
+		progress.Progress = calcProductVectorTaskProgress(progress.Processed, progress.Total)
+		if progress.StartedAt == "" {
+			progress.StartedAt = progress.UpdatedAt
+		}
+		if progress.Processed > 0 {
+			progress.Message = fmt.Sprintf("检测到未完成任务，准备从第%d条继续执行", progress.Processed+1)
+		} else {
+			progress.Message = "检测到未完成任务，准备继续执行"
+		}
+	}
+
+	lockKey := productVectorTaskLockKey(taskID)
+	if !s.cache.SetNX(context.Background(), lockKey, strconv.FormatInt(operatorID, 10), productVectorTaskTTL) {
+		return &mastermodels.ProductVectorTaskData{
+			TaskID:      taskID,
+			ProgressKey: productVectorTaskCacheKey(taskID),
+			Status:      productVectorTaskStatusRunning,
+		}, nil
+	}
+	if err = s.saveProductVectorTaskProgress(taskID, progress); err != nil {
+		s.cache.Del(context.Background(), lockKey)
+		return nil, err
+	}
+	s.saveLatestProductVectorTask(operatorID, taskID)
+
 	copiedReq := *req
+	copiedReq.TaskID = taskID
+	copiedReq.BatchSize = batchSize
 	backgroundCtx := cloneProductGinContext(c)
 	go s.runGenerateAllVectors(backgroundCtx, taskID, &copiedReq, progress.OperatorID, progress.Operator)
 
 	return &mastermodels.ProductVectorTaskData{
 		TaskID:      taskID,
 		ProgressKey: productVectorTaskCacheKey(taskID),
-		Status:      productVectorTaskStatusPending,
+		Status:      progress.Status,
 	}, nil
 }
 
@@ -116,6 +194,51 @@ func (s *ProductServiceImpl) GetGenerateAllVectorsProgress(c *gin.Context, taskI
 		return nil, err
 	}
 	return progress, nil
+}
+
+func (s *ProductServiceImpl) ListGenerateAllVectorTasks(c *gin.Context) (*mastermodels.ProductVectorTaskListData, error) {
+	if s.cache == nil {
+		return nil, errors.New("缓存未初始化")
+	}
+
+	operatorID := baizeContext.GetUserIdSafe(c)
+	keys, err := s.scanProductVectorTaskKeys()
+	if err != nil {
+		return nil, err
+	}
+
+	rows := make([]*mastermodels.ProductVectorTaskProgress, 0, len(keys))
+	for _, key := range keys {
+		taskID := strings.TrimPrefix(key, productVectorTaskCacheKey(""))
+		taskID = strings.TrimSpace(taskID)
+		if taskID == "" {
+			continue
+		}
+
+		progress, loadErr := s.loadProductVectorTaskProgress(taskID)
+		if loadErr != nil {
+			if errors.Is(loadErr, cacheError.Nil) {
+				continue
+			}
+			return nil, loadErr
+		}
+		if progress == nil || !isProductVectorTaskUnfinished(progress) {
+			continue
+		}
+		if operatorID > 0 && progress.OperatorID != operatorID {
+			continue
+		}
+		rows = append(rows, progress)
+	}
+
+	sort.Slice(rows, func(i, j int) bool {
+		return productVectorTaskSortTime(rows[i]).After(productVectorTaskSortTime(rows[j]))
+	})
+
+	return &mastermodels.ProductVectorTaskListData{
+		Rows:  rows,
+		Total: int64(len(rows)),
+	}, nil
 }
 
 func (s *ProductServiceImpl) SearchVector(c *gin.Context, req *mastermodels.ProductVectorSearchReq) (*mastermodels.ProductVectorSearchData, error) {
@@ -235,21 +358,45 @@ func (s *ProductServiceImpl) generateProductVectorWithEmbedder(c *gin.Context, r
 }
 
 func (s *ProductServiceImpl) runGenerateAllVectors(c *gin.Context, taskID string, req *mastermodels.ProductGenAllVectorReq, operatorID int64, operator string) {
-	progress := &mastermodels.ProductVectorTaskProgress{
-		TaskID:     taskID,
-		Status:     productVectorTaskStatusRunning,
-		Message:    "正在初始化向量模型",
-		OperatorID: operatorID,
-		Operator:   operator,
-		StartedAt:  time.Now().Format(time.DateTime),
-		UpdatedAt:  time.Now().Format(time.DateTime),
+	progress, err := s.loadProductVectorTaskProgress(taskID)
+	if err != nil {
+		if !errors.Is(err, cacheError.Nil) {
+			zap.L().Error("load product vector task progress fail", zap.String("taskId", taskID), zap.Error(err))
+		}
+		progress = nil
 	}
+	now := time.Now().Format(time.DateTime)
+	if progress == nil {
+		progress = &mastermodels.ProductVectorTaskProgress{
+			TaskID:     taskID,
+			BatchSize:  resolveProductVectorTaskBatchSize(req.BatchSize, 0),
+			OperatorID: operatorID,
+			Operator:   operator,
+			StartedAt:  now,
+		}
+	} else {
+		progress.BatchSize = resolveProductVectorTaskBatchSize(req.BatchSize, progress.BatchSize)
+		progress.OperatorID = operatorID
+		progress.Operator = operator
+		if progress.StartedAt == "" {
+			progress.StartedAt = now
+		}
+	}
+	if progress.Processed > 0 {
+		progress.Message = fmt.Sprintf("正在继续生成产品向量，已处理%d条", progress.Processed)
+	} else {
+		progress.Message = "正在初始化向量模型"
+	}
+	progress.Status = productVectorTaskStatusRunning
+	progress.UpdatedAt = now
 	if err := s.saveProductVectorTaskProgress(taskID, progress); err != nil {
 		zap.L().Error("save product vector task progress fail", zap.String("taskId", taskID), zap.Error(err))
+		s.cache.Del(context.Background(), productVectorTaskLockKey(taskID))
 		return
 	}
 
 	defer func() {
+		s.cache.Del(context.Background(), productVectorTaskLockKey(taskID))
 		if r := recover(); r != nil {
 			progress.Status = productVectorTaskStatusFailed
 			progress.Message = fmt.Sprintf("任务执行异常: %v", r)
@@ -274,8 +421,15 @@ func (s *ProductServiceImpl) runGenerateAllVectors(c *gin.Context, taskID string
 		return
 	}
 
+	size := int64(resolveProductVectorTaskBatchSize(req.BatchSize, progress.BatchSize))
 	page := int64(1)
-	size := int64(normalizeProductVectorBatchSize(req.BatchSize))
+	resumeSkip := 0
+	resumeCurrentID := progress.CurrentID
+	needResumeTrim := progress.Processed > 0 && size > 0
+	if needResumeTrim {
+		page = progress.Processed/size + 1
+		resumeSkip = int(progress.Processed % size)
+	}
 	status := int32(1)
 
 	for {
@@ -303,8 +457,17 @@ func (s *ProductServiceImpl) runGenerateAllVectors(c *gin.Context, taskID string
 				return
 			}
 		}
+		rows := data.Rows
+		if needResumeTrim {
+			rows = trimProductVectorResumeRows(rows, resumeCurrentID, resumeSkip)
+			needResumeTrim = false
+			if len(rows) == 0 && len(data.Rows) > 0 {
+				page++
+				continue
+			}
+		}
 
-		for _, product := range data.Rows {
+		for _, product := range rows {
 			if product == nil {
 				continue
 			}
@@ -504,8 +667,46 @@ func normalizeProductVectorSearchQueries(queries []string) ([]string, error) {
 	return result, nil
 }
 
+func (s *ProductServiceImpl) scanProductVectorTaskKeys() ([]string, error) {
+	if s.cache == nil {
+		return nil, errors.New("缓存未初始化")
+	}
+
+	match := productVectorTaskCacheKey("") + "*"
+	keys := make([]string, 0)
+	seen := make(map[string]struct{})
+	var cursor uint64
+
+	for {
+		scannedKeys, nextCursor := s.cache.Scan(context.Background(), cursor, match, 100)
+		for _, key := range scannedKeys {
+			if strings.HasSuffix(key, ":lock") {
+				continue
+			}
+			if _, ok := seen[key]; ok {
+				continue
+			}
+			seen[key] = struct{}{}
+			keys = append(keys, key)
+		}
+		if nextCursor == 0 {
+			break
+		}
+		cursor = nextCursor
+	}
+	return keys, nil
+}
+
 func productVectorTaskCacheKey(taskID string) string {
 	return "erp:master:product:vector:task:" + strings.TrimSpace(taskID)
+}
+
+func productVectorTaskLockKey(taskID string) string {
+	return productVectorTaskCacheKey(taskID) + ":lock"
+}
+
+func productVectorLatestTaskKey(operatorID int64) string {
+	return "erp:master:product:vector:latest:" + strconv.FormatInt(operatorID, 10)
 }
 
 func calcProductVectorTaskProgress(processed, total int64) int {
@@ -526,6 +727,107 @@ func normalizeProductVectorBatchSize(batchSize int) int {
 		return maxProductVectorBatchSize
 	}
 	return batchSize
+}
+
+func resolveProductVectorTaskBatchSize(reqBatchSize, progressBatchSize int) int {
+	if reqBatchSize > 0 {
+		return normalizeProductVectorBatchSize(reqBatchSize)
+	}
+	if progressBatchSize > 0 {
+		return normalizeProductVectorBatchSize(progressBatchSize)
+	}
+	return defaultProductVectorBatchSize
+}
+
+func isProductVectorTaskUnfinished(progress *mastermodels.ProductVectorTaskProgress) bool {
+	if progress == nil {
+		return false
+	}
+	return progress.Status != productVectorTaskStatusDone
+}
+
+func trimProductVectorResumeRows(rows []*mastermodels.Product, currentID int64, skipCount int) []*mastermodels.Product {
+	if len(rows) == 0 {
+		return rows
+	}
+	if currentID > 0 {
+		for index, product := range rows {
+			if product != nil && product.ID == currentID {
+				if index+1 >= len(rows) {
+					return rows[:0]
+				}
+				return rows[index+1:]
+			}
+		}
+	}
+	if skipCount <= 0 {
+		return rows
+	}
+	if skipCount >= len(rows) {
+		return rows[:0]
+	}
+	return rows[skipCount:]
+}
+
+func (s *ProductServiceImpl) loadLatestUnfinishedProductVectorTask(operatorID int64) (*mastermodels.ProductVectorTaskProgress, error) {
+	if operatorID <= 0 || s.cache == nil {
+		return nil, nil
+	}
+	taskID, err := s.cache.Get(context.Background(), productVectorLatestTaskKey(operatorID))
+	if err != nil {
+		if errors.Is(err, cacheError.Nil) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	taskID = strings.TrimSpace(taskID)
+	if taskID == "" {
+		return nil, nil
+	}
+	progress, err := s.loadProductVectorTaskProgress(taskID)
+	if err != nil {
+		if errors.Is(err, cacheError.Nil) {
+			s.cache.Del(context.Background(), productVectorLatestTaskKey(operatorID))
+			return nil, nil
+		}
+		return nil, err
+	}
+	if !isProductVectorTaskUnfinished(progress) {
+		return nil, nil
+	}
+	return progress, nil
+}
+
+func (s *ProductServiceImpl) saveLatestProductVectorTask(operatorID int64, taskID string) {
+	if operatorID <= 0 || s.cache == nil {
+		return
+	}
+	s.cache.Set(context.Background(), productVectorLatestTaskKey(operatorID), strings.TrimSpace(taskID), productVectorTaskTTL)
+}
+
+func productVectorTaskSortTime(progress *mastermodels.ProductVectorTaskProgress) time.Time {
+	if progress == nil {
+		return time.Time{}
+	}
+	if ts := parseProductVectorTaskTime(progress.UpdatedAt); !ts.IsZero() {
+		return ts
+	}
+	if ts := parseProductVectorTaskTime(progress.StartedAt); !ts.IsZero() {
+		return ts
+	}
+	return time.Time{}
+}
+
+func parseProductVectorTaskTime(value string) time.Time {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return time.Time{}
+	}
+	ts, err := time.ParseInLocation(time.DateTime, value, time.Local)
+	if err != nil {
+		return time.Time{}
+	}
+	return ts
 }
 
 func normalizeProductVectorSearchLimit(limit int) int {

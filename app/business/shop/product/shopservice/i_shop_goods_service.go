@@ -19,6 +19,7 @@ type IShopGoodsService interface {
 	GenerateVector(c *gin.Context, req *shopmodels.GenVectorReq) (*shopmodels.GoodsVectorResult, error)
 	GenerateAllOnSaleVectors(c *gin.Context, req *shopmodels.GenAllVectorReq) (*shopmodels.GoodsVectorTaskData, error)
 	GetGenerateAllOnSaleVectorsProgress(c *gin.Context, taskID string) (*shopmodels.GoodsVectorTaskProgress, error)
+	ListGenerateAllOnSaleVectorTasks(c *gin.Context) (*shopmodels.GoodsVectorTaskListData, error)
 	SearchVector(c *gin.Context, req *shopmodels.GoodsVectorSearchReq) (*shopmodels.GoodsVectorSearchData, error)
 	BatchSearchVector(c *gin.Context, req *shopmodels.GoodsVectorBatchSearchReq) (*shopmodels.GoodsVectorBatchSearchData, error)
 }

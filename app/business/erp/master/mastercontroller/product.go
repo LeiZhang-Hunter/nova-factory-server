@@ -29,6 +29,8 @@ func (o *Product) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:product:remove"), o.Delete)
 	group.POST("/vector/generate/:id", middlewares.HasPermission("erp:master:product:vector:generate"), o.Generate)
 	group.POST("/vector/generate/all", middlewares.HasPermission("erp:master:product:vector:generate:all"), o.GenerateAll)
+	group.GET("/vector/generate/all/query/list",
+		middlewares.HasPermission("erp:master:product:vector:generate:all:query:list"), o.GetGenerateAllProgressList)
 	group.GET("/vector/generate/all/progress/:taskId",
 		middlewares.HasPermission("erp:master:product:vector:generate:all:progress"), o.GetGenerateAllProgress)
 	group.POST("/vector/search", middlewares.HasPermission("erp:master:product:vector:search"), o.Search)
@@ -213,6 +215,24 @@ func (o *Product) GetGenerateAllProgress(c *gin.Context) {
 	data, err := o.service.GetGenerateAllVectorsProgress(c, taskID)
 	if err != nil {
 		zap.L().Error("get product vector progress fail", zap.String("taskId", taskID), zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// GetGenerateAllProgressList 查询全量生成产品向量未完成任务列表。
+// @Summary 查询全量生成产品向量未完成任务列表
+// @Description 查询当前操作人的全量生成产品向量未完成任务列表
+// @Tags ERP/基础资料
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "查询成功"
+// @Router /erp/master/product/vector/generate/all/query/list [get]
+func (o *Product) GetGenerateAllProgressList(c *gin.Context) {
+	data, err := o.service.ListGenerateAllVectorTasks(c)
+	if err != nil {
+		zap.L().Error("list product vector tasks fail", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}
