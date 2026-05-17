@@ -28,7 +28,8 @@ const (
 	maxProductVectorSearchLimit     = 50
 	defaultProductVectorBatchSize   = 20
 	maxProductVectorBatchSize       = 100
-	productVectorTaskTTL            = 0 * time.Hour
+	productVectorTaskTTL            = 2 * time.Minute
+	productVectorHeartbeatInterval  = 30 * time.Second
 
 	productVectorTaskStatusPending = "pending"
 	productVectorTaskStatusRunning = "running"
@@ -358,6 +359,7 @@ func (s *ProductServiceImpl) generateProductVectorWithEmbedder(c *gin.Context, r
 }
 
 func (s *ProductServiceImpl) runGenerateAllVectors(c *gin.Context, taskID string, req *mastermodels.ProductGenAllVectorReq, operatorID int64, operator string) {
+	lockKey := productVectorTaskLockKey(taskID)
 	progress, err := s.loadProductVectorTaskProgress(taskID)
 	if err != nil {
 		if !errors.Is(err, cacheError.Nil) {
@@ -391,12 +393,17 @@ func (s *ProductServiceImpl) runGenerateAllVectors(c *gin.Context, taskID string
 	progress.UpdatedAt = now
 	if err := s.saveProductVectorTaskProgress(taskID, progress); err != nil {
 		zap.L().Error("save product vector task progress fail", zap.String("taskId", taskID), zap.Error(err))
-		s.cache.Del(context.Background(), productVectorTaskLockKey(taskID))
+		s.cache.Del(context.Background(), lockKey)
 		return
 	}
 
+	heartbeatCtx, heartbeatCancel := context.WithCancel(context.Background())
+	s.cache.Expire(context.Background(), lockKey, productVectorTaskTTL)
+	go s.startLockHeartbeat(heartbeatCtx, lockKey)
+
 	defer func() {
-		s.cache.Del(context.Background(), productVectorTaskLockKey(taskID))
+		heartbeatCancel()
+		s.cache.Del(context.Background(), lockKey)
 		if r := recover(); r != nil {
 			progress.Status = productVectorTaskStatusFailed
 			progress.Message = fmt.Sprintf("任务执行异常: %v", r)
@@ -523,6 +530,19 @@ func (s *ProductServiceImpl) failProductVectorTask(taskID string, progress *mast
 	progress.FinishedAt = progress.UpdatedAt
 	if saveErr := s.saveProductVectorTaskProgress(taskID, progress); saveErr != nil {
 		zap.L().Error("save failed product vector task progress fail", zap.String("taskId", taskID), zap.Error(saveErr))
+	}
+}
+
+func (s *ProductServiceImpl) startLockHeartbeat(ctx context.Context, lockKey string) {
+	ticker := time.NewTicker(productVectorHeartbeatInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			s.cache.Expire(context.Background(), lockKey, productVectorTaskTTL)
+		}
 	}
 }
 

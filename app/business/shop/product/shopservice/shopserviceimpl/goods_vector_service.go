@@ -27,7 +27,8 @@ const (
 	maxGoodsVectorSearchLimit     = 50
 	defaultGoodsVectorBatchSize   = 20
 	maxGoodsVectorBatchSize       = 100
-	goodsVectorTaskTTL            = 0 * time.Hour
+	goodsVectorTaskTTL            = 2 * time.Minute
+	goodsVectorHeartbeatInterval  = 30 * time.Second
 	goodsVectorTaskStatusPending  = "pending"
 	goodsVectorTaskStatusRunning  = "running"
 	goodsVectorTaskStatusDone     = "completed"
@@ -404,6 +405,7 @@ func (s *ShopGoodsServiceImpl) generateGoodsVectorWithEmbedder(c *gin.Context, r
 
 func (s *ShopGoodsServiceImpl) runGenerateAllOnSaleVectors(c *gin.Context, taskID string,
 	req *shopmodels.GenAllVectorReq, operatorID int64, operator string) {
+	lockKey := goodsVectorTaskLockKey(taskID)
 	progress, err := s.loadGoodsVectorTaskProgress(taskID)
 	if err != nil {
 		if !errors.Is(err, cacheError.Nil) {
@@ -437,12 +439,16 @@ func (s *ShopGoodsServiceImpl) runGenerateAllOnSaleVectors(c *gin.Context, taskI
 	progress.UpdatedAt = now
 	if err := s.saveGoodsVectorTaskProgress(taskID, progress); err != nil {
 		zap.L().Error("save goods vector task progress fail", zap.String("taskId", taskID), zap.Error(err))
-		s.cache.Del(context.Background(), goodsVectorTaskLockKey(taskID))
+		s.cache.Del(context.Background(), lockKey)
 		return
 	}
+	s.cache.Expire(context.Background(), lockKey, goodsVectorTaskTTL)
+	heartbeatCtx, heartbeatCancel := context.WithCancel(context.Background())
+	go s.startLockHeartbeat(heartbeatCtx, lockKey)
 
 	defer func() {
-		s.cache.Del(context.Background(), goodsVectorTaskLockKey(taskID))
+		heartbeatCancel()
+		s.cache.Del(context.Background(), lockKey)
 		if r := recover(); r != nil {
 			progress.Status = goodsVectorTaskStatusFailed
 			progress.Message = fmt.Sprintf("任务执行异常: %v", r)
@@ -571,6 +577,19 @@ func (s *ShopGoodsServiceImpl) failGoodsVectorTask(taskID string, progress *shop
 		zap.L().Error("save failed goods vector task progress fail",
 			zap.String("taskId", taskID),
 			zap.Error(saveErr))
+	}
+}
+
+func (s *ShopGoodsServiceImpl) startLockHeartbeat(ctx context.Context, lockKey string) {
+	ticker := time.NewTicker(goodsVectorHeartbeatInterval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			s.cache.Expire(context.Background(), lockKey, goodsVectorTaskTTL)
+		}
 	}
 }
 
