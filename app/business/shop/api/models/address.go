@@ -34,19 +34,19 @@ import (
 //
 // ShopUserAddressApp 移动端用户地址
 type ShopUserAddressApp struct {
-	ID             int64  `json:"id,string" db:"id"`
-	UserID         int64  `json:"userId,string" db:"user_id"`
-	ReceiverName   string `json:"receiverName" db:"receiver_name"`
-	ReceiverMobile string `json:"receiverMobile" db:"receiver_mobile"`
-	ProvinceCode   string `json:"provinceCode" db:"province_code"`
-	ProvinceName   string `json:"provinceName" db:"province_name"`
-	CityCode       string `json:"cityCode" db:"city_code"`
-	CityName       string `json:"cityName" db:"city_name"`
-	DistrictCode   string `json:"districtCode" db:"district_code"`
-	DistrictName   string `json:"districtName" db:"district_name"`
-	DetailAddress  string `json:"detailAddress" db:"detail_address"`
-	AddressLabel   string `json:"addressLabel" db:"address_label"`
-	IsDefault      int    `json:"isDefault" db:"is_default"` // 0-否 1-是
+	ID             int64  `json:"id,string" gorm:"id"`
+	UserID         int64  `json:"userId,string" gorm:"user_id"`
+	ReceiverName   string `json:"receiverName" gorm:"receiver_name"`
+	ReceiverMobile string `json:"receiverMobile" gorm:"receiver_mobile"`
+	ProvinceCode   string `json:"provinceCode" gorm:"province_code"`
+	ProvinceName   string `json:"provinceName" gorm:"province_name"`
+	CityCode       string `json:"cityCode" gorm:"city_code"`
+	CityName       string `json:"cityName" gorm:"city_name"`
+	DistrictCode   string `json:"districtCode" gorm:"district_code"`
+	DistrictName   string `json:"districtName" gorm:"district_name"`
+	DetailAddress  string `json:"detailAddress" gorm:"detail_address"`
+	AddressLabel   string `json:"addressLabel" gorm:"address_label"`
+	IsDefault      int    `json:"isDefault" gorm:"is_default"` // 0-否 1-是
 	baize.BaseEntity
 }
 

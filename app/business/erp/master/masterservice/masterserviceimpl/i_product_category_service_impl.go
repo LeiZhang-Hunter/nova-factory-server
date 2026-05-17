@@ -82,7 +82,16 @@ func (s *ProductCategoryServiceImpl) GetByID(c *gin.Context, id int64) (*masterm
 	if id <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	return s.dao.GetByID(c, id)
+	item, err := s.dao.GetByID(c, id)
+	if err != nil || item == nil {
+		return item, err
+	}
+	if item.ParentID > 0 {
+		if parent, err := s.dao.GetByColumn(c, "id", item.ParentID); err == nil && parent != nil {
+			item.ParentName = parent.Name
+		}
+	}
+	return item, nil
 }
 
 func (s *ProductCategoryServiceImpl) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*mastermodels.ProductCategoryListData, error) {
@@ -129,7 +138,38 @@ func (s *ProductCategoryServiceImpl) List(c *gin.Context, req *mastermodels.Prod
 	if err != nil {
 		return nil, err
 	}
-	return &mastermodels.ProductCategoryListData{Rows: result.Rows, Total: result.Total}, nil
+	if len(result.Rows) == 0 {
+		return result, nil
+	}
+	parentIDSet := make(map[int64]struct{})
+	for _, row := range result.Rows {
+		if row.ParentID > 0 {
+			parentIDSet[row.ParentID] = struct{}{}
+		}
+	}
+	if len(parentIDSet) == 0 {
+		return result, nil
+	}
+	ids := make([]int64, 0, len(parentIDSet))
+	for id := range parentIDSet {
+		ids = append(ids, id)
+	}
+	parents, err := s.dao.GetByIDs(c, ids)
+	if err != nil {
+		return nil, err
+	}
+	idToName := make(map[int64]string)
+	for _, parent := range parents {
+		idToName[parent.ID] = parent.Name
+	}
+	for _, row := range result.Rows {
+		if row.ParentID > 0 {
+			if name, ok := idToName[row.ParentID]; ok {
+				row.ParentName = name
+			}
+		}
+	}
+	return result, nil
 }
 
 func (s *ProductCategoryServiceImpl) ensureCode(req *mastermodels.ProductCategoryUpsert) {

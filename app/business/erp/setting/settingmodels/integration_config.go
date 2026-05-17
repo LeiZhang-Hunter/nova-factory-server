@@ -3,13 +3,13 @@ package settingmodels
 import "nova-factory-server/app/baize"
 
 type IntegrationConfig struct {
-	ID     uint64 `json:"id" db:"id"`
-	Type   string `json:"type" db:"type"`
-	Data   string `json:"data" db:"data"`
-	Status *bool  `json:"status" db:"status"`
-	DeptID int64  `json:"deptId" db:"dept_id"`
+	ID     uint64 `json:"id" gorm:"id"`
+	Type   string `json:"type" gorm:"type"`
+	Data   string `json:"data" gorm:"data"`
+	Status *bool  `json:"status" gorm:"status"`
+	DeptID int64  `json:"deptId" gorm:"dept_id"`
 	baize.BaseEntity
-	State int32 `json:"state" db:"state"`
+	State int32 `json:"state" gorm:"state"`
 }
 
 type IntegrationConfigSet struct {

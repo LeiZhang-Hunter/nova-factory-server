@@ -112,6 +112,24 @@ func (d *ProductCategoryDaoImpl) GetByColumn(c *gin.Context, column string, valu
 	return item, nil
 }
 
+func (d *ProductCategoryDaoImpl) GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.ProductCategory, error) {
+	if len(ids) == 0 {
+		return []*mastermodels.ProductCategory{}, nil
+	}
+	rows := make([]mastermodels.ProductCategory, 0)
+	if err := d.db.WithContext(c).Table("erp_product_category").
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	result := make([]*mastermodels.ProductCategory, 0, len(rows))
+	for i := range rows {
+		result = append(result, &rows[i])
+	}
+	return result, nil
+}
+
 func (d *ProductCategoryDaoImpl) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*mastermodels.ProductCategoryListData, error) {
 	if req == nil {
 		req = new(mastermodels.ProductCategoryQuery)
