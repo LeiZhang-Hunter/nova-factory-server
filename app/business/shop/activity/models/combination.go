@@ -3,31 +3,31 @@ package models
 import "nova-factory-server/app/baize"
 
 type CombinationMainInfo struct {
-	ID            int64   `json:"id,string" db:"id"`
-	ProductID     string  `json:"productId" db:"product_id"`
-	MerID         int64   `json:"merId,string" db:"mer_id"`
-	Attr          string  `json:"attr" db:"attr"`
-	Price         float64 `json:"price" db:"price"`
-	Sort          int32   `json:"sort" db:"sort"`
-	Sales         int64   `json:"sales" db:"sales"`
-	Stock         int64   `json:"stock" db:"stock"`
-	IsHost        int32   `json:"isHost" db:"is_host"`
-	IsShow        int32   `json:"isShow" db:"is_show"`
-	IsPostage     int32   `json:"isPostage" db:"is_postage"`
-	Postage       float64 `json:"postage" db:"postage"`
-	StartTime     int64   `json:"startTime" db:"start_time"`
-	StopTime      int64   `json:"stopTime" db:"stop_time"`
-	EffectiveTime int64   `json:"effectiveTime" db:"effective_time"`
-	Browse        int64   `json:"browse" db:"browse"`
-	UnitName      string  `json:"unitName" db:"unit_name"`
-	Weight        float64 `json:"weight" db:"weight"`
-	Volume        float64 `json:"volume" db:"volume"`
-	Num           int64   `json:"num" db:"num"`
-	OnceNum       int64   `json:"onceNum" db:"once_num"`
-	Quota         int64   `json:"quota" db:"quota"`
-	QuotaShow     int64   `json:"quotaShow" db:"quota_show"`
-	Virtual       int64   `json:"virtual" db:"virtual"`
-	HomeModuleIDs string  `json:"homeModuleIds" db:"home_module_ids"`
+	ID            int64   `json:"id,string" gorm:"id"`
+	ProductID     string  `json:"productId" gorm:"product_id"`
+	MerID         int64   `json:"merId,string" gorm:"mer_id"`
+	Attr          string  `json:"attr" gorm:"attr"`
+	Price         float64 `json:"price" gorm:"price"`
+	Sort          int32   `json:"sort" gorm:"sort"`
+	Sales         int64   `json:"sales" gorm:"sales"`
+	Stock         int64   `json:"stock" gorm:"stock"`
+	IsHost        int32   `json:"isHost" gorm:"is_host"`
+	IsShow        int32   `json:"isShow" gorm:"is_show"`
+	IsPostage     int32   `json:"isPostage" gorm:"is_postage"`
+	Postage       float64 `json:"postage" gorm:"postage"`
+	StartTime     int64   `json:"startTime" gorm:"start_time"`
+	StopTime      int64   `json:"stopTime" gorm:"stop_time"`
+	EffectiveTime int64   `json:"effectiveTime" gorm:"effective_time"`
+	Browse        int64   `json:"browse" gorm:"browse"`
+	UnitName      string  `json:"unitName" gorm:"unit_name"`
+	Weight        float64 `json:"weight" gorm:"weight"`
+	Volume        float64 `json:"volume" gorm:"volume"`
+	Num           int64   `json:"num" gorm:"num"`
+	OnceNum       int64   `json:"onceNum" gorm:"once_num"`
+	Quota         int64   `json:"quota" gorm:"quota"`
+	QuotaShow     int64   `json:"quotaShow" gorm:"quota_show"`
+	Virtual       int64   `json:"virtual" gorm:"virtual"`
+	HomeModuleIDs string  `json:"homeModuleIds" gorm:"home_module_ids"`
 }
 
 // FormatCombinationMainInfo 提取拼团商品主信息。
@@ -65,39 +65,39 @@ func FormatCombinationMainInfo(sec *Combination) *CombinationMainInfo {
 }
 
 type Combination struct {
-	ID            int64   `json:"id,string" db:"id"`
-	ProductID     string  `json:"productId" db:"product_id"`
-	MerID         int64   `json:"merId,string" db:"mer_id"`
-	Image         string  `json:"image" db:"image"`
-	Images        string  `json:"images" db:"images"`
-	Title         string  `json:"title" db:"title"`
-	Attr          string  `json:"attr" db:"attr"`
-	People        int32   `json:"people" db:"people"`
-	Info          string  `json:"info" db:"info"`
-	Price         float64 `json:"price" db:"price"`
-	Sort          int32   `json:"sort" db:"sort"`
-	Sales         int64   `json:"sales" db:"sales"`
-	Stock         int64   `json:"stock" db:"stock"`
-	IsHost        int32   `json:"isHost" db:"is_host"`
-	IsShow        int32   `json:"isShow" db:"is_show"`
-	IsPostage     int32   `json:"isPostage" db:"is_postage"`
-	Postage       float64 `json:"postage" db:"postage"`
-	StartTime     int64   `json:"startTime" db:"start_time"`
-	StopTime      int64   `json:"stopTime" db:"stop_time"`
-	EffectiveTime int64   `json:"effectiveTime" db:"effective_time"`
-	Browse        int64   `json:"browse" db:"browse"`
-	UnitName      string  `json:"unitName" db:"unit_name"`
-	Weight        float64 `json:"weight" db:"weight"`
-	Volume        float64 `json:"volume" db:"volume"`
-	Num           int64   `json:"num" db:"num"`
-	OnceNum       int64   `json:"onceNum" db:"once_num"`
-	Quota         int64   `json:"quota" db:"quota"`
-	QuotaShow     int64   `json:"quotaShow" db:"quota_show"`
-	Virtual       int64   `json:"virtual" db:"virtual"`
-	HomeModuleIDs string  `json:"homeModuleIds" db:"home_module_ids"`
-	DeptID        int64   `json:"deptId" db:"dept_id"`
+	ID            int64   `json:"id,string" gorm:"id"`
+	ProductID     string  `json:"productId" gorm:"product_id"`
+	MerID         int64   `json:"merId,string" gorm:"mer_id"`
+	Image         string  `json:"image" gorm:"image"`
+	Images        string  `json:"images" gorm:"images"`
+	Title         string  `json:"title" gorm:"title"`
+	Attr          string  `json:"attr" gorm:"attr"`
+	People        int32   `json:"people" gorm:"people"`
+	Info          string  `json:"info" gorm:"info"`
+	Price         float64 `json:"price" gorm:"price"`
+	Sort          int32   `json:"sort" gorm:"sort"`
+	Sales         int64   `json:"sales" gorm:"sales"`
+	Stock         int64   `json:"stock" gorm:"stock"`
+	IsHost        int32   `json:"isHost" gorm:"is_host"`
+	IsShow        int32   `json:"isShow" gorm:"is_show"`
+	IsPostage     int32   `json:"isPostage" gorm:"is_postage"`
+	Postage       float64 `json:"postage" gorm:"postage"`
+	StartTime     int64   `json:"startTime" gorm:"start_time"`
+	StopTime      int64   `json:"stopTime" gorm:"stop_time"`
+	EffectiveTime int64   `json:"effectiveTime" gorm:"effective_time"`
+	Browse        int64   `json:"browse" gorm:"browse"`
+	UnitName      string  `json:"unitName" gorm:"unit_name"`
+	Weight        float64 `json:"weight" gorm:"weight"`
+	Volume        float64 `json:"volume" gorm:"volume"`
+	Num           int64   `json:"num" gorm:"num"`
+	OnceNum       int64   `json:"onceNum" gorm:"once_num"`
+	Quota         int64   `json:"quota" gorm:"quota"`
+	QuotaShow     int64   `json:"quotaShow" gorm:"quota_show"`
+	Virtual       int64   `json:"virtual" gorm:"virtual"`
+	HomeModuleIDs string  `json:"homeModuleIds" gorm:"home_module_ids"`
+	DeptID        int64   `json:"deptId" gorm:"dept_id"`
 	baize.BaseEntity
-	State int32 `json:"state" db:"state"`
+	State int32 `json:"state" gorm:"state"`
 }
 
 type CombinationSet struct {

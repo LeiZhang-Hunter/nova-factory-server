@@ -4,26 +4,26 @@ import "nova-factory-server/app/baize"
 
 // Address 商城用户地址
 type Address struct {
-	ID             int64  `json:"id,string" db:"id"`                         // 主键ID
-	UserID         int64  `json:"userId" db:"user_id"`                       // 用户业务ID
-	ReceiverName   string `json:"receiverName" db:"receiver_name"`           // 收货人姓名
-	ReceiverMobile string `json:"receiverMobile" db:"receiver_mobile"`       // 收货人手机号
-	ProvinceCode   string `json:"provinceCode" db:"province_code"`           // 省编码
-	ProvinceName   string `json:"provinceName" db:"province_name"`           // 省名称
-	CityCode       string `json:"cityCode" db:"city_code"`                   // 市编码
-	CityName       string `json:"cityName" db:"city_name"`                   // 市名称
-	DistrictCode   string `json:"districtCode" db:"district_code"`           // 区编码
-	DistrictName   string `json:"districtName" db:"district_name"`           // 区名称
-	StreetCode     string `json:"streetCode" db:"street_code"`               // 街道编码
-	StreetName     string `json:"streetName" db:"street_name"`               // 街道名称
-	DetailAddress  string `json:"detailAddress" db:"detail_address"`         // 详细地址
-	PostalCode     string `json:"postalCode" db:"postal_code"`               // 邮政编码
-	AddressLabel   string `json:"addressLabel" db:"address_label"`           // 地址标签
-	IsDefault      *bool  `json:"isDefault" db:"is_default"`                 // 是否默认地址
-	Status         int32  `json:"status" db:"status"`                        // 状态
-	DeptID         int64  `json:"deptId" gorm:"column:dept_id" db:"dept_id"` // 部门ID
+	ID             int64  `json:"id,string" gorm:"id"`                         // 主键ID
+	UserID         int64  `json:"userId" gorm:"user_id"`                       // 用户业务ID
+	ReceiverName   string `json:"receiverName" gorm:"receiver_name"`           // 收货人姓名
+	ReceiverMobile string `json:"receiverMobile" gorm:"receiver_mobile"`       // 收货人手机号
+	ProvinceCode   string `json:"provinceCode" gorm:"province_code"`           // 省编码
+	ProvinceName   string `json:"provinceName" gorm:"province_name"`           // 省名称
+	CityCode       string `json:"cityCode" gorm:"city_code"`                   // 市编码
+	CityName       string `json:"cityName" gorm:"city_name"`                   // 市名称
+	DistrictCode   string `json:"districtCode" gorm:"district_code"`           // 区编码
+	DistrictName   string `json:"districtName" gorm:"district_name"`           // 区名称
+	StreetCode     string `json:"streetCode" gorm:"street_code"`               // 街道编码
+	StreetName     string `json:"streetName" gorm:"street_name"`               // 街道名称
+	DetailAddress  string `json:"detailAddress" gorm:"detail_address"`         // 详细地址
+	PostalCode     string `json:"postalCode" gorm:"postal_code"`               // 邮政编码
+	AddressLabel   string `json:"addressLabel" gorm:"address_label"`           // 地址标签
+	IsDefault      *bool  `json:"isDefault" gorm:"is_default"`                 // 是否默认地址
+	Status         int32  `json:"status" gorm:"status"`                        // 状态
+	DeptID         int64  `json:"deptId" gorm:"column:dept_id" gorm:"dept_id"` // 部门ID
 	baize.BaseEntity
-	State int32 `json:"state" gorm:"column:state" db:"state"` // 操作状态
+	State int32 `json:"state" gorm:"column:state" gorm:"state"` // 操作状态
 }
 
 // AddressSetReq 地址新增修改参数

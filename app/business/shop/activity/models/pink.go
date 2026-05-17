@@ -3,30 +3,30 @@ package models
 import "nova-factory-server/app/baize"
 
 type Pink struct {
-	ID               int64   `json:"id,string" db:"id"`
-	UID              int64   `json:"uid,string" db:"uid"`
-	Nickname         string  `json:"nickname" db:"nickname"`
-	Avatar           string  `json:"avatar" db:"avatar"`
-	OrderID          string  `json:"orderId" db:"order_id"`
-	OrderIDKey       int64   `json:"orderIdKey,string" db:"order_id_key"`
-	TotalNum         int64   `json:"totalNum" db:"total_num"`
-	TotalPrice       float64 `json:"totalPrice" db:"total_price"`
-	CID              int64   `json:"cid,string" db:"cid"`
-	PID              int64   `json:"pid,string" db:"pid"`
-	People           int64   `json:"people" db:"people"`
-	Price            float64 `json:"price" db:"price"`
-	AddTime          string  `json:"addTime" db:"add_time"`
-	StopTime         string  `json:"stopTime" db:"stop_time"`
-	KID              int64   `json:"kId,string" db:"k_id"`
-	IsTpl            int32   `json:"isTpl" db:"is_tpl"`
-	IsRefund         int32   `json:"isRefund" db:"is_refund"`
-	Status           int32   `json:"status" db:"status"`
-	IsVirtual        int32   `json:"isVirtual" db:"is_virtual"`
-	CombinationTitle string  `json:"combinationTitle" db:"combination_title"`
-	CombinationImage string  `json:"combinationImage" db:"combination_image"`
-	DeptID           int64   `json:"deptId" db:"dept_id"`
+	ID               int64   `json:"id,string" gorm:"id"`
+	UID              int64   `json:"uid,string" gorm:"uid"`
+	Nickname         string  `json:"nickname" gorm:"nickname"`
+	Avatar           string  `json:"avatar" gorm:"avatar"`
+	OrderID          string  `json:"orderId" gorm:"order_id"`
+	OrderIDKey       int64   `json:"orderIdKey,string" gorm:"order_id_key"`
+	TotalNum         int64   `json:"totalNum" gorm:"total_num"`
+	TotalPrice       float64 `json:"totalPrice" gorm:"total_price"`
+	CID              int64   `json:"cid,string" gorm:"cid"`
+	PID              int64   `json:"pid,string" gorm:"pid"`
+	People           int64   `json:"people" gorm:"people"`
+	Price            float64 `json:"price" gorm:"price"`
+	AddTime          string  `json:"addTime" gorm:"add_time"`
+	StopTime         string  `json:"stopTime" gorm:"stop_time"`
+	KID              int64   `json:"kId,string" gorm:"k_id"`
+	IsTpl            int32   `json:"isTpl" gorm:"is_tpl"`
+	IsRefund         int32   `json:"isRefund" gorm:"is_refund"`
+	Status           int32   `json:"status" gorm:"status"`
+	IsVirtual        int32   `json:"isVirtual" gorm:"is_virtual"`
+	CombinationTitle string  `json:"combinationTitle" gorm:"combination_title"`
+	CombinationImage string  `json:"combinationImage" gorm:"combination_image"`
+	DeptID           int64   `json:"deptId" gorm:"dept_id"`
 	baize.BaseEntity
-	State int32 `json:"state" db:"state"`
+	State int32 `json:"state" gorm:"state"`
 }
 
 type PinkQuery struct {

@@ -4,20 +4,20 @@ import "nova-factory-server/app/baize"
 
 // Cart 商城用户购物车项
 type Cart struct {
-	ID          int64   `json:"id,string" db:"id"`                         // 主键ID
-	UserID      int64   `json:"userId" db:"user_id"`                       // 用户ID
-	GoodsID     string  `json:"goodsId" db:"goods_id"`                     // 商品ID
-	SkuID       string  `json:"skuId" db:"sku_id"`                         // SKU ID
-	GoodsName   string  `json:"goodsName" db:"goods_name"`                 // 商品名称快照
-	SkuName     string  `json:"skuName" db:"sku_name"`                     // SKU名称快照
-	ImageURL    string  `json:"imageUrl" db:"image_url"`                   // 商品或SKU图片快照
-	RetailPrice float64 `json:"retailPrice" db:"retail_price"`             // 加入购物车时零售价快照
-	Quantity    int64   `json:"quantity" db:"quantity"`                    // 购买数量
-	Selected    int32   `json:"selected" db:"selected"`                    // 是否选中：1选中，0未选中
-	Status      int32   `json:"status" db:"status"`                        // 状态：1有效，0失效
-	DeptID      int64   `json:"deptId" gorm:"column:dept_id" db:"dept_id"` // 部门ID
+	ID          int64   `json:"id,string" gorm:"id"`                         // 主键ID
+	UserID      int64   `json:"userId" gorm:"user_id"`                       // 用户ID
+	GoodsID     string  `json:"goodsId" gorm:"goods_id"`                     // 商品ID
+	SkuID       string  `json:"skuId" gorm:"sku_id"`                         // SKU ID
+	GoodsName   string  `json:"goodsName" gorm:"goods_name"`                 // 商品名称快照
+	SkuName     string  `json:"skuName" gorm:"sku_name"`                     // SKU名称快照
+	ImageURL    string  `json:"imageUrl" gorm:"image_url"`                   // 商品或SKU图片快照
+	RetailPrice float64 `json:"retailPrice" gorm:"retail_price"`             // 加入购物车时零售价快照
+	Quantity    int64   `json:"quantity" gorm:"quantity"`                    // 购买数量
+	Selected    int32   `json:"selected" gorm:"selected"`                    // 是否选中：1选中，0未选中
+	Status      int32   `json:"status" gorm:"status"`                        // 状态：1有效，0失效
+	DeptID      int64   `json:"deptId" gorm:"column:dept_id" gorm:"dept_id"` // 部门ID
 	baize.BaseEntity
-	State int32 `json:"state" gorm:"column:state" db:"state"` // 操作状态
+	State int32 `json:"state" gorm:"column:state" gorm:"state"` // 操作状态
 }
 
 // CartSetReq 购物车新增修改参数

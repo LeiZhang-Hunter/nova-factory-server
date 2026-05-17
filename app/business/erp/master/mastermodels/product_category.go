@@ -6,13 +6,14 @@ import (
 
 // ProductCategory ERP 产品分类
 type ProductCategory struct {
-	ID       int64  `json:"id,string" gorm:"column:id"`
-	ParentID int64  `json:"parentId" gorm:"column:parent_id"`
-	Name     string `json:"name" gorm:"column:name"`
-	Code     string `json:"code" gorm:"column:code"`
-	Sort     int32  `json:"sort" gorm:"column:sort"`
-	Status   int32  `json:"status" gorm:"column:status"`
-	DeptID   int64  `json:"deptId" gorm:"column:dept_id"`
+	ID         int64  `json:"id,string" gorm:"column:id"`
+	ParentID   int64  `json:"parentId" gorm:"column:parent_id"`
+	ParentName string `json:"parentName" gorm:"-"`
+	Name       string `json:"name" gorm:"column:name"`
+	Code       string `json:"code" gorm:"column:code"`
+	Sort       int32  `json:"sort" gorm:"column:sort"`
+	Status     int32  `json:"status" gorm:"column:status"`
+	DeptID     int64  `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
 }
