@@ -19,7 +19,7 @@ type SeckillMainInfo struct {
 	IsDel        int32   `json:"isDel" gorm:"column:is_del"`                  // 是否删除
 	Num          int32   `json:"num" gorm:"column:num"`                       // 最多秒杀数量
 	IsShow       int32   `json:"isShow" gorm:"column:is_show"`                // 是否显示
-	TimeID       string  `json:"timeId" gorm:"column:time_id"`                // 时间段ID
+	TimeID       string  `json:"timeId,string" gorm:"column:time_id"`         // 时间段ID
 	TempID       int32   `json:"tempId" gorm:"column:temp_id"`                // 运费模板ID
 	Weight       float64 `json:"weight" gorm:"column:weight"`                 // 商品重量
 	Volume       float64 `json:"volume" gorm:"column:volume"`                 // 商品体积
@@ -161,6 +161,7 @@ type SeckillQuery struct {
 	Status     *int32 `form:"status"`     // 商品状态
 	IsShow     *int32 `form:"isShow"`     // 是否显示
 	IsHot      *int32 `form:"isHot"`      // 是否热门推荐
+	TimeID     int64  `form:"timeId"`     // 时间段ID
 	Page       int64  `form:"page"`       // 页码
 	Size       int64  `form:"size"`       // 每页数量
 }
