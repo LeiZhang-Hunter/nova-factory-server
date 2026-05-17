@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // Product ERP 产品控制器
@@ -26,6 +27,12 @@ func (o *Product) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:master:product:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:master:product:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:product:remove"), o.Delete)
+	group.POST("/vector/generate/:id", middlewares.HasPermission("erp:master:product:vector:generate"), o.Generate)
+	group.POST("/vector/generate/all", middlewares.HasPermission("erp:master:product:vector:generate:all"), o.GenerateAll)
+	group.GET("/vector/generate/all/progress/:taskId",
+		middlewares.HasPermission("erp:master:product:vector:generate:all:progress"), o.GetGenerateAllProgress)
+	group.POST("/vector/search", middlewares.HasPermission("erp:master:product:vector:search"), o.Search)
+	group.POST("/vector/search/batch", middlewares.HasPermission("erp:master:product:vector:batch_search"), o.BatchSearch)
 }
 
 // List 查询 ERP 产品列表。
@@ -126,4 +133,144 @@ func (o *Product) Delete(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
+}
+
+// Generate 生成产品向量。
+// @Summary 生成产品向量
+// @Description 根据产品ID生成产品向量
+// @Tags ERP/基础资料
+// @Security BearerAuth
+// @Param id path int true "产品ID"
+// @Param body body mastermodels.ProductGenVectorReq true "产品向量生成参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "生成成功"
+// @Router /erp/master/product/vector/generate/{id} [post]
+func (o *Product) Generate(c *gin.Context) {
+	req := new(mastermodels.ProductGenVectorReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.ID <= 0 {
+		req.ID = baizeContext.ParamInt64(c, "id")
+	}
+	if req.ID <= 0 || req.Embedding == nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := o.service.GenerateVector(c, req)
+	if err != nil {
+		zap.L().Error("generate product vector fail", zap.Int64("id", req.ID), zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// GenerateAll 全量生成启用产品向量。
+// @Summary 全量生成启用产品向量
+// @Description 异步将全部启用产品写入向量数据库，并将任务进度记录到 Redis
+// @Tags ERP/基础资料
+// @Security BearerAuth
+// @Param body body mastermodels.ProductGenAllVectorReq true "全量生成产品向量参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "任务已启动"
+// @Router /erp/master/product/vector/generate/all [post]
+func (o *Product) GenerateAll(c *gin.Context) {
+	req := new(mastermodels.ProductGenAllVectorReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := o.service.GenerateAllVectors(c, req)
+	if err != nil {
+		zap.L().Error("generate all product vectors fail", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// GetGenerateAllProgress 查询全量生成产品向量任务进度。
+// @Summary 查询全量生成产品向量任务进度
+// @Description 根据任务ID读取 Redis 中的全量生成任务进度
+// @Tags ERP/基础资料
+// @Security BearerAuth
+// @Param taskId path string true "任务ID"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "查询成功"
+// @Router /erp/master/product/vector/generate/all/progress/{taskId} [get]
+func (o *Product) GetGenerateAllProgress(c *gin.Context) {
+	taskID := c.Param("taskId")
+	if taskID == "" {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := o.service.GetGenerateAllVectorsProgress(c, taskID)
+	if err != nil {
+		zap.L().Error("get product vector progress fail", zap.String("taskId", taskID), zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// Search 近似搜索产品向量。
+// @Summary 近似搜索产品向量
+// @Description 根据检索文本生成查询向量并近似搜索产品数据
+// @Tags ERP/基础资料
+// @Security BearerAuth
+// @Param body body mastermodels.ProductVectorSearchReq true "产品向量搜索参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "搜索成功"
+// @Router /erp/master/product/vector/search [post]
+func (o *Product) Search(c *gin.Context) {
+	req := new(mastermodels.ProductVectorSearchReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := o.service.SearchVector(c, req)
+	if err != nil {
+		zap.L().Error("search product vector fail", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// BatchSearch 批量近似搜索产品向量。
+// @Summary 批量近似搜索产品向量
+// @Description 根据多条检索文本批量生成查询向量并近似搜索产品数据
+// @Tags ERP/基础资料
+// @Security BearerAuth
+// @Param body body mastermodels.ProductVectorBatchSearchReq true "产品批量向量搜索参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "搜索成功"
+// @Router /erp/master/product/vector/search/batch [post]
+func (o *Product) BatchSearch(c *gin.Context) {
+	req := new(mastermodels.ProductVectorBatchSearchReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Embedding == nil || len(req.Queries) == 0 {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := o.service.BatchSearchVector(c, req)
+	if err != nil {
+		zap.L().Error("batch search product vector fail", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
 }

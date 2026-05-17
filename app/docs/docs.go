@@ -9428,14 +9428,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 结算账户列表",
+                "description": "按条件分页查询结算账户列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 结算账户列表",
+                "summary": "查询结算账户列表",
                 "parameters": [
                     {
                         "type": "boolean",
@@ -9485,14 +9485,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 结算账户详情",
+                "description": "根据ID查询结算账户详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 结算账户详情",
+                "summary": "查询结算账户详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -9519,14 +9519,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 结算账户，多个ID用逗号分隔",
+                "description": "根据ID删除结算账户，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "删除 ERP 结算账户",
+                "summary": "删除结算账户",
                 "parameters": [
                     {
                         "type": "string",
@@ -9553,7 +9553,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 结算账户",
+                "description": "新增或修改结算账户",
                 "consumes": [
                     "application/json"
                 ],
@@ -9563,7 +9563,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "新增或修改 ERP 结算账户",
+                "summary": "新增或修改结算账户",
                 "parameters": [
                     {
                         "description": "ERP 结算账户参数",
@@ -9592,14 +9592,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 客户列表",
+                "description": "按条件分页查询客户列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 客户列表",
+                "summary": "查询客户列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -9644,14 +9644,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 客户详情",
+                "description": "根据ID查询客户详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 客户详情",
+                "summary": "查询客户详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -9678,14 +9678,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 客户，多个ID用逗号分隔",
+                "description": "根据ID删除客户，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "删除 ERP 客户",
+                "summary": "删除客户",
                 "parameters": [
                     {
                         "type": "string",
@@ -9712,7 +9712,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 客户",
+                "description": "新增或修改客户",
                 "consumes": [
                     "application/json"
                 ],
@@ -9722,7 +9722,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "新增或修改 ERP 客户",
+                "summary": "新增或修改客户",
                 "parameters": [
                     {
                         "description": "ERP 客户参数",
@@ -10216,6 +10216,191 @@ const docTemplate = `{
                 }
             }
         },
+        "/erp/master/product/vector/generate/all": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "异步将全部启用产品写入向量数据库，并将任务进度记录到 Redis",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "全量生成启用产品向量",
+                "parameters": [
+                    {
+                        "description": "全量生成产品向量参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductGenAllVectorReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "任务已启动",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/vector/generate/all/progress/{taskId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据任务ID读取 Redis 中的全量生成任务进度",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询全量生成产品向量任务进度",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/vector/generate/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据产品ID生成产品向量",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "生成产品向量",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "产品ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "产品向量生成参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductGenVectorReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "生成成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/vector/search": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据检索文本生成查询向量并近似搜索产品数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "近似搜索产品向量",
+                "parameters": [
+                    {
+                        "description": "产品向量搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductVectorSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/vector/search/batch": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据多条检索文本批量生成查询向量并近似搜索产品数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "批量近似搜索产品向量",
+                "parameters": [
+                    {
+                        "description": "产品批量向量搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductVectorBatchSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/erp/master/supplier/list": {
             "get": {
                 "security": [
@@ -10223,14 +10408,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 供应商列表",
+                "description": "按条件分页查询供应商列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 供应商列表",
+                "summary": "查询供应商列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -10275,14 +10460,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 供应商详情",
+                "description": "根据ID查询供应商详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 供应商详情",
+                "summary": "查询供应商详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -10309,14 +10494,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 供应商，多个ID用逗号分隔",
+                "description": "根据ID删除供应商，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "删除 ERP 供应商",
+                "summary": "删除供应商",
                 "parameters": [
                     {
                         "type": "string",
@@ -10343,7 +10528,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 供应商",
+                "description": "新增或修改供应商",
                 "consumes": [
                     "application/json"
                 ],
@@ -10353,7 +10538,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "新增或修改 ERP 供应商",
+                "summary": "新增或修改供应商",
                 "parameters": [
                     {
                         "description": "ERP 供应商参数",
@@ -10382,14 +10567,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 仓库列表",
+                "description": "按条件分页查询仓库列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 仓库列表",
+                "summary": "查询仓库列表",
                 "parameters": [
                     {
                         "type": "boolean",
@@ -10434,14 +10619,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 仓库详情",
+                "description": "根据ID查询仓库详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 仓库详情",
+                "summary": "查询仓库详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -10468,14 +10653,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 仓库，多个ID用逗号分隔",
+                "description": "根据ID删除仓库，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "删除 ERP 仓库",
+                "summary": "删除仓库",
                 "parameters": [
                     {
                         "type": "string",
@@ -10502,7 +10687,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 仓库",
+                "description": "新增或修改仓库",
                 "consumes": [
                     "application/json"
                 ],
@@ -10512,7 +10697,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "新增或修改 ERP 仓库",
+                "summary": "新增或修改仓库",
                 "parameters": [
                     {
                         "description": "ERP 仓库参数",
@@ -27552,12 +27737,55 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parentId": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "sort": {
                     "type": "integer"
                 },
                 "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "mastermodels.ProductEmbeddingConfig": {
+            "type": "object",
+            "properties": {
+                "api_endpoint": {
+                    "type": "string"
+                },
+                "api_key": {
+                    "type": "string"
+                },
+                "model_id": {
+                    "type": "string"
+                },
+                "provider_id": {
+                    "type": "string"
+                },
+                "provider_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "mastermodels.ProductGenAllVectorReq": {
+            "type": "object",
+            "properties": {
+                "batchSize": {
+                    "type": "integer"
+                },
+                "embedding": {
+                    "$ref": "#/definitions/mastermodels.ProductEmbeddingConfig"
+                }
+            }
+        },
+        "mastermodels.ProductGenVectorReq": {
+            "type": "object",
+            "properties": {
+                "embedding": {
+                    "$ref": "#/definitions/mastermodels.ProductEmbeddingConfig"
+                },
+                "id": {
                     "type": "integer"
                 }
             }
@@ -27625,6 +27853,43 @@ const docTemplate = `{
                 },
                 "weight": {
                     "type": "number"
+                }
+            }
+        },
+        "mastermodels.ProductVectorBatchSearchReq": {
+            "type": "object",
+            "required": [
+                "queries"
+            ],
+            "properties": {
+                "embedding": {
+                    "$ref": "#/definitions/mastermodels.ProductEmbeddingConfig"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "queries": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "mastermodels.ProductVectorSearchReq": {
+            "type": "object",
+            "required": [
+                "query"
+            ],
+            "properties": {
+                "embedding": {
+                    "$ref": "#/definitions/mastermodels.ProductEmbeddingConfig"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "string"
                 }
             }
         },

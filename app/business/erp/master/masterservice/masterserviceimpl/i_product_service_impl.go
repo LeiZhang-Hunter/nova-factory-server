@@ -8,6 +8,7 @@ import (
 	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/master/mastermodels"
 	"nova-factory-server/app/business/erp/master/masterservice"
+	"nova-factory-server/app/datasource/cache"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,15 +16,27 @@ import (
 // ProductServiceImpl 提供业务实现。
 type ProductServiceImpl struct {
 	dao          masterdao.IProductDao
+	vectorDao    masterdao.IProductVectorDao
 	categoryDao  masterdao.IProductCategoryDao
+	unitDao      masterdao.IProductUnitDao
+	cache        cache.Cache
 	uniqueFields []productUniqueField
 }
 
 // NewProductService 创建服务。
-func NewProductService(dao masterdao.IProductDao, categoryDao masterdao.IProductCategoryDao) masterservice.IProductService {
+func NewProductService(
+	dao masterdao.IProductDao,
+	vectorDao masterdao.IProductVectorDao,
+	categoryDao masterdao.IProductCategoryDao,
+	unitDao masterdao.IProductUnitDao,
+	cache cache.Cache,
+) masterservice.IProductService {
 	return &ProductServiceImpl{
 		dao:          dao,
+		vectorDao:    vectorDao,
 		categoryDao:  categoryDao,
+		unitDao:      unitDao,
+		cache:        cache,
 		uniqueFields: []productUniqueField{},
 	}
 }
@@ -79,7 +92,14 @@ func (s *ProductServiceImpl) GetByID(c *gin.Context, id int64) (*mastermodels.Pr
 	if id <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	return s.dao.GetByID(c, id)
+	item, err := s.dao.GetByID(c, id)
+	if err != nil || item == nil {
+		return item, err
+	}
+	if err = s.fillProductRelations(c, []*mastermodels.Product{item}); err != nil {
+		return nil, err
+	}
+	return item, nil
 }
 
 func (s *ProductServiceImpl) ListPage(c *gin.Context, req *mastermodels.ProductQuery) (*mastermodels.ProductListData, error) {
@@ -128,35 +148,65 @@ func (s *ProductServiceImpl) List(c *gin.Context, req *mastermodels.ProductQuery
 	if len(result.Rows) == 0 {
 		return result, nil
 	}
+	if err = s.fillProductRelations(c, result.Rows); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s *ProductServiceImpl) fillProductRelations(c *gin.Context, rows []*mastermodels.Product) error {
+	if len(rows) == 0 {
+		return nil
+	}
 	categoryIDSet := make(map[int64]struct{})
-	for _, row := range result.Rows {
+	unitIDSet := make(map[int64]struct{})
+	for _, row := range rows {
 		if row.CategoryId > 0 {
 			categoryIDSet[row.CategoryId] = struct{}{}
 		}
+		if row.UnitId > 0 {
+			unitIDSet[row.UnitId] = struct{}{}
+		}
 	}
-	if len(categoryIDSet) == 0 {
-		return result, nil
-	}
-	ids := make([]int64, 0, len(categoryIDSet))
-	for id := range categoryIDSet {
-		ids = append(ids, id)
-	}
-	categories, err := s.categoryDao.GetByIDs(c, ids)
-	if err != nil {
-		return nil, err
-	}
-	idToName := make(map[int64]string)
-	for _, cat := range categories {
-		idToName[cat.ID] = cat.Name
-	}
-	for _, row := range result.Rows {
-		if row.CategoryId > 0 {
-			if name, ok := idToName[row.CategoryId]; ok {
-				row.CategoryName = name
+	if len(categoryIDSet) > 0 {
+		ids := make([]int64, 0, len(categoryIDSet))
+		for id := range categoryIDSet {
+			ids = append(ids, id)
+		}
+		categories, err := s.categoryDao.GetByIDs(c, ids)
+		if err != nil {
+			return err
+		}
+		idToName := make(map[int64]string)
+		for _, cat := range categories {
+			idToName[cat.ID] = cat.Name
+		}
+		for _, row := range rows {
+			if row.CategoryId > 0 {
+				row.CategoryName = idToName[row.CategoryId]
 			}
 		}
 	}
-	return result, nil
+	if len(unitIDSet) > 0 {
+		ids := make([]int64, 0, len(unitIDSet))
+		for id := range unitIDSet {
+			ids = append(ids, id)
+		}
+		units, err := s.unitDao.GetByIDs(c, ids)
+		if err != nil {
+			return err
+		}
+		idToName := make(map[int64]string)
+		for _, unit := range units {
+			idToName[unit.ID] = unit.Name
+		}
+		for _, row := range rows {
+			if row.UnitId > 0 {
+				row.UnitName = idToName[row.UnitId]
+			}
+		}
+	}
+	return nil
 }
 
 type productUniqueField struct {
