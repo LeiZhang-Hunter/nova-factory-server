@@ -7,7 +7,7 @@ import (
 // ProductCategory ERP 产品分类
 type ProductCategory struct {
 	ID         int64  `json:"id,string" gorm:"column:id"`
-	ParentID   int64  `json:"parentId" gorm:"column:parent_id"`
+	ParentID   int64  `json:"parentId,string" gorm:"column:parent_id"`
 	ParentName string `json:"parentName" gorm:"-"`
 	Name       string `json:"name" gorm:"column:name"`
 	Code       string `json:"code" gorm:"column:code"`

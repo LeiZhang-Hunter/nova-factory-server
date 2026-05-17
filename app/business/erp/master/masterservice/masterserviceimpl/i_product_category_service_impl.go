@@ -82,7 +82,16 @@ func (s *ProductCategoryServiceImpl) GetByID(c *gin.Context, id int64) (*masterm
 	if id <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	return s.dao.GetByID(c, id)
+	item, err := s.dao.GetByID(c, id)
+	if err != nil || item == nil {
+		return item, err
+	}
+	if item.ParentID > 0 {
+		if parent, err := s.dao.GetByColumn(c, "id", item.ParentID); err == nil && parent != nil {
+			item.ParentName = parent.Name
+		}
+	}
+	return item, nil
 }
 
 func (s *ProductCategoryServiceImpl) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*mastermodels.ProductCategoryListData, error) {
