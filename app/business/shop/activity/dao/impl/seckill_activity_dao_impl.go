@@ -25,7 +25,7 @@ type ShopSeckillActivityDaoImpl struct {
 const seckillActivityBusinessType = "seckill_activity"
 
 func NewShopSeckillActivityDao(ms *gorm.DB, itemDao homeDao.IShopHomeModuleItemDao) dao.IShopSeckillActivityDao {
-	return &ShopSeckillActivityDaoImpl{db: ms, itemDao: itemDao, tableName: "eb_store_seckill_activity"}
+	return &ShopSeckillActivityDaoImpl{db: ms, itemDao: itemDao, tableName: "shop_store_seckill_activity"}
 }
 
 func (s *ShopSeckillActivityDaoImpl) Set(c *gin.Context, req *models.SeckillActivitySet) (*models.SeckillActivity, error) {
