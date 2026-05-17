@@ -5,14 +5,14 @@ import (
 )
 
 type AgentConfig struct {
-	ID      uint64 `json:"id" db:"id"`
-	Name    string `json:"name" db:"name"`
-	AgentID string `json:"agentId" db:"agent_id"`
-	Remark  string `json:"remark" db:"remark"`
-	Status  *bool  `json:"status" db:"status"`
-	DeptID  int64  `json:"deptId" db:"dept_id"`
+	ID      uint64 `json:"id" gorm:"id"`
+	Name    string `json:"name" gorm:"name"`
+	AgentID string `json:"agentId" gorm:"agent_id"`
+	Remark  string `json:"remark" gorm:"remark"`
+	Status  *bool  `json:"status" gorm:"status"`
+	DeptID  int64  `json:"deptId" gorm:"dept_id"`
 	baize.BaseEntity
-	State int32 `json:"state" db:"state"`
+	State int32 `json:"state" gorm:"state"`
 }
 
 type AgentConfigUpsert struct {

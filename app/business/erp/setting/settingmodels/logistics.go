@@ -4,33 +4,33 @@ import "nova-factory-server/app/baize"
 
 // LogisticsCompany ERP物流公司
 type LogisticsCompany struct {
-	ID      int64  `json:"id,string" db:"id"`
-	Code    string `json:"code" db:"code"`
-	Name    string `json:"name" db:"name"`
-	Company string `json:"company" db:"company"`
+	ID      int64  `json:"id,string" gorm:"id"`
+	Code    string `json:"code" gorm:"code"`
+	Name    string `json:"name" gorm:"name"`
+	Company string `json:"company" gorm:"company"`
 
-	ProvinceName string `json:"provinceName" db:"province_name"`
-	ProvinceCode string `json:"provinceCode" db:"province_code"`
+	ProvinceName string `json:"provinceName" gorm:"province_name"`
+	ProvinceCode string `json:"provinceCode" gorm:"province_code"`
 
-	CityName string `json:"cityName" db:"city_name"`
-	CityCode string `json:"cityCode" db:"city_code"`
+	CityName string `json:"cityName" gorm:"city_name"`
+	CityCode string `json:"cityCode" gorm:"city_code"`
 
-	DistrictName string `json:"districtName" db:"district_name"`
-	DistrictCode string `json:"districtCode" db:"district_code"`
+	DistrictName string `json:"districtName" gorm:"district_name"`
+	DistrictCode string `json:"districtCode" gorm:"district_code"`
 
-	StreetName string `json:"streetName" db:"street_name"`
-	StreetCode string `json:"streetCode" db:"street_code"`
+	StreetName string `json:"streetName" gorm:"street_name"`
+	StreetCode string `json:"streetCode" gorm:"street_code"`
 
-	ShortName    string `json:"shortName" db:"short_name"`
-	ContactName  string `json:"contactName" db:"contact_name"`
-	ContactPhone string `json:"contactPhone" db:"contact_phone"`
-	Address      string `json:"address" db:"address"`
-	Remark       string `json:"remark" db:"remark"`
-	Sort         int32  `json:"sort" db:"sort"`
-	Status       *bool  `json:"status" db:"status"`
-	DeptID       int64  `json:"deptId" db:"dept_id"`
+	ShortName    string `json:"shortName" gorm:"short_name"`
+	ContactName  string `json:"contactName" gorm:"contact_name"`
+	ContactPhone string `json:"contactPhone" gorm:"contact_phone"`
+	Address      string `json:"address" gorm:"address"`
+	Remark       string `json:"remark" gorm:"remark"`
+	Sort         int32  `json:"sort" gorm:"sort"`
+	Status       *bool  `json:"status" gorm:"status"`
+	DeptID       int64  `json:"deptId" gorm:"dept_id"`
 	baize.BaseEntity
-	State int32 `json:"state" db:"state"`
+	State int32 `json:"state" gorm:"state"`
 }
 
 // LogisticsCompanyUpsert ERP物流公司新增修改参数

@@ -15,13 +15,15 @@ import (
 // ProductServiceImpl 提供业务实现。
 type ProductServiceImpl struct {
 	dao          masterdao.IProductDao
+	categoryDao  masterdao.IProductCategoryDao
 	uniqueFields []productUniqueField
 }
 
 // NewProductService 创建服务。
-func NewProductService(dao masterdao.IProductDao) masterservice.IProductService {
+func NewProductService(dao masterdao.IProductDao, categoryDao masterdao.IProductCategoryDao) masterservice.IProductService {
 	return &ProductServiceImpl{
 		dao:          dao,
+		categoryDao:  categoryDao,
 		uniqueFields: []productUniqueField{},
 	}
 }
@@ -123,7 +125,38 @@ func (s *ProductServiceImpl) List(c *gin.Context, req *mastermodels.ProductQuery
 	if err != nil {
 		return nil, err
 	}
-	return &mastermodels.ProductListData{Rows: result.Rows, Total: result.Total}, nil
+	if len(result.Rows) == 0 {
+		return result, nil
+	}
+	categoryIDSet := make(map[int64]struct{})
+	for _, row := range result.Rows {
+		if row.CategoryId > 0 {
+			categoryIDSet[row.CategoryId] = struct{}{}
+		}
+	}
+	if len(categoryIDSet) == 0 {
+		return result, nil
+	}
+	ids := make([]int64, 0, len(categoryIDSet))
+	for id := range categoryIDSet {
+		ids = append(ids, id)
+	}
+	categories, err := s.categoryDao.GetByIDs(c, ids)
+	if err != nil {
+		return nil, err
+	}
+	idToName := make(map[int64]string)
+	for _, cat := range categories {
+		idToName[cat.ID] = cat.Name
+	}
+	for _, row := range result.Rows {
+		if row.CategoryId > 0 {
+			if name, ok := idToName[row.CategoryId]; ok {
+				row.CategoryName = name
+			}
+		}
+	}
+	return result, nil
 }
 
 type productUniqueField struct {

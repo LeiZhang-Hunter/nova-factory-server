@@ -10,6 +10,7 @@ type Product struct {
 	Name          string  `json:"name" gorm:"column:name"`
 	BarCode       string  `json:"barCode" gorm:"column:bar_code"`
 	CategoryId    int64   `json:"categoryId" gorm:"column:category_id"`
+	CategoryName  string  `json:"categoryName" gorm:"-"`
 	UnitId        int64   `json:"unitId" gorm:"column:unit_id"`
 	Status        int32   `json:"status" gorm:"column:status"`
 	Standard      string  `json:"standard" gorm:"column:standard"`
