@@ -47,6 +47,7 @@ type ProductUpsert struct {
 // ProductQuery ERP 产品查询参数
 type ProductQuery struct {
 	Name   string `form:"name" filter:"like,name"`
+	Code   string `form:"code"`
 	Status *int32 `form:"status" filter:"eq,status"`
 	Page   int64  `form:"page"`
 	Size   int64  `form:"size"`
