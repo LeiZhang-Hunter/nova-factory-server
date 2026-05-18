@@ -1,7 +1,7 @@
 package saleservice
 
 import (
-	"nova-factory-server/app/business/erp/core/integration/grasp"
+	"nova-factory-server/app/business/erp/core/integration/api"
 	"nova-factory-server/app/business/erp/sale/salemodels"
 
 	"github.com/gin-gonic/gin"
@@ -14,5 +14,5 @@ type IOrderService interface {
 	List(c *gin.Context, req *salemodels.OrderQuery) (*salemodels.OrderListData, error)
 	DeleteByIDs(c *gin.Context, ids []uint64) error
 	CheckLoginState(c *gin.Context, req *salemodels.CheckLoginStateReq) (*salemodels.CheckLoginStateResp, error)
-	SynchronizeSalesOrders(c *gin.Context, req *grasp.OrderSyncRequest) (*grasp.OrderSyncResponse, error)
+	SynchronizeSalesOrders(c *gin.Context, req *api.OrderSyncRequest) (*api.OrderSyncResponse, error)
 }

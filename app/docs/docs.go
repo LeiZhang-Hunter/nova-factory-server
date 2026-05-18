@@ -10286,6 +10286,31 @@ const docTemplate = `{
                 }
             }
         },
+        "/erp/master/product/vector/generate/all/query/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询当前操作人的全量生成产品向量未完成任务列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询全量生成产品向量未完成任务列表",
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/erp/master/product/vector/generate/{id}": {
             "post": {
                 "security": [
@@ -10960,45 +10985,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "删除成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/erp/order-audit/set": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "新增或修改ERP订单审核记录",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ERP/销售管理"
-                ],
-                "summary": "ERP订单审核保存",
-                "parameters": [
-                    {
-                        "description": "ERP订单审核保存参数",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/salemodels.OrderAuditSet"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -12254,6 +12240,45 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/order-audit/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改ERP订单审核记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "ERP订单审核保存",
+                "parameters": [
+                    {
+                        "description": "ERP订单审核保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/salemodels.OrderAuditSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -17893,6 +17918,31 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/vector/generate/all/query/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询当前操作人的全量生成上架商品向量未完成任务列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "查询全量生成上架商品向量未完成任务列表",
                 "responses": {
                     "200": {
                         "description": "查询成功",
@@ -27776,6 +27826,9 @@ const docTemplate = `{
                 },
                 "embedding": {
                     "$ref": "#/definitions/mastermodels.ProductEmbeddingConfig"
+                },
+                "taskId": {
+                    "type": "string"
                 }
             }
         },
@@ -27954,10 +28007,14 @@ const docTemplate = `{
         "mastermodels.WarehouseUpsert": {
             "type": "object",
             "required": [
+                "code",
                 "name"
             ],
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "code": {
                     "type": "string"
                 },
                 "defaultStatus": {
@@ -30731,6 +30788,10 @@ const docTemplate = `{
                 },
                 "embedding": {
                     "$ref": "#/definitions/shopmodels.EmbeddingConfig"
+                },
+                "taskId": {
+                    "description": "可选，指定任务ID续跑",
+                    "type": "string"
                 }
             }
         },

@@ -2738,6 +2738,8 @@ definitions:
         type: integer
       embedding:
         $ref: '#/definitions/mastermodels.ProductEmbeddingConfig'
+      taskId:
+        type: string
     type: object
   mastermodels.ProductGenVectorReq:
     properties:
@@ -2857,6 +2859,8 @@ definitions:
     properties:
       address:
         type: string
+      code:
+        type: string
       defaultStatus:
         type: boolean
       id:
@@ -2877,6 +2881,7 @@ definitions:
       warehousePrice:
         type: number
     required:
+    - code
     - name
     type: object
   materialmodels.InboundInfo:
@@ -4789,6 +4794,9 @@ definitions:
         type: integer
       embedding:
         $ref: '#/definitions/shopmodels.EmbeddingConfig'
+      taskId:
+        description: 可选，指定任务ID续跑
+        type: string
     type: object
   shopmodels.GoodsSkuUpsert:
     properties:
@@ -12470,6 +12478,21 @@ paths:
       summary: 查询全量生成产品向量任务进度
       tags:
       - ERP/基础资料
+  /erp/master/product/vector/generate/all/query/list:
+    get:
+      description: 查询当前操作人的全量生成产品向量未完成任务列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询全量生成产品向量未完成任务列表
+      tags:
+      - ERP/基础资料
   /erp/master/product/vector/search:
     post:
       description: 根据检索文本生成查询向量并近似搜索产品数据
@@ -12860,30 +12883,6 @@ paths:
       security:
       - BearerAuth: []
       summary: ERP订单审核删除
-      tags:
-      - ERP/销售管理
-  /erp/order-audit/set:
-    post:
-      consumes:
-      - application/json
-      description: 新增或修改ERP订单审核记录
-      parameters:
-      - description: ERP订单审核保存参数
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/salemodels.OrderAuditSet'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 保存成功
-          schema:
-            $ref: '#/definitions/response.ResponseData'
-      security:
-      - BearerAuth: []
-      summary: ERP订单审核保存
       tags:
       - ERP/销售管理
   /erp/order/check-login-state:
@@ -13654,6 +13653,30 @@ paths:
       summary: 新增或修改采购退货
       tags:
       - ERP/采购管理
+  /erp/sale/order-audit/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改ERP订单审核记录
+      parameters:
+      - description: ERP订单审核保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/salemodels.OrderAuditSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单审核保存
+      tags:
+      - ERP/销售管理
   /erp/sale/out-items/list:
     get:
       description: 按条件分页查询销售出库项列表
@@ -17164,6 +17187,21 @@ paths:
       security:
       - BearerAuth: []
       summary: 查询全量生成上架商品向量任务进度
+      tags:
+      - 商城/商品管理
+  /shop/goods/vector/generate/all/query/list:
+    get:
+      description: 查询当前操作人的全量生成上架商品向量未完成任务列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询全量生成上架商品向量未完成任务列表
       tags:
       - 商城/商品管理
   /shop/goods/vector/search:

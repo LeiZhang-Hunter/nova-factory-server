@@ -1034,7 +1034,8 @@ CREATE TABLE IF NOT EXISTS `erp_stock_record` (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ERP 产品库存明细 DO';
 
 CREATE TABLE IF NOT EXISTS `erp_warehouse` (
-   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '仓库编号',
+   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '仓库id',
+   `code` varchar(255) NULL COMMENT '仓库编号',
    `name` varchar(255) NULL COMMENT '仓库名称',
     `address` varchar(255) NULL COMMENT '仓库地址',
     `sort` bigint NULL COMMENT '排序',
@@ -1043,7 +1044,7 @@ CREATE TABLE IF NOT EXISTS `erp_warehouse` (
     `warehouse_price` decimal(24,6) NULL COMMENT '仓储费，单位：元',
     `truckage_price` decimal(24,6) NULL COMMENT '搬运费，单位：元',
     `status` int NULL COMMENT '开启状态',
-    `default_status` bit(1) NULL COMMENT '是否默认',
+    `default_status`  tinyint(1) NULL DEFAULT 0 NULL COMMENT '是否默认',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',

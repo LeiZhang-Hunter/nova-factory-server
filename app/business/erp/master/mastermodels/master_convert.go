@@ -1,5 +1,7 @@
 package mastermodels
 
+import "nova-factory-server/app/utils/code"
+
 func ProductUpsertToEntity(upsert *ProductUpsert) *Product {
 	if upsert == nil {
 		return nil
@@ -220,21 +222,14 @@ func SupplierToUpsert(entity *Supplier) *SupplierUpsert {
 	}
 }
 
-func SupplierClone(entity *Supplier) *Supplier {
-	if entity == nil {
-		return nil
-	}
-	clone := *entity
-	return &clone
-}
-
 func WarehouseUpsertToEntity(upsert *WarehouseUpsert) *Warehouse {
 	if upsert == nil {
 		return nil
 	}
-	return &Warehouse{
+	w := &Warehouse{
 		ID:             upsert.ID,
 		Name:           upsert.Name,
+		Code:           upsert.Code,
 		Address:        upsert.Address,
 		Sort:           upsert.Sort,
 		Remark:         upsert.Remark,
@@ -244,32 +239,14 @@ func WarehouseUpsertToEntity(upsert *WarehouseUpsert) *Warehouse {
 		Status:         upsert.Status,
 		DefaultStatus:  upsert.DefaultStatus,
 	}
-}
-
-func WarehouseToUpsert(entity *Warehouse) *WarehouseUpsert {
-	if entity == nil {
-		return nil
+	if w.Code == "" {
+		w.Code = code.GenerateWarehouseCode()
 	}
-	return &WarehouseUpsert{
-		ID:             entity.ID,
-		Name:           entity.Name,
-		Address:        entity.Address,
-		Sort:           entity.Sort,
-		Remark:         entity.Remark,
-		Principal:      entity.Principal,
-		WarehousePrice: entity.WarehousePrice,
-		TruckagePrice:  entity.TruckagePrice,
-		Status:         entity.Status,
-		DefaultStatus:  entity.DefaultStatus,
+	if w.DefaultStatus == nil {
+		var defaultStatus bool = false
+		w.DefaultStatus = &defaultStatus
 	}
-}
-
-func WarehouseClone(entity *Warehouse) *Warehouse {
-	if entity == nil {
-		return nil
-	}
-	clone := *entity
-	return &clone
+	return w
 }
 
 func AccountUpsertToEntity(upsert *AccountUpsert) *Account {
@@ -285,27 +262,4 @@ func AccountUpsertToEntity(upsert *AccountUpsert) *Account {
 		Sort:          upsert.Sort,
 		DefaultStatus: upsert.DefaultStatus,
 	}
-}
-
-func AccountToUpsert(entity *Account) *AccountUpsert {
-	if entity == nil {
-		return nil
-	}
-	return &AccountUpsert{
-		ID:            entity.ID,
-		Name:          entity.Name,
-		No:            entity.No,
-		Remark:        entity.Remark,
-		Status:        entity.Status,
-		Sort:          entity.Sort,
-		DefaultStatus: entity.DefaultStatus,
-	}
-}
-
-func AccountClone(entity *Account) *Account {
-	if entity == nil {
-		return nil
-	}
-	clone := *entity
-	return &clone
 }

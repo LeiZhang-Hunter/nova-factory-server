@@ -2,6 +2,9 @@ package saleserviceimpl
 
 import (
 	"errors"
+	"go.uber.org/zap"
+	"nova-factory-server/app/business/erp/core/integration"
+	"nova-factory-server/app/business/erp/setting/settingdao"
 	"strings"
 
 	"nova-factory-server/app/business/erp/sale/saledao"
@@ -9,17 +12,26 @@ import (
 	"nova-factory-server/app/business/erp/sale/saleservice"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // OrderAuditServiceImpl ERP订单审核服务实现。
 type OrderAuditServiceImpl struct {
-	dao      saledao.IOrderAuditDao
-	orderDao saledao.IOrderDao
+	dao                  saledao.IOrderAuditDao
+	orderDao             saledao.IOrderDao
+	integrationConfigDao settingdao.IIntegrationConfigDao
+	db                   *gorm.DB
 }
 
 // NewOrderAuditService 创建 ERP 订单审核服务。
-func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao) saleservice.IOrderAuditService {
-	return &OrderAuditServiceImpl{dao: dao, orderDao: orderDao}
+func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao,
+	db *gorm.DB, integrationConfigDao settingdao.IIntegrationConfigDao) saleservice.IOrderAuditService {
+	return &OrderAuditServiceImpl{
+		dao:                  dao,
+		orderDao:             orderDao,
+		db:                   db,
+		integrationConfigDao: integrationConfigDao,
+	}
 }
 
 func (o *OrderAuditServiceImpl) Set(c *gin.Context, req *salemodels.OrderAuditSet) (*salemodels.OrderAudit, error) {
@@ -107,14 +119,37 @@ func (o *OrderAuditServiceImpl) Approve(c *gin.Context, req *salemodels.OrderAud
 	if item.AuditStatus == 1 && item.TransferStatus == 1 && item.ERPOrderID > 0 {
 		return item, nil
 	}
-	order, err := o.orderDao.Set(c, o.toOrderSet(item))
-	if err != nil {
-		return nil, err
-	}
-	if err := o.dao.Approve(c, req.ID, strings.TrimSpace(req.AuditRemark), order.ID); err != nil {
-		return nil, err
-	}
-	return o.dao.GetByID(c, req.ID)
+	var result *salemodels.OrderAudit
+	err = o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		order, setErr := o.orderDao.SetWithTx(c, tx, o.toOrderSet(item))
+		if setErr != nil {
+			return setErr
+		}
+		if approveErr := o.dao.ApproveWithTx(c, tx, req.ID, strings.TrimSpace(req.AuditRemark), order.ID); approveErr != nil {
+			return approveErr
+		}
+		result, err = o.dao.GetByIDWithTx(c, tx, req.ID)
+		if err != nil {
+			zap.L().Error("get id error", zap.Error(err))
+			return err
+		}
+
+		// CheckLoginState 检查当前 ERP 集成客户端的登录状态。
+		cfg, err := o.integrationConfigDao.GetEnabled(c)
+		if err != nil {
+			return err
+		}
+		if cfg == nil {
+			return nil
+		}
+		client, err := integration.CreateByType(cfg.Type)
+		if err != nil {
+			return err
+		}
+		_, err = client.CheckLoginState(c, cfg, "", "")
+		return err
+	})
+	return result, err
 }
 
 func (o *OrderAuditServiceImpl) Reject(c *gin.Context, req *salemodels.OrderAuditAction) (*salemodels.OrderAudit, error) {
@@ -128,10 +163,15 @@ func (o *OrderAuditServiceImpl) Reject(c *gin.Context, req *salemodels.OrderAudi
 	if item == nil {
 		return nil, errors.New("订单审核记录不存在")
 	}
-	if err := o.dao.Reject(c, req.ID, strings.TrimSpace(req.AuditRemark)); err != nil {
-		return nil, err
-	}
-	return o.dao.GetByID(c, req.ID)
+	var result *salemodels.OrderAudit
+	err = o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		if rejectErr := o.dao.RejectWithTx(c, tx, req.ID, strings.TrimSpace(req.AuditRemark)); rejectErr != nil {
+			return rejectErr
+		}
+		result, err = o.dao.GetByIDWithTx(c, tx, req.ID)
+		return err
+	})
+	return result, err
 }
 
 func (o *OrderAuditServiceImpl) validateSet(req *salemodels.OrderAuditSet) error {

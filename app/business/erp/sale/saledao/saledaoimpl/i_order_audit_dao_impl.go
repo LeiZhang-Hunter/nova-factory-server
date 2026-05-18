@@ -77,7 +77,6 @@ func (o *OrderAuditDaoImpl) GetByID(c *gin.Context, id uint64) (*salemodels.Orde
 	var item salemodels.OrderAudit
 	if err := o.db.WithContext(c).Table(o.table).
 		Where("id = ?", id).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -143,8 +142,12 @@ func (o *OrderAuditDaoImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 }
 
 func (o *OrderAuditDaoImpl) Approve(c *gin.Context, id uint64, remark string, erpOrderID uint64) error {
+	return o.ApproveWithTx(c, o.db, id, remark, erpOrderID)
+}
+
+func (o *OrderAuditDaoImpl) ApproveWithTx(c *gin.Context, tx *gorm.DB, id uint64, remark string, erpOrderID uint64) error {
 	now := time.Now()
-	return o.db.WithContext(c).Table(o.table).
+	return tx.WithContext(c).Table(o.table).
 		Where("id = ?", id).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
@@ -163,8 +166,12 @@ func (o *OrderAuditDaoImpl) Approve(c *gin.Context, id uint64, remark string, er
 }
 
 func (o *OrderAuditDaoImpl) Reject(c *gin.Context, id uint64, remark string) error {
+	return o.RejectWithTx(c, o.db, id, remark)
+}
+
+func (o *OrderAuditDaoImpl) RejectWithTx(c *gin.Context, tx *gorm.DB, id uint64, remark string) error {
 	now := time.Now()
-	return o.db.WithContext(c).Table(o.table).
+	return tx.WithContext(c).Table(o.table).
 		Where("id = ?", id).
 		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
@@ -176,6 +183,21 @@ func (o *OrderAuditDaoImpl) Reject(c *gin.Context, id uint64, remark string) err
 			"update_by":    baizeContext.GetUserId(c),
 			"update_time":  now,
 		}).Error
+}
+
+func (o *OrderAuditDaoImpl) GetByIDWithTx(c *gin.Context, tx *gorm.DB, id uint64) (*salemodels.OrderAudit, error) {
+	var item salemodels.OrderAudit
+	if err := tx.WithContext(c).Table(o.table).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	decodeOrderAudit(&item)
+	return &item, nil
 }
 
 func (o *OrderAuditDaoImpl) findExists(tx *gorm.DB, req *salemodels.OrderAuditSet) (*salemodels.OrderAudit, error) {
