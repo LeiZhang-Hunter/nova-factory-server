@@ -116,6 +116,20 @@ func (d *ProductDaoImpl) GetByID(c *gin.Context, id int64) (*mastermodels.Produc
 	return item, nil
 }
 
+func (d *ProductDaoImpl) GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.Product, error) {
+	if len(ids) == 0 {
+		return make([]*mastermodels.Product, 0), nil
+	}
+	rows := make([]*mastermodels.Product, 0, len(ids))
+	if err := d.db.WithContext(c).Table("erp_product").
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func (d *ProductDaoImpl) GetByColumn(c *gin.Context, column string, value any) (*mastermodels.Product, error) {
 	if column == "" {
 		return nil, nil

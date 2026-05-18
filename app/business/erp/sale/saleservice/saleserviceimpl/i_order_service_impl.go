@@ -2,12 +2,12 @@ package saleserviceimpl
 
 import (
 	"errors"
+	"nova-factory-server/app/business/erp/core/integration"
+	"nova-factory-server/app/business/erp/core/integration/api"
 	"nova-factory-server/app/business/erp/setting/settingdao"
 	"nova-factory-server/app/utils/order"
 	"strings"
 
-	"nova-factory-server/app/business/erp/core/integration"
-	"nova-factory-server/app/business/erp/core/integration/grasp"
 	"nova-factory-server/app/business/erp/sale/saledao"
 	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/business/erp/sale/saleservice"
@@ -176,7 +176,7 @@ func (o *OrderServiceImpl) CheckLoginState(c *gin.Context, req *salemodels.Check
 }
 
 // SynchronizeSalesOrders 调用管家婆接口同步销售订单。
-func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *grasp.OrderSyncRequest) (*grasp.OrderSyncResponse, error) {
+func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *api.OrderSyncRequest) (*api.OrderSyncResponse, error) {
 	cfg, err := o.integrationConfigDao.GetEnabled(c)
 	if err != nil {
 		return nil, err
@@ -184,5 +184,9 @@ func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *grasp.Ord
 	if cfg == nil {
 		return nil, errors.New("未找到管家婆启用配置")
 	}
-	return grasp.New().SynchronizeOrders(c, cfg, req, o.cache)
+	client, err := integration.CreateByType(cfg.Type)
+	if err != nil {
+		return nil, err
+	}
+	return client.SynchronizeOrders(c, cfg, req, o.cache)
 }

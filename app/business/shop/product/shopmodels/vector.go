@@ -16,6 +16,7 @@ type GenVectorReq struct {
 
 // GenAllVectorReq 全量生成向量请求
 type GenAllVectorReq struct {
+	TaskID    string           `json:"taskId"`    // 可选，指定任务ID续跑
 	BatchSize int              `json:"batchSize"` // 每批处理商品数
 	Embedding *EmbeddingConfig `json:"embedding"`
 }
@@ -77,10 +78,17 @@ type GoodsVectorTaskData struct {
 	Status      string `json:"status"`
 }
 
+// GoodsVectorTaskListData 商品向量任务列表
+type GoodsVectorTaskListData struct {
+	Rows  []*GoodsVectorTaskProgress `json:"rows"`
+	Total int64                      `json:"total"`
+}
+
 // GoodsVectorTaskProgress 商品向量任务进度
 type GoodsVectorTaskProgress struct {
 	TaskID      string `json:"taskId"`
 	Status      string `json:"status"`
+	BatchSize   int    `json:"batchSize"`
 	Total       int64  `json:"total"`
 	Processed   int64  `json:"processed"`
 	Success     int64  `json:"success"`

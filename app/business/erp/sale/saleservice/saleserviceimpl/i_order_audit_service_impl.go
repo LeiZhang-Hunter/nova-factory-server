@@ -2,6 +2,11 @@ package saleserviceimpl
 
 import (
 	"errors"
+	"go.uber.org/zap"
+	"nova-factory-server/app/business/erp/core/integration"
+	"nova-factory-server/app/business/erp/core/integration/api"
+	"nova-factory-server/app/business/erp/setting/settingdao"
+	"nova-factory-server/app/datasource/cache"
 	"strings"
 
 	"nova-factory-server/app/business/erp/sale/saledao"
@@ -9,17 +14,28 @@ import (
 	"nova-factory-server/app/business/erp/sale/saleservice"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // OrderAuditServiceImpl ERP订单审核服务实现。
 type OrderAuditServiceImpl struct {
-	dao      saledao.IOrderAuditDao
-	orderDao saledao.IOrderDao
+	dao                  saledao.IOrderAuditDao
+	orderDao             saledao.IOrderDao
+	integrationConfigDao settingdao.IIntegrationConfigDao
+	db                   *gorm.DB
+	cache                cache.Cache
 }
 
 // NewOrderAuditService 创建 ERP 订单审核服务。
-func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao) saleservice.IOrderAuditService {
-	return &OrderAuditServiceImpl{dao: dao, orderDao: orderDao}
+func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao,
+	db *gorm.DB, integrationConfigDao settingdao.IIntegrationConfigDao, cache cache.Cache) saleservice.IOrderAuditService {
+	return &OrderAuditServiceImpl{
+		dao:                  dao,
+		orderDao:             orderDao,
+		db:                   db,
+		integrationConfigDao: integrationConfigDao,
+		cache:                cache,
+	}
 }
 
 func (o *OrderAuditServiceImpl) Set(c *gin.Context, req *salemodels.OrderAuditSet) (*salemodels.OrderAudit, error) {
@@ -107,14 +123,41 @@ func (o *OrderAuditServiceImpl) Approve(c *gin.Context, req *salemodels.OrderAud
 	if item.AuditStatus == 1 && item.TransferStatus == 1 && item.ERPOrderID > 0 {
 		return item, nil
 	}
-	order, err := o.orderDao.Set(c, o.toOrderSet(item))
+	var result *salemodels.OrderAudit
+	err = o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		order, setErr := o.orderDao.SetWithTx(c, tx, o.toOrderSet(item))
+		if setErr != nil {
+			return setErr
+		}
+		if approveErr := o.dao.ApproveWithTx(c, tx, req.ID, strings.TrimSpace(req.AuditRemark), order.ID); approveErr != nil {
+			return approveErr
+		}
+		result, err = o.dao.GetByIDWithTx(c, tx, req.ID)
+		if err != nil {
+			zap.L().Error("get id error", zap.Error(err))
+			return err
+		}
+
+		// CheckLoginState 检查当前 ERP 集成客户端的登录状态。
+		cfg, err := o.integrationConfigDao.GetEnabled(c)
+		if err != nil {
+			return err
+		}
+		if cfg == nil {
+			return nil
+		}
+		client, err := integration.CreateByType(cfg.Type)
+		if err != nil {
+			return err
+		}
+		data := o.toOrderSyncRequest(item)
+		_, err = client.SynchronizeOrders(c, cfg, data, o.cache)
+		return err
+	})
 	if err != nil {
-		return nil, err
+		zap.L().Error("sync order error", zap.Error(err))
 	}
-	if err := o.dao.Approve(c, req.ID, strings.TrimSpace(req.AuditRemark), order.ID); err != nil {
-		return nil, err
-	}
-	return o.dao.GetByID(c, req.ID)
+	return result, err
 }
 
 func (o *OrderAuditServiceImpl) Reject(c *gin.Context, req *salemodels.OrderAuditAction) (*salemodels.OrderAudit, error) {
@@ -128,10 +171,15 @@ func (o *OrderAuditServiceImpl) Reject(c *gin.Context, req *salemodels.OrderAudi
 	if item == nil {
 		return nil, errors.New("订单审核记录不存在")
 	}
-	if err := o.dao.Reject(c, req.ID, strings.TrimSpace(req.AuditRemark)); err != nil {
-		return nil, err
-	}
-	return o.dao.GetByID(c, req.ID)
+	var result *salemodels.OrderAudit
+	err = o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		if rejectErr := o.dao.RejectWithTx(c, tx, req.ID, strings.TrimSpace(req.AuditRemark)); rejectErr != nil {
+			return rejectErr
+		}
+		result, err = o.dao.GetByIDWithTx(c, tx, req.ID)
+		return err
+	})
+	return result, err
 }
 
 func (o *OrderAuditServiceImpl) validateSet(req *salemodels.OrderAuditSet) error {
@@ -253,4 +301,101 @@ func (o *OrderAuditServiceImpl) toOrderSet(item *salemodels.OrderAudit) *salemod
 		Details:              details,
 		Accounts:             accounts,
 	}
+}
+
+func (o *OrderAuditServiceImpl) toOrderSyncRequest(item *salemodels.OrderAudit) *api.OrderSyncRequest {
+	if item == nil {
+		return nil
+	}
+	details := make([]*api.OrderSyncDetail, 0, len(item.Details))
+	for _, detail := range item.Details {
+		if detail == nil {
+			continue
+		}
+		details = append(details, &api.OrderSyncDetail{
+			OID:            detail.OID,
+			Barcode:        stringPtr(detail.Barcode),
+			EShopGoodsID:   stringPtr(detail.EShopGoodsID),
+			OuterIID:       stringPtr(detail.OuterIID),
+			EShopGoodsName: detail.EShopGoodsName,
+			EShopSKUId:     stringPtr(detail.EShopSkuID),
+			EShopSKUName:   stringPtr(detail.EShopSkuName),
+			NumIID:         int64Ptr(detail.NumIID),
+			SKUId:          int64Ptr(detail.SkuID),
+			Num:            detail.Num,
+			Payment:        detail.Payment,
+			PicPath:        stringPtr(detail.PicPath),
+			Weight:         float64Ptr(detail.Weight),
+			Size:           float64Ptr(detail.Size),
+			UnitID:         int64Ptr(detail.UnitID),
+			UnitQty:        float64Ptr(detail.UnitQty),
+		})
+	}
+	accounts := make([]*api.OrderSyncAccount, 0, len(item.Accounts))
+	for _, account := range item.Accounts {
+		if account == nil {
+			continue
+		}
+		accounts = append(accounts, &api.OrderSyncAccount{
+			FinanceCode: account.FinanceCode,
+			Total:       account.Total,
+		})
+	}
+	var created string
+	if item.CreateTime != nil {
+		created = item.CreateTime.Format("2006-01-02 15:04:05")
+	}
+	var payTime *string
+	if item.PayTime != nil {
+		formatted := item.PayTime.Format("2006-01-02 15:04:05")
+		payTime = &formatted
+	}
+	return &api.OrderSyncRequest{
+		Orders: []*api.OrderSyncOrder{
+			{
+				Tid:              item.Tid,
+				Weight:           float64Ptr(item.Weight),
+				Size:             float64Ptr(item.Size),
+				BuyerNick:        stringPtr(item.BuyerNick),
+				BuyerMessage:     stringPtr(item.BuyerMessage),
+				SellerMemo:       stringPtr(item.SellerMemo),
+				Total:            float64Ptr(item.Total),
+				Privilege:        item.Privilege,
+				PostFee:          item.PostFee,
+				ReceiverName:     item.ReceiverName,
+				ReceiverState:    item.ReceiverProvince,
+				ReceiverCity:     item.ReceiverCity,
+				ReceiverDistrict: item.ReceiverDistrict,
+				ReceiverAddress:  item.ReceiverAddress,
+				ReceiverPhone:    stringPtr(item.ReceiverPhone),
+				ReceiverMobile:   item.ReceiverMobile,
+				Created:          created,
+				Status:           item.Status,
+				Type:             item.Type,
+				InvoiceName:      stringPtr(item.InvoiceName),
+				SellerFlag:       stringPtr(item.SellerFlag),
+				PayTime:          payTime,
+				LogistBTypeCode:  stringPtr(item.LogistBTypeCode),
+				LogistBillCode:   stringPtr(item.LogistBillCode),
+				BTypeCode:        stringPtr(item.BTypeCode),
+				Details:          details,
+				Accounts:         accounts,
+			},
+		},
+	}
+}
+
+func stringPtr(value string) *string {
+	v := value
+	return &v
+}
+
+func float64Ptr(value float64) *float64 {
+	v := value
+	return &v
+}
+
+func int64Ptr(value int64) *int64 {
+	v := value
+	return &v
 }

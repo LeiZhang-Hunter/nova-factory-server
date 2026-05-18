@@ -96,7 +96,7 @@ func (o *OrderAudit) GetByID(c *gin.Context) {
 // @Param body body salemodels.OrderAuditSet true "ERP订单审核保存参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "保存成功"
-// @Router /erp/order-audit/set [post]
+// @Router /erp/sale/order-audit/set [post]
 func (o *OrderAudit) Set(c *gin.Context) {
 	req := new(salemodels.OrderAuditSet)
 	if err := c.ShouldBindJSON(req); err != nil {

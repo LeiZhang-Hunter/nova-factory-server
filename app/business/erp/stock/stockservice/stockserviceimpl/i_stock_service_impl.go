@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 
+	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/stock/stockdao"
 	"nova-factory-server/app/business/erp/stock/stockmodels"
 	"nova-factory-server/app/business/erp/stock/stockservice"
@@ -15,13 +16,17 @@ import (
 // StockServiceImpl 提供业务实现。
 type StockServiceImpl struct {
 	dao          stockdao.IStockDao
+	productDao   masterdao.IProductDao
+	warehouseDao masterdao.IWarehouseDao
 	uniqueFields []stockUniqueField
 }
 
 // NewStockService 创建服务。
-func NewStockService(dao stockdao.IStockDao) stockservice.IStockService {
+func NewStockService(dao stockdao.IStockDao, productDao masterdao.IProductDao, warehouseDao masterdao.IWarehouseDao) stockservice.IStockService {
 	return &StockServiceImpl{
 		dao:          dao,
+		productDao:   productDao,
+		warehouseDao: warehouseDao,
 		uniqueFields: []stockUniqueField{},
 	}
 }
@@ -77,14 +82,31 @@ func (s *StockServiceImpl) GetByID(c *gin.Context, id int64) (*stockmodels.Stock
 	if id <= 0 {
 		return nil, errors.New("id不能为空")
 	}
-	return s.dao.GetByID(c, id)
+	info, err := s.dao.GetByID(c, id)
+	if err != nil {
+		return nil, err
+	}
+	productNameMap, warehouseNameMap, err := s.getStockRelatedNameMaps(c, []*stockmodels.Stock{info})
+	if err != nil {
+		return nil, err
+	}
+	info.ProductName = productNameMap[info.ProductID]
+	info.WarehouseName = warehouseNameMap[info.WarehouseID]
+	return info, nil
 }
 
 func (s *StockServiceImpl) ListPage(c *gin.Context, req *stockmodels.StockQuery) (*stockmodels.StockListData, error) {
 	if req != nil {
 		stockTrimStringFields(req)
 	}
-	return s.dao.ListPage(c, req)
+	result, err := s.dao.ListPage(c, req)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.fillStockNames(c, result); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (s *StockServiceImpl) validateUniqueFields(c *gin.Context, req *stockmodels.StockUpsert, currentID int64) error {
@@ -124,6 +146,97 @@ func (s *StockServiceImpl) List(c *gin.Context, req *stockmodels.StockQuery) (*s
 		return nil, err
 	}
 	return &stockmodels.StockListData{Rows: result.Rows, Total: result.Total}, nil
+}
+
+func (s *StockServiceImpl) fillStockNames(c *gin.Context, result *stockmodels.StockListData) error {
+	if result == nil || len(result.Rows) == 0 {
+		return nil
+	}
+
+	productNameMap, warehouseNameMap, err := s.getStockRelatedNameMaps(c, result.Rows)
+	if err != nil {
+		return err
+	}
+	for _, item := range result.Rows {
+		if item == nil {
+			continue
+		}
+		item.ProductName = productNameMap[item.ProductID]
+		item.WarehouseName = warehouseNameMap[item.WarehouseID]
+	}
+	return nil
+}
+
+func (s *StockServiceImpl) getStockRelatedNameMaps(c *gin.Context, rows []*stockmodels.Stock) (map[int64]string, map[int64]string, error) {
+	productIDs := make([]int64, 0)
+	warehouseIDs := make([]int64, 0)
+	productIDSet := make(map[int64]struct{})
+	warehouseIDSet := make(map[int64]struct{})
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		if row.ProductID > 0 {
+			if _, exists := productIDSet[row.ProductID]; !exists {
+				productIDSet[row.ProductID] = struct{}{}
+				productIDs = append(productIDs, row.ProductID)
+			}
+		}
+		if row.WarehouseID > 0 {
+			if _, exists := warehouseIDSet[row.WarehouseID]; !exists {
+				warehouseIDSet[row.WarehouseID] = struct{}{}
+				warehouseIDs = append(warehouseIDs, row.WarehouseID)
+			}
+		}
+	}
+
+	productNameMap, err := s.batchGetProductNames(c, productIDs)
+	if err != nil {
+		return nil, nil, err
+	}
+	warehouseNameMap, err := s.batchGetWarehouseNames(c, warehouseIDs)
+	if err != nil {
+		return nil, nil, err
+	}
+	return productNameMap, warehouseNameMap, nil
+}
+
+func (s *StockServiceImpl) batchGetProductNames(c *gin.Context, ids []int64) (map[int64]string, error) {
+	nameMap := make(map[int64]string, len(ids))
+	if len(ids) == 0 {
+		return nameMap, nil
+	}
+
+	rows, err := s.productDao.GetByIDs(c, ids)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		nameMap[row.ID] = row.Name
+	}
+	return nameMap, nil
+}
+
+func (s *StockServiceImpl) batchGetWarehouseNames(c *gin.Context, ids []int64) (map[int64]string, error) {
+	nameMap := make(map[int64]string, len(ids))
+	if len(ids) == 0 {
+		return nameMap, nil
+	}
+
+	rows, err := s.warehouseDao.GetByIDs(c, ids)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		nameMap[row.ID] = row.Name
+	}
+	return nameMap, nil
 }
 
 type stockUniqueField struct {

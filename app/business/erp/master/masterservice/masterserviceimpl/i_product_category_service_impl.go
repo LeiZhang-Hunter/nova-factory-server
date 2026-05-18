@@ -8,7 +8,7 @@ import (
 	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/master/mastermodels"
 	"nova-factory-server/app/business/erp/master/masterservice"
-	"nova-factory-server/app/utils/category"
+	"nova-factory-server/app/utils/code"
 
 	"github.com/gin-gonic/gin"
 )
@@ -178,7 +178,7 @@ func (s *ProductCategoryServiceImpl) ensureCode(req *mastermodels.ProductCategor
 	}
 	req.Code = strings.TrimSpace(req.Code)
 	if req.Code == "" {
-		req.Code = category.GenerateProductCategoryCode()
+		req.Code = code.GenerateProductCategoryCode()
 	}
 }
 

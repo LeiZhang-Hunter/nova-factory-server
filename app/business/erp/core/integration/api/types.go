@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"nova-factory-server/app/business/erp/setting/settingmodels"
+	"nova-factory-server/app/datasource/cache"
 	"strings"
 )
 
@@ -24,6 +25,7 @@ type LoginState struct {
 type Client interface {
 	Kind() Kind
 	CheckLoginState(ctx context.Context, cfg *settingmodels.IntegrationConfig, overrideURL string, overrideRedirectURL string) (*LoginState, error)
+	SynchronizeOrders(ctx context.Context, cfg *settingmodels.IntegrationConfig, req *OrderSyncRequest, cacheStore cache.Cache) (*OrderSyncResponse, error)
 }
 
 type ConfigSnapshot struct {
