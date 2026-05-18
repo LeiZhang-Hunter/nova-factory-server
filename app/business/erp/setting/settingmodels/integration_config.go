@@ -2,6 +2,7 @@ package settingmodels
 
 import "nova-factory-server/app/baize"
 
+// IntegrationConfig 集成配置
 type IntegrationConfig struct {
 	ID     uint64 `json:"id" gorm:"id"`
 	Type   string `json:"type" gorm:"type"`
@@ -10,6 +11,10 @@ type IntegrationConfig struct {
 	DeptID int64  `json:"deptId" gorm:"dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"state"`
+}
+
+func (i *IntegrationConfig) GetData() string {
+	return i.Data
 }
 
 type IntegrationConfigSet struct {

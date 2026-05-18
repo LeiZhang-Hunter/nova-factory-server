@@ -9,14 +9,16 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"nova-factory-server/app/business/erp/core/integration/api"
-	"nova-factory-server/app/business/erp/setting/settingmodels"
 	"nova-factory-server/app/datasource/cache"
 )
 
 // SynchronizeOrders 调用管家婆订单同步接口
-func (c *Client) SynchronizeOrders(ctx context.Context, cfg *settingmodels.IntegrationConfig, req *api.OrderSyncRequest, cacheStore cache.Cache) (*api.OrderSyncResponse, error) {
+func (c *Client) SynchronizeOrders(ctx context.Context, cfg api.Config, req *api.OrderSyncRequest, cacheStore cache.Cache) (*api.OrderSyncResponse, error) {
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+
 	if req == nil || len(req.Orders) == 0 {
 		return nil, errors.New("orders不能为空")
 	}
@@ -38,7 +40,12 @@ func (c *Client) SynchronizeOrders(ctx context.Context, cfg *settingmodels.Integ
 	}
 	params := parse.Query()
 	params.Set("method", "emall.order.synchronize")
-	parse.RawQuery = params.Encode()
+	params.Set("timestamp", timestamp)
+	params.Set("format", "json")
+	params.Set("app_key", snapshot.Credentials.AppKey)
+	params.Set("token", token)
+	params.Set("v", "1.0")
+	params.Set("sign_method", "md5")
 	body := map[string]any{
 		"token":  token,
 		"orders": req.Orders,
@@ -47,6 +54,15 @@ func (c *Client) SynchronizeOrders(ctx context.Context, cfg *settingmodels.Integ
 	if err != nil {
 		return nil, err
 	}
+
+	// 执行签名
+	sign, err := c.makeSign(timestamp, token, snapshot, string(payload))
+	if err != nil {
+		return nil, err
+	}
+	params.Set("sign", sign)
+	parse.RawQuery = params.Encode()
+
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, parse.String(), bytes.NewReader(payload))
 	if err != nil {
 		return nil, err
