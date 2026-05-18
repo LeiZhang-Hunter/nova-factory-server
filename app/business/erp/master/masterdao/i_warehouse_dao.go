@@ -12,6 +12,7 @@ type IWarehouseDao interface {
 	Update(c *gin.Context, req *mastermodels.WarehouseUpsert) (*mastermodels.Warehouse, error)
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*mastermodels.Warehouse, error)
+	GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.Warehouse, error)
 	GetByColumn(c *gin.Context, column string, value any) (*mastermodels.Warehouse, error)
 	ListPage(c *gin.Context, req *mastermodels.WarehouseQuery) (*mastermodels.WarehouseListData, error)
 	List(c *gin.Context, req *mastermodels.WarehouseQuery) (*mastermodels.WarehouseListData, error)

@@ -12,6 +12,7 @@ type IProductDao interface {
 	Update(c *gin.Context, req *mastermodels.ProductUpsert) (*mastermodels.Product, error)
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*mastermodels.Product, error)
+	GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.Product, error)
 	GetByColumn(c *gin.Context, column string, value any) (*mastermodels.Product, error)
 	ListPage(c *gin.Context, req *mastermodels.ProductQuery) (*mastermodels.ProductListData, error)
 	List(c *gin.Context, req *mastermodels.ProductQuery) (*mastermodels.ProductListData, error)

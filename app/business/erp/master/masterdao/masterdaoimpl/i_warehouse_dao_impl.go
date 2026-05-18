@@ -113,6 +113,20 @@ func (d *WarehouseDaoImpl) GetByID(c *gin.Context, id int64) (*mastermodels.Ware
 	return item, nil
 }
 
+func (d *WarehouseDaoImpl) GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.Warehouse, error) {
+	if len(ids) == 0 {
+		return make([]*mastermodels.Warehouse, 0), nil
+	}
+	rows := make([]*mastermodels.Warehouse, 0, len(ids))
+	if err := d.db.WithContext(c).Table(d.table).
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func (d *WarehouseDaoImpl) GetByColumn(c *gin.Context, column string, value any) (*mastermodels.Warehouse, error) {
 	if column == "" {
 		return nil, nil

@@ -8,6 +8,7 @@ import (
 type Product struct {
 	ID            int64   `json:"id,string" gorm:"column:id"`
 	Name          string  `json:"name" gorm:"column:name"`
+	ProductCode   string  `json:"product_code" gorm:"column:product_code"`
 	BarCode       string  `json:"barCode" gorm:"column:bar_code"`
 	CategoryId    int64   `json:"categoryId" gorm:"column:category_id"`
 	CategoryName  string  `json:"categoryName" gorm:"-"`
