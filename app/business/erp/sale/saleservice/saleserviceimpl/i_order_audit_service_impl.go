@@ -4,7 +4,9 @@ import (
 	"errors"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/erp/core/integration"
+	"nova-factory-server/app/business/erp/core/integration/api"
 	"nova-factory-server/app/business/erp/setting/settingdao"
+	"nova-factory-server/app/datasource/cache"
 	"strings"
 
 	"nova-factory-server/app/business/erp/sale/saledao"
@@ -21,16 +23,18 @@ type OrderAuditServiceImpl struct {
 	orderDao             saledao.IOrderDao
 	integrationConfigDao settingdao.IIntegrationConfigDao
 	db                   *gorm.DB
+	cache                cache.Cache
 }
 
 // NewOrderAuditService 创建 ERP 订单审核服务。
 func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao,
-	db *gorm.DB, integrationConfigDao settingdao.IIntegrationConfigDao) saleservice.IOrderAuditService {
+	db *gorm.DB, integrationConfigDao settingdao.IIntegrationConfigDao, cache cache.Cache) saleservice.IOrderAuditService {
 	return &OrderAuditServiceImpl{
 		dao:                  dao,
 		orderDao:             orderDao,
 		db:                   db,
 		integrationConfigDao: integrationConfigDao,
+		cache:                cache,
 	}
 }
 
@@ -146,9 +150,13 @@ func (o *OrderAuditServiceImpl) Approve(c *gin.Context, req *salemodels.OrderAud
 		if err != nil {
 			return err
 		}
-		_, err = client.CheckLoginState(c, cfg, "", "")
+		data := o.toOrderSyncRequest(item)
+		_, err = client.SynchronizeOrders(c, cfg, data, o.cache)
 		return err
 	})
+	if err != nil {
+		zap.L().Error("sync order error", zap.Error(err))
+	}
 	return result, err
 }
 
@@ -293,4 +301,101 @@ func (o *OrderAuditServiceImpl) toOrderSet(item *salemodels.OrderAudit) *salemod
 		Details:              details,
 		Accounts:             accounts,
 	}
+}
+
+func (o *OrderAuditServiceImpl) toOrderSyncRequest(item *salemodels.OrderAudit) *api.OrderSyncRequest {
+	if item == nil {
+		return nil
+	}
+	details := make([]*api.OrderSyncDetail, 0, len(item.Details))
+	for _, detail := range item.Details {
+		if detail == nil {
+			continue
+		}
+		details = append(details, &api.OrderSyncDetail{
+			OID:            detail.OID,
+			Barcode:        stringPtr(detail.Barcode),
+			EShopGoodsID:   stringPtr(detail.EShopGoodsID),
+			OuterIID:       stringPtr(detail.OuterIID),
+			EShopGoodsName: detail.EShopGoodsName,
+			EShopSKUId:     stringPtr(detail.EShopSkuID),
+			EShopSKUName:   stringPtr(detail.EShopSkuName),
+			NumIID:         int64Ptr(detail.NumIID),
+			SKUId:          int64Ptr(detail.SkuID),
+			Num:            detail.Num,
+			Payment:        detail.Payment,
+			PicPath:        stringPtr(detail.PicPath),
+			Weight:         float64Ptr(detail.Weight),
+			Size:           float64Ptr(detail.Size),
+			UnitID:         int64Ptr(detail.UnitID),
+			UnitQty:        float64Ptr(detail.UnitQty),
+		})
+	}
+	accounts := make([]*api.OrderSyncAccount, 0, len(item.Accounts))
+	for _, account := range item.Accounts {
+		if account == nil {
+			continue
+		}
+		accounts = append(accounts, &api.OrderSyncAccount{
+			FinanceCode: account.FinanceCode,
+			Total:       account.Total,
+		})
+	}
+	var created string
+	if item.CreateTime != nil {
+		created = item.CreateTime.Format("2006-01-02 15:04:05")
+	}
+	var payTime *string
+	if item.PayTime != nil {
+		formatted := item.PayTime.Format("2006-01-02 15:04:05")
+		payTime = &formatted
+	}
+	return &api.OrderSyncRequest{
+		Orders: []*api.OrderSyncOrder{
+			{
+				Tid:              item.Tid,
+				Weight:           float64Ptr(item.Weight),
+				Size:             float64Ptr(item.Size),
+				BuyerNick:        stringPtr(item.BuyerNick),
+				BuyerMessage:     stringPtr(item.BuyerMessage),
+				SellerMemo:       stringPtr(item.SellerMemo),
+				Total:            float64Ptr(item.Total),
+				Privilege:        item.Privilege,
+				PostFee:          item.PostFee,
+				ReceiverName:     item.ReceiverName,
+				ReceiverState:    item.ReceiverProvince,
+				ReceiverCity:     item.ReceiverCity,
+				ReceiverDistrict: item.ReceiverDistrict,
+				ReceiverAddress:  item.ReceiverAddress,
+				ReceiverPhone:    stringPtr(item.ReceiverPhone),
+				ReceiverMobile:   item.ReceiverMobile,
+				Created:          created,
+				Status:           item.Status,
+				Type:             item.Type,
+				InvoiceName:      stringPtr(item.InvoiceName),
+				SellerFlag:       stringPtr(item.SellerFlag),
+				PayTime:          payTime,
+				LogistBTypeCode:  stringPtr(item.LogistBTypeCode),
+				LogistBillCode:   stringPtr(item.LogistBillCode),
+				BTypeCode:        stringPtr(item.BTypeCode),
+				Details:          details,
+				Accounts:         accounts,
+			},
+		},
+	}
+}
+
+func stringPtr(value string) *string {
+	v := value
+	return &v
+}
+
+func float64Ptr(value float64) *float64 {
+	v := value
+	return &v
+}
+
+func int64Ptr(value int64) *int64 {
+	v := value
+	return &v
 }

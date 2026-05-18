@@ -72,6 +72,9 @@ func (c *Client) SynchronizeOrders(ctx context.Context, cfg *settingmodels.Integ
 		}
 		return nil, errors.New("订单同步失败: " + msg)
 	}
+	if ret.Code != 0 {
+		return nil, errors.New(ret.Message)
+	}
 	return ret, nil
 }
 
