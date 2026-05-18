@@ -39,9 +39,12 @@ func (c *Client) Kind() api.Kind {
 }
 
 func init() {
+	//注册client
 	_ = api.Register(api.KindGuanJiaPo, func() api.Client {
 		return New()
 	})
+
+	//注册配置
 }
 
 // CheckLoginState 返回授权地址，前端跳转后完成OAuth授权

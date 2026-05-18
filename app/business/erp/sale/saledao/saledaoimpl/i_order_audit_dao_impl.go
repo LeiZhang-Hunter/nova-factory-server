@@ -51,7 +51,6 @@ func (o *OrderAuditDaoImpl) Set(c *gin.Context, req *salemodels.OrderAuditSet) (
 		data.SetUpdateBy(baizeContext.GetUserId(c))
 		if err := tx.Table(o.table).
 			Where("id = ?", exists.ID).
-			Where("dept_id = ?", baizeContext.GetDeptId(c)).
 			Where("state = ?", commonStatus.NORMAL).
 			Select("tid", "weight", "size", "buyer_nick", "buyer_message", "seller_memo", "total", "privilege",
 				"post_fee", "receiver_name", "receiver_province", "receiver_province_name", "receiver_city",

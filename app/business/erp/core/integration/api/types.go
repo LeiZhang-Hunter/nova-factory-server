@@ -25,7 +25,7 @@ type LoginState struct {
 type Client interface {
 	Kind() Kind
 	CheckLoginState(ctx context.Context, cfg *settingmodels.IntegrationConfig, overrideURL string, overrideRedirectURL string) (*LoginState, error)
-	SynchronizeOrders(ctx context.Context, cfg *settingmodels.IntegrationConfig, req *OrderSyncRequest, cacheStore cache.Cache) (*OrderSyncResponse, error)
+	SynchronizeOrders(ctx context.Context, cfg Config, req *OrderSyncRequest, cacheStore cache.Cache) (*OrderSyncResponse, error)
 }
 
 type ConfigSnapshot struct {
