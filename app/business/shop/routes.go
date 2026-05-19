@@ -6,6 +6,7 @@ package shop
 import (
 	activityController "nova-factory-server/app/business/shop/activity/controller"
 	"nova-factory-server/app/business/shop/api/controller/address"
+	"nova-factory-server/app/business/shop/api/controller/agent"
 	"nova-factory-server/app/business/shop/api/controller/auth"
 	"nova-factory-server/app/business/shop/api/controller/favorite"
 	"nova-factory-server/app/business/shop/api/controller/order"
@@ -31,6 +32,7 @@ func NewGinEngine(
 	controller *shopcontroller.Controller,
 	userController *userController.Controller,
 	authController *auth.Controller,
+	agentController *agent.Controller,
 	productController *product.Controller,
 	orderController *order.Order,
 	addressController *address.Address,
@@ -60,6 +62,8 @@ func NewGinEngine(
 		orderController.PrivateRoutes(appGroup)
 		addressController.PrivateRoutes(appGroup)
 		favoriteController.PrivateRoutes(appGroup)
+		agentController.Conversations.PrivateRoutes(appGroup)
+		agentController.Message.PrivateRoutes(appGroup)
 		productController.Cart.PrivateRoutes(appGroup)
 	}
 
