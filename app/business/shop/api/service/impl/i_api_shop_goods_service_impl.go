@@ -1,36 +1,16 @@
 package impl
 
 import (
-	"errors"
 	"math"
 	"strconv"
 
-	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
-	"nova-factory-server/app/business/shop/api/service"
 	discountservice "nova-factory-server/app/business/shop/discount/service"
 	"nova-factory-server/app/business/shop/product/shopmodels"
-	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
 )
-
-// IApiShopGoodsServiceImpl 商品服务实现
-type IApiShopGoodsServiceImpl struct {
-	dao              dao.IApiShopGoodsDao
-	shopGoodsService shopservice.IShopGoodsService
-	discountService  discountservice.IDiscountCalculateService
-}
-
-// NewIApiShopGoodsServiceImpl  创建商品服务
-func NewIApiShopGoodsServiceImpl(dao dao.IApiShopGoodsDao, shopGoodsService shopservice.IShopGoodsService, discountService discountservice.IDiscountCalculateService) service.IApiShopGoodsService {
-	return &IApiShopGoodsServiceImpl{
-		dao:              dao,
-		shopGoodsService: shopGoodsService,
-		discountService:  discountService,
-	}
-}
 
 // GetByID 获取商品详情
 func (s *IApiShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error) {
@@ -70,79 +50,6 @@ func (s *IApiShopGoodsServiceImpl) ListRepurchase(c *gin.Context, userID int64, 
 	// 应用折扣价格（商品级别，无SKU，批量查询消除 N+1）
 	s.applyDiscountPriceForList(c, data.Rows)
 	return data, nil
-}
-
-// Search 按多个商品名称检索相似商品，并回填数据库中的最新商品数据
-func (s *IApiShopGoodsServiceImpl) Search(c *gin.Context, req *models.GoodsSearchReq) (*models.GoodsSearchData, error) {
-	if req == nil {
-		return nil, errors.New("检索参数不能为空")
-	}
-	if len(req.GoodsNames) == 0 {
-		return nil, errors.New("商品名称不能为空")
-	}
-	if req.Embedding == nil {
-		return nil, errors.New("向量模型配置不能为空")
-	}
-
-	limit := normalizeGoodsSearchLimit(req.Limit)
-	vectorData, err := s.shopGoodsService.BatchSearchVector(c, &shopmodels.GoodsVectorBatchSearchReq{
-		Queries:   req.GoodsNames,
-		Limit:     buildGoodsVectorSearchLimit(limit),
-		Embedding: req.Embedding,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if vectorData == nil || len(vectorData.Rows) == 0 {
-		return &models.GoodsSearchData{
-			Rows:  make([]*models.GoodsSearchItem, 0),
-			Total: 0,
-		}, nil
-	}
-
-	goodsMap, err := s.loadSearchGoodsMap(c, vectorData.Rows)
-	if err != nil {
-		return nil, err
-	}
-
-	items := make([]*models.GoodsSearchItem, 0, len(vectorData.Rows))
-	for _, row := range vectorData.Rows {
-		if row == nil {
-			continue
-		}
-		matches := make([]*models.GoodsSearchMatch, 0, limit)
-		seen := make(map[int64]struct{}, len(row.Rows))
-		for _, hit := range row.Rows {
-			if hit == nil || hit.GoodsDBID == 0 {
-				continue
-			}
-			if _, ok := seen[hit.GoodsDBID]; ok {
-				continue
-			}
-			goods, ok := goodsMap[hit.GoodsDBID]
-			if !ok || goods == nil {
-				continue
-			}
-			seen[hit.GoodsDBID] = struct{}{}
-			matches = append(matches, &models.GoodsSearchMatch{
-				Score: hit.Score,
-				Goods: goods,
-			})
-			if len(matches) >= limit {
-				break
-			}
-		}
-		items = append(items, &models.GoodsSearchItem{
-			Query: row.Query,
-			Rows:  matches,
-			Total: int64(len(matches)),
-		})
-	}
-
-	return &models.GoodsSearchData{
-		Rows:  items,
-		Total: int64(len(items)),
-	}, nil
 }
 
 // applyDiscountPrice 应用折扣价格（完整版，包含SKU）

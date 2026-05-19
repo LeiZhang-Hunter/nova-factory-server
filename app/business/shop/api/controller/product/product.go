@@ -4,6 +4,7 @@ import (
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,10 @@ func (p *Product) PublicRoutes(router *gin.RouterGroup) {
 func (p *Product) PrivateRoutes(router *gin.RouterGroup) {
 	goods := router.Group("/api/v1/app/shop/goods")
 	goods.GET("/repurchase", p.Repurchase)
+}
+
+func (p *Product) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterSchema("POST", "/api/v1/app/shop/product/search", nil, models.GoodsSearchReq{})
 }
 
 // Info 读取商品详情
@@ -119,8 +124,13 @@ func (p *Product) Search(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if len(req.GoodsNames) == 0 || req.Embedding == nil {
+	req.Limit = 1
+	if len(req.GoodsNames) == 0 {
 		baizeContext.ParameterError(c)
+		return
+	}
+	if len(req.GoodsNames) > 10 {
+		baizeContext.Waring(c, "输入商品太多了，最多50条")
 		return
 	}
 	data, err := p.service.Search(c, req)

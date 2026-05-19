@@ -28821,14 +28821,6 @@ const docTemplate = `{
                 "goodsNames"
             ],
             "properties": {
-                "embedding": {
-                    "description": "向量模型配置",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/shopmodels.EmbeddingConfig"
-                        }
-                    ]
-                },
                 "goodsNames": {
                     "description": "商品名称列表",
                     "type": "array",

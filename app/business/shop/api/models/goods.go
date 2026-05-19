@@ -1,7 +1,5 @@
 package models
 
-import "nova-factory-server/app/business/shop/product/shopmodels"
-
 // Goods 商品信息
 type Goods struct {
 	ID               int64    `json:"id,string" gorm:"id"`                    // 主键ID
@@ -43,9 +41,8 @@ type GoodsListData struct {
 
 // GoodsSearchReq 商品检索参数
 type GoodsSearchReq struct {
-	GoodsNames []string                    `json:"goodsNames" binding:"required"` // 商品名称列表
-	Limit      int                         `json:"limit"`                         // 每个名称返回的商品数量
-	Embedding  *shopmodels.EmbeddingConfig `json:"embedding"`                     // 向量模型配置
+	GoodsNames []string `json:"goodsNames" binding:"required" json:"goodsNames" jsonschema:"description=商品名称列表，OR查询逻辑，支持模糊匹配，建议1-10个,不要超过10个"` // 商品名称列表
+	Limit      int      `json:"-"`                                                                                                             // 每个名称返回的商品数量
 }
 
 // GoodsSearchMatch 商品检索结果
