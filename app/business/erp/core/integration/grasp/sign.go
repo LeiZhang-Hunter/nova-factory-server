@@ -9,15 +9,15 @@ import (
 )
 
 // makeSign 签名
-func (c *Client) makeSign(timestamp string, token string, cfg *ConfigSnapshot, body string) (string, error) {
+func (c *Client) makeSign(timestamp string, token string, cfg *ConfigSnapshot, method string, body string) (string, error) {
 	var param map[string]string = make(map[string]string)
-	param["timestamp"] = timestamp
-	param["format"] = "json"
 	param["app_key"] = cfg.Credentials.AppKey
-	param["token"] = token
-	param["method"] = "emall.goods.get"
 	param["v"] = "1.0"
+	param["format"] = "json"
 	param["sign_method"] = "md5"
+	param["method"] = method
+	param["timestamp"] = timestamp
+	param["token"] = token
 
 	return generateMD5Sign(param, body, cfg.Credentials.AppSecret)
 }
