@@ -2786,7 +2786,8 @@ definitions:
       status:
         type: integer
       unitId:
-        type: integer
+        example: "0"
+        type: string
       weight:
         type: number
     required:
@@ -5185,9 +5186,11 @@ definitions:
         example: "0"
         type: string
       productId:
-        type: integer
+        example: "0"
+        type: string
       warehouseId:
-        type: integer
+        example: "0"
+        type: string
     type: object
   systemmodels.Accredit:
     properties:
@@ -8261,6 +8264,159 @@ paths:
       summary: 新增或修改地址
       tags:
       - 商城/用户地址
+  /api/v1/app/shop/agent/conversations/chat:
+    post:
+      description: 发送会话消息并支持流式返回
+      parameters:
+      - description: 会话消息元数据(JSON字符串)
+        in: formData
+        name: metadata
+        type: string
+      - description: 上传文件
+        in: formData
+        name: file
+        type: file
+      - description: 发送消息参数
+        in: body
+        name: object
+        schema:
+          $ref: '#/definitions/aidatasetmodels.SendMessageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发送成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 会话聊天
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/conversations/create:
+    post:
+      description: 创建当前登录用户的智能体会话
+      parameters:
+      - description: 创建会话参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.SetAiConversation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 创建会话
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/conversations/list:
+    get:
+      description: 查询当前登录用户的智能体会话列表
+      parameters:
+      - in: query
+        name: id
+        type: integer
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询会话列表
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/conversations/remove/{ids}:
+    delete:
+      description: 删除当前登录用户的会话（软删除）
+      parameters:
+      - description: 会话ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除会话
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/conversations/stop-generation:
+    post:
+      description: 停止当前会话正在进行中的模型生成任务
+      parameters:
+      - description: 停止生成参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.StopGenerationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 停止成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 停止会话生成
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/messages/list:
+    get:
+      description: 根据会话ID查询当前登录用户会话下的全部消息记录，按创建时间正序返回
+      parameters:
+      - in: query
+        name: conversation_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/gatewaymodels.AIAgentMessageListData'
+      security:
+      - BearerAuth: []
+      summary: 根据会话ID读取消息列表
+      tags:
+      - app接口/商城/App智能体消息
   /api/v1/app/shop/auth/refresh:
     post:
       consumes:
@@ -12318,6 +12474,9 @@ paths:
     get:
       description: 按条件分页查询 ERP 产品列表
       parameters:
+      - in: query
+        name: code
+        type: string
       - in: query
         name: name
         type: string

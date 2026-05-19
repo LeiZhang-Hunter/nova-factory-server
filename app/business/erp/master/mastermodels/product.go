@@ -33,7 +33,7 @@ type ProductUpsert struct {
 	Name          string  `json:"name" binding:"required" label:"产品名称"`
 	BarCode       string  `json:"barCode"`
 	CategoryId    int64   `json:"categoryId"`
-	UnitId        int64   `json:"unitId"`
+	UnitId        int64   `json:"unitId,string"`
 	Status        int32   `json:"status"`
 	Standard      string  `json:"standard"`
 	Remark        string  `json:"remark"`
