@@ -3216,6 +3216,23 @@ definitions:
     required:
     - goodsId
     type: object
+  models.GoodsSearchReq:
+    properties:
+      embedding:
+        allOf:
+        - $ref: '#/definitions/shopmodels.EmbeddingConfig'
+        description: 向量模型配置
+      goodsNames:
+        description: 商品名称列表
+        items:
+          type: string
+        type: array
+      limit:
+        description: 每个名称返回的商品数量
+        type: integer
+    required:
+    - goodsNames
+    type: object
   models.Group:
     properties:
       key:
@@ -5185,9 +5202,11 @@ definitions:
         example: "0"
         type: string
       productId:
-        type: integer
+        example: "0"
+        type: string
       warehouseId:
-        type: integer
+        example: "0"
+        type: string
     type: object
   systemmodels.Accredit:
     properties:
@@ -8647,6 +8666,28 @@ paths:
           schema:
             $ref: '#/definitions/response.ResponseData'
       summary: 获取商品列表
+      tags:
+      - app接口/商城/App商品
+  /api/v1/app/shop/product/search:
+    post:
+      consumes:
+      - application/json
+      description: 传入多个商品名称，基于商品向量检索相似商品并回填数据库中的最新商品数据
+      parameters:
+      - description: 商品检索参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.GoodsSearchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 商品检索
       tags:
       - app接口/商城/App商品
   /api/v1/building/list:
@@ -12318,6 +12359,9 @@ paths:
     get:
       description: 按条件分页查询 ERP 产品列表
       parameters:
+      - in: query
+        name: code
+        type: string
       - in: query
         name: name
         type: string

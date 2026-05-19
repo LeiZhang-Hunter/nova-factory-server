@@ -4303,6 +4303,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/app/shop/product/search": {
+            "post": {
+                "description": "传入多个商品名称，基于商品向量检索相似商品并回填数据库中的最新商品数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App商品"
+                ],
+                "summary": "商品检索",
+                "parameters": [
+                    {
+                        "description": "商品检索参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.GoodsSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/building/list": {
             "get": {
                 "description": "读取建筑物以及楼层详情列表",
@@ -10078,6 +10112,11 @@ const docTemplate = `{
                 ],
                 "summary": "查询 ERP 产品列表",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "name": "code",
+                        "in": "query"
+                    },
                     {
                         "type": "string",
                         "name": "name",
@@ -28527,6 +28566,33 @@ const docTemplate = `{
                 }
             }
         },
+        "models.GoodsSearchReq": {
+            "type": "object",
+            "required": [
+                "goodsNames"
+            ],
+            "properties": {
+                "embedding": {
+                    "description": "向量模型配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/shopmodels.EmbeddingConfig"
+                        }
+                    ]
+                },
+                "goodsNames": {
+                    "description": "商品名称列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "limit": {
+                    "description": "每个名称返回的商品数量",
+                    "type": "integer"
+                }
+            }
+        },
         "models.Group": {
             "type": "object",
             "properties": {
@@ -31357,10 +31423,12 @@ const docTemplate = `{
                     "example": "0"
                 },
                 "productId": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "warehouseId": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
