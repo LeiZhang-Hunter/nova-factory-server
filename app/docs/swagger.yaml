@@ -3219,10 +3219,6 @@ definitions:
     type: object
   models.GoodsSearchReq:
     properties:
-      embedding:
-        allOf:
-        - $ref: '#/definitions/shopmodels.EmbeddingConfig'
-        description: 向量模型配置
       goodsNames:
         description: 商品名称列表
         items:
