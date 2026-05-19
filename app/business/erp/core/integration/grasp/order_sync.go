@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -39,15 +40,14 @@ func (c *Client) SynchronizeOrders(ctx context.Context, cfg api.Config, req *api
 		return nil, err
 	}
 	params := parse.Query()
+	params.Set("app_key", snapshot.Credentials.AppKey)
+	params.Set("v", "1.0")
+	params.Set("format", "json")
+	params.Set("sign_method", "md5")
 	params.Set("method", "emall.order.synchronize")
 	params.Set("timestamp", timestamp)
-	params.Set("format", "json")
-	params.Set("app_key", snapshot.Credentials.AppKey)
 	params.Set("token", token)
-	params.Set("v", "1.0")
-	params.Set("sign_method", "md5")
 	body := map[string]any{
-		"token":  token,
 		"orders": req.Orders,
 	}
 	payload, err := json.Marshal(body)
@@ -56,13 +56,13 @@ func (c *Client) SynchronizeOrders(ctx context.Context, cfg api.Config, req *api
 	}
 
 	// 执行签名
-	sign, err := c.makeSign(timestamp, token, snapshot, string(payload))
+	sign, err := c.makeSign(timestamp, token, snapshot, "emall.order.synchronize", string(payload))
 	if err != nil {
 		return nil, err
 	}
 	params.Set("sign", sign)
 	parse.RawQuery = params.Encode()
-
+	fmt.Println(parse.String())
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, parse.String(), bytes.NewReader(payload))
 	if err != nil {
 		return nil, err
