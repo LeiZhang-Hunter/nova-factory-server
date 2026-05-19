@@ -2710,13 +2710,43 @@ definitions:
       name:
         type: string
       parentId:
-        type: integer
+        example: "0"
+        type: string
       sort:
         type: integer
       status:
         type: integer
     required:
     - name
+    type: object
+  mastermodels.ProductEmbeddingConfig:
+    properties:
+      api_endpoint:
+        type: string
+      api_key:
+        type: string
+      model_id:
+        type: string
+      provider_id:
+        type: string
+      provider_type:
+        type: string
+    type: object
+  mastermodels.ProductGenAllVectorReq:
+    properties:
+      batchSize:
+        type: integer
+      embedding:
+        $ref: '#/definitions/mastermodels.ProductEmbeddingConfig'
+      taskId:
+        type: string
+    type: object
+  mastermodels.ProductGenVectorReq:
+    properties:
+      embedding:
+        $ref: '#/definitions/mastermodels.ProductEmbeddingConfig'
+      id:
+        type: integer
     type: object
   mastermodels.ProductUnitUpsert:
     properties:
@@ -2756,11 +2786,36 @@ definitions:
       status:
         type: integer
       unitId:
-        type: integer
+        example: "0"
+        type: string
       weight:
         type: number
     required:
     - name
+    type: object
+  mastermodels.ProductVectorBatchSearchReq:
+    properties:
+      embedding:
+        $ref: '#/definitions/mastermodels.ProductEmbeddingConfig'
+      limit:
+        type: integer
+      queries:
+        items:
+          type: string
+        type: array
+    required:
+    - queries
+    type: object
+  mastermodels.ProductVectorSearchReq:
+    properties:
+      embedding:
+        $ref: '#/definitions/mastermodels.ProductEmbeddingConfig'
+      limit:
+        type: integer
+      query:
+        type: string
+    required:
+    - query
     type: object
   mastermodels.SupplierUpsert:
     properties:
@@ -2805,6 +2860,8 @@ definitions:
     properties:
       address:
         type: string
+      code:
+        type: string
       defaultStatus:
         type: boolean
       id:
@@ -2825,6 +2882,7 @@ definitions:
       warehousePrice:
         type: number
     required:
+    - code
     - name
     type: object
   materialmodels.InboundInfo:
@@ -4737,6 +4795,9 @@ definitions:
         type: integer
       embedding:
         $ref: '#/definitions/shopmodels.EmbeddingConfig'
+      taskId:
+        description: 可选，指定任务ID续跑
+        type: string
     type: object
   shopmodels.GoodsSkuUpsert:
     properties:
@@ -5125,9 +5186,11 @@ definitions:
         example: "0"
         type: string
       productId:
-        type: integer
+        example: "0"
+        type: string
       warehouseId:
-        type: integer
+        example: "0"
+        type: string
     type: object
   systemmodels.Accredit:
     properties:
@@ -8201,6 +8264,159 @@ paths:
       summary: 新增或修改地址
       tags:
       - 商城/用户地址
+  /api/v1/app/shop/agent/conversations/chat:
+    post:
+      description: 发送会话消息并支持流式返回
+      parameters:
+      - description: 会话消息元数据(JSON字符串)
+        in: formData
+        name: metadata
+        type: string
+      - description: 上传文件
+        in: formData
+        name: file
+        type: file
+      - description: 发送消息参数
+        in: body
+        name: object
+        schema:
+          $ref: '#/definitions/aidatasetmodels.SendMessageInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发送成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 会话聊天
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/conversations/create:
+    post:
+      description: 创建当前登录用户的智能体会话
+      parameters:
+      - description: 创建会话参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.SetAiConversation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 创建会话
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/conversations/list:
+    get:
+      description: 查询当前登录用户的智能体会话列表
+      parameters:
+      - in: query
+        name: id
+        type: integer
+      - description: 排序规则  降序desc   asc升序
+        in: query
+        name: isAsc
+        type: string
+      - in: query
+        name: name
+        type: string
+      - description: 排序字段
+        in: query
+        name: orderBy
+        type: string
+      - default: 1
+        description: 第几页
+        in: query
+        name: pageNum
+        type: integer
+      - default: 10000
+        description: 数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询会话列表
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/conversations/remove/{ids}:
+    delete:
+      description: 删除当前登录用户的会话（软删除）
+      parameters:
+      - description: 会话ID，多个用逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除会话
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/conversations/stop-generation:
+    post:
+      description: 停止当前会话正在进行中的模型生成任务
+      parameters:
+      - description: 停止生成参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.StopGenerationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 停止成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 停止会话生成
+      tags:
+      - app接口/商城/App智能体会话
+  /api/v1/app/shop/agent/messages/list:
+    get:
+      description: 根据会话ID查询当前登录用户会话下的全部消息记录，按创建时间正序返回
+      parameters:
+      - in: query
+        name: conversation_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/gatewaymodels.AIAgentMessageListData'
+      security:
+      - BearerAuth: []
+      summary: 根据会话ID读取消息列表
+      tags:
+      - app接口/商城/App智能体消息
   /api/v1/app/shop/auth/refresh:
     post:
       consumes:
@@ -11865,7 +12081,7 @@ paths:
       - ERP/财务管理
   /erp/master/account/list:
     get:
-      description: 按条件分页查询 ERP 结算账户列表
+      description: 按条件分页查询结算账户列表
       parameters:
       - in: query
         name: defaultStatus
@@ -11894,12 +12110,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 结算账户列表
+      summary: 查询结算账户列表
       tags:
       - ERP/基础资料
   /erp/master/account/query/{id}:
     get:
-      description: 根据ID查询 ERP 结算账户详情
+      description: 根据ID查询结算账户详情
       parameters:
       - description: 主键ID
         in: path
@@ -11915,12 +12131,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 结算账户详情
+      summary: 查询结算账户详情
       tags:
       - ERP/基础资料
   /erp/master/account/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 结算账户，多个ID用逗号分隔
+      description: 根据ID删除结算账户，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -11936,14 +12152,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 结算账户
+      summary: 删除结算账户
       tags:
       - ERP/基础资料
   /erp/master/account/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 结算账户
+      description: 新增或修改结算账户
       parameters:
       - description: ERP 结算账户参数
         in: body
@@ -11960,12 +12176,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 结算账户
+      summary: 新增或修改结算账户
       tags:
       - ERP/基础资料
   /erp/master/customer/list:
     get:
-      description: 按条件分页查询 ERP 客户列表
+      description: 按条件分页查询客户列表
       parameters:
       - in: query
         name: code
@@ -11991,12 +12207,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 客户列表
+      summary: 查询客户列表
       tags:
       - ERP/基础资料
   /erp/master/customer/query/{id}:
     get:
-      description: 根据ID查询 ERP 客户详情
+      description: 根据ID查询客户详情
       parameters:
       - description: 主键ID
         in: path
@@ -12012,12 +12228,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 客户详情
+      summary: 查询客户详情
       tags:
       - ERP/基础资料
   /erp/master/customer/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 客户，多个ID用逗号分隔
+      description: 根据ID删除客户，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -12033,14 +12249,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 客户
+      summary: 删除客户
       tags:
       - ERP/基础资料
   /erp/master/customer/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 客户
+      description: 新增或修改客户
       parameters:
       - description: ERP 客户参数
         in: body
@@ -12057,7 +12273,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 客户
+      summary: 新增或修改客户
       tags:
       - ERP/基础资料
   /erp/master/product-category/list:
@@ -12259,6 +12475,9 @@ paths:
       description: 按条件分页查询 ERP 产品列表
       parameters:
       - in: query
+        name: code
+        type: string
+      - in: query
         name: name
         type: string
       - in: query
@@ -12348,9 +12567,138 @@ paths:
       summary: 新增或修改 ERP 产品
       tags:
       - ERP/基础资料
+  /erp/master/product/vector/generate/{id}:
+    post:
+      description: 根据产品ID生成产品向量
+      parameters:
+      - description: 产品ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 产品向量生成参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/mastermodels.ProductGenVectorReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 生成成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 生成产品向量
+      tags:
+      - ERP/基础资料
+  /erp/master/product/vector/generate/all:
+    post:
+      description: 异步将全部启用产品写入向量数据库，并将任务进度记录到 Redis
+      parameters:
+      - description: 全量生成产品向量参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/mastermodels.ProductGenAllVectorReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 任务已启动
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 全量生成启用产品向量
+      tags:
+      - ERP/基础资料
+  /erp/master/product/vector/generate/all/progress/{taskId}:
+    get:
+      description: 根据任务ID读取 Redis 中的全量生成任务进度
+      parameters:
+      - description: 任务ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询全量生成产品向量任务进度
+      tags:
+      - ERP/基础资料
+  /erp/master/product/vector/generate/all/query/list:
+    get:
+      description: 查询当前操作人的全量生成产品向量未完成任务列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询全量生成产品向量未完成任务列表
+      tags:
+      - ERP/基础资料
+  /erp/master/product/vector/search:
+    post:
+      description: 根据检索文本生成查询向量并近似搜索产品数据
+      parameters:
+      - description: 产品向量搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/mastermodels.ProductVectorSearchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 搜索成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 近似搜索产品向量
+      tags:
+      - ERP/基础资料
+  /erp/master/product/vector/search/batch:
+    post:
+      description: 根据多条检索文本批量生成查询向量并近似搜索产品数据
+      parameters:
+      - description: 产品批量向量搜索参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/mastermodels.ProductVectorBatchSearchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 搜索成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 批量近似搜索产品向量
+      tags:
+      - ERP/基础资料
   /erp/master/supplier/list:
     get:
-      description: 按条件分页查询 ERP 供应商列表
+      description: 按条件分页查询供应商列表
       parameters:
       - in: query
         name: code
@@ -12376,12 +12724,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 供应商列表
+      summary: 查询供应商列表
       tags:
       - ERP/基础资料
   /erp/master/supplier/query/{id}:
     get:
-      description: 根据ID查询 ERP 供应商详情
+      description: 根据ID查询供应商详情
       parameters:
       - description: 主键ID
         in: path
@@ -12397,12 +12745,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 供应商详情
+      summary: 查询供应商详情
       tags:
       - ERP/基础资料
   /erp/master/supplier/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 供应商，多个ID用逗号分隔
+      description: 根据ID删除供应商，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -12418,14 +12766,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 供应商
+      summary: 删除供应商
       tags:
       - ERP/基础资料
   /erp/master/supplier/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 供应商
+      description: 新增或修改供应商
       parameters:
       - description: ERP 供应商参数
         in: body
@@ -12442,12 +12790,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 供应商
+      summary: 新增或修改供应商
       tags:
       - ERP/基础资料
   /erp/master/warehouse/list:
     get:
-      description: 按条件分页查询 ERP 仓库列表
+      description: 按条件分页查询仓库列表
       parameters:
       - in: query
         name: defaultStatus
@@ -12473,12 +12821,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 仓库列表
+      summary: 查询仓库列表
       tags:
       - ERP/基础资料
   /erp/master/warehouse/query/{id}:
     get:
-      description: 根据ID查询 ERP 仓库详情
+      description: 根据ID查询仓库详情
       parameters:
       - description: 主键ID
         in: path
@@ -12494,12 +12842,12 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 查询 ERP 仓库详情
+      summary: 查询仓库详情
       tags:
       - ERP/基础资料
   /erp/master/warehouse/remove/{ids}:
     delete:
-      description: 根据ID删除 ERP 仓库，多个ID用逗号分隔
+      description: 根据ID删除仓库，多个ID用逗号分隔
       parameters:
       - description: 主键ID，多个用逗号分隔
         in: path
@@ -12515,14 +12863,14 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 删除 ERP 仓库
+      summary: 删除仓库
       tags:
       - ERP/基础资料
   /erp/master/warehouse/set:
     post:
       consumes:
       - application/json
-      description: 新增或修改 ERP 仓库
+      description: 新增或修改仓库
       parameters:
       - description: ERP 仓库参数
         in: body
@@ -12539,7 +12887,7 @@ paths:
             $ref: '#/definitions/response.ResponseData'
       security:
       - BearerAuth: []
-      summary: 新增或修改 ERP 仓库
+      summary: 新增或修改仓库
       tags:
       - ERP/基础资料
   /erp/order-audit/approve:
@@ -12694,30 +13042,6 @@ paths:
       security:
       - BearerAuth: []
       summary: ERP订单审核删除
-      tags:
-      - ERP/销售管理
-  /erp/order-audit/set:
-    post:
-      consumes:
-      - application/json
-      description: 新增或修改ERP订单审核记录
-      parameters:
-      - description: ERP订单审核保存参数
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/salemodels.OrderAuditSet'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 保存成功
-          schema:
-            $ref: '#/definitions/response.ResponseData'
-      security:
-      - BearerAuth: []
-      summary: ERP订单审核保存
       tags:
       - ERP/销售管理
   /erp/order/check-login-state:
@@ -13488,6 +13812,30 @@ paths:
       summary: 新增或修改采购退货
       tags:
       - ERP/采购管理
+  /erp/sale/order-audit/set:
+    post:
+      consumes:
+      - application/json
+      description: 新增或修改ERP订单审核记录
+      parameters:
+      - description: ERP订单审核保存参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/salemodels.OrderAuditSet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: ERP订单审核保存
+      tags:
+      - ERP/销售管理
   /erp/sale/out-items/list:
     get:
       description: 按条件分页查询销售出库项列表
@@ -16998,6 +17346,21 @@ paths:
       security:
       - BearerAuth: []
       summary: 查询全量生成上架商品向量任务进度
+      tags:
+      - 商城/商品管理
+  /shop/goods/vector/generate/all/query/list:
+    get:
+      description: 查询当前操作人的全量生成上架商品向量未完成任务列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 查询全量生成上架商品向量未完成任务列表
       tags:
       - 商城/商品管理
   /shop/goods/vector/search:

@@ -8,6 +8,7 @@ import (
 type Warehouse struct {
 	ID             int64   `json:"id,string" gorm:"column:id"`
 	Name           string  `json:"name" gorm:"column:name"`
+	Code           string  `json:"code"  gorm:"column:code"`
 	Address        string  `json:"address" gorm:"column:address"`
 	Sort           int64   `json:"sort" gorm:"column:sort"`
 	Remark         string  `json:"remark" gorm:"column:remark"`
@@ -24,6 +25,7 @@ type Warehouse struct {
 // WarehouseUpsert ERP 仓库新增修改参数
 type WarehouseUpsert struct {
 	ID             int64   `json:"id,string"`
+	Code           string  `json:"code" binding:"required" label:"仓库编号"`
 	Name           string  `json:"name" binding:"required" label:"仓库名称"`
 	Address        string  `json:"address"`
 	Sort           int64   `json:"sort"`

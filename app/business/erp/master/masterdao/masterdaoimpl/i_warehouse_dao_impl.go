@@ -16,11 +16,15 @@ import (
 )
 
 type WarehouseDaoImpl struct {
-	db *gorm.DB
+	db    *gorm.DB
+	table string
 }
 
 func NewWarehouseDao(db *gorm.DB) masterdao.IWarehouseDao {
-	return &WarehouseDaoImpl{db: db}
+	return &WarehouseDaoImpl{
+		db:    db,
+		table: "erp_warehouse",
+	}
 }
 
 func (d *WarehouseDaoImpl) Create(c *gin.Context, req *mastermodels.WarehouseUpsert) (*mastermodels.Warehouse, error) {
@@ -35,7 +39,7 @@ func (d *WarehouseDaoImpl) Create(c *gin.Context, req *mastermodels.WarehouseUps
 	model.DeptID = baizeContext.GetDeptId(c)
 	model.State = commonStatus.NORMAL
 	model.SetCreateBy(baizeContext.GetUserId(c))
-	if err := d.db.WithContext(c).Table("erp_warehouse").Create(model).Error; err != nil {
+	if err := d.db.WithContext(c).Table(d.table).Create(model).Error; err != nil {
 		return nil, err
 	}
 	return model, nil
@@ -48,6 +52,9 @@ func (d *WarehouseDaoImpl) Update(c *gin.Context, req *mastermodels.WarehouseUps
 	updates := make(map[string]any)
 	if req.Name != "" {
 		updates["name"] = req.Name
+	}
+	if req.Code != "" {
+		updates["code"] = req.Code
 	}
 	if req.Address != "" {
 		updates["address"] = req.Address
@@ -70,7 +77,7 @@ func (d *WarehouseDaoImpl) Update(c *gin.Context, req *mastermodels.WarehouseUps
 	updates["status"] = req.Status
 	updates["update_by"] = baizeContext.GetUserId(c)
 	updates["update_time"] = time.Now()
-	db := d.db.WithContext(c).Table("erp_warehouse").Where("id = ?", req.ID)
+	db := d.db.WithContext(c).Table(d.table).Where("id = ?", req.ID)
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Updates(updates).Error; err != nil {
 		return nil, err
@@ -82,7 +89,7 @@ func (d *WarehouseDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	return d.db.WithContext(c).Table("erp_warehouse").
+	return d.db.WithContext(c).Table(d.table).
 		Where("id IN ?", ids).
 		Where("state = ?", commonStatus.NORMAL).
 		Updates(map[string]any{
@@ -94,7 +101,7 @@ func (d *WarehouseDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 
 func (d *WarehouseDaoImpl) GetByID(c *gin.Context, id int64) (*mastermodels.Warehouse, error) {
 	item := new(mastermodels.Warehouse)
-	if err := d.db.WithContext(c).Table("erp_warehouse").
+	if err := d.db.WithContext(c).Table(d.table).
 		Where("id = ?", id).
 		Where("state = ?", commonStatus.NORMAL).
 		First(item).Error; err != nil {
@@ -106,12 +113,26 @@ func (d *WarehouseDaoImpl) GetByID(c *gin.Context, id int64) (*mastermodels.Ware
 	return item, nil
 }
 
+func (d *WarehouseDaoImpl) GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.Warehouse, error) {
+	if len(ids) == 0 {
+		return make([]*mastermodels.Warehouse, 0), nil
+	}
+	rows := make([]*mastermodels.Warehouse, 0, len(ids))
+	if err := d.db.WithContext(c).Table(d.table).
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 func (d *WarehouseDaoImpl) GetByColumn(c *gin.Context, column string, value any) (*mastermodels.Warehouse, error) {
 	if column == "" {
 		return nil, nil
 	}
 	item := new(mastermodels.Warehouse)
-	if err := d.db.WithContext(c).Table("erp_warehouse").
+	if err := d.db.WithContext(c).Table(d.table).Debug().
 		Where(fmt.Sprintf("%s = ?", column), value).
 		Where("state = ?", commonStatus.NORMAL).
 		First(item).Error; err != nil {
@@ -127,7 +148,7 @@ func (d *WarehouseDaoImpl) ListPage(c *gin.Context, req *mastermodels.WarehouseQ
 	if req == nil {
 		req = new(mastermodels.WarehouseQuery)
 	}
-	db := d.db.WithContext(c).Table("erp_warehouse").Where("state = ?", commonStatus.NORMAL)
+	db := d.db.WithContext(c).Table(d.table).Where("state = ?", commonStatus.NORMAL)
 	db = applyWarehouseFilters(db, req)
 	page, size := getPageSize(req.Page, req.Size)
 	var total int64

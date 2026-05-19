@@ -3686,6 +3686,254 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/app/shop/agent/conversations/chat": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "发送会话消息并支持流式返回",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App智能体会话"
+                ],
+                "summary": "会话聊天",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "会话消息元数据(JSON字符串)",
+                        "name": "metadata",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "上传文件",
+                        "name": "file",
+                        "in": "formData"
+                    },
+                    {
+                        "description": "发送消息参数",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.SendMessageInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "发送成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/agent/conversations/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建当前登录用户的智能体会话",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App智能体会话"
+                ],
+                "summary": "创建会话",
+                "parameters": [
+                    {
+                        "description": "创建会话参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.SetAiConversation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/agent/conversations/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询当前登录用户的智能体会话列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App智能体会话"
+                ],
+                "summary": "查询会话列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序规则  降序desc   asc升序",
+                        "name": "isAsc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "第几页",
+                        "name": "pageNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10000,
+                        "description": "数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/agent/conversations/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除当前登录用户的会话（软删除）",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App智能体会话"
+                ],
+                "summary": "删除会话",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "会话ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/agent/conversations/stop-generation": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "停止当前会话正在进行中的模型生成任务",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App智能体会话"
+                ],
+                "summary": "停止会话生成",
+                "parameters": [
+                    {
+                        "description": "停止生成参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/aidatasetmodels.StopGenerationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "停止成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/agent/messages/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据会话ID查询当前登录用户会话下的全部消息记录，按创建时间正序返回",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App智能体消息"
+                ],
+                "summary": "根据会话ID读取消息列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "conversation_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/gatewaymodels.AIAgentMessageListData"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/app/shop/auth/refresh": {
             "post": {
                 "description": "用有效JWT换取新Token",
@@ -9428,14 +9676,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 结算账户列表",
+                "description": "按条件分页查询结算账户列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 结算账户列表",
+                "summary": "查询结算账户列表",
                 "parameters": [
                     {
                         "type": "boolean",
@@ -9485,14 +9733,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 结算账户详情",
+                "description": "根据ID查询结算账户详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 结算账户详情",
+                "summary": "查询结算账户详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -9519,14 +9767,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 结算账户，多个ID用逗号分隔",
+                "description": "根据ID删除结算账户，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "删除 ERP 结算账户",
+                "summary": "删除结算账户",
                 "parameters": [
                     {
                         "type": "string",
@@ -9553,7 +9801,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 结算账户",
+                "description": "新增或修改结算账户",
                 "consumes": [
                     "application/json"
                 ],
@@ -9563,7 +9811,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "新增或修改 ERP 结算账户",
+                "summary": "新增或修改结算账户",
                 "parameters": [
                     {
                         "description": "ERP 结算账户参数",
@@ -9592,14 +9840,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 客户列表",
+                "description": "按条件分页查询客户列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 客户列表",
+                "summary": "查询客户列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -9644,14 +9892,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 客户详情",
+                "description": "根据ID查询客户详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 客户详情",
+                "summary": "查询客户详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -9678,14 +9926,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 客户，多个ID用逗号分隔",
+                "description": "根据ID删除客户，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "删除 ERP 客户",
+                "summary": "删除客户",
                 "parameters": [
                     {
                         "type": "string",
@@ -9712,7 +9960,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 客户",
+                "description": "新增或修改客户",
                 "consumes": [
                     "application/json"
                 ],
@@ -9722,7 +9970,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "新增或修改 ERP 客户",
+                "summary": "新增或修改客户",
                 "parameters": [
                     {
                         "description": "ERP 客户参数",
@@ -10080,6 +10328,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "name": "code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "name": "name",
                         "in": "query"
                     },
@@ -10216,6 +10469,216 @@ const docTemplate = `{
                 }
             }
         },
+        "/erp/master/product/vector/generate/all": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "异步将全部启用产品写入向量数据库，并将任务进度记录到 Redis",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "全量生成启用产品向量",
+                "parameters": [
+                    {
+                        "description": "全量生成产品向量参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductGenAllVectorReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "任务已启动",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/vector/generate/all/progress/{taskId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据任务ID读取 Redis 中的全量生成任务进度",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询全量生成产品向量任务进度",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "任务ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/vector/generate/all/query/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询当前操作人的全量生成产品向量未完成任务列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "查询全量生成产品向量未完成任务列表",
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/vector/generate/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据产品ID生成产品向量",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "生成产品向量",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "产品ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "产品向量生成参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductGenVectorReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "生成成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/vector/search": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据检索文本生成查询向量并近似搜索产品数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "近似搜索产品向量",
+                "parameters": [
+                    {
+                        "description": "产品向量搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductVectorSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/master/product/vector/search/batch": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据多条检索文本批量生成查询向量并近似搜索产品数据",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/基础资料"
+                ],
+                "summary": "批量近似搜索产品向量",
+                "parameters": [
+                    {
+                        "description": "产品批量向量搜索参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mastermodels.ProductVectorBatchSearchReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "搜索成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/erp/master/supplier/list": {
             "get": {
                 "security": [
@@ -10223,14 +10686,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 供应商列表",
+                "description": "按条件分页查询供应商列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 供应商列表",
+                "summary": "查询供应商列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -10275,14 +10738,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 供应商详情",
+                "description": "根据ID查询供应商详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 供应商详情",
+                "summary": "查询供应商详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -10309,14 +10772,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 供应商，多个ID用逗号分隔",
+                "description": "根据ID删除供应商，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "删除 ERP 供应商",
+                "summary": "删除供应商",
                 "parameters": [
                     {
                         "type": "string",
@@ -10343,7 +10806,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 供应商",
+                "description": "新增或修改供应商",
                 "consumes": [
                     "application/json"
                 ],
@@ -10353,7 +10816,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "新增或修改 ERP 供应商",
+                "summary": "新增或修改供应商",
                 "parameters": [
                     {
                         "description": "ERP 供应商参数",
@@ -10382,14 +10845,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "按条件分页查询 ERP 仓库列表",
+                "description": "按条件分页查询仓库列表",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 仓库列表",
+                "summary": "查询仓库列表",
                 "parameters": [
                     {
                         "type": "boolean",
@@ -10434,14 +10897,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID查询 ERP 仓库详情",
+                "description": "根据ID查询仓库详情",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "查询 ERP 仓库详情",
+                "summary": "查询仓库详情",
                 "parameters": [
                     {
                         "type": "integer",
@@ -10468,14 +10931,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "根据ID删除 ERP 仓库，多个ID用逗号分隔",
+                "description": "根据ID删除仓库，多个ID用逗号分隔",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "删除 ERP 仓库",
+                "summary": "删除仓库",
                 "parameters": [
                     {
                         "type": "string",
@@ -10502,7 +10965,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新增或修改 ERP 仓库",
+                "description": "新增或修改仓库",
                 "consumes": [
                     "application/json"
                 ],
@@ -10512,7 +10975,7 @@ const docTemplate = `{
                 "tags": [
                     "ERP/基础资料"
                 ],
-                "summary": "新增或修改 ERP 仓库",
+                "summary": "新增或修改仓库",
                 "parameters": [
                     {
                         "description": "ERP 仓库参数",
@@ -10775,45 +11238,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "删除成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/erp/order-audit/set": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "新增或修改ERP订单审核记录",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ERP/销售管理"
-                ],
-                "summary": "ERP订单审核保存",
-                "parameters": [
-                    {
-                        "description": "ERP订单审核保存参数",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/salemodels.OrderAuditSet"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -12069,6 +12493,45 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/order-audit/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改ERP订单审核记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "ERP订单审核保存",
+                "parameters": [
+                    {
+                        "description": "ERP订单审核保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/salemodels.OrderAuditSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -17708,6 +18171,31 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/vector/generate/all/query/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询当前操作人的全量生成上架商品向量未完成任务列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "查询全量生成上架商品向量未完成任务列表",
                 "responses": {
                     "200": {
                         "description": "查询成功",
@@ -27552,12 +28040,58 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parentId": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "sort": {
                     "type": "integer"
                 },
                 "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "mastermodels.ProductEmbeddingConfig": {
+            "type": "object",
+            "properties": {
+                "api_endpoint": {
+                    "type": "string"
+                },
+                "api_key": {
+                    "type": "string"
+                },
+                "model_id": {
+                    "type": "string"
+                },
+                "provider_id": {
+                    "type": "string"
+                },
+                "provider_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "mastermodels.ProductGenAllVectorReq": {
+            "type": "object",
+            "properties": {
+                "batchSize": {
+                    "type": "integer"
+                },
+                "embedding": {
+                    "$ref": "#/definitions/mastermodels.ProductEmbeddingConfig"
+                },
+                "taskId": {
+                    "type": "string"
+                }
+            }
+        },
+        "mastermodels.ProductGenVectorReq": {
+            "type": "object",
+            "properties": {
+                "embedding": {
+                    "$ref": "#/definitions/mastermodels.ProductEmbeddingConfig"
+                },
+                "id": {
                     "type": "integer"
                 }
             }
@@ -27621,10 +28155,48 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "unitId": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "weight": {
                     "type": "number"
+                }
+            }
+        },
+        "mastermodels.ProductVectorBatchSearchReq": {
+            "type": "object",
+            "required": [
+                "queries"
+            ],
+            "properties": {
+                "embedding": {
+                    "$ref": "#/definitions/mastermodels.ProductEmbeddingConfig"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "queries": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "mastermodels.ProductVectorSearchReq": {
+            "type": "object",
+            "required": [
+                "query"
+            ],
+            "properties": {
+                "embedding": {
+                    "$ref": "#/definitions/mastermodels.ProductEmbeddingConfig"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "string"
                 }
             }
         },
@@ -27689,10 +28261,14 @@ const docTemplate = `{
         "mastermodels.WarehouseUpsert": {
             "type": "object",
             "required": [
+                "code",
                 "name"
             ],
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "code": {
                     "type": "string"
                 },
                 "defaultStatus": {
@@ -30466,6 +31042,10 @@ const docTemplate = `{
                 },
                 "embedding": {
                     "$ref": "#/definitions/shopmodels.EmbeddingConfig"
+                },
+                "taskId": {
+                    "description": "可选，指定任务ID续跑",
+                    "type": "string"
                 }
             }
         },
@@ -31031,10 +31611,12 @@ const docTemplate = `{
                     "example": "0"
                 },
                 "productId": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "warehouseId": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },

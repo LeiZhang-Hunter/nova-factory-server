@@ -6,11 +6,15 @@ import (
 
 // Stock ERP 产品库存
 type Stock struct {
-	ID          int64   `json:"id,string" gorm:"column:id"`
-	ProductID   int64   `json:"productId" gorm:"column:product_id"`
-	WarehouseID int64   `json:"warehouseId" gorm:"column:warehouse_id"`
-	Count       float64 `json:"count" gorm:"column:count"`
-	DeptID      int64   `json:"deptId" gorm:"column:dept_id"`
+	ID            int64   `json:"id,string" gorm:"column:id"`
+	ProductID     int64   `json:"productId,string" gorm:"column:product_id"`
+	ProductName   string  `json:"productName" gorm:"-"`
+	WarehouseID   int64   `json:"warehouseId,string" gorm:"column:warehouse_id"`
+	WarehouseName string  `json:"warehouseName" gorm:"-"`
+	Count         float64 `json:"count" gorm:"column:count"`
+	EnableNum     float64 `json:"enablenum" gorm:"column:enablenum"`
+	EnSaleNum     float64 `json:"ensalenum" gorm:"column:ensalenum"`
+	DeptID        int64   `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
 }
@@ -18,8 +22,8 @@ type Stock struct {
 // StockUpsert ERP 产品库存新增修改参数
 type StockUpsert struct {
 	ID          int64   `json:"id,string"`
-	ProductID   int64   `json:"productId"`
-	WarehouseID int64   `json:"warehouseId"`
+	ProductID   int64   `json:"productId,string"`
+	WarehouseID int64   `json:"warehouseId,string"`
 	Count       float64 `json:"count"`
 }
 

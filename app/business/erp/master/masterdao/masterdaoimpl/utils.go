@@ -25,6 +25,9 @@ func applyProductFilters(db *gorm.DB, req *mastermodels.ProductQuery) *gorm.DB {
 	if req.Name != "" {
 		db = db.Where("name LIKE ?", "%"+strings.TrimSpace(req.Name)+"%")
 	}
+	if req.Code != "" {
+		db = db.Where("product_code = ?", req.Code)
+	}
 	if req.Status != nil {
 		db = db.Where("status = ?", *req.Status)
 	}

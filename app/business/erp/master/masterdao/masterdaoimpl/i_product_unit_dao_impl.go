@@ -105,6 +105,25 @@ func (d *ProductUnitDaoImpl) GetByColumn(c *gin.Context, column string, value an
 	return item, nil
 }
 
+func (d *ProductUnitDaoImpl) GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.ProductUnit, error) {
+	if len(ids) == 0 {
+		return []*mastermodels.ProductUnit{}, nil
+	}
+	rows := make([]mastermodels.ProductUnit, 0)
+	if err := d.db.WithContext(c).Table("erp_product_unit").
+		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	result := make([]*mastermodels.ProductUnit, 0, len(rows))
+	for i := range rows {
+		item := rows[i]
+		result = append(result, &item)
+	}
+	return result, nil
+}
+
 func (d *ProductUnitDaoImpl) ListPage(c *gin.Context, req *mastermodels.ProductUnitQuery) (*mastermodels.ProductUnitListData, error) {
 	if req == nil {
 		req = new(mastermodels.ProductUnitQuery)

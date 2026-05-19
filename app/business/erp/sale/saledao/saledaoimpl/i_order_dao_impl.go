@@ -83,57 +83,75 @@ func NewOrderDao(db *gorm.DB) saledao.IOrderDao {
 
 // Set 新增或修改 ERP 订单。
 func (o *OrderDaoImpl) Set(c *gin.Context, req *salemodels.OrderSet) (*salemodels.Order, error) {
-
 	var resultID uint64
 	err := o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
-		exists, findErr := o.findExists(tx, c, req)
-		if findErr != nil {
-			return findErr
+		id, setErr := o.doSet(c, tx, req)
+		if setErr != nil {
+			return setErr
 		}
-		data, parseErr := buildOrderModel(c, req)
-		if parseErr != nil {
-			return parseErr
-		}
-		row := buildOrderRow(data)
-		if exists == nil {
-			row.ID = uint64(snowflake.GenID())
-			if err := tx.Table(o.table).Create(row).Error; err != nil {
-				return err
-			}
-			resultID = row.ID
-		} else {
-			data.ID = exists.ID
-			row.ID = exists.ID
-			data.SetUpdateBy(baizeContext.GetUserId(c))
-			row.UpdateBy = data.UpdateBy
-			row.UpdateTime = data.UpdateTime
-			if err := tx.Table(o.table).
-				Where("id = ?", exists.ID).
-				//Where("dept_id = ?", baizeContext.GetDeptId(c)).
-				Where("state = ?", commonStatus.NORMAL).
-				Updates(buildOrderUpdateMap(row)).Error; err != nil {
-				return err
-			}
-			resultID = exists.ID
-			if err := o.detailDao.DeleteByOrderID(tx, resultID); err != nil {
-				return err
-			}
-			if err := o.accountDao.DeleteByOrderID(tx, resultID); err != nil {
-				return err
-			}
-		}
-		if err := o.detailDao.BatchCreate(tx, c, resultID, data.Tid, req.Details); err != nil {
-			return err
-		}
-		if err := o.accountDao.BatchCreate(tx, c, resultID, data.Tid, req.Accounts); err != nil {
-			return err
-		}
+		resultID = id
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
 	return o.GetByID(c, resultID)
+}
+
+// SetWithTx 新增或修改 ERP 订单（带事务）。
+func (o *OrderDaoImpl) SetWithTx(c *gin.Context, tx *gorm.DB, req *salemodels.OrderSet) (*salemodels.Order, error) {
+	resultID, err := o.doSet(c, tx, req)
+	if err != nil {
+		return nil, err
+	}
+	return o.GetByID(c, resultID)
+}
+
+// doSet 执行新增或修改 ERP 订单的核心逻辑。
+func (o *OrderDaoImpl) doSet(c *gin.Context, tx *gorm.DB, req *salemodels.OrderSet) (uint64, error) {
+	var resultID uint64
+	exists, findErr := o.findExists(tx, c, req)
+	if findErr != nil {
+		return 0, findErr
+	}
+	data, parseErr := buildOrderModel(c, req)
+	if parseErr != nil {
+		return 0, parseErr
+	}
+	row := buildOrderRow(data)
+	if exists == nil {
+		row.ID = uint64(snowflake.GenID())
+		if err := tx.Table(o.table).Create(row).Error; err != nil {
+			return 0, err
+		}
+		resultID = row.ID
+	} else {
+		data.ID = exists.ID
+		row.ID = exists.ID
+		data.SetUpdateBy(baizeContext.GetUserId(c))
+		row.UpdateBy = data.UpdateBy
+		row.UpdateTime = data.UpdateTime
+		if err := tx.Table(o.table).
+			Where("id = ?", exists.ID).
+			Where("state = ?", commonStatus.NORMAL).
+			Updates(buildOrderUpdateMap(row)).Error; err != nil {
+			return 0, err
+		}
+		resultID = exists.ID
+		if err := o.detailDao.DeleteByOrderID(tx, resultID); err != nil {
+			return 0, err
+		}
+		if err := o.accountDao.DeleteByOrderID(tx, resultID); err != nil {
+			return 0, err
+		}
+	}
+	if err := o.detailDao.BatchCreate(tx, c, resultID, data.Tid, req.Details); err != nil {
+		return 0, err
+	}
+	if err := o.accountDao.BatchCreate(tx, c, resultID, data.Tid, req.Accounts); err != nil {
+		return 0, err
+	}
+	return resultID, nil
 }
 
 // GetByID 查询 ERP 订单详情。

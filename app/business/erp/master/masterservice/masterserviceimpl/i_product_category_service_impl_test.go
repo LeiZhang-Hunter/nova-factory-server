@@ -99,6 +99,10 @@ func (d *productCategoryServiceTestDAO) GetByColumn(c *gin.Context, column strin
 	return nil, nil
 }
 
+func (d *productCategoryServiceTestDAO) GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.ProductCategory, error) {
+	return []*mastermodels.ProductCategory{}, nil
+}
+
 func (d *productCategoryServiceTestDAO) ListPage(c *gin.Context, req *mastermodels.ProductCategoryQuery) (*mastermodels.ProductCategoryListData, error) {
 	return &mastermodels.ProductCategoryListData{}, nil
 }

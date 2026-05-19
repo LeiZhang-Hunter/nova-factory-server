@@ -37,6 +37,8 @@ func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/vector/search/batch", middlewares.HasPermission("shop:goods:vector:batch_search"), s.BatchSearch)
 
 	group.POST("/vector/generate/all", middlewares.HasPermission("shop:goods:vector:generate:all"), s.GenerateAllOnSale)
+	group.GET("/vector/generate/all/query/list",
+		middlewares.HasPermission("shop:goods:vector:generate:all:query:list"), s.GetGenerateAllProgressList)
 	group.GET("/vector/generate/all/progress/:taskId",
 		middlewares.HasPermission("shop:goods:vector:generate:all:progress"), s.GetGenerateAllProgress)
 }
@@ -272,6 +274,24 @@ func (s *Goods) GetGenerateAllProgress(c *gin.Context) {
 	data, err := s.service.GetGenerateAllOnSaleVectorsProgress(c, taskID)
 	if err != nil {
 		zap.L().Error("get goods full vector progress fail", zap.String("taskId", taskID), zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// GetGenerateAllProgressList 查询全量生成上架商品向量未完成任务列表
+// @Summary 查询全量生成上架商品向量未完成任务列表
+// @Description 查询当前操作人的全量生成上架商品向量未完成任务列表
+// @Tags 商城/商品管理
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "查询成功"
+// @Router /shop/goods/vector/generate/all/query/list [get]
+func (s *Goods) GetGenerateAllProgressList(c *gin.Context) {
+	data, err := s.service.ListGenerateAllOnSaleVectorTasks(c)
+	if err != nil {
+		zap.L().Error("list goods full vector tasks fail", zap.Error(err))
 		baizeContext.Waring(c, err.Error())
 		return
 	}
