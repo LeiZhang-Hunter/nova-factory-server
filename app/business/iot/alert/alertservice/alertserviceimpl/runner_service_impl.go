@@ -1,3 +1,6 @@
+//go:build ai
+// +build ai
+
 package alertserviceimpl
 
 import (

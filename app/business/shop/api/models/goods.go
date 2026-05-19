@@ -1,5 +1,7 @@
 package models
 
+import "nova-factory-server/app/business/shop/product/shopmodels"
+
 // Goods 商品信息
 type Goods struct {
 	ID               int64    `json:"id,string" gorm:"id"`                    // 主键ID
@@ -37,4 +39,30 @@ type GoodsQuery struct {
 type GoodsListData struct {
 	Rows  []*Goods `json:"rows"`  // 数据列表
 	Total int64    `json:"total"` // 总数
+}
+
+// GoodsSearchReq 商品检索参数
+type GoodsSearchReq struct {
+	GoodsNames []string                    `json:"goodsNames" binding:"required"` // 商品名称列表
+	Limit      int                         `json:"limit"`                         // 每个名称返回的商品数量
+	Embedding  *shopmodels.EmbeddingConfig `json:"embedding"`                     // 向量模型配置
+}
+
+// GoodsSearchMatch 商品检索结果
+type GoodsSearchMatch struct {
+	Score float32 `json:"score"` // 相似度分值
+	Goods *Goods  `json:"goods"` // 商品最新数据
+}
+
+// GoodsSearchItem 单个商品名称的检索结果
+type GoodsSearchItem struct {
+	Query string              `json:"query"` // 查询名称
+	Rows  []*GoodsSearchMatch `json:"rows"`  // 命中商品列表
+	Total int64               `json:"total"` // 命中商品数
+}
+
+// GoodsSearchData 商品检索结果集
+type GoodsSearchData struct {
+	Rows  []*GoodsSearchItem `json:"rows"`  // 检索结果
+	Total int64              `json:"total"` // 查询名称数量
 }
