@@ -20,6 +20,7 @@ func (p *Product) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop/product")
 	group.GET("/info/:id", p.Info)
 	group.GET("/list", p.List)
+	group.POST("/search", p.Search)
 }
 
 func (p *Product) PrivateRoutes(router *gin.RouterGroup) {
@@ -96,6 +97,33 @@ func (p *Product) Repurchase(c *gin.Context) {
 		return
 	}
 	data, err := p.service.ListRepurchase(c, userID, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// Search 商品检索
+// @Summary 商品检索
+// @Description 传入多个商品名称，基于商品向量检索相似商品并回填数据库中的最新商品数据
+// @Tags app接口/商城/App商品
+// @Accept application/json
+// @Produce application/json
+// @Param object body models.GoodsSearchReq true "商品检索参数"
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /api/v1/app/shop/product/search [post]
+func (p *Product) Search(c *gin.Context) {
+	req := new(models.GoodsSearchReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if len(req.GoodsNames) == 0 || req.Embedding == nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := p.service.Search(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
