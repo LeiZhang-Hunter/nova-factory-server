@@ -40,6 +40,25 @@ func (s *IApiShopGoodsDaoImpl) GetByID(c *gin.Context, id int64) (*models.Goods,
 	return &item, nil
 }
 
+// ListByIDs 根据 ID 批量查询
+func (s *IApiShopGoodsDaoImpl) ListByIDs(c *gin.Context, ids []int64) ([]*models.Goods, error) {
+	if len(ids) == 0 {
+		return make([]*models.Goods, 0), nil
+	}
+	rows := make([]*models.Goods, 0, len(ids))
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("id IN ?", ids).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		if row != nil {
+			row.ImageURL = fileUtils.BuildAbsoluteURL(c, row.ImageURL)
+		}
+	}
+	return rows, nil
+}
+
 // GetByGoodsID 根据商品业务ID查询
 func (s *IApiShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID string) (*models.Goods, error) {
 	var item models.Goods

@@ -2,6 +2,7 @@ package aidatasetserviceimpl
 
 import (
 	"errors"
+	"nova-factory-server/app/utils/baizeContext"
 	"strings"
 
 	"nova-factory-server/app/business/ai/agent/aidatasetdao"
@@ -55,4 +56,10 @@ func (i *IDatasetRolePermissionServiceImpl) Set(c *gin.Context, req *aidatasetmo
 // Remove 删除知识库/文档-角色权限记录。
 func (i *IDatasetRolePermissionServiceImpl) Remove(c *gin.Context, ids []int64) error {
 	return i.dao.Remove(c, ids)
+}
+
+// GetDatasetData 通过uid 读取权限列表
+func (i *IDatasetRolePermissionServiceImpl) GetDatasetData(c *gin.Context) (*aidatasetmodels.DatasetAccessData, error) {
+	userId := baizeContext.GetUserId(c)
+	return i.dao.GetDatasetData(c, userId)
 }

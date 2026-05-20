@@ -93,5 +93,8 @@ func NewGinEngine(
 		userController.User.PrivateRoutes(adminGroup)
 	}
 
+	// 加载MCP
+	productController.Product.PrivateMcpRoutes(app.McpServer)
+
 	return &Shop{}
 }

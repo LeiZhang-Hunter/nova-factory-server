@@ -38,3 +38,28 @@ type GoodsListData struct {
 	Rows  []*Goods `json:"rows"`  // 数据列表
 	Total int64    `json:"total"` // 总数
 }
+
+// GoodsSearchReq 商品检索参数
+type GoodsSearchReq struct {
+	GoodsNames []string `json:"goodsNames" binding:"required" json:"goodsNames" jsonschema:"description=商品名称列表，OR查询逻辑，支持模糊匹配，建议1-10个,不要超过10个"` // 商品名称列表
+	Limit      int      `json:"-"`                                                                                                             // 每个名称返回的商品数量
+}
+
+// GoodsSearchMatch 商品检索结果
+type GoodsSearchMatch struct {
+	Score float32 `json:"score"` // 相似度分值
+	Goods *Goods  `json:"goods"` // 商品最新数据
+}
+
+// GoodsSearchItem 单个商品名称的检索结果
+type GoodsSearchItem struct {
+	Query string              `json:"query"` // 查询名称
+	Rows  []*GoodsSearchMatch `json:"rows"`  // 命中商品列表
+	Total int64               `json:"total"` // 命中商品数
+}
+
+// GoodsSearchData 商品检索结果集
+type GoodsSearchData struct {
+	Rows  []*GoodsSearchItem `json:"rows"`  // 检索结果
+	Total int64              `json:"total"` // 查询名称数量
+}

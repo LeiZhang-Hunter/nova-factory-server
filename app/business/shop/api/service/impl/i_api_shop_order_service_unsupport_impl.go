@@ -1,11 +1,10 @@
-//go:build erp
-// +build erp
+//go:build !erp
+// +build !erp
 
 package impl
 
 import (
 	"gorm.io/gorm"
-	erporderdao "nova-factory-server/app/business/erp/sale/saledao"
 	activityDao "nova-factory-server/app/business/shop/activity/dao"
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/service"
@@ -13,11 +12,11 @@ import (
 	"nova-factory-server/app/datasource/cache"
 )
 
-// IApiShopOrderServiceImpl 提供订单相关的业务实现。
+// IApiShopOrderServiceImpl 没有erp模块的时候加载erp
 type IApiShopOrderServiceImpl struct {
 	cache           cache.Cache
 	db              *gorm.DB
-	orderDao        erporderdao.IOrderDao
+	orderDao        dao.IApiShopOrderDao
 	userDao         dao.IApiShopWechatUserDao
 	addressDao      dao.IApiShopAddressDao
 	cartDao         dao.IApiShopCartDao
@@ -32,7 +31,7 @@ type IApiShopOrderServiceImpl struct {
 func NewIApiShopOrderServiceImpl(
 	cache cache.Cache,
 	db *gorm.DB,
-	orderDao erporderdao.IOrderDao,
+	orderDao dao.IApiShopOrderDao,
 	userDao dao.IApiShopWechatUserDao,
 	addressDao dao.IApiShopAddressDao,
 	cartDao dao.IApiShopCartDao,

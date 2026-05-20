@@ -3217,6 +3217,16 @@ definitions:
     required:
     - goodsId
     type: object
+  models.GoodsSearchReq:
+    properties:
+      goodsNames:
+        description: 商品名称列表
+        items:
+          type: string
+        type: array
+    required:
+    - goodsNames
+    type: object
   models.Group:
     properties:
       key:
@@ -6353,6 +6363,22 @@ paths:
       summary: 更新助理
       tags:
       - 工业智能体/助理管理
+  /ai/dataset/auth:
+    post:
+      consumes:
+      - application/json
+      description: 在调用 MCP 工具 `ragflow_retrieval` 前先使用此工具。它会根据用户访问权限返回访问所需的 `dataset_ids`
+        和 `document_ids`。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 获取知识库授权信息.
+      tags:
+      - 工业智能体/知识库管理
   /ai/dataset/chunk/add:
     post:
       description: 添加chunk
@@ -8803,6 +8829,28 @@ paths:
           schema:
             $ref: '#/definitions/response.ResponseData'
       summary: 获取商品列表
+      tags:
+      - app接口/商城/App商品
+  /api/v1/app/shop/product/search:
+    post:
+      consumes:
+      - application/json
+      description: 传入多个商品名称，基于商品向量检索相似商品并回填数据库中的最新商品数据
+      parameters:
+      - description: 商品检索参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/models.GoodsSearchReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 商品检索
       tags:
       - app接口/商城/App商品
   /api/v1/building/list:

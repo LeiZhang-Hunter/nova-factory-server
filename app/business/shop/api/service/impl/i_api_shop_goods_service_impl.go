@@ -4,32 +4,13 @@ import (
 	"math"
 	"strconv"
 
-	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
-	"nova-factory-server/app/business/shop/api/service"
 	discountservice "nova-factory-server/app/business/shop/discount/service"
 	"nova-factory-server/app/business/shop/product/shopmodels"
-	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
 )
-
-// IApiShopGoodsServiceImpl 商品服务实现
-type IApiShopGoodsServiceImpl struct {
-	dao              dao.IApiShopGoodsDao
-	shopGoodsService shopservice.IShopGoodsService
-	discountService  discountservice.IDiscountCalculateService
-}
-
-// NewIApiShopGoodsServiceImpl  创建商品服务
-func NewIApiShopGoodsServiceImpl(dao dao.IApiShopGoodsDao, shopGoodsService shopservice.IShopGoodsService, discountService discountservice.IDiscountCalculateService) service.IApiShopGoodsService {
-	return &IApiShopGoodsServiceImpl{
-		dao:              dao,
-		shopGoodsService: shopGoodsService,
-		discountService:  discountService,
-	}
-}
 
 // GetByID 获取商品详情
 func (s *IApiShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error) {
@@ -168,4 +149,63 @@ func (s *IApiShopGoodsServiceImpl) applyDiscountPriceForList(c *gin.Context, goo
 			goods.RetailPrice = discountedPrice
 		}
 	}
+}
+
+func (s *IApiShopGoodsServiceImpl) loadSearchGoodsMap(c *gin.Context, rows []*shopmodels.GoodsVectorBatchSearchItem) (map[int64]*models.Goods, error) {
+	ids := make([]int64, 0)
+	seen := make(map[int64]struct{})
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		for _, item := range row.Rows {
+			if item == nil || item.GoodsDBID == 0 {
+				continue
+			}
+			if _, ok := seen[item.GoodsDBID]; ok {
+				continue
+			}
+			seen[item.GoodsDBID] = struct{}{}
+			ids = append(ids, item.GoodsDBID)
+		}
+	}
+	if len(ids) == 0 {
+		return map[int64]*models.Goods{}, nil
+	}
+
+	goodsRows, err := s.dao.ListByIDs(c, ids)
+	if err != nil {
+		return nil, err
+	}
+	s.applyDiscountPriceForList(c, goodsRows)
+
+	goodsMap := make(map[int64]*models.Goods, len(goodsRows))
+	for _, goods := range goodsRows {
+		if goods == nil {
+			continue
+		}
+		goodsMap[goods.ID] = goods
+	}
+	return goodsMap, nil
+}
+
+func normalizeGoodsSearchLimit(limit int) int {
+	if limit <= 0 {
+		return 10
+	}
+	if limit > 50 {
+		return 50
+	}
+	return limit
+}
+
+func buildGoodsVectorSearchLimit(limit int) int {
+	vectorLimit := limit * 3
+	if vectorLimit < limit {
+		return limit
+	}
+	if vectorLimit > 50 {
+		return 50
+	}
+	return vectorLimit
 }
