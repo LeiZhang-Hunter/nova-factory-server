@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"nova-factory-server/app/business/admin/system/systemdao"
+	"nova-factory-server/app/business/ai/agent/aidatasetdao"
 	"strconv"
 	"strings"
 	"time"
 
-	"nova-factory-server/app/business/ai/agent/aidatasetdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
@@ -20,8 +21,18 @@ import (
 )
 
 type IDatasetRolePermissionDaoImpl struct {
-	db    *gorm.DB
-	table string
+	db      *gorm.DB
+	roleDao systemdao.IRoleDao
+	table   string
+}
+
+// NewIDatasetRolePermissionDaoImpl 知识库/文档-角色权限DAO构造函数。
+func NewIDatasetRolePermissionDaoImpl(db *gorm.DB, roleDao systemdao.IRoleDao) aidatasetdao.IDatasetRolePermissionDao {
+	return &IDatasetRolePermissionDaoImpl{
+		db:      db,
+		table:   "sys_dataset_role_permission",
+		roleDao: roleDao,
+	}
 }
 
 func (i *IDatasetRolePermissionDaoImpl) translateDatasetIDsToUUIDs(c *gin.Context, datasetIDs []string) ([]string, error) {
@@ -132,14 +143,6 @@ func (i *IDatasetRolePermissionDaoImpl) translateDocumentIDsToUUIDs(c *gin.Conte
 		return nil, errors.New(fmt.Sprintf("documentId不存在: %s", strings.Join(missing, ",")))
 	}
 	return uuidList, nil
-}
-
-// NewIDatasetRolePermissionDaoImpl 知识库/文档-角色权限DAO构造函数。
-func NewIDatasetRolePermissionDaoImpl(db *gorm.DB) aidatasetdao.IDatasetRolePermissionDao {
-	return &IDatasetRolePermissionDaoImpl{
-		db:    db,
-		table: "sys_dataset_role_permission",
-	}
 }
 
 // Create 创建知识库/文档-角色权限记录。
@@ -329,4 +332,113 @@ func (i *IDatasetRolePermissionDaoImpl) Remove(c *gin.Context, ids []int64) erro
 			"update_by":   baizeContext.GetUserId(c),
 			"update_time": time.Now(),
 		}).Error
+}
+
+// GetDatasetData 根据用户 ID 查询并聚合其角色对应的知识库权限数据。
+func (i *IDatasetRolePermissionDaoImpl) GetDatasetData(c *gin.Context, userId int64) (*aidatasetmodels.DatasetAccessData, error) {
+	roleInfos := i.roleDao.SelectBasicRolesByUserId(c.Request.Context(), userId)
+	if len(roleInfos) == 0 {
+		return &aidatasetmodels.DatasetAccessData{
+			DatasetIDs:    make([]string, 0),
+			DatasetUuIDs:  make([]string, 0),
+			DocumentIDs:   make([]string, 0),
+			DocumentUuIDs: make([]string, 0),
+		}, nil
+	}
+
+	roleIDs := make([]int64, len(roleInfos))
+	for k, v := range roleInfos {
+		roleIDs[k] = v.RoleId
+	}
+
+	permissions := make([]aidatasetmodels.DatasetRolePermission, 0, len(roleIDs))
+	if err := i.db.Table(i.table).WithContext(c.Request.Context()).
+		Table(i.table).
+		Where("role_id IN ?", roleIDs).Where("status = 1").Where("state = ?", commonStatus.NORMAL).
+		Find(&permissions).Error; err != nil {
+		return nil, err
+	}
+
+	for index := range permissions {
+		if err := i.fillPermissionArrays(&permissions[index]); err != nil {
+			return nil, err
+		}
+	}
+
+	datasetSet := make(map[string]struct{})
+	datasetUUIDSet := make(map[string]struct{})
+	documentSet := make(map[string]struct{})
+	documentUUIDSet := make(map[string]struct{})
+	result := &aidatasetmodels.DatasetAccessData{
+		DatasetIDs:    make([]string, 0),
+		DatasetUuIDs:  make([]string, 0),
+		DocumentIDs:   make([]string, 0),
+		DocumentUuIDs: make([]string, 0),
+	}
+	for _, permission := range permissions {
+		for _, datasetID := range permission.DatasetIDArray {
+			if _, exists := datasetSet[datasetID]; exists {
+				continue
+			}
+			datasetSet[datasetID] = struct{}{}
+			result.DatasetIDs = append(result.DatasetIDs, datasetID)
+		}
+		for _, datasetUUID := range permission.DatasetUUIDArray {
+			if _, exists := datasetUUIDSet[datasetUUID]; exists {
+				continue
+			}
+			datasetUUIDSet[datasetUUID] = struct{}{}
+			result.DatasetUuIDs = append(result.DatasetUuIDs, datasetUUID)
+		}
+		for _, documentID := range permission.DocumentIDsArray {
+			if _, exists := documentSet[documentID]; exists {
+				continue
+			}
+			documentSet[documentID] = struct{}{}
+			result.DocumentIDs = append(result.DocumentIDs, documentID)
+		}
+		for _, documentUUID := range permission.DocumentUUIDsArray {
+			if _, exists := documentUUIDSet[documentUUID]; exists {
+				continue
+			}
+			documentUUIDSet[documentUUID] = struct{}{}
+			result.DocumentUuIDs = append(result.DocumentUuIDs, documentUUID)
+		}
+	}
+
+	return result, nil
+}
+
+// fillPermissionArrays parses dataset and document ID arrays from stored JSON fields.
+func (i *IDatasetRolePermissionDaoImpl) fillPermissionArrays(permission *aidatasetmodels.DatasetRolePermission) error {
+	if len(permission.DatasetIDs) != 0 {
+		err := json.Unmarshal([]byte(permission.DatasetIDs), &permission.DatasetIDArray)
+		if err != nil {
+			zap.L().Error("unmarshal dataset role ids error", zap.Error(err))
+			return err
+		}
+	}
+	if len(permission.DatasetUuIDs) != 0 {
+		err := json.Unmarshal([]byte(permission.DatasetUuIDs), &permission.DatasetUUIDArray)
+		if err != nil {
+			zap.L().Error("unmarshal dataset role uuids error", zap.Error(err))
+			return err
+		}
+	}
+
+	if len(permission.DocumentIDs) != 0 {
+		err := json.Unmarshal([]byte(permission.DocumentIDs), &permission.DocumentIDsArray)
+		if err != nil {
+			zap.L().Error("unmarshal document role ids error", zap.Error(err))
+			return err
+		}
+	}
+	if len(permission.DocumentUuIDs) != 0 {
+		err := json.Unmarshal([]byte(permission.DocumentUuIDs), &permission.DocumentUUIDsArray)
+		if err != nil {
+			zap.L().Error("unmarshal document role uuids error", zap.Error(err))
+			return err
+		}
+	}
+	return nil
 }

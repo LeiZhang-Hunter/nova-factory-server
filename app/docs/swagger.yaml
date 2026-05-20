@@ -3224,9 +3224,6 @@ definitions:
         items:
           type: string
         type: array
-      limit:
-        description: 每个名称返回的商品数量
-        type: integer
     required:
     - goodsNames
     type: object
@@ -6366,6 +6363,22 @@ paths:
       summary: 更新助理
       tags:
       - 工业智能体/助理管理
+  /ai/dataset/auth:
+    post:
+      consumes:
+      - application/json
+      description: 在调用 MCP 工具 `ragflow_retrieval` 前先使用此工具。它会根据用户访问权限返回访问所需的 `dataset_ids`
+        和 `document_ids`。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 获取知识库授权信息.
+      tags:
+      - 工业智能体/知识库管理
   /ai/dataset/chunk/add:
     post:
       description: 添加chunk

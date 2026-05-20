@@ -685,6 +685,29 @@ const docTemplate = `{
                 }
             }
         },
+        "/ai/dataset/auth": {
+            "post": {
+                "description": "在调用 MCP 工具 ` + "`" + `ragflow_retrieval` + "`" + ` 前先使用此工具。它会根据用户访问权限返回访问所需的 ` + "`" + `dataset_ids` + "`" + ` 和 ` + "`" + `document_ids` + "`" + `。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工业智能体/知识库管理"
+                ],
+                "summary": "获取知识库授权信息.",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/ai/dataset/chunk/add": {
             "post": {
                 "description": "添加chunk",
@@ -28827,10 +28850,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "limit": {
-                    "description": "每个名称返回的商品数量",
-                    "type": "integer"
                 }
             }
         },

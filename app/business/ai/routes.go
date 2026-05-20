@@ -44,6 +44,7 @@ func NewGinEngine(
 		ai.Model.PrivateRoutes(group)
 		ai.OCR.PrivateRoutes(group)
 		ai.Role.PrivateRoutes(group)
+		ai.Auth.PrivateRoutes(group)
 		gateway.AIGateway.PrivateRoutes(group)
 		gateway.Agent.PrivateRoutes(group)
 		gateway.Conversations.PrivateRoutes(group)
@@ -51,6 +52,8 @@ func NewGinEngine(
 		gateway.MCPServer.PrivateRoutes(group)
 		gateway.Message.PrivateRoutes(group)
 	}
+
+	ai.Auth.PrivateMcpRoutes(app.McpServer)
 
 	return &AI{}
 }
