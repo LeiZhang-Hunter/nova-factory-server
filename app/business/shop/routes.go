@@ -51,7 +51,6 @@ func NewGinEngine(
 		authController.Auth.PublicRoutes(publicGroup)
 		productController.Category.PublicRoutes(publicGroup)
 		productController.Home.PublicRoutes(publicGroup)
-		productController.Product.PublicRoutes(publicGroup)
 	}
 
 	appGroup := group.Group("")
