@@ -33,10 +33,6 @@ func (p *Product) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 	router.RegisterSchema("POST", "/api/v1/app/shop/product/search", nil, models.GoodsSearchReq{})
 }
 
-func (p *Product) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
-	router.RegisterSchema("POST", "/api/v1/app/shop/product/search", nil, models.GoodsSearchReq{})
-}
-
 // Info 读取商品详情
 // @Summary 读取商品详情
 // @Description 根据ID读取商品详情
