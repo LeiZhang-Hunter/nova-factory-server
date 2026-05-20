@@ -21,6 +21,8 @@ import (
 const (
 	defaultProductVectorCollection = "erp_master_product_vectors"
 
+	productTextBm25EmbFunctionName = "text_bm25_emb"
+
 	productVectorPKField            = "product_id"
 	productVectorNameField          = "name"
 	productVectorBarCodeField       = "bar_code"
@@ -37,6 +39,10 @@ const (
 	productVectorMinPriceField      = "min_price"
 	productVectorContentField       = "content"
 	productVectorEmbeddingField     = "vector"
+	productVectorContextSparseField = "text_sparse_vector"
+
+	productIdxProductVector           = "idx_product_vector"
+	productIdxProductTextSparseVector = "idx_product_text_sparse_vector"
 
 	productVectorNameMaxLength     = 512
 	productVectorBarCodeMaxLength  = 128
@@ -176,32 +182,70 @@ func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.Pro
 	}
 
 	searchVectors := make([]entity.Vector, 0, len(vectors))
+	textQueries := make([]entity.Vector, 0, len(req.Queries))
 	for idx, vector := range vectors {
 		if len(vector) == 0 {
 			return nil, fmt.Errorf("第%d条产品搜索向量为空", idx+1)
 		}
+		query := strings.TrimSpace(req.Queries[idx])
+		if query == "" {
+			return nil, fmt.Errorf("第%d条产品搜索文本为空", idx+1)
+		}
 		searchVectors = append(searchVectors, entity.FloatVector(vector))
+		textQueries = append(textQueries, entity.Text(query))
 	}
 
-	resultSets, err := client.Search(requestCtx, milvusclient.NewSearchOption(cfg.Collection, req.Limit, searchVectors).
-		WithANNSField(productVectorEmbeddingField).
-		WithOutputFields(
-			productVectorPKField,
-			productVectorNameField,
-			productVectorBarCodeField,
-			productVectorCategoryIDField,
-			productVectorCategoryNameField,
-			productVectorUnitIDField,
-			productVectorUnitNameField,
-			productVectorStandardField,
-			productVectorRemarkField,
-			productVectorExpiryDayField,
-			productVectorWeightField,
-			productVectorPurchasePriceField,
-			productVectorSalePriceField,
-			productVectorMinPriceField,
-			productVectorContentField,
-		))
+	outputFields := []string{
+		productVectorPKField,
+		productVectorNameField,
+		productVectorBarCodeField,
+		productVectorCategoryIDField,
+		productVectorCategoryNameField,
+		productVectorUnitIDField,
+		productVectorUnitNameField,
+		productVectorStandardField,
+		productVectorRemarkField,
+		productVectorExpiryDayField,
+		productVectorWeightField,
+		productVectorPurchasePriceField,
+		productVectorSalePriceField,
+		productVectorMinPriceField,
+		productVectorContentField,
+	}
+
+	supportHybrid, err := supportsProductVectorHybridSearch(requestCtx, client, cfg.Collection)
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSets []milvusclient.ResultSet
+	if supportHybrid {
+		sparseAnnParam := index.NewSparseAnnParam()
+		sparseAnnParam.WithDropRatio(0.2)
+
+		denseRequest := milvusclient.NewAnnRequest(productVectorEmbeddingField, req.Limit, searchVectors...)
+		sparseRequest := milvusclient.NewAnnRequest(productVectorContextSparseField, req.Limit, textQueries...).
+			WithAnnParam(sparseAnnParam)
+
+		ranker := entity.NewFunction().
+			WithName("rrf").
+			WithType(entity.FunctionTypeRerank).
+			WithParam("reranker", "rrf").
+			WithParam("k", "100")
+
+		resultSets, err = client.HybridSearch(requestCtx, milvusclient.NewHybridSearchOption(
+			cfg.Collection,
+			req.Limit,
+			denseRequest,
+			sparseRequest,
+		).WithReranker(milvusclient.NewRRFReranker()).WithFunctionRerankers(ranker).
+			WithOutputFields(outputFields...))
+	} else {
+		resultSets, err = client.Search(requestCtx, milvusclient.NewSearchOption(cfg.Collection, req.Limit,
+			searchVectors).
+			WithANNSField(productVectorEmbeddingField).
+			WithOutputFields(outputFields...))
+	}
 	if err != nil {
 		return nil, fmt.Errorf("搜索 Milvus 产品向量失败: %w", err)
 	}
@@ -231,6 +275,26 @@ func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.Pro
 	}, nil
 }
 
+func supportsProductVectorHybridSearch(ctx context.Context, client *milvusclient.Client, collectionName string) (bool, error) {
+	collection, err := client.DescribeCollection(ctx, milvusclient.NewDescribeCollectionOption(collectionName))
+	if err != nil {
+		return false, fmt.Errorf("读取 Milvus collection 结构失败: %w", err)
+	}
+	if collection == nil || collection.Schema == nil {
+		return false, fmt.Errorf("Milvus collection %s 缺少 schema", collectionName)
+	}
+
+	for _, field := range collection.Schema.Fields {
+		if field == nil {
+			continue
+		}
+		if field.Name == productVectorContextSparseField {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func loadProductVectorConfig() (*productVectorConfig, error) {
 	cfg := &productVectorConfig{}
 	_ = viper.UnmarshalKey("erp.master.product_vector", cfg)
@@ -249,6 +313,11 @@ func ensureProductVectorCollection(ctx context.Context, client *milvusclient.Cli
 		return fmt.Errorf("检查 Milvus collection 失败: %w", err)
 	}
 	if !has {
+		function := entity.NewFunction().
+			WithName(productTextBm25EmbFunctionName).
+			WithInputFields(productVectorContentField).
+			WithOutputFields(productVectorContextSparseField).
+			WithType(entity.FunctionTypeBM25)
 		schema := entity.NewSchema().
 			WithField(entity.NewField().WithName(productVectorPKField).WithDataType(entity.FieldTypeInt64).WithIsPrimaryKey(true)).
 			WithField(entity.NewField().WithName(productVectorNameField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(productVectorNameMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
@@ -265,11 +334,17 @@ func ensureProductVectorCollection(ctx context.Context, client *milvusclient.Cli
 			WithField(entity.NewField().WithName(productVectorSalePriceField).WithDataType(entity.FieldTypeDouble)).
 			WithField(entity.NewField().WithName(productVectorMinPriceField).WithDataType(entity.FieldTypeDouble)).
 			WithField(entity.NewField().WithName(productVectorContentField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(productVectorContentMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
-			WithField(entity.NewField().WithName(productVectorEmbeddingField).WithDataType(entity.FieldTypeFloatVector).WithDim(int64(dim)))
+			WithField(entity.NewField().WithName(productVectorEmbeddingField).WithDataType(entity.FieldTypeFloatVector).WithDim(int64(dim))).
+			WithField(entity.NewField().
+				WithName(productVectorContextSparseField).
+				WithDataType(entity.FieldTypeSparseVector),
+			).WithFunction(function)
 
 		err = client.CreateCollection(ctx, milvusclient.NewCreateCollectionOption(collectionName, schema).WithIndexOptions(
-			milvusclient.NewCreateIndexOption(collectionName, productVectorEmbeddingField, index.NewAutoIndex(entity.COSINE)).WithIndexName("idx_product_vector"),
-		))
+			milvusclient.NewCreateIndexOption(collectionName, productVectorEmbeddingField, index.NewAutoIndex(entity.COSINE)).
+				WithIndexName(productIdxProductVector),
+		).WithIndexOptions(milvusclient.NewCreateIndexOption(collectionName, productVectorContextSparseField,
+			index.NewSparseInvertedIndex(entity.BM25, 0.2)).WithIndexName(productIdxProductTextSparseVector)))
 		if err != nil {
 			return fmt.Errorf("创建 Milvus collection 失败: %w", err)
 		}
