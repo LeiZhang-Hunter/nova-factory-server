@@ -4,17 +4,19 @@ import "nova-factory-server/app/baize"
 
 // DatasetRolePermission 知识库/文档-角色权限记录。
 type DatasetRolePermission struct {
-	ID               int64    `json:"id,string" gorm:"column:id"`
-	RoleID           int64    `json:"roleId,string" gorm:"column:role_id"`
-	DatasetIDs       string   `json:"-" gorm:"column:dataset_ids"`
-	DatasetUuIDs     string   `json:"-" gorm:"column:dataset_uuids"`
-	DatasetIDArray   []string `json:"datasetIds" gorm:"-"`
-	DocumentIDs      string   `json:"-" gorm:"column:document_ids"`
-	DocumentUuIDs    string   `json:"-" gorm:"column:document_uuids"`
-	DocumentIDsArray []string `json:"documentIds" gorm:"-"`
-	Permission       string   `json:"permission" gorm:"column:permission"`
-	Status           bool     `json:"status,string" gorm:"column:status"`
-	DeptID           int64    `json:"deptId,string" gorm:"column:dept_id"`
+	ID                 int64    `json:"id,string" gorm:"column:id"`
+	RoleID             int64    `json:"roleId,string" gorm:"column:role_id"`
+	DatasetIDs         string   `json:"-" gorm:"column:dataset_ids"`
+	DatasetUuIDs       string   `json:"-" gorm:"column:dataset_uuids"`
+	DatasetIDArray     []string `json:"datasetIds" gorm:"-"`
+	DatasetUUIDArray   []string `json:"datasetUUIDs" gorm:"-"`
+	DocumentIDs        string   `json:"-" gorm:"column:document_ids"`
+	DocumentUuIDs      string   `json:"-" gorm:"column:document_uuids"`
+	DocumentUUIDsArray []string `json:"documentUUIDs" gorm:"-"`
+	DocumentIDsArray   []string `json:"documentIds" gorm:"-"`
+	Permission         string   `json:"permission" gorm:"column:permission"`
+	Status             bool     `json:"status,string" gorm:"column:status"`
+	DeptID             int64    `json:"deptId,string" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
 }
