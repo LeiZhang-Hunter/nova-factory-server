@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/master/mastermodels"
 	"nova-factory-server/app/datasource/milvus"
+	searchutil "nova-factory-server/app/utils/vectorsearch"
 
 	"github.com/gin-gonic/gin"
 	"github.com/milvus-io/milvus/client/v2/column"
@@ -44,6 +46,7 @@ const (
 	productIdxProductVector           = "idx_product_vector"
 	productIdxProductTextSparseVector = "idx_product_text_sparse_vector"
 
+	// 以下长度限制用于控制写入 Milvus 的 varchar 字段大小，避免超出 schema 限制。
 	productVectorNameMaxLength     = 512
 	productVectorBarCodeMaxLength  = 128
 	productVectorCategoryMaxLength = 256
@@ -51,6 +54,13 @@ const (
 	productVectorStandardMaxLength = 512
 	productVectorRemarkMaxLength   = 2048
 	productVectorContentMaxLength  = 16384
+
+	// 以下检索参数用于控制初始召回规模与对外返回上限，给应用层重排预留足够候选集。
+	productVectorSearchCandidateMultiplier = 3
+	productVectorSearchMinCandidates       = 20
+	productVectorSearchMaxCandidates       = 100
+	productVectorSearchDefaultLimit        = 10
+	productVectorSearchMaxLimit            = 50
 )
 
 type ProductVectorDaoImpl struct{}
@@ -59,10 +69,12 @@ type productVectorConfig struct {
 	Collection string `mapstructure:"collection"`
 }
 
+// NewProductVectorDao 创建产品向量 DAO。
 func NewProductVectorDao() masterdao.IProductVectorDao {
 	return &ProductVectorDaoImpl{}
 }
 
+// Upsert 写入或更新产品向量及其检索字段。
 func (d *ProductVectorDaoImpl) Upsert(c *gin.Context, product *mastermodels.Product, item *mastermodels.ProductVectorUpsertItem) (*mastermodels.ProductVectorResult, error) {
 	if product == nil || product.ID <= 0 {
 		return nil, errors.New("产品不存在")
@@ -70,7 +82,7 @@ func (d *ProductVectorDaoImpl) Upsert(c *gin.Context, product *mastermodels.Prod
 	if item == nil {
 		return nil, errors.New("产品向量写入项为空")
 	}
-	item.Content = trimProductVectorRunes(item.Content, productVectorContentMaxLength)
+	item.Content = searchutil.TrimRunes(item.Content, productVectorContentMaxLength)
 	if strings.TrimSpace(item.Content) == "" {
 		return nil, errors.New("产品向量内容不能为空")
 	}
@@ -94,16 +106,17 @@ func (d *ProductVectorDaoImpl) Upsert(c *gin.Context, product *mastermodels.Prod
 		return nil, err
 	}
 
+	// 同步写入结构化字段、全文检索字段和稠密向量，便于后续做混合检索与二次重排。
 	_, err = client.Upsert(requestCtx, milvusclient.NewColumnBasedInsertOption(cfg.Collection).
 		WithInt64Column(productVectorPKField, []int64{product.ID}).
-		WithVarcharColumn(productVectorNameField, []string{trimProductVectorRunes(product.Name, productVectorNameMaxLength)}).
-		WithVarcharColumn(productVectorBarCodeField, []string{trimProductVectorRunes(product.BarCode, productVectorBarCodeMaxLength)}).
+		WithVarcharColumn(productVectorNameField, []string{searchutil.TrimRunes(product.Name, productVectorNameMaxLength)}).
+		WithVarcharColumn(productVectorBarCodeField, []string{searchutil.TrimRunes(product.BarCode, productVectorBarCodeMaxLength)}).
 		WithInt64Column(productVectorCategoryIDField, []int64{product.CategoryId}).
-		WithVarcharColumn(productVectorCategoryNameField, []string{trimProductVectorRunes(product.CategoryName, productVectorCategoryMaxLength)}).
+		WithVarcharColumn(productVectorCategoryNameField, []string{searchutil.TrimRunes(product.CategoryName, productVectorCategoryMaxLength)}).
 		WithInt64Column(productVectorUnitIDField, []int64{product.UnitId}).
-		WithVarcharColumn(productVectorUnitNameField, []string{trimProductVectorRunes(product.UnitName, productVectorUnitMaxLength)}).
-		WithVarcharColumn(productVectorStandardField, []string{trimProductVectorRunes(product.Standard, productVectorStandardMaxLength)}).
-		WithVarcharColumn(productVectorRemarkField, []string{trimProductVectorRunes(product.Remark, productVectorRemarkMaxLength)}).
+		WithVarcharColumn(productVectorUnitNameField, []string{searchutil.TrimRunes(product.UnitName, productVectorUnitMaxLength)}).
+		WithVarcharColumn(productVectorStandardField, []string{searchutil.TrimRunes(product.Standard, productVectorStandardMaxLength)}).
+		WithVarcharColumn(productVectorRemarkField, []string{searchutil.TrimRunes(product.Remark, productVectorRemarkMaxLength)}).
 		WithInt64Column(productVectorExpiryDayField, []int64{int64(product.ExpiryDay)}).
 		WithColumns(
 			column.NewColumnDouble(productVectorWeightField, []float64{product.Weight}),
@@ -125,6 +138,7 @@ func (d *ProductVectorDaoImpl) Upsert(c *gin.Context, product *mastermodels.Prod
 	}, nil
 }
 
+// Search 单条搜索复用批量搜索逻辑，统一召回与重排行为。
 func (d *ProductVectorDaoImpl) Search(c *gin.Context, req *mastermodels.ProductVectorSearchReq, vector []float32) (*mastermodels.ProductVectorSearchData, error) {
 	if req == nil {
 		return nil, errors.New("产品向量搜索参数为空")
@@ -133,8 +147,9 @@ func (d *ProductVectorDaoImpl) Search(c *gin.Context, req *mastermodels.ProductV
 		return nil, errors.New("产品搜索向量为空")
 	}
 	data, err := d.BatchSearch(c, &mastermodels.ProductVectorBatchSearchReq{
-		Queries: []string{req.Query},
-		Limit:   req.Limit,
+		Queries:     []string{req.Query},
+		SearchTexts: []string{req.SearchText},
+		Limit:       req.Limit,
 	}, [][]float32{vector})
 	if err != nil {
 		return nil, err
@@ -151,6 +166,7 @@ func (d *ProductVectorDaoImpl) Search(c *gin.Context, req *mastermodels.ProductV
 	}, nil
 }
 
+// BatchSearch 先从 Milvus 扩大候选召回，再结合字段特征做应用层重排。
 func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.ProductVectorBatchSearchReq, vectors [][]float32) (*mastermodels.ProductVectorBatchSearchData, error) {
 	if req == nil {
 		return nil, errors.New("产品批量向量搜索参数为空")
@@ -181,6 +197,8 @@ func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.Pro
 		return buildEmptyProductVectorBatchSearchData(req.Queries), nil
 	}
 
+	// Milvus 初排只负责召回候选，实际返回数量放大后交给业务重排做精排。
+	searchLimit := resolveProductVectorSearchCandidateLimit(req.Limit)
 	searchVectors := make([]entity.Vector, 0, len(vectors))
 	textQueries := make([]entity.Vector, 0, len(req.Queries))
 	for idx, vector := range vectors {
@@ -191,8 +209,14 @@ func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.Pro
 		if query == "" {
 			return nil, fmt.Errorf("第%d条产品搜索文本为空", idx+1)
 		}
+		searchText := query
+		if len(req.SearchTexts) == len(req.Queries) {
+			if candidate := strings.TrimSpace(req.SearchTexts[idx]); candidate != "" {
+				searchText = candidate
+			}
+		}
 		searchVectors = append(searchVectors, entity.FloatVector(vector))
-		textQueries = append(textQueries, entity.Text(query))
+		textQueries = append(textQueries, entity.Text(searchText))
 	}
 
 	outputFields := []string{
@@ -220,11 +244,12 @@ func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.Pro
 
 	var resultSets []milvusclient.ResultSet
 	if supportHybrid {
+		// 稠密向量负责语义召回，BM25 稀疏向量负责关键词召回，两者通过 RRF 合并结果。
 		sparseAnnParam := index.NewSparseAnnParam()
 		sparseAnnParam.WithDropRatio(0.2)
 
-		denseRequest := milvusclient.NewAnnRequest(productVectorEmbeddingField, req.Limit, searchVectors...)
-		sparseRequest := milvusclient.NewAnnRequest(productVectorContextSparseField, req.Limit, textQueries...).
+		denseRequest := milvusclient.NewAnnRequest(productVectorEmbeddingField, searchLimit, searchVectors...)
+		sparseRequest := milvusclient.NewAnnRequest(productVectorContextSparseField, searchLimit, textQueries...).
 			WithAnnParam(sparseAnnParam)
 
 		ranker := entity.NewFunction().
@@ -235,13 +260,14 @@ func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.Pro
 
 		resultSets, err = client.HybridSearch(requestCtx, milvusclient.NewHybridSearchOption(
 			cfg.Collection,
-			req.Limit,
+			searchLimit,
 			denseRequest,
 			sparseRequest,
 		).WithReranker(milvusclient.NewRRFReranker()).WithFunctionRerankers(ranker).
 			WithOutputFields(outputFields...))
 	} else {
-		resultSets, err = client.Search(requestCtx, milvusclient.NewSearchOption(cfg.Collection, req.Limit,
+		// 旧 collection 不支持稀疏字段时，降级为纯向量检索，保证兼容已有数据。
+		resultSets, err = client.Search(requestCtx, milvusclient.NewSearchOption(cfg.Collection, searchLimit,
 			searchVectors).
 			WithANNSField(productVectorEmbeddingField).
 			WithOutputFields(outputFields...))
@@ -262,10 +288,12 @@ func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.Pro
 		if parseErr != nil {
 			return nil, fmt.Errorf("解析第%d条产品向量搜索结果失败: %w", idx+1, parseErr)
 		}
+		// 应用层重排会综合标题、条码、分类、规格、正文等字段信号重新排序，并动态裁剪弱相关结果。
+		data.Rows = rerankProductVectorSearchRows(req.Queries[idx], data.Rows, req.Limit)
 		rows = append(rows, &mastermodels.ProductVectorBatchSearchItem{
 			Query: req.Queries[idx],
 			Rows:  data.Rows,
-			Total: data.Total,
+			Total: int64(len(data.Rows)),
 		})
 	}
 
@@ -275,6 +303,7 @@ func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.Pro
 	}, nil
 }
 
+// supportsProductVectorHybridSearch 检查当前 collection 是否具备稀疏向量字段。
 func supportsProductVectorHybridSearch(ctx context.Context, client *milvusclient.Client, collectionName string) (bool, error) {
 	collection, err := client.DescribeCollection(ctx, milvusclient.NewDescribeCollectionOption(collectionName))
 	if err != nil {
@@ -295,6 +324,7 @@ func supportsProductVectorHybridSearch(ctx context.Context, client *milvusclient
 	return false, nil
 }
 
+// loadProductVectorConfig 读取产品向量相关配置。
 func loadProductVectorConfig() (*productVectorConfig, error) {
 	cfg := &productVectorConfig{}
 	_ = viper.UnmarshalKey("erp.master.product_vector", cfg)
@@ -307,12 +337,14 @@ func loadProductVectorConfig() (*productVectorConfig, error) {
 	return cfg, nil
 }
 
+// ensureProductVectorCollection 确保 Milvus collection 存在且字段结构与向量维度符合预期。
 func ensureProductVectorCollection(ctx context.Context, client *milvusclient.Client, collectionName string, dim int) error {
 	has, err := client.HasCollection(ctx, milvusclient.NewHasCollectionOption(collectionName))
 	if err != nil {
 		return fmt.Errorf("检查 Milvus collection 失败: %w", err)
 	}
 	if !has {
+		// 新建 collection 时同时挂上 BM25 function，让 content 字段自动生成稀疏向量。
 		function := entity.NewFunction().
 			WithName(productTextBm25EmbFunctionName).
 			WithInputFields(productVectorContentField).
@@ -351,6 +383,7 @@ func ensureProductVectorCollection(ctx context.Context, client *milvusclient.Cli
 		return nil
 	}
 
+	// 已存在 collection 时只做校验，不在运行期强行修改结构，避免影响线上数据。
 	collection, err := client.DescribeCollection(ctx, milvusclient.NewDescribeCollectionOption(collectionName))
 	if err != nil {
 		return fmt.Errorf("读取 Milvus collection 结构失败: %w", err)
@@ -403,6 +436,7 @@ func ensureProductVectorCollection(ctx context.Context, client *milvusclient.Cli
 	return nil
 }
 
+// buildEmptyProductVectorBatchSearchData 构造空结果，保持批量查询返回结构稳定。
 func buildEmptyProductVectorBatchSearchData(queries []string) *mastermodels.ProductVectorBatchSearchData {
 	rows := make([]*mastermodels.ProductVectorBatchSearchItem, 0, len(queries))
 	for _, query := range queries {
@@ -418,6 +452,7 @@ func buildEmptyProductVectorBatchSearchData(queries []string) *mastermodels.Prod
 	}
 }
 
+// parseProductVectorSearchResultSet 将 Milvus 返回结果转换为业务检索结果。
 func parseProductVectorSearchResultSet(resultSet milvusclient.ResultSet) (*mastermodels.ProductVectorSearchData, error) {
 	if resultSet.Err != nil {
 		return nil, resultSet.Err
@@ -425,6 +460,7 @@ func parseProductVectorSearchResultSet(resultSet milvusclient.ResultSet) (*maste
 
 	rows := make([]*mastermodels.ProductVectorSearchItem, 0, resultSet.ResultCount)
 	for i := 0; i < resultSet.ResultCount; i++ {
+		// 先保留 Milvus 的原始得分，后续应用层重排会基于该分数继续融合字段特征。
 		item := &mastermodels.ProductVectorSearchItem{
 			Score: resultSet.Scores[i],
 		}
@@ -485,6 +521,7 @@ func parseProductVectorSearchResultSet(resultSet milvusclient.ResultSet) (*maste
 	}, nil
 }
 
+// buildProductVectorRequestContext 从 gin 上下文中提取请求上下文。
 func buildProductVectorRequestContext(c *gin.Context) context.Context {
 	if c != nil && c.Request != nil {
 		return c.Request.Context()
@@ -492,18 +529,84 @@ func buildProductVectorRequestContext(c *gin.Context) context.Context {
 	return context.Background()
 }
 
-func trimProductVectorRunes(value string, max int) string {
-	value = strings.TrimSpace(value)
-	if max <= 0 {
-		return value
+// normalizeProductVectorSearchLimit 统一处理搜索数量上限，避免查询参数失控。
+func normalizeProductVectorSearchLimit(limit int) int {
+	if limit <= 0 {
+		return productVectorSearchDefaultLimit
 	}
-	runes := []rune(value)
-	if len(runes) <= max {
-		return value
+	if limit > productVectorSearchMaxLimit {
+		return productVectorSearchMaxLimit
 	}
-	return string(runes[:max])
+	return limit
 }
 
+// resolveProductVectorSearchCandidateLimit 计算候选召回数量，为应用层重排预留足够样本。
+func resolveProductVectorSearchCandidateLimit(limit int) int {
+	limit = normalizeProductVectorSearchLimit(limit)
+	candidateLimit := limit * productVectorSearchCandidateMultiplier
+	if candidateLimit < productVectorSearchMinCandidates {
+		candidateLimit = productVectorSearchMinCandidates
+	}
+	if candidateLimit > productVectorSearchMaxCandidates {
+		candidateLimit = productVectorSearchMaxCandidates
+	}
+	if candidateLimit < limit {
+		return limit
+	}
+	return candidateLimit
+}
+
+// rerankProductVectorSearchRows 使用字段加权与动态阈值对 Milvus 候选结果做二次排序。
+func rerankProductVectorSearchRows(query string, rows []*mastermodels.ProductVectorSearchItem, limit int) []*mastermodels.ProductVectorSearchItem {
+	if len(rows) == 0 {
+		return make([]*mastermodels.ProductVectorSearchItem, 0)
+	}
+
+	// 将业务结果映射为通用候选结构，交由 app/utils/vectorsearch 做统一重排。
+	processedQuery := searchutil.ProcessQuery(query)
+	candidates := make([]searchutil.RankCandidate, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		candidates = append(candidates, searchutil.RankCandidate{
+			ID:        row.ProductID,
+			Title:     row.Name,
+			Code:      row.BarCode,
+			Category:  row.CategoryName,
+			Unit:      row.UnitName,
+			Standard:  row.Standard,
+			Remark:    row.Remark,
+			Content:   row.Content,
+			BaseScore: row.Score,
+		})
+	}
+	if len(candidates) == 0 {
+		return make([]*mastermodels.ProductVectorSearchItem, 0)
+	}
+
+	// 重排后的分数会覆盖原始分数，便于前端或调用方直接按最终得分展示。
+	ranked := searchutil.RerankCandidates(processedQuery, candidates, normalizeProductVectorSearchLimit(limit))
+	result := make([]*mastermodels.ProductVectorSearchItem, 0, len(ranked))
+	for _, item := range ranked {
+		if item.Index < 0 || item.Index >= len(rows) || rows[item.Index] == nil {
+			continue
+		}
+		row := rows[item.Index]
+		row.Score = item.Score
+		result = append(result, row)
+	}
+
+	sort.SliceStable(result, func(i, j int) bool {
+		if result[i].Score == result[j].Score {
+			return result[i].ProductID < result[j].ProductID
+		}
+		return result[i].Score > result[j].Score
+	})
+	return result
+}
+
+// getProductVectorInt64ColumnValue 读取 int64 类型列值。
 func getProductVectorInt64ColumnValue(resultSet *milvusclient.ResultSet, fieldName string, idx int) (int64, error) {
 	if resultSet == nil {
 		return 0, fmt.Errorf("搜索结果为空")
@@ -515,6 +618,7 @@ func getProductVectorInt64ColumnValue(resultSet *milvusclient.ResultSet, fieldNa
 	return col.GetAsInt64(idx)
 }
 
+// getProductVectorStringColumnValue 读取字符串类型列值。
 func getProductVectorStringColumnValue(resultSet *milvusclient.ResultSet, fieldName string, idx int) (string, error) {
 	if resultSet == nil {
 		return "", fmt.Errorf("搜索结果为空")
@@ -526,6 +630,7 @@ func getProductVectorStringColumnValue(resultSet *milvusclient.ResultSet, fieldN
 	return col.GetAsString(idx)
 }
 
+// getProductVectorFloat64ColumnValue 读取浮点类型列值。
 func getProductVectorFloat64ColumnValue(resultSet *milvusclient.ResultSet, fieldName string, idx int) (float64, error) {
 	if resultSet == nil {
 		return 0, fmt.Errorf("搜索结果为空")

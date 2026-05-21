@@ -19,6 +19,7 @@ import (
 	"nova-factory-server/app/utils/baizeContext"
 	embeddingutil "nova-factory-server/app/utils/llm/embedding"
 	"nova-factory-server/app/utils/snowflake"
+	searchutil "nova-factory-server/app/utils/vectorsearch"
 )
 
 const (
@@ -246,7 +247,7 @@ func (s *ProductServiceImpl) SearchVector(c *gin.Context, req *mastermodels.Prod
 	if req == nil {
 		return nil, errors.New("搜索参数不能为空")
 	}
-	queries, err := normalizeProductVectorSearchQueries([]string{req.Query})
+	queries, err := searchutil.NormalizeQueries([]string{req.Query})
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +271,7 @@ func (s *ProductServiceImpl) BatchSearchVector(c *gin.Context, req *mastermodels
 	if req == nil {
 		return nil, errors.New("批量搜索参数不能为空")
 	}
-	queries, err := normalizeProductVectorSearchQueries(req.Queries)
+	queries, err := searchutil.NormalizeQueries(req.Queries)
 	if err != nil {
 		return nil, err
 	}
@@ -285,6 +286,11 @@ func (s *ProductServiceImpl) BatchSearchVector(c *gin.Context, req *mastermodels
 }
 
 func (s *ProductServiceImpl) batchSearchProductVector(c *gin.Context, queries []string, limit int, embeddingCfg *mastermodels.ProductEmbeddingConfig) ([]*mastermodels.ProductVectorBatchSearchItem, error) {
+	processedQueries, err := searchutil.ProcessQueries(queries)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg, err := loadProductEmbeddingProviderConfig(embeddingCfg)
 	if err != nil {
 		return nil, err
@@ -296,16 +302,28 @@ func (s *ProductServiceImpl) batchSearchProductVector(c *gin.Context, queries []
 		return nil, fmt.Errorf("初始化向量模型失败: %w", err)
 	}
 
-	vectors, err := embedder.EmbedStrings(requestCtx, queries)
+	embeddingTexts := make([]string, 0, len(processedQueries))
+	hybridTexts := make([]string, 0, len(processedQueries))
+	normalizedQueries := make([]string, 0, len(processedQueries))
+	for _, processed := range processedQueries {
+		if processed == nil {
+			continue
+		}
+		normalizedQueries = append(normalizedQueries, processed.Original)
+		embeddingTexts = append(embeddingTexts, processed.EmbeddingText)
+		hybridTexts = append(hybridTexts, processed.HybridText)
+	}
+
+	vectors, err := embedder.EmbedStrings(requestCtx, embeddingTexts)
 	if err != nil {
 		return nil, fmt.Errorf("生成搜索向量失败: %w", err)
 	}
-	if len(vectors) != len(queries) {
-		return nil, fmt.Errorf("向量模型返回结果数量不匹配，expected=%d actual=%d", len(queries), len(vectors))
+	if len(vectors) != len(normalizedQueries) {
+		return nil, fmt.Errorf("向量模型返回结果数量不匹配，expected=%d actual=%d", len(normalizedQueries), len(vectors))
 	}
 
 	normalizedVectors := make([][]float32, 0, len(vectors))
-	for idx := range queries {
+	for idx := range normalizedQueries {
 		if len(vectors[idx]) == 0 {
 			return nil, fmt.Errorf("第%d条搜索向量为空", idx+1)
 		}
@@ -313,8 +331,9 @@ func (s *ProductServiceImpl) batchSearchProductVector(c *gin.Context, queries []
 	}
 
 	data, err := s.vectorDao.BatchSearch(c, &mastermodels.ProductVectorBatchSearchReq{
-		Queries: queries,
-		Limit:   normalizeProductVectorSearchLimit(limit),
+		Queries:     normalizedQueries,
+		SearchTexts: hybridTexts,
+		Limit:       normalizeProductVectorSearchLimit(limit),
 	}, normalizedVectors)
 	if err != nil {
 		return nil, err
@@ -627,64 +646,32 @@ func buildProductEmbeddingContent(product *mastermodels.Product) string {
 	if product == nil {
 		return ""
 	}
-	lines := make([]string, 0, 10)
-	appendLine := func(label, value string) {
-		value = strings.TrimSpace(value)
-		if value == "" {
-			return
-		}
-		lines = append(lines, label+": "+value)
-	}
-
-	appendLine("产品名称", product.Name)
-	appendLine("产品分类", product.CategoryName)
-	appendLine("单位", product.UnitName)
-	appendLine("条码", product.BarCode)
-	appendLine("规格", product.Standard)
-	appendLine("备注", product.Remark)
+	lines := make([]searchutil.LabeledValue, 0, 12)
+	lines = append(lines,
+		searchutil.LabeledValue{Label: "产品名称", Value: product.Name},
+		searchutil.LabeledValue{Label: "产品编码", Value: product.ProductCode},
+		searchutil.LabeledValue{Label: "产品分类", Value: product.CategoryName},
+		searchutil.LabeledValue{Label: "单位", Value: product.UnitName},
+		searchutil.LabeledValue{Label: "条码", Value: product.BarCode},
+		searchutil.LabeledValue{Label: "规格", Value: product.Standard},
+		searchutil.LabeledValue{Label: "备注", Value: product.Remark},
+	)
 	if product.ExpiryDay > 0 {
-		lines = append(lines, fmt.Sprintf("保质期: %d天", product.ExpiryDay))
+		lines = append(lines, searchutil.LabeledValue{Label: "保质期", Value: fmt.Sprintf("%d天", product.ExpiryDay)})
 	}
 	if product.Weight > 0 {
-		lines = append(lines, fmt.Sprintf("重量: %.3fkg", product.Weight))
+		lines = append(lines, searchutil.LabeledValue{Label: "重量", Value: fmt.Sprintf("%.3fkg", product.Weight)})
 	}
 	if product.PurchasePrice > 0 {
-		lines = append(lines, fmt.Sprintf("采购价: %.2f", product.PurchasePrice))
+		lines = append(lines, searchutil.LabeledValue{Label: "采购价", Value: fmt.Sprintf("%.2f", product.PurchasePrice)})
 	}
 	if product.SalePrice > 0 {
-		lines = append(lines, fmt.Sprintf("销售价: %.2f", product.SalePrice))
+		lines = append(lines, searchutil.LabeledValue{Label: "销售价", Value: fmt.Sprintf("%.2f", product.SalePrice)})
 	}
 	if product.MinPrice > 0 {
-		lines = append(lines, fmt.Sprintf("最低价: %.2f", product.MinPrice))
+		lines = append(lines, searchutil.LabeledValue{Label: "最低价", Value: fmt.Sprintf("%.2f", product.MinPrice)})
 	}
-	return trimProductEmbeddingContent(strings.Join(lines, "\n"), productVectorContentMaxLengthInService)
-}
-
-func trimProductEmbeddingContent(value string, max int) string {
-	value = strings.TrimSpace(value)
-	if max <= 0 {
-		return value
-	}
-	runes := []rune(value)
-	if len(runes) <= max {
-		return value
-	}
-	return string(runes[:max])
-}
-
-func normalizeProductVectorSearchQueries(queries []string) ([]string, error) {
-	result := make([]string, 0, len(queries))
-	for _, query := range queries {
-		query = strings.TrimSpace(query)
-		if query == "" {
-			continue
-		}
-		result = append(result, query)
-	}
-	if len(result) == 0 {
-		return nil, errors.New("搜索内容不能为空")
-	}
-	return result, nil
+	return searchutil.BuildLabeledContent(lines, productVectorContentMaxLengthInService)
 }
 
 func (s *ProductServiceImpl) scanProductVectorTaskKeys() ([]string, error) {

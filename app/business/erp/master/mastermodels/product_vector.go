@@ -30,16 +30,18 @@ type ProductVectorResult struct {
 
 // ProductVectorSearchReq 产品向量检索请求。
 type ProductVectorSearchReq struct {
-	Query     string                  `json:"query" binding:"required"`
-	Limit     int                     `json:"limit"`
-	Embedding *ProductEmbeddingConfig `json:"embedding"`
+	Query      string                  `json:"query" binding:"required"`
+	Limit      int                     `json:"limit"`
+	Embedding  *ProductEmbeddingConfig `json:"embedding"`
+	SearchText string                  `json:"-"`
 }
 
 // ProductVectorBatchSearchReq 产品批量向量检索请求。
 type ProductVectorBatchSearchReq struct {
-	Queries   []string                `json:"queries" binding:"required"`
-	Limit     int                     `json:"limit"`
-	Embedding *ProductEmbeddingConfig `json:"embedding"`
+	Queries     []string                `json:"queries" binding:"required"`
+	Limit       int                     `json:"limit"`
+	Embedding   *ProductEmbeddingConfig `json:"embedding"`
+	SearchTexts []string                `json:"-"`
 }
 
 // ProductVectorSearchItem 产品向量检索结果。
