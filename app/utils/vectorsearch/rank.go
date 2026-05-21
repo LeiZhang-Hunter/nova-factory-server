@@ -130,15 +130,16 @@ func combineCandidateScore(query *ProcessedQuery, candidate RankCandidate, baseS
 	standardScore := scoreTextField(query, candidate.Standard)
 	remarkScore := scoreTextField(query, candidate.Remark)
 	contentScore := scoreTextField(query, candidate.Content)
+	specScore := scoreSpecTerms(query, candidate.Standard, candidate.Title, candidate.Content)
 
 	// fieldScore 体现“字段加权”思想：
 	// - Title 权重最高，因为商品名通常最能代表实际意图
 	// - Code 次高，因为编码/条码类查询对精确命中极为敏感
 	// - Standard、Category 其次，适合规格或分类型搜索
 	// - Remark、Content 权重较低，避免长文本噪声覆盖核心字段
-	fieldScore := titleScore*0.33 + codeScore*0.22 + standardScore*0.14 + categoryScore*0.10 + unitScore*0.06 + remarkScore*0.05 + contentScore*0.10
+	fieldScore := titleScore*0.28 + codeScore*0.22 + standardScore*0.14 + specScore*0.16 + categoryScore*0.09 + unitScore*0.05 + remarkScore*0.02 + contentScore*0.04
 	// tagScore 只取几个标签字段中的最大值，代表“是否命中过最关键的标签维度”。
-	tagScore := maxFloat(categoryScore, unitScore, standardScore)
+	tagScore := maxFloat(categoryScore, unitScore, standardScore, specScore)
 	// rankBonus 对初排更靠前的候选给一个轻微奖励，避免精排完全无视召回顺序。
 	rankBonus := 1 / float64(rank+3)
 
@@ -159,6 +160,15 @@ func combineCandidateScore(query *ProcessedQuery, candidate RankCandidate, baseS
 		}
 		// 编码检索时正文很可能只是噪声来源，因此给予轻微惩罚。
 		score -= contentScore * 0.05
+	}
+	if len(query.SpecTerms) > 0 {
+		// 规格词命中时额外拉开与“同名不同规格”商品的差距。
+		score += specScore * 0.12
+		if specScore == 0 {
+			// 当 query 明确带规格而候选完全没有命中规格时，给予一档惩罚，
+			// 避免高 baseScore 的“同名不同规格”商品排到前面。
+			score -= 0.18
+		}
 	}
 	if query.IsShortQuery {
 		// 短 query 往往缺少上下文，商品名标题的判别力更强，因此额外补一点标题权重。

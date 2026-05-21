@@ -18,6 +18,8 @@ import (
 	"nova-factory-server/app/datasource/cache/cacheError"
 	"nova-factory-server/app/utils/baizeContext"
 	embeddingutil "nova-factory-server/app/utils/llm/embedding"
+	"nova-factory-server/app/utils/retrieval"
+	retrievalschema "nova-factory-server/app/utils/retrieval/schema"
 	"nova-factory-server/app/utils/snowflake"
 	searchutil "nova-factory-server/app/utils/vectorsearch"
 )
@@ -267,6 +269,7 @@ func (s *ProductServiceImpl) SearchVector(c *gin.Context, req *mastermodels.Prod
 	}, nil
 }
 
+// BatchSearchVector 批量搜索向量
 func (s *ProductServiceImpl) BatchSearchVector(c *gin.Context, req *mastermodels.ProductVectorBatchSearchReq) (*mastermodels.ProductVectorBatchSearchData, error) {
 	if req == nil {
 		return nil, errors.New("批量搜索参数不能为空")
@@ -286,11 +289,6 @@ func (s *ProductServiceImpl) BatchSearchVector(c *gin.Context, req *mastermodels
 }
 
 func (s *ProductServiceImpl) batchSearchProductVector(c *gin.Context, queries []string, limit int, embeddingCfg *mastermodels.ProductEmbeddingConfig) ([]*mastermodels.ProductVectorBatchSearchItem, error) {
-	processedQueries, err := searchutil.ProcessQueries(queries)
-	if err != nil {
-		return nil, err
-	}
-
 	cfg, err := loadProductEmbeddingProviderConfig(embeddingCfg)
 	if err != nil {
 		return nil, err
@@ -301,47 +299,51 @@ func (s *ProductServiceImpl) batchSearchProductVector(c *gin.Context, queries []
 	if err != nil {
 		return nil, fmt.Errorf("初始化向量模型失败: %w", err)
 	}
+	if s.retriever == nil {
+		return nil, errors.New("商品检索器未初始化")
+	}
 
-	embeddingTexts := make([]string, 0, len(processedQueries))
-	hybridTexts := make([]string, 0, len(processedQueries))
-	normalizedQueries := make([]string, 0, len(processedQueries))
-	for _, processed := range processedQueries {
-		if processed == nil {
-			continue
+	rows := make([]*mastermodels.ProductVectorBatchSearchItem, 0, len(queries))
+	topK := normalizeProductVectorSearchLimit(limit)
+	for _, query := range queries {
+		documents, err := s.retriever.Retrieve(requestCtx, query,
+			retrieval.WithTopK(topK),
+			retrieval.WithEmbedding(embedder),
+		)
+		if err != nil {
+			return nil, err
 		}
-		normalizedQueries = append(normalizedQueries, processed.Original)
-		embeddingTexts = append(embeddingTexts, processed.EmbeddingText)
-		hybridTexts = append(hybridTexts, processed.HybridText)
-	}
-
-	vectors, err := embedder.EmbedStrings(requestCtx, embeddingTexts)
-	if err != nil {
-		return nil, fmt.Errorf("生成搜索向量失败: %w", err)
-	}
-	if len(vectors) != len(normalizedQueries) {
-		return nil, fmt.Errorf("向量模型返回结果数量不匹配，expected=%d actual=%d", len(normalizedQueries), len(vectors))
-	}
-
-	normalizedVectors := make([][]float32, 0, len(vectors))
-	for idx := range normalizedQueries {
-		if len(vectors[idx]) == 0 {
-			return nil, fmt.Errorf("第%d条搜索向量为空", idx+1)
+		items := make([]*mastermodels.ProductVectorSearchItem, 0, len(documents))
+		for _, document := range documents {
+			item := productVectorSearchItemFromDocument(document)
+			if item == nil {
+				continue
+			}
+			items = append(items, item)
 		}
-		normalizedVectors = append(normalizedVectors, float64SliceToFloat32(vectors[idx]))
+		rows = append(rows, &mastermodels.ProductVectorBatchSearchItem{
+			Query: query,
+			Rows:  items,
+			Total: int64(len(items)),
+		})
 	}
+	return rows, nil
+}
 
-	data, err := s.vectorDao.BatchSearch(c, &mastermodels.ProductVectorBatchSearchReq{
-		Queries:     normalizedQueries,
-		SearchTexts: hybridTexts,
-		Limit:       normalizeProductVectorSearchLimit(limit),
-	}, normalizedVectors)
-	if err != nil {
-		return nil, err
+// productVectorSearchItemFromDocument 将统一检索文档还原为商品检索结果。
+func productVectorSearchItemFromDocument(document *retrievalschema.Document) *mastermodels.ProductVectorSearchItem {
+	if document == nil || document.Metadata == nil {
+		return nil
 	}
-	if data == nil || data.Rows == nil {
-		return make([]*mastermodels.ProductVectorBatchSearchItem, 0), nil
+	raw, ok := document.Metadata["product"]
+	if !ok || raw == nil {
+		return nil
 	}
-	return data.Rows, nil
+	item, ok := raw.(*mastermodels.ProductVectorSearchItem)
+	if !ok || item == nil {
+		return nil
+	}
+	return item
 }
 
 func (s *ProductServiceImpl) loadProductVectorConfig(req *mastermodels.ProductGenVectorReq) (*productVectorServiceConfig, error) {

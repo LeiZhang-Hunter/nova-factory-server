@@ -18,6 +18,8 @@ import (
 	"nova-factory-server/app/datasource/cache/cacheError"
 	"nova-factory-server/app/utils/baizeContext"
 	embeddingutil "nova-factory-server/app/utils/llm/embedding"
+	"nova-factory-server/app/utils/retrieval"
+	retrievalschema "nova-factory-server/app/utils/retrieval/schema"
 	"nova-factory-server/app/utils/snowflake"
 )
 
@@ -312,33 +314,50 @@ func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queries []strin
 	if err != nil {
 		return nil, fmt.Errorf("初始化向量模型失败: %w", err)
 	}
-
-	vectors, err := embedder.EmbedStrings(requestCtx, queries)
-	if err != nil {
-		return nil, fmt.Errorf("生成搜索向量失败: %w", err)
-	}
-	if len(vectors) != len(queries) {
-		return nil, fmt.Errorf("向量模型返回结果数量不匹配，expected=%d actual=%d", len(queries), len(vectors))
+	if s.retriever == nil {
+		return nil, errors.New("商城商品检索器未初始化")
 	}
 
-	normalizedVectors := make([][]float32, 0, len(vectors))
-	for idx := range queries {
-		if len(vectors[idx]) == 0 {
-			return nil, fmt.Errorf("第%d条搜索向量为空", idx+1)
+	rows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(queries))
+	topK := normalizeGoodsVectorSearchLimit(limit)
+	for _, query := range queries {
+		documents, err := s.retriever.Retrieve(requestCtx, query,
+			retrieval.WithTopK(topK),
+			retrieval.WithEmbedding(embedder),
+		)
+		if err != nil {
+			return nil, err
 		}
-		normalizedVectors = append(normalizedVectors, float64ToFloat32(vectors[idx]))
+		items := make([]*shopmodels.GoodsVectorSearchItem, 0, len(documents))
+		for _, document := range documents {
+			item := goodsVectorSearchItemFromDocument(document)
+			if item == nil {
+				continue
+			}
+			items = append(items, item)
+		}
+		rows = append(rows, &shopmodels.GoodsVectorBatchSearchItem{
+			Query: query,
+			Rows:  items,
+			Total: int64(len(items)),
+		})
 	}
-	data, err := s.vectorDao.BatchSearch(c, &shopmodels.GoodsVectorBatchSearchReq{
-		Queries: queries,
-		Limit:   normalizeGoodsVectorSearchLimit(limit),
-	}, normalizedVectors)
-	if err != nil {
-		return nil, err
+	return rows, nil
+}
+
+func goodsVectorSearchItemFromDocument(document *retrievalschema.Document) *shopmodels.GoodsVectorSearchItem {
+	if document == nil || document.Metadata == nil {
+		return nil
 	}
-	if data == nil || data.Rows == nil {
-		return make([]*shopmodels.GoodsVectorBatchSearchItem, 0), nil
+	raw, ok := document.Metadata["goods"]
+	if !ok || raw == nil {
+		return nil
 	}
-	return data.Rows, nil
+	item, ok := raw.(*shopmodels.GoodsVectorSearchItem)
+	if !ok || item == nil {
+		return nil
+	}
+	return item
 }
 
 func (s *ShopGoodsServiceImpl) loadGoodsVectorConfig(req *shopmodels.GenVectorReq) (*goodsVectorConfig, error) {

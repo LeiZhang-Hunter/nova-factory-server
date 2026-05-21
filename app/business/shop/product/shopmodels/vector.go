@@ -23,16 +23,18 @@ type GenAllVectorReq struct {
 
 // GoodsVectorSearchReq 商品向量检索请求
 type GoodsVectorSearchReq struct {
-	Query     string           `json:"query" binding:"required"` // 检索文本
-	Limit     int              `json:"limit"`                    // 返回条数
-	Embedding *EmbeddingConfig `json:"embedding"`                // 向量模型配置
+	Query      string           `json:"query" binding:"required"` // 检索文本
+	Limit      int              `json:"limit"`                    // 返回条数
+	Embedding  *EmbeddingConfig `json:"embedding"`                // 向量模型配置
+	SearchText string           `json:"-"`
 }
 
 // GoodsVectorBatchSearchReq 商品批量向量检索请求
 type GoodsVectorBatchSearchReq struct {
-	Queries   []string         `json:"queries" binding:"required"` // 检索文本列表
-	Limit     int              `json:"limit"`                      // 每条返回条数
-	Embedding *EmbeddingConfig `json:"embedding"`                  // 向量模型配置
+	Queries     []string         `json:"queries" binding:"required"` // 检索文本列表
+	Limit       int              `json:"limit"`                      // 每条返回条数
+	Embedding   *EmbeddingConfig `json:"embedding"`                  // 向量模型配置
+	SearchTexts []string         `json:"-"`
 }
 
 // GoodsVectorSearchItem 商品向量检索结果
