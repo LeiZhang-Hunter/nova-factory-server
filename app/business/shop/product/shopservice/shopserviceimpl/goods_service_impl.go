@@ -75,6 +75,24 @@ func (s *ShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Go
 	return data, nil
 }
 
+func (s *ShopGoodsServiceImpl) GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error) {
+	data, err := s.dao.GetByGoodsID(c, goodsID)
+	if err != nil {
+		return nil, err
+	}
+	if data == nil {
+		return nil, nil
+	}
+	if err = s.attachCategoryNames(c, []*shopmodels.Goods{data}); err != nil {
+		return nil, err
+	}
+	if err = s.attachSkus(c, []*shopmodels.Goods{data}); err != nil {
+		return nil, err
+	}
+	s.normalizeGoodsMediaURLs(c, []*shopmodels.Goods{data})
+	return data, nil
+}
+
 func (s *ShopGoodsServiceImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error) {
 	data, err := s.dao.List(c, req)
 	if err != nil {

@@ -7,11 +7,12 @@ import (
 	"github.com/google/wire"
 )
 
-var ProviderSet = wire.NewSet(NewConversations, NewMessage, wire.Struct(new(Controller), "*"))
+var ProviderSet = wire.NewSet(NewConversations, NewMessage, NewVoice, wire.Struct(new(Controller), "*"))
 
 type Controller struct {
 	Conversations *Conversations
 	Message       *Message
+	Voice         *Voice
 }
 
 type Conversations struct{}

@@ -15,5 +15,5 @@ type IApiShopSeckillService interface {
 	// ListGoods 获取秒杀商品列表
 	ListGoods(c *gin.Context, query *models.SeckillQuery) (*models.SeckillListData, error)
 	// GetGoodsDetail 获取秒杀商品详情
-	GetGoodsDetail(c *gin.Context, id int64) (*models.Seckill, error)
+	GetGoodsDetail(c *gin.Context, id int64, timeID int64) (*models.Seckill, error)
 }

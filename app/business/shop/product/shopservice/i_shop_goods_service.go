@@ -13,6 +13,7 @@ type IShopGoodsService interface {
 	Update(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error)
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error)
+	GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error)
 	List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error)
 	ExportCSV(c *gin.Context, req *shopmodels.GoodsQuery, csvWriter *csv.Writer, flush func()) error
 	Import(c *gin.Context, records []shopmodels.ImportGoodsRecord) error

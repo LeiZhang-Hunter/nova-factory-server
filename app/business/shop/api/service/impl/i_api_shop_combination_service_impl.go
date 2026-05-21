@@ -4,24 +4,31 @@ import (
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
+	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/business/shop/product/shopservice"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 // IApiShopCombinationServiceImpl 拼团服务实现
 type IApiShopCombinationServiceImpl struct {
-	combinationDao dao.IApiShopCombinationDao
-	pinkDao        dao.IApiShopPinkDao
+	combinationDao   dao.IApiShopCombinationDao
+	pinkDao          dao.IApiShopPinkDao
+	shopGoodsService shopservice.IShopGoodsService
 }
 
 // NewIApiShopCombinationServiceImpl 创建拼团服务
 func NewIApiShopCombinationServiceImpl(
 	combinationDao dao.IApiShopCombinationDao,
 	pinkDao dao.IApiShopPinkDao,
+	shopGoodsService shopservice.IShopGoodsService,
 ) service.IApiShopCombinationService {
 	return &IApiShopCombinationServiceImpl{
-		combinationDao: combinationDao,
-		pinkDao:        pinkDao,
+		combinationDao:   combinationDao,
+		pinkDao:          pinkDao,
+		shopGoodsService: shopGoodsService,
 	}
 }
 
@@ -32,9 +39,157 @@ func (s *IApiShopCombinationServiceImpl) List(c *gin.Context, query *models.Comb
 	return s.combinationDao.List(c, query)
 }
 
-// GetByID 获取拼团商品详情（含进行中的团）
+// GetByID 获取拼团商品详情（含SKU和进行中的团）
 func (s *IApiShopCombinationServiceImpl) GetByID(c *gin.Context, id int64) (*models.Combination, error) {
-	return s.combinationDao.GetByID(c, id)
+	combination, err := s.combinationDao.GetByID(c, id)
+	if err != nil || combination == nil {
+		return combination, err
+	}
+
+	// 填充商品扩展信息（gallery、videoUrl、skus）
+	s.applyCombinationDetail(c, combination)
+	return combination, nil
+}
+
+func (s *IApiShopCombinationServiceImpl) applyCombinationDetail(c *gin.Context, combination *models.Combination) {
+	if s.shopGoodsService == nil {
+		return
+	}
+	goodsKey := strings.TrimSpace(combination.ProductID)
+	if goodsKey == "" {
+		return
+	}
+
+	product, err := s.shopGoodsService.GetByGoodsID(c, goodsKey)
+	if err != nil || product == nil {
+		productIDInt, parseErr := strconv.ParseInt(goodsKey, 10, 64)
+		if parseErr != nil {
+			return
+		}
+		product, err = s.shopGoodsService.GetByID(c, productIDInt)
+		if err != nil || product == nil {
+			return
+		}
+	}
+
+	combination.ProductID = strconv.FormatInt(product.ID, 10)
+	combination.GoodsID = product.GoodsID
+	combination.GoodsName = product.GoodsName
+	combination.VideoURL = product.VideoURL
+	combination.Gallery = buildCombinationGallery(combination, product)
+	combination.Skus = mapCombinationSkus(combination, product)
+}
+
+func buildCombinationGallery(combination *models.Combination, product *shopmodels.Goods) []string {
+	gallery := make([]string, 0)
+	combinationAppendUniqueMedia(&gallery, combination.Image)
+	for _, item := range splitCombinationMedia(combination.Images) {
+		combinationAppendUniqueMedia(&gallery, item)
+	}
+	if product != nil {
+		combinationAppendUniqueMedia(&gallery, product.ImageURL)
+		for _, item := range product.GalleryImagesArray {
+			combinationAppendUniqueMedia(&gallery, item)
+		}
+	}
+	return gallery
+}
+
+func mapCombinationSkus(combination *models.Combination, product *shopmodels.Goods) []*models.CombinationSku {
+	if product == nil || len(product.Skus) == 0 {
+		return []*models.CombinationSku{}
+	}
+	rows := make([]*models.CombinationSku, 0, len(product.Skus))
+	for _, sku := range product.Skus {
+		if sku == nil {
+			continue
+		}
+		gallery := make([]string, 0)
+		combinationAppendUniqueMedia(&gallery, sku.ImageURL)
+		for _, item := range sku.GalleryImagesArray {
+			combinationAppendUniqueMedia(&gallery, item)
+		}
+		if len(gallery) == 0 {
+			gallery = buildCombinationGallery(combination, product)
+		}
+		imageURL := sku.ImageURL
+		if imageURL == "" {
+			if len(gallery) > 0 {
+				imageURL = gallery[0]
+			} else if product != nil {
+				imageURL = product.ImageURL
+			}
+		}
+		unit := sku.Unit
+		if unit == "" && product != nil {
+			unit = product.Unit
+		}
+		rows = append(rows, &models.CombinationSku{
+			ID:             sku.ID,
+			SkuID:          sku.SkuID,
+			SkuName:        sku.SkuName,
+			ImageURL:       imageURL,
+			GalleryImages:  gallery,
+			VideoURL:       chooseCombinationMediaURL(sku.VideoURL, product.VideoURL),
+			Price:          combination.Price, // 拼团价用活动的
+			OriginalPrice:  sku.RetailPrice,   // 单买价用SKU原价
+			Quantity:       sku.Quantity,
+			AvailableStock: minCombinationStock(combination.Quota, sku.Quantity),
+			Unit:           unit,
+			Weight:         sku.Weight,
+			WeightUnit:     sku.WeightUnit,
+		})
+	}
+	return rows
+}
+
+func splitCombinationMedia(raw string) []string {
+	parts := strings.Split(strings.TrimSpace(raw), ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" || part == "[]" || part == "/[]" {
+			continue
+		}
+		result = append(result, part)
+	}
+	return result
+}
+
+func combinationAppendUniqueMedia(target *[]string, value string) {
+	value = strings.TrimSpace(value)
+	if value == "" || value == "[]" || value == "/[]" {
+		return
+	}
+	for _, item := range *target {
+		if item == value {
+			return
+		}
+	}
+	*target = append(*target, value)
+}
+
+func chooseCombinationMediaURL(values ...string) string {
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value != "" && value != "[]" && value != "/[]" {
+			return value
+		}
+	}
+	return ""
+}
+
+func minCombinationStock(values ...int64) int64 {
+	if len(values) == 0 {
+		return 0
+	}
+	result := values[0]
+	for _, value := range values[1:] {
+		if value < result {
+			result = value
+		}
+	}
+	return result
 }
 
 // GetPinkList 获取正在进行中的团列表

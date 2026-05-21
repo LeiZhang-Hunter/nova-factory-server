@@ -3,7 +3,6 @@
 package agent
 
 import (
-	"encoding/json"
 	"net/http"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
@@ -34,14 +33,47 @@ func NewConversations(service gatewayservice.IAiConversationService, gatewayServ
 	}
 }
 
+// ConfigRoutes 注册商城智能体配置路由。
+func (conversations *Conversations) ConfigRoutes(router *gin.RouterGroup) {
+	group := router.Group("/api/v1/app/shop/agent/config")
+	group.GET("/enabled", conversations.GetEnabledByType)
+}
+
 // PrivateRoutes 注册商城智能体会话路由。
 func (conversations *Conversations) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop/agent/conversations")
 	group.GET("/list", conversations.ListConversations)
 	group.POST("/create", conversations.CreateConversation)
 	group.DELETE("/remove/:ids", conversations.RemoveConversation)
-	group.POST("/chat", conversations.Chat)
+	//group.POST("/chat", conversations.Chat)
 	group.POST("/stop-generation", conversations.StopGeneration)
+}
+
+// GetEnabledByType 获取指定类型下已启用的智能体配置
+// @Summary 获取指定类型下已启用的智能体配置
+// @Description 小程序侧通过 agentType 查询已启用的智能体配置
+// @Tags app接口/商城/App智能体配置
+// @Param agentType query string true "智能体类型"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /api/v1/app/shop/agent/config/enabled [get]
+func (conversations *Conversations) GetEnabledByType(c *gin.Context) {
+	agentType := strings.TrimSpace(c.Query("agentType"))
+	if agentType == "" {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := conversations.agentService.GetEnabledByType(c, agentType)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	if data == nil {
+		baizeContext.Waring(c, "智能体配置不存在")
+		return
+	}
+	baizeContext.SuccessData(c, data)
 }
 
 // ListConversations 查询会话列表

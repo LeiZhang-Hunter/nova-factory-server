@@ -49,8 +49,11 @@ func NewGinEngine(
 	{
 		controller.Goods.PublicRoutes(publicGroup)
 		authController.Auth.PublicRoutes(publicGroup)
+		agentController.Voice.PublicRoutes(publicGroup)
 		productController.Category.PublicRoutes(publicGroup)
 		productController.Home.PublicRoutes(publicGroup)
+		productController.Product.PublicRoutes(publicGroup)
+
 	}
 
 	appGroup := group.Group("")
@@ -63,6 +66,7 @@ func NewGinEngine(
 		orderController.PrivateRoutes(appGroup)
 		addressController.PrivateRoutes(appGroup)
 		favoriteController.PrivateRoutes(appGroup)
+		agentController.Conversations.ConfigRoutes(appGroup)
 		agentController.Conversations.PrivateRoutes(appGroup)
 		agentController.Message.PrivateRoutes(appGroup)
 		productController.Cart.PrivateRoutes(appGroup)
@@ -70,6 +74,14 @@ func NewGinEngine(
 		apiActivityController.Seckill.PrivateRoutes(appGroup)
 		apiActivityController.Combination.PrivateRoutes(appGroup)
 		apiActivityController.Pink.PrivateRoutes(appGroup)
+	}
+
+	// WebSocket 路由组 — 握手阶段即要求 Bearer 鉴权，失败时返回标准 HTTP 状态码
+	wsGroup := group.Group("/api/v1/app/shop/agent/conversations")
+	wsGroup.Use(middlewares.NewShopSessionAppWsAuthMiddlewareBuilder(cache).BuildForWebSocket())
+	{
+		agentController.Conversations.WsChatRegister(wsGroup)
+		agentController.Voice.WsRegister(wsGroup)
 	}
 
 	adminGroup := group.Group("")

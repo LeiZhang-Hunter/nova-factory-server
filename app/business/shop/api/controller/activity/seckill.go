@@ -56,7 +56,11 @@ func (c *SeckillController) GetGoodsDetail(ctx *gin.Context) {
 		baizeContext.ParameterError(ctx)
 		return
 	}
-	data, err := c.Service.GetGoodsDetail(ctx, id)
+	timeID := baizeContext.QueryInt64(ctx, "timeId")
+	if timeID == 0 {
+		timeID = baizeContext.QueryInt64(ctx, "time_id")
+	}
+	data, err := c.Service.GetGoodsDetail(ctx, id, timeID)
 	if err != nil {
 		baizeContext.Waring(ctx, err.Error())
 		return

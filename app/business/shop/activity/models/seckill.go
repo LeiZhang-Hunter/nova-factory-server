@@ -111,7 +111,8 @@ type Seckill struct {
 	IsCommission int32   `json:"isCommission" gorm:"column:is_commission"`    // 是否参与返佣
 	DeptID       int64   `json:"deptId" gorm:"column:dept_id"`                // 部门ID
 	baize.BaseEntity
-	State int32 `json:"state" gorm:"column:state"` // 操作状态
+	State   int32 `json:"state" gorm:"column:state"` // 操作状态
+	Percent int64 `json:"percent" gorm:"-"`          // 已抢百分比（计算字段，不存储）
 }
 
 // SeckillSet 秒杀商品保存参数

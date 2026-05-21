@@ -52,6 +52,7 @@ func (i *IAIGatewayServiceImpl) Chat(c *gin.Context, req *aidatasetmodels.SendMe
 		Content:        req.Content,
 		TabID:          req.TabID,
 		UserID:         baizeContext.GetUserId(c),
+		EnableThinking: req.EnableThinking,
 	})
 }
 

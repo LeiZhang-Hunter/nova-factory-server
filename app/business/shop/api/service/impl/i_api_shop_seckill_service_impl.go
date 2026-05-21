@@ -4,7 +4,9 @@ import (
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
-	myTime "nova-factory-server/app/utils/time"
+	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/business/shop/product/shopservice"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,16 +16,19 @@ import (
 type IApiShopSeckillServiceImpl struct {
 	seckillDao       dao.IApiShopSeckillDao
 	seckillConfigDao dao.IApiShopSeckillConfigDao
+	shopGoodsService shopservice.IShopGoodsService
 }
 
 // NewIApiShopSeckillServiceImpl 创建秒杀服务
 func NewIApiShopSeckillServiceImpl(
 	seckillDao dao.IApiShopSeckillDao,
 	seckillConfigDao dao.IApiShopSeckillConfigDao,
+	shopGoodsService shopservice.IShopGoodsService,
 ) service.IApiShopSeckillService {
 	return &IApiShopSeckillServiceImpl{
 		seckillDao:       seckillDao,
 		seckillConfigDao: seckillConfigDao,
+		shopGoodsService: shopGoodsService,
 	}
 }
 
@@ -68,7 +73,7 @@ func (s *IApiShopSeckillServiceImpl) GetCurrentConfig(c *gin.Context) (*models.S
 	return nil, nil
 }
 
-// ListGoods 获取秒杀商品列表（按日期范围过滤）
+// ListGoods 获取秒杀商品列表
 func (s *IApiShopSeckillServiceImpl) ListGoods(c *gin.Context, query *models.SeckillQuery) (*models.SeckillListData, error) {
 	// 只查询显示中的、未删除的
 	query.IsShow = func() *int32 { v := int32(1); return &v }()
@@ -79,39 +84,195 @@ func (s *IApiShopSeckillServiceImpl) ListGoods(c *gin.Context, query *models.Sec
 		return data, err
 	}
 
-	// 按日期范围过滤（start_time <= now <= stop_time）
-	now := time.Now()
-	filteredRows := make([]*models.Seckill, 0, len(data.Rows))
+	// 计算每个商品的进度百分比
 	for _, goods := range data.Rows {
-		if goods == nil {
-			continue
-		}
-		startTime, err1 := myTime.ParseDateTime(goods.StartTime)
-		stopTime, err2 := myTime.ParseDateTime(goods.StopTime)
-		if err1 != nil || err2 != nil {
-			continue
-		}
-		if now.After(*startTime) && now.Before(stopTime.AddDate(0, 0, 1)) {
-			filteredRows = append(filteredRows, goods)
+		if goods != nil && goods.QuotaShow > 0 {
+			goods.Percent = (goods.QuotaShow - goods.Quota) * 100 / goods.QuotaShow
+			goods.StockPercent = goods.Percent
 		}
 	}
 
-	data.Rows = filteredRows
-	data.Total = int64(len(filteredRows))
 	return data, nil
 }
 
 // GetGoodsDetail 获取秒杀商品详情
-func (s *IApiShopSeckillServiceImpl) GetGoodsDetail(c *gin.Context, id int64) (*models.Seckill, error) {
+func (s *IApiShopSeckillServiceImpl) GetGoodsDetail(c *gin.Context, id int64, timeID int64) (*models.Seckill, error) {
 	goods, err := s.seckillDao.GetByID(c, id)
 	if err != nil || goods == nil {
 		return goods, err
 	}
-	// 计算库存百分比
+	applySeckillDetailStatus(c, s.seckillConfigDao, goods, timeID)
 	if goods.QuotaShow > 0 {
-		goods.Stock = (goods.QuotaShow - goods.Quota) * 100 / goods.QuotaShow
+		goods.StockPercent = (goods.QuotaShow - goods.Quota) * 100 / goods.QuotaShow
+		goods.Percent = goods.StockPercent
 	}
+	goods.Stock = goods.Quota
+	if s.shopGoodsService == nil || goods.ProductID == 0 {
+		return goods, nil
+	}
+	product, err := s.shopGoodsService.GetByID(c, goods.ProductID)
+	if err != nil || product == nil {
+		return goods, err
+	}
+	goods.GoodsID = product.GoodsID
+	goods.VideoURL = product.VideoURL
+	goods.Gallery = buildSeckillGallery(goods, product)
+	goods.Skus = mapSeckillSkus(goods, product)
 	return goods, nil
+}
+
+func buildSeckillGallery(seckill *models.Seckill, product *shopmodels.Goods) []string {
+	gallery := make([]string, 0)
+	appendUniqueMedia(&gallery, seckill.Image)
+	for _, item := range splitSeckillMedia(seckill.Images) {
+		appendUniqueMedia(&gallery, item)
+	}
+	if product != nil {
+		appendUniqueMedia(&gallery, product.ImageURL)
+		for _, item := range product.GalleryImagesArray {
+			appendUniqueMedia(&gallery, item)
+		}
+	}
+	return gallery
+}
+
+func mapSeckillSkus(seckill *models.Seckill, product *shopmodels.Goods) []*models.SeckillSku {
+	if product == nil || len(product.Skus) == 0 {
+		return []*models.SeckillSku{}
+	}
+	rows := make([]*models.SeckillSku, 0, len(product.Skus))
+	for _, sku := range product.Skus {
+		if sku == nil {
+			continue
+		}
+		gallery := make([]string, 0)
+		appendUniqueMedia(&gallery, sku.ImageURL)
+		for _, item := range sku.GalleryImagesArray {
+			appendUniqueMedia(&gallery, item)
+		}
+		if len(gallery) == 0 {
+			gallery = buildSeckillGallery(seckill, product)
+		}
+		imageURL := sku.ImageURL
+		if imageURL == "" {
+			if len(gallery) > 0 {
+				imageURL = gallery[0]
+			} else if product != nil {
+				imageURL = product.ImageURL
+			}
+		}
+		unit := sku.Unit
+		if unit == "" && product != nil {
+			unit = product.Unit
+		}
+		rows = append(rows, &models.SeckillSku{
+			ID:             sku.ID,
+			SkuID:          sku.SkuID,
+			SkuName:        sku.SkuName,
+			ImageURL:       imageURL,
+			GalleryImages:  gallery,
+			VideoURL:       chooseMediaURL(sku.VideoURL, product.VideoURL),
+			RetailPrice:    seckill.Price,
+			OriginalPrice:  sku.RetailPrice,
+			Quantity:       sku.Quantity,
+			AvailableStock: minSeckillStock(seckill.Quota, sku.Quantity),
+			Unit:           unit,
+			Weight:         sku.Weight,
+			WeightUnit:     sku.WeightUnit,
+		})
+	}
+	return rows
+}
+
+func splitSeckillMedia(raw string) []string {
+	parts := strings.Split(strings.TrimSpace(raw), ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" || part == "[]" || part == "/[]" {
+			continue
+		}
+		result = append(result, part)
+	}
+	return result
+}
+
+func appendUniqueMedia(target *[]string, value string) {
+	value = strings.TrimSpace(value)
+	if value == "" || value == "[]" || value == "/[]" {
+		return
+	}
+	for _, item := range *target {
+		if item == value {
+			return
+		}
+	}
+	*target = append(*target, value)
+}
+
+func chooseMediaURL(values ...string) string {
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value != "" && value != "[]" && value != "/[]" {
+			return value
+		}
+	}
+	return ""
+}
+
+func minSeckillStock(values ...int64) int64 {
+	if len(values) == 0 {
+		return 0
+	}
+	result := values[0]
+	for _, value := range values[1:] {
+		if value < result {
+			result = value
+		}
+	}
+	return result
+}
+
+func applySeckillDetailStatus(c *gin.Context, configDao dao.IApiShopSeckillConfigDao, goods *models.Seckill, timeID int64) {
+	if goods == nil {
+		return
+	}
+
+	now := time.Now()
+	startTime, startErr := time.ParseInLocation("2006-01-02 15:04:05", goods.StartTime, time.Local)
+	stopTime, stopErr := time.ParseInLocation("2006-01-02 15:04:05", goods.StopTime, time.Local)
+	if startErr == nil && startTime.After(now) {
+		goods.Status = 2
+		return
+	}
+	if stopErr == nil && stopTime.Add(24*time.Hour).Before(now) {
+		goods.Status = 0
+		return
+	}
+	if goods.Status != 1 {
+		goods.Status = 0
+		return
+	}
+	if timeID == 0 || configDao == nil {
+		return
+	}
+	cfg, err := configDao.GetByID(c, timeID)
+	if err != nil || cfg == nil {
+		goods.Status = 0
+		return
+	}
+	currentHour := now.Hour()
+	startHour := int(cfg.BeginClock)
+	endHour := startHour + int(cfg.ContinueClock)
+	if startHour <= currentHour && endHour > currentHour {
+		goods.Status = 1
+		return
+	}
+	if startHour > currentHour {
+		goods.Status = 2
+		return
+	}
+	goods.Status = 0
 }
 
 // computeConfigStatus 计算秒杀时段状态
