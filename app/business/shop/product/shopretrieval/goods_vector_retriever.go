@@ -3,14 +3,12 @@ package shopretrieval
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/utils/retrieval"
 	"nova-factory-server/app/utils/retrieval/schema"
-	searchutil "nova-factory-server/app/utils/vectorsearch"
 )
 
 const (
@@ -33,51 +31,31 @@ func (r *GoodsVectorRetriever) Retrieve(ctx context.Context, query string, opts 
 	if r == nil || r.dao == nil {
 		return nil, errors.New("商城商品检索器未初始化")
 	}
+	return retrieval.RetrieveSingleQueryWithEmbedding(ctx, query, defaultGoodsRetrieverTopK, maxGoodsRetrieverTopK,
+		func(payload retrieval.QueryPayload, topK int, vector []float32) ([]*schema.Document, error) {
+			data, err := r.dao.BatchSearch(nil, &shopmodels.GoodsVectorBatchSearchReq{
+				Queries:     []string{payload.Original},
+				SearchTexts: []string{payload.HybridText},
+				Limit:       topK,
+			}, [][]float32{vector})
+			if err != nil {
+				return nil, err
+			}
+			if data == nil || len(data.Rows) == 0 || data.Rows[0] == nil || len(data.Rows[0].Rows) == 0 {
+				return make([]*schema.Document, 0), nil
+			}
 
-	processed := searchutil.ProcessQuery(query)
-	if processed == nil || processed.Original == "" {
-		return nil, errors.New("搜索内容不能为空")
-	}
-
-	options := retrieval.ApplyOptions(opts...)
-	if options.Embedding == nil {
-		return nil, errors.New("缺少 embedding 组件")
-	}
-
-	topK := resolveGoodsRetrieverTopK(options.TopK)
-	vectors, err := options.Embedding.EmbedStrings(ctx, []string{processed.EmbeddingText})
-	if err != nil {
-		return nil, fmt.Errorf("生成搜索向量失败: %w", err)
-	}
-	if len(vectors) != 1 || len(vectors[0]) == 0 {
-		return nil, errors.New("生成搜索向量失败: 返回结果为空")
-	}
-
-	data, err := r.dao.BatchSearch(nil, &shopmodels.GoodsVectorBatchSearchReq{
-		Queries:     []string{processed.Original},
-		SearchTexts: []string{processed.HybridText},
-		Limit:       topK,
-	}, [][]float32{float64SliceToFloat32(vectors[0])})
-	if err != nil {
-		return nil, err
-	}
-	if data == nil || len(data.Rows) == 0 || data.Rows[0] == nil || len(data.Rows[0].Rows) == 0 {
-		return make([]*schema.Document, 0), nil
-	}
-
-	rows := data.Rows[0].Rows
-	documents := make([]*schema.Document, 0, len(rows))
-	for _, row := range rows {
-		if row == nil {
-			continue
-		}
-		score := float64(row.Score)
-		if options.ScoreThreshold != nil && score < *options.ScoreThreshold {
-			continue
-		}
-		documents = append(documents, toGoodsVectorDocument(row))
-	}
-	return documents, nil
+			rows := data.Rows[0].Rows
+			documents := make([]*schema.Document, 0, len(rows))
+			for _, row := range rows {
+				if row == nil {
+					continue
+				}
+				documents = append(documents, toGoodsVectorDocument(row))
+			}
+			return documents, nil
+		},
+		opts...)
 }
 
 func toGoodsVectorDocument(item *shopmodels.GoodsVectorSearchItem) *schema.Document {
@@ -96,22 +74,4 @@ func toGoodsVectorDocument(item *shopmodels.GoodsVectorSearchItem) *schema.Docum
 			"skuName":   item.SkuName,
 		},
 	}
-}
-
-func resolveGoodsRetrieverTopK(topK *int) int {
-	if topK == nil || *topK <= 0 {
-		return defaultGoodsRetrieverTopK
-	}
-	if *topK > maxGoodsRetrieverTopK {
-		return maxGoodsRetrieverTopK
-	}
-	return *topK
-}
-
-func float64SliceToFloat32(values []float64) []float32 {
-	result := make([]float32, len(values))
-	for idx, value := range values {
-		result[idx] = float32(value)
-	}
-	return result
 }
