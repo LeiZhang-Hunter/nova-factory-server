@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/fileUtils"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -29,7 +30,7 @@ func NewIApiShopSeckillDaoImpl(ms *gorm.DB) dao.IApiShopSeckillDao {
 // List 查询秒杀商品列表
 func (s *IApiShopSeckillDaoImpl) List(c *gin.Context, query *models.SeckillQuery) (*models.SeckillListData, error) {
 	db := s.db.WithContext(c).Table(s.tableName).
-		Select("shop_store_seckill.*, COALESCE(NULLIF(shop_store_seckill.image, ''), shop_goods.image_url) AS image, COALESCE(NULLIF(shop_store_seckill.title, ''), shop_goods.goods_name) AS title").
+		Select("shop_store_seckill.*, COALESCE(NULLIF(shop_store_seckill.image, ''), shop_goods.image_url) AS image, shop_goods.goods_name AS title, shop_goods.retail_price AS product_price").
 		Joins("LEFT JOIN shop_goods ON shop_store_seckill.product_id = shop_goods.id").
 		Where("shop_store_seckill.state = ?", commonStatus.NORMAL).
 		Where("shop_store_seckill.is_del = ?", 0)
@@ -55,6 +56,10 @@ func (s *IApiShopSeckillDaoImpl) List(c *gin.Context, query *models.SeckillQuery
 	if query.TimeID > 0 {
 		db = db.Where("FIND_IN_SET(?, shop_store_seckill.time_id) > 0", query.TimeID)
 	}
+
+	// 时间范围过滤：当前时间在秒杀活动的有效期内
+	db = db.Where("shop_store_seckill.start_time <= ?", time.Now().Format("2006-01-02 15:04:05"))
+	db = db.Where("shop_store_seckill.stop_time >= ?", time.Now().AddDate(0, 0, -1).Format("2006-01-02 15:04:05"))
 
 	if query.Page <= 0 {
 		query.Page = 1
@@ -93,7 +98,7 @@ func (s *IApiShopSeckillDaoImpl) List(c *gin.Context, query *models.SeckillQuery
 func (s *IApiShopSeckillDaoImpl) GetByID(c *gin.Context, id int64) (*models.Seckill, error) {
 	var item models.Seckill
 	if err := s.db.WithContext(c).Table(s.tableName).
-		Select("shop_store_seckill.*, COALESCE(NULLIF(shop_store_seckill.image, ''), shop_goods.image_url) AS image, COALESCE(NULLIF(shop_store_seckill.title, ''), shop_goods.goods_name) AS title").
+		Select("shop_store_seckill.*, COALESCE(NULLIF(shop_store_seckill.image, ''), shop_goods.image_url) AS image, shop_goods.goods_name AS title, shop_goods.retail_price AS product_price").
 		Joins("LEFT JOIN shop_goods ON shop_store_seckill.product_id = shop_goods.id").
 		Where("shop_store_seckill.id = ?", id).
 		Where("shop_store_seckill.state = ?", commonStatus.NORMAL).

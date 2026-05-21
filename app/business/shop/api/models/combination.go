@@ -1,5 +1,22 @@
 package models
 
+// CombinationSku 拼团商品SKU
+type CombinationSku struct {
+	ID             uint64   `json:"id,string"`
+	SkuID          string   `json:"skuId"`
+	SkuName        string   `json:"skuName"`
+	ImageURL       string   `json:"imageUrl"`
+	GalleryImages  []string `json:"galleryImages" gorm:"-"`
+	VideoURL       string   `json:"videoUrl"`
+	Price          float64  `json:"price"`          // 拼团价
+	OriginalPrice  float64  `json:"originalPrice"`  // 单买价
+	Quantity       int64    `json:"quantity"`       // SKU总库存
+	AvailableStock int64    `json:"availableStock"` // 拼团可用库存
+	Unit           string   `json:"unit"`
+	Weight         float64  `json:"weight"`
+	WeightUnit     string   `json:"weightUnit"`
+}
+
 // Combination 拼团商品
 type Combination struct {
 	ID            int64   `json:"id,string" gorm:"column:id"`
@@ -8,10 +25,12 @@ type Combination struct {
 	Image         string  `json:"image" gorm:"column:image"`
 	Images        string  `json:"images" gorm:"column:images"`
 	Title         string  `json:"title" gorm:"column:title"`
+	GoodsName     string  `json:"goodsName" gorm:"column:goods_name"`
 	Attr          string  `json:"attr" gorm:"column:attr"`
 	People        int32   `json:"people" gorm:"column:people"`
 	Info          string  `json:"info" gorm:"column:info"`
 	Price         float64 `json:"price" gorm:"column:price"`
+	OtPrice       float64 `json:"otPrice" gorm:"column:ot_price"`
 	Sort          int32   `json:"sort" gorm:"column:sort"`
 	Sales         int64   `json:"sales" gorm:"column:sales"`
 	Stock         int64   `json:"stock" gorm:"column:stock"`
@@ -33,6 +52,11 @@ type Combination struct {
 	Virtual       int64   `json:"virtual" gorm:"column:virtual"`
 	HomeModuleIDs string  `json:"homeModuleIds" gorm:"column:home_module_ids"`
 	PinkCount     int64   `json:"pinkCount" gorm:"column:pink_count"`
+	// 扩展字段（非数据库映射）
+	GoodsID  string            `json:"goodsId" gorm:"-"`
+	Gallery  []string          `json:"gallery" gorm:"-"`
+	VideoURL string            `json:"videoUrl" gorm:"-"`
+	Skus     []*CombinationSku `json:"skus" gorm:"-"`
 }
 
 // CombinationQuery 拼团商品查询参数

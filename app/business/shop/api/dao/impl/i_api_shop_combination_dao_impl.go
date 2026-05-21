@@ -29,7 +29,8 @@ func NewIApiShopCombinationDaoImpl(ms *gorm.DB) dao.IApiShopCombinationDao {
 // List 查询拼团商品列表（含当前拼团人数）
 func (s *IApiShopCombinationDaoImpl) List(c *gin.Context, query *models.CombinationQuery) (*models.CombinationListData, error) {
 	db := s.db.WithContext(c).Table(s.tableName+" AS c").
-		Select(`c.id, c.product_id, c.mer_id, c.image, c.images, c.title, c.attr, c.people, c.info, c.price, c.sort, c.sales, c.stock, c.is_host, c.is_show, c.is_postage, c.postage, c.start_time, c.stop_time, c.effective_time, c.browse, c.unit_name, c.weight, c.volume, c.num, c.once_num, c.quota, c.quota_show, c.virtual, c.home_module_ids, (SELECT COUNT(*) FROM shop_store_pink WHERE cid = c.id AND status = 1 AND is_refund = 0 AND state = 0) AS pink_count`).
+		Select(`c.id, c.product_id, c.mer_id, COALESCE(NULLIF(c.image, ''), g.image_url) AS image, c.images, c.title, g.goods_name AS goods_name, c.attr, c.people, c.info, c.price, g.retail_price AS ot_price, c.sort, c.sales, c.stock, c.is_host, c.is_show, c.is_postage, c.postage, c.start_time, c.stop_time, c.effective_time, c.browse, c.unit_name, c.weight, c.volume, c.num, c.once_num, c.quota, c.quota_show, c.virtual, c.home_module_ids, (SELECT COUNT(*) FROM shop_store_pink WHERE cid = c.id AND status = 1 AND is_refund = 0 AND state = 0) AS pink_count`).
+		Joins("LEFT JOIN shop_goods AS g ON c.product_id = g.goods_id").
 		Where("c.state = ?", commonStatus.NORMAL)
 
 	if title := strings.TrimSpace(query.Title); title != "" {
@@ -81,9 +82,11 @@ func (s *IApiShopCombinationDaoImpl) List(c *gin.Context, query *models.Combinat
 // GetByID 根据主键获取拼团商品
 func (s *IApiShopCombinationDaoImpl) GetByID(c *gin.Context, id int64) (*models.Combination, error) {
 	var item models.Combination
-	if err := s.db.WithContext(c).Table(s.tableName).
-		Where("id = ?", id).
-		Where("state = ?", commonStatus.NORMAL).
+	if err := s.db.WithContext(c).Table(s.tableName+" AS c").
+		Select("c.*, g.goods_name AS goods_name, g.retail_price AS ot_price").
+		Joins("LEFT JOIN shop_goods AS g ON c.product_id = g.goods_id").
+		Where("c.id = ?", id).
+		Where("c.state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
