@@ -401,3 +401,27 @@ CREATE TABLE IF NOT EXISTS ai_agent_messages (
 
 alter table ai_agent_messages MODIFY column segments LONGTEXT NULL;
 alter table ai_agent_messages MODIFY column thinking_content LONGTEXT NULL;
+
+
+CREATE TABLE IF NOT EXISTS ai_sub_agents (
+     id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `name` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体名称',
+    `type` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体类型，用来读取位置',
+    `description` text NULL COMMENT '描述',
+    `instruction` text NULL COMMENT '指示',
+    `mcp_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否启用MCP',
+    `mcp_server_ids` text NULL COMMENT 'MCP服务ID列表',
+    `mcp_server_enabled_ids` text NULL COMMENT '已启用MCP服务ID列表',
+    `local_tool_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否启用本地工具',
+    `local_tools` text   NULL  COMMENT '本地工具集合',
+    `allow_mcp_server_ids_tools` text NULL COMMENT 'MCP服务工具列表',
+    `enable` tinyint(1) NULL DEFAULT 0 COMMENT '是否开启，0为关闭 1为开启',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`)
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '子智能体配置表';
