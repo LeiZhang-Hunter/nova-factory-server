@@ -7,8 +7,10 @@ import (
 
 	"nova-factory-server/app/business/erp/master/masterdao"
 	"nova-factory-server/app/business/erp/master/mastermodels"
+	"nova-factory-server/app/business/erp/master/masterretrieval"
 	"nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/utils/retrieval"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +19,7 @@ import (
 type ProductServiceImpl struct {
 	dao          masterdao.IProductDao
 	vectorDao    masterdao.IProductVectorDao
+	retriever    retrieval.Retriever
 	categoryDao  masterdao.IProductCategoryDao
 	unitDao      masterdao.IProductUnitDao
 	cache        cache.Cache
@@ -34,6 +37,7 @@ func NewProductService(
 	return &ProductServiceImpl{
 		dao:          dao,
 		vectorDao:    vectorDao,
+		retriever:    masterretrieval.NewProductVectorRetriever(vectorDao),
 		categoryDao:  categoryDao,
 		unitDao:      unitDao,
 		cache:        cache,

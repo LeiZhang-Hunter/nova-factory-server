@@ -15,9 +15,11 @@ import (
 
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/business/shop/product/shopretrieval"
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/fileUtils"
+	"nova-factory-server/app/utils/retrieval"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +27,7 @@ import (
 type ShopGoodsServiceImpl struct {
 	dao         shopdao.IShopGoodsDao
 	vectorDao   shopdao.IShopGoodsVectorDao
+	retriever   retrieval.Retriever
 	skuDao      shopdao.IShopSkuDao
 	categoryDao shopdao.IShopCategoryDao
 	cache       cache.Cache
@@ -39,6 +42,7 @@ func NewShopGoodsService(dao shopdao.IShopGoodsDao, vectorDao shopdao.IShopGoods
 	return &ShopGoodsServiceImpl{
 		dao:         dao,
 		vectorDao:   vectorDao,
+		retriever:   shopretrieval.NewGoodsVectorRetriever(vectorDao),
 		skuDao:      skuDao,
 		categoryDao: categoryDao,
 		cache:       cache,

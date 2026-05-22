@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -17,10 +18,12 @@ import (
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/datasource/milvus"
+	searchutil "nova-factory-server/app/utils/vectorsearch"
 )
 
 const (
 	defaultGoodsVectorCollection = "shop_goods_vectors"
+	goodsTextBm25EmbFunctionName = "text_bm25_emb"
 
 	goodsVectorPKField          = "goods_id"
 	goodsVectorDBIDField        = "goods_db_id"
@@ -37,15 +40,24 @@ const (
 	goodsVectorWeightPriceField   = "weight"
 	goodsVectorQuantityPriceField = "quantity"
 
-	goodsVectorContentField      = "content"
-	goodsVectorEmbeddingField    = "vector"
-	goodsVectorPKMaxLength       = 128
-	goodsVectorNameMaxLength     = 512
-	goodsVectorCodeMaxLength     = 128
-	goodsVectorCategoryMaxLength = 256
-	goodsVectorSkuNameMaxLength  = 512
-	goodsVectorDescMaxLength     = 4096
-	goodsVectorContentMaxLength  = 16384
+	goodsVectorContentField       = "content"
+	goodsVectorEmbeddingField     = "vector"
+	goodsVectorContextSparseField = "text_sparse_vector"
+	goodsIdxVectorField           = "idx_goods_vector"
+	goodsIdxTextSparseVector      = "idx_goods_text_sparse_vector"
+	goodsVectorPKMaxLength        = 128
+	goodsVectorNameMaxLength      = 512
+	goodsVectorCodeMaxLength      = 128
+	goodsVectorCategoryMaxLength  = 256
+	goodsVectorSkuNameMaxLength   = 512
+	goodsVectorDescMaxLength      = 4096
+	goodsVectorContentMaxLength   = 16384
+
+	goodsVectorSearchCandidateMultiplier = 3
+	goodsVectorSearchMinCandidates       = 20
+	goodsVectorSearchMaxCandidates       = 100
+	goodsVectorSearchDefaultLimit        = 10
+	goodsVectorSearchMaxLimit            = 50
 )
 
 type ShopGoodsVectorDaoImpl struct{}
@@ -164,8 +176,9 @@ func (d *ShopGoodsVectorDaoImpl) Search(c *gin.Context, req *shopmodels.GoodsVec
 		return nil, errors.New("商品搜索向量为空")
 	}
 	data, err := d.BatchSearch(c, &shopmodels.GoodsVectorBatchSearchReq{
-		Queries: []string{req.Query},
-		Limit:   req.Limit,
+		Queries:     []string{req.Query},
+		SearchTexts: []string{req.SearchText},
+		Limit:       req.Limit,
 	}, [][]float32{vector})
 	if err != nil {
 		return nil, err
@@ -213,31 +226,69 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 		return buildEmptyGoodsVectorBatchSearchData(req.Queries), nil
 	}
 
+	searchLimit := resolveGoodsVectorSearchCandidateLimit(req.Limit)
 	searchVectors := make([]entity.Vector, 0, len(vectors))
+	textQueries := make([]entity.Vector, 0, len(req.Queries))
 	for idx, vector := range vectors {
 		if len(vector) == 0 {
 			return nil, fmt.Errorf("第%d条商品搜索向量为空", idx+1)
 		}
+		query := strings.TrimSpace(req.Queries[idx])
+		if query == "" {
+			return nil, fmt.Errorf("第%d条商品搜索文本为空", idx+1)
+		}
+		searchText := query
+		if len(req.SearchTexts) == len(req.Queries) {
+			if candidate := strings.TrimSpace(req.SearchTexts[idx]); candidate != "" {
+				searchText = candidate
+			}
+		}
 		searchVectors = append(searchVectors, entity.FloatVector(vector))
+		textQueries = append(textQueries, entity.Text(searchText))
 	}
 
-	resultSets, err := client.Search(requestCtx, milvusclient.NewSearchOption(cfg.Collection, req.Limit,
-		searchVectors).
-		WithANNSField(goodsVectorEmbeddingField).
-		WithOutputFields(
-			goodsVectorDBIDField,
-			goodsVectorNameField,
-			goodsVectorCodeField,
-			goodsVectorCategoryField,
-			goodsVectorDescriptionField,
-			goodsVectorSkuIdField,
-			goodsVectorSkuNameField,
-			goodsVectorSkuDescriptionField,
-			goodsVectorRetailPriceField,
-			goodsVectorWeightPriceField,
-			goodsVectorQuantityPriceField,
-			goodsVectorContentField,
-		))
+	outputFields := []string{
+		goodsVectorDBIDField,
+		goodsVectorNameField,
+		goodsVectorCodeField,
+		goodsVectorCategoryField,
+		goodsVectorDescriptionField,
+		goodsVectorSkuIdField,
+		goodsVectorSkuNameField,
+		goodsVectorSkuDescriptionField,
+		goodsVectorRetailPriceField,
+		goodsVectorWeightPriceField,
+		goodsVectorQuantityPriceField,
+		goodsVectorContentField,
+	}
+
+	supportHybrid, err := supportsGoodsVectorHybridSearch(requestCtx, client, cfg.Collection)
+	if err != nil {
+		return nil, err
+	}
+
+	var resultSets []milvusclient.ResultSet
+	if supportHybrid {
+		sparseAnnParam := index.NewSparseAnnParam()
+		sparseAnnParam.WithDropRatio(0.2)
+
+		denseRequest := milvusclient.NewAnnRequest(goodsVectorEmbeddingField, searchLimit, searchVectors...)
+		sparseRequest := milvusclient.NewAnnRequest(goodsVectorContextSparseField, searchLimit, textQueries...).
+			WithAnnParam(sparseAnnParam)
+
+		resultSets, err = client.HybridSearch(requestCtx, milvusclient.NewHybridSearchOption(
+			cfg.Collection,
+			searchLimit,
+			denseRequest,
+			sparseRequest,
+		).WithReranker(milvusclient.NewRRFReranker()).
+			WithOutputFields(outputFields...))
+	} else {
+		resultSets, err = client.Search(requestCtx, milvusclient.NewSearchOption(cfg.Collection, searchLimit,
+			searchVectors).
+			WithANNSField(goodsVectorEmbeddingField).
+			WithOutputFields(outputFields...))
+	}
 	if err != nil {
 		return nil, fmt.Errorf("搜索 Milvus 商品向量失败: %w", err)
 	}
@@ -254,10 +305,11 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 		if parseErr != nil {
 			return nil, fmt.Errorf("解析第%d条商品向量搜索结果失败: %w", idx+1, parseErr)
 		}
+		data.Rows = rerankGoodsVectorSearchRows(req.Queries[idx], data.Rows, req.Limit)
 		rows = append(rows, &shopmodels.GoodsVectorBatchSearchItem{
 			Query: req.Queries[idx],
 			Rows:  data.Rows,
-			Total: data.Total,
+			Total: int64(len(data.Rows)),
 		})
 	}
 
@@ -265,6 +317,26 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 		Rows:  rows,
 		Total: int64(len(rows)),
 	}, nil
+}
+
+func supportsGoodsVectorHybridSearch(ctx context.Context, client *milvusclient.Client, collectionName string) (bool, error) {
+	collection, err := client.DescribeCollection(ctx, milvusclient.NewDescribeCollectionOption(collectionName))
+	if err != nil {
+		return false, fmt.Errorf("读取 Milvus collection 结构失败: %w", err)
+	}
+	if collection == nil || collection.Schema == nil {
+		return false, fmt.Errorf("Milvus collection %s 缺少 schema", collectionName)
+	}
+
+	for _, field := range collection.Schema.Fields {
+		if field == nil {
+			continue
+		}
+		if field.Name == goodsVectorContextSparseField {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func buildEmptyGoodsVectorBatchSearchData(queries []string) *shopmodels.GoodsVectorBatchSearchData {
@@ -338,6 +410,81 @@ func parseGoodsVectorSearchResultSet(resultSet milvusclient.ResultSet) (*shopmod
 	}, nil
 }
 
+func normalizeGoodsVectorSearchLimit(limit int) int {
+	if limit <= 0 {
+		return goodsVectorSearchDefaultLimit
+	}
+	if limit > goodsVectorSearchMaxLimit {
+		return goodsVectorSearchMaxLimit
+	}
+	return limit
+}
+
+func resolveGoodsVectorSearchCandidateLimit(limit int) int {
+	limit = normalizeGoodsVectorSearchLimit(limit)
+	candidateLimit := limit * goodsVectorSearchCandidateMultiplier
+	if candidateLimit < goodsVectorSearchMinCandidates {
+		candidateLimit = goodsVectorSearchMinCandidates
+	}
+	if candidateLimit > goodsVectorSearchMaxCandidates {
+		candidateLimit = goodsVectorSearchMaxCandidates
+	}
+	if candidateLimit < limit {
+		return limit
+	}
+	return candidateLimit
+}
+
+func rerankGoodsVectorSearchRows(query string, rows []*shopmodels.GoodsVectorSearchItem, limit int) []*shopmodels.GoodsVectorSearchItem {
+	if len(rows) == 0 {
+		return make([]*shopmodels.GoodsVectorSearchItem, 0)
+	}
+
+	processedQuery := searchutil.ProcessQuery(query)
+	candidates := make([]searchutil.RankCandidate, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		candidates = append(candidates, searchutil.RankCandidate{
+			ID:        row.GoodsDBID,
+			Title:     row.GoodsName,
+			Code:      row.GoodsCode,
+			Category:  row.CategoryName,
+			Unit:      "",
+			Standard:  row.SkuName,
+			Remark:    row.SkuDescription,
+			Content:   strings.TrimSpace(row.Content + " " + row.Description),
+			BaseScore: row.Score,
+		})
+	}
+	if len(candidates) == 0 {
+		return make([]*shopmodels.GoodsVectorSearchItem, 0)
+	}
+
+	ranked := searchutil.RerankCandidates(processedQuery, candidates, normalizeGoodsVectorSearchLimit(limit))
+	result := make([]*shopmodels.GoodsVectorSearchItem, 0, len(ranked))
+	for _, item := range ranked {
+		if item.Index < 0 || item.Index >= len(rows) || rows[item.Index] == nil {
+			continue
+		}
+		row := rows[item.Index]
+		row.Score = item.Score
+		result = append(result, row)
+	}
+
+	sort.SliceStable(result, func(i, j int) bool {
+		if result[i].Score == result[j].Score {
+			if result[i].GoodsDBID == result[j].GoodsDBID {
+				return result[i].SkuID < result[j].SkuID
+			}
+			return result[i].GoodsDBID < result[j].GoodsDBID
+		}
+		return result[i].Score > result[j].Score
+	})
+	return result
+}
+
 func loadGoodsVectorConfig() (*goodsVectorConfig, error) {
 	cfg := &goodsVectorConfig{}
 	_ = viper.UnmarshalKey("shop.goods_vector", cfg)
@@ -359,6 +506,11 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 	}
 
 	if !has {
+		function := entity.NewFunction().
+			WithName(goodsTextBm25EmbFunctionName).
+			WithInputFields(goodsVectorContentField).
+			WithOutputFields(goodsVectorContextSparseField).
+			WithType(entity.FunctionTypeBM25)
 		schema := entity.NewSchema().
 			WithField(entity.NewField().WithName(goodsVectorPKField).WithDataType(entity.FieldTypeInt64).WithIsPrimaryKey(true).WithMaxLength(goodsVectorPKMaxLength)).
 			WithField(entity.NewField().WithName(goodsVectorDBIDField).WithDataType(entity.FieldTypeInt64)).
@@ -373,10 +525,14 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 			WithField(entity.NewField().WithName(goodsVectorRetailPriceField).WithDataType(entity.FieldTypeDouble)).
 			WithField(entity.NewField().WithName(goodsVectorWeightPriceField).WithDataType(entity.FieldTypeDouble)).
 			WithField(entity.NewField().WithName(goodsVectorQuantityPriceField).WithDataType(entity.FieldTypeInt64)).
-			WithField(entity.NewField().WithName(goodsVectorEmbeddingField).WithDataType(entity.FieldTypeFloatVector).WithDim(int64(dim)))
+			WithField(entity.NewField().WithName(goodsVectorEmbeddingField).WithDataType(entity.FieldTypeFloatVector).WithDim(int64(dim))).
+			WithField(entity.NewField().WithName(goodsVectorContextSparseField).WithDataType(entity.FieldTypeSparseVector)).
+			WithFunction(function)
 
 		err = client.CreateCollection(ctx, milvusclient.NewCreateCollectionOption(collectionName, schema).WithIndexOptions(
-			milvusclient.NewCreateIndexOption(collectionName, goodsVectorEmbeddingField, index.NewAutoIndex(entity.COSINE)).WithIndexName("idx_goods_vector"),
+			milvusclient.NewCreateIndexOption(collectionName, goodsVectorEmbeddingField, index.NewAutoIndex(entity.COSINE)).WithIndexName(goodsIdxVectorField),
+		).WithIndexOptions(
+			milvusclient.NewCreateIndexOption(collectionName, goodsVectorContextSparseField, index.NewSparseInvertedIndex(entity.BM25, 0.2)).WithIndexName(goodsIdxTextSparseVector),
 		))
 		if err != nil {
 			return fmt.Errorf("创建 Milvus collection 失败: %w", err)
