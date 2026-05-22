@@ -23,6 +23,10 @@ func NewConversations() *Conversations {
 
 func (*Conversations) PrivateRoutes(_ *gin.RouterGroup) {}
 
+func (*Conversations) ConfigRoutes(_ *gin.RouterGroup) {}
+
+func (*Conversations) WsChatRegister(_ *gin.RouterGroup) {}
+
 type Message struct{}
 
 func NewMessage() *Message {

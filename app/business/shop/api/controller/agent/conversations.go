@@ -8,10 +8,7 @@ import (
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/utils/baizeContext"
-	"nova-factory-server/app/utils/sse"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -45,7 +42,6 @@ func (conversations *Conversations) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", conversations.ListConversations)
 	group.POST("/create", conversations.CreateConversation)
 	group.DELETE("/remove/:ids", conversations.RemoveConversation)
-	//group.POST("/chat", conversations.Chat)
 	group.POST("/stop-generation", conversations.StopGeneration)
 }
 
@@ -170,85 +166,6 @@ func (conversations *Conversations) RemoveConversation(c *gin.Context) {
 		return
 	}
 	baizeContext.Success(c)
-}
-
-// Chat 会话聊天
-// @Summary 会话聊天
-// @Description 发送会话消息并支持流式返回
-// @Tags app接口/商城/App智能体会话
-// @Param metadata formData string false "会话消息元数据(JSON字符串)"
-// @Param file formData file false "上传文件"
-// @Param object body aidatasetmodels.SendMessageInput false "发送消息参数"
-// @Security BearerAuth
-// @Produce application/json
-// @Success 200 {object} response.ResponseData "发送成功"
-// @Router /api/v1/app/shop/agent/conversations/chat [post]
-func (conversations *Conversations) Chat(c *gin.Context) {
-	req := new(aidatasetmodels.SendMessageInput)
-
-	contentType := c.ContentType()
-	if strings.HasPrefix(contentType, "multipart/form-data") || strings.TrimSpace(c.PostForm("metadata")) != "" {
-		metadata := c.PostForm("metadata")
-		if err := json.Unmarshal([]byte(metadata), req); err != nil {
-			baizeContext.ParameterError(c)
-			zap.L().Error("metadata param error", zap.Error(err))
-			return
-		}
-	} else {
-		if err := c.ShouldBindJSON(req); err != nil {
-			baizeContext.ParameterError(c)
-			zap.L().Error("bind json error", zap.Error(err))
-			return
-		}
-	}
-
-	if req.ConversationID == 0 {
-		baizeContext.Waring(c, "会话id不能为空")
-		return
-	}
-	if strings.TrimSpace(req.Content) == "" {
-		baizeContext.Waring(c, "提问内容不能为空")
-		return
-	}
-	if strings.TrimSpace(req.TabID) == "" {
-		req.TabID = "team"
-	}
-
-	data, err := conversations.gatewayService.Chat(c, req)
-	if err != nil {
-		zap.L().Error("chat error", zap.Error(err))
-		baizeContext.Waring(c, err.Error())
-		return
-	}
-	if data == nil {
-		baizeContext.Waring(c, "聊天服务无响应")
-		return
-	}
-	if data.StatusCode != http.StatusOK {
-		baizeContext.Waring(c, data.Message)
-		return
-	}
-	if data.IsStream && data.Body != nil {
-		c.Writer.Header().Set("Content-Type", "text/event-stream")
-		c.Writer.Header().Set("Cache-Control", "no-cache")
-		c.Writer.Header().Set("Connection", "keep-alive")
-		c.Writer.Header().Set("X-Accel-Buffering", "no")
-		defer data.Body.Close()
-		sse.ApplyHeaders(c.Writer.Header(), data.Headers)
-		if data.StatusCode > 0 {
-			c.Writer.Header().Set("X-Upstream-Status-Code", strconv.Itoa(data.StatusCode))
-		}
-		c.Status(http.StatusOK)
-		streamErr := sse.Transport(c.Writer, data.Body, 300*time.Second)
-		if streamErr != nil {
-			if writeErr := sse.WriteErrorEvent(c.Writer, streamErr.Error()); writeErr != nil {
-				zap.L().Warn("sse write error event failed", zap.Error(writeErr))
-			}
-			zap.L().Warn("sse stream read failed", zap.Error(streamErr))
-		}
-		return
-	}
-	baizeContext.SuccessData(c, data)
 }
 
 // StopGeneration 停止会话生成
