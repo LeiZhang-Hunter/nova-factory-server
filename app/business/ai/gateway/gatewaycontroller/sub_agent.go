@@ -1,6 +1,7 @@
 package gatewaycontroller
 
 import (
+	"nova-factory-server/app/business/admin/system/systemdao"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
@@ -11,21 +12,25 @@ import (
 
 // SubAgent 子智能体配置控制器。
 type SubAgent struct {
-	service gatewayservice.IAISubAgentService
+	service     gatewayservice.IAISubAgentService
+	dictDataDao systemdao.IDictDataDao
 }
 
 // NewSubAgent 创建子智能体配置控制器。
-func NewSubAgent(service gatewayservice.IAISubAgentService) *SubAgent {
-	return &SubAgent{service: service}
+func NewSubAgent(service gatewayservice.IAISubAgentService, dictDataDao systemdao.IDictDataDao) *SubAgent {
+	return &SubAgent{
+		service:     service,
+		dictDataDao: dictDataDao,
+	}
 }
 
 // PrivateRoutes 注册子智能体配置路由。
 func (s *SubAgent) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/ai/sub/agent")
-	group.GET("/list", middlewares.HasPermission("ai:sub:agent:list"), s.List)
-	group.GET("/info/:id", middlewares.HasPermission("ai:sub:agent:info"), s.Info)
-	group.POST("/set", middlewares.HasPermission("ai:sub:agent:set"), s.Set)
-	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:sub:agent:remove"), s.Delete)
+	group := router.Group("/ai/sub/agent/config")
+	group.GET("/list", middlewares.HasPermission("ai:sub:agent:config:list"), s.List)
+	group.GET("/info/:id", middlewares.HasPermission("ai:sub:agent:config:info"), s.Info)
+	group.POST("/set", middlewares.HasPermission("ai:sub:agent:config:set"), s.Set)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:sub:agent:config:remove"), s.Delete)
 }
 
 // List 获取子智能体配置列表

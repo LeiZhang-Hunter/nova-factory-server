@@ -37,14 +37,15 @@ type AISubAgentQuery struct {
 type AISubAgentUpsert struct {
 	ID                        int64               `json:"id,string"`
 	Name                      string              `json:"name"`
-	Type                      string              `json:"type"`
+	Type                      string              `json:"subAgentType"`
+	CoreSubAgent              string              `json:"coreSubAgent"`
 	Description               string              `json:"description"`
 	Instruction               string              `json:"instruction"`
 	MCPEnabled                *bool               `json:"mcpEnabled"`
-	MCPServerIDs              string              `json:"mcpServerIds"`
-	MCPServerEnabledIDs       string              `json:"mcpServerEnabledIds"`
+	MCPServerIDs              []string            `json:"mcpServerIds"`
+	MCPServerEnabledIDs       []string            `json:"mcpServerEnabledIds"`
 	LocalToolEnabled          *bool               `json:"localToolEnabled"`
-	LocalTools                string              `json:"localTools"`
+	LocalTools                []string            `json:"localTools"`
 	AllowMcpServerIdsToolsRaw string              `json:"-"`
 	AllowMcpServerIdsTools    map[string][]string `json:"allowMcpServerIdsTools"`
 	Enable                    *bool               `json:"enable"`
@@ -54,4 +55,23 @@ type AISubAgentUpsert struct {
 type AISubAgentListData struct {
 	Rows  []*AISubAgent `json:"rows"`
 	Total int64         `json:"total"`
+}
+
+// GraphAISubAgentUpsert 子智能体新增修改参数。
+type GraphAISubAgentUpsert struct {
+	ID                        int64               `json:"id,string"`
+	Name                      string              `json:"name"`
+	Type                      string              `json:"type"`
+	SubAgentType              string              `json:"subAgentType"`
+	CoreSubAgent              string              `json:"coreSubAgent"`
+	Description               string              `json:"description"`
+	Instruction               string              `json:"instruction"`
+	MCPEnabled                *bool               `json:"mcpEnabled"`
+	MCPServerIDs              []string            `json:"mcpServerIds"`
+	MCPServerEnabledIDs       []string            `json:"mcpServerEnabledIds"`
+	LocalToolEnabled          *bool               `json:"localToolEnabled"`
+	LocalTools                []string            `json:"localTools"`
+	AllowMcpServerIdsToolsRaw string              `json:"-"`
+	AllowMcpServerIdsTools    map[string][]string `json:"allowMcpServerIdsTools"`
+	Enable                    *bool               `json:"enable"`
 }

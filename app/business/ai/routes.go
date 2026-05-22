@@ -47,6 +47,7 @@ func NewGinEngine(
 		ai.Auth.PrivateRoutes(group)
 		gateway.AIGateway.PrivateRoutes(group)
 		gateway.Agent.PrivateRoutes(group)
+		gateway.Orchestration.PrivateRoutes(group)
 		gateway.SubAgent.PrivateRoutes(group)
 		gateway.Conversations.PrivateRoutes(group)
 		gateway.Skills.PrivateRoutes(group)

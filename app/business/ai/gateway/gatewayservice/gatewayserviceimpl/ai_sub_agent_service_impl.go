@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"nova-factory-server/app/business/admin/system/systemdao"
+	"nova-factory-server/app/constant/aiagent"
 	"strconv"
 	"strings"
 
@@ -18,18 +20,96 @@ import (
 type AISubAgentServiceImpl struct {
 	dao          gatewaydao.IAISubAgentDao
 	mcpServerDao gatewaydao.IMCPServerDao
+	dictDataDao  systemdao.IDictDataDao
 }
 
 // NewAISubAgentService 创建子智能体配置服务。
-func NewAISubAgentService(dao gatewaydao.IAISubAgentDao, mcpServerDao gatewaydao.IMCPServerDao) gatewayservice.IAISubAgentService {
+func NewAISubAgentService(dao gatewaydao.IAISubAgentDao,
+	mcpServerDao gatewaydao.IMCPServerDao,
+	dictDataDao systemdao.IDictDataDao) gatewayservice.IAISubAgentService {
 	return &AISubAgentServiceImpl{
 		dao:          dao,
 		mcpServerDao: mcpServerDao,
+		dictDataDao:  dictDataDao,
 	}
+}
+
+// ValidateType 子agent类型
+func (a *AISubAgentServiceImpl) ValidateType(c *gin.Context, req *gatewaymodels.AISubAgentUpsert) error {
+	if req == nil {
+		return errors.New("参数不能为空")
+	}
+	req.Type = strings.TrimSpace(req.Type)
+	if req.Type == "" {
+		return errors.New("type不能为空")
+	}
+	typeKey := strings.ToLower(req.Type)
+	rows := a.dictDataDao.SelectDictDataByType(c, aiagent.SubAgentType)
+	var checkDict bool
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		if strings.ToLower(strings.TrimSpace(row.DictValue)) == typeKey {
+			checkDict = true
+		}
+	}
+
+	if !checkDict {
+		return errors.New("agent类型设置失败")
+	}
+
+	checkDict = false
+
+	if req.Type == aiagent.CORE {
+		if req.CoreSubAgent == "" {
+			return errors.New("核心子agent不能为空")
+		}
+
+		rows := a.dictDataDao.SelectDictDataByType(c, aiagent.CoreSubAgent)
+		for _, row := range rows {
+			if row == nil {
+				continue
+			}
+			if strings.ToLower(strings.TrimSpace(row.DictValue)) == typeKey {
+				checkDict = true
+			}
+		}
+
+		if !checkDict {
+			return errors.New("核心agent不存在")
+		}
+		return nil
+	}
+
+	// 自定义Agent校验字段
+	if req.Name == "" {
+		return errors.New("agent名字不是空的")
+	}
+
+	if req.Description == "" {
+		return errors.New("agent描述不能为空")
+	}
+
+	if req.Instruction == "" {
+		return errors.New("agent指令不能为空")
+	}
+	return nil
 }
 
 // Create 新增子智能体配置。
 func (a *AISubAgentServiceImpl) Create(c *gin.Context, req *gatewaymodels.AISubAgentUpsert) (*gatewaymodels.AISubAgent, error) {
+	if err := a.ValidateType(c, req); err != nil {
+		return nil, err
+	}
+	//检查名字是否存在
+	info, err := a.dao.GetByName(c, req.Name)
+	if err != nil {
+		return nil, err
+	}
+	if info != nil {
+		return nil, errors.New("智能体名称已经存在，请切换一个智能体")
+	}
 	if err := a.prepareUpsert(c, req, false); err != nil {
 		return nil, err
 	}
@@ -38,6 +118,9 @@ func (a *AISubAgentServiceImpl) Create(c *gin.Context, req *gatewaymodels.AISubA
 
 // Update 修改子智能体配置。
 func (a *AISubAgentServiceImpl) Update(c *gin.Context, req *gatewaymodels.AISubAgentUpsert) (*gatewaymodels.AISubAgent, error) {
+	if err := a.ValidateType(c, req); err != nil {
+		return nil, err
+	}
 	if err := a.prepareUpsert(c, req, true); err != nil {
 		return nil, err
 	}
@@ -100,9 +183,6 @@ func (a *AISubAgentServiceImpl) prepareUpsert(c *gin.Context, req *gatewaymodels
 	req.Type = strings.TrimSpace(req.Type)
 	req.Description = strings.TrimSpace(req.Description)
 	req.Instruction = strings.TrimSpace(req.Instruction)
-	req.MCPServerIDs = strings.TrimSpace(req.MCPServerIDs)
-	req.MCPServerEnabledIDs = strings.TrimSpace(req.MCPServerEnabledIDs)
-	req.LocalTools = strings.TrimSpace(req.LocalTools)
 	if req.Name == "" {
 		return errors.New("子智能体名称不能为空")
 	}
@@ -118,21 +198,7 @@ func (a *AISubAgentServiceImpl) prepareUpsert(c *gin.Context, req *gatewaymodels
 	if req.Enable == nil {
 		req.Enable = boolPtr(false)
 	}
-	if req.MCPServerIDs != "" {
-		if err := validateJSONArray(req.MCPServerIDs, "MCP服务ID列表"); err != nil {
-			return err
-		}
-	}
-	if req.MCPServerEnabledIDs != "" {
-		if err := validateJSONArray(req.MCPServerEnabledIDs, "已启用MCP服务ID列表"); err != nil {
-			return err
-		}
-	}
-	if req.LocalTools != "" {
-		if err := validateJSONArray(req.LocalTools, "本地工具集合"); err != nil {
-			return err
-		}
-	}
+
 	return a.prepareAllowMcpServerIdsTools(c, req)
 }
 

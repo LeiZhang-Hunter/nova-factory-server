@@ -371,7 +371,7 @@ CREATE TABLE IF NOT EXISTS installed_skills (
     );
 
 CREATE TABLE IF NOT EXISTS ai_agent_messages (
- `id` bigint(20) NOT NULL COMMENT '主键ID',
+    `id` bigint(20) NOT NULL COMMENT '主键ID',
     conversation_id bigint(20) NOT NULL,
     role TEXT NULL,
     content LONGTEXT NULL,
@@ -406,7 +406,8 @@ alter table ai_agent_messages MODIFY column thinking_content LONGTEXT NULL;
 CREATE TABLE IF NOT EXISTS ai_sub_agents (
      id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `name` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体名称',
-    `type` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体类型，用来读取位置',
+    `type` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体类型，类型费为core 和customize',
+    `core_sub_agent` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体类型，子agent核心种类',
     `description` text NULL COMMENT '描述',
     `instruction` text NULL COMMENT '指示',
     `mcp_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否启用MCP',
@@ -425,3 +426,21 @@ CREATE TABLE IF NOT EXISTS ai_sub_agents (
     PRIMARY KEY (`id`)
     ) ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '子智能体配置表';
+
+-- 创建编排连线关联表：记录节点之间的连线关系
+CREATE TABLE `ai_agent_orchestration` (
+    id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '编排记录ID',
+    `agent_id` bigint(20) NOT NULL DEFAULT 0 COMMENT '智能体id',
+    `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '前端配置内容',
+    `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '配置内容',
+    `content_md5` varchar(32) NOT NULL DEFAULT '' COMMENT '内容md5',
+    `config_md5` varchar(32) NOT NULL DEFAULT '' COMMENT '配置md5',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    KEY `idx_agent_id` (`agent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI编排规则';

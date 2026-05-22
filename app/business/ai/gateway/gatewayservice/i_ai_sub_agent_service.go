@@ -13,4 +13,6 @@ type IAISubAgentService interface {
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*gatewaymodels.AISubAgent, error)
 	List(c *gin.Context, req *gatewaymodels.AISubAgentQuery) (*gatewaymodels.AISubAgentListData, error)
+	// ValidateType 校验子Agent
+	ValidateType(c *gin.Context, req *gatewaymodels.AISubAgentUpsert) error
 }
