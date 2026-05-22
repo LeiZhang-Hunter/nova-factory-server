@@ -379,10 +379,7 @@ func buildSeckillSetFromActivity(
 		image = images[0]
 	}
 
-	title := strings.TrimSpace(activity.Title)
-	if title == "" {
-		title = strings.TrimSpace(goods.GoodsName)
-	}
+	title := strings.TrimSpace(goods.GoodsName)
 
 	stats := buildSeckillStats(goods, productInfo, productSkus)
 	seckillReq := &models.SeckillSet{
