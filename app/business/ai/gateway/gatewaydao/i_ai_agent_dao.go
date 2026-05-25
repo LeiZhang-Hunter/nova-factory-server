@@ -1,6 +1,7 @@
 package gatewaydao
 
 import (
+	"context"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 
 	"github.com/gin-gonic/gin"
@@ -14,4 +15,6 @@ type IAIAgentDao interface {
 	GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAgent, error)
 	GetEnabledByType(c *gin.Context, agentType string) (*gatewaymodels.AIAgent, error)
 	List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error)
+	UpdateConfigVersion(c *gin.Context, id int64, version string) error
+	GetEnable(c context.Context) ([]*gatewaymodels.AIAgent, error)
 }

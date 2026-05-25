@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package agent;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "confighotload/v1";
+
+service AgentControllerService {
+  // agent 心跳
+  rpc AgentHeartbeat(AgentHeartbeatReq) returns (AgentHeartbeatRes) {}
+
+  // 获取配置
+  rpc AgentGetConfig(AgentGetConfigReq) returns (AgentGetConfigRes) {}
+
+  // 双向流订阅变更
+  rpc WatchAgentChanges(stream WatchAgentRequest) returns (stream ConfigChangeEvent);
+}
+
+message AgentHeartbeatReq {
+  uint64 AgentId = 1;                        // agent 的id
+  string ConfigUuid = 2;                      // agent 的配置版本
+}
+
+message AgentHeartbeatRes {
+  // 配置uuid
+  string ConfigUuid = 1;
+}
+
+message AgentGetConfigReq {
+  string ConfigUuid = 1;
+}
+
+message AgentGetConfigRes {
+  string Content = 1;
+}
+
+message AgentRef {
+  string type = 1;  // "db" / "file" / "builtin"
+  string id = 2;     // "123" / "sales" / "erp/sales"
+}
+
+// --- 变更订阅请求（双向流） ---
+message WatchAgentRequest {
+  int64 gatewayId = 1;
+}
+
+// --- 变更推送事件 ---
+message ConfigChangeEvent {
+  AgentRef ref = 1;
+  string new_version = 2;
+  string config_hash = 3;
+  string action = 4;
+  string content = 5;
+  google.protobuf.Timestamp timestamp = 6;
+}

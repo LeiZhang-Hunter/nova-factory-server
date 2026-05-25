@@ -242,7 +242,6 @@ CREATE TABLE IF NOT EXISTS `ai_user_llm` (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '用户选择的模型厂商' ROW_FORMAT = Dynamic;
 
 
-
 CREATE TABLE IF NOT EXISTS ai_gateway (
     id               bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     name             VARCHAR(128)    NOT NULL COMMENT '网关名称',
@@ -287,7 +286,7 @@ DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表';
 
 
 CREATE TABLE IF NOT EXISTS ai_agents (
-    id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+     id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `name` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体名称',
     `type` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体类型，用来读取位置',
     `prompt` text NULL COMMENT '提示词',
@@ -307,6 +306,7 @@ CREATE TABLE IF NOT EXISTS ai_agents (
     `mcp_server_ids` text NULL COMMENT 'MCP服务ID列表',
     `mcp_server_enabled_ids` text NULL COMMENT '已启用MCP服务ID列表',
     `allow_mcp_server_ids_tools` text NULL COMMENT 'MCP服务工具列表',
+    `config_version`             VARCHAR(128)    NOT NULL COMMENT '当前版本',
     `enable` tinyint(1) NULL DEFAULT 0 COMMENT '是否开启，0为关闭 1为开启',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
@@ -444,3 +444,27 @@ CREATE TABLE `ai_agent_orchestration` (
     PRIMARY KEY (`id`),
     KEY `idx_agent_id` (`agent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI编排规则';
+
+
+CREATE TABLE IF NOT EXISTS `ai_agent_config_publish_history` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `agent_id` bigint(20) NOT NULL COMMENT '智能体ID',
+    `version` varchar(64) NOT NULL COMMENT '配置版本号',
+    `config_md5` varchar(32) NOT NULL DEFAULT '' COMMENT '配置md5',
+    `config_snapshot` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '配置快照JSON',
+    `publish_description` varchar(512) DEFAULT '' COMMENT '发布说明',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '发布者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '发布时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_agent_version` (`agent_id`, `version`, `state`) COMMENT 'Agent配置版本唯一索引',
+    KEY `idx_agent_id` (`agent_id`),
+    KEY `idx_version` (`version`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  COMMENT = 'AI智能体配置发布历史表';

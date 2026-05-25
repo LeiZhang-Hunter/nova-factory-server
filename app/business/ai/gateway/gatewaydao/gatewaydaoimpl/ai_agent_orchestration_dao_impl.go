@@ -1,6 +1,7 @@
 package gatewaydaoimpl
 
 import (
+	"context"
 	"errors"
 	"nova-factory-server/app/utils/uuid"
 	"time"
@@ -106,4 +107,20 @@ func buildAIAgentOrchestrationModel(c *gin.Context, req *gatewaymodels.AIAgentOr
 		Config:     req.Config,
 		DeptID:     baizeContext.GetDeptId(c),
 	}, nil
+}
+
+// GetConfigByAgentID 按智能体ID查询编排配置。
+func (a *AIAgentOrchestrationDaoImpl) GetConfigByAgentID(c context.Context, agentID int64) (*gatewaymodels.AIAgentOrchestration, error) {
+	var item gatewaymodels.AIAgentOrchestration
+	if err := a.db.WithContext(c).Table(a.table).
+		Where("agent_id = ?", agentID).
+		Where("state = ?", commonStatus.NORMAL).
+		Select("config", "config_md5").
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
 }

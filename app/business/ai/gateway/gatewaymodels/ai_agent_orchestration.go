@@ -258,3 +258,9 @@ type AgentOrchestrationConfig struct {
 	} `json:"edges"`
 	SavedAt int64 `json:"savedAt"`
 }
+
+// AgentLoadConfig 下发的配置
+type AgentLoadConfig struct {
+	Agent    *AIAgent            `json:"agent"`
+	SubAgent []*AISubAgentUpsert `json:"subAgent"`
+}

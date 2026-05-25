@@ -20,7 +20,6 @@ import (
 	"nova-factory-server/app/business/iot/metric/device/metriccontroller"
 	iotSystemControllerImpl "nova-factory-server/app/business/iot/system/controller"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
-	"nova-factory-server/app/daemonize"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/middlewares"
@@ -128,11 +127,10 @@ func NewGinEngine(
 	}
 
 	//grpc
-	s := daemonize.CreateGRpcServer()
+	s := app.GrpcServer
 	controller.Daemonize.PrivateRoutes(s)
 	deviceMonitor.DeviceControl.PrivateRoutes(s)
 	deviceMonitor.CameraGrpc.PrivateRoutes(s)
-	s.Start()
 
 	session, err := iotdb.GetSession()
 	if err != nil {

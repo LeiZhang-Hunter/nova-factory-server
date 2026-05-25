@@ -29,6 +29,7 @@ func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.
 
 	// 4. Mount the MCP server endpoint
 	app.McpServer.Mount() // MCP clients will connect here
+	app.GrpcServer.Start()
 	return app.Engine
 }
 

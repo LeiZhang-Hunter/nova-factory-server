@@ -5,7 +5,7 @@ import (
 )
 
 var ProviderSet = wire.NewSet(NewDataset, NewException, NewPrediction, NewControl, NewModel,
-	NewOCR, NewRole, NewDataSetAuth, wire.Struct(new(AiDataSet), "*"))
+	NewOCR, NewRole, NewDataSetAuth, NewConfigLoaderGrpc, NewAgentConfigPublisher, wire.Struct(new(AiDataSet), "*"))
 
 type AiDataSet struct {
 	Dataset    *Dataset
@@ -16,4 +16,5 @@ type AiDataSet struct {
 	OCR        *OCR
 	Role       *Role
 	Auth       *DataSetAuth
+	Config     *ConfigLoader
 }

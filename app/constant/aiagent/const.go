@@ -16,3 +16,11 @@ var (
 	Master = "master"
 	Sub    = "sub"
 )
+
+type ConfigUpdate string
+
+var ConfigPublishType ConfigUpdate = "publish"
+var ConfigInitType ConfigUpdate = "init"
+var ConfigRemoveType ConfigUpdate = "remove"
+
+var AgentType string = "agent"

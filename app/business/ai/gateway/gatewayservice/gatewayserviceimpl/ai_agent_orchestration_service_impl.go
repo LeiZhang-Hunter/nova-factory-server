@@ -1,6 +1,7 @@
 package gatewayserviceimpl
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -34,17 +35,32 @@ func NewAIAgentOrchestrationService(dao gatewaydao.IAIAgentOrchestrationDao,
 
 // Set 保存智能体编排配置。
 func (a *AIAgentOrchestrationServiceImpl) Set(c *gin.Context, req *gatewaymodels.AIAgentOrchestrationUpsert) (*gatewaymodels.AIAgentOrchestration, error) {
-	if err := a.prepareUpsert(c, req); err != nil {
+	subAgents, err := a.prepareUpsert(c, req)
+	if err != nil {
 		return nil, err
 	}
-	if err := a.ensureAgentExists(c, req.AgentID); err != nil {
+
+	agent, err := a.agentDao.GetByID(c, req.AgentID)
+	if err != nil {
 		return nil, err
+	}
+	if agent == nil {
+		return nil, errors.New("智能体不存在")
 	}
 
 	current, err := a.dao.GetByAgentID(c, req.AgentID)
 	if err != nil {
 		return nil, err
 	}
+
+	var config gatewaymodels.AgentLoadConfig
+	config.Agent = agent
+	config.SubAgent = subAgents
+	content, err := json.Marshal(&config)
+	if err != nil {
+		return nil, err
+	}
+	req.Config = string(content)
 	if current != nil {
 		return a.dao.UpdateByAgentID(c, req)
 	}
@@ -78,28 +94,24 @@ func (a *AIAgentOrchestrationServiceImpl) Remove(c *gin.Context, agentIDs []int6
 	return a.dao.DeleteByAgentIDs(c, agentIDs)
 }
 
-func (a *AIAgentOrchestrationServiceImpl) prepareUpsert(c *gin.Context, req *gatewaymodels.AIAgentOrchestrationUpsert) error {
+func (a *AIAgentOrchestrationServiceImpl) prepareUpsert(c *gin.Context,
+	req *gatewaymodels.AIAgentOrchestrationUpsert) ([]*gatewaymodels.AISubAgentUpsert, error) {
 	if req == nil {
-		return errors.New("参数不能为空")
+		return nil, errors.New("参数不能为空")
 	}
 	if req.AgentID == 0 {
-		return errors.New("agentId不能为空")
+		return nil, errors.New("agentId不能为空")
 	}
 	req.Content = strings.TrimSpace(req.Content)
 	if req.Content == "" {
-		return errors.New("content不能为空")
+		return nil, errors.New("content不能为空")
 	}
 	list, err := a.validateContent(c, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	config, err := json.Marshal(list)
-	if err != nil {
-		return err
-	}
-	req.Config = string(config)
-	return nil
+	return list, nil
 }
 
 func (a *AIAgentOrchestrationServiceImpl) ensureAgentExists(c *gin.Context, agentID int64) error {
@@ -113,6 +125,7 @@ func (a *AIAgentOrchestrationServiceImpl) ensureAgentExists(c *gin.Context, agen
 	return nil
 }
 
+// validateContent 组装配置
 func (a *AIAgentOrchestrationServiceImpl) validateContent(c *gin.Context,
 	req *gatewaymodels.AIAgentOrchestrationUpsert) ([]*gatewaymodels.AISubAgentUpsert, error) {
 	var config gatewaymodels.AgentOrchestrationConfig
@@ -230,4 +243,9 @@ func (a *AIAgentOrchestrationServiceImpl) validateOrchestrationNodeConfig(c *gin
 		return nil, err
 	}
 	return data, nil
+}
+
+// GetConfigInfo 查询智能体编排详情。
+func (a *AIAgentOrchestrationServiceImpl) GetConfigInfo(c context.Context, agentID int64) (*gatewaymodels.AIAgentOrchestration, error) {
+	return a.dao.GetConfigByAgentID(c, agentID)
 }

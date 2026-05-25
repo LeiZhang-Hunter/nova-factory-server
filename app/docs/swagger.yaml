@@ -16,6 +16,19 @@ definitions:
           type: string
         type: array
     type: object
+  aidatasetmodels.AgentPublishReq:
+    properties:
+      action:
+        type: string
+      agentId:
+        type: string
+      gateway_id:
+        type: integer
+      timeoutMs:
+        type: integer
+    required:
+    - agentId
+    type: object
   aidatasetmodels.AgentsCompletionsRequest:
     properties:
       agent_id:
@@ -2308,6 +2321,21 @@ definitions:
     required:
     - "no"
     type: object
+  gatewaymodels.AIAgentConfigPublishHistoryUpsert:
+    properties:
+      agentId:
+        example: "0"
+        type: string
+      configSnapshot:
+        type: string
+      id:
+        example: "0"
+        type: string
+      publishDescription:
+        type: string
+      version:
+        type: string
+    type: object
   gatewaymodels.AIAgentMessage:
     properties:
       content:
@@ -2372,6 +2400,14 @@ definitions:
       total:
         type: integer
     type: object
+  gatewaymodels.AIAgentOrchestrationUpsert:
+    properties:
+      agentId:
+        example: "0"
+        type: string
+      content:
+        type: string
+    type: object
   gatewaymodels.AIAgentUpsert:
     properties:
       allowMcpServerIdsTools:
@@ -2425,6 +2461,60 @@ definitions:
       type:
         type: string
       workDir:
+        type: string
+    type: object
+  gatewaymodels.AIGatewayUpsert:
+    properties:
+      apiKey:
+        type: string
+      baseUrl:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        example: "0"
+        type: string
+      name:
+        type: string
+    type: object
+  gatewaymodels.AISubAgentUpsert:
+    properties:
+      allowMcpServerIdsTools:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        type: object
+      coreSubAgent:
+        type: string
+      description:
+        type: string
+      enable:
+        type: boolean
+      id:
+        example: "0"
+        type: string
+      instruction:
+        type: string
+      localToolEnabled:
+        type: boolean
+      localTools:
+        items:
+          type: string
+        type: array
+      mcpEnabled:
+        type: boolean
+      mcpServerEnabledIds:
+        items:
+          type: string
+        type: array
+      mcpServerIds:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      subAgentType:
         type: string
     type: object
   gatewaymodels.InstalledSkillUpsert:
@@ -5968,6 +6058,120 @@ paths:
       summary: 获取智能体列表
       tags:
       - 工业智能体/智能体管理
+  /ai/agent/config/publish:
+    post:
+      consumes:
+      - application/json
+      description: 向集群节点广播智能体配置变更通知
+      parameters:
+      - description: 智能体发布参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/aidatasetmodels.AgentPublishReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 发布成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      summary: 发布智能体配置变更
+      tags:
+      - 工业智能体/智能体配置
+  /ai/agent/config/publish/history/info/{id}:
+    get:
+      description: 根据ID获取智能体配置发布历史详情
+      parameters:
+      - description: 发布历史ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取智能体配置发布历史详情
+      tags:
+      - 工业智能体/智能体配置发布历史
+  /ai/agent/config/publish/history/list:
+    get:
+      description: 获取智能体配置发布历史列表
+      parameters:
+      - in: query
+        name: agentId
+        type: integer
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: version
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取智能体配置发布历史列表
+      tags:
+      - 工业智能体/智能体配置发布历史
+  /ai/agent/config/publish/history/remove/{ids}:
+    delete:
+      description: 根据ID删除智能体配置发布历史
+      parameters:
+      - description: 发布历史ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除智能体配置发布历史
+      tags:
+      - 工业智能体/智能体配置发布历史
+  /ai/agent/config/publish/history/set:
+    post:
+      description: 保存智能体配置发布历史，id为空时新增，不为空时修改
+      parameters:
+      - description: 智能体配置发布历史保存参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/gatewaymodels.AIAgentConfigPublishHistoryUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存智能体配置发布历史
+      tags:
+      - 工业智能体/智能体配置发布历史
   /ai/agent/config/query/{id}:
     get:
       description: 根据ID获取智能体详情
@@ -6189,6 +6393,70 @@ paths:
       summary: 根据会话ID读取消息列表
       tags:
       - 工业智能体/消息管理
+  /ai/agent/orchestration/info/{agentId}:
+    get:
+      description: 根据智能体ID获取智能体编排详情
+      parameters:
+      - description: 智能体ID
+        in: path
+        name: agentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取智能体编排详情
+      tags:
+      - 工业智能体/智能体编排
+  /ai/agent/orchestration/remove/{agentIds}:
+    delete:
+      description: 根据智能体ID删除智能体编排配置
+      parameters:
+      - description: 智能体ID，多个以逗号分隔
+        in: path
+        name: agentIds
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除智能体编排配置
+      tags:
+      - 工业智能体/智能体编排
+  /ai/agent/orchestration/set:
+    post:
+      description: 根据智能体ID保存编排配置，存在时更新，不存在时新增
+      parameters:
+      - description: 智能体编排保存参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/gatewaymodels.AIAgentOrchestrationUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存智能体编排配置
+      tags:
+      - 工业智能体/智能体编排
   /ai/control/list:
     get:
       description: 预测控制列表
@@ -7273,6 +7541,101 @@ paths:
       summary: 设置异常预警
       tags:
       - 工业智能体/异常预警
+  /ai/gateway/list:
+    get:
+      description: 获取AI网关配置列表
+      parameters:
+      - in: query
+        name: active
+        type: integer
+      - in: query
+        name: enabled
+        type: boolean
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取网关列表
+      tags:
+      - 工业智能体/网关管理
+  /ai/gateway/query/{id}:
+    get:
+      description: 根据ID获取AI网关配置详情
+      parameters:
+      - description: 网关ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取网关详情
+      tags:
+      - 工业智能体/网关管理
+  /ai/gateway/remove/{ids}:
+    delete:
+      description: 根据ID删除AI网关配置
+      parameters:
+      - description: 网关ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除网关配置
+      tags:
+      - 工业智能体/网关管理
+  /ai/gateway/set:
+    post:
+      description: 保存AI网关配置，id为空时新增，不为空时修改
+      parameters:
+      - description: 网关保存参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/gatewaymodels.AIGatewayUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存网关配置
+      tags:
+      - 工业智能体/网关管理
   /ai/mcp/server/list:
     get:
       description: 获取MCP服务配置列表
@@ -7712,6 +8075,107 @@ paths:
       summary: 保存已安装技能
       tags:
       - 工业智能体/已安装技能
+  /ai/sub/agent/info/{id}:
+    get:
+      description: 根据ID获取子智能体配置详情
+      parameters:
+      - description: 子智能体ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取子智能体配置详情
+      tags:
+      - 工业智能体/子智能体配置
+  /ai/sub/agent/list:
+    get:
+      description: 获取子智能体配置列表
+      parameters:
+      - in: query
+        name: enable
+        type: boolean
+      - in: query
+        name: localToolEnabled
+        type: boolean
+      - in: query
+        name: mcpEnabled
+        type: boolean
+      - in: query
+        name: name
+        type: string
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      - in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 获取子智能体配置列表
+      tags:
+      - 工业智能体/子智能体配置
+  /ai/sub/agent/remove/{ids}:
+    delete:
+      description: 根据ID删除子智能体配置
+      parameters:
+      - description: 子智能体ID，多个以逗号分隔
+        in: path
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除子智能体配置
+      tags:
+      - 工业智能体/子智能体配置
+  /ai/sub/agent/set:
+    post:
+      description: 保存子智能体配置，id为空时新增，不为空时修改
+      parameters:
+      - description: 子智能体配置保存参数
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/gatewaymodels.AISubAgentUpsert'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 保存成功
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 保存子智能体配置
+      tags:
+      - 工业智能体/子智能体配置
   /alert/action/list:
     get:
       description: 告警动作列表
