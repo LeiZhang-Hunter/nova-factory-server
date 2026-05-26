@@ -92,6 +92,11 @@ func (a *AIAgentServiceImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuer
 	return a.dao.List(c, req)
 }
 
+// UpdateConfigVersion 更新版本
+func (a *AIAgentServiceImpl) UpdateConfigVersion(c *gin.Context, id int64, version string) error {
+	return a.dao.UpdateConfigVersion(c, id, version)
+}
+
 func (a *AIAgentServiceImpl) prepareUpsert(req *gatewaymodels.AIAgentUpsert, isUpdate bool) error {
 	if req == nil {
 		return errors.New("参数不能为空")
