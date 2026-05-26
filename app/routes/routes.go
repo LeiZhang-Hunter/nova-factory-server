@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"github.com/gogf/gf/contrib/rpc/grpcx/v2"
+	"nova-factory-server/app/daemonize"
 	server "nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/logger"
 	"time"
@@ -21,8 +23,9 @@ import (
 )
 
 type App struct {
-	Engine    *gin.Engine
-	McpServer *server.GinMCP
+	Engine     *gin.Engine
+	McpServer  *server.GinMCP
+	GrpcServer *grpcx.GrpcServer
 }
 
 var ProviderSet = wire.NewSet(NewGinApp)
@@ -61,9 +64,13 @@ func NewGinApp() *App {
 	})
 	mpcServer.UseInMemoryExecuteTool()
 	pprof.Register(r)
+
+	s := daemonize.CreateGRpcServer()
+
 	return &App{
-		Engine:    r,
-		McpServer: mpcServer,
+		Engine:     r,
+		McpServer:  mpcServer,
+		GrpcServer: s,
 	}
 }
 
