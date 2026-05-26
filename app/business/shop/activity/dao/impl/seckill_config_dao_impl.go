@@ -120,6 +120,7 @@ func (s *ShopSeckillConfigDaoImpl) create(c *gin.Context, req *models.SeckillCon
 		ContinueClock: req.ContinueClock,
 		Images:        req.Images,
 		Sort:          req.Sort,
+		Status:        req.Status,
 		DeptID:        baizeContext.GetDeptId(c),
 		State:         commonStatus.NORMAL,
 	}

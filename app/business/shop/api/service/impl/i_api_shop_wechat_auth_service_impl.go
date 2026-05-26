@@ -38,16 +38,17 @@ func (s *IApiShopWechatAuthServiceImpl) WechatLogin(c *gin.Context, req *models.
 		return nil, errors.New("参数不能为空")
 	}
 
-	// 获取微信配置
-	appID, err := s.getWechatConfig(c, "wechat_mini_program_app_id")
-	if err != nil {
-		return nil, errors.New("微信配置缺失")
-	}
-	appSecret, err := s.getWechatConfig(c, "wechat_mini_program_app_secret")
-	if err != nil {
-		return nil, errors.New("微信配置缺失")
-	}
-
+	//// 获取微信配置
+	//appID, err := s.getWechatConfig(c, "wechat_mini_program_app_id")
+	//if err != nil {
+	//	return nil, errors.New("微信配置缺失")
+	//}
+	//appSecret, err := s.getWechatConfig(c, "wechat_mini_program_app_secret")
+	//if err != nil {
+	//	return nil, errors.New("微信配置缺失")
+	//}
+	appID := "wx64538abe63a51bb3"
+	appSecret := "ed97226ab4c0ef092af0ed6597cbce10"
 	// 调用微信接口获取openid
 	openid, err := s.getWechatOpenid(c, appID, appSecret, req.Code)
 	if err != nil {

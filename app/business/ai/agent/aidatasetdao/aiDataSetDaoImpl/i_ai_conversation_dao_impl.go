@@ -43,8 +43,8 @@ func (i *IAiConversationDaoImpl) Create(c *gin.Context, req *aidatasetmodels.Set
 		LLMModelID:     req.LLMModelID,
 		EnableThinking: req.EnableThinking,
 		ChatMode:       req.ChatMode,
-		DeptID:         baizeContext.GetDeptId(c),
-		State:          commonStatus.NORMAL,
+		//DeptID:         baizeContext.GetDeptId(c),
+		State: commonStatus.NORMAL,
 	}
 	data.ID = snowflake.GenID()
 	data.SetCreateBy(baizeContext.GetUserId(c))

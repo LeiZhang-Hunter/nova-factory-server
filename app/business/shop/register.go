@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/shop/activity/controller"
 	activityDaoImpl "nova-factory-server/app/business/shop/activity/dao/impl"
 	activityServiceImpl "nova-factory-server/app/business/shop/activity/service/impl"
+	apiActivity "nova-factory-server/app/business/shop/api/controller/activity"
 	apiAddress "nova-factory-server/app/business/shop/api/controller/address"
 	apiAgent "nova-factory-server/app/business/shop/api/controller/agent"
 	"nova-factory-server/app/business/shop/api/controller/auth"
@@ -42,6 +43,7 @@ var ProviderSet = wire.NewSet(
 	apiAgent.ProviderSet,
 	apiAddress.ProviderSet,
 	apiProduct.ProviderSet,
+	apiActivity.ProviderSet,
 	apiDaoImpl.ProviderSet,
 	apiServiceImpl.ProviderSet,
 
