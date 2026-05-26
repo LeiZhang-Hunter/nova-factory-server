@@ -111,7 +111,8 @@ type Seckill struct {
 	IsCommission int32   `json:"isCommission" gorm:"column:is_commission"`    // 是否参与返佣
 	DeptID       int64   `json:"deptId" gorm:"column:dept_id"`                // 部门ID
 	baize.BaseEntity
-	State int32 `json:"state" gorm:"column:state"` // 操作状态
+	State   int32 `json:"state" gorm:"column:state"` // 操作状态
+	Percent int64 `json:"percent" gorm:"-"`          // 已抢百分比（计算字段，不存储）
 }
 
 // SeckillSet 秒杀商品保存参数
@@ -161,6 +162,7 @@ type SeckillQuery struct {
 	Status     *int32 `form:"status"`     // 商品状态
 	IsShow     *int32 `form:"isShow"`     // 是否显示
 	IsHot      *int32 `form:"isHot"`      // 是否热门推荐
+	TimeID     int64  `form:"timeId"`     // 时间段ID
 	Page       int64  `form:"page"`       // 页码
 	Size       int64  `form:"size"`       // 每页数量
 }

@@ -129,6 +129,37 @@ func (h *Home) List(ctx *gin.Context) {
 		itemMap[item.ModuleID] = append(itemMap[item.ModuleID], buildHomeModuleItemData(item))
 	}
 
+	// 将旧"活动专区"(pageKey=index)的 items 按 businessType 重新分配到
+	// 新的秒杀专区(pageKey=seckill)和拼团专区(pageKey=combination)模块下。
+	var seckillModuleID, combinationModuleID, indexModuleID int64
+	for _, module := range modules {
+		switch module.PageKey {
+		case "seckill":
+			seckillModuleID = module.ID
+		case "combination":
+			combinationModuleID = module.ID
+		case "index":
+			indexModuleID = module.ID
+		}
+	}
+	if indexModuleID > 0 {
+		for _, item := range itemMap[indexModuleID] {
+			switch item.BusinessType {
+			case "seckill_activity":
+				if seckillModuleID > 0 {
+					item.ModuleID = seckillModuleID
+					itemMap[seckillModuleID] = append(itemMap[seckillModuleID], item)
+				}
+			case "combination":
+				if combinationModuleID > 0 {
+					item.ModuleID = combinationModuleID
+					itemMap[combinationModuleID] = append(itemMap[combinationModuleID], item)
+				}
+			}
+		}
+		delete(itemMap, indexModuleID)
+	}
+
 	rows := make([]*HomeModuleData, 0, len(modules))
 	for _, module := range modules {
 		rows = append(rows, &HomeModuleData{
