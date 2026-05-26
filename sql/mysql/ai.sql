@@ -403,6 +403,7 @@ alter table ai_agent_messages MODIFY column segments LONGTEXT NULL;
 alter table ai_agent_messages MODIFY column thinking_content LONGTEXT NULL;
 
 
+
 CREATE TABLE IF NOT EXISTS ai_sub_agents (
      id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `name` varchar(255) NOT NULL DEFAULT '' COMMENT '智能体名称',

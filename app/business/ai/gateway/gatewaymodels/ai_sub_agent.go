@@ -7,6 +7,7 @@ type AISubAgent struct {
 	ID                        int64               `json:"id,string" gorm:"column:id"`
 	Name                      string              `json:"name" gorm:"column:name"`
 	Type                      string              `json:"type" gorm:"column:type"`
+	CoreSubAgent              string              `json:"coreSubAgent" gorm:"column:core_sub_agent"`
 	Description               string              `json:"description" gorm:"column:description"`
 	Instruction               string              `json:"instruction" gorm:"column:instruction"`
 	MCPEnabled                *bool               `json:"mcpEnabled" gorm:"column:mcp_enabled"`
