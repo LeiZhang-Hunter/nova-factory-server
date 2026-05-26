@@ -71,7 +71,7 @@ func (a *AISubAgentServiceImpl) ValidateType(c *gin.Context, req *gatewaymodels.
 			if row == nil {
 				continue
 			}
-			if strings.ToLower(strings.TrimSpace(row.DictValue)) == typeKey {
+			if strings.ToLower(strings.TrimSpace(row.DictValue)) == req.CoreSubAgent {
 				checkDict = true
 			}
 		}
@@ -87,11 +87,11 @@ func (a *AISubAgentServiceImpl) ValidateType(c *gin.Context, req *gatewaymodels.
 		return errors.New("agent名字不是空的")
 	}
 
-	if req.Description == "" {
+	if req.Type != aiagent.CORE && req.Description == "" {
 		return errors.New("agent描述不能为空")
 	}
 
-	if req.Instruction == "" {
+	if req.Type != aiagent.CORE && req.Instruction == "" {
 		return errors.New("agent指令不能为空")
 	}
 	return nil

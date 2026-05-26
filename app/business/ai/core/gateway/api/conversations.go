@@ -17,6 +17,7 @@ type SendMessageInput struct {
 	Content        string `json:"content"`
 	TabID          string `json:"tab_id"`
 	UserID         int64  `json:"user_id"`
+	AgentID        int64  `json:"agent_id"`
 	EnableThinking *bool  `json:"enable_thinking"` // EnableThinking 是否启用思考。
 }
 

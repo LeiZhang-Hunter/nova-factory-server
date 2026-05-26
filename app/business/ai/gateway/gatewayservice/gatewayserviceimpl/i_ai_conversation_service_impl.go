@@ -1,6 +1,7 @@
 package gatewayserviceimpl
 
 import (
+	"errors"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/ai/agent/aidatasetdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
@@ -29,6 +30,13 @@ func (i *IAiConversationServiceImpl) Create(c *gin.Context, req *aidatasetmodels
 
 func (i *IAiConversationServiceImpl) Update(c *gin.Context, req *aidatasetmodels.SetAiConversation) (*aidatasetmodels.AiConversation, error) {
 	return i.dao.Update(c, req)
+}
+
+func (i *IAiConversationServiceImpl) GetByID(c *gin.Context, id int64) (*aidatasetmodels.AiConversation, error) {
+	if id == 0 {
+		return nil, errors.New("会话id不能为空")
+	}
+	return i.dao.GetByID(c, id)
 }
 
 func (i *IAiConversationServiceImpl) List(c *gin.Context, req *aidatasetmodels.AiConversationQuery) (*aidatasetmodels.AiConversationListData, error) {

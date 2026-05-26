@@ -51,7 +51,7 @@ func (a *AISubAgentDaoImpl) Update(c *gin.Context, req *gatewaymodels.AISubAgent
 	if err := a.db.WithContext(c).Table(a.table).
 		Where("id = ?", item.ID).
 		Where("state = ?", commonStatus.NORMAL).
-		Select("name", "type", "description", "instruction", "mcp_enabled", "mcp_server_ids",
+		Select("name", "type", "core_sub_agent", "description", "instruction", "mcp_enabled", "mcp_server_ids",
 			"mcp_server_enabled_ids", "local_tool_enabled", "local_tools", "allow_mcp_server_ids_tools",
 			"enable", "update_by", "update_time").
 		Updates(item).Error; err != nil {
@@ -153,6 +153,7 @@ func buildAISubAgentModel(c *gin.Context, req *gatewaymodels.AISubAgentUpsert) *
 		Name:                      req.Name,
 		Type:                      req.Type,
 		Description:               req.Description,
+		CoreSubAgent:              req.CoreSubAgent,
 		Instruction:               req.Instruction,
 		MCPEnabled:                req.MCPEnabled,
 		MCPServerIDs:              string(mCPServerIDs),

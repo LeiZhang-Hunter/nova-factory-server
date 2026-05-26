@@ -1,6 +1,7 @@
 package aiDataSetDaoImpl
 
 import (
+	"errors"
 	"nova-factory-server/app/utils/snowflake"
 	"strings"
 	"time"
@@ -87,6 +88,21 @@ func (i *IAiConversationDaoImpl) Update(c *gin.Context, req *aidatasetmodels.Set
 			"update_by":       data.UpdateBy,
 			"update_time":     data.UpdateTime,
 		}).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (i *IAiConversationDaoImpl) GetByID(c *gin.Context, id int64) (*aidatasetmodels.AiConversation, error) {
+	data := &aidatasetmodels.AiConversation{}
+	if err := i.db.WithContext(c).Table(i.table).
+		Where("id = ?", id).
+		Where("create_by = ?", baizeContext.GetUserId(c)).
+		Where("state = ?", commonStatus.NORMAL).
+		First(data).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return data, nil
