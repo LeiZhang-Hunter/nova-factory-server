@@ -14,6 +14,7 @@ import (
 	"nova-factory-server/app/datasource/cache"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // AIAgentServiceImpl 提供智能体配置的业务实现。
@@ -94,7 +95,12 @@ func (a *AIAgentServiceImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuer
 	}
 	req.Name = strings.TrimSpace(req.Name)
 	req.SandboxMode = strings.TrimSpace(req.SandboxMode)
-	return a.dao.List(c, req)
+	data, err := a.dao.List(c, req)
+	if err != nil || data == nil || len(data.Rows) == 0 {
+		return data, err
+	}
+	a.fillAgentActiveVersion(c, data.Rows)
+	return data, nil
 }
 
 // RefreshAlive 刷新智能体在线标记。
@@ -104,6 +110,36 @@ func (a *AIAgentServiceImpl) RefreshAlive(ctx context.Context, id int64, version
 	}
 	a.cache.Set(ctx, rediskey.MakeAIAgentAliveCacheKey(id), version, 2*time.Minute)
 	return nil
+}
+
+func (a *AIAgentServiceImpl) fillAgentActiveVersion(ctx context.Context, rows []*gatewaymodels.AIAgent) {
+	keys := make([]string, 0, len(rows))
+	agents := make([]*gatewaymodels.AIAgent, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		row.ActiveVersion = ""
+		keys = append(keys, rediskey.MakeAIAgentAliveCacheKey(row.ID))
+		agents = append(agents, row)
+	}
+	if len(keys) == 0 {
+		return
+	}
+
+	// 批量读取 Redis 中 agent 最新在线版本，避免列表逐条查询带来的性能损耗。
+	values, err := a.cache.MGet(ctx, keys).Result()
+	if err != nil {
+		zap.L().Warn("batch get agent active version failed", zap.Error(err))
+		return
+	}
+	for i, value := range values {
+		version, ok := value.(string)
+		if !ok {
+			continue
+		}
+		agents[i].ActiveVersion = version
+	}
 }
 
 // UpdateConfigVersion 更新版本

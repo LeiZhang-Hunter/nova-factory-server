@@ -26,6 +26,7 @@ type AIAgent struct {
 	AllowMcpServerIdsToolsRaw string              `json:"-" gorm:"column:allow_mcp_server_ids_tools"`
 	AllowMcpServerIdsTools    map[string][]string `json:"allowMcpServerIdsTools" gorm:"-"`
 	ConfigVersion             string              `json:"configVersion" gorm:"column:config_version"`
+	ActiveVersion             string              `json:"activeVersion" gorm:"-"`
 	Enable                    *bool               `json:"enable"`
 	DeptID                    int64               `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
