@@ -1,6 +1,7 @@
 package gatewayserviceimpl
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -156,4 +157,8 @@ func validateAgentJSONArray(content string, fieldName string) error {
 
 func agentBoolPtr(v bool) *bool {
 	return &v
+}
+
+func (a *AIAgentServiceImpl) GetConfigVersion(c context.Context, id int64) (*gatewaymodels.AIAgent, error) {
+	return a.dao.GetConfigVersion(c, id)
 }

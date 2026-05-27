@@ -1,6 +1,7 @@
 package gatewayservice
 
 import (
+	"context"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	v1 "nova-factory-server/app/utils/grpc/confighotload/v1"
 
@@ -16,6 +17,7 @@ type IAIAgentConfigPublisher interface {
 type IAIAgentConfigPublishHistoryService interface {
 	Set(c *gin.Context, req *gatewaymodels.AIAgentConfigPublishHistoryUpsert) (*gatewaymodels.AIAgentConfigPublishHistory, error)
 	Info(c *gin.Context, id int64) (*gatewaymodels.AIAgentConfigPublishHistory, error)
+	GetByVersion(c context.Context, version string) (*gatewaymodels.AIAgentConfigPublishHistory, error)
 	List(c *gin.Context, req *gatewaymodels.AIAgentConfigPublishHistoryQuery) (*gatewaymodels.AIAgentConfigPublishHistoryListData, error)
 	Remove(c *gin.Context, ids []int64) error
 }

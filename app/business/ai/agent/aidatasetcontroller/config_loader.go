@@ -50,17 +50,20 @@ type ConfigLoader struct {
 	service             gatewayservice.IAIAgentOrchestrationService
 	gatewayService      gatewayservice.IAIGatewayService
 	configLoaderService aidatasetservice.IConfigLoaderService
+	agentService        gatewayservice.IAIAgentService
 
 	v1.UnimplementedAgentControllerServiceServer
 }
 
 func NewConfigLoaderGrpc(service gatewayservice.IAIAgentOrchestrationService,
 	gatewayService gatewayservice.IAIGatewayService,
-	configLoaderService aidatasetservice.IConfigLoaderService) *ConfigLoader {
+	configLoaderService aidatasetservice.IConfigLoaderService,
+	agentService gatewayservice.IAIAgentService) *ConfigLoader {
 	return &ConfigLoader{
 		manager:             NewAgentConfigManager(),
 		registry:            NewAgentRegistryManager(),
 		service:             service,
+		agentService:        agentService,
 		gatewayService:      gatewayService,
 		configLoaderService: configLoaderService,
 	}
@@ -138,7 +141,21 @@ func (c *ConfigLoader) AgentHeartbeat(ctx context.Context, req *v1.AgentHeartbea
 	if !c.registry.IsRegistered(id) {
 		return nil, errors.New("gateway id does not exist")
 	}
-	return nil, nil
+
+	info, err := c.agentService.GetConfigVersion(ctx, int64(req.AgentId))
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return &v1.AgentHeartbeatRes{
+			AgentId: req.AgentId,
+			Version: "",
+		}, nil
+	}
+	return &v1.AgentHeartbeatRes{
+		AgentId: req.AgentId,
+		Version: info.ConfigVersion,
+	}, nil
 }
 
 // AgentGetConfig 获取配置
@@ -151,7 +168,23 @@ func (c *ConfigLoader) AgentGetConfig(ctx context.Context, req *v1.AgentGetConfi
 	if !c.registry.IsRegistered(gatewayId) {
 		return nil, errors.New("gateway id does not exist")
 	}
-	return nil, nil
+	version := strings.TrimSpace(req.GetVersion())
+	if version == "" {
+		return nil, errors.New("config uuid does not exist")
+	}
+
+	info, err := c.configLoaderService.GetByAgentIdAndVersion(ctx, req.AgentId, version)
+	if err != nil {
+		zap.L().Error("AgentGetConfig failed", zap.Error(err))
+		return nil, err
+	}
+	if info == nil {
+		return nil, errors.New("config does not exist")
+	}
+
+	return &v1.AgentGetConfigRes{
+		Content: info.ConfigSnapshot,
+	}, nil
 }
 
 // WatchAgentChanges 双向流订阅变更

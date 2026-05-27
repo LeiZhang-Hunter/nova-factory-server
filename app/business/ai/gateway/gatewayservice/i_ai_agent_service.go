@@ -1,6 +1,7 @@
 package gatewayservice
 
 import (
+	"context"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 
 	"github.com/gin-gonic/gin"
@@ -16,4 +17,6 @@ type IAIAgentService interface {
 	List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error)
 	// UpdateConfigVersion 更新版本
 	UpdateConfigVersion(c *gin.Context, id int64, version string) error
+	// GetConfigVersion 读取最新版本
+	GetConfigVersion(c context.Context, id int64) (*gatewaymodels.AIAgent, error)
 }
