@@ -20,6 +20,7 @@ type AIAgentConfigPublishHistoryUpsert struct {
 	ID                 int64  `json:"id,string"`
 	AgentID            int64  `json:"agentId,string"`
 	Version            string `json:"version"`
+	Action             string `json:"action"`
 	ConfigSnapshot     string `json:"configSnapshot"`
 	ConfigMd5          string `json:"-"`
 	PublishDescription string `json:"publishDescription"`
