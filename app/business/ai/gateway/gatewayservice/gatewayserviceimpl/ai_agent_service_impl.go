@@ -5,22 +5,26 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"time"
 
 	"nova-factory-server/app/business/ai/gateway/gatewaydao"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
+	rediskey "nova-factory-server/app/constant/redis"
+	"nova-factory-server/app/datasource/cache"
 
 	"github.com/gin-gonic/gin"
 )
 
 // AIAgentServiceImpl 提供智能体配置的业务实现。
 type AIAgentServiceImpl struct {
-	dao gatewaydao.IAIAgentDao
+	dao   gatewaydao.IAIAgentDao
+	cache cache.Cache
 }
 
 // NewAIAgentService 创建智能体配置服务。
-func NewAIAgentService(dao gatewaydao.IAIAgentDao) gatewayservice.IAIAgentService {
-	return &AIAgentServiceImpl{dao: dao}
+func NewAIAgentService(dao gatewaydao.IAIAgentDao, cache cache.Cache) gatewayservice.IAIAgentService {
+	return &AIAgentServiceImpl{dao: dao, cache: cache}
 }
 
 // Create 新增智能体配置。
@@ -91,6 +95,15 @@ func (a *AIAgentServiceImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuer
 	req.Name = strings.TrimSpace(req.Name)
 	req.SandboxMode = strings.TrimSpace(req.SandboxMode)
 	return a.dao.List(c, req)
+}
+
+// RefreshAlive 刷新智能体在线标记。
+func (a *AIAgentServiceImpl) RefreshAlive(ctx context.Context, id int64, version string) error {
+	if id == 0 {
+		return errors.New("id不能为空")
+	}
+	a.cache.Set(ctx, rediskey.MakeAIAgentAliveCacheKey(id), version, 2*time.Minute)
+	return nil
 }
 
 // UpdateConfigVersion 更新版本

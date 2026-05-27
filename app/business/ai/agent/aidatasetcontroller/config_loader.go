@@ -141,6 +141,14 @@ func (c *ConfigLoader) AgentHeartbeat(ctx context.Context, req *v1.AgentHeartbea
 	if !c.registry.IsRegistered(id) {
 		return nil, errors.New("gateway id does not exist")
 	}
+	c.registry.UpdateLastActive(id)
+
+	if err = c.gatewayService.RefreshAlive(ctx, id); err != nil {
+		zap.L().Warn("refresh gateway alive failed", zap.Int64("gatewayId", id), zap.Error(err))
+	}
+	if err = c.agentService.RefreshAlive(ctx, int64(req.AgentId), req.Version); err != nil {
+		zap.L().Warn("refresh agent alive failed", zap.Uint64("agentId", req.AgentId), zap.Error(err))
+	}
 
 	info, err := c.agentService.GetConfigVersion(ctx, int64(req.AgentId))
 	if err != nil {
