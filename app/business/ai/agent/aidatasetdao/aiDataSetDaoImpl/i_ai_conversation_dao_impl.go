@@ -140,7 +140,6 @@ func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiCon
 
 func (i *IAiConversationDaoImpl) Remove(c *gin.Context, ids []int64) error {
 	return i.db.WithContext(c).Table(i.table).Where("id IN ?", ids).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Updates(map[string]interface{}{
 			"state":       commonStatus.DELETE,
 			"update_by":   baizeContext.GetUserId(c),
