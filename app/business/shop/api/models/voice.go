@@ -5,6 +5,7 @@ type ShopVoiceSubmitReq struct {
 	ConversationID int64  `json:"conversation_id,string"`
 	TabID          string `json:"tab_id"`
 	FileName       string `json:"file_name"`
+	Text           string `json:"text,omitempty"`
 	AudioBase64    string `json:"audio_base64,omitempty"`
 }
 
