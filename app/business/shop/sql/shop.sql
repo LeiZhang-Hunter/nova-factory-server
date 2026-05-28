@@ -153,6 +153,9 @@ CREATE TABLE IF NOT EXISTS `shop_user_cart` (
     `image_url` VARCHAR(1024) DEFAULT NULL COMMENT '商品或SKU图片快照',
     `retail_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '加入购物车时零售价快照',
     `quantity` INT NOT NULL DEFAULT 1 COMMENT '购买数量',
+    `product_type` TINYINT NOT NULL DEFAULT 0 COMMENT '商品类型：0普通，1秒杀，3拼团',
+    `activity_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '活动商品ID，普通商品为0',
+    `pink_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT '拼团记录ID，非参团为0',
     `selected` TINYINT NOT NULL DEFAULT 1 COMMENT '是否选中：1选中，0未选中',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1有效，0失效',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
@@ -162,10 +165,11 @@ CREATE TABLE IF NOT EXISTS `shop_user_cart` (
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_user_sku` (`user_id`, `sku_id`),
+    UNIQUE KEY `uk_user_sku_activity` (`user_id`, `sku_id`, `product_type`, `activity_id`, `state`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_goods_id` (`goods_id`),
     KEY `idx_sku_id` (`sku_id`),
+    KEY `idx_activity` (`product_type`, `activity_id`),
     KEY `idx_selected` (`selected`),
     KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商城用户购物车表';

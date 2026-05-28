@@ -15,6 +15,8 @@ type IOrderDao interface {
 	SetWithTx(c *gin.Context, tx *gorm.DB, req *salemodels.OrderSet) (*salemodels.Order, error)
 	// GetByID 查询 ERP 订单详情。
 	GetByID(c *gin.Context, id uint64) (*salemodels.Order, error)
+	// GetByTid 按订单编号查询 ERP 订单详情。
+	GetByTid(c *gin.Context, tid string) (*salemodels.Order, error)
 	// List 分页查询 ERP 订单。
 	List(c *gin.Context, req *salemodels.OrderQuery) (*salemodels.OrderListData, error)
 	// DeleteByIDs 删除 ERP 订单。

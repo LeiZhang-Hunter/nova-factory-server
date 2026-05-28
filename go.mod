@@ -24,6 +24,7 @@ require (
 	github.com/gogf/gf/v2 v2.9.0
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.5.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/itmisx/go_regions v0.0.2
 	github.com/mark3labs/mcp-go v0.46.0
 	github.com/milvus-io/milvus/client/v2 v2.6.4
@@ -123,7 +124,6 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.14 // indirect
 	github.com/googleapis/gax-go/v2 v2.17.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/grokify/html-strip-tags-go v0.1.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect

@@ -68,6 +68,7 @@ func NewGinEngine(
 		favoriteController.PrivateRoutes(appGroup)
 		agentController.Conversations.ConfigRoutes(appGroup)
 		agentController.Conversations.PrivateRoutes(appGroup)
+		agentController.ASR.PrivateRoutes(appGroup)
 		agentController.Message.PrivateRoutes(appGroup)
 		productController.Cart.PrivateRoutes(appGroup)
 		// 小程序端活动 API

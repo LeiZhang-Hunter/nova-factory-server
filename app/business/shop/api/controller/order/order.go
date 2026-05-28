@@ -24,10 +24,9 @@ func (s *Order) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", s.List)
 	group.GET("/info/:id", s.GetByID)
 	group.GET("/count", s.GetStatistics)
-	group.POST("/cache", s.Cache)
 	group.POST("/confirm", s.Confirm)
 	group.POST("/create", s.Create)
-	group.POST("/status", s.UpdateStatus)
+	group.POST("/pay/:id", s.Pay)
 	group.POST("/cancel/:id", s.Cancel)
 	group.POST("/confirm/:id", s.ConfirmReceive)
 }
@@ -72,30 +71,6 @@ func (s *Order) GetByID(c *gin.Context) {
 		return
 	}
 	data, err := s.service.GetByID(c, id)
-	if err != nil {
-		baizeContext.Waring(c, err.Error())
-		return
-	}
-	baizeContext.SuccessData(c, data)
-}
-
-// Cache 固化本次下单商品快照
-// @Summary 缓存预下单商品
-// @Description 固化本次立即购买商品快照
-// @Tags app接口/商城/App订单
-// @Param object body models.OrderCacheReq true "预下单缓存参数"
-// @Security BearerAuth
-// @Produce application/json
-// @Success 200 {object} response.ResponseData "缓存成功"
-// @Router /api/v1/app/shop/order/cache [post]
-func (s *Order) Cache(c *gin.Context) {
-	userID := baizeContext.GetUserId(c)
-	req := new(models.OrderCacheReq)
-	if err := c.ShouldBindJSON(req); err != nil {
-		baizeContext.ParameterError(c)
-		return
-	}
-	data, err := s.service.Cache(c, userID, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -151,23 +126,23 @@ func (s *Order) Create(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// UpdateStatus 更新订单状态
-// @Summary 更新订单状态
-// @Description 更新订单状态
+// Pay 支付订单
+// @Summary 支付订单
+// @Description 支付待付款订单
 // @Tags 商城/用户订单
-// @Param object body models.OrderStatusReq true "订单状态更新参数"
+// @Param id path int true "订单ID"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object} response.ResponseData "更新成功"
-// @Router /shop/user/order/status [post]
-func (s *Order) UpdateStatus(c *gin.Context) {
+// @Success 200 {object} response.ResponseData "支付成功"
+// @Router /api/v1/app/shop/order/pay/{id} [post]
+func (s *Order) Pay(c *gin.Context) {
 	userID := baizeContext.GetUserId(c)
-	req := new(models.OrderStatusReq)
-	if err := c.ShouldBindJSON(req); err != nil {
+	id := baizeContext.ParamInt64(c, "id")
+	if id == 0 {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if err := s.service.UpdateStatus(c, userID, req); err != nil {
+	if err := s.service.Pay(c, userID, id); err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}

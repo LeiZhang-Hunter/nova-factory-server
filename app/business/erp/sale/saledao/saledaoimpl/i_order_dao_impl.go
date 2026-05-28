@@ -104,7 +104,7 @@ func (o *OrderDaoImpl) SetWithTx(c *gin.Context, tx *gorm.DB, req *salemodels.Or
 	if err != nil {
 		return nil, err
 	}
-	return o.GetByID(c, resultID)
+	return o.getByIDWithDB(c, tx, resultID)
 }
 
 // doSet 执行新增或修改 ERP 订单的核心逻辑。
@@ -156,10 +156,33 @@ func (o *OrderDaoImpl) doSet(c *gin.Context, tx *gorm.DB, req *salemodels.OrderS
 
 // GetByID 查询 ERP 订单详情。
 func (o *OrderDaoImpl) GetByID(c *gin.Context, id uint64) (*salemodels.Order, error) {
+	return o.getByIDWithDB(c, o.db.WithContext(c), id)
+}
+
+func (o *OrderDaoImpl) getByIDWithDB(c *gin.Context, db *gorm.DB, id uint64) (*salemodels.Order, error) {
 	var row erpOrderRow
-	if err := o.db.WithContext(c).Table(o.table).
+	if err := db.Table(o.table).
 		Where("id = ?", id).
 		//Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&row).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	item := row.toModel()
+	if err := o.attachChildrenWithDB(c, db, []*salemodels.Order{&item}); err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+// GetByTid 按订单编号查询 ERP 订单详情。
+func (o *OrderDaoImpl) GetByTid(c *gin.Context, tid string) (*salemodels.Order, error) {
+	var row erpOrderRow
+	if err := o.db.WithContext(c).Table(o.table).
+		Where("tid = ?", strings.TrimSpace(tid)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&row).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -489,6 +512,10 @@ func parseOrderTimePtr(value string) (*time.Time, error) {
 
 // attachChildren 为订单结果批量挂载明细与账户列表。
 func (o *OrderDaoImpl) attachChildren(c *gin.Context, orders []*salemodels.Order) error {
+	return o.attachChildrenWithDB(c, o.db.WithContext(c), orders)
+}
+
+func (o *OrderDaoImpl) attachChildrenWithDB(c *gin.Context, db *gorm.DB, orders []*salemodels.Order) error {
 	if len(orders) == 0 {
 		return nil
 	}
@@ -502,11 +529,11 @@ func (o *OrderDaoImpl) attachChildren(c *gin.Context, orders []*salemodels.Order
 	if len(orderIDs) == 0 {
 		return nil
 	}
-	details, err := o.detailDao.ListByOrderIDs(c, orderIDs)
+	details, err := o.detailDao.listByOrderIDsWithDB(c, db, orderIDs)
 	if err != nil {
 		return err
 	}
-	accounts, err := o.accountDao.ListByOrderIDs(c, orderIDs)
+	accounts, err := o.accountDao.listByOrderIDsWithDB(c, db, orderIDs)
 	if err != nil {
 		return err
 	}

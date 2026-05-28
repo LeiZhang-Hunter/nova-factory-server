@@ -90,12 +90,16 @@ func (d *OrderAccountDaoImpl) DeleteByOrderIDs(tx *gorm.DB, orderIDs []uint64) e
 
 // ListByOrderIDs 按订单ID集合查询账户记录。
 func (d *OrderAccountDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) ([]*salemodels.OrderAccount, error) {
+	return d.listByOrderIDsWithDB(c, d.db.WithContext(c), orderIDs)
+}
+
+func (d *OrderAccountDaoImpl) listByOrderIDsWithDB(c *gin.Context, db *gorm.DB, orderIDs []uint64) ([]*salemodels.OrderAccount, error) {
 	if len(orderIDs) == 0 {
 		return []*salemodels.OrderAccount{}, nil
 	}
 	rows := make([]*salemodels.OrderAccount, 0)
 	rowList := make([]*erpOrderAccountRow, 0)
-	if err := d.db.WithContext(c).Table(d.table).
+	if err := db.Table(d.table).
 		Where("order_id IN ?", orderIDs).
 		Where("state = ?", commonStatus.NORMAL).
 		Order("id ASC").

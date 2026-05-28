@@ -4,7 +4,7 @@ import (
 	"errors"
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
-	"nova-factory-server/app/constant/commonStatus"
+	shopConstant "nova-factory-server/app/constant/shop"
 	"nova-factory-server/app/utils/snowflake"
 	"strings"
 	"time"
@@ -31,16 +31,20 @@ func NewIApiShopCartDaoImpl(db *gorm.DB) dao.IApiShopCartDao {
 func (s *IApiShopCartDaoImpl) Save(c *gin.Context, req *models.CartSetData) (*models.CartDto, error) {
 	var result *models.CartDto
 	now := time.Now()
+	state := req.State
+	if state == 0 {
+		state = shopConstant.CartStateNormal
+	}
 	err := s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
 
-		existing, err := s.getByUserIDAndSkuIDTx(c, tx, req.UserID, req.SkuID)
+		existing, err := s.getByMergeIdentityTx(c, tx, req.UserID, req.SkuID, req.ProductType, req.ActivityID, state)
 		if err != nil {
 			return err
 		}
 		if existing != nil {
 			if err := tx.Table(s.tableName).
 				Where("id = ?", existing.ID).
-				Where("state = ?", commonStatus.NORMAL).
+				Where("state = ?", state).
 				Updates(map[string]interface{}{
 					"goods_id":     req.GoodsID,
 					"goods_name":   req.GoodsName,
@@ -48,11 +52,14 @@ func (s *IApiShopCartDaoImpl) Save(c *gin.Context, req *models.CartSetData) (*mo
 					"image_url":    req.ImageURL,
 					"retail_price": req.RetailPrice,
 					"quantity":     gorm.Expr("quantity + ?", req.Quantity),
+					"product_type": req.ProductType,
+					"activity_id":  req.ActivityID,
+					"pink_id":      req.PinkID,
 					"update_time":  gorm.Expr("NOW()"),
 				}).Error; err != nil {
 				return err
 			}
-			result, err = s.getByIDTx(c, tx, existing.ID)
+			result, err = s.getByIDAndStateTx(c, tx, existing.ID, state)
 			return err
 		}
 
@@ -66,12 +73,15 @@ func (s *IApiShopCartDaoImpl) Save(c *gin.Context, req *models.CartSetData) (*mo
 			ImageURL:    req.ImageURL,
 			RetailPrice: req.RetailPrice,
 			Quantity:    req.Quantity,
-			State:       commonStatus.NORMAL,
+			ProductType: req.ProductType,
+			ActivityID:  req.ActivityID,
+			PinkID:      req.PinkID,
+			State:       state,
 			CreateTime:  &now,
 		}
 		if err := tx.Table(s.tableName).Create(model).Error; err != nil {
 			if isDuplicateKeyError(err) {
-				existing, getErr := s.getByUserIDAndSkuIDTx(c, tx, req.UserID, req.SkuID)
+				existing, getErr := s.getByMergeIdentityTx(c, tx, req.UserID, req.SkuID, req.ProductType, req.ActivityID, state)
 				if getErr != nil {
 					return getErr
 				}
@@ -80,7 +90,7 @@ func (s *IApiShopCartDaoImpl) Save(c *gin.Context, req *models.CartSetData) (*mo
 				}
 				if updateErr := tx.Table(s.tableName).
 					Where("id = ?", existing.ID).
-					Where("state = ?", commonStatus.NORMAL).
+					Where("state = ?", state).
 					Updates(map[string]interface{}{
 						"goods_id":     req.GoodsID,
 						"goods_name":   req.GoodsName,
@@ -88,11 +98,14 @@ func (s *IApiShopCartDaoImpl) Save(c *gin.Context, req *models.CartSetData) (*mo
 						"image_url":    req.ImageURL,
 						"retail_price": req.RetailPrice,
 						"quantity":     gorm.Expr("quantity + ?", req.Quantity),
+						"product_type": req.ProductType,
+						"activity_id":  req.ActivityID,
+						"pink_id":      req.PinkID,
 						"update_time":  gorm.Expr("NOW()"),
 					}).Error; updateErr != nil {
 					return updateErr
 				}
-				result, err = s.getByIDTx(c, tx, existing.ID)
+				result, err = s.getByIDAndStateTx(c, tx, existing.ID, state)
 				return err
 			}
 			return err
@@ -108,7 +121,7 @@ func (s *IApiShopCartDaoImpl) Save(c *gin.Context, req *models.CartSetData) (*mo
 
 // List 查询购物车列表（不分页）。
 func (s *IApiShopCartDaoImpl) List(c *gin.Context, userID int64) ([]*models.CartDto, error) {
-	db := s.db.WithContext(c).Table(s.tableName).Where("user_id = ?", userID).Where("state = ?", commonStatus.NORMAL)
+	db := s.db.WithContext(c).Table(s.tableName).Where("user_id = ?", userID).Where("state = ?", shopConstant.CartStateNormal)
 
 	rows := make([]*models.CartDto, 0)
 	if err := db.Order("update_time DESC").Find(&rows).Error; err != nil {
@@ -119,29 +132,45 @@ func (s *IApiShopCartDaoImpl) List(c *gin.Context, userID int64) ([]*models.Cart
 
 // ListByIDs 按购物车ID列表查询当前用户的购物车商品。
 func (s *IApiShopCartDaoImpl) ListByIDs(c *gin.Context, userID int64, ids []int64) ([]*models.CartDto, error) {
+	return s.ListByIDsAndState(c, userID, ids, shopConstant.CartStateNormal)
+}
+
+func (s *IApiShopCartDaoImpl) ListByIDsAndState(c *gin.Context, userID int64, ids []int64, state int32) ([]*models.CartDto, error) {
 	if len(ids) == 0 {
 		return make([]*models.CartDto, 0), nil
 	}
 
 	rows := make([]*models.CartDto, 0)
-	if err := s.db.WithContext(c).
+	if err := getCurrentDB(c, s.db).WithContext(c).
 		Table(s.tableName).
 		Where("user_id = ?", userID).
 		Where("id IN ?", ids).
-		Where("state = ?", commonStatus.NORMAL).
+		Where("state = ?", state).
 		Find(&rows).Error; err != nil {
 		return nil, err
 	}
 	return rows, nil
 }
 
-func (s *IApiShopCartDaoImpl) getByUserIDAndSkuIDTx(c *gin.Context, tx *gorm.DB, userID int64, skuID uint64) (*models.CartDto, error) {
+func (s *IApiShopCartDaoImpl) DeleteByIds(c *gin.Context, userID int64, ids []int64) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	return getCurrentDB(c, s.db).WithContext(c).Table(s.tableName).
+		Where("user_id = ?", userID).
+		Where("id IN ?", ids).
+		Delete(nil).Error
+}
+
+func (s *IApiShopCartDaoImpl) getByMergeIdentityTx(c *gin.Context, tx *gorm.DB, userID int64, skuID uint64, productType int32, activityID int64, state int32) (*models.CartDto, error) {
 	var item models.CartDto
 	if err := tx.WithContext(c).Table(s.tableName).
 		Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("user_id = ?", userID).
 		Where("sku_id = ?", skuID).
-		Where("state = ?", commonStatus.NORMAL).
+		Where("product_type = ?", productType).
+		Where("activity_id = ?", activityID).
+		Where("state = ?", state).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -161,10 +190,14 @@ func isDuplicateKeyError(err error) bool {
 }
 
 func (s *IApiShopCartDaoImpl) getByIDTx(c *gin.Context, tx *gorm.DB, id int64) (*models.CartDto, error) {
+	return s.getByIDAndStateTx(c, tx, id, shopConstant.CartStateNormal)
+}
+
+func (s *IApiShopCartDaoImpl) getByIDAndStateTx(c *gin.Context, tx *gorm.DB, id int64, state int32) (*models.CartDto, error) {
 	var item models.CartDto
 	if err := tx.WithContext(c).Table(s.tableName).
 		Where("id = ?", id).
-		Where("state = ?", commonStatus.NORMAL).
+		Where("state = ?", state).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
