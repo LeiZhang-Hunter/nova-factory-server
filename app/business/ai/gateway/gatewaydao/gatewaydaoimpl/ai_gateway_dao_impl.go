@@ -91,9 +91,6 @@ func (a *AIGatewayDaoImpl) List(c *gin.Context, req *gatewaymodels.AIGatewayQuer
 	if req.Enabled != nil {
 		db = db.Where("enabled = ?", req.Enabled)
 	}
-	if req.Active != nil {
-		db = db.Where("active = ?", req.Active)
-	}
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	if req.Page <= 0 {
 		req.Page = 1

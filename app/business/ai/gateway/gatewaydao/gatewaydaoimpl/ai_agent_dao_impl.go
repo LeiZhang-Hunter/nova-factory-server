@@ -203,3 +203,17 @@ func (a *AIAgentDaoImpl) GetEnable(c context.Context) ([]*gatewaymodels.AIAgent,
 	}
 	return list, nil
 }
+
+// GetConfigVersion 读取最新版本
+func (a *AIAgentDaoImpl) GetConfigVersion(c context.Context, id int64) (*gatewaymodels.AIAgent, error) {
+	var info *gatewaymodels.AIAgent
+	ret := a.db.Table(a.table).Where("id = ?", id).Select("id", "config_version").Where("state = ?", commonStatus.NORMAL).
+		First(&info)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+	return info, ret.Error
+}

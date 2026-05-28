@@ -1,6 +1,7 @@
 package gatewayserviceimpl
 
 import (
+	"context"
 	"errors"
 	"nova-factory-server/app/constant/aiagent"
 	"strconv"
@@ -47,6 +48,9 @@ func NewAIAgentConfigPublishHistoryService(
 
 // Set 保存智能体配置发布历史。
 func (a *AIAgentConfigPublishHistoryServiceImpl) Set(c *gin.Context, req *gatewaymodels.AIAgentConfigPublishHistoryUpsert) (*gatewaymodels.AIAgentConfigPublishHistory, error) {
+	if req.Action != string(aiagent.ConfigPublishType) && req.Action != string(aiagent.ConfigRemoveType) {
+		return nil, errors.New("下发类型错误")
+	}
 	if err := a.validateUpsert(c, req); err != nil {
 		return nil, err
 	}
@@ -94,11 +98,19 @@ func (a *AIAgentConfigPublishHistoryServiceImpl) Set(c *gin.Context, req *gatewa
 		if err != nil {
 			return err
 		}
-		err = a.agentDao.UpdateConfigVersion(c, req.AgentID, req.Version)
-		if err != nil {
-			return err
+		if req.Action == string(aiagent.ConfigRemoveType) {
+			err = a.agentDao.UpdateConfigVersion(c, req.AgentID, "")
+			if err != nil {
+				return err
+			}
+		} else {
+			err = a.agentDao.UpdateConfigVersion(c, req.AgentID, req.Version)
+			if err != nil {
+				return err
+			}
 		}
-		return a.publishConfig(c, req.AgentID, aiagent.ConfigPublishType)
+
+		return a.publishConfig(c, req.AgentID, aiagent.ConfigUpdate(req.Action))
 	})
 	if err != nil {
 		return nil, err
@@ -112,6 +124,14 @@ func (a *AIAgentConfigPublishHistoryServiceImpl) Info(c *gin.Context, id int64) 
 		return nil, errors.New("id不能为空")
 	}
 	return a.dao.GetByID(c, id)
+}
+
+func (a *AIAgentConfigPublishHistoryServiceImpl) GetByVersion(c context.Context, version string) (*gatewaymodels.AIAgentConfigPublishHistory, error) {
+	version = strings.TrimSpace(version)
+	if version == "" {
+		return nil, errors.New("version不能为空")
+	}
+	return a.dao.GetByVersion(c, version)
 }
 
 // List 查询智能体配置发布历史列表。

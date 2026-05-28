@@ -2,6 +2,7 @@ package aidatasetserviceimpl
 
 import (
 	"context"
+	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/ai/gateway/gatewaydao"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
@@ -38,4 +39,8 @@ func (i *IConfigLoaderServiceImpl) All(ctx context.Context) ([]*gatewaymodels.AI
 
 	configs, err := i.historyDao.GetConfigsByAgentIdAndVersion(ctx, agentIdMap)
 	return configs, err
+}
+
+func (i *IConfigLoaderServiceImpl) GetByAgentIdAndVersion(ctx context.Context, agentId uint64, version string) (*gatewaymodels.AIAgentConfigPublishHistory, error) {
+	return i.historyDao.GetByAgentIDAndVersion(&gin.Context{}, int64(agentId), version)
 }

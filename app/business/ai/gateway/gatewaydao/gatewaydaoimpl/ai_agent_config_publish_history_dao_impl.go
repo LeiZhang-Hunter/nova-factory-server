@@ -118,6 +118,20 @@ func (a *AIAgentConfigPublishHistoryDaoImpl) GetByAgentIDAndVersion(c *gin.Conte
 	return &item, nil
 }
 
+func (a *AIAgentConfigPublishHistoryDaoImpl) GetByVersion(c context.Context, version string) (*gatewaymodels.AIAgentConfigPublishHistory, error) {
+	var item gatewaymodels.AIAgentConfigPublishHistory
+	if err := a.db.WithContext(c).Table(a.table).
+		Where("version = ?", version).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
 // DeleteByIDs 删除智能体配置发布历史。
 func (a *AIAgentConfigPublishHistoryDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	return a.DeleteByIDsWithTx(c, a.db.WithContext(c), ids)

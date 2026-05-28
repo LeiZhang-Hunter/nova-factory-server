@@ -16,6 +16,7 @@ type IAIAgentConfigPublishHistoryDao interface {
 	UpdateWithTx(c *gin.Context, tx *gorm.DB, req *gatewaymodels.AIAgentConfigPublishHistoryUpsert) (*gatewaymodels.AIAgentConfigPublishHistory, error)
 	GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAgentConfigPublishHistory, error)
 	GetByAgentIDAndVersion(c *gin.Context, agentID int64, version string) (*gatewaymodels.AIAgentConfigPublishHistory, error)
+	GetByVersion(c context.Context, version string) (*gatewaymodels.AIAgentConfigPublishHistory, error)
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	DeleteByIDsWithTx(c *gin.Context, tx *gorm.DB, ids []int64) error
 	List(c *gin.Context, req *gatewaymodels.AIAgentConfigPublishHistoryQuery) (*gatewaymodels.AIAgentConfigPublishHistoryListData, error)

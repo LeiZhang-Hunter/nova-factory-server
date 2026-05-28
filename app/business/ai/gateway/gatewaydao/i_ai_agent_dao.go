@@ -17,4 +17,6 @@ type IAIAgentDao interface {
 	List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error)
 	UpdateConfigVersion(c *gin.Context, id int64, version string) error
 	GetEnable(c context.Context) ([]*gatewaymodels.AIAgent, error)
+	// GetConfigVersion 读取最新版本
+	GetConfigVersion(c context.Context, id int64) (*gatewaymodels.AIAgent, error)
 }
