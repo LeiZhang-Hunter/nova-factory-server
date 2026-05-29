@@ -10,8 +10,8 @@ type RagflowAuthOutput struct {
 
 // DatasetAccessData 聚合后的知识库与文档访问数据。
 type DatasetAccessData struct {
-	DatasetIDs    []string `json:"datasetIds"`
-	DatasetUuIDs  []string `json:"datasetUuIds"`
-	DocumentIDs   []string `json:"documentIds"`
-	DocumentUuIDs []string `json:"documentUuIds"`
+	DatasetIDs    []string `json:"-"`
+	DatasetUuIDs  []string `json:"dataset_ids"`
+	DocumentIDs   []string `json:"-"`
+	DocumentUuIDs []string `json:"document_ids"`
 }

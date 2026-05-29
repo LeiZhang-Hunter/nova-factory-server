@@ -12,11 +12,12 @@ import (
 	"nova-factory-server/app/business/erp"
 	"nova-factory-server/app/business/iot"
 	"nova-factory-server/app/business/shop"
+	"nova-factory-server/app/business/wms"
 	"nova-factory-server/app/datasource"
 	"nova-factory-server/app/routes"
 )
 
-func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.Shop, _ *erp.Erp) *gin.Engine {
+func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.Shop, _ *erp.Erp, _ *wms.Wms) *gin.Engine {
 	type McpConfig struct {
 		Path           string `mapstructure:"path"`
 		OperationsPath string `mapstructure:"operationsPath"`
@@ -40,6 +41,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		ai.ProviderSet,
 		shop.ProviderSet,
 		erp.ProviderSet,
+		wms.ProviderSet,
 		admin.ProviderSet,
 		datasource.ProviderSet,
 		finalEngine,

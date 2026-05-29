@@ -103,15 +103,11 @@ func buildChatRequestBody(ctx *gin.Context, req *api.SendMessageInput) ([]byte, 
 	if err == nil && form != nil && len(form.File) > 0 {
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
-		metadata := strings.TrimSpace(ctx.PostForm("metadata"))
-		if metadata == "" {
-			metadataBytes, marshalErr := json.Marshal(req)
-			if marshalErr != nil {
-				return nil, "", marshalErr
-			}
-			metadata = string(metadataBytes)
+		metadataBytes, marshalErr := json.Marshal(req)
+		if marshalErr != nil {
+			return nil, "", marshalErr
 		}
-		if err = writer.WriteField("metadata", metadata); err != nil {
+		if err = writer.WriteField("metadata", string(metadataBytes)); err != nil {
 			return nil, "", err
 		}
 		headers := form.File["file"]

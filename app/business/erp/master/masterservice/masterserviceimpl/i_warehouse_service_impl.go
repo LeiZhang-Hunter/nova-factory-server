@@ -64,6 +64,13 @@ func (s *WarehouseServiceImpl) GetByID(c *gin.Context, id int64) (*mastermodels.
 	return s.dao.GetByID(c, id)
 }
 
+func (s *WarehouseServiceImpl) GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.Warehouse, error) {
+	if len(ids) == 0 {
+		return []*mastermodels.Warehouse{}, nil
+	}
+	return s.dao.GetByIDs(c, ids)
+}
+
 func (s *WarehouseServiceImpl) ListPage(c *gin.Context, req *mastermodels.WarehouseQuery) (*mastermodels.WarehouseListData, error) {
 	if req != nil {
 		req.Name = strings.TrimSpace(req.Name)

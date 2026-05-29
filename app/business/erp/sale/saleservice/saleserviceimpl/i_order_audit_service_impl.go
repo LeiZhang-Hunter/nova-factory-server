@@ -3,10 +3,14 @@ package saleserviceimpl
 import (
 	"errors"
 	"go.uber.org/zap"
+	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/erp/core/integration"
 	"nova-factory-server/app/business/erp/core/integration/api"
+	mastermodels "nova-factory-server/app/business/erp/master/mastermodels"
+	masterservice "nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/business/erp/setting/settingdao"
 	"nova-factory-server/app/datasource/cache"
+	"strconv"
 	"strings"
 
 	"nova-factory-server/app/business/erp/sale/saledao"
@@ -21,20 +25,26 @@ import (
 type OrderAuditServiceImpl struct {
 	dao                  saledao.IOrderAuditDao
 	orderDao             saledao.IOrderDao
+	productService       masterservice.IProductService
 	integrationConfigDao settingdao.IIntegrationConfigDao
+	modelService         aidatasetservice.IAiModelProviderService
 	db                   *gorm.DB
 	cache                cache.Cache
 }
 
 // NewOrderAuditService 创建 ERP 订单审核服务。
 func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao,
-	db *gorm.DB, integrationConfigDao settingdao.IIntegrationConfigDao, cache cache.Cache) saleservice.IOrderAuditService {
+	productService masterservice.IProductService, db *gorm.DB,
+	integrationConfigDao settingdao.IIntegrationConfigDao, cache cache.Cache,
+	modelService aidatasetservice.IAiModelProviderService) saleservice.IOrderAuditService {
 	return &OrderAuditServiceImpl{
 		dao:                  dao,
 		orderDao:             orderDao,
+		productService:       productService,
 		db:                   db,
 		integrationConfigDao: integrationConfigDao,
 		cache:                cache,
+		modelService:         modelService,
 	}
 }
 
@@ -90,7 +100,14 @@ func (o *OrderAuditServiceImpl) GetByID(c *gin.Context, id uint64) (*salemodels.
 	if id == 0 {
 		return nil, errors.New("id不能为空")
 	}
-	return o.dao.GetByID(c, id)
+	info, err := o.dao.GetByID(c, id)
+	if err != nil || info == nil {
+		return info, err
+	}
+	if err = o.fillOrderAuditDetails(c, info); err != nil {
+		zap.L().Warn("fill order audit details failed", zap.Uint64("id", id), zap.Error(err))
+	}
+	return info, nil
 }
 
 func (o *OrderAuditServiceImpl) List(c *gin.Context, req *salemodels.OrderAuditQuery) (*salemodels.OrderAuditListData, error) {
@@ -124,10 +141,14 @@ func (o *OrderAuditServiceImpl) Approve(c *gin.Context, req *salemodels.OrderAud
 		return item, nil
 	}
 	var result *salemodels.OrderAudit
-	err = o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+	db := o.db.WithContext(c)
+	err = db.Transaction(func(tx *gorm.DB) error {
 		order, setErr := o.orderDao.SetWithTx(c, tx, o.toOrderSet(item))
 		if setErr != nil {
 			return setErr
+		}
+		if order == nil {
+			return errors.New("正式订单保存成功但事务内未返回订单")
 		}
 		if approveErr := o.dao.ApproveWithTx(c, tx, req.ID, strings.TrimSpace(req.AuditRemark), order.ID); approveErr != nil {
 			return approveErr
@@ -398,4 +419,105 @@ func float64Ptr(value float64) *float64 {
 func int64Ptr(value int64) *int64 {
 	v := value
 	return &v
+}
+
+// fillOrderAuditDetails 填充商品详情，
+func (o *OrderAuditServiceImpl) fillOrderAuditDetails(c *gin.Context, info *salemodels.OrderAudit) error {
+	if info == nil || len(info.Details) == 0 || o.productService == nil {
+		return nil
+	}
+	queries := make([]string, 0, len(info.Details))
+	indexes := make([]int, 0, len(info.Details))
+	for index, detail := range info.Details {
+		query := buildOrderAuditDetailSearchQuery(detail)
+		if query == "" {
+			continue
+		}
+		queries = append(queries, query)
+		indexes = append(indexes, index)
+	}
+	if len(queries) == 0 {
+		return nil
+	}
+	embeddingInfo, err := o.modelService.EmbeddingWithLLM(c)
+	if err != nil {
+		return err
+	}
+	data, err := o.productService.BatchSearchVector(c, &mastermodels.ProductVectorBatchSearchReq{
+		Queries: queries,
+		Limit:   3,
+		Embedding: &mastermodels.ProductEmbeddingConfig{
+			ProviderType: embeddingInfo.APIType,
+			ProviderID:   embeddingInfo.LLMFactory,
+			APIEndpoint:  embeddingInfo.APIBase,
+			ModelID:      embeddingInfo.LLMName,
+			ApiKey:       embeddingInfo.APIKey,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if data == nil {
+		return nil
+	}
+	for i, row := range data.Rows {
+		if i >= len(indexes) {
+			break
+		}
+		fillOrderAuditDetailMatchedProduct(info.Details[indexes[i]], row)
+	}
+	return nil
+}
+
+func buildOrderAuditDetailSearchQuery(detail *salemodels.OrderDetail) string {
+	if detail == nil {
+		return ""
+	}
+	parts := make([]string, 0, 4)
+	if name := strings.TrimSpace(detail.EShopGoodsName); name != "" {
+		parts = append(parts, "商品名称:"+name)
+	}
+	if skuName := strings.TrimSpace(detail.EShopSkuName); skuName != "" {
+		parts = append(parts, "规格:"+skuName)
+	}
+	if outerIID := strings.TrimSpace(detail.OuterIID); outerIID != "" {
+		parts = append(parts, "外部编码:"+outerIID)
+	}
+	if barcode := strings.TrimSpace(detail.Barcode); barcode != "" {
+		parts = append(parts, "条码:"+barcode)
+	}
+	return strings.Join(parts, "\n")
+}
+
+func fillOrderAuditDetailMatchedProduct(detail *salemodels.OrderDetail, item *mastermodels.ProductVectorBatchSearchItem) {
+	if detail == nil || item == nil || len(item.Rows) == 0 || item.Rows[0] == nil {
+		return
+	}
+	match := item.Rows[0]
+	if match.BarCode != "" {
+		detail.OldBarcode = detail.Barcode
+		detail.Barcode = match.BarCode
+	}
+
+	if match.Name != "" {
+		detail.OldEShopGoodsName = detail.EShopGoodsName
+		detail.EShopGoodsName = match.Name
+	}
+	if match.Standard != "" {
+		detail.OldEShopSkuName = detail.EShopSkuName
+		detail.EShopSkuName = match.Name
+	}
+	if match.UnitId > 0 {
+		detail.UnitID = match.UnitId
+	}
+	if match.ProductID != 0 {
+		detail.OldEShopSkuID = detail.EShopSkuID
+		detail.EShopSkuID = strconv.FormatInt(match.ProductID, 10)
+	}
+
+	if match.SalePrice != 0.0 {
+		detail.OldPayment = detail.Payment
+		detail.Payment = match.SalePrice
+	}
+
 }

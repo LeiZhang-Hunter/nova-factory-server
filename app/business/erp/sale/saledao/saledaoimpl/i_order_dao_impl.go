@@ -104,7 +104,7 @@ func (o *OrderDaoImpl) SetWithTx(c *gin.Context, tx *gorm.DB, req *salemodels.Or
 	if err != nil {
 		return nil, err
 	}
-	return o.GetByID(c, resultID)
+	return o.getByIDWithTx(c, tx, resultID)
 }
 
 // doSet 执行新增或修改 ERP 订单的核心逻辑。
@@ -145,6 +145,9 @@ func (o *OrderDaoImpl) doSet(c *gin.Context, tx *gorm.DB, req *salemodels.OrderS
 			return 0, err
 		}
 	}
+	if err := o.detailDao.DeleteByTidAndOIDs(tx, data.Tid, req.Details); err != nil {
+		return 0, err
+	}
 	if err := o.detailDao.BatchCreate(tx, c, resultID, data.Tid, req.Details); err != nil {
 		return 0, err
 	}
@@ -171,6 +174,25 @@ func (o *OrderDaoImpl) GetByID(c *gin.Context, id uint64) (*salemodels.Order, er
 	if err := o.attachChildren(c, []*salemodels.Order{&item}); err != nil {
 		return nil, err
 	}
+	return &item, nil
+}
+
+// getByIDWithTx 在事务内读取订单主表，避免未提交数据在事务外不可见。
+func (o *OrderDaoImpl) getByIDWithTx(c *gin.Context, tx *gorm.DB, id uint64) (*salemodels.Order, error) {
+	if tx == nil {
+		return o.GetByID(c, id)
+	}
+	var row erpOrderRow
+	if err := tx.WithContext(c).Table(o.table).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&row).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	item := row.toModel()
 	return &item, nil
 }
 

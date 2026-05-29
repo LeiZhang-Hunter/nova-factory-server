@@ -12,5 +12,6 @@ type IWarehouseService interface {
 	Update(c *gin.Context, req *mastermodels.WarehouseUpsert) (*mastermodels.Warehouse, error)
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*mastermodels.Warehouse, error)
+	GetByIDs(c *gin.Context, ids []int64) ([]*mastermodels.Warehouse, error)
 	List(c *gin.Context, req *mastermodels.WarehouseQuery) (*mastermodels.WarehouseListData, error)
 }
