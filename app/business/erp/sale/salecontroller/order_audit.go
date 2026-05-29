@@ -72,7 +72,7 @@ func (o *OrderAudit) List(c *gin.Context) {
 // @Param id path int true "订单审核ID"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "查询成功"
-// @Router /erp/order-audit/query/{id} [get]
+// @Router /erp/sale/order-audit/query/{id} [get]
 func (o *OrderAudit) GetByID(c *gin.Context) {
 	id := baizeContext.ParamInt64(c, "id")
 	if id == 0 {

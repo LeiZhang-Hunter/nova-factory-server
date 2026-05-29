@@ -31,7 +31,8 @@ func NewOrderAuditDao(db *gorm.DB) saledao.IOrderAuditDao {
 
 func (o *OrderAuditDaoImpl) Set(c *gin.Context, req *salemodels.OrderAuditSet) (*salemodels.OrderAudit, error) {
 	var resultID uint64
-	err := o.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+	db := o.db.WithContext(c)
+	err := db.Transaction(func(tx *gorm.DB) error {
 		exists, err := o.findExists(tx, req)
 		if err != nil {
 			return err
@@ -143,7 +144,6 @@ func (o *OrderAuditDaoImpl) ApproveWithTx(c *gin.Context, tx *gorm.DB, id uint64
 	now := time.Now()
 	return tx.WithContext(c).Table(o.table).
 		Where("id = ?", id).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		Updates(map[string]any{
 			"audit_status":     1,
