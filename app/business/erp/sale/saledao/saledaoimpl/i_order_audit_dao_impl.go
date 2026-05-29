@@ -128,16 +128,11 @@ func (o *OrderAuditDaoImpl) List(c *gin.Context, req *salemodels.OrderAuditQuery
 }
 
 func (o *OrderAuditDaoImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
-	now := time.Now()
+
 	return o.db.WithContext(c).Table(o.table).
 		Where("id IN ?", ids).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
-		Updates(map[string]any{
-			"state":       commonStatus.DELETE,
-			"update_by":   baizeContext.GetUserId(c),
-			"update_time": now,
-		}).Error
+		Delete(salemodels.OrderAudit{}).Error
 }
 
 func (o *OrderAuditDaoImpl) Approve(c *gin.Context, id uint64, remark string, erpOrderID uint64) error {

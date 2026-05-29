@@ -143,7 +143,7 @@ func (o *OrderAudit) Import(c *gin.Context) {
 // @Param ids path string true "订单审核ID，多个以逗号分隔"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "删除成功"
-// @Router /erp/order-audit/remove/{ids} [delete]
+// @Router /erp/sale/order-audit/remove/{ids} [delete]
 func (o *OrderAudit) Delete(c *gin.Context) {
 	ids := baizeContext.ParamInt64Array(c, "ids")
 	if len(ids) == 0 {
@@ -177,7 +177,7 @@ func (o *OrderAudit) Delete(c *gin.Context) {
 // @Param body body salemodels.OrderAuditAction true "订单审核动作参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "审核通过成功"
-// @Router /erp/order-audit/approve [post]
+// @Router /erp/sale/order-audit/approve [post]
 func (o *OrderAudit) Approve(c *gin.Context) {
 	req := new(salemodels.OrderAuditAction)
 	if err := c.ShouldBindJSON(req); err != nil {
@@ -201,7 +201,7 @@ func (o *OrderAudit) Approve(c *gin.Context) {
 // @Param body body salemodels.OrderAuditAction true "订单审核动作参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "驳回成功"
-// @Router /erp/order-audit/reject [post]
+// @Router /erp/sale/order-audit/reject [post]
 func (o *OrderAudit) Reject(c *gin.Context) {
 	req := new(salemodels.OrderAuditAction)
 	if err := c.ShouldBindJSON(req); err != nil {
