@@ -21,7 +21,7 @@ func NewWarehouseArea(service service.IWarehouseAreaService) *WarehouseArea {
 
 // PrivateRoutes 注册 WMS 库区私有路由。
 func (w *WarehouseArea) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/wms/admin/warehouse/area")
+	group := router.Group("/wms/warehouse/area")
 	group.GET("/list", middlewares.HasPermission("wms:warehouse:area:list"), w.List)
 	group.GET("/info/:id", middlewares.HasPermission("wms:warehouse:area:info"), w.Info)
 	group.POST("/set", middlewares.HasPermission("wms:warehouse:area:set"), w.Set)

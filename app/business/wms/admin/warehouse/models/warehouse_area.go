@@ -9,8 +9,10 @@ import (
 type WarehouseArea struct {
 	ID                    int64      `json:"id,string" gorm:"column:id"`
 	WarehouseID           int64      `json:"warehouseId,string" gorm:"column:warehouse_id"`
+	WarehouseName         string     `json:"warehouseName" gorm:"-"`
 	AreaName              string     `json:"areaName" gorm:"column:area_name"`
 	ParentID              int64      `json:"parentId,string" gorm:"column:parent_id"`
+	ParentAreaName        string     `json:"parentAreaName" gorm:"-"`
 	WarehouseAreaProperty int8       `json:"warehouseAreaProperty" gorm:"column:warehouse_area_property"`
 	LastUpdateTime        *time.Time `json:"lastUpdateTime" gorm:"column:last_update_time"`
 	IsValid               int8       `json:"isValid" gorm:"column:is_valid"`

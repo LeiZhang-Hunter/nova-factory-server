@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `wms_warehouse_area` (
     KEY `idx_warehouse_id` (`warehouse_id`),
     KEY `idx_area_name` (`area_name`),
     KEY `idx_parent_id` (`parent_id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='仓库分区';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='仓库分区';
 
 
 -- ============================================================

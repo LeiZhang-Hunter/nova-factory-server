@@ -69,6 +69,18 @@ func (d *WarehouseAreaDaoImpl) GetByID(c *gin.Context, id int64) (*models.Wareho
 	return item, nil
 }
 
+// GetByIDs 根据主键批量查询 WMS 库区。
+func (d *WarehouseAreaDaoImpl) GetByIDs(c *gin.Context, ids []int64) ([]*models.WarehouseArea, error) {
+	if len(ids) == 0 {
+		return []*models.WarehouseArea{}, nil
+	}
+	rows := make([]*models.WarehouseArea, 0, len(ids))
+	if err := d.baseQuery(c).Where("id IN ?", ids).Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 // GetByName 按仓库、父级和名称查询 WMS 库区。
 func (d *WarehouseAreaDaoImpl) GetByName(c *gin.Context, warehouseID, parentID int64, areaName string) (*models.WarehouseArea, error) {
 	item := new(models.WarehouseArea)
