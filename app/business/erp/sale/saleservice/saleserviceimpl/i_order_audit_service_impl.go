@@ -3,6 +3,7 @@ package saleserviceimpl
 import (
 	"errors"
 	"go.uber.org/zap"
+	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/erp/core/integration"
 	"nova-factory-server/app/business/erp/core/integration/api"
@@ -12,6 +13,7 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"strconv"
 	"strings"
+	"time"
 
 	"nova-factory-server/app/business/erp/sale/saledao"
 	"nova-factory-server/app/business/erp/sale/salemodels"
@@ -104,8 +106,22 @@ func (o *OrderAuditServiceImpl) GetByID(c *gin.Context, id uint64) (*salemodels.
 	if err != nil || info == nil {
 		return info, err
 	}
-	if err = o.fillOrderAuditDetails(c, info); err != nil {
-		zap.L().Warn("fill order audit details failed", zap.Uint64("id", id), zap.Error(err))
+	if info.AuditStatus == 0 {
+		if err = o.fillOrderAuditDetails(c, info); err != nil {
+			zap.L().Warn("fill order audit details failed", zap.Uint64("id", id), zap.Error(err))
+		}
+	}
+
+	// 付款时间
+	if info.PayTime == nil {
+		kt := baize.NewTime().ToString()
+		// 按当前服务时区解析时间字符串，避免默认按 UTC 解析导致时区偏差。
+		if v, err := time.ParseInLocation("2006-01-02 15:04:05", kt, time.Local); err == nil {
+			info.PayTime = &v
+		} else {
+			now := time.Now().In(time.Local)
+			info.PayTime = &now
+		}
 	}
 	return info, nil
 }
