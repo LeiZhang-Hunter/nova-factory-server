@@ -4,6 +4,7 @@ import (
 	"errors"
 	"go.uber.org/zap"
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/business/admin/system/systemdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/erp/core/integration"
 	"nova-factory-server/app/business/erp/core/integration/api"
@@ -30,6 +31,7 @@ type OrderAuditServiceImpl struct {
 	productService       masterservice.IProductService
 	integrationConfigDao settingdao.IIntegrationConfigDao
 	modelService         aidatasetservice.IAiModelProviderService
+	dictDataDao          systemdao.IDictDataDao
 	db                   *gorm.DB
 	cache                cache.Cache
 }
@@ -38,7 +40,8 @@ type OrderAuditServiceImpl struct {
 func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao,
 	productService masterservice.IProductService, db *gorm.DB,
 	integrationConfigDao settingdao.IIntegrationConfigDao, cache cache.Cache,
-	modelService aidatasetservice.IAiModelProviderService) saleservice.IOrderAuditService {
+	modelService aidatasetservice.IAiModelProviderService,
+	dictDataDao systemdao.IDictDataDao) saleservice.IOrderAuditService {
 	return &OrderAuditServiceImpl{
 		dao:                  dao,
 		orderDao:             orderDao,
@@ -47,6 +50,7 @@ func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao
 		integrationConfigDao: integrationConfigDao,
 		cache:                cache,
 		modelService:         modelService,
+		dictDataDao:          dictDataDao,
 	}
 }
 
@@ -111,6 +115,7 @@ func (o *OrderAuditServiceImpl) GetByID(c *gin.Context, id uint64) (*salemodels.
 			zap.L().Warn("fill order audit details failed", zap.Uint64("id", id), zap.Error(err))
 		}
 	}
+	info.Status = o.normalizeOrderStatus(c, info.Status)
 
 	// 付款时间
 	if info.PayTime == nil {
@@ -124,6 +129,37 @@ func (o *OrderAuditServiceImpl) GetByID(c *gin.Context, id uint64) (*salemodels.
 		}
 	}
 	return info, nil
+}
+
+func (o *OrderAuditServiceImpl) normalizeOrderStatus(c *gin.Context, status string) string {
+	if o.dictDataDao == nil {
+		return strings.TrimSpace(status)
+	}
+	rows := o.dictDataDao.SelectDictDataByType(c, "erp_order_status")
+	if len(rows) == 0 {
+		return strings.TrimSpace(status)
+	}
+	status = strings.TrimSpace(status)
+	firstValue := ""
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		value := strings.TrimSpace(row.DictValue)
+		if value == "" {
+			continue
+		}
+		if firstValue == "" {
+			firstValue = value
+		}
+		if value == status {
+			return status
+		}
+	}
+	if firstValue != "" {
+		return firstValue
+	}
+	return status
 }
 
 func (o *OrderAuditServiceImpl) List(c *gin.Context, req *salemodels.OrderAuditQuery) (*salemodels.OrderAuditListData, error) {
