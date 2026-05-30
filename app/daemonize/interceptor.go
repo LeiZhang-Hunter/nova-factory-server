@@ -3,16 +3,15 @@ package daemonize
 import (
 	"context"
 	"errors"
-	"fmt"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"nova-factory-server/app/constant/agent"
 )
 
 func CompanyValidate(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler,
 ) (interface{}, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
-	zap.L().Info("get md:%v", zap.Any("md", md))
 
 	if !ok {
 		zap.L().Error("get grpc request meta data failed")
@@ -36,9 +35,10 @@ func CompanyValidate(ctx context.Context, req interface{}, info *grpc.UnaryServe
 			return nil, errors.New("grpc request CodeNotAuthorized")
 		}
 	}
-	fmt.Println(username, pasword, gateway_id)
 
-	//companyUuid := val[0]
-	//ctx = context.WithValue(ctx, common.Cid, companyUuid)
+	ctx = context.WithValue(ctx, agent.USERNAME, username)
+	ctx = context.WithValue(ctx, agent.PASSWORD, pasword)
+	ctx = context.WithValue(ctx, agent.GATEWAYID, gateway_id)
+
 	return handler(ctx, req)
 }

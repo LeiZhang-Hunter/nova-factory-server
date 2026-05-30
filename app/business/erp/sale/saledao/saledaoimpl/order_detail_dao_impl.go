@@ -122,6 +122,37 @@ func (d *OrderDetailDaoImpl) DeleteByOrderIDs(tx *gorm.DB, orderIDs []uint64) er
 		Delete(nil).Error
 }
 
+// DeleteByTidAndOIDs 按订单编号和明细 OID 删除旧明细记录。
+func (d *OrderDetailDaoImpl) DeleteByTidAndOIDs(tx *gorm.DB, tid string, details []*salemodels.OrderDetailSet) error {
+	tid = strings.TrimSpace(tid)
+	if tid == "" || len(details) == 0 {
+		return nil
+	}
+	oidSet := make(map[string]struct{}, len(details))
+	oids := make([]string, 0, len(details))
+	for _, item := range details {
+		if item == nil {
+			continue
+		}
+		oid := strings.TrimSpace(item.OID)
+		if oid == "" {
+			continue
+		}
+		if _, ok := oidSet[oid]; ok {
+			continue
+		}
+		oidSet[oid] = struct{}{}
+		oids = append(oids, oid)
+	}
+	if len(oids) == 0 {
+		return nil
+	}
+	return tx.Table(d.table).
+		Where("tid = ?", tid).
+		Where("oid IN ?", oids).
+		Delete(&erpOrderDetailRow{}).Error
+}
+
 // ListByOrderIDs 按订单ID集合查询明细记录。
 func (d *OrderDetailDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) ([]*salemodels.OrderDetail, error) {
 	return d.listByOrderIDsWithDB(c, d.db.WithContext(c), orderIDs)

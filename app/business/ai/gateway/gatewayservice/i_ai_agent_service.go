@@ -1,6 +1,7 @@
 package gatewayservice
 
 import (
+	"context"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 
 	"github.com/gin-gonic/gin"
@@ -14,4 +15,10 @@ type IAIAgentService interface {
 	GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAgent, error)
 	GetEnabledByType(c *gin.Context, agentType string) (*gatewaymodels.AIAgent, error)
 	List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error)
+	// RefreshAlive 刷新智能体在线标记
+	RefreshAlive(ctx context.Context, id int64, version string) error
+	// UpdateConfigVersion 更新版本
+	UpdateConfigVersion(c *gin.Context, id int64, version string) error
+	// GetConfigVersion 读取最新版本
+	GetConfigVersion(c context.Context, id int64) (*gatewaymodels.AIAgent, error)
 }

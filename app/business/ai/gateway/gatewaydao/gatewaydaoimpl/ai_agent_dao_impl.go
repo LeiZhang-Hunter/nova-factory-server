@@ -1,6 +1,7 @@
 package gatewaydaoimpl
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -107,6 +108,12 @@ func (a *AIAgentDaoImpl) GetEnabledByType(c *gin.Context, agentType string) (*ga
 	return &item, nil
 }
 
+// UpdateConfigVersion 更新版本
+func (a *AIAgentDaoImpl) UpdateConfigVersion(c *gin.Context, id int64, version string) error {
+	ret := a.db.Table(a.table).Where("id = ?", id).Update("config_version", version)
+	return ret.Error
+}
+
 // List 查询智能体配置列表。
 func (a *AIAgentDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error) {
 	db := a.db.WithContext(c).Table(a.table).
@@ -183,4 +190,30 @@ func decodeAllowMcpServerIdsTools(item *gatewaymodels.AIAgent) {
 		return
 	}
 	_ = json.Unmarshal([]byte(content), &item.AllowMcpServerIdsTools)
+}
+
+func (a *AIAgentDaoImpl) GetEnable(c context.Context) ([]*gatewaymodels.AIAgent, error) {
+	list := make([]*gatewaymodels.AIAgent, 0)
+	ret := a.db.Table(a.table).Where("enable = ?", true).Where("state = ?", commonStatus.NORMAL).Find(&list)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return list, nil
+		}
+		return nil, ret.Error
+	}
+	return list, nil
+}
+
+// GetConfigVersion 读取最新版本
+func (a *AIAgentDaoImpl) GetConfigVersion(c context.Context, id int64) (*gatewaymodels.AIAgent, error) {
+	var info *gatewaymodels.AIAgent
+	ret := a.db.Table(a.table).Where("id = ?", id).Select("id", "config_version").Where("state = ?", commonStatus.NORMAL).
+		First(&info)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+	return info, ret.Error
 }

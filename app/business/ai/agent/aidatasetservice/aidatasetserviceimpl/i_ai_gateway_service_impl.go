@@ -17,13 +17,16 @@ import (
 )
 
 type IAIGatewayServiceImpl struct {
-	gatewayService gatewayservice.IAIGatewayService
-	config         *coreclient.Config
+	gatewayService       gatewayservice.IAIGatewayService
+	conversationsService gatewayservice.IAiConversationService
+	config               *coreclient.Config
 }
 
-func NewAIGatewayService(gatewayService gatewayservice.IAIGatewayService) aidatasetservice.IAIGatewayService {
+func NewAIGatewayService(gatewayService gatewayservice.IAIGatewayService,
+	conversationsService gatewayservice.IAiConversationService) aidatasetservice.IAIGatewayService {
 	return &IAIGatewayServiceImpl{
-		gatewayService: gatewayService,
+		gatewayService:       gatewayService,
+		conversationsService: conversationsService,
 		config: &coreclient.Config{
 			Algorithm:          coreclient.AlgorithmRoundRobin,
 			APIKeyHeader:       "Authorization-Api-Key",
@@ -43,14 +46,28 @@ func (i *IAIGatewayServiceImpl) Chat(c *gin.Context, req *aidatasetmodels.SendMe
 	if req.TabID == "" {
 		return nil, errors.New("tab_id不能为空")
 	}
+
+	conversationInfo, err := i.conversationsService.GetByID(c, req.ConversationID)
+	if err != nil {
+		return nil, err
+	}
+	if conversationInfo == nil {
+		return nil, errors.New("会话不存在")
+	}
+	if req.EnableThinking == nil {
+		req.EnableThinking = conversationInfo.EnableThinking
+	}
+
 	conversations, err := i.newConversationsClient(c)
 	if err != nil {
 		return nil, err
 	}
+
 	return conversations.Chat(c, &gatewayapi.SendMessageInput{
 		ConversationID: req.ConversationID,
 		Content:        req.Content,
 		TabID:          req.TabID,
+		AgentID:        conversationInfo.AgentID,
 		UserID:         baizeContext.GetUserId(c),
 		EnableThinking: req.EnableThinking,
 	})

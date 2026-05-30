@@ -73,7 +73,7 @@ func (a *AIGatewayDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 
 func (a *AIGatewayDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.AIGateway, error) {
 	var item gatewaymodels.AIGateway
-	if err := a.db.WithContext(c).Table(a.table).Where("id = ?", id).Where("dept_id = ?", baizeContext.GetDeptId(c)).
+	if err := a.db.WithContext(c).Table(a.table).Where("id = ?", id).
 		Where("state = ?", commonStatus.NORMAL).First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -90,9 +90,6 @@ func (a *AIGatewayDaoImpl) List(c *gin.Context, req *gatewaymodels.AIGatewayQuer
 	}
 	if req.Enabled != nil {
 		db = db.Where("enabled = ?", req.Enabled)
-	}
-	if req.Active != nil {
-		db = db.Where("active = ?", req.Active)
 	}
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	if req.Page <= 0 {

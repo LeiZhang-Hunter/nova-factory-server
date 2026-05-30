@@ -1,6 +1,7 @@
 package aiDataSetDaoImpl
 
 import (
+	"errors"
 	"nova-factory-server/app/utils/snowflake"
 	"strings"
 	"time"
@@ -92,6 +93,21 @@ func (i *IAiConversationDaoImpl) Update(c *gin.Context, req *aidatasetmodels.Set
 	return data, nil
 }
 
+func (i *IAiConversationDaoImpl) GetByID(c *gin.Context, id int64) (*aidatasetmodels.AiConversation, error) {
+	data := &aidatasetmodels.AiConversation{}
+	if err := i.db.WithContext(c).Table(i.table).
+		Where("id = ?", id).
+		Where("create_by = ?", baizeContext.GetUserId(c)).
+		Where("state = ?", commonStatus.NORMAL).
+		First(data).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return data, nil
+}
+
 func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiConversationQuery) (*aidatasetmodels.AiConversationListData, error) {
 	db := i.db.WithContext(c).Table(i.table)
 	if req.ID != 0 {
@@ -124,7 +140,6 @@ func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiCon
 
 func (i *IAiConversationDaoImpl) Remove(c *gin.Context, ids []int64) error {
 	return i.db.WithContext(c).Table(i.table).Where("id IN ?", ids).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Updates(map[string]interface{}{
 			"state":       commonStatus.DELETE,
 			"update_by":   baizeContext.GetUserId(c),

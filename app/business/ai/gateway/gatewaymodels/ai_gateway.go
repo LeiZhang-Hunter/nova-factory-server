@@ -3,12 +3,15 @@ package gatewaymodels
 import "nova-factory-server/app/baize"
 
 type AIGateway struct {
-	ID      int64  `json:"id,string" gorm:"column:id"`
-	Name    string `json:"name" gorm:"column:name"`
-	BaseURL string `json:"baseUrl" gorm:"column:base_url"`
-	APIKey  string `json:"apiKey" gorm:"column:api_key"`
-	Enabled *bool  `json:"enabled" gorm:"column:enabled"`
-	DeptID  int64  `json:"deptId" gorm:"column:dept_id"`
+	ID       int64  `json:"id,string" gorm:"column:id"`
+	Username string `json:"username" gorm:"column:username"`
+	Password string `json:"password" gorm:"column:password"`
+	Name     string `json:"name" gorm:"column:name"`
+	BaseURL  string `json:"baseUrl" gorm:"column:base_url"`
+	APIKey   string `json:"apiKey" gorm:"column:api_key"`
+	Enabled  *bool  `json:"enabled" gorm:"column:enabled"`
+	Active   int32  `json:"active" gorm:"-"`
+	DeptID   int64  `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
 }

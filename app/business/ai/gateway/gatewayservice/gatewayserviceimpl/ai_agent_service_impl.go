@@ -1,25 +1,31 @@
 package gatewayserviceimpl
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"strings"
+	"time"
 
 	"nova-factory-server/app/business/ai/gateway/gatewaydao"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
+	rediskey "nova-factory-server/app/constant/redis"
+	"nova-factory-server/app/datasource/cache"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // AIAgentServiceImpl 提供智能体配置的业务实现。
 type AIAgentServiceImpl struct {
-	dao gatewaydao.IAIAgentDao
+	dao   gatewaydao.IAIAgentDao
+	cache cache.Cache
 }
 
 // NewAIAgentService 创建智能体配置服务。
-func NewAIAgentService(dao gatewaydao.IAIAgentDao) gatewayservice.IAIAgentService {
-	return &AIAgentServiceImpl{dao: dao}
+func NewAIAgentService(dao gatewaydao.IAIAgentDao, cache cache.Cache) gatewayservice.IAIAgentService {
+	return &AIAgentServiceImpl{dao: dao, cache: cache}
 }
 
 // Create 新增智能体配置。
@@ -89,7 +95,56 @@ func (a *AIAgentServiceImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuer
 	}
 	req.Name = strings.TrimSpace(req.Name)
 	req.SandboxMode = strings.TrimSpace(req.SandboxMode)
-	return a.dao.List(c, req)
+	data, err := a.dao.List(c, req)
+	if err != nil || data == nil || len(data.Rows) == 0 {
+		return data, err
+	}
+	a.fillAgentActiveVersion(c, data.Rows)
+	return data, nil
+}
+
+// RefreshAlive 刷新智能体在线标记。
+func (a *AIAgentServiceImpl) RefreshAlive(ctx context.Context, id int64, version string) error {
+	if id == 0 {
+		return errors.New("id不能为空")
+	}
+	a.cache.Set(ctx, rediskey.MakeAIAgentAliveCacheKey(id), version, 2*time.Minute)
+	return nil
+}
+
+func (a *AIAgentServiceImpl) fillAgentActiveVersion(ctx context.Context, rows []*gatewaymodels.AIAgent) {
+	keys := make([]string, 0, len(rows))
+	agents := make([]*gatewaymodels.AIAgent, 0, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		row.ActiveVersion = ""
+		keys = append(keys, rediskey.MakeAIAgentAliveCacheKey(row.ID))
+		agents = append(agents, row)
+	}
+	if len(keys) == 0 {
+		return
+	}
+
+	// 批量读取 Redis 中 agent 最新在线版本，避免列表逐条查询带来的性能损耗。
+	values, err := a.cache.MGet(ctx, keys).Result()
+	if err != nil {
+		zap.L().Warn("batch get agent active version failed", zap.Error(err))
+		return
+	}
+	for i, value := range values {
+		version, ok := value.(string)
+		if !ok {
+			continue
+		}
+		agents[i].ActiveVersion = version
+	}
+}
+
+// UpdateConfigVersion 更新版本
+func (a *AIAgentServiceImpl) UpdateConfigVersion(c *gin.Context, id int64, version string) error {
+	return a.dao.UpdateConfigVersion(c, id, version)
 }
 
 func (a *AIAgentServiceImpl) prepareUpsert(req *gatewaymodels.AIAgentUpsert, isUpdate bool) error {
@@ -151,4 +206,8 @@ func validateAgentJSONArray(content string, fieldName string) error {
 
 func agentBoolPtr(v bool) *bool {
 	return &v
+}
+
+func (a *AIAgentServiceImpl) GetConfigVersion(c context.Context, id int64) (*gatewaymodels.AIAgent, error) {
+	return a.dao.GetConfigVersion(c, id)
 }
