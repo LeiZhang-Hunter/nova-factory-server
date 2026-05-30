@@ -43,3 +43,7 @@ func (l *LocalHostFile) PrivateUploadFile(ctx context.Context, file multipart.Fi
 	_, err = io.Copy(out, file)
 	return keyName, nil
 }
+
+func (l *LocalHostFile) ReadPrivateFile(ctx context.Context, fileKey string) ([]byte, error) {
+	return os.ReadFile(l.PrivatePath + fileKey)
+}

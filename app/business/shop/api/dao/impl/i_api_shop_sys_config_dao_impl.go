@@ -23,6 +23,19 @@ func NewIApiShopSysConfigDaoImpl(ms *gorm.DB) dao.IApiShopSysConfigDao {
 	}
 }
 
+// GetByConfigKeys 批量查询配置
+func (s *IApiShopSysConfigDaoImpl) GetByConfigKeys(c *gin.Context, configKeys []string) ([]models.ShopSysConfig, error) {
+	var results []models.ShopSysConfig
+	err := s.db.WithContext(c).Table(s.tableName).
+		Where("config_key IN ?", configKeys).
+		Where("state = ?", commonStatus.NORMAL).
+		Find(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
 // GetByConfigKey 根据配置键名获取配置
 func (s *IApiShopSysConfigDaoImpl) GetByConfigKey(c *gin.Context, configKey string) (*models.ShopSysConfig, error) {
 	var result models.ShopSysConfig

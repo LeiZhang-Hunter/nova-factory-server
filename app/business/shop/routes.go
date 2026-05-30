@@ -36,6 +36,7 @@ func NewGinEngine(
 	agentController *agent.Controller,
 	productController *product.Controller,
 	orderController *order.Order,
+	orderNotifyController *order.OrderNotify,
 	addressController *address.Address,
 	shopConfigController *shopconfigController.Controller,
 	favoriteController *favorite.Favorite,
@@ -53,6 +54,7 @@ func NewGinEngine(
 		productController.Category.PublicRoutes(publicGroup)
 		productController.Home.PublicRoutes(publicGroup)
 		productController.Product.PublicRoutes(publicGroup)
+		orderNotifyController.PublicRoutes(publicGroup)
 
 	}
 

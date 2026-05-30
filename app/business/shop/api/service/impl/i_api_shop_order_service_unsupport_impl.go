@@ -24,6 +24,7 @@ type IApiShopOrderServiceImpl struct {
 	combDao         activityDao.IShopCombinationDao
 	goodsDao        dao.IApiShopGoodsDao
 	skuDao          dao.IApiShopSkuDao
+	configDao       dao.IApiShopSysConfigDao
 	discountService discountservice.IDiscountCalculateService
 }
 
@@ -39,6 +40,7 @@ func NewIApiShopOrderServiceImpl(
 	combDao activityDao.IShopCombinationDao,
 	goodsDao dao.IApiShopGoodsDao,
 	skuDao dao.IApiShopSkuDao,
+	configDao dao.IApiShopSysConfigDao,
 	discountService discountservice.IDiscountCalculateService,
 ) service.IApiShopOrderService {
 	return &IApiShopOrderServiceImpl{
@@ -52,6 +54,7 @@ func NewIApiShopOrderServiceImpl(
 		combDao:         combDao,
 		goodsDao:        goodsDao,
 		skuDao:          skuDao,
+		configDao:       configDao,
 		discountService: discountService,
 	}
 }

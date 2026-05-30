@@ -142,11 +142,12 @@ func (s *Order) Pay(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if err := s.service.Pay(c, userID, id); err != nil {
+	data, err := s.service.Pay(c, userID, id)
+	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
-	baizeContext.Success(c)
+	baizeContext.SuccessData(c, data)
 }
 
 // Cancel 取消订单

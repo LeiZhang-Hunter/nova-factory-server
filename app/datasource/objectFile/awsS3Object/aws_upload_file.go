@@ -2,11 +2,13 @@ package awsS3Object
 
 import (
 	"context"
+	"errors"
+	"mime/multipart"
+	"nova-factory-server/app/utils/fileUtils"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"mime/multipart"
-	"nova-factory-server/app/utils/fileUtils"
 )
 
 type S3File struct {
@@ -46,4 +48,7 @@ func (s *S3File) PrivateUploadFile(ctx context.Context, file multipart.File, key
 		return "", err
 	}
 	return keyName, nil
+}
+func (l *S3File) ReadPrivateFile(ctx context.Context, fileKey string) ([]byte, error) {
+	return nil, errors.New("not support")
 }

@@ -459,6 +459,8 @@ INSERT INTO `shop_sys_config` (`config_key`, `config_value`, `config_type`, `rem
 -- 初始化微信支付配置
 INSERT INTO `shop_sys_config` (`config_key`, `config_value`, `config_type`, `remark`) VALUES
 ('wechat_pay_mch_id', '', 'N', '微信支付商户号'),
-('wechat_pay_mch_key', '', 'N', '微信支付商户密钥'),
 ('wechat_pay_notify_url', '', 'N', '微信支付回调地址'),
-('wechat_pay_cert_path', '', 'N', '微信支付证书路径');
+('wechat_pay_api_v3_key', '', 'N', '微信支付 APIv3Key'),
+('wechat_pay_serial_no', '', 'N', '微信支付证书序列号'),
+('wechat_pay_private_key_path', '', 'N', '微信支付私钥文件路径'),
+('wechat_pay_platform_public_key_path', '', 'N', '微信支付平台公钥文件路径');

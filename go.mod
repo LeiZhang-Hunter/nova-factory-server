@@ -17,6 +17,7 @@ require (
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/pprof v1.5.3
 	github.com/gin-gonic/gin v1.10.0
+	github.com/go-pay/gopay v1.5.118
 	github.com/go-sql-driver/mysql v1.9.1
 	github.com/goccy/go-yaml v1.19.2
 	github.com/gogf/gf v1.16.9
@@ -111,6 +112,12 @@ require (
 	github.com/go-json-experiment/json v0.0.0-20260214004413-d219187c3433 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-pay/crypto v0.0.1 // indirect
+	github.com/go-pay/errgroup v0.0.3 // indirect
+	github.com/go-pay/smap v0.0.2 // indirect
+	github.com/go-pay/util v0.0.4 // indirect
+	github.com/go-pay/xlog v0.0.3 // indirect
+	github.com/go-pay/xtime v0.0.2 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/godbus/dbus/v5 v5.0.4 // indirect
 	github.com/gogf/gf/contrib/registry/file/v2 v2.9.0 // indirect
