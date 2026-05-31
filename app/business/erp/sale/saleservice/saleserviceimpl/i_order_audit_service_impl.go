@@ -19,6 +19,7 @@ import (
 	"nova-factory-server/app/business/erp/sale/saledao"
 	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/business/erp/sale/saleservice"
+	searchutil "nova-factory-server/app/utils/vectorsearch"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -522,23 +523,7 @@ func (o *OrderAuditServiceImpl) fillOrderAuditDetails(c *gin.Context, info *sale
 }
 
 func buildOrderAuditDetailSearchQuery(detail *salemodels.OrderDetail) string {
-	if detail == nil {
-		return ""
-	}
-	parts := make([]string, 0, 4)
-	if name := strings.TrimSpace(detail.EShopGoodsName); name != "" {
-		parts = append(parts, "商品名称:"+name)
-	}
-	if skuName := strings.TrimSpace(detail.EShopSkuName); skuName != "" {
-		parts = append(parts, "规格:"+skuName)
-	}
-	if outerIID := strings.TrimSpace(detail.OuterIID); outerIID != "" {
-		parts = append(parts, "外部编码:"+outerIID)
-	}
-	if barcode := strings.TrimSpace(detail.Barcode); barcode != "" {
-		parts = append(parts, "条码:"+barcode)
-	}
-	return strings.Join(parts, "\n")
+	return searchutil.BuildLabeledContentFromProvider(detail, 0)
 }
 
 func fillOrderAuditDetailMatchedProduct(detail *salemodels.OrderDetail, item *mastermodels.ProductVectorBatchSearchItem) {
