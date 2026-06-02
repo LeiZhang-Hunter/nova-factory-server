@@ -21,9 +21,20 @@ type CartListData struct {
 
 // CartSetDataReq 购物车新增修改参数
 type CartSetDataReq struct {
-	GoodsID  int64 `json:"goodsId,string" binding:"required"` // 商品ID
-	SkuID    int64 `json:"skuId,string" binding:"required"`   // SKU ID
-	Quantity int64 `json:"quantity" binding:"required"`       // 数量
+	GoodsID       int64 `json:"goodsId,string"`       // 商品ID
+	SkuID         int64 `json:"skuId,string"`         // SKU ID
+	Quantity      int64 `json:"quantity"`             // 数量
+	BuyNow        bool  `json:"buyNow"`               // 是否立即购买
+	SecKillID     int64 `json:"secKillId,string"`     // 秒杀活动商品ID
+	CombinationID int64 `json:"combinationId,string"` // 拼团活动商品ID
+	PinkID        int64 `json:"pinkId,string"`        // 拼团记录ID
+}
+
+func (r *CartSetDataReq) IsBuyNow() bool {
+	if r == nil {
+		return false
+	}
+	return r.BuyNow
 }
 
 type CartSetData struct {
@@ -37,6 +48,16 @@ type CartSetData struct {
 	ImageURL    string  `json:"imageUrl"`                     // 图片地址
 	RetailPrice float64 `json:"retailPrice"`                  // 零售价
 	Quantity    int64   `json:"quantity" binding:"required"`  // 数量
+	ProductType int32   `json:"productType"`                  // 商品类型：0普通 1秒杀 3拼团
+	ActivityID  int64   `json:"activityId,string"`            // 活动商品ID
+	PinkID      int64   `json:"pinkId,string"`                // 拼团记录ID
+	State       int32   `json:"state"`                        // 购物车状态
+}
+
+type CartSetDataResp struct {
+	Mode   string   `json:"mode"`             // cart 或 buyNow
+	CartID string   `json:"cartId,omitempty"` // 购物车ID或立即购买临时快照key
+	Cart   *CartDto `json:"cart,omitempty"`   // 购物车项
 }
 
 // CartDto 商城用户购物车项
@@ -50,6 +71,9 @@ type CartDto struct {
 	ImageURL      string     `json:"imageUrl" gorm:"image_url"`              // 商品或SKU图片快照
 	RetailPrice   float64    `json:"retailPrice" gorm:"retail_price"`        // 加入购物车时零售价快照
 	Quantity      int64      `json:"quantity" gorm:"quantity"`               // 购买数量
+	ProductType   int32      `json:"productType" gorm:"column:product_type"` // 商品类型：0普通 1秒杀 3拼团
+	ActivityID    int64      `json:"activityId,string" gorm:"activity_id"`   // 活动商品ID
+	PinkID        int64      `json:"pinkId,string" gorm:"pink_id"`           // 拼团记录ID
 	IsStockEnough bool       `json:"isStockEnough" gorm:"-" gorm:"-"`        // 库存是否充足（当前库存 >= 购买数量）
 	CreateTime    *time.Time `json:"createTime" gorm:"create_time"`          //创建时间
 	UpdateTime    *time.Time `json:"updateTime" gorm:"update_time"`          //修改时间

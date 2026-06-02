@@ -69,9 +69,14 @@ func (voice *Voice) WsVoice(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
+	defer zap.L().Info("[voice-debug] websocket closed",
+		zap.String("client_ip", c.ClientIP()),
+		zap.Duration("ws_elapsed", time.Since(wsStart)),
+	)
 	zap.L().Info("[voice-debug] websocket connected", zap.String("client_ip", c.ClientIP()))
 
 	emitter := &voiceEmitter{conn: conn}
+	zap.L().Info("[voice-debug] send session_ready", zap.Duration("ws_elapsed", time.Since(wsStart)))
 	_ = emitter.SendEvent(&apiModels.ShopVoiceServerEvent{Type: "session_ready"})
 
 	for {
@@ -87,7 +92,7 @@ func (voice *Voice) WsVoice(c *gin.Context) {
 			continue
 		}
 		if strings.TrimSpace(req.Type) == "" {
-			req.Type = "submit_audio"
+			req.Type = "submit_text"
 		}
 		zap.L().Info("[voice-debug] websocket message received",
 			zap.String("type", req.Type),
@@ -95,7 +100,7 @@ func (voice *Voice) WsVoice(c *gin.Context) {
 			zap.Int("payload_bytes", len(payload)),
 			zap.Duration("ws_elapsed", time.Since(wsStart)),
 		)
-		if req.Type != "submit_audio" {
+		if req.Type != "submit_text" {
 			continue
 		}
 		turnStart := time.Now()

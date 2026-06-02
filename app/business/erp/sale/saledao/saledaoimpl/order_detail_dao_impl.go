@@ -155,12 +155,16 @@ func (d *OrderDetailDaoImpl) DeleteByTidAndOIDs(tx *gorm.DB, tid string, details
 
 // ListByOrderIDs 按订单ID集合查询明细记录。
 func (d *OrderDetailDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) ([]*salemodels.OrderDetail, error) {
+	return d.listByOrderIDsWithDB(c, d.db.WithContext(c), orderIDs)
+}
+
+func (d *OrderDetailDaoImpl) listByOrderIDsWithDB(c *gin.Context, db *gorm.DB, orderIDs []uint64) ([]*salemodels.OrderDetail, error) {
 	if len(orderIDs) == 0 {
 		return []*salemodels.OrderDetail{}, nil
 	}
 	rows := make([]*salemodels.OrderDetail, 0)
 	rowList := make([]*erpOrderDetailRow, 0)
-	if err := d.db.WithContext(c).Table(d.table).
+	if err := db.Table(d.table).
 		Where("order_id IN ?", orderIDs).
 		Where("state = ?", commonStatus.NORMAL).
 		Order("id ASC").

@@ -2,13 +2,14 @@ package objectFile
 
 import (
 	"context"
+	"mime/multipart"
+	"nova-factory-server/app/datasource/objectFile/awsS3Object"
+	"nova-factory-server/app/datasource/objectFile/localhostObject"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/spf13/viper"
-	"mime/multipart"
-	"nova-factory-server/app/datasource/objectFile/awsS3Object"
-	"nova-factory-server/app/datasource/objectFile/localhostObject"
 )
 
 const (
@@ -20,6 +21,7 @@ const (
 type ObjectFile interface {
 	PublicUploadFile(ctx context.Context, file multipart.File, keyName string) (string, error)
 	PrivateUploadFile(ctx context.Context, file multipart.File, keyName string) (string, error)
+	ReadPrivateFile(ctx context.Context, fileKey string) ([]byte, error)
 }
 
 func NewConfig() (of ObjectFile) {

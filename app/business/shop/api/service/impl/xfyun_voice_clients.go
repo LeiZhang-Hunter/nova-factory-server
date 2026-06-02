@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -77,18 +78,44 @@ type asrData struct {
 }
 
 type asrResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    struct {
-		Status int `json:"status"`
-		Result struct {
-			Ws []struct {
-				Cw []struct {
-					W string `json:"w"`
-				} `json:"cw"`
-			} `json:"ws"`
-		} `json:"result"`
-	} `json:"data"`
+	Action  string          `json:"action"`
+	Code    asrInt          `json:"code"`
+	Message string          `json:"message"`
+	Desc    string          `json:"desc"`
+	SID     string          `json:"sid"`
+	Data    json.RawMessage `json:"data"`
+}
+
+type asrInt int
+
+func (v *asrInt) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 || string(data) == "null" {
+		*v = 0
+		return nil
+	}
+
+	var intValue int
+	if err := json.Unmarshal(data, &intValue); err == nil {
+		*v = asrInt(intValue)
+		return nil
+	}
+
+	var stringValue string
+	if err := json.Unmarshal(data, &stringValue); err == nil {
+		stringValue = strings.TrimSpace(stringValue)
+		if stringValue == "" {
+			*v = 0
+			return nil
+		}
+		parsed, err := strconv.Atoi(stringValue)
+		if err != nil {
+			return err
+		}
+		*v = asrInt(parsed)
+		return nil
+	}
+
+	return fmt.Errorf("unsupported asr int payload: %s", string(data))
 }
 
 func (c *xfyunASRClient) Transcribe(ctx context.Context, pcm []byte) (string, error) {
@@ -112,50 +139,107 @@ func (c *xfyunASRClient) Transcribe(ctx context.Context, pcm []byte) (string, er
 		_ = conn.UnderlyingConn().SetDeadline(deadline)
 	}
 	frames := splitAudioFrames(pcm, 1280)
+	zap.L().Info("[DEBUG-ASR-UPLOAD] xfyun asr connect",
+		zap.String("url", c.url),
+		zap.Int("pcm_bytes", len(pcm)),
+		zap.Int("frame_count", len(frames)),
+	)
 	for i, frame := range frames {
 		status := 1
 		if i == 0 {
 			status = 0
 		}
 		if i == len(frames)-1 {
-			status = 2
+			status = 1
 		}
 		req := asrRequest{}
 		if status == 0 {
 			req.Common.AppID = c.appID
-			req.Business = map[string]any{"language": "zh_cn", "domain": "iat", "accent": "mandarin", "vad_eos": 10000}
+			req.Business = map[string]any{"language": "zh_cn", "domain": "iat", "accent": "mandarin", "eos": 10000}
 		}
 		req.Data = &asrData{Status: status, Format: "audio/L16;rate=16000", Encoding: "raw", Audio: base64.StdEncoding.EncodeToString(frame)}
+		zap.L().Info("[DEBUG-ASR-UPLOAD] xfyun asr write frame",
+			zap.Int("frame_index", i),
+			zap.Int("status", status),
+			zap.Int("frame_bytes", len(frame)),
+			zap.Int("audio_base64_len", len(req.Data.Audio)),
+			zap.String("audio_base64_preview", previewDebugText(req.Data.Audio, 96)),
+		)
 		if err := conn.WriteJSON(req); err != nil {
 			return "", fmt.Errorf("write asr frame: %w", err)
 		}
-		if status != 2 {
-			select {
-			case <-ctx.Done():
-				return "", ctx.Err()
-			case <-time.After(40 * time.Millisecond):
-			}
+		select {
+		case <-ctx.Done():
+			return "", ctx.Err()
+		case <-time.After(40 * time.Millisecond):
 		}
+	}
+	if err := conn.WriteJSON(map[string]any{
+		"data": map[string]any{
+			"status": 2,
+		},
+	}); err != nil {
+		return "", fmt.Errorf("write asr finish frame: %w", err)
 	}
 	var transcript strings.Builder
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+				break
+			}
 			return "", fmt.Errorf("read asr response: %w", err)
 		}
+		zap.L().Info("[DEBUG-ASR-UPLOAD] xfyun asr raw response",
+			zap.Int("bytes", len(message)),
+			zap.String("payload", previewDebugText(string(message), 512)),
+		)
 		var resp asrResponse
 		if err := json.Unmarshal(message, &resp); err != nil {
 			return "", fmt.Errorf("decode asr response: %w", err)
 		}
-		if resp.Code != 0 {
-			return "", fmt.Errorf("asr failed: code=%d message=%s", resp.Code, resp.Message)
+		if int(resp.Code) != 0 {
+			errorMessage := strings.TrimSpace(resp.Desc)
+			if errorMessage == "" {
+				errorMessage = strings.TrimSpace(resp.Message)
+			}
+			if errorMessage == "" {
+				errorMessage = "unknown asr error"
+			}
+			if strings.TrimSpace(resp.Action) != "" || strings.TrimSpace(resp.SID) != "" {
+				return "", fmt.Errorf("asr failed: code=%d action=%s sid=%s message=%s", int(resp.Code), resp.Action, resp.SID, errorMessage)
+			}
+			return "", fmt.Errorf("asr failed: code=%d message=%s", int(resp.Code), errorMessage)
 		}
-		for _, ws := range resp.Data.Result.Ws {
+
+		var data struct {
+			Status int `json:"status"`
+			Result struct {
+				Ws []struct {
+					Cw []struct {
+						W string `json:"w"`
+					} `json:"cw"`
+				} `json:"ws"`
+				PGS string `json:"pgs"`
+				RG  []int  `json:"rg"`
+				SN  int    `json:"sn"`
+			} `json:"result"`
+		}
+		if len(resp.Data) > 0 && string(resp.Data) != `""` && string(resp.Data) != "null" {
+			if err := json.Unmarshal(resp.Data, &data); err != nil {
+				return "", fmt.Errorf("decode asr data: %w", err)
+			}
+		}
+
+		if data.Result.PGS == "rpl" {
+			transcript.Reset()
+		}
+		for _, ws := range data.Result.Ws {
 			for _, cw := range ws.Cw {
 				transcript.WriteString(cw.W)
 			}
 		}
-		if resp.Data.Status == 2 {
+		if data.Status == 2 {
 			break
 		}
 	}
@@ -164,6 +248,13 @@ func (c *xfyunASRClient) Transcribe(ctx context.Context, pcm []byte) (string, er
 		return "", fmt.Errorf("asr returned empty transcript")
 	}
 	return text, nil
+}
+
+func previewDebugText(text string, limit int) string {
+	if limit <= 0 || len(text) <= limit {
+		return text
+	}
+	return text[:limit] + "...(truncated)"
 }
 
 func splitAudioFrames(data []byte, size int) [][]byte {

@@ -23,23 +23,41 @@ func NewShopSysConfigDao(ms *gorm.DB) dao.IShopSysConfigDao {
 	}
 }
 
-// GetByConfigKey 根据配置键名获取配置
-func (s *ShopSysConfigDaoImpl) GetByConfigKey(c *gin.Context, configKey string) (*models.ShopSysConfig, error) {
-	var result models.ShopSysConfig
+// GetByConfigKeys 批量查询配置
+func (s *ShopSysConfigDaoImpl) GetByConfigKeys(c *gin.Context, configKeys []string) ([]models.ShopSysConfig, error) {
+	var results []models.ShopSysConfig
 	err := s.db.Table(s.tableName).
-		Where("config_key = ?", configKey).
+		Where("config_key IN ?", configKeys).
 		Where("state = ?", commonStatus.NORMAL).
-		First(&result).Error
+		Find(&results).Error
 	if err != nil {
 		return nil, err
 	}
-	return &result, nil
+	return results, nil
 }
 
-// UpdateByConfigKey 根据配置键名更新配置值
-func (s *ShopSysConfigDaoImpl) UpdateByConfigKey(c *gin.Context, configKey string, configValue string) error {
-	return s.db.Table(s.tableName).
-		Where("config_key = ?", configKey).
-		Where("state = ?", commonStatus.NORMAL).
-		Update("config_value", configValue).Error
+// BatchUpdate 全量覆盖写入配置（先删后插）
+func (s *ShopSysConfigDaoImpl) BatchUpdate(c *gin.Context, configs []models.KeyValue) error {
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		var keys []string
+		for _, cfg := range configs {
+			keys = append(keys, cfg.Key)
+		}
+		if err := tx.Table(s.tableName).
+			Where("config_key IN ?", keys).
+			Delete(&models.ShopSysConfig{}).Error; err != nil {
+			return err
+		}
+		var rows []models.ShopSysConfig
+		for _, cfg := range configs {
+			rows = append(rows, models.ShopSysConfig{
+				ConfigKey:   cfg.Key,
+				ConfigValue: cfg.Value,
+			})
+		}
+		if len(rows) > 0 {
+			return tx.Table(s.tableName).CreateInBatches(rows, 100).Error
+		}
+		return nil
+	})
 }

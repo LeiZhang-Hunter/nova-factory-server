@@ -5,10 +5,8 @@ package impl
 import (
 	"bufio"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -48,44 +46,15 @@ func (s *IApiShopVoiceServiceImpl) ProcessTurn(c *gin.Context, emitter service.I
 	if req.ConversationID == 0 {
 		return errors.New("conversation_id不能为空")
 	}
-	if strings.TrimSpace(req.AudioBase64) == "" {
-		return errors.New("audio_base64不能为空")
+	if strings.TrimSpace(req.Text) == "" {
+		return errors.New("text不能为空")
 	}
 	zap.L().Info("[voice-debug] turn start",
 		zap.Int64("conversation_id", req.ConversationID),
 		zap.String("tab_id", req.TabID),
-		zap.Int("audio_base64_len", len(req.AudioBase64)),
+		zap.Int("text_runes", utf8.RuneCountInString(req.Text)),
 	)
-
-	if err := emitter.SendEvent(&apiModels.ShopVoiceServerEvent{Type: "asr_start", ConversationID: req.ConversationID}); err != nil {
-		zap.L().Warn("[voice-debug] send asr_start failed", zap.Int64("conversation_id", req.ConversationID), zap.Error(err))
-		return err
-	}
-
-	audioBytes, err := base64.StdEncoding.DecodeString(req.AudioBase64)
-	if err != nil {
-		return fmt.Errorf("解析音频失败: %w", err)
-	}
-
-	pcm, err := normalizePCM(audioBytes)
-	if err != nil {
-		return err
-	}
-
-	transcript, err := newXFYunASRClient().Transcribe(c.Request.Context(), pcm)
-	if err != nil {
-		zap.L().Warn("[voice-debug] asr failed", zap.Int64("conversation_id", req.ConversationID), zap.Duration("elapsed", time.Since(turnStart)), zap.Error(err))
-		return err
-	}
-	zap.L().Info("[voice-debug] asr complete",
-		zap.Int64("conversation_id", req.ConversationID),
-		zap.Int("transcript_runes", utf8.RuneCountInString(transcript)),
-		zap.Duration("elapsed", time.Since(turnStart)),
-	)
-	if err := emitter.SendEvent(&apiModels.ShopVoiceServerEvent{Type: "asr_final", ConversationID: req.ConversationID, Text: transcript}); err != nil {
-		zap.L().Warn("[voice-debug] send asr_final failed", zap.Int64("conversation_id", req.ConversationID), zap.Error(err))
-		return err
-	}
+	transcript := strings.TrimSpace(req.Text)
 
 	if strings.TrimSpace(req.TabID) == "" {
 		req.TabID = "team"
