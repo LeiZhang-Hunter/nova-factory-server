@@ -117,9 +117,6 @@ func (d *OrderDetail) VectorSearchLabeledValues() []searchutil.LabeledValue {
 	}
 
 	remarkParts := make([]string, 0, 6)
-	if oid := strings.TrimSpace(d.OID); oid != "" {
-		remarkParts = append(remarkParts, "订单明细编号:"+oid)
-	}
 	if goodsID := strings.TrimSpace(d.EShopGoodsID); goodsID != "" {
 		remarkParts = append(remarkParts, "商品ID:"+goodsID)
 	}
