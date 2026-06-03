@@ -6,6 +6,11 @@ type LabeledValue struct {
 	Value string
 }
 
+// LabeledContentProvider 提供可用于向量文本构建的结构化字段。
+type LabeledContentProvider interface {
+	VectorSearchLabeledValues() []LabeledValue
+}
+
 // ProcessedQuery 表示对用户原始检索词做完清洗、分词、扩展后的结构化结果。
 type ProcessedQuery struct {
 	Original       string

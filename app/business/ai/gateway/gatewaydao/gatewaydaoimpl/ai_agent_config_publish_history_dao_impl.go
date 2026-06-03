@@ -107,7 +107,6 @@ func (a *AIAgentConfigPublishHistoryDaoImpl) GetByAgentIDAndVersion(c *gin.Conte
 	if err := a.db.WithContext(c).Table(a.table).
 		Where("agent_id = ?", agentID).
 		Where("version = ?", version).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

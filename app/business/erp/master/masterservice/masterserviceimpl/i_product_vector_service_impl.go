@@ -645,35 +645,7 @@ func cloneProductGinContext(c *gin.Context) *gin.Context {
 }
 
 func buildProductEmbeddingContent(product *mastermodels.Product) string {
-	if product == nil {
-		return ""
-	}
-	lines := make([]searchutil.LabeledValue, 0, 12)
-	lines = append(lines,
-		searchutil.LabeledValue{Label: "产品名称", Value: product.Name},
-		searchutil.LabeledValue{Label: "产品编码", Value: product.ProductCode},
-		searchutil.LabeledValue{Label: "产品分类", Value: product.CategoryName},
-		searchutil.LabeledValue{Label: "单位", Value: product.UnitName},
-		searchutil.LabeledValue{Label: "条码", Value: product.BarCode},
-		searchutil.LabeledValue{Label: "规格", Value: product.Standard},
-		searchutil.LabeledValue{Label: "备注", Value: product.Remark},
-	)
-	if product.ExpiryDay > 0 {
-		lines = append(lines, searchutil.LabeledValue{Label: "保质期", Value: fmt.Sprintf("%d天", product.ExpiryDay)})
-	}
-	if product.Weight > 0 {
-		lines = append(lines, searchutil.LabeledValue{Label: "重量", Value: fmt.Sprintf("%.3fkg", product.Weight)})
-	}
-	if product.PurchasePrice > 0 {
-		lines = append(lines, searchutil.LabeledValue{Label: "采购价", Value: fmt.Sprintf("%.2f", product.PurchasePrice)})
-	}
-	if product.SalePrice > 0 {
-		lines = append(lines, searchutil.LabeledValue{Label: "销售价", Value: fmt.Sprintf("%.2f", product.SalePrice)})
-	}
-	if product.MinPrice > 0 {
-		lines = append(lines, searchutil.LabeledValue{Label: "最低价", Value: fmt.Sprintf("%.2f", product.MinPrice)})
-	}
-	return searchutil.BuildLabeledContent(lines, productVectorContentMaxLengthInService)
+	return searchutil.BuildLabeledContentFromProvider(product, productVectorContentMaxLengthInService)
 }
 
 func (s *ProductServiceImpl) scanProductVectorTaskKeys() ([]string, error) {

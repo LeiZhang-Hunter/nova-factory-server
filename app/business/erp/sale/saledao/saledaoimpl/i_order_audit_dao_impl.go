@@ -105,6 +105,8 @@ func (o *OrderAuditDaoImpl) List(c *gin.Context, req *salemodels.OrderAuditQuery
 		}
 	}
 
+	userId := baizeContext.GetUserId(c)
+	db = db.Where("create_by = ?", userId)
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	page := int64(1)
 	size := int64(20)

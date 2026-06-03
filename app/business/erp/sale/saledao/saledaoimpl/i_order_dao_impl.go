@@ -213,6 +213,25 @@ func (o *OrderDaoImpl) getByIDWithTx(c *gin.Context, tx *gorm.DB, id uint64) (*s
 	return &item, nil
 }
 
+// getByIDWithTx 在事务内读取订单主表，避免未提交数据在事务外不可见。
+func (o *OrderDaoImpl) getByIDWithTx(c *gin.Context, tx *gorm.DB, id uint64) (*salemodels.Order, error) {
+	if tx == nil {
+		return o.GetByID(c, id)
+	}
+	var row erpOrderRow
+	if err := tx.WithContext(c).Table(o.table).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&row).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	item := row.toModel()
+	return &item, nil
+}
+
 // List 分页查询 ERP 订单。
 func (o *OrderDaoImpl) List(c *gin.Context, req *salemodels.OrderQuery) (*salemodels.OrderListData, error) {
 	db := o.db.WithContext(c).Table(o.table).

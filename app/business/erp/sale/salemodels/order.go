@@ -1,7 +1,10 @@
 package salemodels
 
 import (
+	"fmt"
 	"nova-factory-server/app/baize"
+	searchutil "nova-factory-server/app/utils/vectorsearch"
+	"strings"
 	"time"
 )
 
@@ -96,6 +99,61 @@ type OrderDetail struct {
 	DeptID            int64   `json:"dept_id" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
+}
+
+// VectorSearchLabeledValues 返回订单明细可参与向量检索的结构化文本字段。
+func (d *OrderDetail) VectorSearchLabeledValues() []searchutil.LabeledValue {
+	if d == nil {
+		return nil
+	}
+	values := make([]searchutil.LabeledValue, 0, 12)
+
+	productCode := strings.TrimSpace(d.OuterIID)
+	if productCode == "" {
+		productCode = strings.TrimSpace(d.EShopGoodsID)
+	}
+
+	unitParts := make([]string, 0, 2)
+	if d.UnitID > 0 {
+		unitParts = append(unitParts, fmt.Sprintf("单位ID:%d", d.UnitID))
+	}
+	if d.UnitQty > 0 {
+		unitParts = append(unitParts, fmt.Sprintf("单位数量:%.3f", d.UnitQty))
+	}
+
+	remarkParts := make([]string, 0, 6)
+	if goodsID := strings.TrimSpace(d.EShopGoodsID); goodsID != "" {
+		remarkParts = append(remarkParts, "商品ID:"+goodsID)
+	}
+	if skuID := strings.TrimSpace(d.EShopSkuID); skuID != "" {
+		remarkParts = append(remarkParts, "SKU ID:"+skuID)
+	}
+	if d.NumIID > 0 {
+		remarkParts = append(remarkParts, fmt.Sprintf("商品数字ID:%d", d.NumIID))
+	}
+	if d.SkuID > 0 {
+		remarkParts = append(remarkParts, fmt.Sprintf("SKU数字ID:%d", d.SkuID))
+	}
+	if d.Size > 0 {
+		remarkParts = append(remarkParts, fmt.Sprintf("体积:%.3f", d.Size))
+	}
+
+	values = append(values,
+		searchutil.LabeledValue{Label: "产品名称", Value: d.EShopGoodsName},
+		searchutil.LabeledValue{Label: "产品编码", Value: productCode},
+		searchutil.LabeledValue{Label: "产品分类", Value: ""},
+		searchutil.LabeledValue{Label: "单位", Value: strings.Join(unitParts, " ")},
+		searchutil.LabeledValue{Label: "条码", Value: d.Barcode},
+		searchutil.LabeledValue{Label: "规格", Value: d.EShopSkuName},
+		searchutil.LabeledValue{Label: "备注", Value: strings.Join(remarkParts, " ")},
+	)
+	if d.Weight > 0 {
+		values = append(values, searchutil.LabeledValue{Label: "重量", Value: fmt.Sprintf("%.3fkg", d.Weight)})
+	}
+	if d.Payment > 0 {
+		values = append(values, searchutil.LabeledValue{Label: "销售价", Value: fmt.Sprintf("%.2f", d.Payment)})
+	}
+	return values
 }
 
 // OrderAccount ERP订单账户
