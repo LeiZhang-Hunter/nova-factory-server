@@ -9,5 +9,6 @@ import (
 // IApiShopSysConfigDao  商城系统配置数据访问接口
 type IApiShopSysConfigDao interface {
 	GetByConfigKey(c *gin.Context, configKey string) (*models.ShopSysConfig, error)
+	GetByConfigKeys(c *gin.Context, configKeys []string) ([]models.ShopSysConfig, error)
 	UpdateByConfigKey(c *gin.Context, configKey string, configValue string) error
 }

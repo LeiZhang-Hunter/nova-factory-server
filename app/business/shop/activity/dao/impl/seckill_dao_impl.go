@@ -160,10 +160,46 @@ func (s *ShopSeckillDaoImpl) List(c *gin.Context, req *models.SeckillQuery) (*mo
 	return &models.SeckillListData{Rows: rows, Total: total}, nil
 }
 
+// DeductStock 原子扣减秒杀活动库存。
+func (s *ShopSeckillDaoImpl) DeductStock(c *gin.Context, id int64, quantity int64) error {
+	if quantity <= 0 {
+		return errors.New("扣减库存数量必须大于0")
+	}
+	result := activityCurrentDB(c, s.db).WithContext(c).Table(s.tableName).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("is_del = ?", 0).
+		Where("stock >= ?", quantity).
+		Updates(map[string]any{
+			"stock":       gorm.Expr("stock - ?", quantity),
+			"sales":       gorm.Expr("sales + ?", quantity),
+			"update_time": gorm.Expr("NOW()"),
+		})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("秒杀活动库存不足")
+	}
+	return nil
+}
+
 func (s *ShopSeckillDaoImpl) baseQuery(c *gin.Context) *gorm.DB {
 	return s.db.WithContext(c).Table(s.tableName).
 		Where("state = ?", commonStatus.NORMAL).
 		Where("is_del = ?", 0)
+}
+
+func activityCurrentDB(c *gin.Context, db *gorm.DB) *gorm.DB {
+	if c == nil {
+		return db
+	}
+	if value, ok := c.Get("db"); ok {
+		if tx, ok := value.(*gorm.DB); ok && tx != nil {
+			return tx
+		}
+	}
+	return db
 }
 
 func (s *ShopSeckillDaoImpl) create(c *gin.Context, req *models.SeckillSet) (*models.Seckill, error) {

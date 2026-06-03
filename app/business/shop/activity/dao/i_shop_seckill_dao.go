@@ -13,4 +13,5 @@ type IShopSeckillDao interface {
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*models.Seckill, error)
 	List(c *gin.Context, req *models.SeckillQuery) (*models.SeckillListData, error)
+	DeductStock(c *gin.Context, id int64, quantity int64) error
 }

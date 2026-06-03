@@ -1059,3 +1059,11 @@ CREATE TABLE IF NOT EXISTS `erp_warehouse` (
     KEY `idx_name` (`name`),
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ERP 仓库 DO';
+
+-- 微信支付v3 扩展字段
+ALTER TABLE erp_order
+  ADD COLUMN transaction_id varchar(64) DEFAULT NULL COMMENT '微信支付交易单号',
+  ADD COLUMN notify_raw text COMMENT '微信支付回调原文',
+  ADD COLUMN mch_id varchar(32) DEFAULT NULL COMMENT '微信商户号',
+  ADD COLUMN appid varchar(64) DEFAULT NULL COMMENT '小程序AppID',
+  ADD COLUMN payer_openid varchar(128) DEFAULT NULL COMMENT '支付用户openid';

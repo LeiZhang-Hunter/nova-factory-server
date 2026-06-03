@@ -7,7 +7,7 @@ import (
 
 // IApiShopCartService api 商城服务
 type IApiShopCartService interface {
-	GenCart(c *gin.Context, req *api.CartSetDataReq) (*api.CartDto, error)
+	GenCart(c *gin.Context, req *api.CartSetDataReq) (*api.CartSetDataResp, error)
 	List(c *gin.Context) ([]*api.CartDto, error)
 	Remove(c *gin.Context, ids []string) error
 }

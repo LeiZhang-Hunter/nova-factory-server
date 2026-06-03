@@ -135,3 +135,13 @@ type OrderStatistics struct {
 	Completed      int64 `json:"completed"`      // 已完成
 	Cancelled      int64 `json:"cancelled"`      // 已取消
 }
+
+// OrderPayResp 支付响应（微信小程序调起支付参数）
+type OrderPayResp struct {
+	AppId     string `json:"appId"`
+	TimeStamp string `json:"timeStamp"`
+	NonceStr  string `json:"nonceStr"`
+	Package   string `json:"package"`
+	SignType  string `json:"signType"`
+	PaySign   string `json:"paySign"`
+}

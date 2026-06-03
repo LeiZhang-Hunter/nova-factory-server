@@ -51,6 +51,11 @@ type Order struct {
 	InvoiceName          string          `json:"invoice_name" gorm:"column:invoice_name"`
 	SellerFlag           string          `json:"seller_flag" gorm:"column:seller_flag"`
 	PayTime              *time.Time      `json:"pay_time" gorm:"column:pay_time"`
+	TransactionID        string          `json:"transaction_id" gorm:"column:transaction_id"`
+	NotifyRaw            string          `json:"-" gorm:"column:notify_raw"`
+	MchID                string          `json:"mch_id" gorm:"column:mch_id"`
+	AppID                string          `json:"appid" gorm:"column:appid"`
+	PayerOpenid          string          `json:"payer_openid" gorm:"column:payer_openid"`
 	LogistBTypeCode      string          `json:"logist_b_type_code" gorm:"column:logist_b_type_code"`
 	LogistBillCode       string          `json:"logist_bill_code" gorm:"column:logist_bill_code"`
 	BTypeCode            string          `json:"b_type_code" gorm:"column:b_type_code"`

@@ -2,4 +2,4 @@ package order
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewOrder)
+var ProviderSet = wire.NewSet(NewOrder, NewOrderNotify)
