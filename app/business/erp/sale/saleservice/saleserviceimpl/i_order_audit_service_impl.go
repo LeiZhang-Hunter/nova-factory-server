@@ -3,6 +3,8 @@ package saleserviceimpl
 import (
 	"errors"
 	"go.uber.org/zap"
+	"nova-factory-server/app/baize"
+	"nova-factory-server/app/business/admin/system/systemdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/erp/core/integration"
 	"nova-factory-server/app/business/erp/core/integration/api"
@@ -12,10 +14,12 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"strconv"
 	"strings"
+	"time"
 
 	"nova-factory-server/app/business/erp/sale/saledao"
 	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/business/erp/sale/saleservice"
+	searchutil "nova-factory-server/app/utils/vectorsearch"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -28,6 +32,7 @@ type OrderAuditServiceImpl struct {
 	productService       masterservice.IProductService
 	integrationConfigDao settingdao.IIntegrationConfigDao
 	modelService         aidatasetservice.IAiModelProviderService
+	dictDataDao          systemdao.IDictDataDao
 	db                   *gorm.DB
 	cache                cache.Cache
 }
@@ -36,7 +41,8 @@ type OrderAuditServiceImpl struct {
 func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao,
 	productService masterservice.IProductService, db *gorm.DB,
 	integrationConfigDao settingdao.IIntegrationConfigDao, cache cache.Cache,
-	modelService aidatasetservice.IAiModelProviderService) saleservice.IOrderAuditService {
+	modelService aidatasetservice.IAiModelProviderService,
+	dictDataDao systemdao.IDictDataDao) saleservice.IOrderAuditService {
 	return &OrderAuditServiceImpl{
 		dao:                  dao,
 		orderDao:             orderDao,
@@ -45,6 +51,7 @@ func NewOrderAuditService(dao saledao.IOrderAuditDao, orderDao saledao.IOrderDao
 		integrationConfigDao: integrationConfigDao,
 		cache:                cache,
 		modelService:         modelService,
+		dictDataDao:          dictDataDao,
 	}
 }
 
@@ -104,10 +111,56 @@ func (o *OrderAuditServiceImpl) GetByID(c *gin.Context, id uint64) (*salemodels.
 	if err != nil || info == nil {
 		return info, err
 	}
-	if err = o.fillOrderAuditDetails(c, info); err != nil {
-		zap.L().Warn("fill order audit details failed", zap.Uint64("id", id), zap.Error(err))
+	if info.AuditStatus == 0 {
+		if err = o.fillOrderAuditDetails(c, info); err != nil {
+			zap.L().Warn("fill order audit details failed", zap.Uint64("id", id), zap.Error(err))
+		}
+	}
+	info.Status = o.normalizeOrderStatus(c, info.Status)
+
+	// 付款时间
+	if info.PayTime == nil {
+		kt := baize.NewTime().ToString()
+		// 按当前服务时区解析时间字符串，避免默认按 UTC 解析导致时区偏差。
+		if v, err := time.ParseInLocation("2006-01-02 15:04:05", kt, time.Local); err == nil {
+			info.PayTime = &v
+		} else {
+			now := time.Now().In(time.Local)
+			info.PayTime = &now
+		}
 	}
 	return info, nil
+}
+
+func (o *OrderAuditServiceImpl) normalizeOrderStatus(c *gin.Context, status string) string {
+	if o.dictDataDao == nil {
+		return strings.TrimSpace(status)
+	}
+	rows := o.dictDataDao.SelectDictDataByType(c, "erp_order_status")
+	if len(rows) == 0 {
+		return strings.TrimSpace(status)
+	}
+	status = strings.TrimSpace(status)
+	firstValue := ""
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		value := strings.TrimSpace(row.DictValue)
+		if value == "" {
+			continue
+		}
+		if firstValue == "" {
+			firstValue = value
+		}
+		if value == status {
+			return status
+		}
+	}
+	if firstValue != "" {
+		return firstValue
+	}
+	return status
 }
 
 func (o *OrderAuditServiceImpl) List(c *gin.Context, req *salemodels.OrderAuditQuery) (*salemodels.OrderAuditListData, error) {
@@ -470,23 +523,7 @@ func (o *OrderAuditServiceImpl) fillOrderAuditDetails(c *gin.Context, info *sale
 }
 
 func buildOrderAuditDetailSearchQuery(detail *salemodels.OrderDetail) string {
-	if detail == nil {
-		return ""
-	}
-	parts := make([]string, 0, 4)
-	if name := strings.TrimSpace(detail.EShopGoodsName); name != "" {
-		parts = append(parts, "商品名称:"+name)
-	}
-	if skuName := strings.TrimSpace(detail.EShopSkuName); skuName != "" {
-		parts = append(parts, "规格:"+skuName)
-	}
-	if outerIID := strings.TrimSpace(detail.OuterIID); outerIID != "" {
-		parts = append(parts, "外部编码:"+outerIID)
-	}
-	if barcode := strings.TrimSpace(detail.Barcode); barcode != "" {
-		parts = append(parts, "条码:"+barcode)
-	}
-	return strings.Join(parts, "\n")
+	return searchutil.BuildLabeledContentFromProvider(detail, 0)
 }
 
 func fillOrderAuditDetailMatchedProduct(detail *salemodels.OrderDetail, item *mastermodels.ProductVectorBatchSearchItem) {

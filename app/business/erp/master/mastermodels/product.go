@@ -1,7 +1,9 @@
 package mastermodels
 
 import (
+	"fmt"
 	"nova-factory-server/app/baize"
+	searchutil "nova-factory-server/app/utils/vectorsearch"
 )
 
 // Product ERP 产品
@@ -25,6 +27,39 @@ type Product struct {
 	DeptID        int64   `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
+}
+
+// VectorSearchLabeledValues 返回产品可参与向量生成的结构化文本字段。
+func (p *Product) VectorSearchLabeledValues() []searchutil.LabeledValue {
+	if p == nil {
+		return nil
+	}
+	values := make([]searchutil.LabeledValue, 0, 12)
+	values = append(values,
+		searchutil.LabeledValue{Label: "产品名称", Value: p.Name},
+		searchutil.LabeledValue{Label: "产品编码", Value: p.ProductCode},
+		searchutil.LabeledValue{Label: "产品分类", Value: p.CategoryName},
+		searchutil.LabeledValue{Label: "单位", Value: p.UnitName},
+		searchutil.LabeledValue{Label: "条码", Value: p.BarCode},
+		searchutil.LabeledValue{Label: "规格", Value: p.Standard},
+		searchutil.LabeledValue{Label: "备注", Value: p.Remark},
+	)
+	if p.ExpiryDay > 0 {
+		values = append(values, searchutil.LabeledValue{Label: "保质期", Value: fmt.Sprintf("%d天", p.ExpiryDay)})
+	}
+	if p.Weight > 0 {
+		values = append(values, searchutil.LabeledValue{Label: "重量", Value: fmt.Sprintf("%.3fkg", p.Weight)})
+	}
+	if p.PurchasePrice > 0 {
+		values = append(values, searchutil.LabeledValue{Label: "采购价", Value: fmt.Sprintf("%.2f", p.PurchasePrice)})
+	}
+	if p.SalePrice > 0 {
+		values = append(values, searchutil.LabeledValue{Label: "销售价", Value: fmt.Sprintf("%.2f", p.SalePrice)})
+	}
+	if p.MinPrice > 0 {
+		values = append(values, searchutil.LabeledValue{Label: "最低价", Value: fmt.Sprintf("%.2f", p.MinPrice)})
+	}
+	return values
 }
 
 // ProductUpsert ERP 产品新增修改参数

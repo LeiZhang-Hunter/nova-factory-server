@@ -23,6 +23,14 @@ func BuildLabeledContent(values []LabeledValue, max int) string {
 	return TrimRunes(strings.Join(lines, "\n"), max)
 }
 
+// BuildLabeledContentFromProvider 将实现统一接口的对象转为 embedding/search 文本。
+func BuildLabeledContentFromProvider(provider LabeledContentProvider, max int) string {
+	if provider == nil {
+		return ""
+	}
+	return BuildLabeledContent(provider.VectorSearchLabeledValues(), max)
+}
+
 // TrimRunes 按 rune 长度裁剪文本，避免中文被截断成乱码。
 func TrimRunes(value string, max int) string {
 	value = NormalizeWhitespace(value)

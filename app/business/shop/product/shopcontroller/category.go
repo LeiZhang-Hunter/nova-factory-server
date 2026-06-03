@@ -175,18 +175,18 @@ func validateCategoryUpsertSecurity(req *shopmodels.CategoryUpsert) error {
 	if req.CategoryCode != "" && hasUnsafeCategoryText(req.CategoryCode) {
 		return fmt.Errorf("分类编号包含不安全内容")
 	}
-	if req.ImageURL == "" {
-		return fmt.Errorf("分类图片不能为空")
-	}
+	//if req.ImageURL == "" {
+	//	return fmt.Errorf("分类图片不能为空")
+	//}
 	if req.Description == "" {
 		return fmt.Errorf("分类描述不能为空")
 	}
 	if req.Description != "" && hasUnsafeCategoryText(req.Description) {
 		return fmt.Errorf("分类描述包含不安全内容")
 	}
-	if err := validateCategoryImageURL(req.ImageURL); err != nil {
-		return err
-	}
+	//if err := validateCategoryImageURL(req.ImageURL); err != nil {
+	//	return err
+	//}
 
 	return nil
 }
