@@ -39,19 +39,20 @@ func executeProductVectorSearch(
 		sparseRequest := milvusclient.NewAnnRequest(productVectorContextSparseField, limit, textQueries...).
 			WithAnnParam(sparseAnnParam)
 
-		ranker := entity.NewFunction().
-			WithName("rrf").
-			WithType(entity.FunctionTypeRerank).
-			WithParam("reranker", "rrf").
-			WithParam("k", "100")
+		//ranker := entity.NewFunction().
+		//	WithName("rrf").
+		//	WithType(entity.FunctionTypeRerank).
+		//	WithParam("reranker", "rrf").
+		//	WithParam("k", "100")
 
 		return client.HybridSearch(ctx, milvusclient.NewHybridSearchOption(
 			collectionName,
 			limit,
 			denseRequest,
 			sparseRequest,
-		).WithReranker(milvusclient.NewRRFReranker()).
-			WithFunctionRerankers(ranker).
+		).WithReranker(milvusclient.NewWeightedReranker([]float64{
+			0.3, 0.8,
+		})).
 			WithOutputFields(outputFields...))
 	}
 

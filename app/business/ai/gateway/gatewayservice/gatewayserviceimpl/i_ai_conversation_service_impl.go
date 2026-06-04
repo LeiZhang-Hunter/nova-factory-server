@@ -94,6 +94,9 @@ func (i *IAiConversationServiceImpl) List(c *gin.Context, req *aidatasetmodels.A
 }
 
 func (i *IAiConversationServiceImpl) Remove(c *gin.Context, ids []int64) error {
+	if err := i.messageDao.DeleteByConversationIDs(c, ids); err != nil {
+		return err
+	}
 	return i.dao.Remove(c, ids)
 }
 

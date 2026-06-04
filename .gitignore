@@ -33,3 +33,4 @@ mcp_gen_exec
 wire_gen.go
 *.exe
 private
+.llm_factories.initialized

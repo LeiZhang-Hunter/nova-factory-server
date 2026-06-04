@@ -3,7 +3,9 @@ package ai
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -48,10 +50,17 @@ func NewFactoryBootstrap(db *gorm.DB, providerDao aidatasetdao.IAiModelProviderD
 	}
 }
 
+// Init 初始化模型厂商
 func (f *FactoryBootstrap) Init() error {
 	configPath, err := resolveFactoryConfigPath()
 	if err != nil {
 		return err
+	}
+	markerPath := resolveFactoryInitMarkerPath(configPath)
+	if initialized, err := factoryInitMarkerExists(markerPath); err != nil {
+		return err
+	} else if initialized {
+		return nil
 	}
 	raw, err := os.ReadFile(configPath)
 	if err != nil {
@@ -61,7 +70,7 @@ func (f *FactoryBootstrap) Init() error {
 	if err = json.Unmarshal(raw, payload); err != nil {
 		return err
 	}
-	return f.db.WithContext(context.Background()).Transaction(func(tx *gorm.DB) error {
+	if err = f.db.WithContext(context.Background()).Transaction(func(tx *gorm.DB) error {
 		for _, item := range payload.FactoryLLMInfos {
 			if item == nil || item.Name == "" {
 				continue
@@ -96,7 +105,10 @@ func (f *FactoryBootstrap) Init() error {
 			}
 		}
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
+	return writeFactoryInitMarker(markerPath)
 }
 
 func resolveFactoryConfigPath() (string, error) {
@@ -111,4 +123,30 @@ func resolveFactoryConfigPath() (string, error) {
 		}
 	}
 	return "", os.ErrNotExist
+}
+
+func resolveFactoryInitMarkerPath(configPath string) string {
+	return filepath.Join(filepath.Dir(configPath), ".llm_factories.initialized")
+}
+
+func factoryInitMarkerExists(markerPath string) (bool, error) {
+	_, err := os.Stat(markerPath)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, fmt.Errorf("stat factory init marker failed: %w", err)
+}
+
+func writeFactoryInitMarker(markerPath string) error {
+	if err := os.MkdirAll(filepath.Dir(markerPath), 0o755); err != nil {
+		return fmt.Errorf("create factory init marker dir failed: %w", err)
+	}
+	content := []byte(time.Now().Format(time.RFC3339))
+	if err := os.WriteFile(markerPath, content, 0o644); err != nil {
+		return fmt.Errorf("write factory init marker failed: %w", err)
+	}
+	return nil
 }
