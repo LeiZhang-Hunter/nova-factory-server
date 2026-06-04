@@ -134,6 +134,11 @@ func (a *AIAgentOrchestrationServiceImpl) validateContent(c *gin.Context,
 	}
 
 	if len(config.Edges) == 0 {
+		if len(config.Nodes) == 1 {
+			if config.Nodes[0].Type == aiagent.Master {
+				return make([]*gatewaymodels.AISubAgentUpsert, 0), nil
+			}
+		}
 		return nil, errors.New("任务派发路线不能为空")
 	}
 

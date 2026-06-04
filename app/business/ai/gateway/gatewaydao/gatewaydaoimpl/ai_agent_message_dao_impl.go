@@ -3,7 +3,6 @@ package gatewaydaoimpl
 import (
 	"errors"
 	"sort"
-	"time"
 
 	"nova-factory-server/app/business/ai/gateway/gatewaydao"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
@@ -107,14 +106,23 @@ func (a *AIAgentMessageDaoImpl) Update(c *gin.Context, req *gatewaymodels.AIAgen
 }
 
 func (a *AIAgentMessageDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
-	now := time.Now()
-	return a.db.WithContext(c).Table(a.table).Where("id IN ?", ids).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Updates(map[string]interface{}{
-			"state":       commonStatus.DELETE,
-			"update_by":   baizeContext.GetUserId(c),
-			"update_time": now,
-		}).Error
+	if len(ids) == 0 {
+		return nil
+	}
+	return a.db.WithContext(c).Table(a.table).
+		Where("id IN ?", ids).
+		Where("create_by = ?", baizeContext.GetUserId(c)).
+		Delete(&gatewaymodels.AIAgentMessage{}).Error
+}
+
+func (a *AIAgentMessageDaoImpl) DeleteByConversationIDs(c *gin.Context, conversationIDs []int64) error {
+	if len(conversationIDs) == 0 {
+		return nil
+	}
+	return a.db.WithContext(c).Table(a.table).
+		Where("conversation_id IN ?", conversationIDs).
+		Where("create_by = ?", baizeContext.GetUserId(c)).
+		Delete(&gatewaymodels.AIAgentMessage{}).Error
 }
 
 func (a *AIAgentMessageDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAgentMessage, error) {

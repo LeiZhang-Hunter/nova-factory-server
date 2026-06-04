@@ -4,7 +4,6 @@ import (
 	"errors"
 	"nova-factory-server/app/utils/snowflake"
 	"strings"
-	"time"
 
 	"nova-factory-server/app/business/ai/agent/aidatasetdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
@@ -139,10 +138,11 @@ func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiCon
 }
 
 func (i *IAiConversationDaoImpl) Remove(c *gin.Context, ids []int64) error {
-	return i.db.WithContext(c).Table(i.table).Where("id IN ?", ids).
-		Updates(map[string]interface{}{
-			"state":       commonStatus.DELETE,
-			"update_by":   baizeContext.GetUserId(c),
-			"update_time": time.Now(),
-		}).Error
+	if len(ids) == 0 {
+		return nil
+	}
+	return i.db.WithContext(c).Table(i.table).
+		Where("id IN ?", ids).
+		Where("create_by = ?", baizeContext.GetUserId(c)).
+		Delete(&aidatasetmodels.AiConversation{}).Error
 }
