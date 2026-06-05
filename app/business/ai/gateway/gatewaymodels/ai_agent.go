@@ -21,6 +21,7 @@ type AIAgent struct {
 	SandboxNetwork            *bool               `json:"sandboxNetwork" gorm:"column:sandbox_network"`
 	WorkDir                   string              `json:"workDir" gorm:"column:work_dir"`
 	MCPEnabled                *bool               `json:"mcpEnabled" gorm:"column:mcp_enabled"`
+	SuppressPreToolContent    *bool               `json:"suppressPreToolContent" gorm:"column:suppress_pre_tool_content"` // Session-level strategy: buffer pre-tool assistant content until tool usage is known
 	MCPServerIDs              string              `json:"mcpServerIds" gorm:"column:mcp_server_ids"`
 	MCPServerEnabledIDs       string              `json:"mcpServerEnabledIds" gorm:"column:mcp_server_enabled_ids"`
 	AllowMcpServerIdsToolsRaw string              `json:"-" gorm:"column:allow_mcp_server_ids_tools"`
@@ -67,6 +68,7 @@ type AIAgentUpsert struct {
 	MCPServerEnabledIDs       string              `json:"mcpServerEnabledIds"`
 	AllowMcpServerIdsToolsRaw string              `json:"-"`
 	Enable                    *bool               `json:"enable"`
+	SuppressPreToolContent    *bool               `json:"suppressPreToolContent"`
 	AllowMcpServerIdsTools    map[string][]string `json:"allowMcpServerIdsTools"` //允许描述的工具 mcp server id => tools
 }
 
