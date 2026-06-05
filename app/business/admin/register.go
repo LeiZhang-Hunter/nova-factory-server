@@ -1,6 +1,9 @@
 package admin
 
 import (
+	basicscontroller "nova-factory-server/app/business/admin/basics/controller"
+	basicsdaoimpl "nova-factory-server/app/business/admin/basics/dao/impl"
+	basicsserviceimpl "nova-factory-server/app/business/admin/basics/service/impl"
 	"nova-factory-server/app/business/admin/monitor/monitorcontroller"
 	"nova-factory-server/app/business/admin/monitor/monitordao/monitorDaoImpl"
 	"nova-factory-server/app/business/admin/monitor/monitorservice/monitorServiceImpl"
@@ -21,6 +24,10 @@ var ProviderSet = wire.NewSet(
 	tooldaoimpl.ProviderSet,
 	toolserviceimpl.ProviderSet,
 	toolcontroller.ProviderSet,
+
+	basicsdaoimpl.ProviderSet,
+	basicsserviceimpl.ProviderSet,
+	basicscontroller.ProviderSet,
 
 	systemdaoimpl.ProviderSet,
 	systemServiceImpl.ProviderSet,

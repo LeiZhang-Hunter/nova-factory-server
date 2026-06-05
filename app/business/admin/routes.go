@@ -1,6 +1,7 @@
 package admin
 
 import (
+	basicscontroller "nova-factory-server/app/business/admin/basics/controller"
 	"nova-factory-server/app/business/admin/monitor/monitorcontroller"
 	"nova-factory-server/app/business/admin/product/productcontroller"
 	"nova-factory-server/app/business/admin/system/systemcontroller"
@@ -20,6 +21,7 @@ type Admin struct{}
 
 func NewGinEngine(app *routes.App,
 	cache cache.Cache,
+	bc *basicscontroller.Basics,
 	sc *systemcontroller.System,
 	mc *monitorcontroller.Monitor,
 	gc *toolcontroller.Tool,
@@ -54,6 +56,7 @@ func NewGinEngine(app *routes.App,
 		sc.Notice.PrivateRoutes(group)     //消息
 		sc.SelectBox.PrivateRoutes(group)
 		sc.Shift.PrivateRoutes(group)
+		bc.CompanyInfo.PrivateRoutes(group)
 		mc.Server.PrivateRoutes(group)     //服务器详情
 		mc.Oper.PrivateRoutes(group)       //操作日志
 		mc.UserOnline.PrivateRoutes(group) //在线用户
