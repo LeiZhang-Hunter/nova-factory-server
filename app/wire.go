@@ -4,6 +4,9 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/google/wire"
+	"github.com/spf13/viper"
 	"nova-factory-server/app/business/admin"
 	"nova-factory-server/app/business/ai"
 	"nova-factory-server/app/business/erp"
@@ -12,11 +15,6 @@ import (
 	"nova-factory-server/app/business/wms"
 	"nova-factory-server/app/datasource"
 	"nova-factory-server/app/routes"
-	"nova-factory-server/app/store"
-
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
-	"github.com/spf13/viper"
 )
 
 func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.Shop, _ *erp.Erp, _ *wms.Wms) *gin.Engine {
@@ -46,7 +44,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		wms.ProviderSet,
 		admin.ProviderSet,
 		datasource.ProviderSet,
-		store.ProviderSet,
 		finalEngine,
 	))
 }

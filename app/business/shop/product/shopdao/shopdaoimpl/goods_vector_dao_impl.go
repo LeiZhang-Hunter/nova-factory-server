@@ -40,18 +40,20 @@ const (
 	goodsVectorWeightPriceField   = "weight"
 	goodsVectorQuantityPriceField = "quantity"
 
+	goodsVectorMetadataField      = "metadata"
 	goodsVectorContentField       = "content"
 	goodsVectorEmbeddingField     = "vector"
 	goodsVectorContextSparseField = "text_sparse_vector"
 	goodsIdxVectorField           = "idx_goods_vector"
 	goodsIdxTextSparseVector      = "idx_goods_text_sparse_vector"
-	goodsVectorPKMaxLength        = 128
-	goodsVectorNameMaxLength      = 512
-	goodsVectorCodeMaxLength      = 128
-	goodsVectorCategoryMaxLength  = 256
-	goodsVectorSkuNameMaxLength   = 512
-	goodsVectorDescMaxLength      = 4096
-	goodsVectorContentMaxLength   = 16384
+
+	goodsVectorPKMaxLength       = 128
+	goodsVectorNameMaxLength     = 512
+	goodsVectorCodeMaxLength     = 128
+	goodsVectorCategoryMaxLength = 256
+	goodsVectorSkuNameMaxLength  = 512
+	goodsVectorDescMaxLength     = 4096
+	goodsVectorContentMaxLength  = 16384
 
 	goodsVectorSearchCandidateMultiplier = 3
 	goodsVectorSearchMinCandidates       = 20
@@ -527,6 +529,11 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 			WithField(entity.NewField().WithName(goodsVectorQuantityPriceField).WithDataType(entity.FieldTypeInt64)).
 			WithField(entity.NewField().WithName(goodsVectorEmbeddingField).WithDataType(entity.FieldTypeFloatVector).WithDim(int64(dim))).
 			WithField(entity.NewField().WithName(goodsVectorContextSparseField).WithDataType(entity.FieldTypeSparseVector)).
+			WithField(entity.NewField().
+				WithName(goodsVectorMetadataField).
+				WithDataType(entity.FieldTypeJSON).
+				WithNullable(true),
+			).
 			WithFunction(function)
 
 		err = client.CreateCollection(ctx, milvusclient.NewCreateCollectionOption(collectionName, schema).WithIndexOptions(

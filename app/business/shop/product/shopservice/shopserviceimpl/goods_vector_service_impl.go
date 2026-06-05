@@ -21,20 +21,24 @@ import (
 	"nova-factory-server/app/utils/retrieval"
 	retrievalschema "nova-factory-server/app/utils/retrieval/schema"
 	"nova-factory-server/app/utils/snowflake"
+	"nova-factory-server/app/utils/vectorsearch"
 )
 
+// 商品向量文本在送入 embedding 模型前的最大长度，避免单条内容过长。
 const goodsVectorContentMaxLength = 16384
 const (
+	// 检索和批处理相关默认值及安全上限。
 	defaultGoodsVectorSearchLimit = 10
 	maxGoodsVectorSearchLimit     = 50
 	defaultGoodsVectorBatchSize   = 20
 	maxGoodsVectorBatchSize       = 100
-	goodsVectorTaskTTL            = 2 * time.Minute
-	goodsVectorHeartbeatInterval  = 30 * time.Second
-	goodsVectorTaskStatusPending  = "pending"
-	goodsVectorTaskStatusRunning  = "running"
-	goodsVectorTaskStatusDone     = "completed"
-	goodsVectorTaskStatusFailed   = "failed"
+	// 异步任务的缓存生命周期与锁续期心跳间隔。
+	goodsVectorTaskTTL           = 2 * time.Minute
+	goodsVectorHeartbeatInterval = 30 * time.Second
+	goodsVectorTaskStatusPending = "pending"
+	goodsVectorTaskStatusRunning = "running"
+	goodsVectorTaskStatusDone    = "completed"
+	goodsVectorTaskStatusFailed  = "failed"
 )
 
 type goodsVectorConfig struct {
@@ -46,6 +50,7 @@ type goodsEmbeddingPayload struct {
 	content string
 }
 
+// GenerateVector 为单个已上架商品生成并写入向量数据。
 func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.GenVectorReq) (*shopmodels.GoodsVectorResult, error) {
 	goods, err := s.dao.GetByID(c, req.ID)
 	if err != nil {
@@ -87,6 +92,7 @@ func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.Ge
 	return result, nil
 }
 
+// GenerateAllOnSaleVectors 创建或续跑一个上架商品的全量向量生成任务。
 func (s *ShopGoodsServiceImpl) GenerateAllOnSaleVectors(c *gin.Context,
 	req *shopmodels.GenAllVectorReq) (*shopmodels.GoodsVectorTaskData, error) {
 	if req == nil {
@@ -108,6 +114,7 @@ func (s *ShopGoodsServiceImpl) GenerateAllOnSaleVectors(c *gin.Context,
 		progress *shopmodels.GoodsVectorTaskProgress
 		err      error
 	)
+	// 显式传入 taskID 时按指定任务续跑，否则尝试复用当前操作人的最近未完成任务。
 	if taskID != "" {
 		progress, err = s.loadGoodsVectorTaskProgress(taskID)
 		if err != nil {
@@ -140,6 +147,7 @@ func (s *ShopGoodsServiceImpl) GenerateAllOnSaleVectors(c *gin.Context,
 		}
 	}
 
+	// 没有可续跑任务时新建任务；否则重置为待执行状态并保留已处理进度。
 	if progress == nil {
 		taskID = strconv.FormatInt(snowflake.GenID(), 10)
 		now := time.Now().Format(time.DateTime)
@@ -198,6 +206,7 @@ func (s *ShopGoodsServiceImpl) GenerateAllOnSaleVectors(c *gin.Context,
 	}, nil
 }
 
+// GetGenerateAllOnSaleVectorsProgress 查询指定全量生成任务的进度。
 func (s *ShopGoodsServiceImpl) GetGenerateAllOnSaleVectorsProgress(c *gin.Context,
 	taskID string) (*shopmodels.GoodsVectorTaskProgress, error) {
 	taskID = strings.TrimSpace(taskID)
@@ -214,6 +223,7 @@ func (s *ShopGoodsServiceImpl) GetGenerateAllOnSaleVectorsProgress(c *gin.Contex
 	return progress, nil
 }
 
+// ListGenerateAllOnSaleVectorTasks 返回当前操作人仍未结束的全量生成任务列表。
 func (s *ShopGoodsServiceImpl) ListGenerateAllOnSaleVectorTasks(c *gin.Context) (*shopmodels.GoodsVectorTaskListData, error) {
 	if s.cache == nil {
 		return nil, errors.New("缓存未初始化")
@@ -259,15 +269,16 @@ func (s *ShopGoodsServiceImpl) ListGenerateAllOnSaleVectorTasks(c *gin.Context) 
 	}, nil
 }
 
+// SearchVector 按单条查询语句执行向量检索。
 func (s *ShopGoodsServiceImpl) SearchVector(c *gin.Context, req *shopmodels.GoodsVectorSearchReq) (*shopmodels.GoodsVectorSearchData, error) {
 	if req == nil {
 		return nil, errors.New("搜索参数不能为空")
 	}
-	queries, err := normalizeGoodsVectorSearchQueries([]string{req.Query})
+	queryPayloads, err := vectorsearch.BuildGoodsSearchQueryPayloads([]string{req.Query})
 	if err != nil {
 		return nil, err
 	}
-	items, err := s.batchSearchVector(c, queries, req.Limit, req.Embedding)
+	items, err := s.batchSearchVector(c, queryPayloads, req.Limit, req.Embedding)
 	if err != nil {
 		return nil, err
 	}
@@ -283,16 +294,17 @@ func (s *ShopGoodsServiceImpl) SearchVector(c *gin.Context, req *shopmodels.Good
 	}, nil
 }
 
+// BatchSearchVector 按多条查询语句批量执行向量检索。
 func (s *ShopGoodsServiceImpl) BatchSearchVector(c *gin.Context,
 	req *shopmodels.GoodsVectorBatchSearchReq) (*shopmodels.GoodsVectorBatchSearchData, error) {
 	if req == nil {
 		return nil, errors.New("批量搜索参数不能为空")
 	}
-	queries, err := normalizeGoodsVectorSearchQueries(req.Queries)
+	queryPayloads, err := vectorsearch.BuildGoodsSearchQueryPayloads(req.Queries)
 	if err != nil {
 		return nil, err
 	}
-	rows, err := s.batchSearchVector(c, queries, req.Limit, req.Embedding)
+	rows, err := s.batchSearchVector(c, queryPayloads, req.Limit, req.Embedding)
 	if err != nil {
 		return nil, err
 	}
@@ -302,7 +314,8 @@ func (s *ShopGoodsServiceImpl) BatchSearchVector(c *gin.Context,
 	}, nil
 }
 
-func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queries []string, limit int,
+// batchSearchVector 统一处理单条/批量查询的 embedding 生成与召回逻辑。
+func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queryPayloads []vectorsearch.GoodsSearchQueryPayload, limit int,
 	embedding *shopmodels.EmbeddingConfig) ([]*shopmodels.GoodsVectorBatchSearchItem, error) {
 	cfg, err := loadEmbeddingProviderConfig(embedding)
 	if err != nil {
@@ -318,10 +331,10 @@ func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queries []strin
 		return nil, errors.New("商城商品检索器未初始化")
 	}
 
-	rows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(queries))
+	rows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(queryPayloads))
 	topK := normalizeGoodsVectorSearchLimit(limit)
-	for _, query := range queries {
-		documents, err := s.retriever.Retrieve(requestCtx, query,
+	for _, payload := range queryPayloads {
+		documents, err := s.retriever.Retrieve(requestCtx, payload.SearchText,
 			retrieval.WithTopK(topK),
 			retrieval.WithEmbedding(embedder),
 		)
@@ -337,7 +350,7 @@ func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queries []strin
 			items = append(items, item)
 		}
 		rows = append(rows, &shopmodels.GoodsVectorBatchSearchItem{
-			Query: query,
+			Query: payload.Original,
 			Rows:  items,
 			Total: int64(len(items)),
 		})
@@ -370,6 +383,7 @@ func (s *ShopGoodsServiceImpl) loadGoodsVectorConfig(req *shopmodels.GenVectorRe
 	return cfg, nil
 }
 
+// generateGoodsVectorWithEmbedder 将商品内容切分为一个或多个 payload 后生成向量并落库。
 func (s *ShopGoodsServiceImpl) generateGoodsVectorWithEmbedder(c *gin.Context, requestCtx context.Context,
 	embedder embedding.Embedder, goods *shopmodels.Goods) (*shopmodels.GoodsVectorResult, error) {
 	payloads := buildGoodsEmbeddingPayloads(goods)
@@ -422,6 +436,7 @@ func (s *ShopGoodsServiceImpl) generateGoodsVectorWithEmbedder(c *gin.Context, r
 	return result, nil
 }
 
+// runGenerateAllOnSaleVectors 在后台分页扫描上架商品并持续更新任务进度。
 func (s *ShopGoodsServiceImpl) runGenerateAllOnSaleVectors(c *gin.Context, taskID string,
 	req *shopmodels.GenAllVectorReq, operatorID int64, operator string) {
 	lockKey := goodsVectorTaskLockKey(taskID)
@@ -462,6 +477,7 @@ func (s *ShopGoodsServiceImpl) runGenerateAllOnSaleVectors(c *gin.Context, taskI
 		return
 	}
 	s.cache.Expire(context.Background(), lockKey, goodsVectorTaskTTL)
+	// 任务执行期间持续刷新分布式锁，避免长任务过程中锁自然过期。
 	heartbeatCtx, heartbeatCancel := context.WithCancel(context.Background())
 	go s.startLockHeartbeat(heartbeatCtx, lockKey)
 
@@ -495,6 +511,7 @@ func (s *ShopGoodsServiceImpl) runGenerateAllOnSaleVectors(c *gin.Context, taskI
 	page := int64(1)
 	resumeSkip := 0
 	resumeCurrentID := progress.CurrentID
+	// 续跑场景下先定位到上次处理页，再裁掉已处理过的记录。
 	needResumeTrim := progress.Processed > 0 && size > 0
 	if needResumeTrim {
 		page = progress.Processed/size + 1
@@ -584,6 +601,7 @@ func (s *ShopGoodsServiceImpl) runGenerateAllOnSaleVectors(c *gin.Context, taskI
 	}
 }
 
+// failGoodsVectorTask 将任务状态标记为失败并落盘错误信息。
 func (s *ShopGoodsServiceImpl) failGoodsVectorTask(taskID string, progress *shopmodels.GoodsVectorTaskProgress, err error) {
 	if progress == nil {
 		return
@@ -599,6 +617,7 @@ func (s *ShopGoodsServiceImpl) failGoodsVectorTask(taskID string, progress *shop
 	}
 }
 
+// startLockHeartbeat 定时续期任务锁，避免后台任务执行中锁失效。
 func (s *ShopGoodsServiceImpl) startLockHeartbeat(ctx context.Context, lockKey string) {
 	ticker := time.NewTicker(goodsVectorHeartbeatInterval)
 	defer ticker.Stop()
@@ -612,6 +631,7 @@ func (s *ShopGoodsServiceImpl) startLockHeartbeat(ctx context.Context, lockKey s
 	}
 }
 
+// saveGoodsVectorTaskProgress 将任务进度序列化后写入缓存。
 func (s *ShopGoodsServiceImpl) saveGoodsVectorTaskProgress(taskID string,
 	progress *shopmodels.GoodsVectorTaskProgress) error {
 	if s.cache == nil {
@@ -634,6 +654,7 @@ func (s *ShopGoodsServiceImpl) saveGoodsVectorTaskProgress(taskID string,
 	return nil
 }
 
+// loadGoodsVectorTaskProgress 从缓存加载任务进度。
 func (s *ShopGoodsServiceImpl) loadGoodsVectorTaskProgress(taskID string) (*shopmodels.GoodsVectorTaskProgress, error) {
 	if s.cache == nil {
 		return nil, errors.New("缓存未初始化")
@@ -649,6 +670,7 @@ func (s *ShopGoodsServiceImpl) loadGoodsVectorTaskProgress(taskID string) (*shop
 	return progress, nil
 }
 
+// loadEmbeddingProviderConfig 将接口层 embedding 配置转换为底层 provider 配置。
 func loadEmbeddingProviderConfig(req *shopmodels.EmbeddingConfig) (*embeddingutil.ProviderConfig, error) {
 	if req == nil {
 		return nil, errors.New("未配置 embedding.model_id 或 shop.goods_vector.embedding.model_id")
@@ -672,6 +694,7 @@ func loadEmbeddingProviderConfig(req *shopmodels.EmbeddingConfig) (*embeddinguti
 	return cfg, nil
 }
 
+// buildRequestContext 优先复用 gin request 上下文，便于透传取消信号。
 func buildRequestContext(c *gin.Context) context.Context {
 	if c != nil && c.Request != nil {
 		return c.Request.Context()
@@ -699,21 +722,7 @@ func trimRunes(value string, max int) string {
 	return string(runes[:max])
 }
 
-func normalizeGoodsVectorSearchQueries(queries []string) ([]string, error) {
-	result := make([]string, 0, len(queries))
-	for _, query := range queries {
-		query = strings.TrimSpace(query)
-		if query == "" {
-			continue
-		}
-		result = append(result, query)
-	}
-	if len(result) == 0 {
-		return nil, errors.New("搜索内容不能为空")
-	}
-	return result, nil
-}
-
+// cloneGinContext 为后台协程复制一份 gin 上下文，避免直接持有原始请求对象。
 func cloneGinContext(c *gin.Context) *gin.Context {
 	if c == nil {
 		return nil
@@ -777,6 +786,7 @@ func isGoodsVectorTaskUnfinished(progress *shopmodels.GoodsVectorTaskProgress) b
 	return progress.Status != goodsVectorTaskStatusDone
 }
 
+// trimGoodsVectorResumeRows 在续跑时移除当前页中已经处理过的商品记录。
 func trimGoodsVectorResumeRows(rows []*shopmodels.Goods, currentID int64, skipCount int) []*shopmodels.Goods {
 	if len(rows) == 0 {
 		return rows
@@ -800,6 +810,7 @@ func trimGoodsVectorResumeRows(rows []*shopmodels.Goods, currentID int64, skipCo
 	return rows[skipCount:]
 }
 
+// loadLatestUnfinishedGoodsVectorTask 获取当前操作人最近一次未完成的任务。
 func (s *ShopGoodsServiceImpl) loadLatestUnfinishedGoodsVectorTask(operatorID int64) (*shopmodels.GoodsVectorTaskProgress, error) {
 	if operatorID <= 0 || s.cache == nil {
 		return nil, nil
@@ -829,6 +840,7 @@ func (s *ShopGoodsServiceImpl) loadLatestUnfinishedGoodsVectorTask(operatorID in
 	return progress, nil
 }
 
+// saveLatestGoodsVectorTask 记录当前操作人最近发起的任务，便于下次续跑。
 func (s *ShopGoodsServiceImpl) saveLatestGoodsVectorTask(operatorID int64, taskID string) {
 	if operatorID <= 0 || s.cache == nil {
 		return
@@ -836,6 +848,7 @@ func (s *ShopGoodsServiceImpl) saveLatestGoodsVectorTask(operatorID int64, taskI
 	s.cache.Set(context.Background(), goodsVectorLatestTaskKey(operatorID), strings.TrimSpace(taskID), goodsVectorTaskTTL)
 }
 
+// scanGoodsVectorTaskKeys 扫描缓存中的任务 key，并过滤掉锁 key。
 func (s *ShopGoodsServiceImpl) scanGoodsVectorTaskKeys() ([]string, error) {
 	if s.cache == nil {
 		return nil, errors.New("缓存未初始化")
@@ -891,6 +904,7 @@ func parseGoodsVectorTaskTime(value string) time.Time {
 	return ts
 }
 
+// buildGoodsEmbeddingPayloads 将商品主信息与 SKU 信息拼装为 embedding 输入文本。
 func buildGoodsEmbeddingPayloads(goods *shopmodels.Goods) []goodsEmbeddingPayload {
 	if goods == nil {
 		return nil
@@ -924,6 +938,7 @@ func buildGoodsEmbeddingPayloads(goods *shopmodels.Goods) []goodsEmbeddingPayloa
 	//	baseLines = append(baseLines, "上架状态: 下架")
 	//}
 
+	// 优先按 SKU 维度构造 payload，便于检索时保留更细粒度的商品语义。
 	payloads := make([]goodsEmbeddingPayload, 0, maxInt(len(goods.Skus), 1))
 	for _, sku := range goods.Skus {
 		if sku == nil {
@@ -950,6 +965,7 @@ func buildGoodsEmbeddingPayloads(goods *shopmodels.Goods) []goodsEmbeddingPayloa
 	return []goodsEmbeddingPayload{{content: content}}
 }
 
+// appendSkuLines 追加 SKU 维度的可检索文本字段。
 func appendSkuLines(lines *[]string, sku *shopmodels.GoodsSku) {
 	if sku == nil {
 		return
