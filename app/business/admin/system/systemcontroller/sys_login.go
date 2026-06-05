@@ -43,7 +43,7 @@ func (lc *Login) PublicRoutes(router *gin.RouterGroup) {
 // @Description 用户登录
 // @Tags 登录
 // @Param  object body systemmodels.LoginBody true "登录信息"
-// @Success 200 {object}  response.ResponseData "登录成功"
+// @Success 200 {object}  response.ResponseData{data=systemmodels.LoginResp} "登录成功"
 // @Failure 412 {object}  response.ResponseData "参数错误"
 // @Failure 500 {object}  response.ResponseData "服务器错误"
 // @Failure 600 {object}  response.ResponseData "用户名密码错误"

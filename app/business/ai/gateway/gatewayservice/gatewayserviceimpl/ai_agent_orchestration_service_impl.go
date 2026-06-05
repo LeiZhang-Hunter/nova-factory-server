@@ -208,7 +208,7 @@ func (a *AIAgentOrchestrationServiceImpl) validateContent(c *gin.Context,
 	for i, edge := range config.Edges {
 		_, ok := nodeMap[edge.Source]
 		if !ok {
-			return nil, errors.New(fmt.Sprintf(fmt.Sprintf("主Agent %s 不存在", edge.Source)))
+			return nil, errors.New(fmt.Sprintf("主Agent %s 不存在", edge.Source))
 		}
 
 		_, ok = nodeMap[edge.Target]
