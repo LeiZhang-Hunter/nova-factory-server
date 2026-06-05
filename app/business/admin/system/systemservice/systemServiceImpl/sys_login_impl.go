@@ -10,6 +10,7 @@ import (
 	"nova-factory-server/app/constant/sessionStatus"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares/session"
+	"nova-factory-server/app/setting"
 	"nova-factory-server/app/utils/bCryptPasswordEncoder"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
@@ -40,7 +41,7 @@ func NewLoginService(cache cache.Cache, ud systemDao2.IUserDao, pd systemDao2.IP
 	}
 }
 
-func (loginService *LoginService) Login(c *gin.Context, user *systemModels2.User) string {
+func (loginService *LoginService) Login(c *gin.Context, user *systemModels2.User) *systemModels2.LoginResp {
 	manager := session.NewManger(loginService.cache)
 	session, _ := manager.InitSession(c, user.UserId)
 	session.Set(c, sessionStatus.SessionType, sessionStatus.SessionTypeAdmin)
@@ -48,7 +49,10 @@ func (loginService *LoginService) Login(c *gin.Context, user *systemModels2.User
 	session.Set(c, sessionStatus.Browser, user.Browser)
 	session.Set(c, sessionStatus.UserName, user.UserName)
 	session.Set(c, sessionStatus.Avatar, user.Avatar)
-	return session.Id()
+	return &systemModels2.LoginResp{
+		Token:      session.Id(),
+		ExpireTime: setting.Conf.ExpireTime * 60,
+	}
 }
 
 func (loginService *LoginService) Register(c *gin.Context, user *systemModels2.LoginBody) {

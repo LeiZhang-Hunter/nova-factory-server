@@ -50,11 +50,10 @@ func (a *AIAgentDaoImpl) Update(c *gin.Context, req *gatewaymodels.AIAgentUpsert
 	item.SetUpdateBy(baizeContext.GetUserId(c))
 	if err := a.db.WithContext(c).Table(a.table).
 		Where("id = ?", item.ID).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		Select("name", "type", "prompt", "default_llm_provider_id", "default_llm_model_id", "llm_temperature", "llm_top_p",
 			"llm_max_tokens", "enable_llm_temperature", "enable_llm_top_p", "enable_llm_max_tokens",
-			"llm_max_context_count", "sandbox_mode", "sandbox_network", "enable",
+			"llm_max_context_count", "sandbox_mode", "sandbox_network", "enable", "suppress_pre_tool_content",
 			"work_dir", "mcp_enabled", "mcp_server_ids", "mcp_server_enabled_ids", "allow_mcp_server_ids_tools", "update_by", "update_time").
 		Updates(item).Error; err != nil {
 		return nil, err
@@ -175,6 +174,7 @@ func buildAIAgentModel(c *gin.Context, req *gatewaymodels.AIAgentUpsert) *gatewa
 		MCPServerIDs:              req.MCPServerIDs,
 		MCPServerEnabledIDs:       req.MCPServerEnabledIDs,
 		AllowMcpServerIdsToolsRaw: req.AllowMcpServerIdsToolsRaw,
+		SuppressPreToolContent:    req.SuppressPreToolContent,
 		Enable:                    req.Enable,
 		DeptID:                    baizeContext.GetDeptId(c),
 	}

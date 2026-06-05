@@ -7,6 +7,12 @@ type LoginBody struct {
 	Uuid     string `json:"uuid"`                        //uuid
 }
 
+// LoginResp 登录返回
+type LoginResp struct {
+	Token      string `json:"token"`      // 登录 token
+	ExpireTime int64  `json:"expireTime"` // 有效时间，单位秒
+}
+
 type User struct {
 	UserId    int64  `json:"userId,string" db:"user_id"`
 	DeptId    int64  `json:"-" db:"dept_id"`

@@ -19,13 +19,15 @@ import (
 
 // AIAgentServiceImpl 提供智能体配置的业务实现。
 type AIAgentServiceImpl struct {
-	dao   gatewaydao.IAIAgentDao
-	cache cache.Cache
+	dao              gatewaydao.IAIAgentDao
+	orchestrationDao gatewaydao.IAIAgentOrchestrationDao
+	cache            cache.Cache
 }
 
 // NewAIAgentService 创建智能体配置服务。
-func NewAIAgentService(dao gatewaydao.IAIAgentDao, cache cache.Cache) gatewayservice.IAIAgentService {
-	return &AIAgentServiceImpl{dao: dao, cache: cache}
+func NewAIAgentService(dao gatewaydao.IAIAgentDao,
+	orchestrationDao gatewaydao.IAIAgentOrchestrationDao, cache cache.Cache) gatewayservice.IAIAgentService {
+	return &AIAgentServiceImpl{dao: dao, orchestrationDao: orchestrationDao, cache: cache}
 }
 
 // Create 新增智能体配置。
@@ -48,7 +50,14 @@ func (a *AIAgentServiceImpl) Update(c *gin.Context, req *gatewaymodels.AIAgentUp
 	if current == nil {
 		return nil, errors.New("智能体不存在")
 	}
-	return a.dao.Update(c, req)
+	updated, err := a.dao.Update(c, req)
+	if err != nil {
+		return nil, err
+	}
+	if err := a.syncOrchestrationMainAgent(c, updated); err != nil {
+		return nil, err
+	}
+	return updated, nil
 }
 
 // DeleteByIDs 删除智能体配置。
@@ -145,6 +154,35 @@ func (a *AIAgentServiceImpl) fillAgentActiveVersion(ctx context.Context, rows []
 // UpdateConfigVersion 更新版本
 func (a *AIAgentServiceImpl) UpdateConfigVersion(c *gin.Context, id int64, version string) error {
 	return a.dao.UpdateConfigVersion(c, id, version)
+}
+
+func (a *AIAgentServiceImpl) syncOrchestrationMainAgent(c *gin.Context, agent *gatewaymodels.AIAgent) error {
+	if agent == nil {
+		return nil
+	}
+	orchestration, err := a.orchestrationDao.GetByAgentID(c, agent.ID)
+	if err != nil {
+		return err
+	}
+	if orchestration == nil {
+		return nil
+	}
+
+	var config gatewaymodels.AgentLoadConfig
+	if err := json.Unmarshal([]byte(orchestration.Config), &config); err != nil {
+		return errors.New("智能体编排配置格式不正确")
+	}
+	config.Agent = agent
+	content, err := json.Marshal(&config)
+	if err != nil {
+		return err
+	}
+	_, err = a.orchestrationDao.UpdateByAgentID(c, &gatewaymodels.AIAgentOrchestrationUpsert{
+		AgentID: agent.ID,
+		Content: orchestration.Content,
+		Config:  string(content),
+	})
+	return err
 }
 
 func (a *AIAgentServiceImpl) prepareUpsert(req *gatewaymodels.AIAgentUpsert, isUpdate bool) error {

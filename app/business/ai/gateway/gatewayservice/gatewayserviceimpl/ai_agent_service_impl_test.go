@@ -1,6 +1,7 @@
 package gatewayserviceimpl
 
 import (
+	"context"
 	"testing"
 
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
@@ -52,5 +53,17 @@ func (m *mockAIAgentDao) GetEnabledByType(c *gin.Context, agentType string) (*ga
 }
 
 func (m *mockAIAgentDao) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (*gatewaymodels.AIAgentListData, error) {
+	return nil, nil
+}
+
+func (m *mockAIAgentDao) UpdateConfigVersion(c *gin.Context, id int64, version string) error {
+	return nil
+}
+
+func (m *mockAIAgentDao) GetEnable(c context.Context) ([]*gatewaymodels.AIAgent, error) {
+	return nil, nil
+}
+
+func (m *mockAIAgentDao) GetConfigVersion(c context.Context, id int64) (*gatewaymodels.AIAgent, error) {
 	return nil, nil
 }
