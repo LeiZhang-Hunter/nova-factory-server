@@ -83,9 +83,10 @@ func (s *IApiShopGoodsDaoImpl) List(c *gin.Context, query *models.GoodsQuery) (*
 	if query.GoodsCode != "" {
 		db = db.Where("goods_code = ?", query.GoodsCode)
 	}
-	if query.CategoryId > 0 {
-		db = db.Where("shop_category_id = ?", query.CategoryId)
+	if len(query.CategoryIds) > 0 {
+		db = db.Where("shop_category_id in ?", query.CategoryIds)
 	}
+	db = db.Where("is_on_sale = 1")
 
 	if query.Page <= 0 {
 		query.Page = 1

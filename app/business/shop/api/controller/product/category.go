@@ -2,6 +2,7 @@ package product
 
 import (
 	"nova-factory-server/app/business/shop/product/shopservice"
+	"nova-factory-server/app/store"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
@@ -9,10 +10,11 @@ import (
 
 type Category struct {
 	service shopservice.IShopCategoryService
+	cache   store.IShopCategoryStore
 }
 
-func NewCategory(service shopservice.IShopCategoryService) *Category {
-	return &Category{service: service}
+func NewCategory(service shopservice.IShopCategoryService, cache store.IShopCategoryStore) *Category {
+	return &Category{service: service, cache: cache}
 }
 
 func (c *Category) PublicRoutes(router *gin.RouterGroup) {
@@ -33,10 +35,20 @@ func (c *Category) PrivateRoutes(router *gin.RouterGroup) {
 // @Success 200 {object} response.ResponseData "获取成功"
 // @Router /api/v1/app/shop/category/all [get]
 func (c *Category) All(ctx *gin.Context) {
+	if c.cache != nil {
+		if data, ok := c.cache.Get(); ok {
+			baizeContext.SuccessData(ctx, data)
+			return
+		}
+	}
+
 	data, err := c.service.All(ctx)
 	if err != nil {
 		baizeContext.Waring(ctx, err.Error())
 		return
+	}
+	if c.cache != nil {
+		c.cache.Set(data)
 	}
 	baizeContext.SuccessData(ctx, data)
 }

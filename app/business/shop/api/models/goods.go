@@ -24,13 +24,14 @@ type Goods struct {
 
 // GoodsQuery 商品查询参数
 type GoodsQuery struct {
-	GoodsName  string `form:"goodsName"`  // 商品名称
-	GoodsCode  string `form:"goodsCode"`  // 商品编码
-	CategoryId int64  `form:"categoryId"` // 商品分类ID
-	SortBy     string `form:"sortBy"`     // 排序字段
-	SortOrder  string `form:"sortOrder"`  // 排序方向 asc/desc
-	Page       int64  `form:"page"`       // 页码
-	Size       int64  `form:"size"`       // 每页数量
+	GoodsName   string  `form:"goodsName"`   // 商品名称
+	GoodsCode   string  `form:"goodsCode"`   // 商品编码
+	CategoryId  int64   `form:"categoryId"`  // 商品分类ID
+	SortBy      string  `form:"sortBy"`      // 排序字段
+	SortOrder   string  `form:"sortOrder"`   // 排序方向 asc/desc
+	Page        int64   `form:"page"`        // 页码
+	Size        int64   `form:"size"`        // 每页数量
+	CategoryIds []int64 `form:"categoryIds"` // 商品分类ID列表
 }
 
 // GoodsListData 商品列表结果
