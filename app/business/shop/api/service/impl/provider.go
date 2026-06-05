@@ -5,4 +5,5 @@ import "github.com/google/wire"
 var ProviderSet = wire.NewSet(NewIApiShopCartServiceImpl, NewIApiShopWechatAuthServiceImpl,
 	NewIApiShopAuthServiceImpl, NewIApiShopAddressServiceImpl, NewIApiShopOrderServiceImpl, NewIApiShopGoodsServiceImpl,
 	NewIApiShopFavoriteServiceImpl, NewIApiShopSeckillServiceImpl, NewIApiShopCombinationServiceImpl,
-	NewIApiShopPinkServiceImpl, NewIApiShopASRServiceImpl, NewIApiShopVoiceServiceImpl)
+	NewIApiShopPinkServiceImpl, NewIApiShopASRServiceImpl, NewIApiShopVoiceServiceImpl,
+	NewIApiShopCompanyInfoServiceImpl)

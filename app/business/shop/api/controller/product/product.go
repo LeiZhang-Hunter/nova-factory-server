@@ -3,6 +3,7 @@ package product
 import (
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
+	"nova-factory-server/app/store"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/gin_mcp"
 
@@ -10,11 +11,12 @@ import (
 )
 
 type Product struct {
-	service service.IApiShopGoodsService
+	service       service.IApiShopGoodsService
+	categoryStore store.IShopCategoryStore
 }
 
-func NewProduct(service service.IApiShopGoodsService) *Product {
-	return &Product{service: service}
+func NewProduct(service service.IApiShopGoodsService, categoryStore store.IShopCategoryStore) *Product {
+	return &Product{service: service, categoryStore: categoryStore}
 }
 
 func (p *Product) PublicRoutes(router *gin.RouterGroup) {
@@ -71,6 +73,9 @@ func (p *Product) List(c *gin.Context) {
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
+	}
+	if req.CategoryId != 0 || req.CategoryIds != nil {
+		req.CategoryIds = p.categoryStore.GetCategoryIDs(req.CategoryId)
 	}
 	data, err := p.service.List(c, req)
 	if err != nil {

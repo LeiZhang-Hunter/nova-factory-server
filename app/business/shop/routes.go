@@ -9,6 +9,7 @@ import (
 	"nova-factory-server/app/business/shop/api/controller/address"
 	"nova-factory-server/app/business/shop/api/controller/agent"
 	"nova-factory-server/app/business/shop/api/controller/auth"
+	apiCompanyController "nova-factory-server/app/business/shop/api/controller/company"
 	"nova-factory-server/app/business/shop/api/controller/favorite"
 	"nova-factory-server/app/business/shop/api/controller/order"
 	"nova-factory-server/app/business/shop/api/controller/product"
@@ -41,6 +42,7 @@ func NewGinEngine(
 	shopConfigController *shopconfigController.Controller,
 	favoriteController *favorite.Favorite,
 	apiActivityController *apiActivityController.Controller,
+	apiCompanyController *apiCompanyController.Controller,
 ) *Shop {
 	group := app.Engine.Group("")
 
@@ -54,6 +56,7 @@ func NewGinEngine(
 		productController.Category.PublicRoutes(publicGroup)
 		productController.Home.PublicRoutes(publicGroup)
 		productController.Product.PublicRoutes(publicGroup)
+		apiCompanyController.CompanyInfo.PublicRoutes(publicGroup)
 		orderNotifyController.PublicRoutes(publicGroup)
 
 	}
