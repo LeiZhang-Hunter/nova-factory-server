@@ -41,6 +41,7 @@ const (
 	goodsVectorRetailPriceField   = "retail_price"
 	goodsVectorWeightPriceField   = "weight"
 	goodsVectorQuantityPriceField = "quantity"
+	goodsVectorIsSalePriceField   = "is_sale"
 
 	// 检索相关字段。
 	// metadata 存放规格、分类等结构化信息，用于过滤；
@@ -55,6 +56,7 @@ const (
 	goodsIdxVectorField      = "idx_goods_vector"
 	goodsIdxTextSparseVector = "idx_goods_text_sparse_vector"
 	goodsIdxCategoryField    = "idx_goods_category_name"
+	goodsIdxIsSaleField      = "idx_goods_is_sale"
 
 	// 字符串字段长度上限，避免写入 Milvus 时超出 schema 约束。
 	goodsVectorPKMaxLength       = 128
@@ -102,8 +104,10 @@ type goodsVectorRows struct {
 	retailPrices    []float64
 	weights         []float64
 	quantities      []int64
+	isSales         []int64
 	metadatas       [][]byte
 	vectors         [][]float32
+	IsSale          []bool
 }
 
 // goodsSearchRuntimeQuery 表示一次批量检索中单条 query 的运行时上下文。
@@ -338,6 +342,8 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 			WithField(entity.NewField().WithName(goodsVectorRetailPriceField).WithDataType(entity.FieldTypeDouble)).
 			WithField(entity.NewField().WithName(goodsVectorWeightPriceField).WithDataType(entity.FieldTypeDouble)).
 			WithField(entity.NewField().WithName(goodsVectorQuantityPriceField).WithDataType(entity.FieldTypeInt64)).
+			WithField(entity.NewField().WithName(goodsIdxIsSaleField).WithDataType(entity.FieldTypeBool)).
+			WithField(entity.NewField().WithName(goodsVectorIsSalePriceField).WithDataType(entity.FieldTypeInt64)).
 			WithField(entity.NewField().WithName(goodsVectorEmbeddingField).WithDataType(entity.FieldTypeFloatVector).WithDim(int64(dim))).
 			WithField(entity.NewField().WithName(goodsVectorContextSparseField).WithDataType(entity.FieldTypeSparseVector)).
 			WithField(entity.NewField().
@@ -355,6 +361,7 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 		indexOptions := []milvusclient.CreateIndexOption{
 			milvusclient.NewCreateIndexOption(collectionName, goodsVectorEmbeddingField, index.NewAutoIndex(entity.COSINE)).WithIndexName(goodsIdxVectorField),
 			milvusclient.NewCreateIndexOption(collectionName, goodsVectorCategoryField, index.NewInvertedIndex()).WithIndexName(goodsIdxCategoryField),
+			milvusclient.NewCreateIndexOption(collectionName, goodsVectorIsSalePriceField, index.NewInvertedIndex()).WithIndexName(goodsIdxIsSaleField),
 			milvusclient.NewCreateIndexOption(collectionName, goodsVectorContextSparseField, index.NewSparseInvertedIndex(entity.BM25, 0.2)).WithIndexName(goodsIdxTextSparseVector),
 		}
 
@@ -388,6 +395,7 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 		goodsVectorRetailPriceField:    false,
 		goodsVectorWeightPriceField:    false,
 		goodsVectorQuantityPriceField:  false,
+		goodsVectorIsSalePriceField:    false,
 		goodsVectorEmbeddingField:      false,
 	}
 	for _, field := range collection.Schema.Fields {
@@ -416,6 +424,9 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 	}
 	// 历史 collection 不强改 schema，但会补齐必要的标量索引。
 	if err = ensureGoodsVectorScalarIndex(ctx, client, collectionName, goodsVectorCategoryField, goodsIdxCategoryField, index.NewInvertedIndex()); err != nil {
+		return err
+	}
+	if err = ensureGoodsVectorScalarIndex(ctx, client, collectionName, goodsVectorIsSalePriceField, goodsIdxIsSaleField, index.NewInvertedIndex()); err != nil {
 		return err
 	}
 	return nil
@@ -515,6 +526,7 @@ func buildGoodsVectorRows(goods *shopmodels.Goods, items []*shopmodels.GoodsVect
 		if err != nil {
 			return err
 		}
+		rows.IsSale = append(rows.IsSale, item.IsSale)
 		rows.pks = append(rows.pks, item.SkuID)
 		rows.goodsDBIDs = append(rows.goodsDBIDs, goods.ID)
 		rows.goodsNames = append(rows.goodsNames, trimRunes(goods.GoodsName, goodsVectorNameMaxLength))
@@ -528,6 +540,7 @@ func buildGoodsVectorRows(goods *shopmodels.Goods, items []*shopmodels.GoodsVect
 		rows.retailPrices = append(rows.retailPrices, item.RetailPrice)
 		rows.weights = append(rows.weights, item.Weight)
 		rows.quantities = append(rows.quantities, item.Quantity)
+		rows.isSales = append(rows.isSales, int64(goods.IsOnSale))
 		rows.metadatas = append(rows.metadatas, metadataJSON)
 		rows.vectors = append(rows.vectors, item.Vector)
 		return nil

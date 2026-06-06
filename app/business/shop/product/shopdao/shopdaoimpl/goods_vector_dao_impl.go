@@ -98,6 +98,7 @@ func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods,
 		WithVarcharColumn(goodsVectorDescriptionField, rows.descriptions).
 		WithVarcharColumn(goodsVectorContentField, rows.contents).
 		WithInt64Column(goodsVectorSkuIdField, rows.skuIDs).
+		WithBoolColumn(goodsIdxIsSaleField, rows.IsSale).
 		WithVarcharColumn(goodsVectorSkuNameField, rows.skuNames).
 		WithVarcharColumn(goodsVectorSkuDescriptionField, rows.skuDescriptions).
 		WithColumns(
@@ -106,6 +107,7 @@ func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods,
 			column.NewColumnJSONBytes(goodsVectorMetadataField, rows.metadatas),
 		).
 		WithInt64Column(goodsVectorQuantityPriceField, rows.quantities).
+		WithInt64Column(goodsVectorIsSalePriceField, rows.isSales).
 		WithFloatVectorColumn(goodsVectorEmbeddingField, dim, rows.vectors),
 	)
 	if err != nil {

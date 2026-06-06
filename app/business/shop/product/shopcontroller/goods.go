@@ -103,7 +103,7 @@ func (s *Goods) GetByID(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "新增成功"
-// @Router /shop/goods [post]
+// @Router /shop/goods/add [post]
 func (s *Goods) Create(c *gin.Context) {
 	req := new(shopmodels.GoodsUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {
@@ -126,7 +126,7 @@ func (s *Goods) Create(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "修改成功"
-// @Router /shop/goods [put]
+// @Router /shop/goods/edit [put]
 func (s *Goods) Update(c *gin.Context) {
 	req := new(shopmodels.GoodsUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {

@@ -15,6 +15,7 @@ func TestBuildGoodsVectorRowsWithSkus(t *testing.T) {
 		GoodsCode:        "code-a",
 		ShopCategoryName: "分类A",
 		Description:      "商品描述",
+		IsOnSale:         1,
 	}
 
 	items := []*shopmodels.GoodsVectorUpsertItem{
@@ -50,6 +51,9 @@ func TestBuildGoodsVectorRowsWithSkus(t *testing.T) {
 	if rows.retailPrices[1] != 29.9 || rows.weights[1] != 2.3 || rows.quantities[1] != 16 {
 		t.Fatalf("unexpected second sku metrics: %v %v %d", rows.retailPrices[1], rows.weights[1], rows.quantities[1])
 	}
+	if rows.isSales[0] != 1 || rows.isSales[1] != 1 {
+		t.Fatalf("unexpected isSale flags: %#v", rows.isSales)
+	}
 }
 
 func TestBuildGoodsVectorRowsWithoutSku(t *testing.T) {
@@ -57,6 +61,7 @@ func TestBuildGoodsVectorRowsWithoutSku(t *testing.T) {
 		ID:        1002,
 		GoodsID:   "goods-2",
 		GoodsName: "商品B",
+		IsOnSale:  0,
 	}
 
 	items := []*shopmodels.GoodsVectorUpsertItem{
@@ -78,6 +83,9 @@ func TestBuildGoodsVectorRowsWithoutSku(t *testing.T) {
 	}
 	if rows.retailPrices[0] != 0 || rows.weights[0] != 0 || rows.quantities[0] != 0 {
 		t.Fatalf("unexpected empty sku metrics: %v %v %d", rows.retailPrices[0], rows.weights[0], rows.quantities[0])
+	}
+	if rows.isSales[0] != 0 {
+		t.Fatalf("unexpected isSale flag: %#v", rows.isSales)
 	}
 }
 

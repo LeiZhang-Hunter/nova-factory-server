@@ -47,6 +47,7 @@ type goodsVectorConfig struct {
 type goodsEmbeddingPayload struct {
 	sku     *shopmodels.GoodsSku
 	content string
+	IsSale  bool
 }
 
 // GenerateVector 为单个已上架商品生成并写入向量数据。
@@ -407,6 +408,7 @@ func (s *ShopGoodsServiceImpl) generateGoodsVectorWithEmbedder(c *gin.Context, r
 			Content: payload.content,
 			Vector:  float64ToFloat32(vectors[idx]),
 		}
+		item.IsSale = payload.IsSale
 		if payload.sku != nil {
 			item.SkuID = int64(payload.sku.ID)
 			item.SkuName = payload.sku.SkuName
@@ -941,9 +943,14 @@ func buildGoodsEmbeddingPayloads(goods *shopmodels.Goods) []goodsEmbeddingPayloa
 		if strings.TrimSpace(content) == "" {
 			continue
 		}
+		var isSale bool
+		if goods.IsOnSale > 0 {
+			isSale = true
+		}
 		payloads = append(payloads, goodsEmbeddingPayload{
 			sku:     sku,
 			content: content,
+			IsSale:  isSale,
 		})
 	}
 	if len(payloads) > 0 {

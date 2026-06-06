@@ -118,4 +118,5 @@ type GoodsVectorUpsertItem struct {
 	Metadata       map[string]any
 	Content        string
 	Vector         []float32
+	IsSale         bool
 }
