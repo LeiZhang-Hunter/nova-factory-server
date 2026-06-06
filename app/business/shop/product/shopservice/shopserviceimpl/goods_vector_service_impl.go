@@ -21,7 +21,6 @@ import (
 	"nova-factory-server/app/utils/retrieval"
 	retrievalschema "nova-factory-server/app/utils/retrieval/schema"
 	"nova-factory-server/app/utils/snowflake"
-	"nova-factory-server/app/utils/vectorsearch"
 )
 
 // 商品向量文本在送入 embedding 模型前的最大长度，避免单条内容过长。
@@ -274,11 +273,7 @@ func (s *ShopGoodsServiceImpl) SearchVector(c *gin.Context, req *shopmodels.Good
 	if req == nil {
 		return nil, errors.New("搜索参数不能为空")
 	}
-	queryPayloads, err := vectorsearch.BuildGoodsSearchQueryPayloads([]string{req.Query})
-	if err != nil {
-		return nil, err
-	}
-	items, err := s.batchSearchVector(c, queryPayloads, req.Limit, req.Embedding)
+	items, err := s.batchSearchVector(c, []string{req.Query}, req.Limit, req.Embedding)
 	if err != nil {
 		return nil, err
 	}
@@ -300,11 +295,7 @@ func (s *ShopGoodsServiceImpl) BatchSearchVector(c *gin.Context,
 	if req == nil {
 		return nil, errors.New("批量搜索参数不能为空")
 	}
-	queryPayloads, err := vectorsearch.BuildGoodsSearchQueryPayloads(req.Queries)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := s.batchSearchVector(c, queryPayloads, req.Limit, req.Embedding)
+	rows, err := s.batchSearchVector(c, req.Queries, req.Limit, req.Embedding)
 	if err != nil {
 		return nil, err
 	}
@@ -315,7 +306,7 @@ func (s *ShopGoodsServiceImpl) BatchSearchVector(c *gin.Context,
 }
 
 // batchSearchVector 统一处理单条/批量查询的 embedding 生成与召回逻辑。
-func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queryPayloads []vectorsearch.GoodsSearchQueryPayload, limit int,
+func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queryPayloads []string, limit int,
 	embedding *shopmodels.EmbeddingConfig) ([]*shopmodels.GoodsVectorBatchSearchItem, error) {
 	cfg, err := loadEmbeddingProviderConfig(embedding)
 	if err != nil {
@@ -334,7 +325,7 @@ func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queryPayloads [
 	rows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(queryPayloads))
 	topK := normalizeGoodsVectorSearchLimit(limit)
 	for _, payload := range queryPayloads {
-		documents, err := s.retriever.Retrieve(requestCtx, payload.SearchText,
+		documents, err := s.retriever.Retrieve(requestCtx, payload, true,
 			retrieval.WithTopK(topK),
 			retrieval.WithEmbedding(embedder),
 		)
@@ -350,7 +341,7 @@ func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queryPayloads [
 			items = append(items, item)
 		}
 		rows = append(rows, &shopmodels.GoodsVectorBatchSearchItem{
-			Query: payload.Original,
+			Query: payload,
 			Rows:  items,
 			Total: int64(len(items)),
 		})

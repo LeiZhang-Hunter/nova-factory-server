@@ -27,7 +27,7 @@ func NewProductVectorRetriever(dao masterdao.IProductVectorDao) retrieval.Retrie
 }
 
 // Retrieve 执行单条商品检索，并将业务结果映射为统一文档结构。
-func (r *ProductVectorRetriever) Retrieve(ctx context.Context, query string, opts ...retrieval.Option) ([]*schema.Document, error) {
+func (r *ProductVectorRetriever) Retrieve(ctx context.Context, query string, fallbackWithoutMetadata bool, opts ...retrieval.Option) ([]*schema.Document, error) {
 	if r == nil || r.dao == nil {
 		return nil, errors.New("商品检索器未初始化")
 	}

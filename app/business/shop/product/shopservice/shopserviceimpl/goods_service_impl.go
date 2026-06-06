@@ -6,6 +6,7 @@ import (
 	"errors"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/snowflake"
+	"nova-factory-server/app/utils/vectorsearch/goods"
 	"sort"
 	"strconv"
 	"strings"
@@ -31,36 +32,51 @@ type ShopGoodsServiceImpl struct {
 	skuDao      shopdao.IShopSkuDao
 	categoryDao shopdao.IShopCategoryDao
 	cache       cache.Cache
+	// metadataExtractor 元数据提取器
+	metadataExtractor *goods.MetadataExtractor
 }
 
+// 导入商品时的数据库分批大小，避免单次批量过大。
 const importBatchSize = 100
+
+// 导出 CSV 时单次分页拉取的行数，兼顾内存与导出吞吐。
 const goodsExportBatchSize int64 = 500
 
 // NewShopGoodsService 创建商品服务
 func NewShopGoodsService(dao shopdao.IShopGoodsDao, vectorDao shopdao.IShopGoodsVectorDao,
 	skuDao shopdao.IShopSkuDao, categoryDao shopdao.IShopCategoryDao, cache cache.Cache) shopservice.IShopGoodsService {
+	metadataExtractor := goods.NewMetadataExtractor()
+	err := metadataExtractor.Init()
+	if err != nil {
+		zap.L().Error("metadataExtractor init error", zap.Error(err))
+	}
 	return &ShopGoodsServiceImpl{
-		dao:         dao,
-		vectorDao:   vectorDao,
-		retriever:   shopretrieval.NewGoodsVectorRetriever(vectorDao),
-		skuDao:      skuDao,
-		categoryDao: categoryDao,
-		cache:       cache,
+		dao:               dao,
+		vectorDao:         vectorDao,
+		retriever:         shopretrieval.NewGoodsVectorRetriever(vectorDao),
+		skuDao:            skuDao,
+		categoryDao:       categoryDao,
+		cache:             cache,
+		metadataExtractor: metadataExtractor,
 	}
 }
 
+// Create 创建商品基础信息。
 func (s *ShopGoodsServiceImpl) Create(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error) {
 	return s.dao.Create(c, req)
 }
 
+// Update 更新商品基础信息。
 func (s *ShopGoodsServiceImpl) Update(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error) {
 	return s.dao.Update(c, req)
 }
 
+// DeleteByIDs 批量删除商品。
 func (s *ShopGoodsServiceImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	return s.dao.DeleteByIDs(c, ids)
 }
 
+// GetByID 按数据库主键查询商品，并补齐分类名、SKU 和媒体绝对地址。
 func (s *ShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error) {
 	data, err := s.dao.GetByID(c, id)
 	if err != nil {
@@ -79,6 +95,7 @@ func (s *ShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Go
 	return data, nil
 }
 
+// GetByGoodsID 按业务商品 ID 查询商品，并补齐分类名、SKU 和媒体绝对地址。
 func (s *ShopGoodsServiceImpl) GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error) {
 	data, err := s.dao.GetByGoodsID(c, goodsID)
 	if err != nil {
@@ -97,6 +114,7 @@ func (s *ShopGoodsServiceImpl) GetByGoodsID(c *gin.Context, goodsID string) (*sh
 	return data, nil
 }
 
+// List 分页查询商品列表，并统一补齐分类名、SKU 与媒体地址。
 func (s *ShopGoodsServiceImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error) {
 	data, err := s.dao.List(c, req)
 	if err != nil {
@@ -115,11 +133,14 @@ func (s *ShopGoodsServiceImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) 
 	return data, nil
 }
 
+// ExportCSV 以流式方式导出商品 CSV。
+// 这里按分页批次拉取商品，避免一次性将全部商品加载到内存。
 func (s *ShopGoodsServiceImpl) ExportCSV(c *gin.Context, req *shopmodels.GoodsQuery, csvWriter *csv.Writer, flush func()) error {
 	exportReq := &shopmodels.GoodsQuery{}
 	if req != nil {
 		*exportReq = *req
 	}
+	// 导出时强制改用固定分页大小，由服务端主动分页遍历。
 	exportReq.Page = 1
 	exportReq.Size = goodsExportBatchSize
 
@@ -139,6 +160,7 @@ func (s *ShopGoodsServiceImpl) ExportCSV(c *gin.Context, req *shopmodels.GoodsQu
 		flush()
 	}
 
+	// 第一批已经查出，先写入，后续再继续翻页。
 	if err = writeGoodsCSVRows(csvWriter, firstBatch.Rows); err != nil {
 		return err
 	}
@@ -153,6 +175,7 @@ func (s *ShopGoodsServiceImpl) ExportCSV(c *gin.Context, req *shopmodels.GoodsQu
 	written := int64(len(firstBatch.Rows))
 	total := firstBatch.Total
 	for exportReq.Page++; written < total; exportReq.Page++ {
+		// 如果客户端主动断开，则尽快终止导出，避免无效 IO。
 		if c.Request.Context().Err() != nil {
 			zap.L().Warn("goods csv export canceled by client", zap.Error(c.Request.Context().Err()))
 			return c.Request.Context().Err()
@@ -183,6 +206,7 @@ func (s *ShopGoodsServiceImpl) ExportCSV(c *gin.Context, req *shopmodels.GoodsQu
 	return nil
 }
 
+// goodsCSVHeader 返回商品导出 CSV 的表头定义。
 func goodsCSVHeader() []string {
 	return []string{
 		"ID",
@@ -224,6 +248,8 @@ func goodsCSVHeader() []string {
 	}
 }
 
+// writeGoodsCSVRows 将商品列表按“商品 x SKU”展开写入 CSV。
+// 无 SKU 的商品也会输出一行，仅 SKU 列留空。
 func writeGoodsCSVRows(csvWriter *csv.Writer, rows []*shopmodels.Goods) error {
 	for _, row := range rows {
 		if row == nil {
@@ -244,6 +270,7 @@ func writeGoodsCSVRows(csvWriter *csv.Writer, rows []*shopmodels.Goods) error {
 	return nil
 }
 
+// buildGoodsCSVRecord 将商品及可选 SKU 展平为单行 CSV 记录。
 func buildGoodsCSVRecord(row *shopmodels.Goods, sku *shopmodels.GoodsSku) []string {
 	record := []string{
 		strconv.FormatInt(row.ID, 10),
@@ -294,6 +321,7 @@ func buildGoodsCSVRecord(row *shopmodels.Goods, sku *shopmodels.GoodsSku) []stri
 	return record
 }
 
+// formatGoodsOnSale 将上下架状态转为中文文案。
 func formatGoodsOnSale(status int32) string {
 	if status == 1 {
 		return "是"
@@ -301,6 +329,7 @@ func formatGoodsOnSale(status int32) string {
 	return "否"
 }
 
+// formatCSVTime 统一格式化时间字段，空时间返回空字符串。
 func formatCSVTime(t *time.Time) string {
 	if t == nil {
 		return ""
@@ -308,6 +337,8 @@ func formatCSVTime(t *time.Time) string {
 	return t.Format("2006-01-02 15:04:05")
 }
 
+// attachCategoryNames 为商品批量补充分类名称。
+// 这里会先去重分类 ID，再一次性查询分类，避免 N+1 查询。
 func (s *ShopGoodsServiceImpl) attachCategoryNames(c *gin.Context, goodsRows []*shopmodels.Goods) error {
 	if len(goodsRows) == 0 || s.categoryDao == nil {
 		return nil
@@ -349,6 +380,8 @@ func (s *ShopGoodsServiceImpl) attachCategoryNames(c *gin.Context, goodsRows []*
 
 // Import 增量导入商品与规格数据
 func (s *ShopGoodsServiceImpl) Import(c *gin.Context, records []shopmodels.ImportGoodsRecord) error {
+	// 导入采用“先分批、再按批 diff、最后分别批量新增/更新”的流程，
+	// 这样可以兼顾导入吞吐与数据库压力。
 	for _, batch := range splitImportRecords(records, importBatchSize) {
 		goodsMap, skuMap, err := buildImportBatch(batch)
 		if err != nil {
@@ -382,6 +415,7 @@ func (s *ShopGoodsServiceImpl) Import(c *gin.Context, records []shopmodels.Impor
 
 // buildGoodsUpsert 组装商品导入参数
 func buildGoodsUpsert(record shopmodels.ImportGoodsRecord) (*shopmodels.GoodsUpsert, error) {
+	// 商品业务 ID 优先取 external_id，其次回退到 product_code。
 	goodsID := strings.TrimSpace(record.ExternalID)
 	if goodsID == "" {
 		goodsID = strings.TrimSpace(record.Data.ProductCode)
@@ -389,6 +423,8 @@ func buildGoodsUpsert(record shopmodels.ImportGoodsRecord) (*shopmodels.GoodsUps
 	if goodsID == "" {
 		return nil, errors.New("导入商品缺少external_id或product_code")
 	}
+
+	// 聚合 SKU 数据，反推商品层面的库存、售价和重量等摘要字段。
 	quantity := int64(0)
 	retailPrice := 0.0
 	weight := 0.0
@@ -428,6 +464,7 @@ func buildGoodsUpsert(record shopmodels.ImportGoodsRecord) (*shopmodels.GoodsUps
 
 // buildGoodsSkuUpsert 组装商品规格导入参数
 func buildGoodsSkuUpsert(goodsID string, record shopmodels.ImportGoodsRecord, sku shopmodels.ImportGoodsSkuRawData) (*shopmodels.GoodsSkuUpsert, bool) {
+	// SKU 业务 ID 允许从多个候选字段回退，尽可能吸收外部数据源的不一致格式。
 	skuID := strings.TrimSpace(sku.Skuid)
 	if skuID == "" {
 		skuID = strings.TrimSpace(sku.Skucode)
@@ -502,6 +539,7 @@ func splitImportRecords(records []shopmodels.ImportGoodsRecord, batchSize int) [
 
 // buildImportBatch 构建单批次导入的商品与规格数据
 func buildImportBatch(records []shopmodels.ImportGoodsRecord) (map[string]*shopmodels.GoodsUpsert, map[string]*shopmodels.GoodsSkuUpsert, error) {
+	// 同一批次内以业务 ID 做 key，天然具备去重效果；后出现的数据会覆盖前一条。
 	goodsMap := make(map[string]*shopmodels.GoodsUpsert, len(records))
 	skuMap := make(map[string]*shopmodels.GoodsSkuUpsert)
 	for _, record := range records {
@@ -539,6 +577,7 @@ func (s *ShopGoodsServiceImpl) diffGoods(c *gin.Context, goodsMap map[string]*sh
 	for goodsID, req := range goodsMap {
 		current := existingMap[goodsID]
 		if current == nil {
+			// 新商品由服务端生成分布式 ID。
 			req.ID = snowflake.GenID()
 			creates = append(creates, req)
 			continue
@@ -585,6 +624,7 @@ func sameGoods(current *shopmodels.Goods, req *shopmodels.GoodsUpsert) bool {
 	if current == nil || req == nil {
 		return false
 	}
+	// 图集在库里是 JSON 字符串，这里先序列化再参与比较。
 	content, err := json.Marshal(req.GalleryImages)
 	if err != nil {
 		zap.L().Error("json marsh error", zap.Error(err))
@@ -658,6 +698,7 @@ func (s *ShopGoodsServiceImpl) attachSkus(c *gin.Context, rows []*shopmodels.Goo
 	if len(rows) == 0 {
 		return nil
 	}
+	// 先按商品业务 ID 一次性查询全部 SKU，再按 goods_id 回填。
 	skus, err := s.skuDao.ListByGoodsIDs(c, goodsIDsFromRows(rows))
 	if err != nil {
 		return err
@@ -675,6 +716,8 @@ func (s *ShopGoodsServiceImpl) attachSkus(c *gin.Context, rows []*shopmodels.Goo
 	return nil
 }
 
+// normalizeGoodsMediaURLs 将商品及 SKU 的媒体相对路径补齐为绝对地址，
+// 同时把逗号分隔的图集字符串转成数组，便于前端直接使用。
 func (s *ShopGoodsServiceImpl) normalizeGoodsMediaURLs(c *gin.Context, rows []*shopmodels.Goods) {
 	for _, row := range rows {
 		if row == nil {
@@ -694,6 +737,7 @@ func (s *ShopGoodsServiceImpl) normalizeGoodsMediaURLs(c *gin.Context, rows []*s
 	}
 }
 
+// splitAndNormalizeMediaURLs 将逗号分隔的媒体列表切分并补齐绝对地址。
 func splitAndNormalizeMediaURLs(c *gin.Context, raw string) []string {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {

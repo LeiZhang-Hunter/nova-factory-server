@@ -1,6 +1,7 @@
 package shopdaoimpl
 
 import (
+	"encoding/json"
 	"testing"
 
 	"nova-factory-server/app/business/shop/product/shopmodels"
@@ -21,7 +22,10 @@ func TestBuildGoodsVectorRowsWithSkus(t *testing.T) {
 		{SkuID: 22, SkuName: "规格2", RetailPrice: 29.9, Weight: 2.3, Quantity: 16, Content: "embedding content 2", Vector: []float32{0.3, 0.4}},
 	}
 
-	rows := buildGoodsVectorRows(goods, items)
+	rows, err := buildGoodsVectorRows(goods, items, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if len(rows.pks) != 2 {
 		t.Fatalf("unexpected pk count: %d", len(rows.pks))
 	}
@@ -59,7 +63,10 @@ func TestBuildGoodsVectorRowsWithoutSku(t *testing.T) {
 		{Content: "embedding content", Vector: []float32{0.3, 0.4}},
 	}
 
-	rows := buildGoodsVectorRows(goods, items)
+	rows, err := buildGoodsVectorRows(goods, items, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if len(rows.pks) != 1 {
 		t.Fatalf("unexpected pk count: %d", len(rows.pks))
 	}
@@ -71,5 +78,45 @@ func TestBuildGoodsVectorRowsWithoutSku(t *testing.T) {
 	}
 	if rows.retailPrices[0] != 0 || rows.weights[0] != 0 || rows.quantities[0] != 0 {
 		t.Fatalf("unexpected empty sku metrics: %v %v %d", rows.retailPrices[0], rows.weights[0], rows.quantities[0])
+	}
+}
+
+func TestBuildGoodsVectorRowsWithExplicitMetadata(t *testing.T) {
+	goods := &shopmodels.Goods{
+		ID:               1003,
+		GoodsID:          "goods-3",
+		GoodsName:        "商品C",
+		ShopCategoryName: "默认分类",
+	}
+
+	items := []*shopmodels.GoodsVectorUpsertItem{
+		{
+			SkuID:    33,
+			Content:  "测试内容",
+			Vector:   []float32{0.5, 0.6},
+			Metadata: map[string]any{"category": "显式分类", "spec": "69*5.3", "shopId": 1001},
+		},
+	}
+
+	rows, err := buildGoodsVectorRows(goods, items, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(rows.metadatas) != 1 {
+		t.Fatalf("unexpected metadata count: %d", len(rows.metadatas))
+	}
+
+	metadata := make(map[string]any)
+	if err = json.Unmarshal(rows.metadatas[0], &metadata); err != nil {
+		t.Fatalf("unmarshal metadata fail: %v", err)
+	}
+	if metadata["category"] != "显式分类" {
+		t.Fatalf("unexpected category metadata: %#v", metadata)
+	}
+	if metadata["spec"] != "69*5.3" {
+		t.Fatalf("unexpected spec metadata: %#v", metadata)
+	}
+	if metadata["shopId"] != "1001" {
+		t.Fatalf("unexpected shopId metadata: %#v", metadata)
 	}
 }

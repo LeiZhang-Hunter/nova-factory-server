@@ -1,4 +1,4 @@
-package vectorsearch
+package goods
 
 import (
 	"testing"
@@ -28,7 +28,7 @@ func TestGoodsNormalizationEnhancerInitAndNormalization(t *testing.T) {
 	}
 
 	got := enhancer.Normalization("  21x5.3O型圈GB/T3452.1橡胶NBR  ")
-	if got != "天然矿泉水 69*5.3" {
+	if got != "21*5.3O型圈GB/T3452.1橡胶NBR" {
 		t.Fatalf("unexpected normalized value: %q", got)
 	}
 }
