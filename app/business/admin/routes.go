@@ -3,7 +3,6 @@ package admin
 import (
 	basicscontroller "nova-factory-server/app/business/admin/basics/controller"
 	"nova-factory-server/app/business/admin/monitor/monitorcontroller"
-	"nova-factory-server/app/business/admin/product/productcontroller"
 	"nova-factory-server/app/business/admin/system/systemcontroller"
 	"nova-factory-server/app/business/admin/tool/toolcontroller"
 	"nova-factory-server/app/datasource/cache"
@@ -24,8 +23,7 @@ func NewGinEngine(app *routes.App,
 	bc *basicscontroller.Basics,
 	sc *systemcontroller.System,
 	mc *monitorcontroller.Monitor,
-	gc *toolcontroller.Tool,
-	product *productcontroller.Product) *Admin {
+	gc *toolcontroller.Tool) *Admin {
 	r := app.Engine
 	group := r.Group("")
 	//不做鉴权的
@@ -36,7 +34,6 @@ func NewGinEngine(app *routes.App,
 		sc.Login.PublicRoutes(group) //登录
 		sc.Sse.PublicRoutes(group)   //SSE链接
 
-		product.Laboratory.PublicRoutes(group)
 	}
 
 	//做鉴权的
@@ -63,7 +60,6 @@ func NewGinEngine(app *routes.App,
 		mc.Logfor.PrivateRoutes(group)     //登录日志
 		mc.Job.PrivateRoutes(group)        //定时任务
 		gc.GenTable.PrivateRoutes(group)   //代码生成
-		product.Laboratory.PrivateRoutes(group)
 	}
 
 	return &Admin{}
