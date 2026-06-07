@@ -59,9 +59,6 @@ func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.Ge
 	if goods == nil {
 		return nil, errors.New("商品不存在")
 	}
-	if goods.IsOnSale <= 0 {
-		return nil, errors.New("商品未上架，不能生成向量")
-	}
 
 	if err = s.attachSkus(c, []*shopmodels.Goods{goods}); err != nil {
 		return nil, err

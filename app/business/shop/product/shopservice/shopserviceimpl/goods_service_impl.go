@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/snowflake"
 	"nova-factory-server/app/utils/vectorsearch/goods"
@@ -68,11 +69,68 @@ func (s *ShopGoodsServiceImpl) Create(c *gin.Context, req *shopmodels.GoodsUpser
 
 // Update 更新商品基础信息。
 func (s *ShopGoodsServiceImpl) Update(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error) {
-	return s.dao.Update(c, req)
+	var (
+		data *shopmodels.Goods
+		err  error
+	)
+	err = s.dao.Transaction(c, func(txDao shopdao.IShopGoodsDao) error {
+		data, err = txDao.Update(c, req)
+		if err != nil {
+			return err
+		}
+		if s.vectorDao == nil {
+			return nil
+		}
+		goodsDBID := req.ID
+		if data != nil && data.ID > 0 {
+			goodsDBID = data.ID
+		}
+		if goodsDBID <= 0 {
+			return nil
+		}
+		if err = s.vectorDao.UpdateSaleStatusByGoodsID(c, goodsDBID, req.IsOnSale); err != nil {
+			return fmt.Errorf("同步商品向量在售状态失败: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 // DeleteByIDs 批量删除商品。
 func (s *ShopGoodsServiceImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	if s.skuDao != nil {
+		goodsIDs := make([]string, 0, len(ids))
+		seen := make(map[string]struct{}, len(ids))
+		for _, id := range ids {
+			goods, err := s.dao.GetByID(c, id)
+			if err != nil {
+				return err
+			}
+			if goods == nil || strings.TrimSpace(goods.GoodsID) == "" {
+				continue
+			}
+			if _, ok := seen[goods.GoodsID]; ok {
+				continue
+			}
+			seen[goods.GoodsID] = struct{}{}
+			goodsIDs = append(goodsIDs, goods.GoodsID)
+		}
+		if len(goodsIDs) > 0 {
+			skus, err := s.skuDao.ListByGoodsIDs(c, goodsIDs)
+			if err != nil {
+				return err
+			}
+			if len(skus) > 0 {
+				return errors.New("商品下存在SKU，不允许删除")
+			}
+		}
+	}
 	return s.dao.DeleteByIDs(c, ids)
 }
 

@@ -27,14 +27,14 @@ func TestBuildGoodsVectorRowsWithSkus(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(rows.pks) != 2 {
-		t.Fatalf("unexpected pk count: %d", len(rows.pks))
+	if len(rows.skuIDs) != 2 {
+		t.Fatalf("unexpected sku count: %d", len(rows.skuIDs))
 	}
-	if rows.pks[0] != 11 {
-		t.Fatalf("unexpected first pk: %d", rows.pks[0])
+	if rows.skuIDs[0] != 11 {
+		t.Fatalf("unexpected first sku id: %d", rows.skuIDs[0])
 	}
-	if rows.pks[1] != 22 {
-		t.Fatalf("unexpected second pk: %d", rows.pks[1])
+	if rows.skuIDs[1] != 22 {
+		t.Fatalf("unexpected second sku id: %d", rows.skuIDs[1])
 	}
 	if rows.skuIDs[0] != 11 || rows.skuNames[0] != "规格1" {
 		t.Fatalf("unexpected first sku fields: %d %s", rows.skuIDs[0], rows.skuNames[0])
@@ -51,8 +51,8 @@ func TestBuildGoodsVectorRowsWithSkus(t *testing.T) {
 	if rows.retailPrices[1] != 29.9 || rows.weights[1] != 2.3 || rows.quantities[1] != 16 {
 		t.Fatalf("unexpected second sku metrics: %v %v %d", rows.retailPrices[1], rows.weights[1], rows.quantities[1])
 	}
-	if rows.isSales[0] != 1 || rows.isSales[1] != 1 {
-		t.Fatalf("unexpected isSale flags: %#v", rows.isSales)
+	if !rows.saleFlags[0] || !rows.saleFlags[1] {
+		t.Fatalf("unexpected sale flags: %#v", rows.saleFlags)
 	}
 }
 
@@ -72,11 +72,11 @@ func TestBuildGoodsVectorRowsWithoutSku(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(rows.pks) != 1 {
-		t.Fatalf("unexpected pk count: %d", len(rows.pks))
+	if len(rows.skuIDs) != 1 {
+		t.Fatalf("unexpected sku count: %d", len(rows.skuIDs))
 	}
-	if rows.pks[0] != 0 {
-		t.Fatalf("unexpected pk: %d", rows.pks[0])
+	if rows.skuIDs[0] != 0 {
+		t.Fatalf("unexpected sku id: %d", rows.skuIDs[0])
 	}
 	if rows.skuIDs[0] != 0 || rows.skuNames[0] != "" {
 		t.Fatalf("unexpected empty sku fields: %d %s", rows.skuIDs[0], rows.skuNames[0])
@@ -84,8 +84,8 @@ func TestBuildGoodsVectorRowsWithoutSku(t *testing.T) {
 	if rows.retailPrices[0] != 0 || rows.weights[0] != 0 || rows.quantities[0] != 0 {
 		t.Fatalf("unexpected empty sku metrics: %v %v %d", rows.retailPrices[0], rows.weights[0], rows.quantities[0])
 	}
-	if rows.isSales[0] != 0 {
-		t.Fatalf("unexpected isSale flag: %#v", rows.isSales)
+	if rows.saleFlags[0] {
+		t.Fatalf("unexpected sale flag: %#v", rows.saleFlags)
 	}
 }
 

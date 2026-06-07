@@ -90,7 +90,7 @@ func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods,
 		return nil, err
 	}
 	_, err = client.Upsert(requestCtx, milvusclient.NewColumnBasedInsertOption(cfg.Collection).
-		WithInt64Column(goodsVectorPKField, rows.pks).
+		WithInt64Column(goodsVectorGoodsIDField, rows.skuIDs).
 		WithInt64Column(goodsVectorDBIDField, rows.goodsDBIDs).
 		WithVarcharColumn(goodsVectorNameField, rows.goodsNames).
 		WithVarcharColumn(goodsVectorCodeField, rows.goodsCodes).
@@ -98,7 +98,7 @@ func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods,
 		WithVarcharColumn(goodsVectorDescriptionField, rows.descriptions).
 		WithVarcharColumn(goodsVectorContentField, rows.contents).
 		WithInt64Column(goodsVectorSkuIdField, rows.skuIDs).
-		WithBoolColumn(goodsIdxIsSaleField, rows.IsSale).
+		WithBoolColumn(goodsVectorIsSaleField, rows.saleFlags).
 		WithVarcharColumn(goodsVectorSkuNameField, rows.skuNames).
 		WithVarcharColumn(goodsVectorSkuDescriptionField, rows.skuDescriptions).
 		WithColumns(
@@ -107,7 +107,6 @@ func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods,
 			column.NewColumnJSONBytes(goodsVectorMetadataField, rows.metadatas),
 		).
 		WithInt64Column(goodsVectorQuantityPriceField, rows.quantities).
-		WithInt64Column(goodsVectorIsSalePriceField, rows.isSales).
 		WithFloatVectorColumn(goodsVectorEmbeddingField, dim, rows.vectors),
 	)
 	if err != nil {
@@ -124,8 +123,110 @@ func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods,
 		GoodsID:    goodsPK,
 		Collection: cfg.Collection,
 		Dimension:  dim,
-		SkuCount:   len(rows.pks),
+		SkuCount:   len(rows.skuIDs),
 	}, nil
+}
+
+// UpdateSaleStatusByGoodsID 按商品数据库主键覆盖 Milvus 中对应向量行的在售状态。
+// 这里先按 goods_db_id 找到该商品下全部向量行的主键 sku_id，再走 partial update 更新 is_sale。
+func (d *ShopGoodsVectorDaoImpl) UpdateSaleStatusByGoodsID(c *gin.Context, goodsDBID int64, isOnSale int32) error {
+	if goodsDBID <= 0 {
+		return nil
+	}
+
+	cfg, err := loadGoodsVectorConfig()
+	if err != nil {
+		return err
+	}
+
+	requestCtx := buildRequestContext(c)
+	client, err := milvus.GetClient(requestCtx)
+	if err != nil {
+		return fmt.Errorf("初始化 Milvus 客户端失败: %w", err)
+	}
+
+	has, err := client.HasCollection(requestCtx, milvusclient.NewHasCollectionOption(cfg.Collection))
+	if err != nil {
+		return fmt.Errorf("检查 Milvus collection 失败: %w", err)
+	}
+	if !has {
+		return nil
+	}
+
+	resultSet, err := client.Query(requestCtx, milvusclient.NewQueryOption(cfg.Collection).
+		WithFilter(fmt.Sprintf("%s == %d", goodsVectorDBIDField, goodsDBID)).
+		WithOutputFields(goodsVectorSkuIdField))
+	if err != nil {
+		return fmt.Errorf("查询 Milvus 商品向量失败: %w", err)
+	}
+	if resultSet.Len() == 0 {
+		return nil
+	}
+	pkColumn := resultSet.GetColumn(goodsVectorSkuIdField)
+	if pkColumn == nil {
+		return fmt.Errorf("Milvus 查询结果缺少字段 %s", goodsVectorSkuIdField)
+	}
+
+	pks := make([]int64, 0, resultSet.Len())
+	for idx := 0; idx < resultSet.Len(); idx++ {
+		pk, pkErr := pkColumn.GetAsInt64(idx)
+		if pkErr != nil {
+			return fmt.Errorf("读取商品向量主键失败: %w", pkErr)
+		}
+		pks = append(pks, pk)
+	}
+	if len(pks) == 0 {
+		return nil
+	}
+
+	isSaleFlags := make([]bool, 0, len(pks))
+	for range pks {
+		isSaleFlags = append(isSaleFlags, isOnSale > 0)
+	}
+
+	_, err = client.Upsert(requestCtx, milvusclient.NewColumnBasedInsertOption(cfg.Collection).
+		WithInt64Column(goodsVectorSkuIdField, pks).
+		WithBoolColumn(goodsVectorIsSaleField, isSaleFlags).
+		WithPartialUpdate(true),
+	)
+	if err != nil {
+		return fmt.Errorf("更新 Milvus 商品在售状态失败: %w", err)
+	}
+	return nil
+}
+
+// DeleteBySkuIDs 按 SKU 主键批量删除 Milvus 中的商品向量行。
+// SKU 删除场景会先删向量、再提交关系库事务；如果这里失败，业务层会回滚本次数据库删除。
+func (d *ShopGoodsVectorDaoImpl) DeleteBySkuIDs(c *gin.Context, skuIDs []int64) error {
+	if len(skuIDs) == 0 {
+		return nil
+	}
+
+	cfg, err := loadGoodsVectorConfig()
+	if err != nil {
+		return err
+	}
+
+	requestCtx := buildRequestContext(c)
+	client, err := milvus.GetClient(requestCtx)
+	if err != nil {
+		return fmt.Errorf("初始化 Milvus 客户端失败: %w", err)
+	}
+
+	has, err := client.HasCollection(requestCtx, milvusclient.NewHasCollectionOption(cfg.Collection))
+	if err != nil {
+		return fmt.Errorf("检查 Milvus collection 失败: %w", err)
+	}
+	if !has {
+		return nil
+	}
+
+	_, err = client.Delete(requestCtx, milvusclient.NewDeleteOption(cfg.Collection).
+		WithInt64IDs(goodsVectorSkuIdField, skuIDs))
+	if err != nil {
+		return fmt.Errorf("删除 Milvus 商品向量失败: %w", err)
+	}
+	return nil
 }
 
 // Search 复用批量检索入口处理单条查询。

@@ -25,7 +25,7 @@ const (
 	goodsTextBm25EmbFunctionName = "text_bm25_emb"
 
 	// 商品主数据字段。
-	goodsVectorPKField          = "goods_id"
+	goodsVectorGoodsIDField     = "goods_id"
 	goodsVectorDBIDField        = "goods_db_id"
 	goodsVectorNameField        = "goods_name"
 	goodsVectorCodeField        = "goods_code"
@@ -41,7 +41,7 @@ const (
 	goodsVectorRetailPriceField   = "retail_price"
 	goodsVectorWeightPriceField   = "weight"
 	goodsVectorQuantityPriceField = "quantity"
-	goodsVectorIsSalePriceField   = "is_sale"
+	goodsVectorIsSaleField        = "is_sale"
 
 	// 检索相关字段。
 	// metadata 存放规格、分类等结构化信息，用于过滤；
@@ -91,7 +91,6 @@ type goodsVectorConfig struct {
 // goodsVectorRows 是 Milvus 列式写入所需的中间结构。
 // DAO 先把商品与 SKU 业务对象展开成同长度切片，再一次性调用 Upsert。
 type goodsVectorRows struct {
-	pks             []int64
 	goodsDBIDs      []int64
 	goodsNames      []string
 	goodsCodes      []string
@@ -104,10 +103,9 @@ type goodsVectorRows struct {
 	retailPrices    []float64
 	weights         []float64
 	quantities      []int64
-	isSales         []int64
 	metadatas       [][]byte
 	vectors         [][]float32
-	IsSale          []bool
+	saleFlags       []bool
 }
 
 // goodsSearchRuntimeQuery 表示一次批量检索中单条 query 的运行时上下文。
@@ -329,21 +327,20 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 			WithOutputFields(goodsVectorContextSparseField).
 			WithType(entity.FunctionTypeBM25)
 		schema := entity.NewSchema().
-			WithField(entity.NewField().WithName(goodsVectorPKField).WithDataType(entity.FieldTypeInt64).WithIsPrimaryKey(true).WithMaxLength(goodsVectorPKMaxLength)).
+			WithField(entity.NewField().WithName(goodsVectorSkuIdField).WithDataType(entity.FieldTypeInt64).WithIsPrimaryKey(true).WithMaxLength(goodsVectorPKMaxLength)).
+			WithField(entity.NewField().WithName(goodsVectorGoodsIDField).WithDataType(entity.FieldTypeInt64)).
 			WithField(entity.NewField().WithName(goodsVectorDBIDField).WithDataType(entity.FieldTypeInt64)).
 			WithField(entity.NewField().WithName(goodsVectorNameField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorNameMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
 			WithField(entity.NewField().WithName(goodsVectorCodeField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorCodeMaxLength)).
 			WithField(entity.NewField().WithName(goodsVectorCategoryField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorCategoryMaxLength)).
 			WithField(entity.NewField().WithName(goodsVectorDescriptionField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorDescMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
 			WithField(entity.NewField().WithName(goodsVectorContentField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorContentMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
-			WithField(entity.NewField().WithName(goodsVectorSkuIdField).WithDataType(entity.FieldTypeInt64)).
 			WithField(entity.NewField().WithName(goodsVectorSkuNameField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorSkuNameMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
 			WithField(entity.NewField().WithName(goodsVectorSkuDescriptionField).WithDataType(entity.FieldTypeVarChar).WithMaxLength(goodsVectorSkuNameMaxLength).WithEnableAnalyzer(true).WithEnableMatch(true)).
 			WithField(entity.NewField().WithName(goodsVectorRetailPriceField).WithDataType(entity.FieldTypeDouble)).
 			WithField(entity.NewField().WithName(goodsVectorWeightPriceField).WithDataType(entity.FieldTypeDouble)).
 			WithField(entity.NewField().WithName(goodsVectorQuantityPriceField).WithDataType(entity.FieldTypeInt64)).
-			WithField(entity.NewField().WithName(goodsIdxIsSaleField).WithDataType(entity.FieldTypeBool)).
-			WithField(entity.NewField().WithName(goodsVectorIsSalePriceField).WithDataType(entity.FieldTypeInt64)).
+			WithField(entity.NewField().WithName(goodsVectorIsSaleField).WithDataType(entity.FieldTypeBool)).
 			WithField(entity.NewField().WithName(goodsVectorEmbeddingField).WithDataType(entity.FieldTypeFloatVector).WithDim(int64(dim))).
 			WithField(entity.NewField().WithName(goodsVectorContextSparseField).WithDataType(entity.FieldTypeSparseVector)).
 			WithField(entity.NewField().
@@ -361,7 +358,7 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 		indexOptions := []milvusclient.CreateIndexOption{
 			milvusclient.NewCreateIndexOption(collectionName, goodsVectorEmbeddingField, index.NewAutoIndex(entity.COSINE)).WithIndexName(goodsIdxVectorField),
 			milvusclient.NewCreateIndexOption(collectionName, goodsVectorCategoryField, index.NewInvertedIndex()).WithIndexName(goodsIdxCategoryField),
-			milvusclient.NewCreateIndexOption(collectionName, goodsVectorIsSalePriceField, index.NewInvertedIndex()).WithIndexName(goodsIdxIsSaleField),
+			milvusclient.NewCreateIndexOption(collectionName, goodsVectorIsSaleField, index.NewInvertedIndex()).WithIndexName(goodsIdxIsSaleField),
 			milvusclient.NewCreateIndexOption(collectionName, goodsVectorContextSparseField, index.NewSparseInvertedIndex(entity.BM25, 0.2)).WithIndexName(goodsIdxTextSparseVector),
 		}
 
@@ -382,7 +379,7 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 
 	requiredFields := map[string]bool{
 		// 这里只校验写入与检索强依赖字段，避免历史 schema 缺列却继续运行。
-		goodsVectorPKField:             false,
+		goodsVectorGoodsIDField:        false,
 		goodsVectorDBIDField:           false,
 		goodsVectorNameField:           false,
 		goodsVectorCodeField:           false,
@@ -395,7 +392,7 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 		goodsVectorRetailPriceField:    false,
 		goodsVectorWeightPriceField:    false,
 		goodsVectorQuantityPriceField:  false,
-		goodsVectorIsSalePriceField:    false,
+		goodsVectorIsSaleField:         false,
 		goodsVectorEmbeddingField:      false,
 	}
 	for _, field := range collection.Schema.Fields {
@@ -426,7 +423,7 @@ func ensureGoodsVectorCollection(ctx context.Context, client *milvusclient.Clien
 	if err = ensureGoodsVectorScalarIndex(ctx, client, collectionName, goodsVectorCategoryField, goodsIdxCategoryField, index.NewInvertedIndex()); err != nil {
 		return err
 	}
-	if err = ensureGoodsVectorScalarIndex(ctx, client, collectionName, goodsVectorIsSalePriceField, goodsIdxIsSaleField, index.NewInvertedIndex()); err != nil {
+	if err = ensureGoodsVectorScalarIndex(ctx, client, collectionName, goodsVectorIsSaleField, goodsIdxIsSaleField, index.NewInvertedIndex()); err != nil {
 		return err
 	}
 	return nil
@@ -526,8 +523,7 @@ func buildGoodsVectorRows(goods *shopmodels.Goods, items []*shopmodels.GoodsVect
 		if err != nil {
 			return err
 		}
-		rows.IsSale = append(rows.IsSale, item.IsSale)
-		rows.pks = append(rows.pks, item.SkuID)
+		rows.saleFlags = append(rows.saleFlags, item.IsSale)
 		rows.goodsDBIDs = append(rows.goodsDBIDs, goods.ID)
 		rows.goodsNames = append(rows.goodsNames, trimRunes(goods.GoodsName, goodsVectorNameMaxLength))
 		rows.goodsCodes = append(rows.goodsCodes, trimRunes(goods.GoodsCode, goodsVectorCodeMaxLength))
@@ -540,7 +536,6 @@ func buildGoodsVectorRows(goods *shopmodels.Goods, items []*shopmodels.GoodsVect
 		rows.retailPrices = append(rows.retailPrices, item.RetailPrice)
 		rows.weights = append(rows.weights, item.Weight)
 		rows.quantities = append(rows.quantities, item.Quantity)
-		rows.isSales = append(rows.isSales, int64(goods.IsOnSale))
 		rows.metadatas = append(rows.metadatas, metadataJSON)
 		rows.vectors = append(rows.vectors, item.Vector)
 		return nil
