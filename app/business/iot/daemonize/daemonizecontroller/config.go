@@ -1,6 +1,7 @@
 package daemonizecontroller
 
 import (
+	xdsv1 "github.com/novawatcher-io/nova-factory-payload/gateway/xds/v1"
 	"nova-factory-server/app/business/iot/daemonize/daemonizemodels"
 	daemonizeService2 "nova-factory-server/app/business/iot/daemonize/daemonizeservice"
 	"nova-factory-server/app/middlewares"
@@ -16,6 +17,7 @@ type Config struct {
 	service       daemonizeService2.IGatewayConfigService
 	configService daemonizeService2.IotAgentConfigService
 	agentService  daemonizeService2.IotAgentService
+	xdsv1.UnimplementedGatewayDiscoveryServiceServer
 }
 
 func NewConfig(service daemonizeService2.IGatewayConfigService,
