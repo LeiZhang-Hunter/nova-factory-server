@@ -297,3 +297,5 @@ require (
 )
 
 replace go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.60.0
+
+replace github.com/novawatcher-io/nova-factory-payload => /home/zhanglei/project/nova/nova-factory-payload
