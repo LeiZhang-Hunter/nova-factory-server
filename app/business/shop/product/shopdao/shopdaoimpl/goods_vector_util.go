@@ -734,7 +734,8 @@ func groupGoodsSearchRuntimeQueries(runtimeQueries []goodsSearchRuntimeQuery) []
 
 // collectGoodsMetadataFallbackQueries 收集首轮 metadata 过滤未命中的 query，
 // 并将其改写为无 filter 的回退查询。
-func collectGoodsMetadataFallbackQueries(runtimeQueries []goodsSearchRuntimeQuery, resultSets []milvusclient.ResultSet) []goodsSearchRuntimeQuery {
+func collectGoodsMetadataFallbackQueries(runtimeQueries []goodsSearchRuntimeQuery,
+	req *shopmodels.GoodsVectorBatchSearchReq, resultSets []milvusclient.ResultSet) []goodsSearchRuntimeQuery {
 	if len(runtimeQueries) == 0 || len(resultSets) == 0 {
 		return nil
 	}
@@ -751,6 +752,11 @@ func collectGoodsMetadataFallbackQueries(runtimeQueries []goodsSearchRuntimeQuer
 			continue
 		}
 		runtimeQuery.filterExpr = ""
+		if req.IsSale != nil {
+			isSaleFilterExpr := fmt.Sprintf("%s == %t", goodsVectorIsSaleField, *req.IsSale)
+			runtimeQuery.filterExpr = isSaleFilterExpr
+		}
+
 		fallbackQueries = append(fallbackQueries, runtimeQuery)
 	}
 	return fallbackQueries

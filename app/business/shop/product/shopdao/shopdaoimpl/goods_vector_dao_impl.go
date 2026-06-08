@@ -384,7 +384,7 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 		}
 	}
 	if FallbackWithoutMetadata {
-		fallbackQueries := collectGoodsMetadataFallbackQueries(runtimeQueries, resultSets)
+		fallbackQueries := collectGoodsMetadataFallbackQueries(runtimeQueries, req, resultSets)
 		if len(fallbackQueries) > 0 {
 			fallbackGroups := groupGoodsSearchRuntimeQueries(fallbackQueries)
 			if supportHybrid {

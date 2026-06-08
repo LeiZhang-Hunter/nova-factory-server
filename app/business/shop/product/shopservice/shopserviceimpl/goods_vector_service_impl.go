@@ -51,12 +51,6 @@ type goodsEmbeddingPayload struct {
 	IsSale  bool
 }
 
-// goodsVectorRetrieveOptions 封装服务层向检索器透传的可选过滤条件。
-// 当前仅承载 isSale，后续新增字段时继续在这里扩展即可。
-type goodsVectorRetrieveOptions struct {
-	IsSale *bool
-}
-
 // GenerateVector 为单个已上架商品生成并写入向量数据。
 func (s *ShopGoodsServiceImpl) GenerateVector(c *gin.Context, req *shopmodels.GenVectorReq) (*shopmodels.GoodsVectorResult, error) {
 	goods, err := s.dao.GetByID(c, req.ID)
@@ -278,9 +272,7 @@ func (s *ShopGoodsServiceImpl) SearchVector(c *gin.Context, req *shopmodels.Good
 	if req == nil {
 		return nil, errors.New("搜索参数不能为空")
 	}
-	items, err := s.batchSearchVector(c, []string{req.Query}, req.Limit, req.Embedding, &goodsVectorRetrieveOptions{
-		IsSale: req.IsSale,
-	})
+	items, err := s.batchSearchVector(c, []string{req.Query}, req.Limit, req.Embedding, req.IsSale)
 	if err != nil {
 		return nil, err
 	}
@@ -302,9 +294,7 @@ func (s *ShopGoodsServiceImpl) BatchSearchVector(c *gin.Context,
 	if req == nil {
 		return nil, errors.New("批量搜索参数不能为空")
 	}
-	rows, err := s.batchSearchVector(c, req.Queries, req.Limit, req.Embedding, &goodsVectorRetrieveOptions{
-		IsSale: req.IsSale,
-	})
+	rows, err := s.batchSearchVector(c, req.Queries, req.Limit, req.Embedding, req.IsSale)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +306,7 @@ func (s *ShopGoodsServiceImpl) BatchSearchVector(c *gin.Context,
 
 // batchSearchVector 统一处理单条/批量查询的 embedding 生成与召回逻辑。
 func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queryPayloads []string, limit int,
-	embedding *shopmodels.EmbeddingConfig, options *goodsVectorRetrieveOptions) ([]*shopmodels.GoodsVectorBatchSearchItem, error) {
+	embedding *shopmodels.EmbeddingConfig, isSale *bool) ([]*shopmodels.GoodsVectorBatchSearchItem, error) {
 	cfg, err := loadEmbeddingProviderConfig(embedding)
 	if err != nil {
 		return nil, err
@@ -333,15 +323,15 @@ func (s *ShopGoodsServiceImpl) batchSearchVector(c *gin.Context, queryPayloads [
 
 	rows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(queryPayloads))
 	topK := normalizeGoodsVectorSearchLimit(limit)
-	retrieverOptions := []retrieval.Option{
-		retrieval.WithTopK(topK),
-		retrieval.WithEmbedding(embedder),
-	}
-	if options != nil && options.IsSale != nil {
-		retrieverOptions = append(retrieverOptions, shopretrieval.WithGoodsIsSale(*options.IsSale))
-	}
 	for _, payload := range queryPayloads {
-		documents, err := s.retriever.Retrieve(requestCtx, payload, true, retrieverOptions...)
+		retrieveOpts := []retrieval.Option{
+			retrieval.WithTopK(topK),
+			retrieval.WithEmbedding(embedder),
+		}
+		if isSale != nil {
+			retrieveOpts = append(retrieveOpts, shopretrieval.WithGoodsIsSale(*isSale))
+		}
+		documents, err := s.retriever.Retrieve(requestCtx, payload, true, retrieveOpts...)
 		if err != nil {
 			return nil, err
 		}
