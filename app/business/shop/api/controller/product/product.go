@@ -3,32 +3,34 @@ package product
 import (
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
-	"nova-factory-server/app/store"
+	"nova-factory-server/app/constant/shop"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/gin_mcp"
+	"nova-factory-server/app/utils/store"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Product struct {
-	service       service.IApiShopGoodsService
-	categoryStore store.IShopCategoryStore
+	service service.IApiShopGoodsService
 }
 
-func NewProduct(service service.IApiShopGoodsService, categoryStore store.IShopCategoryStore) *Product {
-	return &Product{service: service, categoryStore: categoryStore}
+func NewProduct(service service.IApiShopGoodsService) *Product {
+	return &Product{
+		service: service,
+	}
 }
 
 func (p *Product) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop/product")
 	group.GET("/info/:id", p.Info)
 	group.GET("/list", p.List)
-	group.POST("/search", p.Search)
 }
 
 func (p *Product) PrivateRoutes(router *gin.RouterGroup) {
 	product := router.Group("/api/v1/app/shop/product")
 	product.GET("/repurchase", p.Repurchase)
+	product.POST("/search", p.Search)
 }
 
 func (p *Product) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
@@ -75,7 +77,13 @@ func (p *Product) List(c *gin.Context) {
 		return
 	}
 	if req.CategoryId != 0 || req.CategoryIds != nil {
-		req.CategoryIds = p.categoryStore.GetCategoryIDs(req.CategoryId)
+		categoryStore := store.GetStore(shop.ShopCategoryStoreName)
+		if categoryStore == nil {
+			baizeContext.Waring(c, "分类存储初始化失败")
+			return
+		}
+
+		req.CategoryIds = categoryStore.GetCategoryIDs(req.CategoryId)
 	}
 	data, err := p.service.List(c, req)
 	if err != nil {

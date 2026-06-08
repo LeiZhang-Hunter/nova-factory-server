@@ -15,11 +15,17 @@ type Match struct {
 	Category string
 }
 
+// Category 表示命中的分类结果。
+type Category struct {
+	Name string `json:"name"`
+	ID   int64  `json:"id"`
+}
+
 // Result 表示 pipeline 执行后的归一化结果。
 type Result struct {
 	Original   string
 	Value      string
-	Categories []string
+	Categories []Category
 	Matches    []Match
 	Metadata   map[string][]string
 }
@@ -29,7 +35,7 @@ type Context struct {
 	Original string
 	Value    string
 
-	categories []string
+	categories []Category
 	matches    []Match
 	metadata   map[string][]string
 }
@@ -44,12 +50,15 @@ func NewContext(input string) *Context {
 }
 
 // AddCategory 追加分类标签并去重。
-func (c *Context) AddCategory(category string) {
-	category = normalizeWhitespace(category)
-	if category == "" {
+func (c *Context) AddCategory(name string, id int64) {
+	name = normalizeWhitespace(name)
+	if name == "" {
 		return
 	}
-	c.categories = appendUnique(c.categories, category)
+	c.categories = appendUniqueCategory(c.categories, Category{
+		Name: name,
+		ID:   id,
+	})
 }
 
 // AddMetadata 追加归一化元数据并去重。
@@ -75,7 +84,7 @@ func (c *Context) Result() Result {
 	result := Result{
 		Original:   c.Original,
 		Value:      c.Value,
-		Categories: append([]string(nil), c.categories...),
+		Categories: append([]Category(nil), c.categories...),
 		Matches:    append([]Match(nil), c.matches...),
 	}
 	if len(c.metadata) > 0 {
@@ -90,6 +99,15 @@ func (c *Context) Result() Result {
 func appendUnique(values []string, value string) []string {
 	for _, item := range values {
 		if item == value {
+			return values
+		}
+	}
+	return append(values, value)
+}
+
+func appendUniqueCategory(values []Category, value Category) []Category {
+	for _, item := range values {
+		if item.Name == value.Name && item.ID == value.ID {
 			return values
 		}
 	}

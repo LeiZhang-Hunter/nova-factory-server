@@ -1,20 +1,30 @@
 package product
 
 import (
+	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
-	"nova-factory-server/app/store"
+	"nova-factory-server/app/constant/shop"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/store"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
+
+const categoryCacheRefreshInterval = 5 * time.Minute
 
 type Category struct {
 	service shopservice.IShopCategoryService
 	cache   store.IShopCategoryStore
 }
 
-func NewCategory(service shopservice.IShopCategoryService, cache store.IShopCategoryStore) *Category {
-	return &Category{service: service, cache: cache}
+func NewCategory(service shopservice.IShopCategoryService) *Category {
+	categoryCache := store.NewShopCategoryStore()
+	controller := &Category{service: service, cache: categoryCache}
+	store.RegisterStore(shop.ShopCategoryStoreName, categoryCache)
+	controller.startCacheRefresh()
+	return controller
 }
 
 func (c *Category) PublicRoutes(router *gin.RouterGroup) {
@@ -23,7 +33,6 @@ func (c *Category) PublicRoutes(router *gin.RouterGroup) {
 }
 
 func (c *Category) PrivateRoutes(router *gin.RouterGroup) {
-
 }
 
 // All 读取全部分类
@@ -48,7 +57,40 @@ func (c *Category) All(ctx *gin.Context) {
 		return
 	}
 	if c.cache != nil {
-		c.cache.Set(data)
+		c.cache.Set(toCategoryStoreData(data))
 	}
 	baizeContext.SuccessData(ctx, data)
+}
+
+// startCacheRefresh 开启缓存刷新
+func (c *Category) startCacheRefresh() {
+	c.refreshCache()
+	go func() {
+		ticker := time.NewTicker(categoryCacheRefreshInterval)
+		defer ticker.Stop()
+		for range ticker.C {
+			c.refreshCache()
+		}
+	}()
+}
+
+func (c *Category) refreshCache() {
+	if c == nil || c.service == nil || c.cache == nil {
+		return
+	}
+
+	data, err := c.service.All(&gin.Context{})
+	if err != nil {
+		zap.L().Warn("refresh shop category cache failed", zap.Error(err))
+		return
+	}
+	c.cache.Set(toCategoryStoreData(data))
+}
+
+func toCategoryStoreData(data []*shopmodels.CategoryInfo) []store.ShopCategoryData {
+	categoryDataList := make([]store.ShopCategoryData, 0, len(data))
+	for _, row := range data {
+		categoryDataList = append(categoryDataList, row)
+	}
+	return categoryDataList
 }

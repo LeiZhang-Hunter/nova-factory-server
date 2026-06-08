@@ -3,12 +3,15 @@ package normalization
 import (
 	"testing"
 
+	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/constant/shop"
 	"nova-factory-server/app/utils/gateway/v1/config/cfg"
+	"nova-factory-server/app/utils/store"
 	"nova-factory-server/app/utils/vectorsearch/normalization/api"
-	"nova-factory-server/app/utils/vectorsearch/normalization/category"
 	"nova-factory-server/app/utils/vectorsearch/normalization/lowercase"
 	"nova-factory-server/app/utils/vectorsearch/normalization/regex"
 	replacepkg "nova-factory-server/app/utils/vectorsearch/normalization/replace"
+	"nova-factory-server/app/utils/vectorsearch/normalization/shopcategory"
 	"nova-factory-server/app/utils/vectorsearch/normalization/whitespace"
 )
 
@@ -42,35 +45,71 @@ func TestNewPipelineWithConfiguredSteps(t *testing.T) {
 }
 
 func TestNewPipelineWithCategoryStep(t *testing.T) {
-	categoryProperties, err := cfg.Pack(category.Config{
-		Rules: []category.Rule{
-			{
-				Category: "饮用水",
-				Keywords: []string{"矿泉水", "纯净水"},
-				Mode:     category.MatchContains,
-			},
+	categoryStore := store.NewShopCategoryStore()
+	categoryStore.Set([]store.ShopCategoryData{
+		&shopmodels.CategoryInfo{
+			ID:           1001,
+			CategoryName: "饮用水",
 		},
 	})
-	if err != nil {
-		t.Fatalf("pack category config failed: %v", err)
-	}
+	store.RegisterStore(shop.ShopCategoryStoreName, categoryStore)
+	defer categoryStore.Clear()
 
 	pipeline := NewPipeline(api.Config{
 		Interceptors: []*api.InterceptorConfig{
 			{Type: whitespace.Type},
-			{Type: category.Type, Properties: categoryProperties},
+			{Type: shopcategory.Type},
 		},
 	})
 
-	result, err := pipeline.Normalize("  纯净水  ")
+	result, err := pipeline.Normalize("  饮用水  ")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
-	if len(result.Categories) != 1 || result.Categories[0] != "饮用水" {
+	if len(result.Categories) != 1 || result.Categories[0].Name != "饮用水" || result.Categories[0].ID != 1001 {
 		t.Fatalf("unexpected categories: %#v", result.Categories)
 	}
 	if len(result.Metadata["category"]) != 1 || result.Metadata["category"][0] != "饮用水" {
 		t.Fatalf("unexpected metadata: %#v", result.Metadata)
+	}
+	if len(result.Metadata["category_id"]) != 1 || result.Metadata["category_id"][0] != "1001" {
+		t.Fatalf("unexpected category id metadata: %#v", result.Metadata)
+	}
+}
+
+func TestNewPipelineWithCategoryStepMatchFromCache(t *testing.T) {
+	categoryStore := store.NewShopCategoryStore()
+	categoryStore.Set([]store.ShopCategoryData{
+		&shopmodels.CategoryInfo{
+			ID:           2001,
+			CategoryName: "饮用水",
+			Children: []*shopmodels.CategoryInfo{
+				{
+					ID:           2002,
+					CategoryName: "天然矿泉水",
+				},
+			},
+		},
+	})
+	store.RegisterStore(shop.ShopCategoryStoreName, categoryStore)
+	defer categoryStore.Clear()
+
+	pipeline := NewPipeline(api.Config{
+		Interceptors: []*api.InterceptorConfig{
+			{Type: whitespace.Type},
+			{Type: shopcategory.Type},
+		},
+	})
+
+	result, err := pipeline.Normalize("  天然矿泉水 550ml ")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(result.Categories) == 0 || result.Categories[0].Name != "天然矿泉水" || result.Categories[0].ID != 2002 {
+		t.Fatalf("unexpected categories: %#v", result.Categories)
+	}
+	if len(result.Metadata["category_id"]) == 0 || result.Metadata["category_id"][0] != "2002" {
+		t.Fatalf("unexpected category id metadata: %#v", result.Metadata)
 	}
 }
 

@@ -307,6 +307,7 @@ func (s *ProductServiceImpl) batchSearchProductVector(c *gin.Context, queries []
 	topK := normalizeProductVectorSearchLimit(limit)
 	for _, query := range queries {
 		documents, err := s.retriever.Retrieve(requestCtx, query,
+			true,
 			retrieval.WithTopK(topK),
 			retrieval.WithEmbedding(embedder),
 		)

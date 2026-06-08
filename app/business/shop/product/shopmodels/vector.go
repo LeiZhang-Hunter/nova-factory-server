@@ -23,10 +23,11 @@ type GenAllVectorReq struct {
 
 // GoodsVectorSearchReq 商品向量检索请求
 type GoodsVectorSearchReq struct {
-	Query      string           `json:"query" binding:"required"` // 检索文本
-	Limit      int              `json:"limit"`                    // 返回条数
-	Embedding  *EmbeddingConfig `json:"embedding"`                // 向量模型配置
-	SearchText string           `json:"-"`
+	Query                   string           `json:"query" binding:"required"` // 检索文本
+	Limit                   int              `json:"limit"`                    // 返回条数
+	Embedding               *EmbeddingConfig `json:"embedding"`                // 向量模型配置
+	FallbackWithoutMetadata bool             `json:"fallbackWithoutMetadata"`  // metadata 过滤无结果时是否回退为无过滤检索
+	SearchText              string           `json:"-"`
 }
 
 // GoodsVectorBatchSearchReq 商品批量向量检索请求
@@ -114,6 +115,8 @@ type GoodsVectorUpsertItem struct {
 	RetailPrice    float64
 	Weight         float64
 	Quantity       int64
+	Metadata       map[string]any
 	Content        string
 	Vector         []float32
+	IsSale         bool
 }

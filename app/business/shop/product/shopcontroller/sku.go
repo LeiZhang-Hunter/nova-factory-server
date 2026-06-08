@@ -81,7 +81,7 @@ func (s *Sku) GetByID(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "新增成功"
-// @Router /shop/sku [post]
+// @Router /shop/sku/add [post]
 func (s *Sku) Create(c *gin.Context) {
 	req := new(shopmodels.GoodsSkuUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {
@@ -104,7 +104,7 @@ func (s *Sku) Create(c *gin.Context) {
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "修改成功"
-// @Router /shop/sku [put]
+// @Router /shop/sku/edit [put]
 func (s *Sku) Update(c *gin.Context) {
 	req := new(shopmodels.GoodsSkuUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {

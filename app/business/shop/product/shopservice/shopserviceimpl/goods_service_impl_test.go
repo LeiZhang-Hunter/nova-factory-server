@@ -3,9 +3,11 @@ package shopserviceimpl
 import (
 	"bytes"
 	"encoding/csv"
+	"errors"
 	"testing"
 	"time"
 
+	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 
 	"github.com/gin-gonic/gin"
@@ -194,6 +196,135 @@ func TestGetByIDAttachSkus(t *testing.T) {
 	}
 }
 
+func TestUpdateSyncsVectorSaleStatus(t *testing.T) {
+	goodsDao := &mockShopGoodsDao{}
+	vectorDao := &mockShopGoodsVectorDao{}
+	service := &ShopGoodsServiceImpl{
+		dao:       goodsDao,
+		vectorDao: vectorDao,
+	}
+	req := &shopmodels.GoodsUpsert{
+		ID:       12,
+		GoodsID:  "g-12",
+		IsOnSale: 0,
+	}
+
+	data, err := service.Update(&gin.Context{}, req)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if data == nil || data.ID != 12 {
+		t.Fatalf("unexpected update result: %#v", data)
+	}
+	if goodsDao.transactionCalls != 1 {
+		t.Fatalf("expected transaction once, got %d", goodsDao.transactionCalls)
+	}
+	if len(goodsDao.updated) != 1 {
+		t.Fatalf("expected one goods update, got %d", len(goodsDao.updated))
+	}
+	if len(vectorDao.updateSaleStatusCalls) != 1 {
+		t.Fatalf("expected one vector sync, got %d", len(vectorDao.updateSaleStatusCalls))
+	}
+	call := vectorDao.updateSaleStatusCalls[0]
+	if call.goodsDBID != 12 || call.isOnSale != 0 {
+		t.Fatalf("unexpected vector sync call: %#v", call)
+	}
+}
+
+func TestUpdateRollbackWhenVectorSyncFails(t *testing.T) {
+	goodsDao := &mockShopGoodsDao{}
+	vectorDao := &mockShopGoodsVectorDao{
+		updateSaleStatusErr: errors.New("milvus unavailable"),
+	}
+	service := &ShopGoodsServiceImpl{
+		dao:       goodsDao,
+		vectorDao: vectorDao,
+	}
+	req := &shopmodels.GoodsUpsert{
+		ID:       18,
+		GoodsID:  "g-18",
+		IsOnSale: 1,
+	}
+
+	data, err := service.Update(&gin.Context{}, req)
+	if err == nil {
+		t.Fatal("expected err")
+	}
+	if data != nil {
+		t.Fatalf("expected nil data when vector sync fails, got %#v", data)
+	}
+	if err.Error() != "同步商品向量在售状态失败: milvus unavailable" {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if goodsDao.transactionCalls != 1 {
+		t.Fatalf("expected transaction once, got %d", goodsDao.transactionCalls)
+	}
+	if len(goodsDao.updated) != 1 {
+		t.Fatalf("expected one goods update before rollback, got %d", len(goodsDao.updated))
+	}
+	if len(vectorDao.updateSaleStatusCalls) != 1 {
+		t.Fatalf("expected one vector sync attempt, got %d", len(vectorDao.updateSaleStatusCalls))
+	}
+}
+
+func TestDeleteByIDsRejectWhenGoodsHasSkus(t *testing.T) {
+	goodsDao := &mockShopGoodsDao{
+		byID: map[int64]*shopmodels.Goods{
+			1: {ID: 1, GoodsID: "g-1"},
+			2: {ID: 2, GoodsID: "g-2"},
+		},
+	}
+	skuDao := &mockShopSkuDao{
+		skusByGoodsID: map[string][]*shopmodels.GoodsSku{
+			"g-2": {
+				{SkuID: "s-1", GoodsID: "g-2"},
+			},
+		},
+	}
+	service := &ShopGoodsServiceImpl{
+		dao:    goodsDao,
+		skuDao: skuDao,
+	}
+
+	err := service.DeleteByIDs(&gin.Context{}, []int64{1, 2})
+	if err == nil {
+		t.Fatal("expected err")
+	}
+	if err.Error() != "商品下存在SKU，不允许删除" {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if goodsDao.deleteCalls != 0 {
+		t.Fatalf("expected delete not called, got %d", goodsDao.deleteCalls)
+	}
+}
+
+func TestDeleteByIDsAllowWhenGoodsHasNoSkus(t *testing.T) {
+	goodsDao := &mockShopGoodsDao{
+		byID: map[int64]*shopmodels.Goods{
+			3: {ID: 3, GoodsID: "g-3"},
+			4: {ID: 4, GoodsID: "g-4"},
+		},
+	}
+	skuDao := &mockShopSkuDao{
+		skusByGoodsID: map[string][]*shopmodels.GoodsSku{},
+	}
+	service := &ShopGoodsServiceImpl{
+		dao:    goodsDao,
+		skuDao: skuDao,
+	}
+
+	err := service.DeleteByIDs(&gin.Context{}, []int64{3, 4})
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if goodsDao.deleteCalls != 1 {
+		t.Fatalf("expected delete called once, got %d", goodsDao.deleteCalls)
+	}
+	if len(goodsDao.deletedIDs) != 2 || goodsDao.deletedIDs[0] != 3 || goodsDao.deletedIDs[1] != 4 {
+		t.Fatalf("unexpected deleted ids: %#v", goodsDao.deletedIDs)
+	}
+}
+
 func TestWriteGoodsCSVRowsIncludesSkuDetails(t *testing.T) {
 	now := time.Date(2026, 5, 14, 12, 0, 0, 0, time.UTC)
 	rows := []*shopmodels.Goods{
@@ -295,13 +426,16 @@ func TestWriteGoodsCSVRowsIncludesSkuDetails(t *testing.T) {
 }
 
 type mockShopGoodsDao struct {
-	byID         map[int64]*shopmodels.Goods
-	byGoodsID    map[string]*shopmodels.Goods
-	created      []*shopmodels.GoodsUpsert
-	updated      []*shopmodels.GoodsUpsert
-	batchCreated []*shopmodels.GoodsUpsert
-	batchUpdated []*shopmodels.GoodsUpsert
-	listData     *shopmodels.GoodsListData
+	byID             map[int64]*shopmodels.Goods
+	byGoodsID        map[string]*shopmodels.Goods
+	created          []*shopmodels.GoodsUpsert
+	updated          []*shopmodels.GoodsUpsert
+	batchCreated     []*shopmodels.GoodsUpsert
+	batchUpdated     []*shopmodels.GoodsUpsert
+	deletedIDs       []int64
+	deleteCalls      int
+	listData         *shopmodels.GoodsListData
+	transactionCalls int
 }
 
 func (m *mockShopGoodsDao) Create(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error) {
@@ -315,6 +449,11 @@ func (m *mockShopGoodsDao) Create(c *gin.Context, req *shopmodels.GoodsUpsert) (
 func (m *mockShopGoodsDao) BatchCreate(c *gin.Context, reqs []*shopmodels.GoodsUpsert, batchSize int) error {
 	m.batchCreated = append(m.batchCreated, reqs...)
 	return nil
+}
+
+func (m *mockShopGoodsDao) Transaction(c *gin.Context, fn func(txDao shopdao.IShopGoodsDao) error) error {
+	m.transactionCalls++
+	return fn(m)
 }
 
 func (m *mockShopGoodsDao) Update(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error) {
@@ -331,6 +470,8 @@ func (m *mockShopGoodsDao) BatchUpdate(c *gin.Context, reqs []*shopmodels.GoodsU
 }
 
 func (m *mockShopGoodsDao) DeleteByIDs(c *gin.Context, ids []int64) error {
+	m.deleteCalls++
+	m.deletedIDs = append(m.deletedIDs, ids...)
 	return nil
 }
 
@@ -375,6 +516,16 @@ type mockShopCategoryDao struct {
 	byID map[int64]*shopmodels.Category
 }
 
+type mockShopGoodsVectorDao struct {
+	updateSaleStatusCalls []mockGoodsVectorSaleStatusCall
+	updateSaleStatusErr   error
+}
+
+type mockGoodsVectorSaleStatusCall struct {
+	goodsDBID int64
+	isOnSale  int32
+}
+
 func (m *mockShopCategoryDao) Create(c *gin.Context, req *shopmodels.CategoryUpsert) (*shopmodels.Category, error) {
 	return nil, nil
 }
@@ -416,6 +567,33 @@ func (m *mockShopCategoryDao) List(c *gin.Context, req *shopmodels.CategoryQuery
 	return nil, nil
 }
 
+func (m *mockShopGoodsVectorDao) Upsert(c *gin.Context, goods *shopmodels.Goods,
+	items []*shopmodels.GoodsVectorUpsertItem) (*shopmodels.GoodsVectorResult, error) {
+	return nil, nil
+}
+
+func (m *mockShopGoodsVectorDao) UpdateSaleStatusByGoodsID(c *gin.Context, goodsDBID int64, isOnSale int32) error {
+	m.updateSaleStatusCalls = append(m.updateSaleStatusCalls, mockGoodsVectorSaleStatusCall{
+		goodsDBID: goodsDBID,
+		isOnSale:  isOnSale,
+	})
+	return m.updateSaleStatusErr
+}
+
+func (m *mockShopGoodsVectorDao) DeleteBySkuIDs(c *gin.Context, skuIDs []int64) error {
+	return nil
+}
+
+func (m *mockShopGoodsVectorDao) Search(c *gin.Context, req *shopmodels.GoodsVectorSearchReq,
+	vector []float32, fallbackWithoutMetadata bool) (*shopmodels.GoodsVectorSearchData, error) {
+	return nil, nil
+}
+
+func (m *mockShopGoodsVectorDao) BatchSearch(c *gin.Context, req *shopmodels.GoodsVectorBatchSearchReq,
+	vectors [][]float32, fallbackWithoutMetadata bool) (*shopmodels.GoodsVectorBatchSearchData, error) {
+	return nil, nil
+}
+
 func (m *mockShopSkuDao) Create(c *gin.Context, req *shopmodels.GoodsSkuUpsert) (*shopmodels.GoodsSku, error) {
 	m.created = append(m.created, req)
 	return &shopmodels.GoodsSku{
@@ -423,6 +601,10 @@ func (m *mockShopSkuDao) Create(c *gin.Context, req *shopmodels.GoodsSkuUpsert) 
 		GoodsID: req.GoodsID,
 		SkuID:   req.SkuID,
 	}, nil
+}
+
+func (m *mockShopSkuDao) Transaction(c *gin.Context, fn func(txDao shopdao.IShopSkuDao) error) error {
+	return fn(m)
 }
 
 func (m *mockShopSkuDao) BatchCreate(c *gin.Context, reqs []*shopmodels.GoodsSkuUpsert, batchSize int) error {

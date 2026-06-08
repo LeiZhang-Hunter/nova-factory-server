@@ -46,3 +46,7 @@ func (i *IotAgentConfigServiceImpl) GetLastedConfig(ctx context.Context, agentId
 func (i *IotAgentConfigServiceImpl) Remove(ctx context.Context, ids []string) error {
 	return i.dao.Remove(ctx, ids)
 }
+
+func (i *IotAgentConfigServiceImpl) GetLastedConfigHashAndVersion(ctx context.Context, agentId uint64) (*daemonizemodels.SysIotAgentConfig, error) {
+	return i.dao.GetLastedConfigHashAndVersion(ctx, agentId)
+}

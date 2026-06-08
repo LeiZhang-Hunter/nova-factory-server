@@ -9,6 +9,7 @@ type SysIotAgentConfig struct {
 	AgentObjectID int64  `gorm:"column:agent_object_id;not null;comment:agent id" json:"agent_object_id,string"` // agent id
 	ConfigVersion string `gorm:"column:config_version;not null;comment:配置版本" json:"config_version"`              // 配置版本
 	Content       string `gorm:"column:content;not null;comment:配置内容" json:"content"`                            // 配置内容
+	ContentHash   string `gorm:"column:content_hash;not null;comment:配置内容" json:"content_hash"`                  // 配置内容
 	DeptID        int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                     // 部门ID
 	baize.BaseEntity
 	State bool `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"` // 操作状态（0正常 -1删除）

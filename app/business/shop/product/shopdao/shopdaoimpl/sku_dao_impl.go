@@ -25,6 +25,16 @@ func NewShopSkuDao(ms *gorm.DB) shopdao.IShopSkuDao {
 	}
 }
 
+func (s *ShopSkuDaoImpl) Transaction(c *gin.Context, fn func(txDao shopdao.IShopSkuDao) error) error {
+	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		txDao := &ShopSkuDaoImpl{
+			db:        tx,
+			tableName: s.tableName,
+		}
+		return fn(txDao)
+	})
+}
+
 func (s *ShopSkuDaoImpl) Create(c *gin.Context, req *shopmodels.GoodsSkuUpsert) (*shopmodels.GoodsSku, error) {
 	model := buildSkuModel(req)
 	if err := s.db.WithContext(c).Table(s.tableName).Create(model).Error; err != nil {

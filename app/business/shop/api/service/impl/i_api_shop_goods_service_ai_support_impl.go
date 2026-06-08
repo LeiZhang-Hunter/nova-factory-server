@@ -5,6 +5,7 @@ package impl
 
 import (
 	"errors"
+
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/shop/api/dao"
@@ -56,6 +57,7 @@ func (s *IApiShopGoodsServiceImpl) Search(c *gin.Context, req *models.GoodsSearc
 		return nil, errors.New("嵌入式模型没设置")
 	}
 
+	// 将当前模型提供方配置转换为商品向量检索使用的 embedding 参数。
 	embeddingModel := shopmodels.EmbeddingConfig{
 		ProviderType: embeddingInfo.APIType,
 		ProviderID:   embeddingInfo.LLMFactory,
@@ -80,6 +82,7 @@ func (s *IApiShopGoodsServiceImpl) Search(c *gin.Context, req *models.GoodsSearc
 		}, nil
 	}
 
+	// 统一回表拉取数据库最新商品信息，避免直接返回向量库中的冗余快照数据。
 	goodsMap, err := s.loadSearchGoodsMap(c, vectorData.Rows)
 	if err != nil {
 		return nil, err
@@ -90,6 +93,7 @@ func (s *IApiShopGoodsServiceImpl) Search(c *gin.Context, req *models.GoodsSearc
 		if row == nil {
 			continue
 		}
+		query := row.Query
 		matches := make([]*models.GoodsSearchMatch, 0, limit)
 		seen := make(map[int64]struct{}, len(row.Rows))
 		for _, hit := range row.Rows {
@@ -113,7 +117,7 @@ func (s *IApiShopGoodsServiceImpl) Search(c *gin.Context, req *models.GoodsSearc
 			}
 		}
 		items = append(items, &models.GoodsSearchItem{
-			Query: row.Query,
+			Query: query,
 			Rows:  matches,
 			Total: int64(len(matches)),
 		})
