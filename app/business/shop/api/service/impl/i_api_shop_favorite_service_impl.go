@@ -33,8 +33,8 @@ func (s *IApiShopFavoriteServiceImpl) RemoveFavorite(c *gin.Context, userId int6
 }
 
 // ListFavorites 获取收藏列表
-func (s *IApiShopFavoriteServiceImpl) ListFavorites(c *gin.Context, userId int64, page int64, size int64) (*models.GoodsListData, error) {
-	favorites, total, err := s.favoriteDao.ListByUserID(c, userId, page, size)
+func (s *IApiShopFavoriteServiceImpl) ListFavorites(c *gin.Context, userId int64, page int64, size int64, goodsName string) (*models.GoodsListData, error) {
+	favorites, total, err := s.favoriteDao.ListByUserID(c, userId, page, size, goodsName)
 	if err != nil {
 		return nil, err
 	}

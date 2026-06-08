@@ -13,7 +13,7 @@ type IApiShopFavoriteService interface {
 	// RemoveFavorite 移除收藏
 	RemoveFavorite(c *gin.Context, userId int64, goodsId string) error
 	// ListFavorites 获取收藏列表
-	ListFavorites(c *gin.Context, userId int64, page int64, size int64) (*models.GoodsListData, error)
+	ListFavorites(c *gin.Context, userId int64, page int64, size int64, goodsName string) (*models.GoodsListData, error)
 	// CheckFavoriteStatus 检查收藏状态
 	CheckFavoriteStatus(c *gin.Context, userId int64, goodsId string) (bool, error)
 }

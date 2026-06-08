@@ -90,7 +90,7 @@ func (a *AIAgentConfigPublishHistoryDaoImpl) getByIDWithDB(c *gin.Context, db *g
 	var item gatewaymodels.AIAgentConfigPublishHistory
 	if err := db.Table(a.table).
 		Where("id = ?", id).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		//Where("dept_id = ?", baizeContext.GetDeptId(c)).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

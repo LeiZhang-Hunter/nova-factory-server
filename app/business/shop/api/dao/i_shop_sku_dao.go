@@ -10,5 +10,6 @@ import (
 type IApiShopSkuDao interface {
 	GetByID(c *gin.Context, id int64) (*shopmodels.GoodsSku, error)
 	ListByIDs(c *gin.Context, ids []int64) ([]*shopmodels.GoodsSku, error)
+	ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.GoodsSku, error)
 	DeductStock(c *gin.Context, id int64, quantity int64) error
 }

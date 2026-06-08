@@ -43,7 +43,9 @@ func (s *IApiShopGoodsServiceImpl) ListRepurchase(c *gin.Context, userID int64, 
 	if size <= 0 {
 		size = 20
 	}
-	data, err := s.dao.ListByUserPurchased(c, userID, query.CategoryId, page, size)
+	query.Page = page
+	query.Size = size
+	data, err := s.dao.ListByUserPurchased(c, userID, query)
 	if err != nil || data == nil || len(data.Rows) == 0 {
 		return data, err
 	}
