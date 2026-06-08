@@ -7,6 +7,7 @@ import (
 )
 
 type IShopSkuDao interface {
+	Transaction(c *gin.Context, fn func(txDao IShopSkuDao) error) error
 	Create(c *gin.Context, req *shopmodels.GoodsSkuUpsert) (*shopmodels.GoodsSku, error)
 	BatchCreate(c *gin.Context, reqs []*shopmodels.GoodsSkuUpsert, batchSize int) error
 	Update(c *gin.Context, req *shopmodels.GoodsSkuUpsert) (*shopmodels.GoodsSku, error)

@@ -4,6 +4,7 @@
 package shop
 
 import (
+	"github.com/google/wire"
 	activityController "nova-factory-server/app/business/shop/activity/controller"
 	apiActivityController "nova-factory-server/app/business/shop/api/controller/activity"
 	"nova-factory-server/app/business/shop/api/controller/address"
@@ -20,8 +21,6 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
-
-	"github.com/google/wire"
 )
 
 var GinProviderSet = wire.NewSet(NewGinEngine)

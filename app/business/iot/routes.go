@@ -129,6 +129,7 @@ func NewGinEngine(
 	//grpc
 	s := app.GrpcServer
 	controller.Daemonize.PrivateRoutes(s)
+	controller.Config.PrivateGrpcRoutes(s)
 	deviceMonitor.DeviceControl.PrivateRoutes(s)
 	deviceMonitor.CameraGrpc.PrivateRoutes(s)
 

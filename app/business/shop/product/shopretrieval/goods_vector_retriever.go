@@ -27,7 +27,7 @@ func NewGoodsVectorRetriever(dao shopdao.IShopGoodsVectorDao) retrieval.Retrieve
 }
 
 // Retrieve 执行单条商品检索，并输出统一文档结构。
-func (r *GoodsVectorRetriever) Retrieve(ctx context.Context, query string, opts ...retrieval.Option) ([]*schema.Document, error) {
+func (r *GoodsVectorRetriever) Retrieve(ctx context.Context, query string, fallbackWithoutMetadata bool, opts ...retrieval.Option) ([]*schema.Document, error) {
 	if r == nil || r.dao == nil {
 		return nil, errors.New("商城商品检索器未初始化")
 	}
@@ -37,7 +37,7 @@ func (r *GoodsVectorRetriever) Retrieve(ctx context.Context, query string, opts 
 				Queries:     []string{payload.Original},
 				SearchTexts: []string{payload.HybridText},
 				Limit:       topK,
-			}, [][]float32{vector})
+			}, [][]float32{vector}, fallbackWithoutMetadata)
 			if err != nil {
 				return nil, err
 			}

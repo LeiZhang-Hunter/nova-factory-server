@@ -34,6 +34,17 @@ func NewShopGoodsDao(ms *gorm.DB, itemDao homeDao.IShopHomeModuleItemDao) shopda
 	}
 }
 
+func (s *ShopGoodsDaoImpl) Transaction(c *gin.Context, fn func(txDao shopdao.IShopGoodsDao) error) error {
+	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		txDao := &ShopGoodsDaoImpl{
+			db:        tx,
+			itemDao:   s.itemDao,
+			tableName: s.tableName,
+		}
+		return fn(txDao)
+	})
+}
+
 func (s *ShopGoodsDaoImpl) Create(c *gin.Context, req *shopmodels.GoodsUpsert) (*shopmodels.Goods, error) {
 	model := buildGoodsModel(req)
 	if err := s.db.WithContext(c).Table(s.tableName).Create(model).Error; err != nil {

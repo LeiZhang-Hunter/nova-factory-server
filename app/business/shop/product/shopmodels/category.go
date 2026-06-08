@@ -2,6 +2,8 @@ package shopmodels
 
 import (
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/utils/store"
+	"sync"
 	"time"
 )
 
@@ -36,6 +38,34 @@ type CategoryInfo struct {
 	Children     []*CategoryInfo `json:"children" gorm:"-"`
 	CreateTime   *time.Time      `json:"createTime" gorm:"create_time"` //创建时间
 	UpdateTime   *time.Time      `json:"updateTime" gorm:"update_time"` //修改时间
+	mtx          sync.RWMutex    `json:"-"`
+}
+
+func (c *CategoryInfo) ToShopCategoryData() store.ShopCategoryData {
+	return c
+}
+
+func (c *CategoryInfo) CategoryID() int64 {
+	return c.ID
+}
+func (c *CategoryInfo) ChildrenData() []store.ShopCategoryData {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	list := make([]store.ShopCategoryData, 0)
+	for _, child := range c.Children {
+		list = append(list, child.ToShopCategoryData())
+	}
+	return list
+}
+func (c *CategoryInfo) SetChildren(list []store.ShopCategoryData) error {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	childrens := make([]*CategoryInfo, len(list))
+	for k, child := range list {
+		childrens[k] = child.(*CategoryInfo)
+	}
+	c.Children = childrens
+	return nil
 }
 
 // CategoryUpsert 商品分类新增修改参数

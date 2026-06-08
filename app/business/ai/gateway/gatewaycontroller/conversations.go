@@ -165,8 +165,6 @@ func (conversations *Conversations) Chat(c *gin.Context) {
 		req.TabID = "team"
 	}
 
-	var enableThink bool = false
-	req.EnableThinking = &enableThink
 	data, err := conversations.gatewayService.Chat(c, req)
 	if err != nil {
 		zap.L().Error("chat error", zap.Error(err))

@@ -68,3 +68,36 @@ milvus:
   username: ""
   password: ""
   db_name: "nova"
+vectorsearch:
+  normalization:
+    goods:
+      # 商品查询通用归一化，适合做基础清洗和分类识别。
+      normalize:
+        interceptors:
+          - name: trim_whitespace
+            type: whitespace
+          - name: detect_category
+            type: product_type
+          - name: replace_lower_x
+            type: replace
+            old: "x"
+            new: "*"
+          - name: replace_upper_x
+            type: replace
+            old: "X"
+            new: "*"
+
+      metadata:
+        spec:
+          - name: extract_spec
+            type: regex
+            pattern: '(?i)^.*?((?:d)?\d+(?:\.\d+)?\*\d+(?:\.\d+)?\*\d+(?:\.\d+)?|(?:d)?\d+(?:\.\d+)?\*\d+(?:\.\d+)?(?:[-\s]+(?:d)?\d+(?:\.\d+)?\*\d+(?:\.\d+)?)?).*$'
+            replacement: "$1"
+
+        # 分类提取 pipeline，仅抽取分类信息。
+        category:
+          interceptors:
+            - name: detect_category
+              type: product_type
+
+
