@@ -2,8 +2,6 @@ package daemonizecontroller
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -58,6 +56,7 @@ func (c *Config) StreamResources(stream xdsv1.GatewayDiscoveryService_StreamReso
 
 	ackVersion := firstReq.GetVersionInfo()
 	sentVersion := ""
+	lastProbeVersion := ""
 
 	reqCh := make(chan *xdsv1.DiscoveryRequest, 4)
 	errCh := make(chan error, 1)
@@ -73,16 +72,29 @@ func (c *Config) StreamResources(stream xdsv1.GatewayDiscoveryService_StreamReso
 	}()
 
 	sendLatest := func() error {
+		probeVersion, probeErr := c.getLatestPipelineProbeVersion(stream.Context(), gatewayID)
+		if probeErr != nil {
+			return probeErr
+		}
+		if probeVersion == "" || probeVersion == lastProbeVersion {
+			return nil
+		}
+
 		resp, buildErr := c.buildDiscoveryResponse(stream.Context(), gatewayID)
 		if buildErr != nil {
 			return buildErr
 		}
-		if resp.GetVersionInfo() == "" || resp.GetVersionInfo() == ackVersion || resp.GetVersionInfo() == sentVersion {
+		if resp.GetVersionInfo() == "" {
+			return nil
+		}
+		if resp.GetVersionInfo() == ackVersion || resp.GetVersionInfo() == sentVersion {
+			lastProbeVersion = probeVersion
 			return nil
 		}
 		if sendErr := stream.Send(resp); sendErr != nil {
 			return sendErr
 		}
+		lastProbeVersion = probeVersion
 		sentVersion = resp.GetVersionInfo()
 		return nil
 	}
@@ -158,18 +170,28 @@ func (c *Config) buildPipelineSnapshot(ctx context.Context, gatewayID uint64) (*
 		return nil, err
 	}
 
-	content := []byte(config.Content)
-	sum := sha256.Sum256(content)
-	version := hex.EncodeToString(sum[:])
-
 	return &xdsv1.PipelineSnapshot{
 		TypeUrl:     pipelineSnapshotTypeURL,
 		GatewayId:   strconv.FormatUint(gatewayID, 10),
-		VersionInfo: version,
+		VersionInfo: config.ConfigVersion,
 		YamlContent: config.Content,
-		ContentHash: version,
+		ContentHash: config.ContentHash,
 		GeneratedAt: timestamppb.Now(),
 	}, nil
+}
+
+func (c *Config) getLatestPipelineProbeVersion(ctx context.Context, gatewayID uint64) (string, error) {
+	config, err := c.configService.GetLastedConfigHashAndVersion(ctx, gatewayID)
+	if err != nil {
+		return "", err
+	}
+	if config == nil {
+		return "", nil
+	}
+	if config.ContentHash != "" {
+		return config.ContentHash, nil
+	}
+	return config.ConfigVersion, nil
 }
 
 func (c *Config) authorizeGateway(ctx context.Context, gatewayID string) (uint64, error) {

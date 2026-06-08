@@ -12,5 +12,6 @@ type IotAgentConfigService interface {
 	Update(ctx *gin.Context, config *daemonizemodels.SysIotAgentConfigSetReq) (*daemonizemodels.SysIotAgentConfig, error)
 	List(c *gin.Context, req *daemonizemodels.SysIotAgentConfigListReq) (*daemonizemodels.SysIotAgentConfigListData, error)
 	GetLastedConfig(ctx context.Context, agentId uint64) (*daemonizemodels.SysIotAgentConfig, error)
+	GetLastedConfigHashAndVersion(ctx context.Context, agentId uint64) (*daemonizemodels.SysIotAgentConfig, error)
 	Remove(ctx context.Context, ids []string) error
 }

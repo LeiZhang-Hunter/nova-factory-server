@@ -203,7 +203,8 @@ CREATE TABLE `sys_iot_agent_config` (
    `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增标识',
    `agent_object_id` bigint(20) unsigned NOT NULL COMMENT 'agent id',
    `config_version` varchar(64) not null comment '配置版本',
-   `content` TEXT not null comment '配置内容',
+   `content` LONGTEXT not null comment '配置内容',
+   `content_hash` varchar(32) not null comment '配置hash',
    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
@@ -213,6 +214,7 @@ CREATE TABLE `sys_iot_agent_config` (
    PRIMARY KEY (`id`),
    INDEX `agent_object_id`(`agent_object_id`) USING BTREE
 ) ENGINE=Innodb   COMMENT='agent配置';
+
 
 CREATE TABLE `sys_iot_db_dev_map`
 (

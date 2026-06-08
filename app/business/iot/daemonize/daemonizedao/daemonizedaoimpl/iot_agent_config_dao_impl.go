@@ -8,6 +8,7 @@ import (
 	"nova-factory-server/app/business/iot/daemonize/daemonizemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/uuid"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -97,6 +98,8 @@ func (i *IotAgentConfigDaoImpl) Create(ctx context.Context, config *daemonizemod
 	if config == nil {
 		return nil, errors.New("agent config is nil")
 	}
+	config.ContentHash = uuid.MakeMd5([]byte(config.Content))
+	config.ConfigVersion = fmt.Sprintf("%s-%s", config.ConfigVersion, config.ContentHash)
 	ret := i.db.Table(i.tableName).Create(config)
 	if ret.Error != nil {
 		zap.L().Error("agent config[%+v] update db error: %v", zap.Any("config", config), zap.Error(ret.Error))
@@ -110,6 +113,8 @@ func (i *IotAgentConfigDaoImpl) Update(ctx context.Context, config *daemonizemod
 	if config == nil {
 		return nil, errors.New("agent config is nil")
 	}
+	config.ContentHash = uuid.MakeMd5([]byte(config.Content))
+	config.ConfigVersion = fmt.Sprintf("%s-%s", config.ConfigVersion, config.ContentHash)
 	ret := i.db.Table(i.tableName).Where("id = ?", config.ID).Updates(config)
 	if ret.Error != nil {
 		zap.L().Error("agent config[%+v] update db error: %v", zap.Any("config", config), zap.Error(ret.Error))
@@ -166,4 +171,18 @@ func (i *IotAgentConfigDaoImpl) List(c *gin.Context, req *daemonizemodels.SysIot
 func (i *IotAgentConfigDaoImpl) Remove(ctx context.Context, ids []string) error {
 	ret := i.db.Table(i.tableName).Where("id in (?)", ids).Delete(&daemonizemodels.SysIotAgentConfig{})
 	return ret.Error
+}
+
+// GetLastedConfigHashAndVersion 获取最新的配置hash 和版本
+func (i *IotAgentConfigDaoImpl) GetLastedConfigHashAndVersion(ctx context.Context, agentId uint64) (*daemonizemodels.SysIotAgentConfig, error) {
+	var config *daemonizemodels.SysIotAgentConfig
+	ret := i.db.Table(i.tableName).Select("content_hash", "config_version").Where("agent_object_id = ?", agentId).Order("create_time desc").Where("state = ?", commonStatus.NORMAL).First(&config)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, ret.Error
+	}
+
+	return config, nil
 }

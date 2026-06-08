@@ -17,4 +17,5 @@ type IotAgentConfigDao interface {
 	Update(ctx context.Context, config *daemonizemodels.SysIotAgentConfig) (*daemonizemodels.SysIotAgentConfig, error)
 	List(c *gin.Context, req *daemonizemodels.SysIotAgentConfigListReq) (*daemonizemodels.SysIotAgentConfigListData, error)
 	Remove(ctx context.Context, ids []string) error
+	GetLastedConfigHashAndVersion(ctx context.Context, agentId uint64) (*daemonizemodels.SysIotAgentConfig, error)
 }
