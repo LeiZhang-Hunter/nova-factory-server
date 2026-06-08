@@ -98,8 +98,9 @@ func (f *Favorite) List(c *gin.Context) {
 	userId := baizeContext.GetUserId(c)
 	page := baizeContext.QueryInt64(c, "page")
 	size := baizeContext.QueryInt64(c, "size")
+	goodsName := c.Query("goodsName")
 
-	data, err := f.service.ListFavorites(c, userId, page, size)
+	data, err := f.service.ListFavorites(c, userId, page, size, goodsName)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

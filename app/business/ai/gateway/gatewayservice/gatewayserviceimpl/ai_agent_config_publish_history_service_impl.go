@@ -49,7 +49,7 @@ func NewAIAgentConfigPublishHistoryService(
 // Set 保存智能体配置发布历史。
 func (a *AIAgentConfigPublishHistoryServiceImpl) Set(c *gin.Context, req *gatewaymodels.AIAgentConfigPublishHistoryUpsert) (*gatewaymodels.AIAgentConfigPublishHistory, error) {
 	if req.Action != string(aiagent.ConfigPublishType) && req.Action != string(aiagent.ConfigRemoveType) {
-		return nil, errors.New("下发类型错误")
+		req.Action = string(aiagent.ConfigPublishType)
 	}
 	if err := a.validateUpsert(c, req); err != nil {
 		return nil, err

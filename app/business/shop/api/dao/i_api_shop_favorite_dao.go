@@ -13,7 +13,7 @@ type IApiShopFavoriteDao interface {
 	// Remove 移除收藏
 	Remove(c *gin.Context, userId int64, goodsId string) error
 	// ListByUserID 获取用户收藏列表
-	ListByUserID(c *gin.Context, userId int64, page int64, size int64) ([]*models.ShopUserGoodsFavorite, int64, error)
+	ListByUserID(c *gin.Context, userId int64, page int64, size int64, goodsName string) ([]*models.ShopUserGoodsFavorite, int64, error)
 	// GetByUserAndGoods 获取指定用户的指定商品收藏记录
 	GetByUserAndGoods(c *gin.Context, userId int64, goodsId string) (*models.ShopUserGoodsFavorite, error)
 	// CountByUserID 统计用户收藏数量

@@ -12,7 +12,6 @@ import (
 	"nova-factory-server/app/business/wms"
 	"nova-factory-server/app/datasource"
 	"nova-factory-server/app/routes"
-	"nova-factory-server/app/store"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
@@ -46,7 +45,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		wms.ProviderSet,
 		admin.ProviderSet,
 		datasource.ProviderSet,
-		store.ProviderSet,
 		finalEngine,
 	))
 }

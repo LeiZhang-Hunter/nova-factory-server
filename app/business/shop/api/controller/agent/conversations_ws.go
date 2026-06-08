@@ -110,7 +110,7 @@ func (conversations *Conversations) WsChat(c *gin.Context) {
 		initReq.TabID = "team"
 	}
 	var ret bool
-	ret = true
+	ret = false
 	initReq.EnableThinking = &ret
 
 	// 调用网关获取 SSE 流

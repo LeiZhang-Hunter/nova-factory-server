@@ -40,13 +40,20 @@ func (d *IApiShopFavoriteDaoImpl) Remove(c *gin.Context, userId int64, goodsId s
 }
 
 // ListByUserID 获取用户收藏列表
-func (d *IApiShopFavoriteDaoImpl) ListByUserID(c *gin.Context, userId int64, page int64, size int64) ([]*models.ShopUserGoodsFavorite, int64, error) {
+func (d *IApiShopFavoriteDaoImpl) ListByUserID(c *gin.Context, userId int64, page int64, size int64, goodsName string) ([]*models.ShopUserGoodsFavorite, int64, error) {
 	var rows []*models.ShopUserGoodsFavorite
 	var total int64
 
-	db := d.db.WithContext(c).Table(d.tableName).Where("user_id = ?", userId)
+	baseQuery := func() *gorm.DB {
+		db := d.db.WithContext(c).Table(d.tableName+" AS f").Where("f.user_id = ?", userId)
+		if goodsName != "" {
+			db = db.Joins("JOIN shop_goods ON shop_goods.goods_id = f.goods_id").
+				Where("shop_goods.goods_name LIKE ?", "%"+goodsName+"%")
+		}
+		return db
+	}
 
-	if err := db.Count(&total).Error; err != nil {
+	if err := baseQuery().Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -57,7 +64,7 @@ func (d *IApiShopFavoriteDaoImpl) ListByUserID(c *gin.Context, userId int64, pag
 		size = 20
 	}
 
-	if err := db.Offset(int((page - 1) * size)).Limit(int(size)).Order("id DESC").Find(&rows).Error; err != nil {
+	if err := baseQuery().Select("f.*").Offset(int((page - 1) * size)).Limit(int(size)).Order("f.id DESC").Find(&rows).Error; err != nil {
 		return nil, 0, err
 	}
 
