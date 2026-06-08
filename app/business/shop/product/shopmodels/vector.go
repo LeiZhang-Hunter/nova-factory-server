@@ -28,6 +28,7 @@ type GoodsVectorSearchReq struct {
 	Embedding               *EmbeddingConfig `json:"embedding"`                // 向量模型配置
 	FallbackWithoutMetadata bool             `json:"fallbackWithoutMetadata"`  // metadata 过滤无结果时是否回退为无过滤检索
 	SearchText              string           `json:"-"`
+	IsSale                  *bool            `json:"-"` // 可选，按在售状态过滤
 }
 
 // GoodsVectorBatchSearchReq 商品批量向量检索请求
@@ -36,6 +37,7 @@ type GoodsVectorBatchSearchReq struct {
 	Limit       int              `json:"limit"`                      // 每条返回条数
 	Embedding   *EmbeddingConfig `json:"embedding"`                  // 向量模型配置
 	SearchTexts []string         `json:"-"`
+	IsSale      *bool            `json:"-"` // 可选，按在售状态过滤
 }
 
 // GoodsVectorSearchItem 商品向量检索结果
