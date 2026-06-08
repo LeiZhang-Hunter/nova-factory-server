@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	defaultGoodsRetrieverTopK = 10
-	maxGoodsRetrieverTopK     = 50
+	defaultGoodsRetrieverTopK     = 10
+	maxGoodsRetrieverTopK         = 50
+	goodsRetrieverOptionIsSaleKey = "shop.goods.is_sale"
 )
 
 // GoodsVectorRetriever 将商城商品向量检索适配为通用 Retriever 接口。
@@ -26,17 +27,30 @@ func NewGoodsVectorRetriever(dao shopdao.IShopGoodsVectorDao) retrieval.Retrieve
 	return &GoodsVectorRetriever{dao: dao}
 }
 
+// WithGoodsIsSale 为商城商品检索器设置在售状态过滤。
+func WithGoodsIsSale(isSale bool) retrieval.Option {
+	return func(opts *retrieval.Options) {
+		if opts.DSLInfo == nil {
+			opts.DSLInfo = make(map[string]any, 1)
+		}
+		opts.DSLInfo[goodsRetrieverOptionIsSaleKey] = isSale
+	}
+}
+
 // Retrieve 执行单条商品检索，并输出统一文档结构。
 func (r *GoodsVectorRetriever) Retrieve(ctx context.Context, query string, fallbackWithoutMetadata bool, opts ...retrieval.Option) ([]*schema.Document, error) {
 	if r == nil || r.dao == nil {
 		return nil, errors.New("商城商品检索器未初始化")
 	}
+	options := retrieval.ApplyOptions(opts...)
+	isSale := goodsIsSaleFromOptions(options)
 	return retrieval.RetrieveSingleQueryWithEmbedding(ctx, query, defaultGoodsRetrieverTopK, maxGoodsRetrieverTopK,
 		func(payload retrieval.QueryPayload, topK int, vector []float32) ([]*schema.Document, error) {
 			data, err := r.dao.BatchSearch(nil, &shopmodels.GoodsVectorBatchSearchReq{
 				Queries:     []string{payload.Original},
 				SearchTexts: []string{payload.HybridText},
 				Limit:       topK,
+				IsSale:      isSale,
 			}, [][]float32{vector}, fallbackWithoutMetadata)
 			if err != nil {
 				return nil, err
@@ -56,6 +70,29 @@ func (r *GoodsVectorRetriever) Retrieve(ctx context.Context, query string, fallb
 			return documents, nil
 		},
 		opts...)
+}
+
+func goodsIsSaleFromOptions(options retrieval.Options) *bool {
+	if options.DSLInfo == nil {
+		return nil
+	}
+	raw, ok := options.DSLInfo[goodsRetrieverOptionIsSaleKey]
+	if !ok || raw == nil {
+		return nil
+	}
+	switch value := raw.(type) {
+	case bool:
+		isSale := value
+		return &isSale
+	case *bool:
+		if value == nil {
+			return nil
+		}
+		isSale := *value
+		return &isSale
+	default:
+		return nil
+	}
 }
 
 func toGoodsVectorDocument(item *shopmodels.GoodsVectorSearchItem) *schema.Document {
