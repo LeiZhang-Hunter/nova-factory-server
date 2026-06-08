@@ -71,6 +71,7 @@ func (s *IApiShopGoodsServiceImpl) Search(c *gin.Context, req *models.GoodsSearc
 		Queries:   req.GoodsNames,
 		Limit:     buildGoodsVectorSearchLimit(limit),
 		Embedding: &embeddingModel,
+		IsSale:    req.IsSale,
 	})
 	if err != nil {
 		return nil, err

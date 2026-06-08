@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go.uber.org/zap"
+	"nova-factory-server/app/utils/vectorsearch"
 	"nova-factory-server/app/utils/vectorsearch/goods"
 	"strconv"
 	"strings"
@@ -241,6 +242,7 @@ func (d *ShopGoodsVectorDaoImpl) Search(c *gin.Context, req *shopmodels.GoodsVec
 		Queries:     []string{req.Query},
 		SearchTexts: []string{req.SearchText},
 		Limit:       req.Limit,
+		IsSale:      req.IsSale,
 	}, [][]float32{vector}, FallbackWithoutMetadata)
 	if err != nil {
 		return nil, err
@@ -327,11 +329,19 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 				filterExpr = buildGoodsMetadataFilterExpr(extract)
 			}
 		}
+		if req.IsSale != nil {
+			isSaleFilterExpr := fmt.Sprintf("%s == %t", goodsVectorIsSaleField, *req.IsSale)
+			if filterExpr == "" {
+				filterExpr = isSaleFilterExpr
+			} else {
+				filterExpr = "(" + filterExpr + ") and " + isSaleFilterExpr
+			}
+		}
 		runtimeQueries = append(runtimeQueries, goodsSearchRuntimeQuery{
 			index:      len(runtimeQueries),
 			query:      query,
 			vector:     entity.FloatVector(vector),
-			text:       entity.Text(searchText),
+			text:       entity.Text(vectorsearch.NormalizeWhitespace(searchText)),
 			filterExpr: filterExpr,
 		})
 	}

@@ -146,6 +146,8 @@ func (p *Product) Search(c *gin.Context) {
 		baizeContext.Waring(c, "输入商品太多了，最多50条")
 		return
 	}
+	isSale := true
+	req.IsSale = &isSale
 	data, err := p.service.Search(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
