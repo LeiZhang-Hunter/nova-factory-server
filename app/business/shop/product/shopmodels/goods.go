@@ -34,27 +34,29 @@ type Goods struct {
 
 // GoodsUpsert 商品新增修改参数
 type GoodsUpsert struct {
-	ID            int64    `json:"id,string"`                    // 主键ID
-	GoodsID       string   `json:"goodsId" binding:"required"`   // 商品业务ID
-	GoodsName     string   `json:"goodsName" binding:"required"` // 商品名称
-	GoodsCode     string   `json:"goodsCode"`                    // 商品编码
-	OuterID       string   `json:"outerId"`                      // 外部系统ID
-	ImageURL      string   `json:"imageUrl"`                     // 主图地址
-	RetailPrice   float64  `json:"retailPrice"`                  // 零售价
-	GalleryImages []string `json:"galleryImages"`                // 图集
-	VideoURL      string   `json:"videoUrl"`                     // 视频地址
-	Description   string   `json:"description"`                  // 商品描述
-	Weight        float64  `json:"weight"`                       // 重量
-	WeightUnit    string   `json:"weightUnit"`                   // 重量单位
-	Unit          string   `json:"unit"`                         // 销售单位
-	IsOnSale      int32    `json:"isOnSale"`                     // 是否上架
-	Quantity      int64    `json:"quantity"`                     // 库存数量
-	HomeModuleIDs []string `json:"homeModuleIds"`                // 推荐首页模块ID集合
+	ID             int64    `json:"id,string"`                                     // 主键ID
+	GoodsID        string   `json:"goodsId" binding:"required"`                    // 商品业务ID
+	ShopCategoryId int64    `json:"shopCategoryId,string" gorm:"shop_category_id"` // 商品分类id
+	GoodsName      string   `json:"goodsName" binding:"required"`                  // 商品名称
+	GoodsCode      string   `json:"goodsCode"`                                     // 商品编码
+	OuterID        string   `json:"outerId"`                                       // 外部系统ID
+	ImageURL       string   `json:"imageUrl"`                                      // 主图地址
+	RetailPrice    float64  `json:"retailPrice"`                                   // 零售价
+	GalleryImages  []string `json:"galleryImages"`                                 // 图集
+	VideoURL       string   `json:"videoUrl"`                                      // 视频地址
+	Description    string   `json:"description"`                                   // 商品描述
+	Weight         float64  `json:"weight"`                                        // 重量
+	WeightUnit     string   `json:"weightUnit"`                                    // 重量单位
+	Unit           string   `json:"unit"`                                          // 销售单位
+	IsOnSale       int32    `json:"isOnSale"`                                      // 是否上架
+	Quantity       int64    `json:"quantity"`                                      // 库存数量
+	HomeModuleIDs  []string `json:"homeModuleIds"`                                 // 推荐首页模块ID集合
 	baize.BaseEntity
 }
 
 // GoodsQuery 商品查询参数
 type GoodsQuery struct {
+	ID         int64  `form:"id"`         // 主键ID
 	GoodsName  string `form:"goodsName"`  // 商品名称
 	GoodsCode  string `form:"goodsCode"`  // 商品编码
 	OuterID    string `form:"outerId"`    // 外部系统ID
