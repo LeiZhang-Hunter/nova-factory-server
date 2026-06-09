@@ -43,7 +43,7 @@ type GoodsListData struct {
 // GoodsSearchReq 商品检索参数
 type GoodsSearchReq struct {
 	GoodsNames []string `json:"goodsNames" binding:"required" json:"goodsNames" jsonschema:"description=商品名称列表，OR查询逻辑，支持模糊匹配，建议1-10个,不要超过10个"` // 商品名称列表
-	Limit      int      `json:"-"`                                                                                                             // 每个名称返回的商品数量
+	Limit      int      `json:"limit" binding:"required" jsonschema:"description=查询数量限制，建议1-10个,不要超过10个"`                                      // 商品名称列表
 	IsSale     *bool    `json:"-"`
 }
 

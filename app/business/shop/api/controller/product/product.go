@@ -25,12 +25,12 @@ func (p *Product) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop/product")
 	group.GET("/info/:id", p.Info)
 	group.GET("/list", p.List)
+	group.POST("/search", p.Search)
 }
 
 func (p *Product) PrivateRoutes(router *gin.RouterGroup) {
 	product := router.Group("/api/v1/app/shop/product")
 	product.GET("/repurchase", p.Repurchase)
-	product.POST("/search", p.Search)
 }
 
 func (p *Product) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
@@ -137,7 +137,12 @@ func (p *Product) Search(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	req.Limit = 1
+	if req.Limit <= 0 {
+		req.Limit = 1
+	}
+	if req.Limit > 10 {
+		req.Limit = 10
+	}
 	if len(req.GoodsNames) == 0 {
 		baizeContext.ParameterError(c)
 		return
