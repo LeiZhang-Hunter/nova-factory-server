@@ -340,6 +340,15 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 				filterExpr = "(" + filterExpr + ") and " + isSaleFilterExpr
 			}
 		}
+
+		// 加入库存筛选，只推荐库存大于0的商品
+		quantityFilterExpr := fmt.Sprintf("%s > 0", goodsVectorQuantityPriceField)
+		if quantityFilterExpr == "" {
+			filterExpr = quantityFilterExpr
+		} else {
+			filterExpr = "(" + filterExpr + ") and " + quantityFilterExpr
+		}
+
 		runtimeQueries = append(runtimeQueries, goodsSearchRuntimeQuery{
 			index:               len(runtimeQueries),
 			query:               query,

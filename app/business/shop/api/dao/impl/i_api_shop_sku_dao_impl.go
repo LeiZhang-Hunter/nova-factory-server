@@ -4,6 +4,7 @@ import (
 	"errors"
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/constant/commonStatus"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -48,6 +49,7 @@ func (s *IApiShopSkuDaoImpl) ListByIDs(c *gin.Context, ids []int64) ([]*shopmode
 	if err := getCurrentDB(c, s.db).WithContext(c).
 		Table(s.tableName).
 		Where("id IN ?", ids).
+		Where("state = ?", commonStatus.NORMAL).
 		Find(&rows).Error; err != nil {
 		return nil, err
 	}

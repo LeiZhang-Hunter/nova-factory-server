@@ -18,16 +18,19 @@ import (
 // - Title/Code/Category/Unit/Standard: 结构化高价值字段
 // - Remark/Content: 补充语义字段
 // - BaseScore: 第一阶段召回返回的原始分数
+// - Quantity/InventoryKnown: 可用库存信号，已知有库存时给予轻微排序奖励
 type RankCandidate struct {
-	ID        int64
-	Title     string
-	Code      string
-	Category  string
-	Unit      string
-	Standard  string
-	Remark    string
-	Content   string
-	BaseScore float32
+	ID             int64
+	Title          string
+	Code           string
+	Category       string
+	Unit           string
+	Standard       string
+	Remark         string
+	Content        string
+	BaseScore      float32
+	Quantity       int64
+	InventoryKnown bool
 }
 
 // RankedCandidate 表示重排后的结果索引与最终得分。
@@ -109,10 +112,11 @@ func RerankCandidates(query *ProcessedQuery, candidates []RankCandidate, limit i
 // 评分公式 (默认):
 // ============================================================================
 //
-//	finalScore = baseScore * 0.44          // 保留 Milvus 原始召回信号
-//	           + fieldScore * 0.38         // 结构化字段匹配 (核心可解释性)
-//	           + tagScore * 0.10           // 最强标签信号
-//	           + rankBonus * 0.08          // 初排位置奖励
+//	finalScore = baseScore * 0.42          // 保留 Milvus 原始召回信号
+//	           + fieldScore * 0.36         // 结构化字段匹配 (核心可解释性)
+//	           + tagScore * 0.09           // 最强标签信号
+//	           + rankBonus * 0.06          // 初排位置奖励
+//	           + inventoryScore * 0.07     // 库存信号，相关性接近时有库存优先
 //
 // 其中 fieldScore = titleScore      * 0.34   (商品名, 最高权重)
 //   - codeScore       * 0.28   (编码/条码, 次高权重)
@@ -131,7 +135,7 @@ func RerankCandidates(query *ProcessedQuery, candidates []RankCandidate, limit i
 // ============================================================================
 // 编码类查询 (IsCodeLike = true):
 //
-//	finalScore = baseScore*0.24 + fieldScore*0.24 + codeScore*0.42 + tagScore*0.04 + rankBonus*0.06
+//	finalScore = baseScore*0.23 + fieldScore*0.23 + codeScore*0.42 + tagScore*0.04 + rankBonus*0.04 + inventoryScore*0.04
 //	- codeScore 权重翻倍至 0.42
 //	- 精确匹配(codeScore >= 0.95) 追加 +0.18 奖励
 //	- 正文 contentScore 施加 -0.05 惩罚
@@ -144,6 +148,7 @@ func RerankCandidates(query *ProcessedQuery, candidates []RankCandidate, limit i
 // 2. fieldScore: 各结构化字段的匹配得分，代表"业务可解释性"
 // 3. tagScore: 分类/单位/规格中的最强标签信号，代表"标签命中"
 // 4. rankBonus: 对靠前候选给予轻微位置奖励，减少初排信息完全丢失
+// 5. inventoryScore: 库存可用性信号，代表“可展示且可购买”的业务优先级
 func combineCandidateScore(query *ProcessedQuery, candidate RankCandidate, baseScore float64, rank int) float64 {
 	titleScore := scoreTextField(query, candidate.Title)
 	codeScore := scoreCodeField(query, candidate.Code)
@@ -152,6 +157,7 @@ func combineCandidateScore(query *ProcessedQuery, candidate RankCandidate, baseS
 	standardScore := scoreTextField(query, candidate.Standard)
 	remarkScore := scoreTextField(query, candidate.Remark)
 	contentScore := scoreTextField(query, candidate.Content)
+	inventoryScore := scoreInventory(candidate)
 	// specScore/SpecTerms/CodeTerms 精排已移除, 上层调用方通过 metadata 匹配注入同类信号。
 
 	// fieldScore 体现"字段加权"思想：
@@ -166,16 +172,17 @@ func combineCandidateScore(query *ProcessedQuery, candidate RankCandidate, baseS
 	rankBonus := 1 / float64(rank+3)
 
 	// 默认配比下：
-	// - 0.44 给原始召回分，保留向量/BM25 初排价值
-	// - 0.38 给字段匹配分，强调结构化字段解释性
-	// - 0.10 给标签信号，补充业务属性相关性
-	// - 0.08 给位置奖励，让前序结果更稳定
-	score := baseScore*0.44 + fieldScore*0.38 + tagScore*0.10 + rankBonus*0.08
+	// - 0.42 给原始召回分，保留向量/BM25 初排价值
+	// - 0.36 给字段匹配分，强调结构化字段解释性
+	// - 0.09 给标签信号，补充业务属性相关性
+	// - 0.06 给位置奖励，让前序结果更稳定
+	// - 0.07 给库存信号，只在相关性接近时优先展示有库存商品
+	score := baseScore*0.42 + fieldScore*0.36 + tagScore*0.09 + rankBonus*0.06 + inventoryScore*0.07
 	if query.IsCodeLike {
 		// 编码类检索通常目标非常明确，例如条码、SKU、货号。
 		// 这类场景下若仍过度依赖语义和正文，容易把"语义相关但编码不对"的结果顶上来，
 		// 因此这里显著抬高 codeScore 权重，并压低正文影响。
-		score = baseScore*0.24 + fieldScore*0.24 + codeScore*0.42 + tagScore*0.04 + rankBonus*0.06
+		score = baseScore*0.23 + fieldScore*0.23 + codeScore*0.42 + tagScore*0.04 + rankBonus*0.04 + inventoryScore*0.04
 		if codeScore >= 0.95 {
 			// 对精确匹配或前缀高匹配再加一档奖励，尽量把"真正的目标商品"顶到最前面。
 			score += 0.18
@@ -186,9 +193,21 @@ func combineCandidateScore(query *ProcessedQuery, candidate RankCandidate, baseS
 	if query.IsShortQuery {
 		// 短 query 往往缺少上下文，商品名标题的判别力更强，因此额外补一点标题权重。
 		score += titleScore * 0.08
+		// 短 query 歧义更高，有库存商品通常更符合前台展示预期。
+		score += inventoryScore * 0.02
 	}
 	// 最终把得分限制在合理范围，避免不同规则叠加后出现异常值。
 	return clampFloat(score, 0, 1.5)
+}
+
+func scoreInventory(candidate RankCandidate) float64 {
+	if !candidate.InventoryKnown {
+		return 0.5
+	}
+	if candidate.Quantity > 0 {
+		return 1
+	}
+	return 0
 }
 
 // calcDynamicThreshold 根据当前排序结果动态估算保留阈值。

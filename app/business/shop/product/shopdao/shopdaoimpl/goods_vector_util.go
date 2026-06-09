@@ -342,15 +342,17 @@ func rerankGoodsVectorSearchRows(query goodsSearchRuntimeQuery, rows []*shopmode
 			continue
 		}
 		candidates = append(candidates, searchutil.RankCandidate{
-			ID:        row.GoodsDBID,                                          // 数据库主键, 用于回填
-			Title:     row.GoodsName,                                          // 商品名称, 权重最高的语义字段
-			Code:      row.GoodsCode,                                          // 商品编码/条码, 编码类查询核心判别字段
-			Category:  row.CategoryName,                                       // 商品分类
-			Unit:      "",                                                     // 商品向量暂无单位字段, 留空
-			Standard:  row.SkuName,                                            // SKU 规格名, 替代 Standard 作为规格信号
-			Remark:    row.SkuDescription,                                     // SKU 描述, 辅助语义补充
-			Content:   strings.TrimSpace(row.Content + " " + row.Description), // 拼接 content 和 description 作为语义正文
-			BaseScore: row.Score,                                              // Milvus 原始召回分数(COSINE 距离)
+			ID:             row.GoodsDBID,                                          // 数据库主键, 用于回填
+			Title:          row.GoodsName,                                          // 商品名称, 权重最高的语义字段
+			Code:           row.GoodsCode,                                          // 商品编码/条码, 编码类查询核心判别字段
+			Category:       row.CategoryName,                                       // 商品分类
+			Quantity:       row.Quantity,                                           // 库存
+			InventoryKnown: true,                                                   // 商品向量结果包含库存快照, 可参与精排
+			Unit:           "",                                                     // 商品向量暂无单位字段, 留空
+			Standard:       row.SkuName,                                            // SKU 规格名, 替代 Standard 作为规格信号
+			Remark:         row.SkuDescription,                                     // SKU 描述, 辅助语义补充
+			Content:        strings.TrimSpace(row.Content + " " + row.Description), // 拼接 content 和 description 作为语义正文
+			BaseScore:      row.Score,                                              // Milvus 原始召回分数(COSINE 距离)
 		})
 	}
 	if len(candidates) == 0 {

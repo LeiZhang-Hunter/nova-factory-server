@@ -20,6 +20,7 @@ import (
 // IApiShopGoodsServiceImpl 商品服务实现
 type IApiShopGoodsServiceImpl struct {
 	dao              dao.IApiShopGoodsDao
+	skuDao           dao.IApiShopSkuDao
 	shopGoodsService shopservice.IShopGoodsService
 	discountService  discountservice.IDiscountCalculateService
 	// service 读取模型
@@ -29,12 +30,14 @@ type IApiShopGoodsServiceImpl struct {
 // NewIApiShopGoodsServiceImpl  创建商品服务
 func NewIApiShopGoodsServiceImpl(dao dao.IApiShopGoodsDao,
 	shopGoodsService shopservice.IShopGoodsService,
-	discountService discountservice.IDiscountCalculateService, service aidatasetservice.IAiModelProviderService) service.IApiShopGoodsService {
+	discountService discountservice.IDiscountCalculateService, service aidatasetservice.IAiModelProviderService,
+	skuDao dao.IApiShopSkuDao) service.IApiShopGoodsService {
 	return &IApiShopGoodsServiceImpl{
 		dao:              dao,
 		shopGoodsService: shopGoodsService,
 		discountService:  discountService,
 		service:          service,
+		skuDao:           skuDao,
 	}
 }
 
@@ -101,14 +104,14 @@ func (s *IApiShopGoodsServiceImpl) Search(c *gin.Context, req *models.GoodsSearc
 			if hit == nil || hit.GoodsDBID == 0 {
 				continue
 			}
-			if _, ok := seen[hit.GoodsDBID]; ok {
+			if _, ok := seen[hit.SkuID]; ok {
 				continue
 			}
-			goods, ok := goodsMap[hit.GoodsDBID]
+			goods, ok := goodsMap[hit.SkuID]
 			if !ok || goods == nil {
 				continue
 			}
-			seen[hit.GoodsDBID] = struct{}{}
+			seen[hit.SkuID] = struct{}{}
 			matches = append(matches, &models.GoodsSearchMatch{
 				Score: hit.Score,
 				Goods: goods,
