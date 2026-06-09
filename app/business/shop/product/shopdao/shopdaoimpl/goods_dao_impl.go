@@ -183,6 +183,9 @@ func (s *ShopGoodsDaoImpl) ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]
 
 func (s *ShopGoodsDaoImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error) {
 	db := s.db.WithContext(c).Table(s.tableName)
+	if req.ID > 0 {
+		db = db.Where("id = ?", req.ID)
+	}
 	if req.GoodsName != "" {
 		db = db.Where("goods_name LIKE ?", "%"+req.GoodsName+"%")
 	}
@@ -280,21 +283,22 @@ func buildGoodsUpdates(c *gin.Context, req *shopmodels.GoodsUpsert) map[string]i
 	}
 
 	return map[string]interface{}{
-		"goods_id":        req.GoodsID,
-		"goods_name":      req.GoodsName,
-		"goods_code":      req.GoodsCode,
-		"outer_id":        req.OuterID,
-		"image_url":       imageURL,
-		"retail_price":    req.RetailPrice,
-		"gallery_images":  galleryImagesStr,
-		"video_url":       videoUrl,
-		"description":     req.Description,
-		"weight":          req.Weight,
-		"weight_unit":     req.WeightUnit,
-		"unit":            req.Unit,
-		"is_on_sale":      req.IsOnSale,
-		"quantity":        req.Quantity,
-		"home_module_ids": strings.Join(req.HomeModuleIDs, ","),
+		"goods_id":         req.GoodsID,
+		"goods_name":       req.GoodsName,
+		"goods_code":       req.GoodsCode,
+		"outer_id":         req.OuterID,
+		"image_url":        imageURL,
+		"retail_price":     req.RetailPrice,
+		"gallery_images":   galleryImagesStr,
+		"video_url":        videoUrl,
+		"description":      req.Description,
+		"weight":           req.Weight,
+		"weight_unit":      req.WeightUnit,
+		"unit":             req.Unit,
+		"is_on_sale":       req.IsOnSale,
+		"quantity":         req.Quantity,
+		"shop_category_id": req.ShopCategoryId,
+		"home_module_ids":  strings.Join(req.HomeModuleIDs, ","),
 	}
 }
 

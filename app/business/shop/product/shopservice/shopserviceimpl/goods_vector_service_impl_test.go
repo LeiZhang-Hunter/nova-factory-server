@@ -61,3 +61,49 @@ func TestBuildGoodsEmbeddingPayloadsWithoutSku(t *testing.T) {
 		t.Fatalf("payload missing goods content: %s", payloads[0].content)
 	}
 }
+
+func TestDeduplicateGoodsVectorBatchSearchRows(t *testing.T) {
+	rows := []*shopmodels.GoodsVectorBatchSearchItem{
+		{
+			Query: "鞋子",
+			Rows: []*shopmodels.GoodsVectorSearchItem{
+				{GoodsDBID: 1, SkuID: 11, GoodsName: "商品1", Score: 0.9},
+				{GoodsDBID: 1, SkuID: 12, GoodsName: "商品1重复", Score: 0.8},
+				{GoodsDBID: 2, SkuID: 21, GoodsName: "商品2", Score: 0.7},
+			},
+			Total: 3,
+		},
+		{
+			Query: "鞋子",
+			Rows: []*shopmodels.GoodsVectorSearchItem{
+				{GoodsDBID: 3, SkuID: 31, GoodsName: "商品3", Score: 0.6},
+			},
+			Total: 1,
+		},
+		{
+			Query: "帽子",
+			Rows: []*shopmodels.GoodsVectorSearchItem{
+				{SkuID: 41, GoodsName: "商品4", Score: 0.5},
+				{SkuID: 41, GoodsName: "商品4重复", Score: 0.4},
+			},
+			Total: 2,
+		},
+	}
+
+	deduped := deduplicateGoodsVectorBatchSearchRows(rows)
+	if len(deduped) != 2 {
+		t.Fatalf("unexpected batch row count: %d", len(deduped))
+	}
+	if deduped[0].Query != "鞋子" || deduped[1].Query != "帽子" {
+		t.Fatalf("unexpected query order: %#v", []string{deduped[0].Query, deduped[1].Query})
+	}
+	if len(deduped[0].Rows) != 2 || deduped[0].Total != 2 {
+		t.Fatalf("unexpected first query rows: len=%d total=%d", len(deduped[0].Rows), deduped[0].Total)
+	}
+	if deduped[0].Rows[0].SkuID != 11 || deduped[0].Rows[1].GoodsDBID != 2 {
+		t.Fatalf("unexpected first query dedup result: %#v", deduped[0].Rows)
+	}
+	if len(deduped[1].Rows) != 1 || deduped[1].Total != 1 || deduped[1].Rows[0].Score != 0.5 {
+		t.Fatalf("unexpected second query rows: %#v", deduped[1].Rows)
+	}
+}

@@ -298,10 +298,66 @@ func (s *ShopGoodsServiceImpl) BatchSearchVector(c *gin.Context,
 	if err != nil {
 		return nil, err
 	}
+	rows = deduplicateGoodsVectorBatchSearchRows(rows)
 	return &shopmodels.GoodsVectorBatchSearchData{
 		Rows:  rows,
 		Total: int64(len(rows)),
 	}, nil
+}
+
+func deduplicateGoodsVectorBatchSearchRows(rows []*shopmodels.GoodsVectorBatchSearchItem) []*shopmodels.GoodsVectorBatchSearchItem {
+	if len(rows) == 0 {
+		return rows
+	}
+	dedupedRows := make([]*shopmodels.GoodsVectorBatchSearchItem, 0, len(rows))
+	seenQueries := make(map[string]struct{}, len(rows))
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		if _, ok := seenQueries[row.Query]; ok {
+			continue
+		}
+		seenQueries[row.Query] = struct{}{}
+		row.Rows = deduplicateGoodsVectorSearchItems(row.Rows)
+		row.Total = int64(len(row.Rows))
+		dedupedRows = append(dedupedRows, row)
+	}
+	return dedupedRows
+}
+
+func deduplicateGoodsVectorSearchItems(rows []*shopmodels.GoodsVectorSearchItem) []*shopmodels.GoodsVectorSearchItem {
+	if len(rows) == 0 {
+		return rows
+	}
+	dedupedRows := make([]*shopmodels.GoodsVectorSearchItem, 0, len(rows))
+	seen := make(map[string]struct{}, len(rows))
+	for _, item := range rows {
+		if item == nil {
+			continue
+		}
+		key := goodsVectorSearchItemDedupKey(item)
+		if key == "" {
+			dedupedRows = append(dedupedRows, item)
+			continue
+		}
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		dedupedRows = append(dedupedRows, item)
+	}
+	return dedupedRows
+}
+
+func goodsVectorSearchItemDedupKey(item *shopmodels.GoodsVectorSearchItem) string {
+	if item == nil {
+		return ""
+	}
+	if item.SkuID != 0 {
+		return "sku:" + strconv.FormatInt(item.SkuID, 10)
+	}
+	return ""
 }
 
 // batchSearchVector 统一处理单条/批量查询的 embedding 生成与召回逻辑。
