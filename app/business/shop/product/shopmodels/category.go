@@ -45,6 +45,10 @@ func (c *CategoryInfo) ToShopCategoryData() store.ShopCategoryData {
 	return c
 }
 
+func (c *CategoryInfo) Name() string {
+	return c.CategoryName
+}
+
 func (c *CategoryInfo) CategoryID() int64 {
 	return c.ID
 }

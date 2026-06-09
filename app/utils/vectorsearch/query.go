@@ -41,9 +41,7 @@ func ProcessQuery(query string) *ProcessedQuery {
 	tokens := tokenize(normalized)
 	expanded := expandTokens(tokens)
 	categoryTerms := extractCategoryTerms(normalized, tokens)
-	specTerms := extractSpecTerms(normalized, tokens)
-	codeTerms := extractCodeTerms(normalized, tokens)
-	keywords := dedupeKeywords(append(append(append(append([]string{normalized}, tokens...), expanded...), categoryTerms...), specTerms...))
+	keywords := dedupeKeywords(append(append(append(append([]string{normalized}, tokens...), expanded...), categoryTerms...)))
 	return &ProcessedQuery{
 		Original:       original,
 		Normalized:     normalized,
@@ -51,10 +49,8 @@ func ProcessQuery(query string) *ProcessedQuery {
 		ExpandedTokens: expanded,
 		Keywords:       keywords,
 		CategoryTerms:  categoryTerms,
-		SpecTerms:      specTerms,
-		CodeTerms:      codeTerms,
-		EmbeddingText:  buildQueryText(original, tokens, expanded, categoryTerms, specTerms, codeTerms, 2),
-		HybridText:     buildQueryText(original, tokens, expanded, categoryTerms, specTerms, codeTerms, 1),
+		EmbeddingText:  buildQueryText(original, tokens, expanded, categoryTerms, 2),
+		HybridText:     buildQueryText(original, tokens, expanded, categoryTerms, 1),
 		IsCodeLike:     isCodeLike(normalized),
 		IsShortQuery:   len([]rune(original)) <= 4 || len(tokens) <= 2,
 	}

@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	"nova-factory-server/app/utils/vectorsearch"
 	"nova-factory-server/app/utils/vectorsearch/goods"
+	"nova-factory-server/app/utils/vectorsearch/normalization"
 	"strconv"
 	"strings"
 
@@ -312,11 +313,13 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 		}
 
 		filterExpr := ""
+		var extract normalization.Result
+		var extractErr error
 		if d.metadataExtractor != nil {
 			// 对搜索文本做规格/分类提取：
 			// 1. 提取后的 Value 可替换为更干净的文本参与召回；
 			// 2. 提取后的 Metadata 会被拼成 Milvus filter，用于精确过滤。
-			extract, extractErr := d.metadataExtractor.Extract(searchText)
+			extract, extractErr = d.metadataExtractor.Extract(searchText)
 			if extractErr != nil {
 				zap.L().Error("extract goods search metadata fail",
 					zap.String("query", query),
@@ -338,11 +341,12 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 			}
 		}
 		runtimeQueries = append(runtimeQueries, goodsSearchRuntimeQuery{
-			index:      len(runtimeQueries),
-			query:      query,
-			vector:     entity.FloatVector(vector),
-			text:       entity.Text(vectorsearch.NormalizeWhitespace(searchText)),
-			filterExpr: filterExpr,
+			index:               len(runtimeQueries),
+			query:               query,
+			metaExtractorResult: extract,
+			vector:              entity.FloatVector(vector),
+			text:                entity.Text(vectorsearch.NormalizeWhitespace(searchText)),
+			filterExpr:          filterExpr,
 		})
 	}
 	if len(runtimeQueries) == 0 {
@@ -415,7 +419,7 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 		if parseErr != nil {
 			return nil, fmt.Errorf("解析第%d条商品向量搜索结果失败: %w", idx+1, parseErr)
 		}
-		data.Rows = rerankGoodsVectorSearchRows(runtimeQueries[idx].query, data.Rows, req.Limit)
+		data.Rows = rerankGoodsVectorSearchRows(runtimeQueries[idx], data.Rows, req.Limit)
 		rows = append(rows, &shopmodels.GoodsVectorBatchSearchItem{
 			Query: runtimeQueries[idx].query,
 			Rows:  data.Rows,
