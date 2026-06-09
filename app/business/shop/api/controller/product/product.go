@@ -137,7 +137,12 @@ func (p *Product) Search(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	req.Limit = 1
+	if req.Limit <= 0 {
+		req.Limit = 1
+	}
+	if req.Limit > 10 {
+		req.Limit = 10
+	}
 	if len(req.GoodsNames) == 0 {
 		baizeContext.ParameterError(c)
 		return
