@@ -1,13 +1,15 @@
 package order
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
-	"encoding/pem"
 	"fmt"
+	"io"
 	"net/http"
+	"nova-factory-server/app/datasource/objectFile"
 	"os"
+	"time"
 
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/service"
@@ -30,7 +32,7 @@ func NewOrderNotify(service service.IApiShopOrderService, configDao dao.IApiShop
 // PublicRoutes 注册微信支付回调路由到 publicGroup（不鉴权）。
 func (s *OrderNotify) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop")
-	group.POST("/order/notify", s.HandleWechatNotify)
+	group.Any("/order/notify", s.HandleWechatNotify)
 }
 
 var notifyConfigKeys = []string{
@@ -39,17 +41,24 @@ var notifyConfigKeys = []string{
 	"wechat_pay_api_v3_key",
 	"wechat_pay_serial_no",
 	"wechat_pay_platform_public_key_path",
+	"wechat_pay_platform_public_key_id",
+	"wechat_pay_private_key_path",
 }
 
 // HandleWechatNotify 微信支付异步回调。
 func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
-	// 解析回调
-	notifyReq, err := gopayWechat.V3ParseNotify(c.Request)
+	// 读取原始请求体
+	bodyBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "解析失败"})
+		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "读取请求体失败"})
 		return
 	}
+	c.Request.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 
+	if err := writeWechatNotifyRequestFile(c, bodyBytes); err != nil {
+		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "写入请求数据失败"})
+		return
+	}
 	// 读微信配置
 	cfgMap, err := s.loadNotifyConfig(c)
 	if err != nil {
@@ -60,21 +69,49 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	mchId := cfgMap["wechat_pay_mch_id"]
 	apiV3Key := cfgMap["wechat_pay_api_v3_key"]
 	serialNo := cfgMap["wechat_pay_serial_no"]
+	privateKeyPath := cfgMap["wechat_pay_private_key_path"]
 	platformPublicKeyPath := cfgMap["wechat_pay_platform_public_key_path"]
+	//platformPublicKeyID := cfgMap["wechat_pay_platform_public_key_id"]
+	platformPublicKeyID := "PUB_KEY_ID_0117458477192026052700212128000000"
+	//NewClientV3 初始化微信客户端 v3
+	// mchid：商户ID 或者服务商模式的 sp_mchid
+	// serialNo：商户证书的证书序列号
+	// apiV3Key：apiV3Key，商户平台获取
+	// privateKey：私钥 apiclient_key.pem 读取后的内容
+	file := objectFile.NewConfig()
+	privateKeyData, err := file.ReadPrivateFile(c, privateKeyPath)
+	if err != nil {
+		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "私钥读取失败"})
+		return
+	}
+	client, err := gopayWechat.NewClientV3(mchId, serialNo, apiV3Key, string(privateKeyData))
+	if err != nil {
+		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "初始化微信客户端失败"})
+		return
+	}
+	platformPublicKeyData, err := file.ReadPrivateFile(c, platformPublicKeyPath)
+	if err != nil {
+		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "微信支付公钥读取失败"})
+		return
+	}
+	if err := client.AutoVerifySignByPublicKey(platformPublicKeyData, platformPublicKeyID); err != nil {
+		_ = writeWechatNotifyErrorFile("auto_verify_sign_by_public_key", err)
+		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "验签初始化失败"})
+		return
+	}
 
-	// 平台公钥验签
-	platformKeyData, err := os.ReadFile(platformPublicKeyPath)
+	// 解析回调
+	notifyReq, err := gopayWechat.V3ParseNotify(c.Request)
 	if err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "公钥读取失败"})
+		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "解析失败"})
 		return
 	}
-	publicKey, err := parseRSAPublicKey(platformKeyData)
+	// 获取微信平台证书
+	certMap := client.WxPublicKeyMap()
+	// 验证异步通知的签名
+	err = notifyReq.VerifySignByPKMap(certMap)
 	if err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "公钥解析失败"})
-		return
-	}
-	certMap := map[string]*rsa.PublicKey{"PUB_KEY_ID_" + serialNo: publicKey}
-	if err := notifyReq.VerifySignByPKMap(certMap); err != nil {
+		_ = writeWechatNotifyErrorFile("verify_sign", err)
 		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "验签失败"})
 		return
 	}
@@ -126,6 +163,86 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "SUCCESS", Message: "成功"})
 }
 
+func writeWechatNotifyRequestFile(c *gin.Context, bodyBytes []byte) error {
+	record := struct {
+		Time          string              `json:"time"`
+		Method        string              `json:"method"`
+		Scheme        string              `json:"scheme"`
+		Host          string              `json:"host"`
+		Path          string              `json:"path"`
+		RawQuery      string              `json:"rawQuery"`
+		RequestURI    string              `json:"requestUri"`
+		Proto         string              `json:"proto"`
+		RemoteAddr    string              `json:"remoteAddr"`
+		ClientIP      string              `json:"clientIp"`
+		ContentLength int64               `json:"contentLength"`
+		Headers       map[string][]string `json:"headers"`
+		Query         map[string][]string `json:"query"`
+		Body          string              `json:"body"`
+		BodyBase64    string              `json:"bodyBase64"`
+	}{
+		Time:          time.Now().Format(time.RFC3339Nano),
+		Method:        c.Request.Method,
+		Scheme:        c.Request.URL.Scheme,
+		Host:          c.Request.Host,
+		Path:          c.Request.URL.Path,
+		RawQuery:      c.Request.URL.RawQuery,
+		RequestURI:    c.Request.RequestURI,
+		Proto:         c.Request.Proto,
+		RemoteAddr:    c.Request.RemoteAddr,
+		ClientIP:      c.ClientIP(),
+		ContentLength: c.Request.ContentLength,
+		Headers:       c.Request.Header,
+		Query:         c.Request.URL.Query(),
+		Body:          string(bodyBytes),
+		BodyBase64:    base64.StdEncoding.EncodeToString(bodyBytes),
+	}
+
+	payload, err := json.MarshalIndent(record, "", "  ")
+	if err != nil {
+		return err
+	}
+	payload = append(payload, '\n')
+
+	file, err := os.OpenFile("pay.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if _, err := file.Write(payload); err != nil {
+		return err
+	}
+	return nil
+}
+
+func writeWechatNotifyErrorFile(stage string, err error) error {
+	record := struct {
+		Time  string `json:"time"`
+		Stage string `json:"stage"`
+		Error string `json:"error"`
+	}{
+		Time:  time.Now().Format(time.RFC3339Nano),
+		Stage: stage,
+		Error: err.Error(),
+	}
+
+	payload, marshalErr := json.MarshalIndent(record, "", "  ")
+	if marshalErr != nil {
+		return marshalErr
+	}
+	payload = append(payload, '\n')
+
+	file, openErr := os.OpenFile("pay.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if openErr != nil {
+		return openErr
+	}
+	defer file.Close()
+
+	_, writeErr := file.Write(payload)
+	return writeErr
+}
+
 func (s *OrderNotify) loadNotifyConfig(c *gin.Context) (map[string]string, error) {
 	rows, err := s.configDao.GetByConfigKeys(c, notifyConfigKeys)
 	if err != nil {
@@ -136,17 +253,4 @@ func (s *OrderNotify) loadNotifyConfig(c *gin.Context) (map[string]string, error
 		cfgMap[row.ConfigKey] = row.ConfigValue
 	}
 	return cfgMap, nil
-}
-
-func parseRSAPublicKey(data []byte) (*rsa.PublicKey, error) {
-	block, _ := pem.Decode(data)
-	if block == nil {
-		return nil, fmt.Errorf("invalid public key pem")
-	}
-	if key, err := x509.ParsePKIXPublicKey(block.Bytes); err == nil {
-		if rsaKey, ok := key.(*rsa.PublicKey); ok {
-			return rsaKey, nil
-		}
-	}
-	return x509.ParsePKCS1PublicKey(block.Bytes)
 }

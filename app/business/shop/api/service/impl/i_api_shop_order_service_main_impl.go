@@ -566,6 +566,7 @@ func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo
 			"mch_id":         mchId,
 			"appid":          appid,
 			"payer_openid":   payerOpenid,
+			"pay_channel":    1,
 		}).Error
 }
 
