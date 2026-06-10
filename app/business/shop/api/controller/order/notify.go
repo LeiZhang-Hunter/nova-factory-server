@@ -71,8 +71,7 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	serialNo := cfgMap["wechat_pay_serial_no"]
 	privateKeyPath := cfgMap["wechat_pay_private_key_path"]
 	platformPublicKeyPath := cfgMap["wechat_pay_platform_public_key_path"]
-	//platformPublicKeyID := cfgMap["wechat_pay_platform_public_key_id"]
-	platformPublicKeyID := "PUB_KEY_ID_0117458477192026052700212128000000"
+	platformPublicKeyID := cfgMap["wechat_pay_platform_public_key_id"]
 	//NewClientV3 初始化微信客户端 v3
 	// mchid：商户ID 或者服务商模式的 sp_mchid
 	// serialNo：商户证书的证书序列号
