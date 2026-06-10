@@ -30,6 +30,7 @@ func (s *IApiShopSkuDaoImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Good
 	if err := getCurrentDB(c, s.db).WithContext(c).
 		Table(s.tableName).
 		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -65,6 +66,7 @@ func (s *IApiShopSkuDaoImpl) ListByGoodsIDs(c *gin.Context, goodsIDs []string) (
 	if err := getCurrentDB(c, s.db).WithContext(c).
 		Table(s.tableName).
 		Where("goods_id IN ?", goodsIDs).
+		Where("state = ?", commonStatus.NORMAL).
 		Order("id ASC").
 		Find(&rows).Error; err != nil {
 		return nil, err
@@ -81,6 +83,7 @@ func (s *IApiShopSkuDaoImpl) DeductStock(c *gin.Context, id int64, quantity int6
 		Table(s.tableName).
 		Where("id = ?", id).
 		Where("quantity >= ?", quantity).
+		Where("state = ?", commonStatus.NORMAL).
 		Updates(map[string]interface{}{
 			"quantity":    gorm.Expr("quantity - ?", quantity),
 			"update_time": gorm.Expr("NOW()"),
