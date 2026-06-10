@@ -64,15 +64,13 @@ func dedupeKeywords(tokens []string) []string {
 }
 
 // buildQueryText 组合生成给 embedding 与 hybrid 检索使用的查询文本。
-func buildQueryText(original string, tokens, expanded, categoryTerms, specTerms, codeTerms []string, duplicateWeight int) string {
-	parts := make([]string, 0, 1+len(tokens)+len(expanded)*duplicateWeight+len(categoryTerms)+len(specTerms)+len(codeTerms))
+func buildQueryText(original string, tokens, expanded, categoryTerms []string, duplicateWeight int) string {
+	parts := make([]string, 0, 1+len(tokens)+len(expanded)*duplicateWeight+len(categoryTerms))
 	if original != "" {
 		parts = append(parts, original)
 	}
 	parts = append(parts, tokens...)
 	parts = append(parts, categoryTerms...)
-	parts = append(parts, specTerms...)
-	parts = append(parts, codeTerms...)
 	for _, token := range expanded {
 		for i := 0; i < duplicateWeight; i++ {
 			parts = append(parts, token)

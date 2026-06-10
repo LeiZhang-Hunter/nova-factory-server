@@ -5,6 +5,7 @@ go 1.26.1
 require (
 	charm.land/fantasy v0.16.0
 	github.com/apache/iotdb-client-go v1.3.4
+	github.com/apache/skywalking-go v0.6.0
 	github.com/aws/aws-sdk-go-v2 v1.41.4
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.12
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.96.4
@@ -91,6 +92,7 @@ require (
 	github.com/cilium/ebpf v0.11.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cloudwego/eino-ext/libs/acl/openai v0.1.15 // indirect
+	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
 	github.com/cockroachdb/errors v1.9.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20211118104740-dabe8e521a4f // indirect
 	github.com/cockroachdb/redact v1.1.3 // indirect
@@ -102,6 +104,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/eino-contrib/jsonschema v1.0.3 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
+	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/evanphx/json-patch v0.5.2 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -216,6 +219,7 @@ require (
 	gorm.io/driver/sqlite v1.6.0 // indirect
 	k8s.io/apimachinery v0.32.3 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
+	skywalking.apache.org/repo/goapi v0.0.0-20230314034821-0c5a44bb767a // indirect
 )
 
 require (
@@ -272,7 +276,7 @@ require (
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
-	github.com/spf13/afero v1.11.0 // indirect
+	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect

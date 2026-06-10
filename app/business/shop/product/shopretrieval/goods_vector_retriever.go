@@ -109,6 +109,7 @@ func toGoodsVectorDocument(item *shopmodels.GoodsVectorSearchItem) *schema.Docum
 			"goodsCode": item.GoodsCode,
 			"skuId":     item.SkuID,
 			"skuName":   item.SkuName,
+			"quantity":  item.Quantity,
 		},
 	}
 }
