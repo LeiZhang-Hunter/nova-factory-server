@@ -136,6 +136,9 @@ func (d *ProductVectorDaoImpl) BatchSearch(c *gin.Context, req *mastermodels.Pro
 	if !has {
 		return buildEmptyProductVectorBatchSearchData(req.Queries), nil
 	}
+	if err = milvus.EnsureCollectionLoaded(requestCtx, client, cfg.Collection); err != nil {
+		return nil, err
+	}
 
 	searchLimit := resolveProductVectorSearchCandidateLimit(req.Limit)
 	plans, err := buildProductVectorSearchPlans(req, vectors)

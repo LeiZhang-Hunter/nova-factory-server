@@ -112,3 +112,85 @@ func TestRerankCandidatesWithSpec(t *testing.T) {
 		t.Fatalf("expected spec matched item to rank first, got %#v", ranked)
 	}
 }
+
+func TestRerankInventoryPrefersInStockWhenRelevanceIsClose(t *testing.T) {
+	query := &ProcessedQuery{Normalized: "矿泉水", Keywords: []string{"矿泉水"}, Tokens: []string{"矿泉水"}}
+	ranked := RerankCandidates(query, []RankCandidate{
+		{
+			ID:             1,
+			Title:          "矿泉水 550ml",
+			BaseScore:      0.8,
+			Quantity:       0,
+			InventoryKnown: true,
+		},
+		{
+			ID:             2,
+			Title:          "矿泉水 550ml",
+			BaseScore:      0.8,
+			Quantity:       10,
+			InventoryKnown: true,
+		},
+	}, 2)
+	if len(ranked) == 0 {
+		t.Fatalf("expected reranked results")
+	}
+	if ranked[0].Index != 1 {
+		t.Fatalf("expected in-stock candidate to rank first when relevance is close, got %#v", ranked)
+	}
+}
+
+func TestRerankInventoryKeepsStrongRelevanceAheadOfWeakInStock(t *testing.T) {
+	query := &ProcessedQuery{Normalized: "矿泉水 550ml", Keywords: []string{"矿泉水", "550ml"}, Tokens: []string{"矿泉水", "550ml"}}
+	ranked := RerankCandidates(query, []RankCandidate{
+		{
+			ID:             1,
+			Title:          "矿泉水 550ml",
+			Standard:       "550ml",
+			BaseScore:      0.8,
+			Quantity:       0,
+			InventoryKnown: true,
+		},
+		{
+			ID:             2,
+			Title:          "抽纸",
+			Content:        "日用品",
+			BaseScore:      0.8,
+			Quantity:       100,
+			InventoryKnown: true,
+		},
+	}, 2)
+	if len(ranked) == 0 {
+		t.Fatalf("expected reranked results")
+	}
+	if ranked[0].Index != 0 {
+		t.Fatalf("expected stronger relevance to stay first, got %#v", ranked)
+	}
+}
+
+func TestRerankInventoryKeepsExactCodeAheadOfInStockMismatch(t *testing.T) {
+	query := &ProcessedQuery{Normalized: "sp-1001", Keywords: []string{"sp-1001"}, Tokens: []string{"sp-1001"}, IsCodeLike: true}
+	ranked := RerankCandidates(query, []RankCandidate{
+		{
+			ID:             1,
+			Title:          "矿泉水 550ml",
+			Code:           "SP-1001",
+			BaseScore:      0.8,
+			Quantity:       0,
+			InventoryKnown: true,
+		},
+		{
+			ID:             2,
+			Title:          "矿泉水 330ml",
+			Code:           "AB-2002",
+			BaseScore:      0.8,
+			Quantity:       20,
+			InventoryKnown: true,
+		},
+	}, 2)
+	if len(ranked) == 0 {
+		t.Fatalf("expected reranked results")
+	}
+	if ranked[0].Index != 0 {
+		t.Fatalf("expected exact code match to stay first, got %#v", ranked)
+	}
+}

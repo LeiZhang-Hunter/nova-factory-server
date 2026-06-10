@@ -115,11 +115,13 @@ type goodsVectorRows struct {
 // 3. metadata 过滤表达式
 // 4. 原始顺序下标，便于分组搜索后再回填结果
 type goodsSearchRuntimeQuery struct {
-	index      int
-	query      string
-	vector     entity.Vector
-	text       entity.Vector
-	filterExpr string
+	index int
+	query string
+	// metaExtractorResult 提取元数据
+	metaExtractorResult normalization.Result
+	vector              entity.Vector
+	text                entity.Vector
+	filterExpr          string
 }
 
 // supportsGoodsVectorHybridSearch 检查当前 collection 是否具备稀疏向量字段。
@@ -247,54 +249,213 @@ func resolveGoodsVectorSearchCandidateLimit(limit int) int {
 }
 
 // rerankGoodsVectorSearchRows 将 Milvus 初召结果映射为通用候选，再结合 query 做业务重排。
-func rerankGoodsVectorSearchRows(query string, rows []*shopmodels.GoodsVectorSearchItem, limit int) []*shopmodels.GoodsVectorSearchItem {
+//
+// ============================================================================
+// 调用链路:
+// ============================================================================
+// HTTP POST /shop/goods/vector/search/batch
+//
+//	-> Goods.BatchSearch (controller/shopcontroller/goods.go)
+//	  -> ShopGoodsServiceImpl.BatchSearchVector (service)
+//	    -> batchSearchVector (private, 生成 embedding 向量)
+//	      -> GoodsVectorRetriever.Retrieve (retriever, 适配通用检索接口)
+//	        -> RetrieveSingleQueryWithEmbedding (通用检索工具函数)
+//	          -> dao.BatchSearch (dao, 实际 Milvus 检索)
+//	            -> [1] metadata 提取 (规格/分类词条 -> filter 表达式)
+//	            -> [2] 按 filterExpr 分组，批量 Hybrid/Dense 搜索
+//	            -> [3] parseGoodsVectorSearchResultSet (Milvus 列式 -> 业务结构)
+//	            -> [4] rerankGoodsVectorSearchRows (本函数, 应用层重排) <----
+//	        -> toGoodsVectorDocument (业务结构 -> 通用 Document)
+//	      -> goodsVectorSearchItemFromDocument (通用 Document -> 业务结构)
+//	    -> deduplicateGoodsVectorBatchSearchRows (去重)
+//	  -> json 响应
+//
+// ============================================================================
+// 函数内部流程:
+// ============================================================================
+// Step 1: ProcessQuery(query) - 将原始查询文本做分词、扩展、提取
+//
+//	分类词条(CategoryTerms)、规格词条(SpecTerms)、编码词条(CodeTerms)
+//	输出 ProcessedQuery 结构化对象
+//
+// Step 2: 将 Milvus 返回的 []*GoodsVectorSearchItem 映射为 []RankCandidate
+//   - ID       = GoodsDBID     (用于回填原始行)
+//   - Title    = GoodsName     (商品名, 最高权重字段)
+//   - Code     = GoodsCode     (商品编码, 编码查询核心字段)
+//   - Category = CategoryName  (分类名)
+//   - Standard = SkuName       (规格名, 规格查询核心字段)
+//   - Remark   = SkuDescription(SKU 描述)
+//   - Content  = Content + Description (语义正文)
+//   - BaseScore = row.Score    (Milvus 原始召回分)
+//
+// Step 3: RerankCandidates(processedQuery, candidates, limit)
+//   - normalizeBaseScores: min-max 归一化原始召回分到 0~1
+//   - combineCandidateScore: 四类信号加权融合
+//   - baseScore * 0.42 + fieldScore * 0.38 + tagScore * 0.12 + rankBonus * 0.08
+//   - 编码类查询: 特殊提升 codeScore 权重至 0.42
+//   - 短查询: 额外提升 titleScore
+//   - 带规格查询: 提升 specScore, 未命中规格则惩罚
+//   - 按综合分稳定排序
+//   - calcDynamicThreshold: 动态阈值过滤弱相关结果
+//   - 默认阈值 = top1 * 0.58
+//   - 编码类 = top1 * 0.72 (更严格)
+//   - 短查询 = top1 * 0.52 (更宽松)
+//   - top1/top2 分差 < 0.05 时放宽 0.06, 分差 > 0.20 时收紧 0.05
+//   - 至少保留 minKeep(limit,3) 个结果
+//
+// Step 4: 将 RerankCandidates 返回的 Index+Score 回填到原始 rows
+//   - 通过 RankedCandidate.Index 定位原始行
+//   - 用精排后的 Score 覆盖 Milvus 原始分
+//
+// Step 5: 最终稳定排序
+//   - 主键: Score 降序
+//   - 次键: GoodsDBID 升序 (同分保证一致性)
+//   - 三键: SkuID 升序
+//
+// 返回值: 重排后的 []*GoodsVectorSearchItem, len <= limit
+//
+// fieldScore 权重重新分配:
+//
+//	title   0.28→0.34  (商品名权重提升)
+//	code    0.22→0.28  (编码权重提升)
+//	standard  0.14→0.16
+//	spec    0.16→删除   (移到 metadata)
+//	category  0.09→0.10
+//	unit    0.05→0.06
+//	remark  0.02→0.02
+//	content  0.04→0.04
+func rerankGoodsVectorSearchRows(query goodsSearchRuntimeQuery, rows []*shopmodels.GoodsVectorSearchItem, limit int) []*shopmodels.GoodsVectorSearchItem {
+	// 空输入直接返回空切片
 	if len(rows) == 0 {
 		return make([]*shopmodels.GoodsVectorSearchItem, 0)
 	}
 
-	processedQuery := searchutil.ProcessQuery(query)
+	// Step 1: 对原始 query 做分词、扩展、特征提取
+	// ProcessQuery 内部会调用 tokenize(分词) -> expandTokens(同义词扩展)
+	// -> extractCategoryTerms(分类词) -> extractSpecTerms(规格词) -> extractCodeTerms(编码词)
+	processedQuery := searchutil.ProcessQuery(query.query)
+
+	// Step 2: 映射为精排候选列表 RankCandidate
 	candidates := make([]searchutil.RankCandidate, 0, len(rows))
 	for _, row := range rows {
 		if row == nil {
 			continue
 		}
 		candidates = append(candidates, searchutil.RankCandidate{
-			ID:        row.GoodsDBID,
-			Title:     row.GoodsName,
-			Code:      row.GoodsCode,
-			Category:  row.CategoryName,
-			Unit:      "",
-			Standard:  row.SkuName,
-			Remark:    row.SkuDescription,
-			Content:   strings.TrimSpace(row.Content + " " + row.Description),
-			BaseScore: row.Score,
+			ID:             row.GoodsDBID,                                          // 数据库主键, 用于回填
+			Title:          row.GoodsName,                                          // 商品名称, 权重最高的语义字段
+			Code:           row.GoodsCode,                                          // 商品编码/条码, 编码类查询核心判别字段
+			Category:       row.CategoryName,                                       // 商品分类
+			Quantity:       row.Quantity,                                           // 库存
+			InventoryKnown: true,                                                   // 商品向量结果包含库存快照, 可参与精排
+			Unit:           "",                                                     // 商品向量暂无单位字段, 留空
+			Standard:       row.SkuName,                                            // SKU 规格名, 替代 Standard 作为规格信号
+			Remark:         row.SkuDescription,                                     // SKU 描述, 辅助语义补充
+			Content:        strings.TrimSpace(row.Content + " " + row.Description), // 拼接 content 和 description 作为语义正文
+			BaseScore:      row.Score,                                              // Milvus 原始召回分数(COSINE 距离)
 		})
 	}
 	if len(candidates) == 0 {
 		return make([]*shopmodels.GoodsVectorSearchItem, 0)
 	}
 
+	// Step 3: 调用通用精排引擎
+	// 返回 []RankedCandidate, 每个包含 Index(原始位置) 和 Score(综合分)
+	// limit 先做安全归一化: 0 -> 10, >50 -> 50
 	ranked := searchutil.RerankCandidates(processedQuery, candidates, normalizeGoodsVectorSearchLimit(limit))
+
+	// Step 3.5: metadata 匹配奖励精排
+	// 利用 normalization pipeline 提取的结构化 metadata(如 category),
+	// 与候选结果字段做精确匹配, 命中则给予加分。
+	// 这替代了原来 ProcessQuery 中基于正则的 SpecTerms/CodeTerms 精排。
+	if len(query.metaExtractorResult.Metadata) > 0 {
+		applyMetadataBonus(query.metaExtractorResult.Metadata, rows, ranked)
+		// metadata 加分后按新分数重新稳定排序
+		sort.SliceStable(ranked, func(i, j int) bool {
+			if ranked[i].Score == ranked[j].Score {
+				return ranked[i].Index < ranked[j].Index
+			}
+			return ranked[i].Score > ranked[j].Score
+		})
+	}
+
+	// Step 4: 回填精排分数到原始结果行
 	result := make([]*shopmodels.GoodsVectorSearchItem, 0, len(ranked))
 	for _, item := range ranked {
+		// 安全检查: Index 越界或对应行已被过滤
 		if item.Index < 0 || item.Index >= len(rows) || rows[item.Index] == nil {
 			continue
 		}
 		row := rows[item.Index]
-		row.Score = item.Score
+		row.Score = item.Score // 用精排综合分覆盖原始 Milvus 召回分
 		result = append(result, row)
 	}
 
+	// Step 5: 最终稳定排序, 保证同接口多次调用结果一致
 	sort.SliceStable(result, func(i, j int) bool {
 		if result[i].Score == result[j].Score {
+			// Score 相同时: 先按 GoodsDBID 排序
 			if result[i].GoodsDBID == result[j].GoodsDBID {
+				// 同一个商品的不同 SKU: 按 SkuID 排序
 				return result[i].SkuID < result[j].SkuID
 			}
 			return result[i].GoodsDBID < result[j].GoodsDBID
 		}
+		// 主排序键: Score 降序, 得分高的在前
 		return result[i].Score > result[j].Score
 	})
 	return result
+}
+
+// applyMetadataBonus 用 normalization pipeline 提取的 metadata 对候选精排分做奖励加成。
+//
+// metadata 匹配规则:
+// ┌──────────────┬─────────────────────┬──────────┐
+// │ metadata key │ 候选匹配字段         │ 奖励分    │
+// ├──────────────┼─────────────────────┼──────────┤
+// │ category     │ CategoryName 精确匹配 │ +0.18    │
+// │ category     │ CategoryName 包含匹配 │ +0.10    │
+// └──────────────┴─────────────────────┴──────────┘
+//
+// 单个候选的 metadata 奖励上限为 0.3, 避免 metadata 匹配过度主导最终排序。
+// Score 上限为 1.0, 防止浮点数溢出。
+func applyMetadataBonus(metadata map[string][]string, rows []*shopmodels.GoodsVectorSearchItem, ranked []searchutil.RankedCandidate) {
+	const maxMetadataBonus = 0.3
+
+	for idx := range ranked {
+		item := &ranked[idx]
+		if item.Index < 0 || item.Index >= len(rows) || rows[item.Index] == nil {
+			continue
+		}
+		row := rows[item.Index]
+
+		bonus := float32(0)
+		for _, cv := range metadata {
+			for _, valueStr := range cv {
+				cvLower := strings.ToLower(strings.TrimSpace(valueStr))
+				catLower := strings.ToLower(strings.TrimSpace(row.CategoryName))
+				if cvLower == "" || catLower == "" {
+					continue
+				}
+				if catLower == cvLower {
+					bonus += 0.18
+					break // 精确匹配只需命中一次
+				}
+				if strings.Contains(catLower, cvLower) {
+					bonus += 0.10
+					break
+				}
+			}
+		}
+
+		if bonus > maxMetadataBonus {
+			bonus = maxMetadataBonus
+		}
+		item.Score += bonus
+		if item.Score > 1.0 {
+			item.Score = 1.0
+		}
+	}
 }
 
 // loadGoodsVectorConfig 读取商品向量相关配置，并回退到默认 collection。

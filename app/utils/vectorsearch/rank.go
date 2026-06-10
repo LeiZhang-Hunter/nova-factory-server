@@ -18,16 +18,19 @@ import (
 // - Title/Code/Category/Unit/Standard: 结构化高价值字段
 // - Remark/Content: 补充语义字段
 // - BaseScore: 第一阶段召回返回的原始分数
+// - Quantity/InventoryKnown: 可用库存信号，已知有库存时给予轻微排序奖励
 type RankCandidate struct {
-	ID        int64
-	Title     string
-	Code      string
-	Category  string
-	Unit      string
-	Standard  string
-	Remark    string
-	Content   string
-	BaseScore float32
+	ID             int64
+	Title          string
+	Code           string
+	Category       string
+	Unit           string
+	Standard       string
+	Remark         string
+	Content        string
+	BaseScore      float32
+	Quantity       int64
+	InventoryKnown bool
 }
 
 // RankedCandidate 表示重排后的结果索引与最终得分。
@@ -50,7 +53,7 @@ type RankedCandidate struct {
 // 3. 按综合分做稳定排序
 // 4. 根据 query 类型和 top1/top2 分差动态计算阈值，过滤弱相关结果
 //
-// 这个函数的目标不是替代底层向量库排序，而是在“已召回候选”的基础上做更贴近业务语义的精排。
+// 这个函数的目标不是替代底层向量库排序，而是在"已召回候选"的基础上做更贴近业务语义的精排。
 func RerankCandidates(query *ProcessedQuery, candidates []RankCandidate, limit int) []RankedCandidate {
 	if len(candidates) == 0 {
 		return make([]RankedCandidate, 0)
@@ -87,7 +90,7 @@ func RerankCandidates(query *ProcessedQuery, candidates []RankCandidate, limit i
 		minKeep = minInt(limit, 3)
 	}
 
-	// 至少保留前几个候选，避免阈值过严导致“明明有结果却被过滤空”的体验问题。
+	// 至少保留前几个候选，避免阈值过严导致"明明有结果却被过滤空"的体验问题。
 	filtered := make([]RankedCandidate, 0, limit)
 	for idx, item := range ranked {
 		if len(filtered) >= limit {
@@ -105,23 +108,47 @@ func RerankCandidates(query *ProcessedQuery, candidates []RankCandidate, limit i
 
 // combineCandidateScore 计算单个候选的综合得分。
 //
+// ============================================================================
+// 评分公式 (默认):
+// ============================================================================
+//
+//	finalScore = baseScore * 0.42          // 保留 Milvus 原始召回信号
+//	           + fieldScore * 0.36         // 结构化字段匹配 (核心可解释性)
+//	           + tagScore * 0.09           // 最强标签信号
+//	           + rankBonus * 0.06          // 初排位置奖励
+//	           + inventoryScore * 0.07     // 库存信号，相关性接近时有库存优先
+//
+// 其中 fieldScore = titleScore      * 0.34   (商品名, 最高权重)
+//   - codeScore       * 0.28   (编码/条码, 次高权重)
+//   - standardScore   * 0.16   (规格名)
+//   - categoryScore   * 0.10   (分类名)
+//   - unitScore       * 0.06   (单位)
+//   - remarkScore     * 0.02   (备注, 最低权重)
+//   - contentScore    * 0.04   (正文, 避免长文本噪声)
+//
+// rankBonus = 1 / (rank + 3), rank 为候选在初排结果中的原始位置
+//
+// 注意: SpecTerms/CodeTerms 的精排已移除, 相关信号由上层调用方通过 metadata 匹配注入。
+//
+// ============================================================================
+// 特殊场景调整:
+// ============================================================================
+// 编码类查询 (IsCodeLike = true):
+//
+//	finalScore = baseScore*0.23 + fieldScore*0.23 + codeScore*0.42 + tagScore*0.04 + rankBonus*0.04 + inventoryScore*0.04
+//	- codeScore 权重翻倍至 0.42
+//	- 精确匹配(codeScore >= 0.95) 追加 +0.18 奖励
+//	- 正文 contentScore 施加 -0.05 惩罚
+//
+// 短查询 (IsShortQuery = true):
+//   - +titleScore * 0.08 (标题判别力更强)
+//
 // 评分逻辑由四类信号组成：
-// 1. baseScore: 底层召回的原始相似度，代表“整体相关性”
-// 2. fieldScore: 各结构化字段的匹配得分，代表“业务可解释性”
-// 3. tagScore: 分类/单位/规格中的最强标签信号，代表“标签命中”
+// 1. baseScore: 底层召回的原始相似度，代表"整体相关性"
+// 2. fieldScore: 各结构化字段的匹配得分，代表"业务可解释性"
+// 3. tagScore: 分类/单位/规格中的最强标签信号，代表"标签命中"
 // 4. rankBonus: 对靠前候选给予轻微位置奖励，减少初排信息完全丢失
-//
-// 默认场景下：
-// - 保留 baseScore 的主导作用，但不过度依赖
-// - 强化标题、编码、规格等字段的价值
-//
-// 编码类 query 场景下：
-// - 明显提高 codeScore 权重
-// - 降低正文 content 的干扰
-// - 对精确码命中追加额外奖励
-//
-// 短 query 场景下：
-// - 额外增强标题命中，因为短 query 往往更像“关键词检索”
+// 5. inventoryScore: 库存可用性信号，代表“可展示且可购买”的业务优先级
 func combineCandidateScore(query *ProcessedQuery, candidate RankCandidate, baseScore float64, rank int) float64 {
 	titleScore := scoreTextField(query, candidate.Title)
 	codeScore := scoreCodeField(query, candidate.Code)
@@ -130,58 +157,78 @@ func combineCandidateScore(query *ProcessedQuery, candidate RankCandidate, baseS
 	standardScore := scoreTextField(query, candidate.Standard)
 	remarkScore := scoreTextField(query, candidate.Remark)
 	contentScore := scoreTextField(query, candidate.Content)
-	specScore := scoreSpecTerms(query, candidate.Standard, candidate.Title, candidate.Content)
+	inventoryScore := scoreInventory(candidate)
+	// specScore/SpecTerms/CodeTerms 精排已移除, 上层调用方通过 metadata 匹配注入同类信号。
 
-	// fieldScore 体现“字段加权”思想：
+	// fieldScore 体现"字段加权"思想：
 	// - Title 权重最高，因为商品名通常最能代表实际意图
 	// - Code 次高，因为编码/条码类查询对精确命中极为敏感
 	// - Standard、Category 其次，适合规格或分类型搜索
 	// - Remark、Content 权重较低，避免长文本噪声覆盖核心字段
-	fieldScore := titleScore*0.28 + codeScore*0.22 + standardScore*0.14 + specScore*0.16 + categoryScore*0.09 + unitScore*0.05 + remarkScore*0.02 + contentScore*0.04
-	// tagScore 只取几个标签字段中的最大值，代表“是否命中过最关键的标签维度”。
-	tagScore := maxFloat(categoryScore, unitScore, standardScore, specScore)
+	fieldScore := titleScore*0.34 + codeScore*0.28 + standardScore*0.16 + categoryScore*0.10 + unitScore*0.06 + remarkScore*0.02 + contentScore*0.04
+	// tagScore 只取几个标签字段中的最大值，代表"是否命中过最关键的标签维度"。
+	tagScore := maxFloat(categoryScore, unitScore, standardScore)
 	// rankBonus 对初排更靠前的候选给一个轻微奖励，避免精排完全无视召回顺序。
 	rankBonus := 1 / float64(rank+3)
 
 	// 默认配比下：
 	// - 0.42 给原始召回分，保留向量/BM25 初排价值
-	// - 0.38 给字段匹配分，强调结构化字段解释性
-	// - 0.12 给标签信号，补充业务属性相关性
-	// - 0.08 给位置奖励，让前序结果更稳定
-	score := baseScore*0.42 + fieldScore*0.38 + tagScore*0.12 + rankBonus*0.08
+	// - 0.36 给字段匹配分，强调结构化字段解释性
+	// - 0.09 给标签信号，补充业务属性相关性
+	// - 0.06 给位置奖励，让前序结果更稳定
+	// - 0.07 给库存信号，只在相关性接近时优先展示有库存商品
+	score := baseScore*0.42 + fieldScore*0.36 + tagScore*0.09 + rankBonus*0.06 + inventoryScore*0.07
 	if query.IsCodeLike {
 		// 编码类检索通常目标非常明确，例如条码、SKU、货号。
-		// 这类场景下若仍过度依赖语义和正文，容易把“语义相关但编码不对”的结果顶上来，
+		// 这类场景下若仍过度依赖语义和正文，容易把"语义相关但编码不对"的结果顶上来，
 		// 因此这里显著抬高 codeScore 权重，并压低正文影响。
-		score = baseScore*0.24 + fieldScore*0.24 + codeScore*0.42 + tagScore*0.04 + rankBonus*0.06
+		score = baseScore*0.23 + fieldScore*0.23 + codeScore*0.42 + tagScore*0.04 + rankBonus*0.04 + inventoryScore*0.04
 		if codeScore >= 0.95 {
-			// 对精确匹配或前缀高匹配再加一档奖励，尽量把“真正的目标商品”顶到最前面。
+			// 对精确匹配或前缀高匹配再加一档奖励，尽量把"真正的目标商品"顶到最前面。
 			score += 0.18
 		}
 		// 编码检索时正文很可能只是噪声来源，因此给予轻微惩罚。
 		score -= contentScore * 0.05
 	}
-	if len(query.SpecTerms) > 0 {
-		// 规格词命中时额外拉开与“同名不同规格”商品的差距。
-		score += specScore * 0.12
-		if specScore == 0 {
-			// 当 query 明确带规格而候选完全没有命中规格时，给予一档惩罚，
-			// 避免高 baseScore 的“同名不同规格”商品排到前面。
-			score -= 0.18
-		}
-	}
 	if query.IsShortQuery {
 		// 短 query 往往缺少上下文，商品名标题的判别力更强，因此额外补一点标题权重。
 		score += titleScore * 0.08
+		// 短 query 歧义更高，有库存商品通常更符合前台展示预期。
+		score += inventoryScore * 0.02
 	}
 	// 最终把得分限制在合理范围，避免不同规则叠加后出现异常值。
 	return clampFloat(score, 0, 1.5)
 }
 
+func scoreInventory(candidate RankCandidate) float64 {
+	if !candidate.InventoryKnown {
+		return 0.5
+	}
+	if candidate.Quantity > 0 {
+		return 1
+	}
+	return 0
+}
+
 // calcDynamicThreshold 根据当前排序结果动态估算保留阈值。
 //
+// ============================================================================
+// 阈值计算公式:
+// ============================================================================
+//
+//	默认:     threshold = top1 * 0.58
+//	编码类:   threshold = top1 * 0.72  (更严格, 减少误召回)
+//	短查询:   threshold = top1 * 0.52  (更宽松, 短查询歧义高)
+//
+// top1/top2 分差修正:
+//
+//	gap < 0.05  (竞争激烈): threshold -= 0.06  (放宽, 头部都接近)
+//	gap > 0.20  (top1 明显): threshold += 0.05  (收紧, 头部很明确)
+//
+// 最终阈值区间: clamp(threshold, 0.18, 0.92)
+//
 // 设计目标：
-// - 阈值太低：会放进很多“勉强相关”的长尾结果
+// - 阈值太低：会放进很多"勉强相关"的长尾结果
 // - 阈值太高：会把本来可用的次优结果过度过滤
 //
 // 因此这里不使用固定阈值，而是根据：
@@ -263,7 +310,7 @@ func normalizeBaseScores(candidates []RankCandidate) []float64 {
 
 // scoreTextField 计算普通文本字段对 query 的匹配得分。
 //
-// 评分策略采用“精确命中 > 完整包含 > 关键词覆盖率 > token 覆盖率”的思路：
+// 评分策略采用"精确命中 > 完整包含 > 关键词覆盖率 > token 覆盖率"的思路：
 // - 精确等值：直接返回 1
 // - 包含完整 query：给高分 0.92
 // - 否则退化为按关键词和 token 的覆盖率估分
@@ -296,7 +343,7 @@ func scoreTextField(query *ProcessedQuery, field string) float64 {
 		}
 	}
 	if len(query.Keywords) > 0 {
-		// Keywords 覆盖率更偏向“增强后的检索意图”。
+		// Keywords 覆盖率更偏向"增强后的检索意图"。
 		coverage := float64(matched) / float64(len(query.Keywords))
 		if coverage > score {
 			score = coverage
@@ -312,7 +359,7 @@ func scoreTextField(query *ProcessedQuery, field string) float64 {
 				tokenMatched++
 			}
 		}
-		// Tokens 覆盖率更偏向“原始 query 分词命中”。
+		// Tokens 覆盖率更偏向"原始 query 分词命中"。
 		coverage := float64(tokenMatched) / float64(len(query.Tokens))
 		score = maxFloat(score, coverage)
 	}
@@ -327,7 +374,7 @@ func scoreTextField(query *ProcessedQuery, field string) float64 {
 // - 子串包含：0.88
 // - 其他：0
 //
-// 这是因为编码类字段的核心诉求是“精准识别”，不是“语义相近”。
+// 这是因为编码类字段的核心诉求是"精准识别"，不是"语义相近"。
 func scoreCodeField(query *ProcessedQuery, field string) float64 {
 	if query == nil {
 		return 0

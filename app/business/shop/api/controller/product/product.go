@@ -25,6 +25,7 @@ func (p *Product) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop/product")
 	group.GET("/info/:id", p.Info)
 	group.GET("/list", p.List)
+	//group.POST("/search", p.Search)
 }
 
 func (p *Product) PrivateRoutes(router *gin.RouterGroup) {
