@@ -155,7 +155,7 @@ func (s *IApiShopGoodsServiceImpl) applyDiscountPriceForList(c *gin.Context, goo
 
 func (s *IApiShopGoodsServiceImpl) loadSearchGoodsMap(c *gin.Context, rows []*shopmodels.GoodsVectorBatchSearchItem) (map[int64]*models.Goods, error) {
 	ids := make([]int64, 0)
-	names := make([]string, 0)
+	//names := make([]string, 0)
 	seen := make(map[int64]struct{})
 	for _, row := range rows {
 		if row == nil {
@@ -170,7 +170,7 @@ func (s *IApiShopGoodsServiceImpl) loadSearchGoodsMap(c *gin.Context, rows []*sh
 			}
 			seen[item.SkuID] = struct{}{}
 			ids = append(ids, item.SkuID)
-			names = append(names, item.GoodsName)
+			//names = append(names, item.GoodsName)
 		}
 	}
 	if len(ids) == 0 {
@@ -183,12 +183,12 @@ func (s *IApiShopGoodsServiceImpl) loadSearchGoodsMap(c *gin.Context, rows []*sh
 	}
 	goodsRows := make([]*models.Goods, 0)
 
-	for k, v := range skuRows {
+	for _, v := range skuRows {
 		var goods models.Goods
 		goods.ID = int64(v.ID)
 		goods.GoodsID = v.GoodsID
-		goods.GoodsName = names[k]
-		//goods.GoodsName = v.SkuName
+		//goods.GoodsName = names[k]
+		goods.GoodsName = v.SkuName
 		goods.GoodsCode = v.GoodsID
 		goods.OuterID = v.OuterID
 		goods.Description = v.Description
@@ -197,6 +197,8 @@ func (s *IApiShopGoodsServiceImpl) loadSearchGoodsMap(c *gin.Context, rows []*sh
 		goods.Unit = v.Unit
 		goods.IsOnSale = 1
 		goods.Quantity = v.Quantity
+		goods.ImageURL = v.ImageURL
+		goods.RetailPrice = v.RetailPrice
 		goodsRows = append(goodsRows, &goods)
 	}
 	s.applyDiscountPriceForList(c, goodsRows)
