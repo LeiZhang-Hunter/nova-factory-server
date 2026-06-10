@@ -121,6 +121,29 @@ func (s *IApiShopGoodsDaoImpl) List(c *gin.Context, query *models.GoodsQuery) (*
 	}, nil
 }
 
+// RandomSale 随机查询在售商品
+func (s *IApiShopGoodsDaoImpl) RandomSale(c *gin.Context, limit int64) (*models.GoodsListData, error) {
+	rows := make([]*models.Goods, 0)
+	if err := s.db.WithContext(c).Table(s.tableName).
+		Where("is_on_sale = 1").
+		Order("RAND()").
+		Limit(int(limit)).
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	for _, row := range rows {
+		if row != nil {
+			row.ImageURL = fileUtils.BuildAbsoluteURL(c, row.ImageURL)
+		}
+	}
+
+	return &models.GoodsListData{
+		Rows:  rows,
+		Total: int64(len(rows)),
+	}, nil
+}
+
 // ListByUserPurchased 查询用户已购买的商品（用于复购）
 func (s *IApiShopGoodsDaoImpl) ListByUserPurchased(c *gin.Context, userID int64, query *models.GoodsQuery) (*models.GoodsListData, error) {
 	// 子查询：获取用户已完成订单的商品ID列表

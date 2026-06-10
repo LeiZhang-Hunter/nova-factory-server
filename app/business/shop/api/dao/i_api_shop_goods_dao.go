@@ -12,5 +12,6 @@ type IApiShopGoodsDao interface {
 	ListByIDs(c *gin.Context, ids []int64) ([]*models.Goods, error)
 	GetByGoodsID(c *gin.Context, goodsID string) (*models.Goods, error)
 	List(c *gin.Context, query *models.GoodsQuery) (*models.GoodsListData, error)
+	RandomSale(c *gin.Context, limit int64) (*models.GoodsListData, error)
 	ListByUserPurchased(c *gin.Context, userID int64, query *models.GoodsQuery) (*models.GoodsListData, error)
 }

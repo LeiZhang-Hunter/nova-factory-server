@@ -140,6 +140,13 @@ CREATE TABLE IF NOT EXISTS `erp_order` (
     `details_json` LONGTEXT COMMENT '订单商品明细JSON',
     `accounts_json` LONGTEXT COMMENT '订单账户信息JSON',
 
+    `transaction_id` VARCHAR(64) DEFAULT NULL COMMENT '微信支付交易单号',
+    `notify_raw` TEXT COMMENT '微信支付回调原文',
+    `mch_id` VARCHAR(32) DEFAULT NULL COMMENT '微信商户号',
+    `appid` VARCHAR(64) DEFAULT NULL COMMENT '小程序AppID',
+    `payer_openid` VARCHAR(128) DEFAULT NULL COMMENT '支付用户openid',
+    `pay_channel` TINYINT DEFAULT 0 COMMENT '支付通道：0未知 1微信 2支付宝',
+
     `bill_code` VARCHAR(100) DEFAULT NULL COMMENT '管家婆返回订单编号',
     `sync_message` VARCHAR(500) DEFAULT NULL COMMENT '同步结果描述',
     `sync_status` TINYINT NOT NULL DEFAULT 0 COMMENT '同步状态：0待同步 1成功 2失败',
@@ -1059,11 +1066,3 @@ CREATE TABLE IF NOT EXISTS `erp_warehouse` (
     KEY `idx_name` (`name`),
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ERP 仓库 DO';
-
--- 微信支付v3 扩展字段
-ALTER TABLE erp_order
-  ADD COLUMN transaction_id varchar(64) DEFAULT NULL COMMENT '微信支付交易单号',
-  ADD COLUMN notify_raw text COMMENT '微信支付回调原文',
-  ADD COLUMN mch_id varchar(32) DEFAULT NULL COMMENT '微信商户号',
-  ADD COLUMN appid varchar(64) DEFAULT NULL COMMENT '小程序AppID',
-  ADD COLUMN payer_openid varchar(128) DEFAULT NULL COMMENT '支付用户openid';
