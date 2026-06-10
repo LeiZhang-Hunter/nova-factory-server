@@ -187,6 +187,7 @@ func (s *IApiShopGoodsServiceImpl) loadSearchGoodsMap(c *gin.Context, rows []*sh
 		var goods models.Goods
 		goods.ID = int64(v.ID)
 		goods.GoodsID = v.GoodsID
+		goods.GoodsDBID = v.GoodsDBID
 		//goods.GoodsName = names[k]
 		goods.GoodsName = v.SkuName
 		goods.GoodsCode = v.GoodsID

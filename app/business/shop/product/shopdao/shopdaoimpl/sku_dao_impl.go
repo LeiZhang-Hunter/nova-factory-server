@@ -230,6 +230,7 @@ func buildSkuModel(req *shopmodels.GoodsSkuUpsert) *shopmodels.GoodsSku {
 		VideoURL:      req.VideoURL,
 		Description:   req.Description,
 		Weight:        req.Weight,
+		GoodsDBID:     req.GoodsDBID,
 		WeightUnit:    req.WeightUnit,
 		Unit:          req.Unit,
 		Quantity:      req.Quantity,
@@ -245,6 +246,7 @@ func buildSkuUpdates(req *shopmodels.GoodsSkuUpsert) map[string]interface{} {
 		req.VideoURL, _ = fileUtils.NormalizeResourcePath(req.VideoURL)
 	}
 	return map[string]interface{}{
+		"goods_db_id":    req.GoodsDBID,
 		"goods_id":       req.GoodsID,
 		"sku_id":         req.SkuID,
 		"sku_name":       req.SkuName,
