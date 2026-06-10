@@ -31,11 +31,13 @@ func (p *Product) PublicRoutes(router *gin.RouterGroup) {
 func (p *Product) PrivateRoutes(router *gin.RouterGroup) {
 	product := router.Group("/api/v1/app/shop/product")
 	product.GET("/repurchase", p.Repurchase)
+	product.GET("/random-sale", p.RandomSale)
 	product.POST("/search", p.Search)
 }
 
 func (p *Product) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 	router.RegisterSchema("POST", "/api/v1/app/shop/product/search", nil, models.GoodsSearchReq{})
+	router.RegisterSchema("GET", "/api/v1/app/shop/product/random-sale", models.GoodsRandomSaleReq{}, nil)
 }
 
 // Info 读取商品详情
@@ -123,9 +125,37 @@ func (p *Product) Repurchase(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
+// RandomSale 随机获取在售商品
+// @Summary 随机获取在售商品
+// @Description 随机返回指定数量的在售商品
+// @Tags app接口/商城/App商品
+// @Produce application/json
+// @Param limit query int false "返回数量，默认1，最大10"
+// @Success 200 {object} response.ResponseData "获取成功"
+// @Router /api/v1/app/shop/product/random-sale [get]
+func (p *Product) RandomSale(c *gin.Context) {
+	req := new(models.GoodsRandomSaleReq)
+	if err := c.ShouldBindQuery(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if req.Limit <= 0 {
+		req.Limit = 1
+	}
+	if req.Limit > 10 {
+		req.Limit = 10
+	}
+	data, err := p.service.RandomSale(c, req.Limit)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
 // Search 商品检索
 // @Summary 商品检索
-// @Description 传入多个商品名称，基于商品向量检索相似商品并回填数据库中的最新商品数据
+// @Description 搜索密封件商品。当用户咨询任何商品（包括推荐、查询、比较、是否有货等），必须调用此工具获取最新商品数据后再回答。
 // @Tags app接口/商城/App商品
 // @Accept application/json
 // @Produce application/json

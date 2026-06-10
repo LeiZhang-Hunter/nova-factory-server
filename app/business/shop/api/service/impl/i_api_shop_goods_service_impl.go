@@ -2,6 +2,7 @@ package impl
 
 import (
 	"math"
+	"nova-factory-server/app/utils/fileUtils"
 	"strconv"
 
 	"nova-factory-server/app/business/shop/api/models"
@@ -29,6 +30,16 @@ func (s *IApiShopGoodsServiceImpl) List(c *gin.Context, query *models.GoodsQuery
 		return data, err
 	}
 	// 应用折扣价格（商品级别，无SKU，批量查询消除 N+1）
+	s.applyDiscountPriceForList(c, data.Rows)
+	return data, nil
+}
+
+// RandomSale 随机获取在售商品列表
+func (s *IApiShopGoodsServiceImpl) RandomSale(c *gin.Context, limit int64) (*models.GoodsListData, error) {
+	data, err := s.dao.RandomSale(c, limit)
+	if err != nil || data == nil || len(data.Rows) == 0 {
+		return data, err
+	}
 	s.applyDiscountPriceForList(c, data.Rows)
 	return data, nil
 }
@@ -198,7 +209,7 @@ func (s *IApiShopGoodsServiceImpl) loadSearchGoodsMap(c *gin.Context, rows []*sh
 		goods.Unit = v.Unit
 		goods.IsOnSale = 1
 		goods.Quantity = v.Quantity
-		goods.ImageURL = v.ImageURL
+		goods.ImageURL = fileUtils.BuildAbsoluteURL(c, v.ImageURL)
 		goods.RetailPrice = v.RetailPrice
 		goodsRows = append(goodsRows, &goods)
 	}
