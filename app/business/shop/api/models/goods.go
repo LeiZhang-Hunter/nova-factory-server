@@ -41,10 +41,15 @@ type GoodsListData struct {
 	Total int64    `json:"total"` // 总数
 }
 
+// GoodsRandomSaleReq 随机在售商品参数
+type GoodsRandomSaleReq struct {
+	Limit int64 `form:"limit" json:"limit" jsonschema:"description=返回随机在售商品数量，默认1，最大10"` // 返回数量
+}
+
 // GoodsSearchReq 商品检索参数
 type GoodsSearchReq struct {
-	GoodsNames []string `json:"goodsNames" binding:"required" json:"goodsNames" jsonschema:"description=商品名称列表，OR查询逻辑，支持模糊匹配，建议1-10个,不要超过10个"` // 商品名称列表
-	Limit      int      `json:"limit" binding:"required" jsonschema:"description=查询数量限制，建议1-10个,不要超过10个"`                                      // 商品名称列表
+	GoodsNames []string `json:"goodsNames" binding:"required" json:"goodsNames" jsonschema:"description=搜索关键词列表，支持商品名称、类别、材质、用途等，无明确名称时可传入品类词如 [\"密封件\"]，OR查询逻辑，建议1-10个"` // 商品名称列表
+	Limit      int      `json:"limit" binding:"required" jsonschema:"description=返回商品数量，默认为1，建议1-10个"`                                                                    // 商品名称列表
 	IsSale     *bool    `json:"-"`
 }
 
