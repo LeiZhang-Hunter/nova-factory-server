@@ -6,23 +6,24 @@ import (
 
 // GoodsSku 商品规格信息
 type GoodsSku struct {
-	ID                 uint64   `json:"id,string" gorm:"id"`             // 主键ID
-	GoodsID            string   `json:"goodsId" gorm:"goods_id"`         // 商品业务ID
-	SkuID              string   `json:"skuId" gorm:"sku_id"`             // 规格业务ID
-	SkuName            string   `json:"skuName" gorm:"sku_name"`         // 规格名称
-	SkuCode            string   `json:"skuCode" gorm:"sku_code"`         // 规格编码
-	OuterID            string   `json:"outerId" gorm:"outer_id"`         // 外部系统ID
-	Barcode            string   `json:"barcode" gorm:"barcode"`          // 条码
-	ImageURL           string   `json:"imageUrl" gorm:"image_url"`       // 主图地址
-	RetailPrice        float64  `json:"retailPrice" gorm:"retail_price"` // 零售价
-	GalleryImages      string   `json:"-" gorm:"gallery_images"`         // 图集
-	GalleryImagesArray []string `json:"galleryImages" gorm:"-" gorm:"-"` // 图集
-	VideoURL           string   `json:"videoUrl" gorm:"video_url"`       // 视频地址
-	Description        string   `json:"description" gorm:"description"`  // 规格描述
-	Weight             float64  `json:"weight" gorm:"weight"`            // 重量
-	WeightUnit         string   `json:"weightUnit" gorm:"weight_unit"`   // 重量单位
-	Unit               string   `json:"unit" gorm:"unit"`                // 销售单位
-	Quantity           int64    `json:"quantity" gorm:"quantity"`        // 库存数量
+	ID                 uint64   `json:"id,string" gorm:"id"`                 // 主键ID
+	GoodsDBID          int64    `json:"goodsDBId,string" gorm:"goods_db_id"` // 商品业务ID
+	GoodsID            string   `json:"goodsId" gorm:"goods_id"`             // 商品业务ID
+	SkuID              string   `json:"skuId" gorm:"sku_id"`                 // 规格业务ID
+	SkuName            string   `json:"skuName" gorm:"sku_name"`             // 规格名称
+	SkuCode            string   `json:"skuCode" gorm:"sku_code"`             // 规格编码
+	OuterID            string   `json:"outerId" gorm:"outer_id"`             // 外部系统ID
+	Barcode            string   `json:"barcode" gorm:"barcode"`              // 条码
+	ImageURL           string   `json:"imageUrl" gorm:"image_url"`           // 主图地址
+	RetailPrice        float64  `json:"retailPrice" gorm:"retail_price"`     // 零售价
+	GalleryImages      string   `json:"-" gorm:"gallery_images"`             // 图集
+	GalleryImagesArray []string `json:"galleryImages" gorm:"-" gorm:"-"`     // 图集
+	VideoURL           string   `json:"videoUrl" gorm:"video_url"`           // 视频地址
+	Description        string   `json:"description" gorm:"description"`      // 规格描述
+	Weight             float64  `json:"weight" gorm:"weight"`                // 重量
+	WeightUnit         string   `json:"weightUnit" gorm:"weight_unit"`       // 重量单位
+	Unit               string   `json:"unit" gorm:"unit"`                    // 销售单位
+	Quantity           int64    `json:"quantity" gorm:"quantity"`            // 库存数量
 	DeptID             int64    `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
@@ -30,15 +31,16 @@ type GoodsSku struct {
 
 // GoodsSkuUpsert 商品规格新增修改参数
 type GoodsSkuUpsert struct {
-	ID                 uint64   `json:"id,string"`                  // 主键ID
-	GoodsID            string   `json:"goodsId" binding:"required"` // 商品业务ID
-	SkuID              string   `json:"skuId" binding:"required"`   // 规格业务ID
-	SkuName            string   `json:"skuName"`                    // 规格名称
-	SkuCode            string   `json:"skuCode"`                    // 规格编码
-	OuterID            string   `json:"outerId"`                    // 外部系统ID
-	Barcode            string   `json:"barcode"`                    // 条码
-	ImageURL           string   `json:"imageUrl"`                   // 主图地址
-	RetailPrice        float64  `json:"retailPrice"`                // 零售价
+	ID                 uint64   `json:"id,string"`                           // 主键ID
+	GoodsID            string   `json:"goodsId" binding:"required"`          // 商品业务ID
+	SkuID              string   `json:"skuId" binding:"required"`            // 规格业务ID
+	GoodsDBID          int64    `json:"goodsDBId,string" gorm:"goods_db_id"` // 商品业务ID
+	SkuName            string   `json:"skuName"`                             // 规格名称
+	SkuCode            string   `json:"skuCode"`                             // 规格编码
+	OuterID            string   `json:"outerId"`                             // 外部系统ID
+	Barcode            string   `json:"barcode"`                             // 条码
+	ImageURL           string   `json:"imageUrl"`                            // 主图地址
+	RetailPrice        float64  `json:"retailPrice"`                         // 零售价
 	GalleryImagesArray []string `json:"galleryImages" `
 	VideoURL           string   `json:"videoUrl"`    // 视频地址
 	Description        string   `json:"description"` // 规格描述
