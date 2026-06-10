@@ -9,6 +9,7 @@ import (
 
 	"github.com/milvus-io/milvus/client/v2/milvusclient"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc"
 )
 
 type Config struct {
@@ -55,20 +56,83 @@ func GetClient(ctx context.Context) (*milvusclient.Client, error) {
 		defer cancel()
 	}
 
-	c, err := milvusclient.New(ctx, &milvusclient.ClientConfig{
-		Address:       cfg.Address,
-		Username:      cfg.Username,
-		Password:      cfg.Password,
-		DBName:        cfg.DBName,
-		APIKey:        cfg.APIKey,
-		EnableTLSAuth: cfg.EnableTLS,
-	})
+	c, err := newClient(ctx, cfg, "default")
 	if err != nil {
+		return nil, fmt.Errorf("init milvus client failed: %w", err)
+	}
+
+	if err := ensureClientDatabase(ctx, c, cfg.DBName); err != nil {
+		_ = c.Close(ctx)
 		return nil, fmt.Errorf("init milvus client failed: %w", err)
 	}
 
 	client = c
 	return client, nil
+}
+
+type milvusDatabaseClient interface {
+	ListDatabase(context.Context, milvusclient.ListDatabaseOption, ...grpc.CallOption) ([]string, error)
+	CreateDatabase(context.Context, milvusclient.CreateDatabaseOption, ...grpc.CallOption) error
+	UseDatabase(context.Context, milvusclient.UseDatabaseOption) error
+}
+
+func newClient(ctx context.Context, cfg Config, dbName string) (*milvusclient.Client, error) {
+	return milvusclient.New(ctx, &milvusclient.ClientConfig{
+		Address:       cfg.Address,
+		Username:      cfg.Username,
+		Password:      cfg.Password,
+		DBName:        dbName,
+		APIKey:        cfg.APIKey,
+		EnableTLSAuth: cfg.EnableTLS,
+	})
+}
+
+func ensureClientDatabase(ctx context.Context, client milvusDatabaseClient, dbName string) error {
+	dbName = strings.TrimSpace(dbName)
+	if dbName == "" || dbName == "default" {
+		return nil
+	}
+
+	exists, err := milvusDatabaseExists(ctx, client, dbName)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return useMilvusDatabase(ctx, client, dbName)
+	}
+
+	if err := client.CreateDatabase(ctx, milvusclient.NewCreateDatabaseOption(dbName)); err != nil {
+		if !isMilvusDatabaseAlreadyExistsError(err) {
+			return err
+		}
+	}
+
+	return useMilvusDatabase(ctx, client, dbName)
+}
+
+func milvusDatabaseExists(ctx context.Context, client milvusDatabaseClient, dbName string) (bool, error) {
+	dbNames, err := client.ListDatabase(ctx, milvusclient.NewListDatabaseOption())
+	if err != nil {
+		return false, err
+	}
+	for _, name := range dbNames {
+		if strings.TrimSpace(name) == dbName {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func useMilvusDatabase(ctx context.Context, client milvusDatabaseClient, dbName string) error {
+	return client.UseDatabase(ctx, milvusclient.NewUseDatabaseOption(dbName))
+}
+
+func isMilvusDatabaseAlreadyExistsError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "already exists") || strings.Contains(msg, "database already exists")
 }
 
 func closeClient() error {

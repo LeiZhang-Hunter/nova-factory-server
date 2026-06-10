@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/apache/skywalking-go"
 	"nova-factory-server/app/setting"
 	"os"
 	"os/signal"
