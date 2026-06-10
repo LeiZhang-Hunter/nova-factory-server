@@ -762,11 +762,14 @@ func (s *ShopGoodsServiceImpl) attachSkus(c *gin.Context, rows []*shopmodels.Goo
 		return err
 	}
 	skuMap := make(map[string][]*shopmodels.GoodsSku, len(rows))
+	skuQuantity := make(map[string]int64, len(rows))
 	for _, sku := range skus {
+		skuQuantity[sku.GoodsID] += sku.Quantity
 		skuMap[sku.GoodsID] = append(skuMap[sku.GoodsID], sku)
 	}
 	for _, row := range rows {
 		row.Skus = skuMap[row.GoodsID]
+		row.Quantity = skuQuantity[row.GoodsID]
 		if row.Skus == nil {
 			row.Skus = make([]*shopmodels.GoodsSku, 0)
 		}
