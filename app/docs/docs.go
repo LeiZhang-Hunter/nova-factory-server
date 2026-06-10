@@ -4320,46 +4320,33 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/app/shop/agent/conversations/chat": {
-            "post": {
+        "/api/v1/app/shop/agent/config/enabled": {
+            "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "发送会话消息并支持流式返回",
+                "description": "小程序侧通过 agentType 查询已启用的智能体配置",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "app接口/商城/App智能体会话"
+                    "app接口/商城/App智能体配置"
                 ],
-                "summary": "会话聊天",
+                "summary": "获取指定类型下已启用的智能体配置",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "会话消息元数据(JSON字符串)",
-                        "name": "metadata",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "file",
-                        "description": "上传文件",
-                        "name": "file",
-                        "in": "formData"
-                    },
-                    {
-                        "description": "发送消息参数",
-                        "name": "object",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/aidatasetmodels.SendMessageInput"
-                        }
+                        "description": "智能体类型",
+                        "name": "agentType",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "发送成功",
+                        "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -4534,6 +4521,25 @@ const docTemplate = `{
                         }
                     }
                 }
+            }
+        },
+        "/api/v1/app/shop/agent/conversations/ws/chat": {
+            "get": {
+                "description": "建立 WebSocket 连接后，发送 JSON 消息体 { conversation_id, tab_id, content }，服务端将 SSE 事件实时推送回客户端",
+                "tags": [
+                    "app接口/商城/App智能体WebSocket"
+                ],
+                "summary": "WebSocket 流式聊天",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "WebSocket 端点 /api/v1/app/shop/agent/conversations/ws/chat",
+                        "name": "ws",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
             }
         },
         "/api/v1/app/shop/agent/messages/list": {
@@ -4736,6 +4742,38 @@ const docTemplate = `{
                         "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/company/info": {
+            "get": {
+                "description": "获取小程序关于我们页面展示的公司信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App公司信息"
+                ],
+                "summary": "获取小程序公司信息",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CompanyInfoResp"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -5002,42 +5040,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/app/shop/order/cache": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "固化本次立即购买商品快照",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "app接口/商城/App订单"
-                ],
-                "summary": "缓存预下单商品",
-                "parameters": [
-                    {
-                        "description": "预下单缓存参数",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.OrderCacheReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "缓存成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/app/shop/order/confirm": {
             "post": {
                 "security": [
@@ -5103,6 +5105,79 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/order/pay/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "支付待付款订单",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/用户订单"
+                ],
+                "summary": "支付订单",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "支付成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/app/shop/pink": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建拼团订单时调用，开团 pink_id=0，参团 pink_id\u003e0",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/拼团"
+                ],
+                "summary": "开团或参团",
+                "parameters": [
+                    {
+                        "description": "拼团参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/activity.PinkCreateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -5185,9 +5260,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/app/shop/product/random-sale": {
+            "get": {
+                "description": "随机返回指定数量的在售商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "app接口/商城/App商品"
+                ],
+                "summary": "随机获取在售商品",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "返回数量，默认1，最大10",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/app/shop/product/search": {
             "post": {
-                "description": "传入多个商品名称，基于商品向量检索相似商品并回填数据库中的最新商品数据",
+                "description": "搜索密封件商品。当用户咨询任何商品（包括推荐、查询、比较、是否有货等），必须调用此工具获取最新商品数据后再回答。",
                 "consumes": [
                     "application/json"
                 ],
@@ -5487,331 +5590,6 @@ const docTemplate = `{
                         "description": "获取成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/product/laboratory/dict": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "配料物料列表",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "化验单管理"
-                ],
-                "summary": "配料物料列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "dictLabel",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "dictType",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.ResponseData"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.ListData"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "rows": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/product/laboratory/first": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "最近一份的采样化验单",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "化验单管理"
-                ],
-                "summary": "最新化验单",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "beginTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "contact",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "endTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "material",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "number",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "state",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "type",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.ResponseData"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.ListData"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "rows": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/product/laboratory/first/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "最新化验单列表",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "化验单管理"
-                ],
-                "summary": "最新化验单列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "beginTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "contact",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "endTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "material",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "number",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "state",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "type",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.ResponseData"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.ListData"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "rows": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
                         }
                     }
                 }
@@ -7903,6 +7681,77 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/basics/company/info": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取公司信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "公司信息"
+                ],
+                "summary": "获取公司信息",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CompanyInfoVo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "保存公司信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "公司信息"
+                ],
+                "summary": "保存公司信息",
+                "parameters": [
+                    {
+                        "description": "公司信息",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CompanyInfoVo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -11665,45 +11514,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/erp/order-audit/approve": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "审核通过订单审核记录并转入正式ERP订单",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ERP/销售管理"
-                ],
-                "summary": "ERP订单审核通过",
-                "parameters": [
-                    {
-                        "description": "订单审核动作参数",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/salemodels.OrderAuditAction"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "审核通过成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
         "/erp/order-audit/import": {
             "post": {
                 "security": [
@@ -11799,113 +11609,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "查询成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/erp/order-audit/query/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "根据ID查询ERP订单审核详情",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ERP/销售管理"
-                ],
-                "summary": "ERP订单审核详情",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "订单审核ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "查询成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/erp/order-audit/reject": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "驳回订单审核记录",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ERP/销售管理"
-                ],
-                "summary": "ERP订单审核驳回",
-                "parameters": [
-                    {
-                        "description": "订单审核动作参数",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/salemodels.OrderAuditAction"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "驳回成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/erp/order-audit/remove/{ids}": {
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "根据ID删除ERP订单审核记录",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ERP/销售管理"
-                ],
-                "summary": "ERP订单审核删除",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "订单审核ID，多个以逗号分隔",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "删除成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -13161,6 +12864,152 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "设置成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/order-audit/approve": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "审核通过订单审核记录并转入正式ERP订单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "ERP订单审核通过",
+                "parameters": [
+                    {
+                        "description": "订单审核动作参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/salemodels.OrderAuditAction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "审核通过成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/order-audit/query/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询ERP订单审核详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "ERP订单审核详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "订单审核ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/order-audit/reject": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "驳回订单审核记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "ERP订单审核驳回",
+                "parameters": [
+                    {
+                        "description": "订单审核动作参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/salemodels.OrderAuditAction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "驳回成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/erp/sale/order-audit/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除ERP订单审核记录",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ERP/销售管理"
+                ],
+                "summary": "ERP订单审核删除",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "订单审核ID，多个以逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -16320,7 +16169,19 @@ const docTemplate = `{
                     "200": {
                         "description": "登录成功",
                         "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.ResponseData"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/systemmodels.LoginResp"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "412": {
@@ -17146,352 +17007,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/product/laboratory/info/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "化验单详情",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "化验单管理"
-                ],
-                "summary": "化验单详情",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "主键ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.ResponseData"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/product/laboratory/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "化验单列表",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "化验单管理"
-                ],
-                "summary": "化验单列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "beginTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "contact",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "endTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "material",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "number",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "state",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "type",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.ResponseData"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.ListData"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "rows": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/product/laboratory/our/list": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "化验单列表",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "化验单管理"
-                ],
-                "summary": "化验单列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "name": "beginTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "contact",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "endTime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序规则  降序desc   asc升序",
-                        "name": "isAsc",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "material",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "number",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "排序字段",
-                        "name": "orderBy",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "第几页",
-                        "name": "pageNum",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10000,
-                        "description": "数量",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "state",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "type",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.ResponseData"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/definitions/response.ListData"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "properties": {
-                                                        "rows": {
-                                                            "type": "array",
-                                                            "items": {
-                                                                "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/product/laboratory/remove/{ids}": {
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "删除化验单",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "化验单管理"
-                ],
-                "summary": "删除化验单",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "主键ID,多个用逗号分隔",
-                        "name": "ids",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/product/laboratory/set": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "保存化验单",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "保存化验单"
-                ],
-                "summary": "保存化验单",
-                "parameters": [
-                    {
-                        "description": "请求体",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/productmodels.SysProductLaboratoryVo"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
         "/register": {
             "post": {
                 "description": "用户登录",
@@ -17836,6 +17351,12 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "商品状态",
                         "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "时间段ID",
+                        "name": "timeId",
                         "in": "query"
                     },
                     {
@@ -18492,12 +18013,12 @@ const docTemplate = `{
                 "summary": "更新微信小程序配置",
                 "parameters": [
                     {
-                        "description": "微信小程序配置参数",
+                        "description": "配置参数",
                         "name": "object",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.WechatConfigReq"
+                            "$ref": "#/definitions/models.BatchConfigReq"
                         }
                     }
                 ],
@@ -18511,41 +18032,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/shop/goods": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "修改商品",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "商城/商品管理"
-                ],
-                "summary": "修改商品",
-                "parameters": [
-                    {
-                        "description": "商品修改参数",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/shopmodels.GoodsUpsert"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "修改成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            },
+        "/shop/goods/add": {
             "post": {
                 "security": [
                     {
@@ -18574,6 +18061,42 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/goods/edit": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改商品",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品管理"
+                ],
+                "summary": "修改商品",
+                "parameters": [
+                    {
+                        "description": "商品修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -18613,6 +18136,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "商品名称",
                         "name": "goodsName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
                         "in": "query"
                     },
                     {
@@ -18730,6 +18259,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "商品名称",
                         "name": "goodsName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "主键ID",
+                        "name": "id",
                         "in": "query"
                     },
                     {
@@ -19388,41 +18923,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/shop/sku": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "修改商品规格",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "商城/商品规格"
-                ],
-                "summary": "修改商品规格",
-                "parameters": [
-                    {
-                        "description": "商品规格修改参数",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/shopmodels.GoodsSkuUpsert"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "修改成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            },
+        "/shop/sku/add": {
             "post": {
                 "security": [
                     {
@@ -19451,6 +18952,42 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "新增成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/shop/sku/edit": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "修改商品规格",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "商城/商品规格"
+                ],
+                "summary": "修改商品规格",
+                "parameters": [
+                    {
+                        "description": "商品规格修改参数",
+                        "name": "object",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/shopmodels.GoodsSkuUpsert"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "修改成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -20597,42 +20134,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "获取成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.ResponseData"
-                        }
-                    }
-                }
-            }
-        },
-        "/shop/user/order/status": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "更新订单状态",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "商城/用户订单"
-                ],
-                "summary": "更新订单状态",
-                "parameters": [
-                    {
-                        "description": "订单状态更新参数",
-                        "name": "object",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.OrderStatusReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "更新成功",
                         "schema": {
                             "$ref": "#/definitions/response.ResponseData"
                         }
@@ -24772,9 +24273,385 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/wms/admin/warehouse/area/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 WMS 库区详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WMS/仓储管理/库区"
+                ],
+                "summary": "查询库区详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "库区ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/wms/admin/warehouse/area/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 WMS 库区列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WMS/仓储管理/库区"
+                ],
+                "summary": "查询库区列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "areaName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "isValid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "parentId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseAreaProperty",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/wms/admin/warehouse/area/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 WMS 库区，多个ID使用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WMS/仓储管理/库区"
+                ],
+                "summary": "删除库区",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "库区ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/wms/admin/warehouse/area/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 WMS 库区",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WMS/仓储管理/库区"
+                ],
+                "summary": "保存库区",
+                "parameters": [
+                    {
+                        "description": "WMS 库区保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WarehouseAreaSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/wms/admin/warehouse/location/info/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID查询 WMS 库位详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WMS/仓储管理/库位"
+                ],
+                "summary": "查询库位详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "库位ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/wms/admin/warehouse/location/list": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "按条件分页查询 WMS 库位列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WMS/仓储管理/库位"
+                ],
+                "summary": "查询库位列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "isValid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "layerNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "locationName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "roadwayNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "shelfNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "tagNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseAreaId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "warehouseId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/wms/admin/warehouse/location/remove/{ids}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID删除 WMS 库位，多个ID使用逗号分隔",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WMS/仓储管理/库位"
+                ],
+                "summary": "删除库位",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "库位ID，多个用逗号分隔",
+                        "name": "ids",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/wms/admin/warehouse/location/set": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增或修改 WMS 库位",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WMS/仓储管理/库位"
+                ],
+                "summary": "保存库位",
+                "parameters": [
+                    {
+                        "description": "WMS 库位保存参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.WarehouseLocationSet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "保存成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.ResponseData"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "activity.PinkCreateReq": {
+            "type": "object",
+            "required": [
+                "combinationId"
+            ],
+            "properties": {
+                "combinationId": {
+                    "description": "拼团商品ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "orderId": {
+                    "description": "订单ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "pinkId": {
+                    "description": "拼团记录ID（0=开团，\u003e0=参团）",
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
         "aidatasetmodels.AddChunkReq": {
             "type": "object",
             "properties": {
@@ -25312,6 +25189,10 @@ const docTemplate = `{
                 "conversation_id": {
                     "type": "string",
                     "example": "0"
+                },
+                "enable_thinking": {
+                    "description": "EnableThinking 是否启用思考。",
+                    "type": "boolean"
                 },
                 "tab_id": {
                     "type": "string"
@@ -28125,6 +28006,9 @@ const docTemplate = `{
         "gatewaymodels.AIAgentConfigPublishHistoryUpsert": {
             "type": "object",
             "properties": {
+                "action": {
+                    "type": "string"
+                },
                 "agentId": {
                     "type": "string",
                     "example": "0"
@@ -28322,6 +28206,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sandboxNetwork": {
+                    "type": "boolean"
+                },
+                "suppressPreToolContent": {
                     "type": "boolean"
                 },
                 "type": {
@@ -29340,6 +29227,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.BatchConfigReq": {
+            "type": "object",
+            "properties": {
+                "configs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.KeyValue"
+                    }
+                }
+            }
+        },
         "models.BatchDiscountRuleCreate": {
             "type": "object",
             "properties": {
@@ -29377,20 +29275,34 @@ const docTemplate = `{
         },
         "models.CartSetDataReq": {
             "type": "object",
-            "required": [
-                "goodsId",
-                "quantity",
-                "skuId"
-            ],
             "properties": {
+                "buyNow": {
+                    "description": "是否立即购买",
+                    "type": "boolean"
+                },
+                "combinationId": {
+                    "description": "拼团活动商品ID",
+                    "type": "string",
+                    "example": "0"
+                },
                 "goodsId": {
                     "description": "商品ID",
+                    "type": "string",
+                    "example": "0"
+                },
+                "pinkId": {
+                    "description": "拼团记录ID",
                     "type": "string",
                     "example": "0"
                 },
                 "quantity": {
                     "description": "数量",
                     "type": "integer"
+                },
+                "secKillId": {
+                    "description": "秒杀活动商品ID",
+                    "type": "string",
+                    "example": "0"
                 },
                 "skuId": {
                     "description": "SKU ID",
@@ -29561,6 +29473,61 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CompanyInfoResp": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "companyDetail": {
+                    "type": "string"
+                },
+                "companyName": {
+                    "type": "string"
+                },
+                "contactPhone": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "logoUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CompanyInfoVo": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "businessLicenseNo": {
+                    "type": "string"
+                },
+                "companyDetail": {
+                    "type": "string"
+                },
+                "companyName": {
+                    "type": "string"
+                },
+                "contactPerson": {
+                    "type": "string"
+                },
+                "contactPhone": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "logoUrl": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Expression": {
             "type": "object",
             "properties": {
@@ -29587,7 +29554,8 @@ const docTemplate = `{
         "models.GoodsSearchReq": {
             "type": "object",
             "required": [
-                "goodsNames"
+                "goodsNames",
+                "limit"
             ],
             "properties": {
                 "goodsNames": {
@@ -29596,6 +29564,10 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "limit": {
+                    "description": "商品名称列表",
+                    "type": "integer"
                 }
             }
         },
@@ -29718,68 +29690,38 @@ const docTemplate = `{
                 }
             }
         },
-        "models.OrderCacheReq": {
+        "models.KeyValue": {
             "type": "object",
             "properties": {
-                "cartId": {
-                    "description": "购物车ID列表",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "key": {
+                    "type": "string"
                 },
-                "combinationId": {
-                    "description": "拼团活动ID",
-                    "type": "string",
-                    "example": "0"
-                },
-                "pinkId": {
-                    "description": "拼团记录ID",
-                    "type": "string",
-                    "example": "0"
-                },
-                "quantity": {
-                    "description": "购买数量",
-                    "type": "integer"
-                },
-                "secKillId": {
-                    "description": "秒杀活动ID",
-                    "type": "string",
-                    "example": "0"
-                },
-                "skuId": {
-                    "description": "立即购买商品规格ID",
-                    "type": "string",
-                    "example": "0"
+                "value": {
+                    "type": "string"
                 }
             }
         },
         "models.OrderConfirmReq": {
             "type": "object",
             "required": [
-                "orderKey"
+                "cartId"
             ],
             "properties": {
                 "addressId": {
-                    "description": "地址ID",
                     "type": "string",
                     "example": "0"
                 },
-                "couponCode": {
-                    "description": "优惠券编码",
+                "buyNow": {
+                    "type": "boolean"
+                },
+                "cartId": {
                     "type": "string"
                 },
                 "deliveryType": {
-                    "description": "配送方式",
                     "type": "string"
                 },
-                "orderKey": {
-                    "description": "预订单 key",
-                    "type": "string"
-                },
-                "usePoints": {
-                    "description": "是否使用积分",
-                    "type": "boolean"
+                "shippingType": {
+                    "type": "integer"
                 }
             }
         },
@@ -29790,34 +29732,10 @@ const docTemplate = `{
             ],
             "properties": {
                 "orderKey": {
-                    "description": "预订单 key",
                     "type": "string"
                 },
                 "remark": {
-                    "description": "订单备注",
                     "type": "string"
-                }
-            }
-        },
-        "models.OrderStatusReq": {
-            "type": "object",
-            "required": [
-                "id",
-                "status"
-            ],
-            "properties": {
-                "id": {
-                    "description": "订单ID",
-                    "type": "string",
-                    "example": "0"
-                },
-                "reason": {
-                    "description": "变更原因（如取消原因）",
-                    "type": "string"
-                },
-                "status": {
-                    "description": "目标状态",
-                    "type": "integer"
                 }
             }
         },
@@ -30284,39 +30202,87 @@ const docTemplate = `{
                 }
             }
         },
-        "models.WechatConfigReq": {
+        "models.WarehouseAreaSet": {
             "type": "object",
             "properties": {
-                "appId": {
-                    "description": "微信小程序应用ID",
+                "areaName": {
                     "type": "string"
                 },
-                "appSecret": {
-                    "description": "微信小程序应用密钥",
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "isValid": {
+                    "type": "integer"
+                },
+                "parentId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "warehouseAreaProperty": {
+                    "type": "integer"
+                },
+                "warehouseId": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "models.WarehouseLocationSet": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "isValid": {
+                    "type": "integer"
+                },
+                "layerNumber": {
                     "type": "string"
                 },
-                "certPath": {
-                    "description": "微信支付证书路径",
+                "locationHeight": {
+                    "type": "number"
+                },
+                "locationLength": {
+                    "type": "number"
+                },
+                "locationLoad": {
+                    "type": "number"
+                },
+                "locationName": {
                     "type": "string"
                 },
-                "encodingAESKey": {
-                    "description": "消息加密密钥",
+                "locationVolume": {
+                    "type": "number"
+                },
+                "locationWidth": {
+                    "type": "number"
+                },
+                "roadwayNumber": {
                     "type": "string"
                 },
-                "mchId": {
-                    "description": "微信支付商户号",
+                "shelfNumber": {
                     "type": "string"
                 },
-                "mchKey": {
-                    "description": "微信支付商户密钥",
+                "tagNumber": {
                     "type": "string"
                 },
-                "notifyUrl": {
-                    "description": "微信支付回调地址",
+                "warehouseAreaId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "warehouseAreaName": {
                     "type": "string"
                 },
-                "token": {
-                    "description": "微信令牌",
+                "warehouseAreaProperty": {
+                    "type": "integer"
+                },
+                "warehouseId": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "warehouseName": {
                     "type": "string"
                 }
             }
@@ -30618,63 +30584,6 @@ const docTemplate = `{
                 "streetName": {
                     "description": "街道名称",
                     "type": "string"
-                }
-            }
-        },
-        "productmodels.SysProductLaboratoryVo": {
-            "type": "object",
-            "required": [
-                "material",
-                "number"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "contact": {
-                    "type": "string"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "dry_high": {
-                    "description": "干燥基高位",
-                    "type": "number"
-                },
-                "heat": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "0"
-                },
-                "img": {
-                    "type": "string"
-                },
-                "material": {
-                    "type": "string"
-                },
-                "number": {
-                    "type": "string"
-                },
-                "received_low": {
-                    "description": "收到基低位",
-                    "type": "number"
-                },
-                "sulphur": {
-                    "type": "number"
-                },
-                "type": {
-                    "type": "integer"
-                },
-                "volatility": {
-                    "type": "number"
-                },
-                "water": {
-                    "type": "number"
-                },
-                "weight": {
-                    "type": "number"
                 }
             }
         },
@@ -31896,6 +31805,11 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "goodsDBId": {
+                    "description": "商品业务ID",
+                    "type": "string",
+                    "example": "0"
+                },
                 "goodsId": {
                     "description": "商品业务ID",
                     "type": "string"
@@ -32029,6 +31943,11 @@ const docTemplate = `{
                     "description": "零售价",
                     "type": "number"
                 },
+                "shopCategoryId": {
+                    "description": "商品分类id",
+                    "type": "string",
+                    "example": "0"
+                },
                 "unit": {
                     "description": "销售单位",
                     "type": "string"
@@ -32095,6 +32014,10 @@ const docTemplate = `{
                             "$ref": "#/definitions/shopmodels.EmbeddingConfig"
                         }
                     ]
+                },
+                "fallbackWithoutMetadata": {
+                    "description": "metadata 过滤无结果时是否回退为无过滤检索",
+                    "type": "boolean"
                 },
                 "limit": {
                     "description": "返回条数",
@@ -32567,6 +32490,19 @@ const docTemplate = `{
                 },
                 "uuid": {
                     "description": "uuid",
+                    "type": "string"
+                }
+            }
+        },
+        "systemmodels.LoginResp": {
+            "type": "object",
+            "properties": {
+                "expireTime": {
+                    "description": "有效时间，单位秒",
+                    "type": "integer"
+                },
+                "token": {
+                    "description": "登录 token",
                     "type": "string"
                 }
             }
