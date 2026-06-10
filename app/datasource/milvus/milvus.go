@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/milvus-io/milvus/client/v2/entity"
 	"github.com/milvus-io/milvus/client/v2/milvusclient"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -133,6 +134,79 @@ func isMilvusDatabaseAlreadyExistsError(err error) bool {
 	}
 	msg := strings.ToLower(err.Error())
 	return strings.Contains(msg, "already exists") || strings.Contains(msg, "database already exists")
+}
+
+const collectionLoadPollInterval = 200 * time.Millisecond
+
+func EnsureCollectionLoaded(ctx context.Context, client *milvusclient.Client, collectionName string) error {
+	collectionName = strings.TrimSpace(collectionName)
+	if collectionName == "" {
+		return fmt.Errorf("milvus collection name is empty")
+	}
+
+	state, err := client.GetLoadState(ctx, milvusclient.NewGetLoadStateOption(collectionName))
+	if err != nil {
+		return fmt.Errorf("读取 Milvus collection 加载状态失败: %w", err)
+	}
+	if state.State == entity.LoadStateLoaded {
+		return nil
+	}
+	if state.State == entity.LoadStateLoading {
+		return waitCollectionLoaded(ctx, client, collectionName)
+	}
+
+	return loadCollectionAndWait(ctx, client, collectionName)
+}
+
+func loadCollectionAndWait(ctx context.Context, client *milvusclient.Client, collectionName string) error {
+	task, err := client.LoadCollection(ctx, milvusclient.NewLoadCollectionOption(collectionName))
+	if err != nil {
+		if isMilvusCollectionLoadingOrLoadedError(err) {
+			return waitCollectionLoaded(ctx, client, collectionName)
+		}
+		return fmt.Errorf("加载 Milvus collection 失败: %w", err)
+	}
+	if err = task.Await(ctx); err != nil {
+		return fmt.Errorf("等待 Milvus collection 加载完成失败: %w", err)
+	}
+	return nil
+}
+
+func waitCollectionLoaded(ctx context.Context, client *milvusclient.Client, collectionName string) error {
+	ticker := time.NewTicker(collectionLoadPollInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			state, err := client.GetLoadState(ctx, milvusclient.NewGetLoadStateOption(collectionName))
+			if err != nil {
+				return fmt.Errorf("读取 Milvus collection 加载状态失败: %w", err)
+			}
+			if state.State == entity.LoadStateLoaded {
+				return nil
+			}
+			if state.State != entity.LoadStateLoading {
+				return loadCollectionAndWait(ctx, client, collectionName)
+			}
+		}
+	}
+}
+
+func isMilvusCollectionLoadingOrLoadedError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	if strings.Contains(msg, "not loaded") {
+		return false
+	}
+	return strings.Contains(msg, "already loaded") ||
+		strings.Contains(msg, "already loading") ||
+		strings.Contains(msg, "loading") ||
+		strings.Contains(msg, "load state")
 }
 
 func closeClient() error {

@@ -292,6 +292,9 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 	if !has {
 		return buildEmptyGoodsVectorBatchSearchData(req.Queries), nil
 	}
+	if err = milvus.EnsureCollectionLoaded(requestCtx, client, cfg.Collection); err != nil {
+		return nil, err
+	}
 
 	// 先扩大召回候选集，再在应用层做一次业务重排。
 	searchLimit := resolveGoodsVectorSearchCandidateLimit(req.Limit)
