@@ -12,4 +12,5 @@ type IShopCombinationDao interface {
 	GetByID(c *gin.Context, id int64) (*models.Combination, error)
 	List(c *gin.Context, req *models.CombinationQuery) (*models.CombinationListData, error)
 	DeductStock(c *gin.Context, id int64, quantity int64) error
+	RestoreStock(c *gin.Context, id int64, quantity int64) error
 }

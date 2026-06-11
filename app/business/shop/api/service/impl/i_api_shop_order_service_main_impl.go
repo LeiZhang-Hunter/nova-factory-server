@@ -25,6 +25,7 @@ import (
 	"github.com/go-pay/gopay"
 	"github.com/go-pay/gopay/wechat/v3"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 const (
@@ -237,6 +238,9 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 		if !s.isOrderOwnedByUser(existingOrder, shopUser) {
 			return nil, errors.New("无权操作该订单")
 		}
+		if err := s.ensureExistingOrderCreated(existingOrder); err != nil {
+			return nil, err
+		}
 		return s.toShopOrder(existingOrder), nil
 	}
 
@@ -251,6 +255,9 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 	} else if existingOrder != nil {
 		if !s.isOrderOwnedByUser(existingOrder, shopUser) {
 			return nil, errors.New("无权操作该订单")
+		}
+		if err := s.ensureExistingOrderCreated(existingOrder); err != nil {
+			return nil, err
 		}
 		return s.toShopOrder(existingOrder), nil
 	}
@@ -287,6 +294,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 	var createdOrder *erpordermodels.Order
 	err = s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
 		c.Set("db", tx)
+		defer c.Set("db", nil)
 		for _, item := range cacheData.Items {
 			if item == nil {
 				continue
@@ -310,17 +318,27 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 		if createErr != nil {
 			return fmt.Errorf("创建订单失败: %v", createErr)
 		}
-		if err := s.cartDao.DeleteByIds(c, userID, cacheData.CartIDs); err != nil {
-			return fmt.Errorf("删除购物车记录失败: %v", err)
-		}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
+	if err := s.syncCreatedOrder(c, createdOrder, cacheData); err != nil {
+		return nil, err
+	}
+
+	if len(cacheData.CartIDs) > 0 {
+		if err := s.cartDao.DeleteByIds(c, userID, cacheData.CartIDs); err != nil {
+			return nil, fmt.Errorf("删除购物车记录失败: %v", err)
+		}
+	}
 	s.cache.Del(context.Background(), s.buildOrderCacheKey(req.OrderKey))
-	return s.toShopOrder(createdOrder), nil
+	latestOrder, err := s.orderDao.GetByTid(c, orderNo)
+	if err != nil || latestOrder == nil {
+		return nil, errors.New("读取订单信息失败")
+	}
+	return s.toShopOrder(latestOrder), nil
 }
 
 // GetByID 获取订单详情，包含商品明细。
@@ -432,6 +450,9 @@ func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (
 	if s.erpStatusToShopStatus(order.Status) != orderConstant.OrderStatusPending {
 		return nil, errors.New("只能支付待支付的订单")
 	}
+	if order.SyncStatus != shopConstant.OrderSyncStatusSuccess {
+		return nil, errors.New("订单尚未同步管家婆，暂不能支付")
+	}
 	if shopUser.WechatOpenid == "" {
 		return nil, errors.New("用户未绑定微信")
 	}
@@ -536,8 +557,11 @@ func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo
 	}
 
 	// 幂等：已支付则跳过
-	if order.Status == orderConstant.ERPStatusPayed {
-		return nil
+	//if order.Status == orderConstant.ERPStatusPayed {
+	//	return nil
+	//}
+	if order.Status != orderConstant.ERPStatusNoPay {
+		return errors.New("订单状态错误")
 	}
 
 	// 金额校验
@@ -555,19 +579,26 @@ func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo
 	order.PayTime = &now
 	order.Status = orderConstant.ERPStatusPayed
 
-	return s.db.WithContext(c).Table("erp_order").
-		Where("id = ?", order.ID).
-		Where("status = ?", orderConstant.ERPStatusNoPay).
-		Updates(map[string]interface{}{
-			"status":         orderConstant.ERPStatusPayed,
-			"pay_time":       order.PayTime,
-			"transaction_id": transactionId,
-			"notify_raw":     notifyRaw,
-			"mch_id":         mchId,
-			"appid":          appid,
-			"payer_openid":   payerOpenid,
-			"pay_channel":    1,
-		}).Error
+	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		var orderModel models.Order
+
+		if err = tx.Table("erp_order").Clauses(clause.Locking{Strength: "UPDATE"}).First(&orderModel).Error; err != nil {
+			return fmt.Errorf("订单不存在: %v", err)
+		}
+		return tx.Table("erp_order").
+			Where("id = ?", order.ID).
+			Where("status = ?", orderConstant.ERPStatusNoPay).
+			Updates(map[string]interface{}{
+				"status":         orderConstant.ERPStatusPayed,
+				"pay_time":       order.PayTime,
+				"transaction_id": transactionId,
+				"notify_raw":     notifyRaw,
+				"mch_id":         mchId,
+				"appid":          appid,
+				"payer_openid":   payerOpenid,
+				"pay_channel":    1,
+			}).Error
+	})
 }
 
 // Cancel 取消订单，仅允许对待支付的订单进行取消。
@@ -660,6 +691,89 @@ func (s *IApiShopOrderServiceImpl) GetStatistics(c *gin.Context, userID int64) (
 		return nil, errors.New("商城用户不存在")
 	}
 	return s.getERPOrderStatistics(c, shopUser)
+}
+
+func (s *IApiShopOrderServiceImpl) syncCreatedOrder(c *gin.Context, order *erpordermodels.Order, cacheData *models.OrderCacheData) error {
+	if order == nil {
+		return errors.New("订单不存在")
+	}
+	if s.orderSync == nil {
+		return nil
+	}
+	if err := s.orderSync.SyncCreatedOrder(c, order.Tid); err != nil {
+		compensateErr := s.compensateCreateOrderSyncFailure(c, order, cacheData, err)
+		if compensateErr != nil {
+			return fmt.Errorf("订单同步管家婆失败: %v；补偿失败: %v", err, compensateErr)
+		}
+		return fmt.Errorf("订单同步管家婆失败: %v", err)
+	}
+	return nil
+}
+
+func (s *IApiShopOrderServiceImpl) ensureExistingOrderCreated(order *erpordermodels.Order) error {
+	if order == nil {
+		return errors.New("订单不存在")
+	}
+	if strings.TrimSpace(order.Status) == orderConstant.ERPStatusTradeClosed {
+		return errors.New("订单同步管家婆失败，请重新下单")
+	}
+	if order.SyncStatus == shopConstant.OrderSyncStatusFailed {
+		return errors.New("订单同步管家婆失败，请重新下单")
+	}
+	if order.SyncStatus != shopConstant.OrderSyncStatusSuccess {
+		return errors.New("订单尚未同步管家婆，请稍后重试")
+	}
+	return nil
+}
+
+func (s *IApiShopOrderServiceImpl) compensateCreateOrderSyncFailure(c *gin.Context, order *erpordermodels.Order, cacheData *models.OrderCacheData, syncErr error) error {
+	if s.db == nil {
+		return errors.New("数据库连接不存在")
+	}
+	if order == nil {
+		return errors.New("订单不存在")
+	}
+	message := "订单同步管家婆失败"
+	if syncErr != nil {
+		message = syncErr.Error()
+	}
+	now := time.Now()
+	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		c.Set("db", tx)
+		defer c.Set("db", nil)
+		if err := tx.Table("erp_order").
+			Where("id = ?", order.ID).
+			Updates(map[string]interface{}{
+				"status":       orderConstant.ERPStatusTradeClosed,
+				"sync_status":  shopConstant.OrderSyncStatusFailed,
+				"sync_message": truncateSyncMessage(message),
+				"sync_time":    &now,
+				"update_time":  &now,
+			}).Error; err != nil {
+			return err
+		}
+		if cacheData != nil {
+			for _, item := range cacheData.Items {
+				if item == nil {
+					continue
+				}
+				if err := s.skuDao.RestoreStock(c, item.SkuID, item.Quantity); err != nil {
+					return fmt.Errorf("回补库存失败: %v", err)
+				}
+				if item.SecKillId > 0 {
+					if err := s.seckillDao.RestoreStock(c, item.SecKillId, item.Quantity); err != nil {
+						return fmt.Errorf("回补秒杀库存失败: %v", err)
+					}
+				}
+				if item.CombinationId > 0 {
+					if err := s.combDao.RestoreStock(c, item.CombinationId, item.Quantity); err != nil {
+						return fmt.Errorf("回补拼团库存失败: %v", err)
+					}
+				}
+			}
+		}
+		return nil
+	})
 }
 
 // isValidStatusTransition 验证订单状态流转是否合法。
