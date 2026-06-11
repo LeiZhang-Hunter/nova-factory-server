@@ -34,7 +34,7 @@ func NewSseService(cache cache.Cache) systemservice.ISseService {
 }
 
 func (s *SseService) BuildNotificationChannel(c *gin.Context) {
-	manager := session.NewManger(s.cache)
+	manager := session.NewAdminManager(s.cache)
 	sess, err := manager.Get(c, c.Param("token"))
 	if err != nil {
 		baizeContext.InvalidToken(c)

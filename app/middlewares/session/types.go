@@ -7,10 +7,12 @@ import (
 )
 
 type Store interface {
+	Profile() sessionCache.SessionProfile
 	Generate(ctx context.Context, userId int64) (*sessionCache.Session, error)
 	Refresh(ctx context.Context, id string) error
 	Remove(ctx context.Context, id string) error
 	Get(ctx context.Context, id string) (*sessionCache.Session, error)
+	ScanSessions(ctx context.Context) []*sessionCache.Session
 }
 
 type Session interface {

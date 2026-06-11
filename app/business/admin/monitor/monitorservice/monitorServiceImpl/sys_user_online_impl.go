@@ -5,7 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/monitor/monitorservice"
 	"nova-factory-server/app/constant/sessionStatus"
 	"nova-factory-server/app/datasource/cache"
-	"nova-factory-server/app/middlewares/session/sessionCache"
+	"nova-factory-server/app/middlewares/session"
 	"strconv"
 	"strings"
 
@@ -21,29 +21,13 @@ func NewUserOnlineService(cache cache.Cache) monitorservice.IUserOnlineService {
 }
 
 func (userOnlineService *UserOnlineService) SelectUserOnlineList(c *gin.Context, ol *monitormodels.SysUserOnlineDQL) (list []*monitormodels.SysUserOnline, total int64) {
+	manager := session.NewAdminManager(userOnlineService.cache)
+	sessions := manager.ScanSessions(c)
 
-	var cursor uint64 = 0
-	keyAll := make([]string, 0, 16)
-	for {
-		keys, newCursor := userOnlineService.cache.Scan(c, cursor, sessionCache.SessionKey+":*", 10)
-		// 处理从Scan中返回的键值对集合
-		for _, key := range keys {
-			keyAll = append(keyAll, key)
-		}
-		// 如果新游标为0，则意味着所有键都已经扫描完成
-		if newCursor == 0 {
-			break
-		}
-		// 更新游标，继续下一轮扫描
-		cursor = newCursor
-	}
-
-	list = make([]*monitormodels.SysUserOnline, 0, len(keyAll))
-	for _, key := range keyAll {
-		sk := strings.TrimPrefix(key, sessionCache.SessionKey+":")
-		newSession := sessionCache.NewSession(sk, userOnlineService.cache)
+	list = make([]*monitormodels.SysUserOnline, 0, len(sessions))
+	for _, newSession := range sessions {
 		oui := new(monitormodels.SysUserOnline)
-		oui.TokenId = sk
+		oui.TokenId = newSession.Id()
 		oui.UserName = newSession.Get(c, sessionStatus.UserName)
 		oui.Browser = newSession.Get(c, sessionStatus.Browser)
 		oui.Ipaddr = newSession.Get(c, sessionStatus.IpAddr)
@@ -63,5 +47,5 @@ func (userOnlineService *UserOnlineService) SelectUserOnlineList(c *gin.Context,
 }
 
 func (userOnlineService *UserOnlineService) ForceLogout(c *gin.Context, tokenId string) {
-	userOnlineService.cache.Del(c, sessionCache.SessionKey+":"+tokenId)
+	_ = session.NewAdminManager(userOnlineService.cache).Remove(c, tokenId)
 }
