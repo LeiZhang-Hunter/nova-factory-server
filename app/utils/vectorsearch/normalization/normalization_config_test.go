@@ -145,8 +145,8 @@ func TestNewPipelineWithReplaceStep(t *testing.T) {
 	}{
 		{
 			name:           "three_dimensions",
-			input:          " 5型试样PTFE棕+二硫化钼-4.5*4.5*320 ",
-			want:           "4.5*4.5*320",
+			input:          "丁青骨架油封 60×80×12 丁青骨架油封 丁青 青骨 骨架 架油 油封 丁青骨 青骨架 骨架油 架油封 60 80 12 骨架油封",
+			want:           "60×80×12",
 			wantMatchCount: 1,
 		},
 		{

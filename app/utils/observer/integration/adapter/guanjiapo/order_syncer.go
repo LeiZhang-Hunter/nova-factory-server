@@ -1,37 +1,60 @@
-package grasp
+package guanjiapo
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"gopkg.in/errgo.v2/errors"
 	"io"
 	"net/http"
 	"net/url"
+	"nova-factory-server/app/utils/observer/integration/api"
+	"nova-factory-server/app/utils/observer/integration/event"
+	"nova-factory-server/app/utils/observer/integration/result"
 	"strings"
 	"time"
-
-	"nova-factory-server/app/business/erp/core/integration/api"
-	"nova-factory-server/app/datasource/cache"
 )
 
-// SynchronizeOrders 调用管家婆订单同步接口
-func (c *Client) SynchronizeOrders(ctx context.Context, cfg api.Config, req *api.OrderSyncRequest, cacheStore cache.Cache) (*api.OrderSyncResponse, error) {
+type orderSyncer struct {
+	tokenURL string
+}
+
+func newOrderSyncer(tokenURL string) api.OrderSyncer {
+	return &orderSyncer{
+		tokenURL: tokenURL,
+	}
+}
+
+// makeSign 签名
+func (s *orderSyncer) makeSign(timestamp string, token string, cfg *ConfigSnapshot, method string, body string) (string, error) {
+	var param map[string]string = make(map[string]string)
+	param["app_key"] = cfg.Credentials.AppKey
+	param["v"] = "1.0"
+	param["format"] = "json"
+	param["sign_method"] = "md5"
+	param["method"] = method
+	param["timestamp"] = timestamp
+	param["token"] = token
+
+	return generateMD5Sign(param, body, cfg.Credentials.AppSecret)
+}
+
+func (s *orderSyncer) SyncOrders(ctx context.Context, req event.OrderEvent) (result.OrderSyncResponse, error) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 
-	if req == nil || len(req.Orders) == 0 {
+	if req == nil || len(req.Orders()) == 0 {
 		return nil, errors.New("orders不能为空")
 	}
-	snapshot, err := ParseSnapshot(cfg)
+	snapshot, err := parseSnapshot(req.Config())
 	if err != nil {
 		return nil, err
 	}
-	token, err := c.resolveAccessToken(ctx, snapshot, cacheStore)
+	token, err := resolveAccessToken(ctx, snapshot, req.Cache())
 	if err != nil {
 		return nil, err
 	}
-	openapiURL := c.tokenURL
+	openapiURL := s.tokenURL
 	if strings.TrimSpace(snapshot.BaseURL) != "" {
 		openapiURL = strings.TrimRight(strings.TrimSpace(snapshot.BaseURL), "/") + "/openapi"
 	}
@@ -48,15 +71,14 @@ func (c *Client) SynchronizeOrders(ctx context.Context, cfg api.Config, req *api
 	params.Set("timestamp", timestamp)
 	params.Set("token", token)
 	body := map[string]any{
-		"orders": req.Orders,
+		"orders": req.Orders(),
 	}
 	payload, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 
-	// 执行签名
-	sign, err := c.makeSign(timestamp, token, snapshot, "emall.order.synchronize", string(payload))
+	sign, err := s.makeSign(timestamp, token, snapshot, "emall.order.synchronize", string(payload))
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +99,7 @@ func (c *Client) SynchronizeOrders(ctx context.Context, cfg api.Config, req *api
 	if err != nil {
 		return nil, err
 	}
-	ret := &api.OrderSyncResponse{}
+	ret := &OrderSyncResponse{}
 	if err = json.Unmarshal(respBytes, ret); err != nil {
 		return nil, err
 	}
@@ -92,25 +114,4 @@ func (c *Client) SynchronizeOrders(ctx context.Context, cfg api.Config, req *api
 		return nil, errors.New(ret.Message)
 	}
 	return ret, nil
-}
-
-// resolveAccessToken 解析可用token，优先配置，其次缓存
-func (c *Client) resolveAccessToken(ctx context.Context, snapshot *ConfigSnapshot, cacheStore cache.Cache) (string, error) {
-	if snapshot == nil {
-		return "", errors.New("管家婆配置不能为空")
-	}
-	token := strings.TrimSpace(snapshot.Token)
-	if token == "" {
-		token = strings.TrimSpace(snapshot.AccessToken)
-	}
-	if token != "" {
-		return token, nil
-	}
-	if cacheStore != nil {
-		cacheToken, err := c.GetLoginTokenFromCache(ctx, cacheStore)
-		if err == nil && cacheToken != nil && strings.TrimSpace(cacheToken.Token) != "" {
-			return strings.TrimSpace(cacheToken.Token), nil
-		}
-	}
-	return "", errors.New("未找到可用token，请先完成授权")
 }

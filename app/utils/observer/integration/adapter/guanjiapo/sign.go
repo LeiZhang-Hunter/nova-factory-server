@@ -1,4 +1,4 @@
-package grasp
+package guanjiapo
 
 import (
 	"crypto/md5"
@@ -8,21 +8,7 @@ import (
 	"strings"
 )
 
-// makeSign 签名
-func (c *Client) makeSign(timestamp string, token string, cfg *ConfigSnapshot, method string, body string) (string, error) {
-	var param map[string]string = make(map[string]string)
-	param["app_key"] = cfg.Credentials.AppKey
-	param["v"] = "1.0"
-	param["format"] = "json"
-	param["sign_method"] = "md5"
-	param["method"] = method
-	param["timestamp"] = timestamp
-	param["token"] = token
-
-	return generateMD5Sign(param, body, cfg.Credentials.AppSecret)
-}
-
-// GenerateMD5Sign 按管家婆开放接口的 MD5 规则生成签名。
+// generateMD5Sign 按管家婆开放接口的 MD5 规则生成签名
 func generateMD5Sign(params map[string]string, body string, appSecret string) (string, error) {
 	if appSecret == "" {
 		return "", fmt.Errorf("appSecret is required")

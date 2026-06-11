@@ -40,7 +40,7 @@ var upgrader = websocket.Upgrader{
 // @Description 建立 WebSocket 连接后，发送 JSON 消息体 { conversation_id, tab_id, content }，服务端将 SSE 事件实时推送回客户端
 // @Tags app接口/商城/App智能体WebSocket
 // @Param ws path string true "WebSocket 端点 /api/v1/app/shop/agent/conversations/ws/chat"
-// @Router /api/v1/app/shop/agent/conversations/ws/chat [ws]
+// @Router /api/v1/app/shop/agent/conversations/ws/chat [get]
 func (conversations *Conversations) WsChat(c *gin.Context) {
 	wsStart := time.Now()
 	// 升级为 WebSocket

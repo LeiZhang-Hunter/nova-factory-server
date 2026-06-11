@@ -1,7 +1,6 @@
 package salecontroller
 
 import (
-	"nova-factory-server/app/business/erp/core/integration/api"
 	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/business/erp/sale/saleservice"
 	"nova-factory-server/app/middlewares"
@@ -173,7 +172,7 @@ func (o *Order) CheckLoginState(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "同步成功"
 // @Router /erp/order/synchronize-sales-orders [post]
 func (o *Order) SynchronizeSalesOrders(c *gin.Context) {
-	req := new(api.OrderSyncRequest)
+	req := new(salemodels.OrderSyncRequest)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)
 		return

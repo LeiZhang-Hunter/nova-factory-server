@@ -2,23 +2,28 @@ package api
 
 import (
 	"errors"
+	"nova-factory-server/app/utils/observer/integration/kind"
 	"sync"
 )
 
-type Factory func() Client
+// Factory 创建 Client 的工厂函数
+type Factory func() Service
 
+// Registry Client 工厂注册表
 type Registry struct {
 	mu        sync.RWMutex
-	factories map[Kind]Factory
+	factories map[kind.Kind]Factory
 }
 
+// NewRegistry 创建注册表
 func NewRegistry() *Registry {
 	return &Registry{
-		factories: map[Kind]Factory{},
+		factories: map[kind.Kind]Factory{},
 	}
 }
 
-func (r *Registry) Register(kind Kind, factory Factory) error {
+// Register 注册客户端工厂
+func (r *Registry) Register(kind kind.Kind, factory Factory) error {
 	if kind == "" {
 		return errors.New("kind不能为空")
 	}
@@ -31,7 +36,8 @@ func (r *Registry) Register(kind Kind, factory Factory) error {
 	return nil
 }
 
-func (r *Registry) Create(kind Kind) (Client, error) {
+// Create 按类型创建客户端
+func (r *Registry) Create(kind kind.Kind) (Service, error) {
 	if kind == "" {
 		return nil, errors.New("kind不能为空")
 	}
@@ -49,6 +55,7 @@ var (
 	defaultRegistry     *Registry
 )
 
+// GetRegistry 获取默认注册表单例
 func GetRegistry() *Registry {
 	defaultRegistryOnce.Do(func() {
 		defaultRegistry = NewRegistry()
@@ -56,6 +63,7 @@ func GetRegistry() *Registry {
 	return defaultRegistry
 }
 
-func Register(kind Kind, factory Factory) error {
+// Register 向默认注册表注册客户端工厂
+func Register(kind kind.Kind, factory Factory) error {
 	return GetRegistry().Register(kind, factory)
 }

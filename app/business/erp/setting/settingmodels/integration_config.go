@@ -1,6 +1,10 @@
 package settingmodels
 
-import "nova-factory-server/app/baize"
+import (
+	"nova-factory-server/app/baize"
+	"nova-factory-server/app/utils/observer/integration/api"
+	"nova-factory-server/app/utils/observer/integration/kind"
+)
 
 // IntegrationConfig 集成配置
 type IntegrationConfig struct {
@@ -15,6 +19,25 @@ type IntegrationConfig struct {
 
 func (i *IntegrationConfig) GetData() string {
 	return i.Data
+}
+
+// GetType 返回集成类型，实现 observer.IntegrationConfig 接口
+func (i *IntegrationConfig) GetType() string {
+	return i.Type
+}
+
+func (i *IntegrationConfig) GetStatus() *bool {
+	return i.Status
+}
+func (i *IntegrationConfig) GetOverrideURL() string {
+	return ""
+}
+func (i *IntegrationConfig) GetMetadata() map[string]any {
+	return make(map[string]any)
+}
+
+func (i *IntegrationConfig) Service() (api.Service, error) {
+	return api.GetRegistry().Create(kind.Kind(i.Type))
 }
 
 type IntegrationConfigSet struct {

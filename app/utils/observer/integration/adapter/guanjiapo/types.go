@@ -1,10 +1,17 @@
-package grasp
+package guanjiapo
 
 import (
 	"encoding/json"
 	"errors"
-	"nova-factory-server/app/business/erp/core/integration/api"
+	"nova-factory-server/app/utils/observer/integration/config"
+	"nova-factory-server/app/utils/observer/integration/kind"
 	"strings"
+)
+
+// Kind 集成系统类型标识
+
+const (
+	KindGuanJiaPo kind.Kind = "gjp_v1"
 )
 
 // Credentials 管家婆应用授权信息
@@ -13,7 +20,7 @@ type Credentials struct {
 	AppSecret string `json:"appSecret"`
 }
 
-// ConfigSnapshot 集成配置快照
+// ConfigSnapshot 管家婆集成配置快照
 type ConfigSnapshot struct {
 	SystemName  string            `json:"systemName"`
 	Credentials Credentials       `json:"credentials"`
@@ -27,8 +34,8 @@ type ConfigSnapshot struct {
 	Headers     map[string]string `json:"headers"`
 }
 
-// ParseSnapshot 解析集成配置JSON为配置快照
-func ParseSnapshot(cfg api.Config) (*ConfigSnapshot, error) {
+// parseSnapshot 解析集成配置JSON为配置快照
+func parseSnapshot(cfg config.Config) (*ConfigSnapshot, error) {
 	if cfg == nil {
 		return nil, errors.New("integration config不能为空")
 	}

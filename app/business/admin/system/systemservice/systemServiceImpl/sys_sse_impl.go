@@ -38,6 +38,7 @@ func (s *SseService) BuildNotificationChannel(c *gin.Context) {
 	sess, err := manager.Get(c, c.Param("token"))
 	if err != nil {
 		baizeContext.InvalidToken(c)
+		return
 	}
 	c.Set(sessionStatus.SessionKey, sess)
 	closeNotify := c.Request.Context().Done()

@@ -23,4 +23,4 @@ func MakeAIGatewayAliveCacheKey(gatewayID int64) string {
 }
 
 // IntegrationLoginCacheKeyPattern erp集成系统登陆数据
-const IntegrationLoginCacheKeyPattern = "erp:integration:login:%s"
+const IntegrationLoginCacheKeyPattern = "erp:integration:login:%s:%s"

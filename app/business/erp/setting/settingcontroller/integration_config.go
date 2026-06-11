@@ -1,16 +1,13 @@
 package settingcontroller
 
 import (
-	"nova-factory-server/app/business/erp/core/integration/api"
-	"nova-factory-server/app/business/erp/core/integration/grasp"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/erp/setting/settingmodels"
 	"nova-factory-server/app/business/erp/setting/settingservice"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
-
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 )
@@ -169,14 +166,25 @@ func (i *IntegrationConfig) CheckLoginState(c *gin.Context) {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
-	loginInfo, cacheErr := grasp.New().GetLoginTokenFromCache(c, i.cache)
-	if cacheErr == nil && loginInfo != nil && loginInfo.Token != "" {
-		baizeContext.SuccessData(c, &api.LoginState{
-			Online:   true,
-			Message:  "已授权",
-			Type:     enableInfo.Type,
-			CheckURL: "",
-		})
+	if enableInfo == nil {
+		baizeContext.Success(c)
+		return
+	}
+
+	service, err := enableInfo.Service()
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+
+	if service == nil {
+		baizeContext.Waring(c, "集成配置不存在")
+		return
+	}
+
+	loginInfo, cacheErr := service.TokenGetter().GetTokenByCache(c, i.cache)
+	if cacheErr == nil && loginInfo != nil && loginInfo.GetToken() != "" {
+		baizeContext.SuccessData(c, loginInfo)
 		return
 	}
 	data, err := i.service.CheckLoginState(c, req)
@@ -208,31 +216,46 @@ func (i *IntegrationConfig) OAuthCallback(c *gin.Context) {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
+	if enableInfo == nil {
+		baizeContext.Success(c)
+		return
+	}
 
-	tokenData, err := grasp.New().ExchangeTokenByOAuthCode(c, enableInfo, req.Code)
+	service, err := enableInfo.Service()
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
 
-	if tokenData.Code != 0 {
-		baizeContext.Waring(c, tokenData.Message)
+	if service == nil {
+		baizeContext.Waring(c, "集成配置不存在")
 		return
 	}
 
-	if cacheErr := grasp.New().SaveLoginTokenToCache(c, i.cache, tokenData, 0); cacheErr != nil {
+	tokenData, err := service.TokenGetter().GetTokenByCode(c, enableInfo, req.Code)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+
+	if tokenData.GetCode() != 0 {
+		baizeContext.Waring(c, tokenData.GetMessage())
+		return
+	}
+
+	if cacheErr := service.TokenGetter().SaveTokenToCache(c, i.cache, tokenData, 0); cacheErr != nil {
 		baizeContext.Waring(c, cacheErr.Error())
 		return
 	}
 	baizeContext.SuccessData(c, &settingmodels.IntegrationOAuthCallbackData{
 		Code:       req.Code,
 		State:      req.State,
-		Token:      tokenData.Token,
-		ExpireDate: tokenData.ExpireDate,
-		IssueDate:  tokenData.IssueDate,
-		AppKey:     tokenData.AppKey,
-		AppSecret:  tokenData.AppSecret,
-		Message:    tokenData.Message,
-		ApiCode:    tokenData.Code,
+		Token:      tokenData.GetToken(),
+		ExpireDate: tokenData.GetExpireDate(),
+		IssueDate:  tokenData.GetIssueDate(),
+		AppKey:     tokenData.GetAppKey(),
+		AppSecret:  tokenData.GetAppSecret(),
+		Message:    tokenData.GetMessage(),
+		ApiCode:    tokenData.GetCode(),
 	})
 }
