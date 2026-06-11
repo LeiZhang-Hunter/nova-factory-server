@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
@@ -70,16 +71,19 @@ func (s *IApiShopWechatAuthServiceImpl) WechatLogin(c *gin.Context, req *models.
 	}
 
 	// 创建 Session
-	manager := session.NewManger(s.cache)
-	currentSession, err := manager.InitSession(c, user.ID)
+	manager := session.NewShopManager(s.cache)
+	currentSession, err := manager.InitSessionWithData(c, user.ID, &session.SessionData{
+		SessionType: sessionStatus.SessionTypeShopUser,
+		UserId:      user.ID,
+		DeptId:      user.DeptID,
+		Avatar:      user.Avatar,
+		UserName:    s.getUserDisplayName(user),
+		IpAddr:      c.ClientIP(),
+		LoginTime:   time.Now().Unix(),
+	})
 	if err != nil {
 		return nil, errors.New("创建会话失败")
 	}
-	currentSession.Set(c, sessionStatus.SessionType, sessionStatus.SessionTypeShopUser)
-	currentSession.Set(c, sessionStatus.UserId, user.UserID)
-	currentSession.Set(c, sessionStatus.UserName, s.getUserDisplayName(user))
-	currentSession.Set(c, sessionStatus.Avatar, user.Avatar)
-
 	return &models.WechatLoginResp{
 		Token:  currentSession.Id(),
 		UserId: user.ID,
@@ -93,7 +97,7 @@ func (s *IApiShopWechatAuthServiceImpl) RefreshToken(c *gin.Context, req *models
 	}
 
 	// 通过 session id 获取用户信息
-	manager := session.NewManger(s.cache)
+	manager := session.NewShopManager(s.cache)
 	sess, err := manager.Get(c, req.Token)
 	if err != nil {
 		return nil, errors.New("无效的会话")

@@ -57,7 +57,7 @@ func (s *ShopAuthServiceImpl) Login(c *gin.Context, req *models.ShopLoginReq) (*
 		return nil, errors.New("用户不存在/密码错误")
 	}
 
-	manager := session.NewManger(s.cache)
+	manager := session.NewShopManager(s.cache)
 	currentSession, err := manager.InitSession(c, user.ID)
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (s *ShopAuthServiceImpl) GetInfo(c *gin.Context) (*models.ShopGetInfoResp, 
 
 // Logout 退出当前商城登录会话。
 func (s *ShopAuthServiceImpl) Logout(c *gin.Context) error {
-	session.NewManger(s.cache).RemoveSession(c)
+	session.NewShopManager(s.cache).RemoveSession(c)
 	return nil
 }
 
