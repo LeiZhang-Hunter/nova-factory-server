@@ -6,8 +6,6 @@ import (
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/admin/system/systemdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
-	"nova-factory-server/app/business/erp/core/integration"
-	"nova-factory-server/app/business/erp/core/integration/api"
 	mastermodels "nova-factory-server/app/business/erp/master/mastermodels"
 	masterservice "nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/business/erp/setting/settingdao"
@@ -220,12 +218,15 @@ func (o *OrderAuditServiceImpl) Approve(c *gin.Context, req *salemodels.OrderAud
 		if cfg == nil {
 			return nil
 		}
-		client, err := integration.CreateByType(cfg.Type)
+		service, err := cfg.Service()
 		if err != nil {
 			return err
 		}
+		if service == nil {
+			return errors.New("没有配置集成商")
+		}
 		data := o.toOrderSyncRequest(item)
-		_, err = client.SynchronizeOrders(c, cfg, data, o.cache)
+		_, err = service.OrderSyncer().SyncOrders(c, data)
 		return err
 	})
 	if err != nil {
@@ -377,40 +378,40 @@ func (o *OrderAuditServiceImpl) toOrderSet(item *salemodels.OrderAudit) *salemod
 	}
 }
 
-func (o *OrderAuditServiceImpl) toOrderSyncRequest(item *salemodels.OrderAudit) *api.OrderSyncRequest {
+func (o *OrderAuditServiceImpl) toOrderSyncRequest(item *salemodels.OrderAudit) *salemodels.OrderSyncRequest {
 	if item == nil {
 		return nil
 	}
-	details := make([]*api.OrderSyncDetail, 0, len(item.Details))
+	details := make([]*salemodels.OrderSyncDetail, 0, len(item.Details))
 	for _, detail := range item.Details {
 		if detail == nil {
 			continue
 		}
-		details = append(details, &api.OrderSyncDetail{
+		details = append(details, &salemodels.OrderSyncDetail{
 			OID:            detail.OID,
-			Barcode:        stringPtr(detail.Barcode),
-			EShopGoodsID:   stringPtr(detail.EShopGoodsID),
-			OuterIID:       stringPtr(detail.OuterIID),
+			Barcode:        detail.Barcode,
+			EShopGoodsID:   detail.EShopGoodsID,
+			OuterIID:       detail.OuterIID,
 			EShopGoodsName: detail.EShopGoodsName,
-			EShopSKUId:     stringPtr(detail.EShopSkuID),
-			EShopSKUName:   stringPtr(detail.EShopSkuName),
-			NumIID:         int64Ptr(detail.NumIID),
-			SKUId:          int64Ptr(detail.SkuID),
+			EShopSKUId:     detail.EShopSkuID,
+			EShopSKUName:   detail.EShopSkuName,
+			NumIID:         detail.NumIID,
+			SKUId:          detail.SkuID,
 			Num:            detail.Num,
 			Payment:        detail.Payment,
-			PicPath:        stringPtr(detail.PicPath),
-			Weight:         float64Ptr(detail.Weight),
-			Size:           float64Ptr(detail.Size),
-			UnitID:         int64Ptr(detail.UnitID),
-			UnitQty:        float64Ptr(detail.UnitQty),
+			PicPath:        detail.PicPath,
+			Weight:         detail.Weight,
+			Size:           detail.Size,
+			UnitID:         detail.UnitID,
+			UnitQty:        detail.UnitQty,
 		})
 	}
-	accounts := make([]*api.OrderSyncAccount, 0, len(item.Accounts))
+	accounts := make([]*salemodels.OrderSyncAccount, 0, len(item.Accounts))
 	for _, account := range item.Accounts {
 		if account == nil {
 			continue
 		}
-		accounts = append(accounts, &api.OrderSyncAccount{
+		accounts = append(accounts, &salemodels.OrderSyncAccount{
 			FinanceCode: account.FinanceCode,
 			Total:       account.Total,
 		})
@@ -419,21 +420,21 @@ func (o *OrderAuditServiceImpl) toOrderSyncRequest(item *salemodels.OrderAudit) 
 	if item.CreateTime != nil {
 		created = item.CreateTime.Format("2006-01-02 15:04:05")
 	}
-	var payTime *string
+	var payTime string
 	if item.PayTime != nil {
 		formatted := item.PayTime.Format("2006-01-02 15:04:05")
-		payTime = &formatted
+		payTime = formatted
 	}
-	return &api.OrderSyncRequest{
-		Orders: []*api.OrderSyncOrder{
+	return &salemodels.OrderSyncRequest{
+		Orders: []*salemodels.OrderSyncOrder{
 			{
 				Tid:              item.Tid,
-				Weight:           float64Ptr(item.Weight),
-				Size:             float64Ptr(item.Size),
-				BuyerNick:        stringPtr(item.BuyerNick),
-				BuyerMessage:     stringPtr(item.BuyerMessage),
-				SellerMemo:       stringPtr(item.SellerMemo),
-				Total:            float64Ptr(item.Total),
+				Weight:           item.Weight,
+				Size:             item.Size,
+				BuyerNick:        item.BuyerNick,
+				BuyerMessage:     item.BuyerMessage,
+				SellerMemo:       item.SellerMemo,
+				Total:            item.Total,
 				Privilege:        item.Privilege,
 				PostFee:          item.PostFee,
 				ReceiverName:     item.ReceiverName,
@@ -441,37 +442,22 @@ func (o *OrderAuditServiceImpl) toOrderSyncRequest(item *salemodels.OrderAudit) 
 				ReceiverCity:     item.ReceiverCity,
 				ReceiverDistrict: item.ReceiverDistrict,
 				ReceiverAddress:  item.ReceiverAddress,
-				ReceiverPhone:    stringPtr(item.ReceiverPhone),
+				ReceiverPhone:    item.ReceiverPhone,
 				ReceiverMobile:   item.ReceiverMobile,
 				Created:          created,
 				Status:           item.Status,
 				Type:             item.Type,
-				InvoiceName:      stringPtr(item.InvoiceName),
-				SellerFlag:       stringPtr(item.SellerFlag),
+				InvoiceName:      item.InvoiceName,
+				SellerFlag:       item.SellerFlag,
 				PayTime:          payTime,
-				LogistBTypeCode:  stringPtr(item.LogistBTypeCode),
-				LogistBillCode:   stringPtr(item.LogistBillCode),
-				BTypeCode:        stringPtr(item.BTypeCode),
+				LogistBTypeCode:  item.LogistBTypeCode,
+				LogistBillCode:   item.LogistBillCode,
+				BTypeCode:        item.BTypeCode,
 				Details:          details,
 				Accounts:         accounts,
 			},
 		},
 	}
-}
-
-func stringPtr(value string) *string {
-	v := value
-	return &v
-}
-
-func float64Ptr(value float64) *float64 {
-	v := value
-	return &v
-}
-
-func int64Ptr(value int64) *int64 {
-	v := value
-	return &v
 }
 
 // fillOrderAuditDetails 填充商品详情，

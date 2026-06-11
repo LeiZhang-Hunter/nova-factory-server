@@ -2,9 +2,8 @@ package saleserviceimpl
 
 import (
 	"errors"
-	"nova-factory-server/app/business/erp/core/integration"
-	"nova-factory-server/app/business/erp/core/integration/api"
 	"nova-factory-server/app/business/erp/setting/settingdao"
+	"nova-factory-server/app/utils/observer/integration/result"
 	"nova-factory-server/app/utils/order"
 	"strings"
 
@@ -159,24 +158,28 @@ func (o *OrderServiceImpl) CheckLoginState(c *gin.Context, req *salemodels.Check
 	if cfg == nil {
 		return nil, errors.New("未找到管家婆启用配置")
 	}
-	client, err := integration.CreateByType(cfg.Type)
+	service, err := cfg.Service()
 	if err != nil {
 		return nil, err
 	}
-	state, err := client.CheckLoginState(c, cfg, req.CheckURL, "")
+	if service == nil {
+		return nil, errors.New("没有配置集成商")
+	}
+
+	state, err := service.CheckLoginState(cfg, req.CheckURL)
 	if err != nil {
 		return nil, err
 	}
 	return &salemodels.CheckLoginStateResp{
-		Online:   state.Online,
-		Message:  state.Message,
-		Type:     state.Type,
-		CheckURL: state.CheckURL,
+		Online:   state.GetOnline(),
+		Message:  state.GetMessage(),
+		Type:     state.GetType(),
+		CheckURL: state.GetCheckURL(),
 	}, nil
 }
 
-// SynchronizeSalesOrders 调用管家婆接口同步销售订单。
-func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *api.OrderSyncRequest) (*api.OrderSyncResponse, error) {
+// SynchronizeSalesOrders 调用集成客户端接口同步销售订单。
+func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *salemodels.OrderSyncRequest) (result.OrderSyncResponse, error) {
 	cfg, err := o.integrationConfigDao.GetEnabled(c)
 	if err != nil {
 		return nil, err
@@ -184,9 +187,13 @@ func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *api.Order
 	if cfg == nil {
 		return nil, errors.New("未找到管家婆启用配置")
 	}
-	client, err := integration.CreateByType(cfg.Type)
+	service, err := cfg.Service()
 	if err != nil {
 		return nil, err
 	}
-	return client.SynchronizeOrders(c, cfg, req, o.cache)
+	if service == nil {
+		return nil, errors.New("没有配置集成商")
+	}
+
+	return service.OrderSyncer().SyncOrders(c, req)
 }

@@ -1,9 +1,9 @@
 package observer
 
 import (
-	"sync"
-
 	"go.uber.org/zap"
+	"nova-factory-server/app/utils/observer/integration/event"
+	"sync"
 )
 
 // Notifier 事件分发器，管理所有观察者并异步分发事件
@@ -35,20 +35,53 @@ func (n *Notifier) Register(obs Observer) {
 }
 
 // Notify 异步分发事件，通过回调函数决定调用哪个 Observer 方法
-func (n *Notifier) Notify(fn func(obs Observer)) {
+func (n *Notifier) notify(fn func(obs Observer) error) error {
 	n.mu.RLock()
 	observers := make([]Observer, len(n.observers))
 	copy(observers, n.observers)
 	n.mu.RUnlock()
 
-	for _, obs := range observers {
-		go func(o Observer) {
-			defer func() {
-				if err := recover(); err != nil {
-					zap.L().Error("observer panic", zap.String("name", string(o.Name())), zap.Any("error", err))
-				}
-			}()
-			fn(o)
-		}(obs)
+	for _, ob := range observers {
+		err := fn(ob)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
+}
+
+// OnProductChanged 商品变更回调
+func (n *Notifier) OnProductChanged(event event.ProductEvent) error {
+	return n.notify(func(ob Observer) error {
+		err := ob.OnProductChanged(event)
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
+		return nil
+	})
+}
+
+// OnStockChanged 库存变更回调
+func (n *Notifier) OnStockChanged(event event.StockEvent) error {
+	return n.notify(func(ob Observer) error {
+		err := ob.OnStockChanged(event)
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
+		return nil
+	})
+}
+
+// OnOrderChanged 订单变更回调
+func (n *Notifier) OnOrderChanged(event event.OrderEvent) error {
+	return n.notify(func(ob Observer) error {
+		err := ob.OnOrderChanged(event)
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
+		return nil
+	})
 }

@@ -2,10 +2,12 @@ package api
 
 import (
 	"context"
+	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
 	"nova-factory-server/app/utils/observer/integration/result"
+	"time"
 )
 
 // Service 集成客户端最小接口，定义身份标识与登录态检查。
@@ -34,5 +36,7 @@ type OrderSyncer interface {
 //}
 
 type TokenGetter interface {
-	GetToken(ctx context.Context, cfg config.Config, oauthCode string) (result.OAuthTokenResponse, error)
+	GetTokenByCode(ctx context.Context, cfg config.Config, oauthCode string) (result.OAuthTokenResponse, error)
+	SaveTokenToCache(ctx context.Context, cacheStore cache.Cache, token result.OAuthTokenResponse, expiration time.Duration) error
+	GetTokenByCache(ctx context.Context, cacheStore cache.Cache) (result.OAuthTokenResponse, error)
 }

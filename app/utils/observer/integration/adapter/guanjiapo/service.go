@@ -38,7 +38,7 @@ func New() api.Service {
 	return &Service{
 		oauthURL:    oauthURL,
 		tokenURL:    tokenURL,
-		tokenSyncer: newTokenSyncer(tokenURL, tokenURL),
+		tokenSyncer: newTokenSyncer(tokenURL, tokenURL, mode),
 		orderSyncer: newOrderSyncer(tokenURL),
 		mode:        strings.ToLower(mode),
 	}

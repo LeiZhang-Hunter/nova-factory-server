@@ -5,29 +5,35 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"nova-factory-server/app/constant/redis"
+	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/api"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/result"
 	"strings"
+	"time"
 )
 
 type tokenSyncer struct {
 	tokenURL string
 	oauthURL string
+	mode     string
 }
 
-func newTokenSyncer(tokenURL string, oauthURL string) api.TokenGetter {
+func newTokenSyncer(tokenURL string, oauthURL string, mode string) api.TokenGetter {
 	return &tokenSyncer{
 		tokenURL: tokenURL,
 		oauthURL: oauthURL,
+		mode:     mode,
 	}
 }
 
-// GetToken 使用oauthcode换取访问令牌
-func (c *tokenSyncer) GetToken(ctx context.Context, cfg config.Config, oauthCode string) (result.OAuthTokenResponse, error) {
+// GetTokenByCode 使用oauthcode换取访问令牌
+func (c *tokenSyncer) GetTokenByCode(ctx context.Context, cfg config.Config, oauthCode string) (result.OAuthTokenResponse, error) {
 	snapshot, err := parseSnapshot(cfg)
 	if err != nil {
 		return nil, err
@@ -86,6 +92,39 @@ func (c *tokenSyncer) GetToken(ctx context.Context, cfg config.Config, oauthCode
 			msg = string(respBytes)
 		}
 		return nil, errors.New("获取token失败: " + msg)
+	}
+	return ret, nil
+}
+
+// SaveTokenToCache 写入管家婆登录态到缓存
+func (c *tokenSyncer) SaveTokenToCache(ctx context.Context, cacheStore cache.Cache, token result.OAuthTokenResponse, expiration time.Duration) error {
+	if cacheStore == nil {
+		return errors.New("cache不能为空")
+	}
+	if token == nil {
+		return errors.New("token不能为空")
+	}
+	cacheKey := fmt.Sprintf(redis.IntegrationLoginCacheKeyPattern, c.mode, KindGuanJiaPo)
+	value, err := json.Marshal(token)
+	if err != nil {
+		return err
+	}
+	cacheStore.Set(ctx, cacheKey, string(value), expiration)
+	return nil
+}
+
+func (c *tokenSyncer) GetTokenByCache(ctx context.Context, cacheStore cache.Cache) (result.OAuthTokenResponse, error) {
+	if cacheStore == nil {
+		return nil, errors.New("cache不能为空")
+	}
+	cacheKey := fmt.Sprintf(redis.IntegrationLoginCacheKeyPattern, c.mode, KindGuanJiaPo)
+	cacheValue, err := cacheStore.Get(ctx, cacheKey)
+	if err != nil || strings.TrimSpace(cacheValue) == "" {
+		return nil, err
+	}
+	ret := new(OAuthTokenResponse)
+	if err = json.Unmarshal([]byte(cacheValue), ret); err != nil {
+		return nil, err
 	}
 	return ret, nil
 }

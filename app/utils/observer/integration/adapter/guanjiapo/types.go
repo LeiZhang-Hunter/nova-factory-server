@@ -40,10 +40,10 @@ func parseSnapshot(cfg config.Config) (*ConfigSnapshot, error) {
 		return nil, errors.New("integration config不能为空")
 	}
 	s := &ConfigSnapshot{}
-	if strings.TrimSpace(cfg.Data()) == "" {
+	if strings.TrimSpace(cfg.GetData()) == "" {
 		return s, nil
 	}
-	if err := json.Unmarshal([]byte(cfg.Data()), s); err != nil {
+	if err := json.Unmarshal([]byte(cfg.GetData()), s); err != nil {
 		return nil, err
 	}
 	return s, nil
