@@ -49,6 +49,6 @@ func (s *IApiShopAuthServiceImpl) GetInfo(c *gin.Context) (*apiModels.ShopGetInf
 
 // Logout 退出当前商城登录会话（小程序）。
 func (s *IApiShopAuthServiceImpl) Logout(c *gin.Context) error {
-	session.NewManger(s.cache).RemoveSession(c)
+	session.NewShopManager(s.cache).RemoveSession(c)
 	return nil
 }

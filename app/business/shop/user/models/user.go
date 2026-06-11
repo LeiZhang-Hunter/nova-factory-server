@@ -18,6 +18,7 @@ type User struct {
 	ContactPhone string `json:"contactPhone" gorm:"contact_phone"` // 联系人手机号
 	WechatOpenid string `json:"wechatOpenid" gorm:"wechat_openid"` // 微信Openid
 	Status       *bool  `json:"status" gorm:"status"`              // 状态
+	IsOnline     bool   `json:"isOnline" gorm:"-"`                 // 是否在线
 	DeptID       int64  `json:"deptId" gorm:"column:dept_id"`      // 部门ID
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"` // 操作状态

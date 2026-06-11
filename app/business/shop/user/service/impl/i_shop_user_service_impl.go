@@ -5,18 +5,23 @@ import (
 	"nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/business/shop/user/service"
+	"nova-factory-server/app/constant/sessionStatus"
+	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/middlewares/session"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/utils/bCryptPasswordEncoder"
+	"strconv"
 )
 
 type ShopUserServiceImpl struct {
-	dao dao.IShopUserDao
+	dao   dao.IShopUserDao
+	cache cache.Cache
 }
 
-func NewShopUserService(dao dao.IShopUserDao) service.IShopUserService {
-	return &ShopUserServiceImpl{dao: dao}
+func NewShopUserService(cache cache.Cache, dao dao.IShopUserDao) service.IShopUserService {
+	return &ShopUserServiceImpl{dao: dao, cache: cache}
 }
 
 func (s *ShopUserServiceImpl) Create(c *gin.Context, req *models.UserUpsert) (*models.User, error) {
@@ -38,11 +43,58 @@ func (s *ShopUserServiceImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 }
 
 func (s *ShopUserServiceImpl) GetByID(c *gin.Context, id int64) (*models.User, error) {
-	return s.dao.GetByID(c, id)
+	user, err := s.dao.GetByID(c, id)
+	if err != nil || user == nil {
+		return user, err
+	}
+	user.IsOnline = s.isUserOnline(c, user.ID)
+	return user, nil
 }
 
 func (s *ShopUserServiceImpl) List(c *gin.Context, req *models.UserQuery) (*models.UserListData, error) {
-	return s.dao.List(c, req)
+	data, err := s.dao.List(c, req)
+	if err != nil || data == nil {
+		return data, err
+	}
+	s.fillOnlineStatus(c, data.Rows)
+	return data, nil
+}
+
+func (s *ShopUserServiceImpl) fillOnlineStatus(c *gin.Context, rows []*models.User) {
+	if len(rows) == 0 {
+		return
+	}
+	onlineUserIDs := s.onlineUserIDSet(c)
+	for _, row := range rows {
+		if row == nil {
+			continue
+		}
+		_, row.IsOnline = onlineUserIDs[row.ID]
+	}
+}
+
+func (s *ShopUserServiceImpl) isUserOnline(c *gin.Context, userID int64) bool {
+	if userID == 0 {
+		return false
+	}
+	_, ok := s.onlineUserIDSet(c)[userID]
+	return ok
+}
+
+func (s *ShopUserServiceImpl) onlineUserIDSet(c *gin.Context) map[int64]struct{} {
+	onlineUserIDs := make(map[int64]struct{})
+	if s.cache == nil {
+		return onlineUserIDs
+	}
+	manager := session.NewShopManager(s.cache)
+	for _, sess := range manager.ScanSessions(c) {
+		userID, err := strconv.ParseInt(sess.Get(c, sessionStatus.UserId), 10, 64)
+		if err != nil || userID == 0 {
+			continue
+		}
+		onlineUserIDs[userID] = struct{}{}
+	}
+	return onlineUserIDs
 }
 
 func (s *ShopUserServiceImpl) prepareUpsert(c *gin.Context, req *models.UserUpsert, isUpdate bool) error {

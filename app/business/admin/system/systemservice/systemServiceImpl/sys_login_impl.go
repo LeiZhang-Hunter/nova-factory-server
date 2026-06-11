@@ -42,7 +42,7 @@ func NewLoginService(cache cache.Cache, ud systemDao2.IUserDao, pd systemDao2.IP
 }
 
 func (loginService *LoginService) Login(c *gin.Context, user *systemModels2.User) *systemModels2.LoginResp {
-	manager := session.NewManger(loginService.cache)
+	manager := session.NewAdminManager(loginService.cache)
 	session, _ := manager.InitSession(c, user.UserId)
 	session.Set(c, sessionStatus.SessionType, sessionStatus.SessionTypeAdmin)
 	session.Set(c, sessionStatus.Os, user.Os)
