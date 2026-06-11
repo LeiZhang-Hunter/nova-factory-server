@@ -68,6 +68,18 @@ milvus:
   username: ""
   password: ""
   db_name: "nova"
+
+voice:
+  xfyun:
+    app_id: "f079c783"
+    api_key: "490f0927ebb94f973ab4610920b52310"
+    api_secret: "N2QwNTJkMWYxMzZhN2U5NzgwY2EwNzAy"
+    asr_url: "wss://iat-api.xfyun.cn/v2/iat"
+    tts_url: "wss://cbm01.cn-huabei-1.xf-yun.com/v1/private/mcd9m97e6"
+    tts_voice: "x5_lingxiaoxuan_flow"
+    tts_speed: 50
+    tts_volume: 50
+    tts_pitch: 50
 vectorsearch:
   normalization:
     goods:

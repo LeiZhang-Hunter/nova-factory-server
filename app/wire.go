@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/admin"
 	"nova-factory-server/app/business/ai"
 	"nova-factory-server/app/business/erp"
+	"nova-factory-server/app/business/erp_api"
 	"nova-factory-server/app/business/iot"
 	"nova-factory-server/app/business/shop"
 	"nova-factory-server/app/business/wms"
@@ -18,7 +19,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.Shop, _ *erp.Erp, _ *wms.Wms) *gin.Engine {
+func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.Shop, _ *erp.Erp, _ *erp_api.ErpAPI, _ *wms.Wms) *gin.Engine {
 	type McpConfig struct {
 		Path           string `mapstructure:"path"`
 		OperationsPath string `mapstructure:"operationsPath"`
@@ -42,6 +43,7 @@ func wireApp() (*gin.Engine, func(), error) {
 		ai.ProviderSet,
 		shop.ProviderSet,
 		erp.ProviderSet,
+		erp_api.ProviderSet,
 		wms.ProviderSet,
 		admin.ProviderSet,
 		datasource.ProviderSet,
