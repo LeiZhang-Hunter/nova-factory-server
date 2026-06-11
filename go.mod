@@ -70,7 +70,7 @@ require (
 	github.com/ClickHouse/ch-go v0.61.5 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.30.0 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
-	github.com/apache/thrift v0.15.0 // indirect
+	github.com/apache/thrift v0.17.0 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.32.12 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.20 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.6 // indirect
@@ -301,3 +301,9 @@ require (
 )
 
 replace go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.60.0
+
+replace google.golang.org/grpc => google.golang.org/grpc v1.68.2
+
+replace google.golang.org/api => google.golang.org/api v0.228.0
+
+replace cloud.google.com/go/auth => cloud.google.com/go/auth v0.15.0
