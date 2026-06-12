@@ -3,6 +3,7 @@ package shopservice
 import (
 	"encoding/csv"
 	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/utils/observer/integration/event"
 
 	"github.com/gin-gonic/gin"
 )
@@ -53,4 +54,7 @@ type IShopGoodsService interface {
 
 	// BatchSearchVector 执行批量商品向量检索。
 	BatchSearchVector(c *gin.Context, req *shopmodels.GoodsVectorBatchSearchReq) (*shopmodels.GoodsVectorBatchSearchData, error)
+
+	// SyncEvent 同步事件
+	SyncEvent(event event.ProductEvent)
 }

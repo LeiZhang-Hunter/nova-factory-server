@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/snowflake"
 	"nova-factory-server/app/utils/vectorsearch/goods"
 	"sort"
@@ -815,4 +816,16 @@ func splitAndNormalizeMediaURLs(c *gin.Context, raw string) []string {
 		urls = append(urls, fileUtils.BuildAbsoluteURL(c, part))
 	}
 	return urls
+}
+
+// SyncEvent 同步事件
+func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) {
+	if event == nil {
+		return
+	}
+
+	if len(event.GetProducts()) == 0 {
+		return
+	}
+
 }
