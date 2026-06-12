@@ -13,6 +13,10 @@ type OrderSyncRequest struct {
 	c      cache.Cache       `json:"-"`
 }
 
+func (o *OrderSyncRequest) GetCallback() event.Callback {
+	return nil
+}
+
 func (o *OrderSyncRequest) GetOrders() []event.OrderData {
 	if o.Orders == nil {
 		return make([]event.OrderData, 0)

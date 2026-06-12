@@ -62,7 +62,7 @@ func (n *Notifier) notify(fn func(obs Observer) error) error {
 // 任一观察者返回错误即停止分发并返回该错误。
 func (n *Notifier) OnProductChanged(event event.ProductEvent) error {
 	return n.notify(func(ob Observer) error {
-		err := ob.OnProductChanged(event)
+		_, err := ob.OnProductChanged(event)
 		if err != nil {
 			zap.L().Error("Observer OnProductChanged", zap.Error(err))
 			return err

@@ -169,3 +169,13 @@ func ParseDateTime(s string) (*time.Time, error) {
 	}
 	return &t, nil
 }
+
+// FirstTime 返回已有时间或兜底时间。
+//
+// value 不为空时优先返回 value；value 为空时返回 fallback。
+func FirstTime(value *time.Time, fallback *time.Time) *time.Time {
+	if value != nil {
+		return value
+	}
+	return fallback
+}
