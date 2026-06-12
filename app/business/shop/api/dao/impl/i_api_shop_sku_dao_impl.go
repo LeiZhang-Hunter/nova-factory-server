@@ -96,3 +96,25 @@ func (s *IApiShopSkuDaoImpl) DeductStock(c *gin.Context, id int64, quantity int6
 	}
 	return nil
 }
+
+// RestoreStock 原子回补 SKU 库存。
+func (s *IApiShopSkuDaoImpl) RestoreStock(c *gin.Context, id int64, quantity int64) error {
+	if quantity <= 0 {
+		return errors.New("回补库存数量必须大于0")
+	}
+	result := getCurrentDB(c, s.db).WithContext(c).
+		Table(s.tableName).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(map[string]interface{}{
+			"quantity":    gorm.Expr("quantity + ?", quantity),
+			"update_time": gorm.Expr("NOW()"),
+		})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("商品规格不存在")
+	}
+	return nil
+}

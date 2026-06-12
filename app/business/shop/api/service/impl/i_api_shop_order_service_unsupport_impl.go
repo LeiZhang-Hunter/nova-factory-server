@@ -26,6 +26,7 @@ type IApiShopOrderServiceImpl struct {
 	skuDao          dao.IApiShopSkuDao
 	configDao       dao.IApiShopSysConfigDao
 	discountService discountservice.IDiscountCalculateService
+	orderSync       *shopOrderSyncService
 }
 
 // NewIApiShopOrderServiceImpl 创建订单服务实现。
@@ -42,6 +43,7 @@ func NewIApiShopOrderServiceImpl(
 	skuDao dao.IApiShopSkuDao,
 	configDao dao.IApiShopSysConfigDao,
 	discountService discountservice.IDiscountCalculateService,
+	orderSync *shopOrderSyncService,
 ) service.IApiShopOrderService {
 	return &IApiShopOrderServiceImpl{
 		cache:           cache,
@@ -56,5 +58,6 @@ func NewIApiShopOrderServiceImpl(
 		skuDao:          skuDao,
 		configDao:       configDao,
 		discountService: discountService,
+		orderSync:       orderSync,
 	}
 }

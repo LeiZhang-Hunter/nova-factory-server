@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/business/erp/sale/saledao"
 	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
@@ -51,7 +52,12 @@ type erpOrderDetailRow struct {
 }
 
 // NewOrderDetailDao 创建 ERP 订单明细 DAO。
-func NewOrderDetailDao(db *gorm.DB) *OrderDetailDaoImpl {
+func NewOrderDetailDao(db *gorm.DB) saledao.IOrderDetailDao {
+	return newOrderDetailDaoImpl(db)
+}
+
+// newOrderDetailDaoImpl 创建 ERP 订单明细 DAO 具体实现。
+func newOrderDetailDaoImpl(db *gorm.DB) *OrderDetailDaoImpl {
 	return &OrderDetailDaoImpl{
 		db:    db,
 		table: "erp_order_detail",
@@ -97,6 +103,50 @@ func (d *OrderDetailDaoImpl) BatchCreate(tx *gorm.DB, c *gin.Context, orderID ui
 		row.CreateTime = &now
 		row.UpdateBy = baizeContext.GetUserId(c)
 		row.UpdateTime = &now
+		rows = append(rows, row)
+	}
+	if len(rows) == 0 {
+		return nil
+	}
+	return tx.Table(d.table).Create(&rows).Error
+}
+
+// BatchCreateByOrder 批量创建事件同步转换后的订单明细。
+func (d *OrderDetailDaoImpl) BatchCreateByOrder(tx *gorm.DB, orderID uint64, order *salemodels.Order, now *time.Time) error {
+	if order == nil || len(order.Details) == 0 {
+		return nil
+	}
+	rows := make([]*erpOrderDetailRow, 0, len(order.Details))
+	for _, item := range order.Details {
+		if item == nil {
+			continue
+		}
+		row := &erpOrderDetailRow{
+			OrderID:        orderID,
+			Tid:            order.Tid,
+			OID:            item.OID,
+			Barcode:        item.Barcode,
+			EShopGoodsID:   item.EShopGoodsID,
+			OuterIID:       item.OuterIID,
+			EShopGoodsName: item.EShopGoodsName,
+			EShopSkuID:     item.EShopSkuID,
+			EShopSkuName:   item.EShopSkuName,
+			NumIID:         item.NumIID,
+			SkuID:          item.SkuID,
+			Num:            item.Num,
+			Payment:        item.Payment,
+			PicPath:        item.PicPath,
+			Weight:         item.Weight,
+			Size:           item.Size,
+			UnitID:         item.UnitID,
+			UnitQty:        item.UnitQty,
+			DeptID:         order.DeptID,
+			CreateBy:       order.CreateBy,
+			CreateTime:     now,
+			UpdateBy:       order.UpdateBy,
+			UpdateTime:     now,
+			State:          commonStatus.NORMAL,
+		}
 		rows = append(rows, row)
 	}
 	if len(rows) == 0 {

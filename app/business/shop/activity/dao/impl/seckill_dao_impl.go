@@ -184,6 +184,29 @@ func (s *ShopSeckillDaoImpl) DeductStock(c *gin.Context, id int64, quantity int6
 	return nil
 }
 
+// RestoreStock 原子回补秒杀活动库存。
+func (s *ShopSeckillDaoImpl) RestoreStock(c *gin.Context, id int64, quantity int64) error {
+	if quantity <= 0 {
+		return errors.New("回补库存数量必须大于0")
+	}
+	result := activityCurrentDB(c, s.db).WithContext(c).Table(s.tableName).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("is_del = ?", 0).
+		Updates(map[string]any{
+			"stock":       gorm.Expr("stock + ?", quantity),
+			"sales":       gorm.Expr("GREATEST(sales - ?, 0)", quantity),
+			"update_time": gorm.Expr("NOW()"),
+		})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("秒杀活动不存在")
+	}
+	return nil
+}
+
 func (s *ShopSeckillDaoImpl) baseQuery(c *gin.Context) *gorm.DB {
 	return s.db.WithContext(c).Table(s.tableName).
 		Where("state = ?", commonStatus.NORMAL).

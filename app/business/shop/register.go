@@ -21,6 +21,7 @@ import (
 	shopConfigDaoImpl "nova-factory-server/app/business/shop/config/dao/impl"
 	shopConfigServiceImpl "nova-factory-server/app/business/shop/config/service/impl"
 	"nova-factory-server/app/business/shop/discount"
+	"nova-factory-server/app/business/shop/product/shopobserver"
 
 	homeController "nova-factory-server/app/business/shop/home/controller"
 	homeDaoImpl "nova-factory-server/app/business/shop/home/dao/impl"
@@ -68,5 +69,8 @@ var ProviderSet = wire.NewSet(
 	userServiceImpl.ProviderSet,
 	userController.ProviderSet,
 	discount.ProviderSet,
+
+	shopobserver.ProviderSet,
+
 	GinProviderSet,
 )

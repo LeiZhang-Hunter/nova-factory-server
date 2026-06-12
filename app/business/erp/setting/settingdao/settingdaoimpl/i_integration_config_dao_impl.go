@@ -28,49 +28,68 @@ func (i *IntegrationConfigDaoImpl) Set(c *gin.Context, req *settingmodels.Integr
 	if req.Type == "" {
 		return nil, errors.New("type不能为空")
 	}
-	var exists settingmodels.IntegrationConfig
-	err := i.db.WithContext(c).Table(i.table).Where("type = ?", req.Type).Where("state = ?", commonStatus.NORMAL).First(&exists).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		data := &settingmodels.IntegrationConfig{
-			Type:   req.Type,
+
+	var data *settingmodels.IntegrationConfig
+	err := i.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		var exists settingmodels.IntegrationConfig
+		err := tx.Table(i.table).Where("type = ?", req.Type).Where("state = ?", commonStatus.NORMAL).First(&exists).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			data = &settingmodels.IntegrationConfig{
+				Type:   req.Type,
+				Data:   req.Data,
+				Status: req.Status,
+				DeptID: baizeContext.GetDeptId(c),
+				State:  commonStatus.NORMAL,
+			}
+			if data.Status == nil {
+				status := true
+				data.Status = &status
+			}
+			if data.Status != nil && *data.Status {
+				if err = tx.Table(i.table).Where("state = ?", commonStatus.NORMAL).Updates(map[string]any{"status": false}).Error; err != nil {
+					return err
+				}
+			}
+			data.SetCreateBy(baizeContext.GetUserId(c))
+			if err = tx.Table(i.table).Create(data).Error; err != nil {
+				return err
+			}
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		update := &settingmodels.IntegrationConfig{
+			ID:     exists.ID,
+			Type:   exists.Type,
 			Data:   req.Data,
-			Status: req.Status,
-			DeptID: baizeContext.GetDeptId(c),
-			State:  commonStatus.NORMAL,
+			Status: exists.Status,
 		}
-		if data.Status == nil {
-			status := true
-			data.Status = &status
+		if req.Status != nil {
+			update.Status = req.Status
 		}
-		data.SetCreateBy(baizeContext.GetUserId(c))
-		if err = i.db.WithContext(c).Table(i.table).Create(data).Error; err != nil {
-			return nil, err
+		if update.Status != nil && *update.Status {
+			if err = tx.Table(i.table).Where("state = ?", commonStatus.NORMAL).Where("id <> ?", exists.ID).Updates(map[string]any{"status": false}).Error; err != nil {
+				return err
+			}
 		}
-		return data, nil
-	}
+		update.SetUpdateBy(baizeContext.GetUserId(c))
+		if err = tx.Table(i.table).Where("id = ?", exists.ID).Where("state = ?", commonStatus.NORMAL).
+			Select("data", "status", "update_by", "update_time").Updates(update).Error; err != nil {
+			return err
+		}
+		if err = tx.Table(i.table).Where("id = ?", exists.ID).Where("state = ?", commonStatus.NORMAL).First(&exists).Error; err != nil {
+			return err
+		}
+		data = &exists
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
-	update := &settingmodels.IntegrationConfig{
-		ID:     exists.ID,
-		Type:   exists.Type,
-		Data:   req.Data,
-		Status: exists.Status,
-	}
-	if req.Status != nil {
-		update.Status = req.Status
-	}
-	update.SetUpdateBy(baizeContext.GetUserId(c))
-	if err = i.db.WithContext(c).Table(i.table).Where("id = ?", exists.ID).Where("state = ?", commonStatus.NORMAL).
-		Select("data", "status", "update_by", "update_time").Updates(update).Error; err != nil {
-		return nil, err
-	}
-	if err = i.db.WithContext(c).Table(i.table).Where("id = ?", exists.ID).Where("state = ?", commonStatus.NORMAL).First(&exists).Error; err != nil {
-		return nil, err
-	}
-	return &exists, nil
+	return data, nil
 }
-
 func (i *IntegrationConfigDaoImpl) List(c *gin.Context, req *settingmodels.IntegrationConfigQuery) (*settingmodels.IntegrationConfigListData, error) {
 	db := i.db.WithContext(c).Table(i.table).Where("state = ?", commonStatus.NORMAL)
 	if req != nil && req.Type != "" {

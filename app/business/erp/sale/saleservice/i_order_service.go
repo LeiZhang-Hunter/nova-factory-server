@@ -2,6 +2,7 @@ package saleservice
 
 import (
 	"nova-factory-server/app/business/erp/sale/salemodels"
+	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
 
 	"github.com/gin-gonic/gin"
@@ -15,4 +16,7 @@ type IOrderService interface {
 	DeleteByIDs(c *gin.Context, ids []uint64) error
 	CheckLoginState(c *gin.Context, req *salemodels.CheckLoginStateReq) (*salemodels.CheckLoginStateResp, error)
 	SynchronizeSalesOrders(c *gin.Context, req *salemodels.OrderSyncRequest) (result.OrderSyncResponse, error)
+
+	// Sync 同步销售订单
+	Sync(event event.OrderEvent)
 }

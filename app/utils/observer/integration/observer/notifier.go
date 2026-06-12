@@ -1,3 +1,6 @@
+// Notifier 事件分发器，负责管理所有已注册的 Observer（观察者），
+// 在业务事件（商品变更、库存变更、订单变更）发生时依次通知每个观察者。
+// 采用全局单例模式，确保全应用共享同一组观察者列表。
 package observer
 
 import (
@@ -6,7 +9,8 @@ import (
 	"sync"
 )
 
-// Notifier 事件分发器，管理所有观察者并异步分发事件
+// Notifier 事件分发器，管理所有 Observer 观察者并分发业务事件。
+// 内部使用读写锁保证并发安全，在通知时先复制观察者列表再迭代，避免锁持有时间过长。
 type Notifier struct {
 	mu        sync.RWMutex
 	observers []Observer
@@ -17,7 +21,8 @@ var (
 	notifierIns  *Notifier
 )
 
-// GetNotifier 获取全局单例事件分发器
+// GetNotifier 获取全局单例事件分发器。
+// 首次调用时初始化，后续调用返回同一实例。
 func GetNotifier() *Notifier {
 	notifierOnce.Do(func() {
 		notifierIns = &Notifier{
@@ -27,14 +32,17 @@ func GetNotifier() *Notifier {
 	return notifierIns
 }
 
-// Register 注册观察者
+// Register 注册一个观察者到分发器。
+// 同一类型的 Observer 可注册多次，各适配器通常在 init() 中调用。
 func (n *Notifier) Register(obs Observer) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 	n.observers = append(n.observers, obs)
 }
 
-// Notify 异步分发事件，通过回调函数决定调用哪个 Observer 方法
+// notify 内部事件分发逻辑，通过回调函数决定对每个 Observer 执行的具体操作。
+// 先加读锁复制观察者列表，释放锁后再迭代，避免在通知过程中阻塞注册操作。
+// 一旦任一观察者返回错误，立即终止后续分发并返回该错误。
 func (n *Notifier) notify(fn func(obs Observer) error) error {
 	n.mu.RLock()
 	observers := make([]Observer, len(n.observers))
@@ -50,10 +58,11 @@ func (n *Notifier) notify(fn func(obs Observer) error) error {
 	return nil
 }
 
-// OnProductChanged 商品变更回调
+// OnProductChanged 向所有观察者分发商品变更事件。
+// 任一观察者返回错误即停止分发并返回该错误。
 func (n *Notifier) OnProductChanged(event event.ProductEvent) error {
 	return n.notify(func(ob Observer) error {
-		err := ob.OnProductChanged(event)
+		_, err := ob.OnProductChanged(event)
 		if err != nil {
 			zap.L().Error("Observer OnProductChanged", zap.Error(err))
 			return err
@@ -62,7 +71,7 @@ func (n *Notifier) OnProductChanged(event event.ProductEvent) error {
 	})
 }
 
-// OnStockChanged 库存变更回调
+// OnStockChanged 向所有观察者分发库存变更事件。
 func (n *Notifier) OnStockChanged(event event.StockEvent) error {
 	return n.notify(func(ob Observer) error {
 		err := ob.OnStockChanged(event)
@@ -74,7 +83,7 @@ func (n *Notifier) OnStockChanged(event event.StockEvent) error {
 	})
 }
 
-// OnOrderChanged 订单变更回调
+// OnOrderChanged 向所有观察者分发订单变更事件。
 func (n *Notifier) OnOrderChanged(event event.OrderEvent) error {
 	return n.notify(func(ob Observer) error {
 		err := ob.OnOrderChanged(event)
