@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/business/erp/sale/saledao"
 	"nova-factory-server/app/business/erp/sale/salemodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
@@ -34,7 +35,12 @@ type erpOrderAccountRow struct {
 }
 
 // NewOrderAccountDao 创建 ERP 订单账户 DAO。
-func NewOrderAccountDao(db *gorm.DB) *OrderAccountDaoImpl {
+func NewOrderAccountDao(db *gorm.DB) saledao.IOrderAccountDao {
+	return newOrderAccountDaoImpl(db)
+}
+
+// newOrderAccountDaoImpl 创建 ERP 订单账户 DAO 具体实现。
+func newOrderAccountDaoImpl(db *gorm.DB) *OrderAccountDaoImpl {
 	return &OrderAccountDaoImpl{
 		db:    db,
 		table: "erp_order_account",
@@ -63,6 +69,36 @@ func (d *OrderAccountDaoImpl) BatchCreate(tx *gorm.DB, c *gin.Context, orderID u
 		row.CreateTime = &now
 		row.UpdateBy = baizeContext.GetUserId(c)
 		row.UpdateTime = &now
+		rows = append(rows, row)
+	}
+	if len(rows) == 0 {
+		return nil
+	}
+	return tx.Table(d.table).Create(&rows).Error
+}
+
+// BatchCreateByOrder 批量创建事件同步转换后的订单账户。
+func (d *OrderAccountDaoImpl) BatchCreateByOrder(tx *gorm.DB, orderID uint64, order *salemodels.Order, now *time.Time) error {
+	if order == nil || len(order.Accounts) == 0 {
+		return nil
+	}
+	rows := make([]*erpOrderAccountRow, 0, len(order.Accounts))
+	for _, item := range order.Accounts {
+		if item == nil {
+			continue
+		}
+		row := &erpOrderAccountRow{
+			OrderID:     orderID,
+			Tid:         order.Tid,
+			FinanceCode: item.FinanceCode,
+			Total:       item.Total,
+			DeptID:      order.DeptID,
+			CreateBy:    order.CreateBy,
+			CreateTime:  now,
+			UpdateBy:    order.UpdateBy,
+			UpdateTime:  now,
+			State:       commonStatus.NORMAL,
+		}
 		rows = append(rows, row)
 	}
 	if len(rows) == 0 {

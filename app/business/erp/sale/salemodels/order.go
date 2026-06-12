@@ -59,6 +59,8 @@ type Order struct {
 	LogistBTypeCode      string          `json:"logist_b_type_code" gorm:"column:logist_b_type_code"`
 	LogistBillCode       string          `json:"logist_bill_code" gorm:"column:logist_bill_code"`
 	BTypeCode            string          `json:"b_type_code" gorm:"column:b_type_code"`
+	DetailsJSON          string          `json:"-" gorm:"column:details_json"`
+	AccountsJSON         string          `json:"-" gorm:"column:accounts_json"`
 	BillCode             string          `json:"bill_code" gorm:"column:bill_code"`
 	SyncMessage          string          `json:"sync_message" gorm:"column:sync_message"`
 	SyncStatus           int32           `json:"sync_status" gorm:"column:sync_status"`

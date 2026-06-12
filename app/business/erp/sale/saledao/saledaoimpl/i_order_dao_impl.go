@@ -76,8 +76,8 @@ func NewOrderDao(db *gorm.DB) saledao.IOrderDao {
 	return &OrderDaoImpl{
 		db:         db,
 		table:      "erp_order",
-		detailDao:  NewOrderDetailDao(db),
-		accountDao: NewOrderAccountDao(db),
+		detailDao:  newOrderDetailDaoImpl(db),
+		accountDao: newOrderAccountDaoImpl(db),
 	}
 }
 
@@ -105,6 +105,38 @@ func (o *OrderDaoImpl) SetWithTx(c *gin.Context, tx *gorm.DB, req *salemodels.Or
 		return nil, err
 	}
 	return o.getByIDWithTx(c, tx, resultID)
+}
+
+// Create 在事务内创建 ERP 订单主表记录。
+func (o *OrderDaoImpl) Create(tx *gorm.DB, order *salemodels.Order) error {
+	if tx == nil {
+		return errors.New("ERP订单主表创建失败：事务不能为空")
+	}
+	if order == nil {
+		return errors.New("ERP订单主表创建失败：订单不能为空")
+	}
+	if order.ID == 0 {
+		order.ID = uint64(snowflake.GenID())
+	}
+	row := buildOrderRow(order)
+	return tx.Table(o.table).Create(row).Error
+}
+
+// UpdateByID 在事务内按 ID 更新 ERP 订单主表记录。
+func (o *OrderDaoImpl) UpdateByID(tx *gorm.DB, id uint64, updates map[string]any) error {
+	if tx == nil {
+		return errors.New("ERP订单主表更新失败：事务不能为空")
+	}
+	if id == 0 {
+		return errors.New("ERP订单主表更新失败：订单ID不能为空")
+	}
+	if len(updates) == 0 {
+		return nil
+	}
+	return tx.Table(o.table).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(updates).Error
 }
 
 // doSet 执行新增或修改 ERP 订单的核心逻辑。
@@ -398,6 +430,8 @@ func buildOrderRow(data *salemodels.Order) *erpOrderRow {
 		LogistBTypeCode:      data.LogistBTypeCode,
 		LogistBillCode:       data.LogistBillCode,
 		BTypeCode:            data.BTypeCode,
+		DetailsJSON:          data.DetailsJSON,
+		AccountsJSON:         data.AccountsJSON,
 		BillCode:             data.BillCode,
 		SyncMessage:          data.SyncMessage,
 		SyncStatus:           data.SyncStatus,
@@ -448,6 +482,8 @@ func (r *erpOrderRow) toModel() salemodels.Order {
 		LogistBTypeCode:      r.LogistBTypeCode,
 		LogistBillCode:       r.LogistBillCode,
 		BTypeCode:            r.BTypeCode,
+		DetailsJSON:          r.DetailsJSON,
+		AccountsJSON:         r.AccountsJSON,
 		BillCode:             r.BillCode,
 		SyncMessage:          r.SyncMessage,
 		SyncStatus:           r.SyncStatus,
@@ -499,6 +535,8 @@ func buildOrderUpdateMap(row *erpOrderRow) map[string]interface{} {
 		"logist_b_type_code":     row.LogistBTypeCode,
 		"logist_bill_code":       row.LogistBillCode,
 		"b_type_code":            row.BTypeCode,
+		"details_json":           row.DetailsJSON,
+		"accounts_json":          row.AccountsJSON,
 		"bill_code":              row.BillCode,
 		"sync_message":           row.SyncMessage,
 		"sync_status":            row.SyncStatus,
@@ -565,4 +603,29 @@ func (o *OrderDaoImpl) attachChildren(c *gin.Context, orders []*salemodels.Order
 		item.Accounts = accountMap[item.ID]
 	}
 	return nil
+}
+
+func (o *OrderDaoImpl) GetByTidTx(tx *gorm.DB, tid string) (*salemodels.Order, error) {
+	var item salemodels.Order
+	if err := tx.Table(o.table).
+		Where("tid = ?", tid).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
+// Transaction 开启订单同步事务。
+//
+// service 层会在该事务中组合调用订单主表 DAO、订单明细 DAO、订单账户 DAO。
+// 只要 fn 返回 error，GORM 会回滚整个事务；fn 返回 nil 时才提交。
+func (o *OrderDaoImpl) Transaction(fn func(tx *gorm.DB) error) error {
+	if o.db == nil {
+		return errors.New("ERP order dao db is nil")
+	}
+	return o.db.Transaction(fn)
 }

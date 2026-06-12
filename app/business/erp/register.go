@@ -10,6 +10,7 @@ import (
 	"nova-factory-server/app/business/erp/master/mastercontroller"
 	"nova-factory-server/app/business/erp/master/masterdao/masterdaoimpl"
 	"nova-factory-server/app/business/erp/master/masterservice/masterserviceimpl"
+	erpObserver "nova-factory-server/app/business/erp/observer"
 	"nova-factory-server/app/business/erp/purchase/purchasecontroller"
 	"nova-factory-server/app/business/erp/purchase/purchasedao/purchasedaoimpl"
 	"nova-factory-server/app/business/erp/purchase/purchaseservice/purchaseserviceimpl"
@@ -45,5 +46,6 @@ var ProviderSet = wire.NewSet(
 	settingdaoimpl.ProviderSet,
 	settingserviceimpl.ProviderSet,
 	settingcontroller.ProviderSet,
+	erpObserver.ProviderSet,
 	GinProviderSet,
 )

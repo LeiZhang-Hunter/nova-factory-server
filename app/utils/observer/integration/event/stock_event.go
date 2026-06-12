@@ -23,8 +23,8 @@ type StockData interface {
 // StockEvent 库存变更事件接口，表示一次库存数量变化事件。
 // 聚合了 Event（事件元信息）和 Base（基础能力），并提供库存数据列表。
 type StockEvent interface {
-	// Stocks 返回本次事件涉及的库存数据列表
-	Stocks() []StockData
+	// GetStocks 返回本次事件涉及的库存数据列表
+	GetStocks() []StockData
 	Event
 	Base
 }
