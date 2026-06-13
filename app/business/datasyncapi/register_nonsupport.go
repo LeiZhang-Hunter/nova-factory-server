@@ -6,14 +6,11 @@
 package datasyncapi
 
 import (
-	qqdcontroller "nova-factory-server/app/business/datasyncapi/gjpqqd/controller"
-	"nova-factory-server/app/routes"
-
 	"github.com/google/wire"
 )
 
 // NewGinEngine 模块未启用时返回空的 DataSyncApi，不挂载任何路由
-func NewGinEngine(app *routes.App, qqd *qqdcontroller.Controller) *DataSyncApi {
+func NewGinEngine() *DataSyncApi {
 	return &DataSyncApi{}
 }
 

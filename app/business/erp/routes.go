@@ -4,6 +4,7 @@
 package erp
 
 import (
+	"nova-factory-server/app/business/erp/erpobserver"
 	"nova-factory-server/app/business/erp/finance/financecontroller"
 	"nova-factory-server/app/business/erp/master/mastercontroller"
 	"nova-factory-server/app/business/erp/purchase/purchasecontroller"
@@ -28,6 +29,7 @@ func NewGinEngine(
 	sale *salecontroller.Controller,
 	stock *stockcontroller.Controller,
 	setting *settingcontroller.Controller,
+	_ *erpobserver.ErpObserver,
 ) *Erp {
 	group := app.Engine.Group("")
 	{

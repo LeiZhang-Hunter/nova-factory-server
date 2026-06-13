@@ -15,4 +15,6 @@ type IStockDao interface {
 	GetByColumn(c *gin.Context, column string, value any) (*stockmodels.Stock, error)
 	ListPage(c *gin.Context, req *stockmodels.StockQuery) (*stockmodels.StockListData, error)
 	List(c *gin.Context, req *stockmodels.StockQuery) (*stockmodels.StockListData, error)
+	UpdateStockByID(c *gin.Context, id int64, count float64) error
+	UpsertByID(c *gin.Context, id int64, updates map[string]any) error
 }

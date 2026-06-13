@@ -198,22 +198,23 @@ func (o *OrderServiceImpl) CheckLoginState(c *gin.Context, req *salemodels.Check
 
 // SynchronizeSalesOrders 调用集成客户端接口同步销售订单。
 func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *salemodels.OrderSyncRequest) (result.OrderSyncResponse, error) {
-	cfg, err := o.integrationConfigDao.GetEnabled(c)
-	if err != nil {
-		return nil, err
-	}
-	if cfg == nil {
-		return nil, errors.New("未找到管家婆启用配置")
-	}
-	service, err := cfg.Service()
-	if err != nil {
-		return nil, err
-	}
-	if service == nil {
-		return nil, errors.New("没有配置集成商")
-	}
-
-	return service.OrderSyncer().SyncOrders(c, req)
+	//cfg, err := o.integrationConfigDao.GetEnabled(c)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if cfg == nil {
+	//	return nil, errors.New("未找到管家婆启用配置")
+	//}
+	//service, err := cfg.Service()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if service == nil {
+	//	return nil, errors.New("没有配置集成商")
+	//}
+	//
+	//return service.OrderSyncer().SyncOrders(c, req)
+	return nil, nil
 }
 
 // Sync 同步销售订单事件数据。

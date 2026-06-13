@@ -4,15 +4,16 @@
 package kingdee
 
 import (
-	"go.uber.org/zap"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
 	"nova-factory-server/app/utils/observer/integration/observer"
+
+	"go.uber.org/zap"
 )
 
 // init 包初始化时自动将金蝶观察者注册到全局事件分发器
 func init() {
-	observer.GetNotifier().Register(NewSyncObserver())
+	//observer.GetNotifier().Register(NewSyncObserver())
 }
 
 // SyncObserver 金蝶同步观察者，实现 observer.Observer 接口。
@@ -23,7 +24,8 @@ type SyncObserver struct {
 
 // NewSyncObserver 创建金蝶同步观察者实例
 func NewSyncObserver() observer.Observer {
-	return &SyncObserver{}
+	//return &SyncObserver{}
+	return nil
 }
 
 // Name 返回观察者名称（金蝶类型标识）

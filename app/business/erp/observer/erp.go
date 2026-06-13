@@ -1,7 +1,10 @@
 package observer
 
 import (
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/business/erp/sale/saleservice"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
@@ -18,12 +21,18 @@ import (
 // 商品和库存事件目前 ERP 模块没有统一的事件同步 service，因此这里保留完整回调入口并记录日志，
 // 后续如果 ERP 商品档案或库存单据需要响应事件，可在对应回调中注入并调用相关 service。
 type ERPObserver struct {
-	orderService saleservice.IOrderService
+	orderService   saleservice.IOrderService
+	productService masterservice.IProductService
 }
 
 // NewERPObserver 创建 ERP 观察者。
-func NewERPObserver(orderService saleservice.IOrderService) observerapi.Observer {
-	return &ERPObserver{orderService: orderService}
+func NewERPObserver(orderService saleservice.IOrderService, productService masterservice.IProductService, observer observerapi.Observer, stockService masterservice.IStockService) observerapi.Observer {
+	s := &ERPObserver{
+		orderService:   orderService,
+		productService: productService,
+	}
+	observer.GetNotifier().Register(s)
+	return s
 }
 
 // Name 返回观察者名称。
@@ -37,11 +46,54 @@ func (o *ERPObserver) Name() kind.Kind {
 //
 // 当前 ERP 商品事件同步尚未接入，先安全跳过。
 func (o *ERPObserver) OnProductChanged(event event.ProductEvent) (result.SyncProductResponse, error) {
-	productCount := 0
-	if event != nil {
-		productCount = len(event.GetProducts())
+	products := event.GetProducts()
+	if len(products) == 0 {
+		return nil, nil
 	}
-	zap.L().Debug("ERP观察者暂未处理商品变更事件", zap.Int("products", productCount))
+
+	c := &gin.Context{}
+
+	for _, product := range products {
+		skus := product.GetSkus()
+		if len(skus) == 0 {
+			continue
+		}
+
+		for _, sku := range skus {
+			skuID := sku.GetSkuId()
+
+			productUpdates := map[string]any{
+				"name":       product.GetGoodsName(),
+				"bar_code":   sku.GetBarcode(),
+				"weight":     sku.GetWeight(),
+				"sale_price": sku.GetPrice(),
+				"standard":   sku.GetSkuName(),
+			}
+			if code := product.GetGoodsCode(); code != "" {
+				productUpdates["product_code"] = code
+			}
+
+			if err := o.productDao.UpsertByID(c, skuID, productUpdates); err != nil {
+				zap.L().Error("ErpObserver: 同步ERP产品失败",
+					zap.Int64("skuId", skuID),
+					zap.Error(err))
+				return nil, fmt.Errorf("同步ERP产品失败 skuId=%d: %w", skuID, err)
+			}
+
+			stockUpdates := map[string]any{
+				"product_id": skuID,
+				"count":      float64(sku.GetQuantity()),
+			}
+
+			if err := s.stockDao.UpsertByID(c, skuID, stockUpdates); err != nil {
+				zap.L().Error("ErpObserver: 同步ERP库存失败",
+					zap.Int64("skuId", skuID),
+					zap.Error(err))
+				return nil, fmt.Errorf("同步ERP库存失败 skuId=%d: %w", skuID, err)
+			}
+		}
+	}
+
 	return nil, nil
 }
 
@@ -49,11 +101,26 @@ func (o *ERPObserver) OnProductChanged(event event.ProductEvent) (result.SyncPro
 //
 // 当前 ERP 库存事件同步尚未接入，先安全跳过。
 func (o *ERPObserver) OnStockChanged(event event.StockEvent) error {
-	stockCount := 0
-	if event != nil {
-		stockCount = len(event.GetStocks())
+	stocks := event.GetStocks()
+	if len(stocks) == 0 {
+		return nil
 	}
-	zap.L().Debug("ERP观察者暂未处理库存变更事件", zap.Int("stocks", stockCount))
+
+	c := &gin.Context{}
+
+	for _, stock := range stocks {
+		id := stock.SkuID()
+		afterQty := stock.AfterQty()
+
+		if err := o.stockDao.UpdateStockByID(c, id, afterQty); err != nil {
+			zap.L().Error("ErpObserver: 更新ERP库存失败",
+				zap.Int64("id", id),
+				zap.Float64("count", afterQty),
+				zap.Error(err))
+			return fmt.Errorf("更新ERP库存失败 id=%d: %w", id, err)
+		}
+	}
+
 	return nil
 }
 

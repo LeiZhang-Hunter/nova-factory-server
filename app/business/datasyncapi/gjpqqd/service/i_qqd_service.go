@@ -19,7 +19,7 @@ type GjpQqdService interface {
 
 	// IssueToken 签发或刷新 access_token
 	// grantType 为 authorization_code 时使用 code 换取，为 refresh_token 时使用 oldRefreshToken 刷新
-	IssueToken(ctx *gin.Context, appKey, appSecret, code, grantType, oldRefreshToken string) (TokenResponse, error)
+	IssueToken(ctx *gin.Context, appKey, appSecret, code, grantType, oldRefreshToken string) (models.TokenResponse, error)
 
 	// ValidAccessToken 校验 access_token 是否有效且未过期，并与 appKey 匹配
 	ValidAccessToken(ctx *gin.Context, token, appKey string) bool
@@ -28,40 +28,11 @@ type GjpQqdService interface {
 	ValidSign(params map[string]string, body, sign string) bool
 
 	// ProductList 分页查询商品列表，返回管家婆 API 兼容的响应格式
-	ProductList(ctx *gin.Context, request ProductListRequest) (map[string]any, error)
+	ProductList(ctx *gin.Context, request models.ProductListRequest) (map[string]any, error)
 
 	// AddProducts 批量新增商品，goodsInfos 中每项包含 goodsid 及可选的 skus 和 quantity
 	AddProducts(ctx *gin.Context, goodsInfos []map[string]any) ([]map[string]any, error)
 
 	// ProductStockUpdate 更新商品库存，支持按商品批量更新和按 SKU 明细更新两种模式
-	ProductStockUpdate(ctx *gin.Context, request ProductStockUpdateRequest) (map[string]any, error)
+	ProductStockUpdate(ctx *gin.Context, request models.ProductStockUpdateRequest) (map[string]any, error)
 }
-
-// TokenResponse Token 签发成功后的返回结构
-// 包含 access_token、过期时间、refresh_token 及关联的应用凭据
-type TokenResponse struct {
-	Token           string
-	ExpireDate      string
-	RefreshToken    string
-	RefreshExpireAt string
-	AppKey          string
-	AppSecret       string
-	SelfMallAccount string
-}
-
-// ProductListRequest 商品列表查询请求参数
-type ProductListRequest struct {
-	PageNo   int
-	PageSize int
-}
-
-// ProductStockUpdateRequest 库存更新请求参数
-// 支持按 skuid:qty 形式批量更新多个 SKU 的库存
-type ProductStockUpdateRequest struct {
-	ProductID  string
-	ProductQty string
-	Skus       string
-}
-
-// QQDConfig 类型别名，引用 models.QQDConfig
-type QQDConfig = models.QQDConfig

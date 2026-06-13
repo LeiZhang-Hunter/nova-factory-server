@@ -16,4 +16,5 @@ type IProductDao interface {
 	GetByColumn(c *gin.Context, column string, value any) (*mastermodels.Product, error)
 	ListPage(c *gin.Context, req *mastermodels.ProductQuery) (*mastermodels.ProductListData, error)
 	List(c *gin.Context, req *mastermodels.ProductQuery) (*mastermodels.ProductListData, error)
+	UpsertByID(c *gin.Context, id int64, updates map[string]any) error
 }
