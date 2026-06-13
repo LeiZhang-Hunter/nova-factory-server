@@ -302,6 +302,22 @@ func buildGoodsUpdates(c *gin.Context, req *shopmodels.GoodsUpsert) map[string]i
 	}
 }
 
+func (s *ShopGoodsDaoImpl) UpdateStockByGoodsID(c *gin.Context, goodsID string, quantity int64) error {
+	return s.db.WithContext(c).Table(s.tableName).
+		Where("goods_id = ?", goodsID).
+		Update("quantity", quantity).Error
+}
+
+func (s *ShopGoodsDaoImpl) UpsertByGoodsID(c *gin.Context, goodsID string, updates map[string]any) error {
+	var count int64
+	s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Count(&count)
+	if count == 0 {
+		updates["goods_id"] = goodsID
+		return s.db.WithContext(c).Table(s.tableName).Create(updates).Error
+	}
+	return s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Updates(updates).Error
+}
+
 func (s *ShopGoodsDaoImpl) attachHomeModuleIDs(c *gin.Context, rows []*shopmodels.Goods) error {
 	linkIDs := make([]int64, 0, len(rows))
 	for _, row := range rows {

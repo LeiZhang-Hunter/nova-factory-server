@@ -140,3 +140,24 @@ func (d *StockDaoImpl) List(c *gin.Context, req *stockmodels.StockQuery) (*stock
 	}
 	return &stockmodels.StockListData{Rows: result.Rows, Total: result.Total}, nil
 }
+
+func (d *StockDaoImpl) UpdateStockByID(c *gin.Context, id int64, count float64) error {
+	return d.db.WithContext(c).Table("erp_stock").
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		Update("count", count).Error
+}
+
+func (d *StockDaoImpl) UpsertByID(c *gin.Context, id int64, updates map[string]any) error {
+	existing := new(stockmodels.Stock)
+	err := d.db.WithContext(c).Table("erp_stock").Where("id = ?", id).First(existing).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		updates["id"] = id
+		updates["state"] = commonStatus.NORMAL
+		return d.db.WithContext(c).Table("erp_stock").Create(updates).Error
+	}
+	if err != nil {
+		return err
+	}
+	return d.db.WithContext(c).Table("erp_stock").Where("id = ?", id).Updates(updates).Error
+}

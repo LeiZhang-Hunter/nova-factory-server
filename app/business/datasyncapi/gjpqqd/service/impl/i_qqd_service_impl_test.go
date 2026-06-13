@@ -12,8 +12,9 @@ import (
 	"time"
 
 	qqddaoimpl "nova-factory-server/app/business/datasyncapi/dao/impl"
+	qqdmodels "nova-factory-server/app/business/datasyncapi/gjpqqd/models"
+	qqdservice "nova-factory-server/app/business/datasyncapi/gjpqqd/service"
 	"nova-factory-server/app/business/datasyncapi/models"
-	qqdservice "nova-factory-server/app/business/datasyncapi/service/qqd"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/sqlite"
@@ -61,7 +62,7 @@ func TestProductListReadsProductAndSkuTables(t *testing.T) {
 	db := openTestStockDB(t)
 	service := newTestService(t, db)
 
-	response, err := service.ProductList(context.Background(), qqdservice.ProductListRequest{})
+	response, err := service.ProductList(context.Background(), qqdmodels.ProductListRequest{})
 	if err != nil {
 		t.Fatalf("product list: %v", err)
 	}
@@ -92,7 +93,7 @@ func TestProductStockUpdateUpdatesMySQLOnly(t *testing.T) {
 	db := openTestStockDB(t)
 	service := newTestService(t, db)
 
-	response, err := service.ProductStockUpdate(context.Background(), qqdservice.ProductStockUpdateRequest{
+	response, err := service.ProductStockUpdate(context.Background(), qqdmodels.ProductStockUpdateRequest{
 		ProductID:  "1001",
 		ProductQty: "99",
 	})
@@ -105,10 +106,10 @@ func TestProductStockUpdateUpdatesMySQLOnly(t *testing.T) {
 	assertGoodsQuantity(t, db, "1001", 99)
 	assertSkuQuantity(t, db, "1001", 99)
 
-	if _, err := service.ProductStockUpdate(context.Background(), qqdservice.ProductStockUpdateRequest{ProductQty: "1"}); err == nil {
+	if _, err := service.ProductStockUpdate(context.Background(), qqdmodels.ProductStockUpdateRequest{ProductQty: "1"}); err == nil {
 		t.Fatal("expected missing productid to fail")
 	}
-	if _, err := service.ProductStockUpdate(context.Background(), qqdservice.ProductStockUpdateRequest{ProductID: "1001"}); err == nil {
+	if _, err := service.ProductStockUpdate(context.Background(), qqdmodels.ProductStockUpdateRequest{ProductID: "1001"}); err == nil {
 		t.Fatal("expected missing productqty without skus to fail")
 	}
 }
@@ -145,7 +146,7 @@ func TestAddProductsUpdatesGoodsAndSkuTables(t *testing.T) {
 
 // newTestService 创建用于测试的服务实例
 // 使用预置的测试配置和内存缓存，可选地注入 SQLite 数据库
-func newTestService(t *testing.T, db *gorm.DB) qqdservice.Service {
+func newTestService(t *testing.T, db *gorm.DB) qqdservice.GjpQqdService {
 	t.Helper()
 
 	service := &IQQDServiceImpl{
@@ -262,7 +263,7 @@ func (i testCacheItem) expired() bool {
 }
 
 // createTestAuthCode 创建测试用的授权码，调用 CreateAuthorizationCallback 并解析回调 URL
-func createTestAuthCode(t *testing.T, service qqdservice.Service) string {
+func createTestAuthCode(t *testing.T, service qqdservice.GjpQqdService) string {
 	t.Helper()
 
 	callback, err := service.CreateAuthorizationCallback(context.Background(), "app-key", "app-secret", "http://example.com/callback", "")

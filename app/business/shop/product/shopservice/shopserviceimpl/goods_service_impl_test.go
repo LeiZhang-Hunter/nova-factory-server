@@ -503,6 +503,14 @@ func (m *mockShopGoodsDao) List(c *gin.Context, req *shopmodels.GoodsQuery) (*sh
 	return m.listData, nil
 }
 
+func (m *mockShopGoodsDao) UpdateStockByGoodsID(c *gin.Context, goodsID string, quantity int64) error {
+	return nil
+}
+
+func (m *mockShopGoodsDao) UpsertByGoodsID(c *gin.Context, goodsID string, updates map[string]any) error {
+	return nil
+}
+
 type mockShopSkuDao struct {
 	bySkuID       map[string]*shopmodels.GoodsSku
 	created       []*shopmodels.GoodsSkuUpsert
@@ -665,4 +673,16 @@ func (m *mockShopSkuDao) ListBySkuIDs(c *gin.Context, skuIDs []string) ([]*shopm
 
 func (m *mockShopSkuDao) List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*shopmodels.GoodsSkuListData, error) {
 	return nil, nil
+}
+
+func (m *mockShopSkuDao) UpdateStockBySkuID(c *gin.Context, skuID string, quantity int64) error {
+	return nil
+}
+
+func (m *mockShopSkuDao) SumStockByGoodsID(c *gin.Context, goodsID string) (int64, error) {
+	return 0, nil
+}
+
+func (m *mockShopSkuDao) UpsertBySkuID(c *gin.Context, skuID string, updates map[string]any) error {
+	return nil
 }

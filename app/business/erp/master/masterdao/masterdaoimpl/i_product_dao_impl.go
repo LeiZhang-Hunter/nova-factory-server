@@ -177,3 +177,17 @@ func (d *ProductDaoImpl) List(c *gin.Context, req *mastermodels.ProductQuery) (*
 	}
 	return &mastermodels.ProductListData{Rows: result.Rows, Total: result.Total}, nil
 }
+
+func (d *ProductDaoImpl) UpsertByID(c *gin.Context, id int64, updates map[string]any) error {
+	existing := new(mastermodels.Product)
+	err := d.db.WithContext(c).Table("erp_product").Where("id = ?", id).First(existing).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		updates["id"] = id
+		updates["state"] = commonStatus.NORMAL
+		return d.db.WithContext(c).Table("erp_product").Create(updates).Error
+	}
+	if err != nil {
+		return err
+	}
+	return d.db.WithContext(c).Table("erp_product").Where("id = ?", id).Updates(updates).Error
+}

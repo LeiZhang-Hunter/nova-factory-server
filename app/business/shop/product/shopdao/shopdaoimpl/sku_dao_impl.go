@@ -190,6 +190,31 @@ func (s *ShopSkuDaoImpl) List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*s
 	}, nil
 }
 
+func (s *ShopSkuDaoImpl) UpdateStockBySkuID(c *gin.Context, skuID string, quantity int64) error {
+	return s.db.WithContext(c).Table(s.tableName).
+		Where("sku_id = ?", skuID).
+		Update("quantity", quantity).Error
+}
+
+func (s *ShopSkuDaoImpl) SumStockByGoodsID(c *gin.Context, goodsID string) (int64, error) {
+	var total int64
+	err := s.db.WithContext(c).Table(s.tableName).
+		Where("goods_id = ?", goodsID).
+		Select("COALESCE(SUM(quantity), 0)").
+		Scan(&total).Error
+	return total, err
+}
+
+func (s *ShopSkuDaoImpl) UpsertBySkuID(c *gin.Context, skuID string, updates map[string]any) error {
+	var count int64
+	s.db.WithContext(c).Table(s.tableName).Where("sku_id = ?", skuID).Count(&count)
+	if count == 0 {
+		updates["sku_id"] = skuID
+		return s.db.WithContext(c).Table(s.tableName).Create(updates).Error
+	}
+	return s.db.WithContext(c).Table(s.tableName).Where("sku_id = ?", skuID).Updates(updates).Error
+}
+
 func buildImages(galleryImagesArray []string) string {
 	var galleryImagesStr string
 	var galleryImagesRetArray []string = make([]string, 0)

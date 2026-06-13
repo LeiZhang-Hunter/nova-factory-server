@@ -68,7 +68,7 @@ func (q *API) API(c *gin.Context) {
 	// 按 method 分发到不同业务处理逻辑
 	switch strings.ToLower(req.Method) {
 	case "selfmall.product.list.get":
-		response, err := q.service.ProductList(c, service.ProductListRequest{
+		response, err := q.service.ProductList(c, models.ProductListRequest{
 			PageNo:   req.PageNo,
 			PageSize: req.PageSize,
 		})
