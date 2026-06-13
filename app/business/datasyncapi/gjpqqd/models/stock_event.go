@@ -23,6 +23,10 @@ func (s *StockSyncReq) DB() *gorm.DB {
 	return s.db
 }
 
+func (s *StockSyncReq) SetDB(db *gorm.DB) {
+	s.db = db
+}
+
 func (s *StockSyncReq) GetStocks() []event.StockData {
 	stocks := make([]event.StockData, 0, len(s.Stocks))
 	for i := range s.Stocks {

@@ -3,6 +3,8 @@
 // 用于将网店库存变化同步至第三方 ERP/全渠道系统。
 package event
 
+import "gorm.io/gorm"
+
 // StockData 库存数据接口，描述某一商品/SKU在特定仓库的库存信息。
 // 包含变更前后的数量，便于 ERP 系统进行增量或全量同步。
 type StockData interface {
@@ -27,4 +29,11 @@ type StockEvent interface {
 	GetStocks() []StockData
 	Event
 	Base
+}
+
+// StockStoreTransactionEvent 库存适配器
+type StockStoreTransactionEvent interface {
+	GetDB() *gorm.DB
+	SetDB(*gorm.DB)
+	ToEvent() StockEvent
 }

@@ -94,9 +94,9 @@ func (n *Notifier) OnProductChanged(ev event.ProductEvent) error {
 
 // OnStockChanged 向所有观察者分发库存变更事件。
 // 如果事件携带 DB，则在事务中执行，保证所有观察者原子一致。
-func (n *Notifier) OnStockChanged(ev event.StockEvent) error {
+func (n *Notifier) OnStockChanged(ev event.StockStoreTransactionEvent) error {
 	return n.notifyWithTx(ev.SetDB, func(ob Observer) error {
-		err := ob.OnStockChanged(ev)
+		err := ob.OnStockChanged(ev.ToEvent())
 		if err != nil {
 			zap.L().Error("Observer OnStockChanged", zap.Error(err))
 			return err
