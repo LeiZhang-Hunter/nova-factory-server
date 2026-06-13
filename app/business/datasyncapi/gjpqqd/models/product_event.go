@@ -20,7 +20,7 @@ type GoodsSyncReq struct {
 	db         *gorm.DB
 }
 
-func (g *GoodsSyncReq) DB() *gorm.DB {
+func (g *GoodsSyncReq) GetDB() *gorm.DB {
 	return g.db
 }
 

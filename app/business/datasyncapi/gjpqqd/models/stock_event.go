@@ -19,12 +19,12 @@ func (s *StockSyncReq) WidthDB(db *gorm.DB) {
 	s.db = db
 }
 
-func (s *StockSyncReq) DB() *gorm.DB {
+func (s *StockSyncReq) GetDB() *gorm.DB {
 	return s.db
 }
 
-func (s *StockSyncReq) SetDB(db *gorm.DB) {
-	s.db = db
+func (s *StockSyncReq) ToEvent() event.StockEvent {
+	return s
 }
 
 func (s *StockSyncReq) GetStocks() []event.StockData {

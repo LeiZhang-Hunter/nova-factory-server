@@ -34,6 +34,6 @@ type StockEvent interface {
 // StockStoreTransactionEvent 库存适配器
 type StockStoreTransactionEvent interface {
 	GetDB() *gorm.DB
-	SetDB(*gorm.DB)
+	WidthDB(*gorm.DB)
 	ToEvent() StockEvent
 }
