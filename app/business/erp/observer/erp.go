@@ -99,7 +99,7 @@ func (o *ERPObserver) OnProductChanged(event event.ProductEvent) (result.SyncPro
 
 // OnStockChanged 处理库存变更事件。
 func (o *ERPObserver) OnStockChanged(ev event.StockEvent) error {
-	return o.stockService.SyncStock(ev.DB(), ev.GetStocks())
+	return o.stockService.SyncStock(ev.GetDB(), ev.GetStocks())
 }
 
 // OnOrderChanged 处理订单变更事件。

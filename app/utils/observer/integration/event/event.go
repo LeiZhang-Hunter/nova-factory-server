@@ -31,5 +31,10 @@ type Event interface {
 	Cache() cache.Cache
 	// GetCallback 返回处理完成后的回调接口，用于通知上游同步结果
 	GetCallback() Callback
+}
+
+type StoreTransactionEvent[T any] interface {
 	GetDB() *gorm.DB
+	WidthDB(*gorm.DB)
+	ToEvent() T
 }

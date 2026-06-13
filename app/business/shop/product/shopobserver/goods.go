@@ -30,7 +30,7 @@ func (s *ShopObserver) OnProductChanged(ev event.ProductEvent) (result.SyncProdu
 }
 
 func (s *ShopObserver) OnStockChanged(ev event.StockEvent) error {
-	return s.goodsService.SyncStock(ev.DB(), ev.GetStocks())
+	return s.goodsService.SyncStock(ev.GetDB(), ev.GetStocks())
 }
 
 func (s *ShopObserver) OnOrderChanged(ev event.OrderEvent) error {

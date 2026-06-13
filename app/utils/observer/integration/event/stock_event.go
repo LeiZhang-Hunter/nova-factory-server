@@ -29,11 +29,5 @@ type StockEvent interface {
 	GetStocks() []StockData
 	Event
 	Base
-}
-
-// StockStoreTransactionEvent 库存适配器
-type StockStoreTransactionEvent interface {
 	GetDB() *gorm.DB
-	WidthDB(*gorm.DB)
-	ToEvent() StockEvent
 }

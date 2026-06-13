@@ -24,6 +24,16 @@ func (g *GoodsSyncReq) GetDB() *gorm.DB {
 	return g.db
 }
 
+// WidthDB 注入事务 DB，供 Notifier 在事务内分发事件时调用。
+func (g *GoodsSyncReq) WidthDB(db *gorm.DB) {
+	g.db = db
+}
+
+// ToEvent 脱壳为商品变更业务事件，交由观察者处理。
+func (g *GoodsSyncReq) ToEvent() event.ProductEvent {
+	return g
+}
+
 // GetProducts 实现 event.ProductEvent 接口，将内部 GoodsInfoReq 转换为 event.ProductData 列表
 func (g *GoodsSyncReq) GetProducts() []event.ProductData {
 	goods := make([]event.ProductData, 0)

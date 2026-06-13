@@ -16,7 +16,6 @@ import (
 type Notifier struct {
 	mu        sync.RWMutex
 	observers []Observer
-	db        *gorm.DB
 }
 
 var (
@@ -43,11 +42,6 @@ func (n *Notifier) Register(obs Observer) {
 	n.observers = append(n.observers, obs)
 }
 
-func (n *Notifier) SetDB(db *gorm.DB) *Notifier {
-	n.db = db
-	return n
-}
-
 // notify 内部事件分发逻辑，通过回调函数决定对每个 Observer 执行的具体操作。
 // 先加读锁复制观察者列表，释放锁后再迭代，避免在通知过程中阻塞注册操作。
 // 一旦任一观察者返回错误，立即终止后续分发并返回该错误。
@@ -68,12 +62,12 @@ func (n *Notifier) notify(fn func(obs Observer) error) error {
 
 // notifyWithTx 带事务的分发：如果 db 不为 nil，所有 observer 在同一事务中执行；
 // 任一 observer 返回 error 则整体回滚。db 为 nil 时退化为普通分发。
-func (n *Notifier) notifyWithTx(setDB func(*gorm.DB), fn func(obs Observer) error) error {
-	if n.db == nil {
+func (n *Notifier) notifyWithTx(db func() *gorm.DB, setDB func(*gorm.DB), fn func(obs Observer) error) error {
+	if db() == nil {
 		return n.notify(fn)
 	}
 
-	return n.db.Transaction(func(tx *gorm.DB) error {
+	return db().Transaction(func(tx *gorm.DB) error {
 		setDB(tx)
 		return n.notify(fn)
 	})
@@ -81,9 +75,9 @@ func (n *Notifier) notifyWithTx(setDB func(*gorm.DB), fn func(obs Observer) erro
 
 // OnProductChanged 向所有观察者分发商品变更事件。
 // 如果事件携带 DB，则在事务中执行，保证所有观察者原子一致。
-func (n *Notifier) OnProductChanged(ev event.ProductEvent) error {
-	return n.notifyWithTx(ev.SetDB, func(ob Observer) error {
-		_, err := ob.OnProductChanged(ev)
+func (n *Notifier) OnProductChanged(ev event.StoreTransactionEvent[event.ProductEvent]) error {
+	return n.notifyWithTx(ev.GetDB, ev.WidthDB, func(ob Observer) error {
+		_, err := ob.OnProductChanged(ev.ToEvent())
 		if err != nil {
 			zap.L().Error("Observer OnProductChanged", zap.Error(err))
 			return err
@@ -94,8 +88,8 @@ func (n *Notifier) OnProductChanged(ev event.ProductEvent) error {
 
 // OnStockChanged 向所有观察者分发库存变更事件。
 // 如果事件携带 DB，则在事务中执行，保证所有观察者原子一致。
-func (n *Notifier) OnStockChanged(ev event.StockStoreTransactionEvent) error {
-	return n.notifyWithTx(ev.WidthDB, func(ob Observer) error {
+func (n *Notifier) OnStockChanged(ev event.StoreTransactionEvent[event.StockEvent]) error {
+	return n.notifyWithTx(ev.GetDB, ev.WidthDB, func(ob Observer) error {
 		err := ob.OnStockChanged(ev.ToEvent())
 		if err != nil {
 			zap.L().Error("Observer OnStockChanged", zap.Error(err))
@@ -107,9 +101,9 @@ func (n *Notifier) OnStockChanged(ev event.StockStoreTransactionEvent) error {
 
 // OnOrderChanged 向所有观察者分发订单变更事件。
 // 如果事件携带 DB，则在事务中执行，保证所有观察者原子一致。
-func (n *Notifier) OnOrderChanged(ev event.OrderEvent) error {
-	return n.notifyWithTx(ev.SetDB, func(ob Observer) error {
-		err := ob.OnOrderChanged(ev)
+func (n *Notifier) OnOrderChanged(ev event.StoreTransactionEvent[event.OrderEvent]) error {
+	return n.notifyWithTx(ev.GetDB, ev.WidthDB, func(ob Observer) error {
+		err := ob.OnOrderChanged(ev.ToEvent())
 		if err != nil {
 			zap.L().Error("Observer OnOrderChanged", zap.Error(err))
 			return err
