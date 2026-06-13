@@ -101,7 +101,6 @@ func (q *API) productStockUpdate(c *gin.Context) {
 	}
 
 	stockReq := req.ToStockSyncReq()
-	stockReq.WidthDB(q.db)
 	if err := observer.GetNotifier().OnStockChanged(stockReq); err != nil {
 		zap.L().Error("stock changed notify failed", zap.Error(err))
 		c.JSON(http.StatusOK, qqdError("stock sync failed: "+err.Error()))
@@ -129,8 +128,8 @@ func (q *API) productAdd(c *gin.Context) {
 		return
 	}
 	// 通过全局 Notifier 分发商品变更事件，所有已注册的 Observer 均会收到通知
-	goodsInfos.WidthDB(q.db)
-	err = observer.GetNotifier().OnProductChanged(goodsInfos)
+	//goodsInfos.WidthDB(q.db)
+	//err = observer.GetNotifier().OnProductChanged(goodsInfos)
 	if err != nil {
 		zap.L().Error("save qqd product add payload failed", zap.Error(err))
 		c.JSON(http.StatusOK, qqdError("save product failed: "+err.Error()))

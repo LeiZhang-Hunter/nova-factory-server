@@ -7,8 +7,6 @@ package event
 import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
-
-	"gorm.io/gorm"
 )
 
 // Base 事件数据基础接口，所有业务数据载体（ProductData、StockData、OrderData）均需实现。
@@ -31,10 +29,4 @@ type Event interface {
 	Cache() cache.Cache
 	// GetCallback 返回处理完成后的回调接口，用于通知上游同步结果
 	GetCallback() Callback
-}
-
-type StoreTransactionEvent[T any] interface {
-	GetDB() *gorm.DB
-	WidthDB(*gorm.DB)
-	ToEvent() T
 }

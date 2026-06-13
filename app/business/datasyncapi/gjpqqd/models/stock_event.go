@@ -4,27 +4,12 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
-
-	"gorm.io/gorm"
 )
 
 type StockSyncReq struct {
 	Stocks   []StockItem    `json:"stocks" form:"stocks"`
 	cache    cache.Cache    `json:"-"`
 	callback event.Callback `json:"-"`
-	db       *gorm.DB
-}
-
-func (s *StockSyncReq) WidthDB(db *gorm.DB) {
-	s.db = db
-}
-
-func (s *StockSyncReq) GetDB() *gorm.DB {
-	return s.db
-}
-
-func (s *StockSyncReq) ToEvent() event.StockEvent {
-	return s
 }
 
 func (s *StockSyncReq) GetStocks() []event.StockData {

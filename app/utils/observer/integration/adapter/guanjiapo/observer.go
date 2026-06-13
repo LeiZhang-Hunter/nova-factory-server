@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"nova-factory-server/app/utils/observer/integration/api"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
@@ -29,17 +30,17 @@ func (o *SyncObserver) Name() kind.Kind {
 }
 
 // OnProductChanged 商品变更回调
-func (o *SyncObserver) OnProductChanged(event event.ProductEvent) (result.SyncProductResponse, error) {
+func (o *SyncObserver) OnProductChanged(tx *gorm.DB, event event.ProductEvent) (result.SyncProductResponse, error) {
 	return nil, nil
 }
 
 // OnStockChanged 库存变更回调
-func (o *SyncObserver) OnStockChanged(event event.StockEvent) error {
+func (o *SyncObserver) OnStockChanged(tx *gorm.DB, event event.StockEvent) error {
 	return nil
 }
 
 // OnOrderChanged 订单变更回调
-func (o *SyncObserver) OnOrderChanged(event event.OrderEvent) error {
+func (o *SyncObserver) OnOrderChanged(tx *gorm.DB, event event.OrderEvent) error {
 	if event.Config == nil {
 		zap.L().Debug("未传入集成配置，跳过管家婆订单同步")
 		return nil

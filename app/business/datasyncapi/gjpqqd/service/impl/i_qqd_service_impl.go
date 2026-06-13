@@ -15,6 +15,7 @@ import (
 	"nova-factory-server/app/business/datasyncapi/gjpqqd/models"
 	"nova-factory-server/app/business/datasyncapi/gjpqqd/service"
 	"nova-factory-server/app/business/erp/setting/settingdao"
+	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/datasource/cache"
 	"strconv"
 	"strings"
@@ -36,11 +37,7 @@ type IQQDServiceImpl struct {
 	// goodsDao    预留：商品 DAO
 	// goodsSkuDao 预留：商品 SKU DAO
 	configDao settingdao.IIntegrationConfigDao
-}
-
-func (s *IQQDServiceImpl) ProductList(ctx *gin.Context, request models.ProductListRequest) (map[string]any, error) {
-	//TODO implement me
-	panic("implement me")
+	shopGoods shopdao.IShopGoodsDao
 }
 
 // authCodePayload 授权码的缓存负载，记录授权的 appKey、回调地址和过期时间
@@ -59,10 +56,11 @@ type tokenPayload struct {
 }
 
 // NewIQQDServiceImpl 创建管家婆全渠道服务实例
-func NewIQQDServiceImpl(configDao settingdao.IIntegrationConfigDao, cache cache.Cache) service.GjpQqdService {
+func NewIQQDServiceImpl(configDao settingdao.IIntegrationConfigDao, cache cache.Cache, shopGoods shopdao.IShopGoodsDao) service.GjpQqdService {
 	return &IQQDServiceImpl{
 		configDao: configDao,
 		cache:     cache,
+		shopGoods: shopGoods,
 	}
 }
 
@@ -77,13 +75,13 @@ func (s *IQQDServiceImpl) initConfig(ctx *gin.Context) error {
 	if enabled == nil {
 		return errors.New("integration config disabled")
 	}
-	enableService, err := enabled.Service()
-	if err != nil {
-		return err
-	}
-	if enableService == nil {
-		return errors.New("service disabled")
-	}
+	//enableService, err := enabled.Service()
+	//if err != nil {
+	//	return err
+	//}
+	//if enableService == nil {
+	//	return errors.New("service disabled")
+	//}
 	var cfg models.QQDConfig
 	cfg.ApplyDefaults()
 	err = json.Unmarshal([]byte(enabled.Data), &cfg)
@@ -183,6 +181,11 @@ func (s *IQQDServiceImpl) ValidSign(params map[string]string, body, sign string)
 		return false
 	}
 	return strings.EqualFold(sign, expected)
+}
+
+func (s *IQQDServiceImpl) ProductList(ctx *gin.Context, request models.ProductListRequest) (map[string]any, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 // issueTokenResponse 生成新的 access_token 和 refresh_token，存入缓存并返回

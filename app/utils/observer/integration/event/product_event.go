@@ -3,8 +3,6 @@
 // 用于将网店商品变更同步至第三方 ERP 系统。
 package event
 
-import "gorm.io/gorm"
-
 // ProductSku 商品SKU（规格）接口，描述商品的单个规格变体信息。
 // 一种商品可能有多个SKU，每个SKU对应不同颜色、尺码等属性组合。
 type ProductSku interface {
@@ -66,5 +64,4 @@ type ProductEvent interface {
 	Event
 	// GetProducts 返回本次事件涉及的商品数据列表
 	GetProducts() []ProductData
-	GetDB() *gorm.DB
 }

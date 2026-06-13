@@ -4,11 +4,11 @@ package models
 // IssueTokenReq Token 签发/刷新请求参数
 // grant_type 支持 authorization_code 和 refresh_token 两种模式
 type IssueTokenReq struct {
-	AppKey       string `json:"appkey"`
-	AppSecret    string `json:"appsecret"`
-	Code         string `json:"code"`
-	GrantType    string `json:"grant_type"`
-	RefreshToken string `json:"refresh_token"`
+	AppKey       string `json:"appkey" form:"appkey"`
+	AppSecret    string `json:"appsecret" form:"appsecret"`
+	Code         string `json:"code" form:"code"`
+	GrantType    string `json:"grant_type" form:"grant_type"`
+	RefreshToken string `json:"refresh_token" form:"refresh_token"`
 }
 
 // IssueTokenResponse Token 签发成功响应

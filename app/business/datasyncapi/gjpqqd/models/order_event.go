@@ -12,19 +12,8 @@ type OrderSyncReq struct {
 	Orders   []OrderItem    `json:"orders" form:"orders"`
 	cache    cache.Cache    `json:"-"`
 	callback event.Callback `json:"-"`
-	db       *gorm.DB
 }
 
-func (o *OrderSyncReq) WidthDB(db *gorm.DB) {
-	o.db = db
-}
-
-func (o *OrderSyncReq) GetDB() *gorm.DB {
-	return o.db
-}
-func (o *OrderSyncReq) ToEvent() event.OrderEvent {
-	return o
-}
 func (o *OrderSyncReq) GetOrders() []event.OrderData {
 	orders := make([]event.OrderData, 0, len(o.Orders))
 	for i := range o.Orders {

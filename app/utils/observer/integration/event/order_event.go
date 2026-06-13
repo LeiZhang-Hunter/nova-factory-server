@@ -4,8 +4,6 @@
 // 用于将网店订单同步至第三方 ERP/全渠道系统（如管家婆）。
 package event
 
-import "gorm.io/gorm"
-
 // Account 订单账户信息，记录订单收款的账户及其金额。
 // 一般用于货到付款或多账户收款场景，需在全渠道系统中预先配置对应编码。
 type Account interface {
@@ -125,5 +123,4 @@ type OrderEvent interface {
 	Base
 	// GetOrders 返回本次事件涉及的订单数据列表
 	GetOrders() []OrderData
-	GetDB() *gorm.DB
 }
