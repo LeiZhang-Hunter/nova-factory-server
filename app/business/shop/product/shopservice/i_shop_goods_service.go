@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/utils/observer/integration/event"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // IShopGoodsService 定义商品领域的应用服务能力。
@@ -57,4 +58,7 @@ type IShopGoodsService interface {
 
 	// SyncEvent 同步事件
 	SyncEvent(event event.ProductEvent)
+
+	// SyncStock 同步库存变更，使用传入的 db 保证事务一致性
+	SyncStock(db *gorm.DB, stocks []event.StockData) error
 }

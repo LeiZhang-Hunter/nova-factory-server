@@ -43,16 +43,6 @@ func (s *IQQDServiceImpl) ProductList(ctx *gin.Context, request models.ProductLi
 	panic("implement me")
 }
 
-func (s *IQQDServiceImpl) AddProducts(ctx *gin.Context, goodsInfos []map[string]any) ([]map[string]any, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *IQQDServiceImpl) ProductStockUpdate(ctx *gin.Context, request models.ProductStockUpdateRequest) (map[string]any, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 // authCodePayload 授权码的缓存负载，记录授权的 appKey、回调地址和过期时间
 type authCodePayload struct {
 	AppKey      string    `json:"app_key"`

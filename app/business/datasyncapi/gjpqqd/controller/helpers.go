@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"nova-factory-server/app/business/datasyncapi/gjpqqd/models"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -89,30 +88,4 @@ func parseProductAddGoodsInfos(c *gin.Context) ([]map[string]any, error) {
 		return nil, errors.New("goodsinfos is empty")
 	}
 	return payload.GoodsInfos, nil
-}
-
-// parseProductStockUpdateRequest 解析库存更新请求参数
-// 支持 form 和 JSON 两种格式，返回 ProductStockUpdateRequest 结构
-func parseProductStockUpdateRequest(c *gin.Context) (models.ProductStockUpdateRequest, error) {
-	var req struct {
-		ProductID  string `form:"productid" json:"productid"`
-		ProductQty any    `form:"productqty" json:"productqty"`
-		Skus       string `form:"skus" json:"skus"`
-	}
-	if err := c.ShouldBind(&req); err != nil {
-		return models.ProductStockUpdateRequest{}, fmt.Errorf("invalid request: %w", err)
-	}
-	return models.ProductStockUpdateRequest{
-		ProductID:  req.ProductID,
-		ProductQty: toString(req.ProductQty),
-		Skus:       req.Skus,
-	}, nil
-}
-
-// toString 将任意值转换为字符串，nil 返回空字符串
-func toString(value any) string {
-	if value == nil {
-		return ""
-	}
-	return fmt.Sprintf("%v", value)
 }

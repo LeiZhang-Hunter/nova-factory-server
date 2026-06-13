@@ -7,6 +7,8 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
+
+	"gorm.io/gorm"
 )
 
 // GoodsSyncReq 商品同步请求，实现 event.ProductEvent 接口
@@ -15,14 +17,19 @@ type GoodsSyncReq struct {
 	GoodsInfos []GoodsInfoReq `json:"goodsinfos" form:"goodsinfos"`
 	cache      cache.Cache    `json:"-"`
 	callback   event.Callback `json:"-"`
+	db         *gorm.DB
+}
+
+func (g *GoodsSyncReq) DB() *gorm.DB {
+	return g.db
 }
 
 // GetProducts 实现 event.ProductEvent 接口，将内部 GoodsInfoReq 转换为 event.ProductData 列表
 func (g *GoodsSyncReq) GetProducts() []event.ProductData {
 	goods := make([]event.ProductData, 0)
-	for _, info := range g.GoodsInfos {
-		goods = append(goods, &info)
-	}
+	//for _, info := range g.GoodsInfos {
+	//	//goods = append(goods, &info)
+	//}
 	return goods
 }
 
@@ -76,6 +83,11 @@ type GoodsInfoReq struct {
 	Quantity  string            `json:"quantity" form:"quantity"`
 	Outerid   string            `json:"outerid" form:"outerid"`
 	Skus      []GoodsSkuSyncReq `json:"skus" form:"skus"`
+}
+
+func (g *GoodsInfoReq) DB() *gorm.DB {
+	//TODO implement me
+	panic("implement me")
 }
 
 // 实现 event.Base 接口

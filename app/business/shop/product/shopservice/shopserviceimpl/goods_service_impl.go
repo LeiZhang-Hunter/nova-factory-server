@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
@@ -828,4 +829,41 @@ func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) {
 		return
 	}
 
+}
+
+func (s *ShopGoodsServiceImpl) SyncStock(db *gorm.DB, stocks []event.StockData) error {
+	if len(stocks) == 0 {
+		return nil
+	}
+
+	goodsIDSet := make(map[string]struct{})
+	goodsStockMap := make(map[string]int64)
+	for _, stock := range stocks {
+		skuID := strconv.FormatInt(stock.SkuID(), 10)
+		goodsID := strconv.FormatInt(stock.ProductID(), 10)
+		afterQty := int64(stock.AfterQty())
+
+		if err := s.skuDao.UpdateStockBySkuIDWithDB(db, skuID, afterQty); err != nil {
+			zap.L().Error("SyncStock: 更新SKU库存失败",
+				zap.String("skuId", skuID),
+				zap.Int64("quantity", afterQty),
+				zap.Error(err))
+			return fmt.Errorf("更新SKU库存失败 skuId=%s: %w", skuID, err)
+		}
+		goodsStockMap[goodsID] += afterQty
+		goodsIDSet[goodsID] = struct{}{}
+	}
+
+	for goodsID := range goodsIDSet {
+		totalStock := goodsStockMap[goodsID]
+		if err := s.dao.UpdateStockByGoodsIDWithDB(db, goodsID, totalStock); err != nil {
+			zap.L().Error("SyncStock: 更新商品总库存失败",
+				zap.String("goodsId", goodsID),
+				zap.Int64("quantity", totalStock),
+				zap.Error(err))
+			return fmt.Errorf("更新商品总库存失败 goodsId=%s: %w", goodsID, err)
+		}
+	}
+
+	return nil
 }

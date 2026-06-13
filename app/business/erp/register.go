@@ -4,7 +4,6 @@
 package erp
 
 import (
-	"nova-factory-server/app/business/erp/erpobserver"
 	"nova-factory-server/app/business/erp/finance/financecontroller"
 	"nova-factory-server/app/business/erp/finance/financedao/financedaoimpl"
 	"nova-factory-server/app/business/erp/finance/financeservice/financeserviceimpl"
@@ -48,6 +47,5 @@ var ProviderSet = wire.NewSet(
 	settingserviceimpl.ProviderSet,
 	settingcontroller.ProviderSet,
 	erpObserver.ProviderSet,
-	erpobserver.ProviderSet,
 	GinProviderSet,
 )

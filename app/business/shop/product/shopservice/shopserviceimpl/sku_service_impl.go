@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type ShopSkuServiceImpl struct {
@@ -201,4 +202,9 @@ func (s *ShopSkuServiceImpl) loadGoodsVectorEmbeddingConfig(c *gin.Context) *sho
 		ModelID:      strings.TrimSpace(info.LLMName),
 		ApiKey:       strings.TrimSpace(info.APIKey),
 	}
+}
+
+func (s *ShopSkuServiceImpl) UpdateStock(db *gorm.DB, req *shopmodels.GoodsSkuUpsert) error {
+	//TODO implement me
+	panic("implement me")
 }

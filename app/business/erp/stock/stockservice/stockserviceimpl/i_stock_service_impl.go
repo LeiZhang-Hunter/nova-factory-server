@@ -2,6 +2,7 @@ package stockserviceimpl
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -9,8 +10,10 @@ import (
 	"nova-factory-server/app/business/erp/stock/stockdao"
 	"nova-factory-server/app/business/erp/stock/stockmodels"
 	"nova-factory-server/app/business/erp/stock/stockservice"
+	"nova-factory-server/app/utils/observer/integration/event"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // StockServiceImpl 提供业务实现。
@@ -388,4 +391,23 @@ func stockFieldValue(target any, name string) reflect.Value {
 		return reflect.Value{}
 	}
 	return value.FieldByName(name)
+}
+
+func (s *StockServiceImpl) SyncStock(db *gorm.DB, stocks []event.StockData) error {
+	if db == nil {
+		return errors.New("db is nil")
+	}
+	if len(stocks) == 0 {
+		return nil
+	}
+
+	for _, stock := range stocks {
+		productID := stock.SkuID()
+		afterQty := stock.AfterQty()
+		if err := s.dao.UpdateStockByProductIDWithDB(db, productID, afterQty); err != nil {
+			return fmt.Errorf("更新ERP库存失败 productId=%d: %w", productID, err)
+		}
+	}
+
+	return nil
 }

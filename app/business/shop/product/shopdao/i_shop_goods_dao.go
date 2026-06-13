@@ -4,6 +4,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopmodels"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type IShopGoodsDao interface {
@@ -17,6 +18,5 @@ type IShopGoodsDao interface {
 	GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error)
 	ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.Goods, error)
 	List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error)
-	UpdateStockByGoodsID(c *gin.Context, goodsID string, quantity int64) error
-	UpsertByGoodsID(c *gin.Context, goodsID string, updates map[string]any) error
+	UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID string, quantity int64) error
 }

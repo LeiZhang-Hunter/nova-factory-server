@@ -3,7 +3,6 @@ package shopdaoimpl
 import (
 	"encoding/json"
 	"errors"
-	"go.uber.org/zap"
 	homeDao "nova-factory-server/app/business/shop/home/dao"
 	homeModels "nova-factory-server/app/business/shop/home/models"
 	"nova-factory-server/app/business/shop/product/shopdao"
@@ -12,6 +11,8 @@ import (
 	"nova-factory-server/app/utils/fileUtils"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -302,20 +303,10 @@ func buildGoodsUpdates(c *gin.Context, req *shopmodels.GoodsUpsert) map[string]i
 	}
 }
 
-func (s *ShopGoodsDaoImpl) UpdateStockByGoodsID(c *gin.Context, goodsID string, quantity int64) error {
-	return s.db.WithContext(c).Table(s.tableName).
+func (s *ShopGoodsDaoImpl) UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID string, quantity int64) error {
+	return db.Table(s.tableName).
 		Where("goods_id = ?", goodsID).
 		Update("quantity", quantity).Error
-}
-
-func (s *ShopGoodsDaoImpl) UpsertByGoodsID(c *gin.Context, goodsID string, updates map[string]any) error {
-	var count int64
-	s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Count(&count)
-	if count == 0 {
-		updates["goods_id"] = goodsID
-		return s.db.WithContext(c).Table(s.tableName).Create(updates).Error
-	}
-	return s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Updates(updates).Error
 }
 
 func (s *ShopGoodsDaoImpl) attachHomeModuleIDs(c *gin.Context, rows []*shopmodels.Goods) error {

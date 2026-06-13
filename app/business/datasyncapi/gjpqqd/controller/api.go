@@ -10,21 +10,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 // API 全渠道 API 调用控制器，负责鉴权、签名校验及方法分发
-// 管家婆全渠道 API 调用控制器。
-// 处理 POST /api 请求，通过 method 参数分发到不同子功能，
-// 包括商品列表查询、商品新增、库存更新等。
-// 调用前先校验 access_token 和签名。
 type API struct {
 	service service.GjpQqdService
+	db      *gorm.DB
 }
 
 // NewAPI 创建 API 控制器实例
-func NewAPI(service service.GjpQqdService) *API {
+func NewAPI(service service.GjpQqdService, db *gorm.DB) *API {
 	return &API{
 		service: service,
+		db:      db,
 	}
 }
 
@@ -94,20 +93,25 @@ func (q *API) API(c *gin.Context) {
 }
 
 // productStockUpdate 处理 selfmall.productstock.list.update 请求
-// 解析请求中的 productid、productqty 和 skus，调用服务层执行库存更新
 func (q *API) productStockUpdate(c *gin.Context) {
-	request, err := parseProductStockUpdateRequest(c)
-	if err != nil {
+	req := new(models.ProductStockUpdateRequest)
+	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusOK, qqdError(err.Error()))
 		return
 	}
 
-	response, err := q.service.ProductStockUpdate(c, request)
-	if err != nil {
-		c.JSON(http.StatusOK, qqdError(err.Error()))
+	stockReq := req.ToStockSyncReq()
+	stockReq.WidthDB(q.db)
+	if err := observer.GetNotifier().OnStockChanged(stockReq); err != nil {
+		zap.L().Error("stock changed notify failed", zap.Error(err))
+		c.JSON(http.StatusOK, qqdError("stock sync failed: "+err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, response)
+
+	c.JSON(http.StatusOK, gin.H{
+		"iserror":  false,
+		"errormsg": "ok",
+	})
 }
 
 // productAdd 处理 selfmall.product.add 请求
@@ -120,15 +124,12 @@ func (q *API) productAdd(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-
 	if len(goodsInfos.GoodsInfos) == 0 {
 		baizeContext.Waring(c, "goodsinfo is required")
 		return
 	}
-
 	// 通过全局 Notifier 分发商品变更事件，所有已注册的 Observer 均会收到通知
-	err = observer.GetNotifier().OnProductChanged(goodsInfos)
-
+	err = observer.GetNotifier().SetDB(q.db).OnProductChanged(goodsInfos)
 	if err != nil {
 		zap.L().Error("save qqd product add payload failed", zap.Error(err))
 		c.JSON(http.StatusOK, qqdError("save product failed: "+err.Error()))
@@ -142,11 +143,11 @@ func (q *API) productAdd(c *gin.Context) {
 			"errormsg": "",
 		})
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"iserror":  false,
-		"errormsg": "ok",
-		"result":   result,
-		"total":    len(storedGoods),
-	})
+	//
+	//c.JSON(http.StatusOK, gin.H{
+	//	"iserror":  false,
+	//	"errormsg": "ok",
+	//	"result":   result,
+	//	"total":    len(storedGoods),
+	//})
 }

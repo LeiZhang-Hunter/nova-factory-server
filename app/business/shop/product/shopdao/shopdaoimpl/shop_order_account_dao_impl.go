@@ -4,7 +4,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/constant/commonStatus"
-	objectutil "nova-factory-server/app/utils/json"
+	myTime "nova-factory-server/app/utils/time"
 	"time"
 
 	"gorm.io/gorm"
@@ -50,8 +50,8 @@ func (d *ShopOrderAccountDaoImpl) BatchCreate(tx *gorm.DB, orderID uint64, order
 		account.ID = 0
 		account.OrderID = orderID
 		account.Tid = order.Tid
-		account.CreateTime = objectutil.FirstTime(account.CreateTime, now)
-		account.UpdateTime = objectutil.FirstTime(account.UpdateTime, now)
+		account.CreateTime = myTime.FirstTime(account.CreateTime, now)
+		account.UpdateTime = myTime.FirstTime(account.UpdateTime, now)
 		account.State = commonStatus.NORMAL
 		rows = append(rows, account)
 	}

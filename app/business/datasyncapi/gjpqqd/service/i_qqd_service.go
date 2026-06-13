@@ -16,23 +16,13 @@ import (
 type GjpQqdService interface {
 	// CreateAuthorizationCallback 校验 app 凭据并生成授权码，返回拼接好 code 和 state 的回调 URL
 	CreateAuthorizationCallback(ctx *gin.Context, req *models.AuthorizeReq) (string, error)
-
 	// IssueToken 签发或刷新 access_token
 	// grantType 为 authorization_code 时使用 code 换取，为 refresh_token 时使用 oldRefreshToken 刷新
 	IssueToken(ctx *gin.Context, appKey, appSecret, code, grantType, oldRefreshToken string) (models.TokenResponse, error)
-
 	// ValidAccessToken 校验 access_token 是否有效且未过期，并与 appKey 匹配
 	ValidAccessToken(ctx *gin.Context, token, appKey string) bool
-
 	// ValidSign 校验请求的 MD5 签名是否与预期一致
 	ValidSign(params map[string]string, body, sign string) bool
-
 	// ProductList 分页查询商品列表，返回管家婆 API 兼容的响应格式
 	ProductList(ctx *gin.Context, request models.ProductListRequest) (map[string]any, error)
-
-	// AddProducts 批量新增商品，goodsInfos 中每项包含 goodsid 及可选的 skus 和 quantity
-	AddProducts(ctx *gin.Context, goodsInfos []map[string]any) ([]map[string]any, error)
-
-	// ProductStockUpdate 更新商品库存，支持按商品批量更新和按 SKU 明细更新两种模式
-	ProductStockUpdate(ctx *gin.Context, request models.ProductStockUpdateRequest) (map[string]any, error)
 }
