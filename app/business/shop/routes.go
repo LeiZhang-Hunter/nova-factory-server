@@ -17,6 +17,7 @@ import (
 	shopconfigController "nova-factory-server/app/business/shop/config/controller"
 	homeController "nova-factory-server/app/business/shop/home/controller"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
+	"nova-factory-server/app/business/shop/product/shopobserver"
 	userController "nova-factory-server/app/business/shop/user/controller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
@@ -42,6 +43,7 @@ func NewGinEngine(
 	favoriteController *favorite.Favorite,
 	apiActivityController *apiActivityController.Controller,
 	apiCompanyController *apiCompanyController.Controller,
+	_ *shopobserver.ShopObserver,
 ) *Shop {
 	group := app.Engine.Group("")
 
