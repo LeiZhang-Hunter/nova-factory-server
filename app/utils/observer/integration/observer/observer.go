@@ -7,8 +7,6 @@ import (
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
 	"nova-factory-server/app/utils/observer/integration/result"
-
-	"gorm.io/gorm"
 )
 
 // Observer 观察者接口，各第三方系统（管家婆、金蝶等）实现此接口以接收业务变更事件。
@@ -19,11 +17,11 @@ type Observer interface {
 	Name() kind.Kind
 
 	// OnProductChanged 商品变更回调，当商品创建、更新或删除时触发
-	OnProductChanged(tx *gorm.DB, event event.ProductEvent) (result.SyncProductResponse, error)
+	OnProductChanged(event event.ProductEvent) (result.SyncProductResponse, error)
 
 	// OnStockChanged 库存变更回调，当库存数量发生变化时触发
-	OnStockChanged(tx *gorm.DB, event event.StockEvent) error
+	OnStockChanged(event event.StockEvent) error
 
 	// OnOrderChanged 订单变更回调，当订单创建或状态变更（付款、发货等）时触发
-	OnOrderChanged(tx *gorm.DB, event event.OrderEvent) error
+	OnOrderChanged(event event.OrderEvent) error
 }

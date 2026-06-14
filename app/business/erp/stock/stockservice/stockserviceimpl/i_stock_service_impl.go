@@ -13,7 +13,6 @@ import (
 	"nova-factory-server/app/utils/observer/integration/event"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // StockServiceImpl 提供业务实现。
@@ -393,18 +392,15 @@ func stockFieldValue(target any, name string) reflect.Value {
 	return value.FieldByName(name)
 }
 
-func (s *StockServiceImpl) SyncStock(db *gorm.DB, stocks []event.StockData) error {
-	if db == nil {
-		return errors.New("db is nil")
-	}
-	if len(stocks) == 0 {
+func (s *StockServiceImpl) SyncStock(stock event.StockEvent) error {
+	if len(stock.GetStocks()) == 0 {
 		return nil
 	}
 
-	for _, stock := range stocks {
-		productID := stock.SkuID()
-		afterQty := stock.AfterQty()
-		if err := s.dao.UpdateStockByProductIDWithDB(db, productID, afterQty); err != nil {
+	for _, e := range stock.GetStocks() {
+		productID := e.SkuID()
+		afterQty := e.AfterQty()
+		if err := s.dao.UpdateStockByProductIDWithDB(stock.GetDB(), productID, afterQty); err != nil {
 			return fmt.Errorf("更新ERP库存失败 productId=%d: %w", productID, err)
 		}
 	}

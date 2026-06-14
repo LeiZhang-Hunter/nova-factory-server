@@ -4,12 +4,11 @@
 package observer
 
 import (
-	"errors"
+	"gorm.io/gorm"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"sync"
 
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 // Notifier 事件分发器，管理所有 Observer 观察者并分发业务事件。
@@ -18,7 +17,6 @@ import (
 type Notifier struct {
 	mu        sync.RWMutex
 	observers []Observer
-	db        *gorm.DB
 }
 
 var (
@@ -35,16 +33,6 @@ func GetNotifier() *Notifier {
 		}
 	})
 	return notifierIns
-}
-
-// InitNotifier 初始化全局 Notifier 的数据库连接，供 Wire 注入调用。
-// 返回初始化后的全局单例，使其能作为 Wire provider 被依赖图驱动调用。
-func InitNotifier(db *gorm.DB) *Notifier {
-	n := GetNotifier()
-	n.mu.Lock()
-	n.db = db
-	n.mu.Unlock()
-	return n
 }
 
 // Register 注册一个观察者到分发器。
@@ -73,24 +61,23 @@ func (n *Notifier) notify(fn func(obs Observer) error) error {
 	return nil
 }
 
-// withTx 统一事务入口：在 Notifier 持有的 db 上开启事务，把 tx 交给 fn。
-// db 未初始化时显式报错，绝不静默退化为无事务分发。
-func (n *Notifier) withTx(fn func(tx *gorm.DB) error) error {
-	n.mu.RLock()
-	db := n.db
-	n.mu.RUnlock()
-	if db == nil {
-		return errors.New("notifier: db 未初始化（InitNotifier 未接入 Wire）")
-	}
-	return db.Transaction(fn)
-}
-
 // OnProductChanged 向所有观察者分发商品变更事件。
 // 由 Notifier 统一开启事务，并将 tx 显式传给每个观察者，保证全员原子一致。
-func (n *Notifier) OnProductChanged(ev event.ProductEvent) error {
-	return n.withTx(func(tx *gorm.DB) error {
+func (n *Notifier) OnProductChanged(ev event.TransactionEvent[event.ProductEvent]) error {
+	if ev.GetDB() == nil {
 		return n.notify(func(ob Observer) error {
-			_, err := ob.OnProductChanged(tx, ev)
+			_, err := ob.OnProductChanged(ev.ToEvent())
+			if err != nil {
+				zap.L().Error("Observer OnProductChanged", zap.Error(err))
+				return err
+			}
+			return nil
+		})
+	}
+	return ev.GetDB().Transaction(func(tx *gorm.DB) error {
+		ev.WithDB(tx)
+		return n.notify(func(ob Observer) error {
+			_, err := ob.OnProductChanged(ev.ToEvent())
 			if err != nil {
 				zap.L().Error("Observer OnProductChanged", zap.Error(err))
 				return err
@@ -102,10 +89,21 @@ func (n *Notifier) OnProductChanged(ev event.ProductEvent) error {
 
 // OnStockChanged 向所有观察者分发库存变更事件。
 // 由 Notifier 统一开启事务，并将 tx 显式传给每个观察者，保证全员原子一致。
-func (n *Notifier) OnStockChanged(ev event.StockEvent) error {
-	return n.withTx(func(tx *gorm.DB) error {
+func (n *Notifier) OnStockChanged(ev event.TransactionEvent[event.StockEvent]) error {
+	if ev.GetDB() == nil {
 		return n.notify(func(ob Observer) error {
-			err := ob.OnStockChanged(tx, ev)
+			err := ob.OnStockChanged(ev.ToEvent())
+			if err != nil {
+				zap.L().Error("Observer OnProductChanged", zap.Error(err))
+				return err
+			}
+			return nil
+		})
+	}
+	return ev.GetDB().Transaction(func(tx *gorm.DB) error {
+		ev.WithDB(tx)
+		return n.notify(func(ob Observer) error {
+			err := ob.OnStockChanged(ev.ToEvent())
 			if err != nil {
 				zap.L().Error("Observer OnStockChanged", zap.Error(err))
 				return err
@@ -117,10 +115,21 @@ func (n *Notifier) OnStockChanged(ev event.StockEvent) error {
 
 // OnOrderChanged 向所有观察者分发订单变更事件。
 // 由 Notifier 统一开启事务，并将 tx 显式传给每个观察者，保证全员原子一致。
-func (n *Notifier) OnOrderChanged(ev event.OrderEvent) error {
-	return n.withTx(func(tx *gorm.DB) error {
+func (n *Notifier) OnOrderChanged(ev event.TransactionEvent[event.OrderEvent]) error {
+	if ev.GetDB() == nil {
 		return n.notify(func(ob Observer) error {
-			err := ob.OnOrderChanged(tx, ev)
+			err := ob.OnOrderChanged(ev.ToEvent())
+			if err != nil {
+				zap.L().Error("Observer OnOrderChanged", zap.Error(err))
+				return err
+			}
+			return nil
+		})
+	}
+	return ev.GetDB().Transaction(func(tx *gorm.DB) error {
+		ev.WithDB(tx)
+		return n.notify(func(ob Observer) error {
+			err := ob.OnOrderChanged(ev.ToEvent())
 			if err != nil {
 				zap.L().Error("Observer OnOrderChanged", zap.Error(err))
 				return err

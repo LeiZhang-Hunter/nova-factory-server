@@ -5,6 +5,7 @@
 package event
 
 import (
+	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 )
@@ -26,7 +27,20 @@ type Event interface {
 	// Action 返回事件类型（创建、更新、删除等），观察者据此决定同步策略
 	Action() EventType
 	// Cache 返回缓存实例，用于在同步过程中读写临时数据（如 OAuth Token）
-	Cache() cache.Cache
+	GetCache() cache.Cache
 	// GetCallback 返回处理完成后的回调接口，用于通知上游同步结果
 	GetCallback() Callback
+	// GetDB 读取DB
+	GetDB() *gorm.DB
+}
+
+// TransactionEvent 事务事件。
+// T 用于指定转换后的业务事件类型，例如 OrderEvent、ProductEvent 或 StockEvent。
+type TransactionEvent[T Event] interface {
+	// GetDB 读取DB
+	GetDB() *gorm.DB
+	// WithDB 设置DB
+	WithDB(tx *gorm.DB)
+	// ToEvent 转换为具体业务事件
+	ToEvent() T
 }

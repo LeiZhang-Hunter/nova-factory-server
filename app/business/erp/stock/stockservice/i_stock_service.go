@@ -5,7 +5,6 @@ import (
 	"nova-factory-server/app/utils/observer/integration/event"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // IStockService ERP 产品库存服务接口
@@ -15,5 +14,5 @@ type IStockService interface {
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*stockmodels.Stock, error)
 	List(c *gin.Context, req *stockmodels.StockQuery) (*stockmodels.StockListData, error)
-	SyncStock(db *gorm.DB, stocks []event.StockData) error
+	SyncStock(stock event.StockEvent) error
 }

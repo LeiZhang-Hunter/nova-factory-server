@@ -8,8 +8,6 @@ import (
 	"nova-factory-server/app/utils/observer/integration/kind"
 	"nova-factory-server/app/utils/observer/integration/observer"
 	"nova-factory-server/app/utils/observer/integration/result"
-
-	"gorm.io/gorm"
 )
 
 // ERPObserver ERP 模块观察者。
@@ -47,7 +45,7 @@ func (o *ERPObserver) Name() kind.Kind {
 // OnProductChanged 处理商品变更事件。
 //
 // 当前 ERP 商品事件同步尚未接入，先安全跳过。
-func (o *ERPObserver) OnProductChanged(tx *gorm.DB, event event.ProductEvent) (result.SyncProductResponse, error) {
+func (o *ERPObserver) OnProductChanged(event event.ProductEvent) (result.SyncProductResponse, error) {
 	//products := event.GetProducts()
 	//if len(products) == 0 {
 	//	return nil, nil
@@ -100,15 +98,15 @@ func (o *ERPObserver) OnProductChanged(tx *gorm.DB, event event.ProductEvent) (r
 }
 
 // OnStockChanged 处理库存变更事件。
-func (o *ERPObserver) OnStockChanged(tx *gorm.DB, ev event.StockEvent) error {
-	return o.stockService.SyncStock(tx, ev.GetStocks())
+func (o *ERPObserver) OnStockChanged(ev event.StockEvent) error {
+	return o.stockService.SyncStock(ev)
 }
 
 // OnOrderChanged 处理订单变更事件。
 //
 // Observer 只负责把事件分发给 ERP 订单 service，不在这里做订单转换和保存。
 // 具体同步逻辑由 saleservice.IOrderService.Sync(event event.OrderEvent) 承担。
-func (o *ERPObserver) OnOrderChanged(tx *gorm.DB, event event.OrderEvent) error {
+func (o *ERPObserver) OnOrderChanged(event event.OrderEvent) error {
 	//if event == nil {
 	//	return nil
 	//}

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
@@ -8,8 +9,19 @@ import (
 
 type StockSyncReq struct {
 	Stocks   []StockItem    `json:"stocks" form:"stocks"`
-	cache    cache.Cache    `json:"-"`
-	callback event.Callback `json:"-"`
+	Cache    cache.Cache    `json:"-"`
+	Callback event.Callback `json:"-"`
+	DB       *gorm.DB       `json:"-"`
+}
+
+func (s *StockSyncReq) GetDB() *gorm.DB {
+	return s.DB
+}
+func (s *StockSyncReq) WithDB(tx *gorm.DB) {
+	s.DB = tx
+}
+func (s *StockSyncReq) ToEvent() event.StockEvent {
+	return s
 }
 
 func (s *StockSyncReq) GetStocks() []event.StockData {
@@ -36,12 +48,12 @@ func (s *StockSyncReq) Action() event.EventType {
 	return event.EventStockChanged
 }
 
-func (s *StockSyncReq) Cache() cache.Cache {
-	return s.cache
+func (s *StockSyncReq) GetCache() cache.Cache {
+	return s.Cache
 }
 
 func (s *StockSyncReq) GetCallback() event.Callback {
-	return s.callback
+	return s.Callback
 }
 
 // StockItem 单条库存变更数据，实现 event.StockData 接口

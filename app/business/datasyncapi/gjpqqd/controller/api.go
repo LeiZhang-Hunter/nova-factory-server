@@ -101,15 +101,16 @@ func (q *API) productStockUpdate(c *gin.Context) {
 	}
 
 	stockReq := req.ToStockSyncReq()
+	stockReq.WithDB(q.db)
 	if err := observer.GetNotifier().OnStockChanged(stockReq); err != nil {
 		zap.L().Error("stock changed notify failed", zap.Error(err))
 		c.JSON(http.StatusOK, qqdError("stock sync failed: "+err.Error()))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"iserror":  false,
-		"errormsg": "ok",
+	c.JSON(http.StatusOK, models.ErrorResponse{
+		Iserror:  false,
+		Errormsg: "ok",
 	})
 }
 
@@ -127,15 +128,6 @@ func (q *API) productAdd(c *gin.Context) {
 		baizeContext.Waring(c, "goodsinfo is required")
 		return
 	}
-	// 通过全局 Notifier 分发商品变更事件，所有已注册的 Observer 均会收到通知
-	//goodsInfos.WidthDB(q.db)
-	//err = observer.GetNotifier().OnProductChanged(goodsInfos)
-	if err != nil {
-		zap.L().Error("save qqd product add payload failed", zap.Error(err))
-		c.JSON(http.StatusOK, qqdError("save product failed: "+err.Error()))
-		return
-	}
-
 	result := make([]gin.H, 0, len(goodsInfos.GoodsInfos))
 	for _, goods := range goodsInfos.GoodsInfos {
 		result = append(result, gin.H{
