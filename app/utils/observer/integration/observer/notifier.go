@@ -64,7 +64,7 @@ func (n *Notifier) notify(fn func(obs Observer) error) error {
 // OnProductChanged 向所有观察者分发商品变更事件。
 // 由 Notifier 统一开启事务，并将 tx 显式传给每个观察者，保证全员原子一致。
 func (n *Notifier) OnProductChanged(ev event.TransactionEvent[event.ProductEvent]) error {
-	if ev.GetDB() == nil {
+	if ev.GetDB() == nil || (ev.ToEvent() != nil && !ev.ToEvent().GetTransaction()) {
 		return n.notify(func(ob Observer) error {
 			_, err := ob.OnProductChanged(ev.ToEvent())
 			if err != nil {

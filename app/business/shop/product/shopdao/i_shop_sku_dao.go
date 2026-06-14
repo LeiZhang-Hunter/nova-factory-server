@@ -23,6 +23,7 @@ type IShopSkuDao interface {
 	UpdateStockBySkuIDWithDB(db *gorm.DB, skuID string, quantity int64) error
 	UpdateStockBySkuID(c *gin.Context, skuID string, quantity int64) error
 	SumStockByGoodsID(c *gin.Context, goodsID string) (int64, error)
-	UpsertBySkuID(c *gin.Context, skuID string, updates map[string]any) error
+	UpsertBySkuID(c *gin.Context, skuID string, req *shopmodels.GoodsSkuSyncUpsert) error
+	UpsertBySkuIDWithDB(db *gorm.DB, skuID string, req *shopmodels.GoodsSkuSyncUpsert) error
 	LockStockRows(db *gorm.DB, goodsIDs []string) error
 }

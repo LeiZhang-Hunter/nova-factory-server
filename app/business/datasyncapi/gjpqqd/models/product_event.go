@@ -4,28 +4,57 @@
 package models
 
 import (
+	"encoding/json"
+	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
-
-	"gorm.io/gorm"
 )
 
 // GoodsSyncReq 商品同步请求，实现 event.ProductEvent 接口
 // 作为观察者模式中的事件载体，包含待同步的商品列表、缓存和回调
 type GoodsSyncReq struct {
-	GoodsInfos []GoodsInfoReq `json:"goodsinfos" form:"goodsinfos"`
-	cache      cache.Cache    `json:"-"`
-	callback   event.Callback `json:"-"`
+	GoodsInfos     string              `json:"goodsinfos" form:"goodsinfos"`
+	goodsInfoArray []event.ProductData `json:"-" form:"-"`
+	Cache          cache.Cache         `json:"-" form:"-"`
+	Callback       event.Callback      `json:"-" form:"-"`
+	DB             *gorm.DB            `json:"-" form:"-"`
+	Transaction    bool                `json:"-" form:"-"`
 }
 
 // GetProducts 实现 event.ProductEvent 接口，将内部 GoodsInfoReq 转换为 event.ProductData 列表
 func (g *GoodsSyncReq) GetProducts() []event.ProductData {
+	if len(g.goodsInfoArray) != 0 {
+		return g.goodsInfoArray
+	}
 	goods := make([]event.ProductData, 0)
-	//for _, info := range g.GoodsInfos {
-	//	//goods = append(goods, &info)
-	//}
+	infos := make([]GoodsInfoReq, 0)
+	err := json.Unmarshal([]byte(g.GoodsInfos), &infos)
+	if err != nil {
+		return goods
+	}
+	for _, info := range infos {
+		goods = append(goods, &info)
+	}
+	g.goodsInfoArray = goods
 	return goods
+}
+
+func (g *GoodsSyncReq) GetDB() *gorm.DB {
+	return g.DB
+}
+
+func (g *GoodsSyncReq) WithDB(tx *gorm.DB) {
+	g.DB = tx
+	return
+}
+
+func (g *GoodsSyncReq) ToEvent() event.ProductEvent {
+	return g
+}
+
+func (g *GoodsSyncReq) GetTransaction() bool {
+	return g.Transaction
 }
 
 // Metadata 实现 event.Base 接口，返回扩展元数据
@@ -48,20 +77,20 @@ func (g *GoodsSyncReq) Action() event.EventType {
 	return event.EventProductUpdated
 }
 
-// Cache 实现 event.Event 接口，返回缓存实例
-func (g *GoodsSyncReq) Cache() cache.Cache {
-	return g.cache
+// GetCache 实现 event.Event 接口，返回缓存实例
+func (g *GoodsSyncReq) GetCache() cache.Cache {
+	return g.Cache
 }
 
 // WIthCallback 设置事件处理完成后的回调
 func (g *GoodsSyncReq) WIthCallback(callback event.Callback) {
-	g.callback = callback
+	g.Callback = callback
 	return
 }
 
 // GetCallback 实现 event.Event 接口，返回事件回调
 func (g *GoodsSyncReq) GetCallback() event.Callback {
-	return g.callback
+	return g.Callback
 }
 
 // GoodsInfoReq 单个商品信息，实现 event.ProductData 接口
@@ -73,9 +102,9 @@ type GoodsInfoReq struct {
 	Image     string            `json:"image" form:"image"`
 	Desc      string            `json:"desc" form:"desc"`
 	Unitname  string            `json:"unitname" form:"unitname"`
-	Isservice string            `json:"isservice" form:"isservice"`
-	Price     string            `json:"price" form:"price"`
-	Quantity  string            `json:"quantity" form:"quantity"`
+	Isservice int               `json:"isservice" form:"isservice"`
+	Price     float64           `json:"price" form:"price"`
+	Quantity  float64           `json:"quantity" form:"quantity"`
 	Outerid   string            `json:"outerid" form:"outerid"`
 	Skus      []GoodsSkuSyncReq `json:"skus" form:"skus"`
 }
@@ -94,8 +123,8 @@ func (g *GoodsInfoReq) Ptr() any {
 }
 
 // 实现 event.ProductData 接口的各 getter 方法
-func (g *GoodsInfoReq) GetGoodsId() int64 {
-	return g.Goodsid
+func (g *GoodsInfoReq) GetGoodsId() string {
+	return g.Goodscode
 }
 func (g *GoodsInfoReq) GetGoodsName() string {
 	return g.Goodsname
@@ -112,13 +141,13 @@ func (g *GoodsInfoReq) GetDesc() string {
 func (g *GoodsInfoReq) GetUnitName() string {
 	return g.Unitname
 }
-func (g *GoodsInfoReq) GetIsService() string {
+func (g *GoodsInfoReq) GetIsService() int {
 	return g.Isservice
 }
-func (g *GoodsInfoReq) GetPrice() string {
+func (g *GoodsInfoReq) GetPrice() float64 {
 	return g.Price
 }
-func (g *GoodsInfoReq) GetQuantity() string {
+func (g *GoodsInfoReq) GetQuantity() float64 {
 	return g.Quantity
 }
 func (g *GoodsInfoReq) GetOuterId() string {
@@ -143,7 +172,7 @@ type GoodsSkuSyncReq struct {
 	Skucode  string  `json:"skucode" form:"skucode"`
 	Barcode  string  `json:"barcode" form:"barcode"`
 	Weight   float64 `json:"weight" form:"weight"`
-	Size     int64   `json:"size" form:"size"`
+	Size     float64 `json:"size" form:"size"`
 }
 
 // 实现 event.ProductSku 接口的各 getter 方法
@@ -174,7 +203,7 @@ func (g *GoodsSkuSyncReq) GetBarcode() string {
 func (g *GoodsSkuSyncReq) GetWeight() float64 {
 	return g.Weight
 }
-func (g *GoodsSkuSyncReq) GetSize() int64 {
+func (g *GoodsSkuSyncReq) GetSize() float64 {
 	return g.Size
 }
 

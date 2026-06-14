@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/observer/integration/event"
+	"nova-factory-server/app/utils/observer/integration/result"
 	"nova-factory-server/app/utils/snowflake"
 	"nova-factory-server/app/utils/vectorsearch/goods"
 	"sort"
@@ -821,16 +822,142 @@ func splitAndNormalizeMediaURLs(c *gin.Context, raw string) []string {
 	return urls
 }
 
-// SyncEvent 同步事件
-func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) {
+// SyncEvent 同步商品变更事件，将 ProductData 转换为 Goods 与 GoodsSku 并持久化。
+// 当 event.GetTransaction() 为 false 时自动开启数据库事务。
+func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) (result.SyncProductResponse, error) {
 	if event == nil {
-		return
+		return &shopmodels.SyncProductResponse{Code: 0, Message: "ok"}, nil
 	}
 
-	if len(event.GetProducts()) == 0 {
-		return
+	products := event.GetProducts()
+	if len(products) == 0 {
+		return &shopmodels.SyncProductResponse{Code: 0, Message: "ok"}, nil
 	}
 
+	type goodsEntry struct {
+		goodsID string
+		req     *shopmodels.GoodsSyncUpsert
+	}
+	type skuEntry struct {
+		skuID string
+		req   *shopmodels.GoodsSkuSyncUpsert
+	}
+
+	var goodsList []goodsEntry
+	var skuList []skuEntry
+
+	goodsIDSet := make(map[string]struct{})
+
+	for _, product := range products {
+		goodsID := product.GetGoodsId()
+		if goodsID == "" || goodsID == "0" {
+			zap.L().Warn("SyncEvent: 跳过无效商品", zap.String("goodsId", product.GetGoodsId()))
+			continue
+		}
+		goodsIDSet[goodsID] = struct{}{}
+
+		retailPrice := product.GetPrice()
+		if retailPrice <= 0 {
+			for _, sku := range product.GetSkus() {
+				if sku.GetPrice() > 0 {
+					retailPrice = sku.GetPrice()
+					break
+				}
+			}
+		}
+		quantity := product.GetQuantity()
+
+		goodsList = append(goodsList, goodsEntry{
+			goodsID: goodsID,
+			req: &shopmodels.GoodsSyncUpsert{
+				GoodsID:     goodsID,
+				GoodsName:   product.GetGoodsName(),
+				GoodsCode:   product.GetGoodsCode(),
+				OuterID:     product.GetOuterId(),
+				ImageURL:    product.GetImage(),
+				Description: product.GetDesc(),
+				Unit:        defaultString(product.GetUnitName(), "件"),
+				IsOnSale:    1,
+				RetailPrice: retailPrice,
+				WeightUnit:  "kg",
+				Quantity:    int64(quantity),
+			},
+		})
+
+		for _, sku := range product.GetSkus() {
+			skuID := strconv.FormatInt(sku.GetSkuId(), 10)
+			if skuID == "" || skuID == "0" {
+				skuID = sku.GetSkuCode()
+			}
+			if skuID == "" {
+				continue
+			}
+
+			skuList = append(skuList, skuEntry{
+				skuID: skuID,
+				req: &shopmodels.GoodsSkuSyncUpsert{
+					GoodsID:     goodsID,
+					SkuID:       skuID,
+					SkuName:     sku.GetSkuName(),
+					SkuCode:     sku.GetSkuCode(),
+					OuterID:     sku.GetOuterId(),
+					Barcode:     sku.GetBarcode(),
+					RetailPrice: sku.GetPrice(),
+					Weight:      sku.GetWeight(),
+					WeightUnit:  "",
+					Quantity:    sku.GetQuantity(),
+				},
+			})
+		}
+	}
+
+	goodsIDs := make([]string, 0, len(goodsIDSet))
+	for gid := range goodsIDSet {
+		goodsIDs = append(goodsIDs, gid)
+	}
+	sort.Strings(goodsIDs)
+
+	fn := func(tx *gorm.DB) error {
+		if err := s.skuDao.LockStockRows(tx, goodsIDs); err != nil {
+			zap.L().Error("SyncEvent: 锁定SKU商品行失败",
+				zap.Strings("goodsIds", goodsIDs),
+				zap.Error(err))
+			return fmt.Errorf("锁定SKU库存行失败: %w", err)
+		}
+
+		if err := s.dao.LockStockRows(tx, goodsIDs); err != nil {
+			zap.L().Error("SyncEvent: 锁定商品行失败",
+				zap.Strings("goodsIds", goodsIDs),
+				zap.Error(err))
+			return fmt.Errorf("锁定商品库存行失败: %w", err)
+		}
+
+		for _, ge := range goodsList {
+			if err := s.dao.UpsertByGoodsIDWithDB(tx, ge.goodsID, ge.req); err != nil {
+				return fmt.Errorf("同步商品失败 goodsId=%s: %w", ge.goodsID, err)
+			}
+		}
+
+		for _, se := range skuList {
+			if err := s.skuDao.UpsertBySkuIDWithDB(tx, se.skuID, se.req); err != nil {
+				return fmt.Errorf("同步SKU失败 skuId=%s: %w", se.skuID, err)
+			}
+		}
+
+		return nil
+	}
+
+	if !event.GetTransaction() {
+		if err := s.transactionStock(event.GetDB(), fn); err != nil {
+			return &shopmodels.SyncProductResponse{Code: 1, Message: err.Error()}, err
+		}
+	} else {
+		if err := fn(event.GetDB()); err != nil {
+			return &shopmodels.SyncProductResponse{Code: 1, Message: err.Error()}, err
+		}
+	}
+
+	return &shopmodels.SyncProductResponse{Code: 0, Message: "ok"}, nil
 }
 
 // TransactionStock 同步库存事物

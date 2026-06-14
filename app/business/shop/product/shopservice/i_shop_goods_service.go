@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/utils/observer/integration/event"
+	"nova-factory-server/app/utils/observer/integration/result"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,7 +57,7 @@ type IShopGoodsService interface {
 	BatchSearchVector(c *gin.Context, req *shopmodels.GoodsVectorBatchSearchReq) (*shopmodels.GoodsVectorBatchSearchData, error)
 
 	// SyncEvent 同步事件
-	SyncEvent(event event.ProductEvent)
+	SyncEvent(event event.ProductEvent) (result.SyncProductResponse, error)
 
 	// SyncStock 同步库存变更，使用传入的 db 保证事务一致性
 	SyncStock(stocks event.StockEvent) error

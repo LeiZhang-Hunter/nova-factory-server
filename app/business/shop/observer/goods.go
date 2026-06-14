@@ -23,8 +23,7 @@ func (s *ShopObserver) Name() kind.Kind {
 
 // OnProductChanged 商品变更回调，当商品创建、更新或删除时触发
 func (s *ShopObserver) OnProductChanged(event event.ProductEvent) (result.SyncProductResponse, error) {
-	s.goodsService.SyncEvent(event)
-	return nil, nil
+	return s.goodsService.SyncEvent(event)
 }
 
 // OnStockChanged 库存变更回调，当库存数量发生变化时触发

@@ -205,3 +205,69 @@ func (r *GoodsDataResult) GetIsError() bool                         { return r.I
 func (r *GoodsDataResult) GetErrorMsg() string                      { return r.ErrorMsg }
 func (r *GoodsDataResult) GetTotalResults() int                     { return r.TotalResults }
 func (r *GoodsDataResult) GetProductInfo() []goodsstore.ProductData { return r.ProductInfo }
+
+// GoodsSyncUpsert 商品同步 upsert 参数，用于 SyncEvent 等场景。
+// 只包含同步所需的字段，不含 GalleryImages、VideoURL 等非同步字段。
+type GoodsSyncUpsert struct {
+	GoodsID     string  // 商品业务ID
+	GoodsName   string  // 商品名称
+	GoodsCode   string  // 商品编码
+	OuterID     string  // 外部系统ID
+	ImageURL    string  // 主图地址
+	Description string  // 商品描述
+	Unit        string  // 销售单位
+	IsOnSale    int32   // 是否上架
+	RetailPrice float64 // 零售价
+	WeightUnit  string  // 重量单位
+	Quantity    int64   // 库存数量
+}
+
+// ToSyncMap 转换为数据库字段映射，用于 GORM Create/Updates，仅包含非空/非零字段
+func (r *GoodsSyncUpsert) ToSyncMap(now *time.Time) map[string]any {
+	m := map[string]any{"update_time": now}
+	if r.GoodsID != "" {
+		m["goods_id"] = r.GoodsID
+	}
+	if r.GoodsName != "" {
+		m["goods_name"] = r.GoodsName
+	}
+	if r.GoodsCode != "" {
+		m["goods_code"] = r.GoodsCode
+	}
+	if r.OuterID != "" {
+		m["outer_id"] = r.OuterID
+	}
+	if r.ImageURL != "" {
+		m["image_url"] = r.ImageURL
+	}
+	if r.Description != "" {
+		m["description"] = r.Description
+	}
+	if r.Unit != "" {
+		m["unit"] = r.Unit
+	}
+	if r.IsOnSale != 0 {
+		m["is_on_sale"] = r.IsOnSale
+	}
+	if r.RetailPrice != 0 {
+		m["retail_price"] = r.RetailPrice
+	}
+	if r.WeightUnit != "" {
+		m["weight_unit"] = r.WeightUnit
+	}
+	if r.Quantity != 0 {
+		m["quantity"] = r.Quantity
+	}
+	return m
+}
+
+// SyncProductResponse 接口的默认实现
+type SyncProductResponse struct {
+	Code    int
+	Message string
+	Meta    map[string]any
+}
+
+func (r *SyncProductResponse) GetCode() int                { return r.Code }
+func (r *SyncProductResponse) GetMessage() string          { return r.Message }
+func (r *SyncProductResponse) GetMetadata() map[string]any { return r.Meta }

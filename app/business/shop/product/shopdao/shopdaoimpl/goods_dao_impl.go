@@ -316,14 +316,38 @@ func (s *ShopGoodsDaoImpl) UpdateStockByGoodsID(c *gin.Context, goodsID string, 
 		Update("quantity", quantity).Error
 }
 
-func (s *ShopGoodsDaoImpl) UpsertByGoodsID(c *gin.Context, goodsID string, updates map[string]any) error {
+func (s *ShopGoodsDaoImpl) UpsertByGoodsID(c *gin.Context, goodsID string, req *shopmodels.GoodsSyncUpsert) error {
+	now := time.Now()
+	updates := req.ToSyncMap(&now)
 	var count int64
 	s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Count(&count)
 	if count == 0 {
 		updates["goods_id"] = goodsID
+		updates["create_by"] = int64(1)
+		updates["create_time"] = &now
 		return s.db.WithContext(c).Table(s.tableName).Create(updates).Error
 	}
 	return s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Updates(updates).Error
+}
+
+// UpsertByGoodsIDWithDB 使用外部传入的 db 操作商品 upsert，用于事务场景
+func (s *ShopGoodsDaoImpl) UpsertByGoodsIDWithDB(db *gorm.DB, goodsID string, req *shopmodels.GoodsSyncUpsert) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+	now := time.Now()
+	updates := req.ToSyncMap(&now)
+	var count int64
+	if err := db.Table(s.tableName).Where("goods_id = ?", goodsID).Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		updates["goods_id"] = goodsID
+		updates["create_by"] = int64(1)
+		updates["create_time"] = &now
+		return db.Table(s.tableName).Create(updates).Error
+	}
+	return db.Table(s.tableName).Where("goods_id = ?", goodsID).Updates(updates).Error
 }
 
 // LockStockRows 锁定指定商品的库存行，防止并发更新

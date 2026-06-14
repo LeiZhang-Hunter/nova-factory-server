@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"nova-factory-server/app/business/datasyncapi/gjpqqd/callback"
 	"nova-factory-server/app/business/datasyncapi/gjpqqd/models"
 	"nova-factory-server/app/business/datasyncapi/gjpqqd/service"
 	"nova-factory-server/app/utils/baizeContext"
@@ -131,27 +132,44 @@ func (q *API) productAdd(c *gin.Context) {
 	goodsInfos := new(models.GoodsSyncReq)
 	err := c.ShouldBind(goodsInfos)
 	if err != nil {
-		baizeContext.ParameterError(c)
+		zap.L().Error("should bind error", zap.Error(err))
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: err.Error(),
+		})
 		return
 	}
 	if len(goodsInfos.GoodsInfos) == 0 {
-		baizeContext.Waring(c, "goodsinfo is required")
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: "goodsinfo is required",
+		})
 		return
 	}
 	result := make([]gin.H, 0, len(goodsInfos.GoodsInfos))
-	for _, goods := range goodsInfos.GoodsInfos {
+	for _, goods := range goodsInfos.GetProducts() {
 		result = append(result, gin.H{
-			"goodsid":  goods.Goodsid,
+			"goodsid":  goods.GetGoodsId(),
 			"errormsg": "",
 		})
 	}
 
-	//observer.GetNotifier().OnProductChanged(goodsInfos)
-	//
-	//c.JSON(http.StatusOK, gin.H{
-	//	"iserror":  false,
-	//	"errormsg": "ok",
-	//	"result":   result,
-	//	"total":    len(storedGoods),
-	//})
+	call := callback.NewGoodsCallback()
+	goodsInfos.WIthCallback(call)
+	goodsInfos.WithDB(q.db)
+	err = observer.GetNotifier().OnProductChanged(goodsInfos)
+	if err != nil {
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"iserror":  false,
+		"errormsg": "ok",
+		"result":   result,
+		"total":    len(result),
+	})
 }
