@@ -29,4 +29,6 @@ type GjpQqdService interface {
 	ProductList(ctx *gin.Context, request *models.ProductListRequest) goods.DataResult
 	// GetConfig 读取配置
 	GetConfig(ctx *gin.Context) (*models.QQDConfig, error)
+	// GetProductCategory 读取分类列表
+	GetProductCategory(ctx *gin.Context, request *models.CategorySearchRequest) goods.DataCategoryResult
 }

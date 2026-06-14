@@ -185,6 +185,10 @@ func (s *IQQDServiceImpl) ProductList(ctx *gin.Context, request *models.ProductL
 	return goods.GetStore().GetProductList(request)
 }
 
+func (s *IQQDServiceImpl) GetProductCategory(ctx *gin.Context, request *models.CategorySearchRequest) goods.DataCategoryResult {
+	return goods.GetStore().GetProductCategory(request)
+}
+
 // issueTokenResponse 生成新的 access_token 和 refresh_token，存入缓存并返回
 func (s *IQQDServiceImpl) issueTokenResponse(ctx *gin.Context, appKey string, config *models.QQDConfig) (models.TokenResponse, error) {
 	token, err := randomToken()

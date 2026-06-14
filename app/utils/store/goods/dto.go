@@ -66,6 +66,27 @@ type DataResult interface {
 	GetProductInfo() []ProductData
 }
 
+type CategoryData interface {
+	GetCid() int
+	GetName() string
+	GetParentcid() int
+	GetSortorder() int
+	GetIsparent() bool
+	GetChildcategories() []CategoryData
+}
+
+type DataCategoryRequest interface {
+	GetParentcid() string
+}
+
+// DataCategoryResult 查询商品结果
+type DataCategoryResult interface {
+	GetIsError() bool
+	GetErrorMsg() string
+	GetTotalResults() int
+	GetCategoryData() []CategoryData
+}
+
 // EmptyDataResult 查询空的商品结果
 type EmptyDataResult struct{}
 
@@ -83,4 +104,23 @@ func (*EmptyDataResult) GetTotalResults() int {
 
 func (*EmptyDataResult) GetProductInfo() []ProductData {
 	return []ProductData{}
+}
+
+// EmptyCategoryDataResult 查询空的商品结果
+type EmptyCategoryDataResult struct{}
+
+func (*EmptyCategoryDataResult) GetIsError() bool {
+	return false
+}
+
+func (*EmptyCategoryDataResult) GetErrorMsg() string {
+	return ""
+}
+
+func (*EmptyCategoryDataResult) GetTotalResults() int {
+	return 0
+}
+
+func (*EmptyCategoryDataResult) GetCategoryData() []CategoryData {
+	return []CategoryData{}
 }

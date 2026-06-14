@@ -3,6 +3,7 @@ package shopmodels
 import (
 	"nova-factory-server/app/baize"
 	store "nova-factory-server/app/utils/store/category"
+	goodsstore "nova-factory-server/app/utils/store/goods"
 	"sync"
 	"time"
 )
@@ -97,4 +98,56 @@ type CategoryQuery struct {
 type CategoryListData struct {
 	Rows  []*Category `json:"rows"`  // 数据列表
 	Total int64       `json:"total"` // 总数
+}
+
+// CategoryData 适配 shopmodels.Category 为 goods.CategoryData 接口，json tag 对齐管家婆 API 标准。
+type CategoryData struct {
+	Cid             int                       `json:"cid"`
+	Name            string                    `json:"name"`
+	Parentcid       int                       `json:"parentcid"`
+	Sortorder       int                       `json:"sortorder"`
+	Isparent        bool                      `json:"isparent"`
+	Childcategories []goodsstore.CategoryData `json:"childcategories"`
+}
+
+func (c *CategoryData) GetCid() int                                   { return c.Cid }
+func (c *CategoryData) GetName() string                               { return c.Name }
+func (c *CategoryData) GetParentcid() int                             { return c.Parentcid }
+func (c *CategoryData) GetSortorder() int                             { return c.Sortorder }
+func (c *CategoryData) GetIsparent() bool                             { return c.Isparent }
+func (c *CategoryData) GetChildcategories() []goodsstore.CategoryData { return c.Childcategories }
+
+// CategoryDataResult 实现 goods.DataCategoryResult 接口，json tag 对齐管家婆 API 标准。
+type CategoryDataResult struct {
+	IsError         bool                      `json:"iserror"`
+	ErrorMsg        string                    `json:"errormsg"`
+	TotalResults    int                       `json:"-"`
+	SellerCategorys []goodsstore.CategoryData `json:"sellercategorys"`
+}
+
+func (r *CategoryDataResult) GetIsError() bool                           { return r.IsError }
+func (r *CategoryDataResult) GetErrorMsg() string                        { return r.ErrorMsg }
+func (r *CategoryDataResult) GetTotalResults() int                       { return r.TotalResults }
+func (r *CategoryDataResult) GetCategoryData() []goodsstore.CategoryData { return r.SellerCategorys }
+
+// buildGoodsCategoryTree 递归构建分类树，将 []*shopmodels.Category 转为 goodsstore.CategoryData 接口切片。
+func BuildGoodsCategoryTree(childrenMap map[int64][]*Category, parentID int64) []goodsstore.CategoryData {
+	children, ok := childrenMap[parentID]
+	if !ok || len(children) == 0 {
+		return nil
+	}
+	result := make([]goodsstore.CategoryData, 0, len(children))
+	for _, child := range children {
+		node := &CategoryData{
+			Cid:       int(child.ID),
+			Name:      child.CategoryName,
+			Parentcid: int(child.ParentID),
+			Sortorder: int(child.Sort),
+		}
+		subChildren := BuildGoodsCategoryTree(childrenMap, child.ID)
+		node.Isparent = len(subChildren) > 0
+		node.Childcategories = subChildren
+		result = append(result, node)
+	}
+	return result
 }

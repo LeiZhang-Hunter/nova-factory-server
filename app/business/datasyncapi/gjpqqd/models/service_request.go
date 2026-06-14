@@ -71,3 +71,9 @@ func (r *ProductStockUpdateRequest) ToStockSyncReq() *StockSyncReq {
 
 	return &StockSyncReq{Stocks: items}
 }
+
+type CategorySearchRequest struct {
+	Parentcid string `json:"parentcid"`
+}
+
+func (r *CategorySearchRequest) GetParentcid() string { return r.Parentcid }

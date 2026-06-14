@@ -1043,6 +1043,48 @@ func (s *ShopGoodsServiceImpl) SyncStock(event event.StockEvent) error {
 	return fn(event.GetDB())
 }
 
+// GetProductCategory 读取分类列表
+func (s *ShopGoodsServiceImpl) GetProductCategory(request goodsstore.DataCategoryRequest) goodsstore.DataCategoryResult {
+	rows, err := s.categoryDao.All(&gin.Context{})
+	if err != nil {
+		return &shopmodels.CategoryDataResult{
+			IsError:  true,
+			ErrorMsg: err.Error(),
+		}
+	}
+	if len(rows) == 0 {
+		return &shopmodels.CategoryDataResult{
+			ErrorMsg: "ok",
+		}
+	}
+
+	parentcid := strings.TrimSpace(request.GetParentcid())
+	if parentcid == "" || parentcid == "0" {
+		parentcid = "0"
+	}
+
+	pid, err := strconv.ParseInt(parentcid, 10, 64)
+	if err != nil {
+		return &shopmodels.CategoryDataResult{
+			IsError:  true,
+			ErrorMsg: fmt.Sprintf("invalid parentcid: %s", parentcid),
+		}
+	}
+
+	childrenMap := make(map[int64][]*shopmodels.Category)
+	for _, row := range rows {
+		childrenMap[row.ParentID] = append(childrenMap[row.ParentID], row)
+	}
+
+	categories := shopmodels.BuildGoodsCategoryTree(childrenMap, pid)
+
+	return &shopmodels.CategoryDataResult{
+		TotalResults:    len(categories),
+		ErrorMsg:        "ok",
+		SellerCategorys: categories,
+	}
+}
+
 // GetProductList 根据请求参数查询商品列表，返回符合 goods.DataResult 接口的结果。
 func (s *ShopGoodsServiceImpl) GetProductList(request goodsstore.Request) goodsstore.DataResult {
 	var isSale bool

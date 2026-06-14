@@ -88,8 +88,16 @@ func (q *API) API(c *gin.Context) {
 		q.productAdd(c)
 	case "selfmall.productstock.list.update":
 		q.productStockUpdate(c)
+	case "selfmall.sellercats.list.get":
+		categoryReq := new(models.CategorySearchRequest)
+		if err := c.ShouldBind(categoryReq); err != nil {
+			zap.L().Error("bind qqd product list request failed", zap.Error(err))
+			c.JSON(http.StatusOK, qqdError(err.Error()))
+			return
+		}
+		response := q.service.GetProductCategory(c, categoryReq)
+		c.JSON(http.StatusOK, response)
 	case "selfmall.product.query",
-		"selfmall.sellercats.list.get",
 		"selfmall.order.ship",
 		"selfmall.stock.update",
 		"selfmall.sale.status.write":
