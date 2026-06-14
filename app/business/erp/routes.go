@@ -4,6 +4,7 @@
 package erp
 
 import (
+	"github.com/google/wire"
 	"nova-factory-server/app/business/erp/finance/financecontroller"
 	"nova-factory-server/app/business/erp/master/mastercontroller"
 	"nova-factory-server/app/business/erp/observer"
@@ -15,8 +16,6 @@ import (
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
 	observer2 "nova-factory-server/app/utils/observer/integration/observer"
-
-	"github.com/google/wire"
 )
 
 var GinProviderSet = wire.NewSet(NewGinEngine)

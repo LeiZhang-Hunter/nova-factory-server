@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type StockDaoImpl struct {
@@ -142,8 +143,25 @@ func (d *StockDaoImpl) List(c *gin.Context, req *stockmodels.StockQuery) (*stock
 }
 
 func (d *StockDaoImpl) UpdateStockByProductIDWithDB(db *gorm.DB, productID int64, count float64) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+
+	rows := make([]stockmodels.Stock, 0)
+	lockDB := db.Table("erp_stock").
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("product_id = ?", productID).
+		Where("state = ?", commonStatus.NORMAL)
+	if err := lockDB.Find(&rows).Error; err != nil {
+		return err
+	}
+	if len(rows) == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
 	return db.Table("erp_stock").
 		Where("product_id = ?", productID).
+		Where("state = ?", commonStatus.NORMAL).
 		Update("count", count).Error
 }
 

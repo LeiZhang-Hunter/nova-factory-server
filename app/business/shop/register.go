@@ -21,7 +21,7 @@ import (
 	shopConfigDaoImpl "nova-factory-server/app/business/shop/config/dao/impl"
 	shopConfigServiceImpl "nova-factory-server/app/business/shop/config/service/impl"
 	"nova-factory-server/app/business/shop/discount"
-	"nova-factory-server/app/business/shop/product/shopobserver"
+	shopobserver "nova-factory-server/app/business/shop/observer"
 
 	homeController "nova-factory-server/app/business/shop/home/controller"
 	homeDaoImpl "nova-factory-server/app/business/shop/home/dao/impl"

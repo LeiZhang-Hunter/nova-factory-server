@@ -47,7 +47,7 @@ func (i *IDataSetDocumentServiceImpl) UploadFile(c *gin.Context, datasetId int64
 	// 创建一个缓冲区来存储表单数据
 	//var requestBody bytes.Buffer
 	multiPartform, _ := c.MultipartForm()
-	err := file.CreatFormFiles(&b, multiPartform, w)
+	err := file.CreatFormFiles(multiPartform, w)
 	if err != nil {
 		zap.L().Error("上传文档失败", zap.Error(err))
 		return make([]*aidatasetmodels.SysDatasetDocument, 0), errors.New("上传文档失败")

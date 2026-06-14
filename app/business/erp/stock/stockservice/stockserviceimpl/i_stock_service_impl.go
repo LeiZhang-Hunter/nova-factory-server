@@ -393,6 +393,9 @@ func stockFieldValue(target any, name string) reflect.Value {
 }
 
 func (s *StockServiceImpl) SyncStock(stock event.StockEvent) error {
+	if stock.GetDB() == nil {
+		return errors.New("库存同步需要事务DB")
+	}
 	if len(stock.GetStocks()) == 0 {
 		return nil
 	}

@@ -26,10 +26,4 @@ type GjpQqdService interface {
 	ValidSign(params map[string]string, body, sign string) bool
 	// ProductList 分页查询商品列表，返回管家婆 API 兼容的响应格式
 	ProductList(ctx *gin.Context, request models.ProductListRequest) (map[string]any, error)
-
-	// AddProducts 批量新增商品，goodsInfos 中每项包含 goodsid 及可选的 skus 和 quantity
-	AddProducts(ctx *gin.Context, goodsInfos []map[string]any) ([]map[string]any, error)
-
-	// ProductStockUpdate 更新商品库存，支持按商品批量更新和按 SKU 明细更新两种模式
-	ProductStockUpdate(ctx *gin.Context, request models.ProductStockUpdateRequest) (map[string]any, error)
 }

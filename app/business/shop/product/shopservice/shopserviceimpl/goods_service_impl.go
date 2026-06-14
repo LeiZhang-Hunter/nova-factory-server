@@ -15,8 +15,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"gorm.io/gorm"
-
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopretrieval"
@@ -26,6 +24,8 @@ import (
 	"nova-factory-server/app/utils/retrieval"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ShopGoodsServiceImpl struct {
@@ -831,32 +831,59 @@ func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) {
 
 }
 
-func (s *ShopGoodsServiceImpl) SyncStock(db *gorm.DB, stocks []event.StockData) error {
-	if len(stocks) == 0 {
+func (s *ShopGoodsServiceImpl) SyncStock(event event.StockEvent) error {
+	if event.GetDB() == nil {
+		return errors.New("库存同步需要事务DB")
+	}
+	if len(event.GetStocks()) == 0 {
 		return nil
 	}
 
+	type stockUpdate struct {
+		skuID    string
+		goodsID  string
+		afterQty int64
+	}
+
+	updates := make([]stockUpdate, 0, len(event.GetStocks()))
 	goodsIDSet := make(map[string]struct{})
 	goodsStockMap := make(map[string]int64)
-	for _, stock := range stocks {
+	for _, stock := range event.GetStocks() {
 		skuID := strconv.FormatInt(stock.SkuID(), 10)
 		goodsID := strconv.FormatInt(stock.ProductID(), 10)
 		afterQty := int64(stock.AfterQty())
 
-		if err := s.skuDao.UpdateStockBySkuIDWithDB(db, skuID, afterQty); err != nil {
-			zap.L().Error("SyncStock: 更新SKU库存失败",
-				zap.String("skuId", skuID),
-				zap.Int64("quantity", afterQty),
-				zap.Error(err))
-			return fmt.Errorf("更新SKU库存失败 skuId=%s: %w", skuID, err)
-		}
+		updates = append(updates, stockUpdate{
+			skuID:    skuID,
+			goodsID:  goodsID,
+			afterQty: afterQty,
+		})
 		goodsStockMap[goodsID] += afterQty
 		goodsIDSet[goodsID] = struct{}{}
 	}
 
-	for goodsID := range goodsIDSet {
+	goodsIDs := mapKeys(goodsIDSet)
+	sort.Strings(goodsIDs)
+	if err := lockShopStockRows(event.GetDB(), goodsIDs); err != nil {
+		zap.L().Error("SyncStock: 锁定商品库存行失败",
+			zap.Strings("goodsIds", goodsIDs),
+			zap.Error(err))
+		return fmt.Errorf("锁定商品库存行失败: %w", err)
+	}
+
+	for _, update := range updates {
+		if err := s.skuDao.UpdateStockBySkuIDWithDB(event.GetDB(), update.skuID, update.afterQty); err != nil {
+			zap.L().Error("SyncStock: 更新SKU库存失败",
+				zap.String("skuId", update.skuID),
+				zap.Int64("quantity", update.afterQty),
+				zap.Error(err))
+			return fmt.Errorf("更新SKU库存失败 skuId=%s: %w", update.skuID, err)
+		}
+	}
+
+	for _, goodsID := range goodsIDs {
 		totalStock := goodsStockMap[goodsID]
-		if err := s.dao.UpdateStockByGoodsIDWithDB(db, goodsID, totalStock); err != nil {
+		if err := s.dao.UpdateStockByGoodsIDWithDB(event.GetDB(), goodsID, totalStock); err != nil {
 			zap.L().Error("SyncStock: 更新商品总库存失败",
 				zap.String("goodsId", goodsID),
 				zap.Int64("quantity", totalStock),
@@ -866,4 +893,29 @@ func (s *ShopGoodsServiceImpl) SyncStock(db *gorm.DB, stocks []event.StockData) 
 	}
 
 	return nil
+}
+
+func lockShopStockRows(db *gorm.DB, goodsIDs []string) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+	if len(goodsIDs) == 0 {
+		return nil
+	}
+
+	skus := make([]shopmodels.GoodsSku, 0)
+	if err := db.Table("shop_goods_sku").
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("goods_id IN ?", goodsIDs).
+		Order("goods_id ASC, sku_id ASC").
+		Find(&skus).Error; err != nil {
+		return err
+	}
+
+	goodsRows := make([]shopmodels.Goods, 0)
+	return db.Table("shop_goods").
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("goods_id IN ?", goodsIDs).
+		Order("goods_id ASC").
+		Find(&goodsRows).Error
 }

@@ -40,21 +40,6 @@ type IQQDServiceImpl struct {
 	shopGoods shopdao.IShopGoodsDao
 }
 
-func (s *IQQDServiceImpl) ProductList(ctx *gin.Context, request models.ProductListRequest) (map[string]any, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *IQQDServiceImpl) AddProducts(ctx *gin.Context, goodsInfos []map[string]any) ([]map[string]any, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *IQQDServiceImpl) ProductStockUpdate(ctx *gin.Context, request models.ProductStockUpdateRequest) (map[string]any, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 // authCodePayload 授权码的缓存负载，记录授权的 appKey、回调地址和过期时间
 type authCodePayload struct {
 	AppKey      string    `json:"app_key"`
@@ -90,13 +75,7 @@ func (s *IQQDServiceImpl) initConfig(ctx *gin.Context) error {
 	if enabled == nil {
 		return errors.New("integration config disabled")
 	}
-	//enableService, err := enabled.Service()
-	//if err != nil {
-	//	return err
-	//}
-	//if enableService == nil {
-	//	return errors.New("service disabled")
-	//}
+
 	var cfg models.QQDConfig
 	cfg.ApplyDefaults()
 	err = json.Unmarshal([]byte(enabled.Data), &cfg)
@@ -323,19 +302,6 @@ func refreshTokenKey(token string) string {
 	return cacheKeyPrefix + "refresh_token:" + token
 }
 
-// appendCallbackParams 向 URL 追加 code 和 state 查询参数
-func appendCallbackParams(rawURL, code, state string) (string, error) {
-	parsed, err := url.Parse(rawURL)
-	if err != nil {
-		return "", err
-	}
-	query := parsed.Query()
-	query.Set("code", code)
-	query.Set("state", state)
-	parsed.RawQuery = query.Encode()
-	return parsed.String(), nil
-}
-
 // randomToken 生成 24 字节随机数的 hex 编码字符串，用作 token 或授权码
 func randomToken() (string, error) {
 	buf := make([]byte, 24)
@@ -363,16 +329,6 @@ func FormatQQDTime(t time.Time) string {
 	return t.Format("2006-01-02 15:04:05")
 }
 
-// firstNonNil 返回第一个非 nil 的值
-func firstNonNil(values ...any) any {
-	for _, value := range values {
-		if value != nil {
-			return value
-		}
-	}
-	return nil
-}
-
 // parseInt64Value 将任意类型的值转换为 int64，支持 int、float64、string 和 json.Number
 func parseInt64Value(value any) (int64, error) {
 	switch v := value.(type) {
@@ -389,9 +345,4 @@ func parseInt64Value(value any) (int64, error) {
 	default:
 		return 0, fmt.Errorf("invalid int64 value %v", value)
 	}
-}
-
-// parseStringIDValue 将任意类型的值解析为 int64 ID，等价于 parseInt64Value
-func parseStringIDValue(value any) (int64, error) {
-	return parseInt64Value(value)
 }

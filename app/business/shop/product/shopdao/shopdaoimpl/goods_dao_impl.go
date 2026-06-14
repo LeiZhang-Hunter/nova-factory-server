@@ -16,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ShopGoodsDaoImpl struct {
@@ -338,4 +339,22 @@ func (s *ShopGoodsDaoImpl) attachHomeModuleIDs(c *gin.Context, rows []*shopmodel
 		row.HomeModuleIDs = moduleMap[row.ID]
 	}
 	return nil
+}
+
+func (s *ShopGoodsDaoImpl) UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID string, quantity int64) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+
+	var goods shopmodels.Goods
+	if err := db.Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("goods_id = ?", goodsID).
+		First(&goods).Error; err != nil {
+		return err
+	}
+
+	return db.Table(s.tableName).
+		Where("goods_id = ?", goodsID).
+		Update("quantity", quantity).Error
 }

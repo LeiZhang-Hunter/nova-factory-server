@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ShopSkuDaoImpl struct {
@@ -193,6 +194,18 @@ func (s *ShopSkuDaoImpl) List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*s
 
 // UpdateStockBySkuIDWithDB 更新商品规格库存
 func (s *ShopSkuDaoImpl) UpdateStockBySkuIDWithDB(db *gorm.DB, skuID string, quantity int64) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+
+	var sku shopmodels.GoodsSku
+	if err := db.Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("sku_id = ?", skuID).
+		First(&sku).Error; err != nil {
+		return err
+	}
+
 	return db.Table(s.tableName).
 		Where("sku_id = ?", skuID).
 		Update("quantity", quantity).Error

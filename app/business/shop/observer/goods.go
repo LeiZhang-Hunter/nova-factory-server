@@ -1,4 +1,4 @@
-package shopobserver
+package observer
 
 import (
 	"nova-factory-server/app/business/shop/product/shopservice"
@@ -29,7 +29,7 @@ func (s *ShopObserver) OnProductChanged(event event.ProductEvent) (result.SyncPr
 
 // OnStockChanged 库存变更回调，当库存数量发生变化时触发
 func (s *ShopObserver) OnStockChanged(event event.StockEvent) error {
-	return nil
+	return s.goodsService.SyncStock(event)
 }
 
 // OnOrderChanged 订单变更回调，当订单创建或状态变更（付款、发货等）时触发
