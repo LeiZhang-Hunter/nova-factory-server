@@ -21,4 +21,7 @@ type IShopSkuDao interface {
 	ListBySkuIDs(c *gin.Context, skuIDs []string) ([]*shopmodels.GoodsSku, error)
 	List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*shopmodels.GoodsSkuListData, error)
 	UpdateStockBySkuIDWithDB(db *gorm.DB, skuID string, quantity int64) error
+	UpdateStockBySkuID(c *gin.Context, skuID string, quantity int64) error
+	SumStockByGoodsID(c *gin.Context, goodsID string) (int64, error)
+	UpsertBySkuID(c *gin.Context, skuID string, updates map[string]any) error
 }
