@@ -45,6 +45,12 @@ func (q *API) API(c *gin.Context) {
 		c.JSON(http.StatusOK, qqdError("method is required"))
 		return
 	}
+
+	config, err := q.service.GetConfig(c)
+	if err != nil || config == nil {
+		c.JSON(http.StatusOK, qqdError("后台没有配置参数"))
+		return
+	}
 	// 校验 access_token 是否有效
 	if !q.service.ValidAccessToken(c, req.AccessToken, req.AppKey) {
 		c.JSON(http.StatusOK, qqdError(models.ErrInvalidAccessToken.Error()))
@@ -59,7 +65,7 @@ func (q *API) API(c *gin.Context) {
 		return
 	}
 	// MD5 签名校验
-	if !q.service.ValidSign(formValues(c), body, req.Sign) {
+	if !q.service.ValidSign(formValues(c), body, req.Sign, config) {
 		c.JSON(http.StatusOK, qqdError(models.ErrInvalidSign.Error()))
 		return
 	}
@@ -67,15 +73,15 @@ func (q *API) API(c *gin.Context) {
 	// 按 method 分发到不同业务处理逻辑
 	switch strings.ToLower(req.Method) {
 	case "selfmall.product.list.get":
-		response, err := q.service.ProductList(c, models.ProductListRequest{
-			PageNo:   req.PageNo,
-			PageSize: req.PageSize,
-		})
-		if err != nil {
-			zap.L().Error("load qqd product list failed", zap.Error(err))
-			c.JSON(http.StatusOK, qqdError("load product list failed: "+err.Error()))
+		productReq := new(models.ProductListRequest)
+		if err := c.ShouldBind(productReq); err != nil {
+			zap.L().Error("bind qqd product list request failed", zap.Error(err))
+			c.JSON(http.StatusOK, qqdError(err.Error()))
 			return
 		}
+		productReq.PageSize = req.PageSize
+		productReq.PageNo = req.PageNo
+		response := q.service.ProductList(c, productReq)
 		c.JSON(http.StatusOK, response)
 	case "selfmall.product.add":
 		q.productAdd(c)
@@ -98,6 +104,10 @@ func (q *API) productStockUpdate(c *gin.Context) {
 	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusOK, qqdError(err.Error()))
 		return
+	}
+
+	if req.ProductID != "" {
+		req.ProductID = "0" + req.ProductID
 	}
 
 	stockReq := req.ToStockSyncReq()
@@ -135,6 +145,8 @@ func (q *API) productAdd(c *gin.Context) {
 			"errormsg": "",
 		})
 	}
+
+	//observer.GetNotifier().OnProductChanged(goodsInfos)
 	//
 	//c.JSON(http.StatusOK, gin.H{
 	//	"iserror":  false,

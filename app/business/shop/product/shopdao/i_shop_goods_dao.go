@@ -21,4 +21,5 @@ type IShopGoodsDao interface {
 	UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID string, quantity int64) error
 	UpdateStockByGoodsID(c *gin.Context, goodsID string, quantity int64) error
 	UpsertByGoodsID(c *gin.Context, goodsID string, updates map[string]any) error
+	LockStockRows(db *gorm.DB, goodsIDs []string) error
 }

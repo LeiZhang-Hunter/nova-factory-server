@@ -2,7 +2,7 @@ package shopmodels
 
 import (
 	"nova-factory-server/app/baize"
-	"nova-factory-server/app/utils/store"
+	store "nova-factory-server/app/utils/store/category"
 	"sync"
 	"time"
 )

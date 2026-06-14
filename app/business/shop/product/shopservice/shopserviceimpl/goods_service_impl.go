@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/snowflake"
@@ -22,10 +23,9 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/fileUtils"
 	"nova-factory-server/app/utils/retrieval"
+	goodsstore "nova-factory-server/app/utils/store/goods"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type ShopGoodsServiceImpl struct {
@@ -53,7 +53,7 @@ func NewShopGoodsService(dao shopdao.IShopGoodsDao, vectorDao shopdao.IShopGoods
 	if err != nil {
 		zap.L().Error("metadataExtractor init error", zap.Error(err))
 	}
-	return &ShopGoodsServiceImpl{
+	impl := &ShopGoodsServiceImpl{
 		dao:               dao,
 		vectorDao:         vectorDao,
 		retriever:         shopretrieval.NewGoodsVectorRetriever(vectorDao),
@@ -62,6 +62,8 @@ func NewShopGoodsService(dao shopdao.IShopGoodsDao, vectorDao shopdao.IShopGoods
 		cache:             cache,
 		metadataExtractor: metadataExtractor,
 	}
+	goodsstore.RegisterStore(impl)
+	return impl
 }
 
 // Create 创建商品基础信息。
@@ -831,10 +833,14 @@ func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) {
 
 }
 
+// TransactionStock 同步库存事物
+func (s *ShopGoodsServiceImpl) transactionStock(db *gorm.DB, fn func(tx *gorm.DB) error) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		return fn(tx)
+	})
+}
+
 func (s *ShopGoodsServiceImpl) SyncStock(event event.StockEvent) error {
-	if event.GetDB() == nil {
-		return errors.New("库存同步需要事务DB")
-	}
 	if len(event.GetStocks()) == 0 {
 		return nil
 	}
@@ -850,7 +856,7 @@ func (s *ShopGoodsServiceImpl) SyncStock(event event.StockEvent) error {
 	goodsStockMap := make(map[string]int64)
 	for _, stock := range event.GetStocks() {
 		skuID := strconv.FormatInt(stock.SkuID(), 10)
-		goodsID := strconv.FormatInt(stock.ProductID(), 10)
+		goodsID := stock.ProductID()
 		afterQty := int64(stock.AfterQty())
 
 		updates = append(updates, stockUpdate{
@@ -864,58 +870,189 @@ func (s *ShopGoodsServiceImpl) SyncStock(event event.StockEvent) error {
 
 	goodsIDs := mapKeys(goodsIDSet)
 	sort.Strings(goodsIDs)
-	if err := lockShopStockRows(event.GetDB(), goodsIDs); err != nil {
-		zap.L().Error("SyncStock: 锁定商品库存行失败",
-			zap.Strings("goodsIds", goodsIDs),
-			zap.Error(err))
-		return fmt.Errorf("锁定商品库存行失败: %w", err)
-	}
 
-	for _, update := range updates {
-		if err := s.skuDao.UpdateStockBySkuIDWithDB(event.GetDB(), update.skuID, update.afterQty); err != nil {
-			zap.L().Error("SyncStock: 更新SKU库存失败",
-				zap.String("skuId", update.skuID),
-				zap.Int64("quantity", update.afterQty),
+	fn := func(tx *gorm.DB) error {
+		if err := s.skuDao.LockStockRows(tx, goodsIDs); err != nil {
+			zap.L().Error("SyncStock: 锁定SKU库存行失败",
+				zap.Strings("goodsIds", goodsIDs),
 				zap.Error(err))
-			return fmt.Errorf("更新SKU库存失败 skuId=%s: %w", update.skuID, err)
+			return fmt.Errorf("锁定SKU库存行失败: %w", err)
 		}
-	}
 
-	for _, goodsID := range goodsIDs {
-		totalStock := goodsStockMap[goodsID]
-		if err := s.dao.UpdateStockByGoodsIDWithDB(event.GetDB(), goodsID, totalStock); err != nil {
-			zap.L().Error("SyncStock: 更新商品总库存失败",
-				zap.String("goodsId", goodsID),
-				zap.Int64("quantity", totalStock),
+		if err := s.dao.LockStockRows(tx, goodsIDs); err != nil {
+			zap.L().Error("SyncStock: 锁定商品库存行失败",
+				zap.Strings("goodsIds", goodsIDs),
 				zap.Error(err))
-			return fmt.Errorf("更新商品总库存失败 goodsId=%s: %w", goodsID, err)
+			return fmt.Errorf("锁定商品库存行失败: %w", err)
 		}
-	}
 
-	return nil
-}
+		for _, update := range updates {
+			if err := s.skuDao.UpdateStockBySkuIDWithDB(tx, update.skuID, update.afterQty); err != nil {
+				zap.L().Error("SyncStock: 更新SKU库存失败",
+					zap.String("skuId", update.skuID),
+					zap.Int64("quantity", update.afterQty),
+					zap.Error(err))
+				return fmt.Errorf("更新SKU库存失败 skuId=%s: %w", update.skuID, err)
+			}
+		}
 
-func lockShopStockRows(db *gorm.DB, goodsIDs []string) error {
-	if db == nil {
-		return errors.New("db不能为空")
-	}
-	if len(goodsIDs) == 0 {
+		for _, goodsID := range goodsIDs {
+			totalStock := goodsStockMap[goodsID]
+			if err := s.dao.UpdateStockByGoodsIDWithDB(tx, goodsID, totalStock); err != nil {
+				zap.L().Error("SyncStock: 更新商品总库存失败",
+					zap.String("goodsId", goodsID),
+					zap.Int64("quantity", totalStock),
+					zap.Error(err))
+				return fmt.Errorf("更新商品总库存失败 goodsId=%s: %w", goodsID, err)
+			}
+		}
 		return nil
 	}
 
-	skus := make([]shopmodels.GoodsSku, 0)
-	if err := db.Table("shop_goods_sku").
-		Clauses(clause.Locking{Strength: "UPDATE"}).
-		Where("goods_id IN ?", goodsIDs).
-		Order("goods_id ASC, sku_id ASC").
-		Find(&skus).Error; err != nil {
-		return err
+	if !event.GetTransaction() {
+		return s.transactionStock(event.GetDB(), fn)
 	}
 
-	goodsRows := make([]shopmodels.Goods, 0)
-	return db.Table("shop_goods").
-		Clauses(clause.Locking{Strength: "UPDATE"}).
-		Where("goods_id IN ?", goodsIDs).
-		Order("goods_id ASC").
-		Find(&goodsRows).Error
+	return fn(event.GetDB())
+}
+
+// GetProductList 根据请求参数查询商品列表，返回符合 goods.DataResult 接口的结果。
+func (s *ShopGoodsServiceImpl) GetProductList(request goodsstore.Request) goodsstore.DataResult {
+	var isSale bool
+	if request.GetStatus() == "up" {
+		isSale = true
+	}
+	query := &shopmodels.GoodsQuery{
+		GoodsName:     request.GetName(),
+		OuterID:       request.GetOuterId(),
+		Page:          int64(request.GetPageNo()),
+		Size:          int64(request.GetPageSize()),
+		StartModified: request.GetStartModified(),
+		EndModified:   request.GetEndModified(),
+		IsOnSale:      &isSale,
+	}
+
+	if request.GetStatus() == "up" {
+		onSale := true
+		query.IsOnSale = &onSale
+	} else if request.GetStatus() == "down" {
+		onSale := false
+		query.IsOnSale = &onSale
+	}
+
+	if cids := strings.TrimSpace(request.GetSellerCIds()); cids != "" && cids != "0" {
+		parts := strings.Split(cids, ",")
+		if len(parts) > 0 {
+			if id, err := strconv.ParseInt(strings.TrimSpace(parts[0]), 10, 64); err == nil {
+				query.CategoryId = id
+			}
+		}
+	}
+
+	data, err := s.List(&gin.Context{}, query)
+	if err != nil {
+		return &shopmodels.GoodsDataResult{
+			IsError:  true,
+			ErrorMsg: err.Error(),
+		}
+	}
+	if data == nil || len(data.Rows) == 0 {
+		return &shopmodels.GoodsDataResult{}
+	}
+
+	products := make([]goodsstore.ProductData, 0, len(data.Rows))
+	for _, row := range data.Rows {
+		if row == nil {
+			continue
+		}
+		products = append(products, toGoodsProductData(row))
+	}
+	return &shopmodels.GoodsDataResult{
+		TotalResults: int(data.Total),
+		ProductInfo:  products,
+	}
+}
+
+// toGoodsProductData 将 shopmodels.Goods 转为 goodsProductData。
+func toGoodsProductData(row *shopmodels.Goods) *shopmodels.GoodsProductData {
+	barcode := ""
+	if len(row.Skus) > 0 && row.Skus[0] != nil {
+		barcode = row.Skus[0].Barcode
+	}
+	created := ""
+	if row.CreateTime != nil {
+		created = row.CreateTime.Format("2006-01-02 15:04:05")
+	}
+	modified := ""
+	if row.UpdateTime != nil {
+		modified = row.UpdateTime.Format("2006-01-02 15:04:05")
+	}
+	status := "down"
+	if row.IsOnSale == 1 {
+		status = "up"
+	}
+	skus := make([]goodsstore.ProductSku, 0, len(row.Skus))
+	for _, sku := range row.Skus {
+		if sku == nil {
+			continue
+		}
+		skus = append(skus, toGoodsProductSku(sku))
+	}
+
+	var goodsId int64 = 0
+	parseInt, err := strconv.ParseInt(row.GoodsID, 10, 64)
+	if err != nil {
+		goodsId = int64(row.ID)
+		zap.L().Error("convert sku id error", zap.Error(err))
+	} else {
+		goodsId = parseInt
+	}
+
+	return &shopmodels.GoodsProductData{
+		Cid:        int(row.ShopCategoryId),
+		CatName:    row.ShopCategoryName,
+		ProductId:  goodsId,
+		Name:       row.GoodsName,
+		OuterId:    row.OuterID,
+		PicPath:    row.ImageURL,
+		Price:      int(row.RetailPrice),
+		BarcodeStr: barcode,
+		Created:    created,
+		Desc:       row.Description,
+		Modified:   modified,
+		Status:     status,
+		Quantity:   int(row.Quantity),
+		Skus:       skus,
+	}
+}
+
+// toGoodsProductSku 将 shopmodels.GoodsSku 转为 goodsProductSku。
+func toGoodsProductSku(sku *shopmodels.GoodsSku) *shopmodels.GoodsProductSku {
+	created := ""
+	if sku.CreateTime != nil {
+		created = sku.CreateTime.Format("2006-01-02 15:04:05")
+	}
+	modified := ""
+	if sku.UpdateTime != nil {
+		modified = sku.UpdateTime.Format("2006-01-02 15:04:05")
+	}
+	var skuId int64 = 0
+	parseInt, err := strconv.ParseInt(sku.SkuID, 10, 64)
+	if err != nil {
+		skuId = int64(sku.ID)
+		zap.L().Error("convert sku id error", zap.Error(err))
+	} else {
+		skuId = parseInt
+	}
+	return &shopmodels.GoodsProductSku{
+		SkuId:      skuId,
+		SkuName:    sku.SkuName,
+		ProductId:  int(sku.GoodsDBID),
+		OuterId:    sku.OuterID,
+		Price:      int(sku.RetailPrice),
+		Quantity:   int(sku.Quantity),
+		Created:    created,
+		Modified:   modified,
+		Properties: "",
+	}
 }

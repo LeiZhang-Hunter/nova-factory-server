@@ -90,7 +90,7 @@ func (n *Notifier) OnProductChanged(ev event.TransactionEvent[event.ProductEvent
 // OnStockChanged 向所有观察者分发库存变更事件。
 // 由 Notifier 统一开启事务，并将 tx 显式传给每个观察者，保证全员原子一致。
 func (n *Notifier) OnStockChanged(ev event.TransactionEvent[event.StockEvent]) error {
-	if ev.GetDB() == nil {
+	if ev.GetDB() == nil || (ev.ToEvent() != nil && !ev.ToEvent().GetTransaction()) {
 		return n.notify(func(ob Observer) error {
 			err := ob.OnStockChanged(ev.ToEvent())
 			if err != nil {
@@ -115,8 +115,8 @@ func (n *Notifier) OnStockChanged(ev event.TransactionEvent[event.StockEvent]) e
 
 // OnOrderChanged 向所有观察者分发订单变更事件。
 // 由 Notifier 统一开启事务，并将 tx 显式传给每个观察者，保证全员原子一致。
-func (n *Notifier) OnOrderChanged(ev event.TransactionEvent[event.OrderEvent]) error {
-	if ev.GetDB() == nil {
+func (n *Notifier) OnOrderChanged(ev event.TransactionEvent[event.OrderEvent], transaction bool) error {
+	if ev.GetDB() == nil || !transaction {
 		return n.notify(func(ob Observer) error {
 			err := ob.OnOrderChanged(ev.ToEvent())
 			if err != nil {

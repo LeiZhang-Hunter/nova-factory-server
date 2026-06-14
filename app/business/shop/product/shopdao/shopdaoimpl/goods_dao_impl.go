@@ -203,6 +203,12 @@ func (s *ShopGoodsDaoImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*sh
 	if req.CategoryId > 0 {
 		db = db.Where("shop_category_id = ?", req.CategoryId)
 	}
+	if req.StartModified != "" {
+		db = db.Where("update_time >= ?", req.StartModified)
+	}
+	if req.EndModified != "" {
+		db = db.Where("update_time <= ?", req.EndModified)
+	}
 
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	if req.Page <= 0 {
@@ -318,6 +324,22 @@ func (s *ShopGoodsDaoImpl) UpsertByGoodsID(c *gin.Context, goodsID string, updat
 		return s.db.WithContext(c).Table(s.tableName).Create(updates).Error
 	}
 	return s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Updates(updates).Error
+}
+
+// LockStockRows 锁定指定商品的库存行，防止并发更新
+func (s *ShopGoodsDaoImpl) LockStockRows(db *gorm.DB, goodsIDs []string) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+	if len(goodsIDs) == 0 {
+		return nil
+	}
+	goodsRows := make([]shopmodels.Goods, 0)
+	return db.Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("goods_id IN ?", goodsIDs).
+		Order("goods_id ASC").
+		Find(&goodsRows).Error
 }
 
 func (s *ShopGoodsDaoImpl) attachHomeModuleIDs(c *gin.Context, rows []*shopmodels.Goods) error {

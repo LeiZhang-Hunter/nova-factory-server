@@ -226,6 +226,22 @@ func (s *ShopSkuDaoImpl) SumStockByGoodsID(c *gin.Context, goodsID string) (int6
 	return total, err
 }
 
+// LockStockRows 锁定指定商品的SKU库存行，防止并发更新
+func (s *ShopSkuDaoImpl) LockStockRows(db *gorm.DB, goodsIDs []string) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+	if len(goodsIDs) == 0 {
+		return nil
+	}
+	skus := make([]shopmodels.GoodsSku, 0)
+	return db.Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("goods_id IN ?", goodsIDs).
+		Order("goods_id ASC, sku_id ASC").
+		Find(&skus).Error
+}
+
 func (s *ShopSkuDaoImpl) UpsertBySkuID(c *gin.Context, skuID string, updates map[string]any) error {
 	var count int64
 	s.db.WithContext(c).Table(s.tableName).Where("sku_id = ?", skuID).Count(&count)

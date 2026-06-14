@@ -32,6 +32,8 @@ type Event interface {
 	GetCallback() Callback
 	// GetDB 读取DB
 	GetDB() *gorm.DB
+	// GetTransaction 是否打开事物
+	GetTransaction() bool
 }
 
 // TransactionEvent 事务事件。
