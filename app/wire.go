@@ -48,7 +48,6 @@ func wireApp() (*gin.Engine, func(), error) {
 		wms.ProviderSet,
 		admin.ProviderSet,
 		datasource.ProviderSet,
-		observer.ProviderSet,
 		finalEngine,
 	))
 }

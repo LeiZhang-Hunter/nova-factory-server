@@ -1,20 +1,10 @@
 package shopobserver
 
 import (
-	"fmt"
-	"strconv"
-
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
-
-	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
-	"nova-factory-server/app/utils/observer/integration/observer"
 	"nova-factory-server/app/utils/observer/integration/result"
-
-	"gorm.io/gorm"
 )
 
 type ShopObserver struct {
@@ -22,19 +12,18 @@ type ShopObserver struct {
 }
 
 func NewShopObserver(goodsService shopservice.IShopGoodsService) *ShopObserver {
-	s := &ShopObserver{
+	return &ShopObserver{
 		goodsService: goodsService,
 	}
-	observer.GetNotifier().Register(s)
-	return s
 }
 
 func (s *ShopObserver) Name() kind.Kind {
 	return "shop"
 }
 
-func (s *ShopObserver) OnProductChanged(tx *gorm.DB, ev event.ProductEvent) (result.SyncProductResponse, error) {
-	s.goodsService.SyncEvent(ev)
+// OnProductChanged 商品变更回调，当商品创建、更新或删除时触发
+func (s *ShopObserver) OnProductChanged(event event.ProductEvent) (result.SyncProductResponse, error) {
+	s.goodsService.SyncEvent(event)
 	return nil, nil
 }
 

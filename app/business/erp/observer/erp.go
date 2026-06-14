@@ -1,15 +1,11 @@
 package observer
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/business/erp/sale/saleservice"
 	"nova-factory-server/app/business/erp/stock/stockservice"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
-	"nova-factory-server/app/utils/observer/integration/observer"
 	"nova-factory-server/app/utils/observer/integration/result"
 )
 
@@ -28,13 +24,12 @@ type ERPObserver struct {
 }
 
 // NewERPObserver 创建 ERP 观察者。
-func NewERPObserver(orderService saleservice.IOrderService, productService masterservice.IProductService, stockService stockservice.IStockService) observer.Observer {
+func NewERPObserver(orderService saleservice.IOrderService, productService masterservice.IProductService, stockService stockservice.IStockService) *ERPObserver {
 	s := &ERPObserver{
 		orderService:   orderService,
 		productService: productService,
 		stockService:   stockService,
 	}
-	observer.GetNotifier().Register(s)
 	return s
 }
 
@@ -49,53 +44,53 @@ func (o *ERPObserver) Name() kind.Kind {
 //
 // 当前 ERP 商品事件同步尚未接入，先安全跳过。
 func (o *ERPObserver) OnProductChanged(event event.ProductEvent) (result.SyncProductResponse, error) {
-	products := event.GetProducts()
-	if len(products) == 0 {
-		return nil, nil
-	}
-
-	c := &gin.Context{}
-
-	for _, product := range products {
-		skus := product.GetSkus()
-		if len(skus) == 0 {
-			continue
-		}
-
-		for _, sku := range skus {
-			skuID := sku.GetSkuId()
-
-			productUpdates := map[string]any{
-				"name":       product.GetGoodsName(),
-				"bar_code":   sku.GetBarcode(),
-				"weight":     sku.GetWeight(),
-				"sale_price": sku.GetPrice(),
-				"standard":   sku.GetSkuName(),
-			}
-			if code := product.GetGoodsCode(); code != "" {
-				productUpdates["product_code"] = code
-			}
-
-			if err := o.productDao.UpsertByID(c, skuID, productUpdates); err != nil {
-				zap.L().Error("ErpObserver: 同步ERP产品失败",
-					zap.Int64("skuId", skuID),
-					zap.Error(err))
-				return nil, fmt.Errorf("同步ERP产品失败 skuId=%d: %w", skuID, err)
-			}
-
-			stockUpdates := map[string]any{
-				"product_id": skuID,
-				"count":      float64(sku.GetQuantity()),
-			}
-
-			if err := s.stockDao.UpsertByID(c, skuID, stockUpdates); err != nil {
-				zap.L().Error("ErpObserver: 同步ERP库存失败",
-					zap.Int64("skuId", skuID),
-					zap.Error(err))
-				return nil, fmt.Errorf("同步ERP库存失败 skuId=%d: %w", skuID, err)
-			}
-		}
-	}
+	//products := event.GetProducts()
+	//if len(products) == 0 {
+	//	return nil, nil
+	//}
+	//
+	//c := &gin.Context{}
+	//
+	//for _, product := range products {
+	//	skus := product.GetSkus()
+	//	if len(skus) == 0 {
+	//		continue
+	//	}
+	//
+	//	for _, sku := range skus {
+	//		skuID := sku.GetSkuId()
+	//
+	//		productUpdates := map[string]any{
+	//			"name":       product.GetGoodsName(),
+	//			"bar_code":   sku.GetBarcode(),
+	//			"weight":     sku.GetWeight(),
+	//			"sale_price": sku.GetPrice(),
+	//			"standard":   sku.GetSkuName(),
+	//		}
+	//		if code := product.GetGoodsCode(); code != "" {
+	//			productUpdates["product_code"] = code
+	//		}
+	//
+	//		if err := o.productDao.UpsertByID(c, skuID, productUpdates); err != nil {
+	//			zap.L().Error("ErpObserver: 同步ERP产品失败",
+	//				zap.Int64("skuId", skuID),
+	//				zap.Error(err))
+	//			return nil, fmt.Errorf("同步ERP产品失败 skuId=%d: %w", skuID, err)
+	//		}
+	//
+	//		stockUpdates := map[string]any{
+	//			"product_id": skuID,
+	//			"count":      float64(sku.GetQuantity()),
+	//		}
+	//
+	//		if err := s.stockDao.UpsertByID(c, skuID, stockUpdates); err != nil {
+	//			zap.L().Error("ErpObserver: 同步ERP库存失败",
+	//				zap.Int64("skuId", skuID),
+	//				zap.Error(err))
+	//			return nil, fmt.Errorf("同步ERP库存失败 skuId=%d: %w", skuID, err)
+	//		}
+	//	}
+	//}
 
 	return nil, nil
 }
