@@ -220,7 +220,7 @@ func (s *IQQDServiceImpl) issueTokenResponse(ctx *gin.Context, appKey string, co
 		RefreshExpireAt: FormatQQDTime(refreshExpireAt),
 		AppKey:          config.Credentials.AppKey,
 		AppSecret:       config.Credentials.AppSecret,
-		SelfMallAccount: config.Selfmallaccount,
+		SelfMallAccount: config.Credentials.Selfmallaccount,
 	}, nil
 }
 

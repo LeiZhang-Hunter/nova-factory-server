@@ -16,8 +16,9 @@ const (
 
 // Credentials 管家婆应用授权信息
 type Credentials struct {
-	AppKey    string `json:"appKey"`
-	AppSecret string `json:"appSecret"`
+	AppKey          string `json:"appKey"`
+	AppSecret       string `json:"appSecret"`
+	Selfmallaccount string `json:"selfmallaccount"`
 }
 
 // ConfigSnapshot 管家婆集成配置快照
@@ -35,7 +36,6 @@ type ConfigSnapshot struct {
 	CodeTTL         string            `json:"codeTTL"`
 	TokenTTL        string            `json:"tokenTTL"`
 	RefreshTokenTTL string            `json:"refreshTokenTTL"`
-	Selfmallaccount string            `json:"selfmallaccount"`
 }
 
 // parseSnapshot 解析集成配置JSON为配置快照
