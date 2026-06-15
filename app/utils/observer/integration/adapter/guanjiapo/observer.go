@@ -40,7 +40,7 @@ func (o *SyncObserver) OnStockChanged(event event.StockEvent) error {
 
 // OnOrderChanged 订单变更回调
 func (o *SyncObserver) OnOrderChanged(event event.OrderEvent) error {
-	if event.Config == nil {
+	if event.Config() == nil {
 		zap.L().Debug("未传入集成配置，跳过管家婆订单同步")
 		return nil
 	}
