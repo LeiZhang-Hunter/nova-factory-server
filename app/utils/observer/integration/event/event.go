@@ -44,8 +44,6 @@ type TransactionEvent[T Event] interface {
 	GetDB() *gorm.DB
 	// WithDB 设置DB
 	WithDB(tx *gorm.DB)
-	// WithCache 设置缓存
-	WithCache(cache *cache.Cache)
 	// ToEvent 转换为具体业务事件
 	ToEvent() T
 }
