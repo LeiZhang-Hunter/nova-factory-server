@@ -27,7 +27,7 @@ func (o *OrderSyncRequest) GetTransaction() bool {
 }
 
 func (o *OrderSyncRequest) GetCache() cache.Cache {
-	return nil
+	return o.c
 }
 
 func (o *OrderSyncRequest) GetCallback() event.Callback {

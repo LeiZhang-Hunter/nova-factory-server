@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/spf13/viper"
 	"nova-factory-server/app/constant/redis"
 	"nova-factory-server/app/datasource/cache"
 	"strings"
@@ -15,7 +16,8 @@ func GetLoginTokenFromCache(ctx context.Context, cacheStore cache.Cache) (*OAuth
 	if cacheStore == nil {
 		return nil, errors.New("cache不能为空")
 	}
-	cacheKey := fmt.Sprintf(redis.IntegrationLoginCacheKeyPattern, KindGuanJiaPo)
+	mode := viper.GetString("mode")
+	cacheKey := fmt.Sprintf(redis.IntegrationLoginCacheKeyPattern, mode, KindGuanJiaPo)
 	cacheValue, err := cacheStore.Get(ctx, cacheKey)
 	if err != nil || strings.TrimSpace(cacheValue) == "" {
 		return nil, err
