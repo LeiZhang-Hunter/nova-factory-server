@@ -18,4 +18,6 @@ const (
 	EventOrderCreated EventType = "order.created"
 	// EventOrderStatusChanged 订单状态变更事件，当订单状态（付款、发货、完成等）发生流转时触发
 	EventOrderStatusChanged EventType = "order.status_changed"
+	//
+	EventOrderSendChanged EventType = "order.send_changed"
 )

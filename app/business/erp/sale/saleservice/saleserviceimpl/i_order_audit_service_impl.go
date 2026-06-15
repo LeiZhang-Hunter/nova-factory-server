@@ -179,62 +179,63 @@ func (o *OrderAuditServiceImpl) DeleteByIDs(c *gin.Context, ids []uint64) error 
 }
 
 func (o *OrderAuditServiceImpl) Approve(c *gin.Context, req *salemodels.OrderAuditAction) (*salemodels.OrderAudit, error) {
-	return nil, nil
-	//if req == nil || req.ID == 0 {
-	//	return nil, errors.New("id不能为空")
-	//}
-	//item, err := o.dao.GetByID(c, req.ID)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if item == nil {
-	//	return nil, errors.New("订单审核记录不存在")
-	//}
-	//if item.AuditStatus == 1 && item.TransferStatus == 1 && item.ERPOrderID > 0 {
-	//	return item, nil
-	//}
-	//var result *salemodels.OrderAudit
-	//db := o.db.WithContext(c)
-	//err = db.Transaction(func(tx *gorm.DB) error {
-	//	order, setErr := o.orderDao.SetWithTx(c, tx, o.toOrderSet(item))
-	//	if setErr != nil {
-	//		return setErr
-	//	}
-	//	if order == nil {
-	//		return errors.New("正式订单保存成功但事务内未返回订单")
-	//	}
-	//	if approveErr := o.dao.ApproveWithTx(c, tx, req.ID, strings.TrimSpace(req.AuditRemark), order.ID); approveErr != nil {
-	//		return approveErr
-	//	}
-	//	result, err = o.dao.GetByIDWithTx(c, tx, req.ID)
-	//	if err != nil {
-	//		zap.L().Error("get id error", zap.Error(err))
-	//		return err
-	//	}
-	//
-	//	// CheckLoginState 检查当前 ERP 集成客户端的登录状态。
-	//	cfg, err := o.integrationConfigDao.GetEnabled(c)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	if cfg == nil {
-	//		return nil
-	//	}
-	//	service, err := cfg.Service()
-	//	if err != nil {
-	//		return err
-	//	}
-	//	if service == nil {
-	//		return errors.New("没有配置集成商")
-	//	}
-	//	data := o.toOrderSyncRequest(item)
-	//	//_, err = service.OrderSyncer().SyncOrders(c, data)
-	//	return err
-	//})
-	//if err != nil {
-	//	zap.L().Error("sync order error", zap.Error(err))
-	//}
-	//return result, err
+	if req == nil || req.ID == 0 {
+		return nil, errors.New("id不能为空")
+	}
+	item, err := o.dao.GetByID(c, req.ID)
+	if err != nil {
+		return nil, err
+	}
+	if item == nil {
+		return nil, errors.New("订单审核记录不存在")
+	}
+	if item.AuditStatus == 1 && item.TransferStatus == 1 && item.ERPOrderID > 0 {
+		return item, nil
+	}
+	var result *salemodels.OrderAudit
+	db := o.db.WithContext(c)
+	err = db.Transaction(func(tx *gorm.DB) error {
+		order, setErr := o.orderDao.SetWithTx(c, tx, o.toOrderSet(item))
+		if setErr != nil {
+			return setErr
+		}
+		if order == nil {
+			return errors.New("正式订单保存成功但事务内未返回订单")
+		}
+		if approveErr := o.dao.ApproveWithTx(c, tx, req.ID, strings.TrimSpace(req.AuditRemark), order.ID); approveErr != nil {
+			return approveErr
+		}
+		result, err = o.dao.GetByIDWithTx(c, tx, req.ID)
+		if err != nil {
+			zap.L().Error("get id error", zap.Error(err))
+			return err
+		}
+
+		// CheckLoginState 检查当前 ERP 集成客户端的登录状态。
+		cfg, err := o.integrationConfigDao.GetEnabled(c)
+		if err != nil {
+			return err
+		}
+		if cfg == nil {
+			return nil
+		}
+		service, err := cfg.Service()
+		if err != nil {
+			return err
+		}
+		if service == nil {
+			return errors.New("没有配置集成商")
+		}
+		data := o.toOrderSyncRequest(item)
+		data.WithConfig(cfg)
+		data.WithCache(o.cache)
+		_, err = service.OrderSyncer().SyncOrders(c, data)
+		return err
+	})
+	if err != nil {
+		zap.L().Error("sync order error", zap.Error(err))
+	}
+	return result, err
 }
 
 func (o *OrderAuditServiceImpl) Reject(c *gin.Context, req *salemodels.OrderAuditAction) (*salemodels.OrderAudit, error) {

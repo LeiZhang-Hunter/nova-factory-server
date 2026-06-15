@@ -22,5 +22,5 @@ func MakeAIGatewayAliveCacheKey(gatewayID int64) string {
 	return fmt.Sprintf(AIGatewayAliveCacheKey, gatewayID)
 }
 
-// IntegrationLoginCacheKeyPattern erp集成系统登陆数据
+// IntegrationLoginCacheKeyPattern erp集成系统登陆数据 mode +kind
 const IntegrationLoginCacheKeyPattern = "erp:integration:login:%s:%s"

@@ -16,22 +16,26 @@ const (
 
 // Credentials 管家婆应用授权信息
 type Credentials struct {
-	AppKey    string `json:"appKey"`
-	AppSecret string `json:"appSecret"`
+	AppKey          string `json:"appKey"`
+	AppSecret       string `json:"appSecret"`
+	Selfmallaccount string `json:"selfmallaccount"`
 }
 
 // ConfigSnapshot 管家婆集成配置快照
 type ConfigSnapshot struct {
-	SystemName  string            `json:"systemName"`
-	Credentials Credentials       `json:"credentials"`
-	CheckURL    string            `json:"checkUrl"`
-	BaseURL     string            `json:"baseUrl"`
-	RedirectURL string            `json:"redirect_url"`
-	State       string            `json:"state"`
-	Token       string            `json:"token"`
-	AccessToken string            `json:"accessToken"`
-	Cookie      string            `json:"cookie"`
-	Headers     map[string]string `json:"headers"`
+	SystemName      string            `json:"systemName"`
+	Credentials     Credentials       `json:"credentials"`
+	CheckURL        string            `json:"checkUrl"`
+	BaseURL         string            `json:"baseUrl"`
+	RedirectURL     string            `json:"redirect_url"`
+	State           string            `json:"state"`
+	Token           string            `json:"token"`
+	AccessToken     string            `json:"accessToken"`
+	Cookie          string            `json:"cookie"`
+	Headers         map[string]string `json:"headers"`
+	CodeTTL         string            `json:"codeTTL"`
+	TokenTTL        string            `json:"tokenTTL"`
+	RefreshTokenTTL string            `json:"refreshTokenTTL"`
 }
 
 // parseSnapshot 解析集成配置JSON为配置快照
@@ -47,4 +51,18 @@ func parseSnapshot(cfg config.Config) (*ConfigSnapshot, error) {
 		return nil, err
 	}
 	return s, nil
+}
+
+// ApplyDefaults 为未配置的 TTL 字段填充默认值
+// codeTTL 默认 10 分钟，tokenTTL 默认 24 小时，refreshTokenTTL 默认 720 小时（30天）
+func (c *ConfigSnapshot) ApplyDefaults() {
+	if c.CodeTTL == "" {
+		c.CodeTTL = "10m"
+	}
+	if c.TokenTTL == "" {
+		c.TokenTTL = "24h"
+	}
+	if c.RefreshTokenTTL == "" {
+		c.RefreshTokenTTL = "720h"
+	}
 }

@@ -1,4 +1,4 @@
-package salemodels
+package models
 
 import (
 	"gorm.io/gorm"
@@ -27,7 +27,7 @@ func (o *OrderSyncRequest) GetTransaction() bool {
 }
 
 func (o *OrderSyncRequest) GetCache() cache.Cache {
-	return o.c
+	return nil
 }
 
 func (o *OrderSyncRequest) GetCallback() event.Callback {

@@ -11,10 +11,37 @@ type OrderSyncResult struct {
 	Message  string `json:"message"`
 }
 
+func (o *OrderSyncResult) GetTid() string {
+	return o.Tid
+}
+
+func (o *OrderSyncResult) GetBillCode() string {
+	return o.BillCode
+}
+
+func (o *OrderSyncResult) GetMessage() string {
+	return o.Message
+}
+
+// Ptr 返回当前响应对象的指针
+func (o *OrderSyncResult) Ptr() any {
+	return o
+}
+
+// RawStr 将响应序列化为原始 JSON 字符串
+func (o *OrderSyncResult) RawStr() (string, error) {
+	return "", nil
+}
+
+// MetaData 返回响应的扩展元数据键值对
+func (o *OrderSyncResult) MetaData() map[string]any {
+	return make(map[string]any)
+}
+
 type OrderSyncResponse struct {
-	Code    int64                    `json:"code"`
-	Message string                   `json:"message"`
-	Orders  []result.OrderSyncResult `json:"orders"`
+	Code    int64             `json:"code"`
+	Message string            `json:"message"`
+	Orders  []OrderSyncResult `json:"orders"`
 }
 
 func (o *OrderSyncResponse) GetCode() int64 {
@@ -24,7 +51,11 @@ func (o *OrderSyncResponse) GetMessage() string {
 	return o.Message
 }
 func (o *OrderSyncResponse) GetOrders() []result.OrderSyncResult {
-	return o.Orders
+	var orders = make([]result.OrderSyncResult, len(o.Orders))
+	for _, order := range o.Orders {
+		orders = append(orders, &order)
+	}
+	return orders
 }
 
 func (o *OrderSyncResponse) Ptr() any {
