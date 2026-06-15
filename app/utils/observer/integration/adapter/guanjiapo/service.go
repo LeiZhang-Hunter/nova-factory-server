@@ -16,11 +16,12 @@ import (
 
 // Service 管家婆全渠道集成客户端
 type Service struct {
-	oauthURL    string
-	tokenURL    string
-	mode        string
-	tokenSyncer api.TokenGetter
-	orderSyncer api.OrderSyncer
+	oauthURL      string
+	tokenURL      string
+	mode          string
+	tokenSyncer   api.TokenGetter
+	orderSyncer   api.OrderSyncer
+	productSyncer api.Product
 }
 
 // New 创建管家婆集成客户端
@@ -36,11 +37,12 @@ func New() api.Service {
 		tokenURL = "https://openapi.gjpqqd.com/Service/ERPService.asmx/EMallApi"
 	}
 	return &Service{
-		oauthURL:    oauthURL,
-		tokenURL:    tokenURL,
-		tokenSyncer: newTokenSyncer(tokenURL, tokenURL, mode),
-		orderSyncer: newOrderSyncer(tokenURL),
-		mode:        strings.ToLower(mode),
+		oauthURL:      oauthURL,
+		tokenURL:      tokenURL,
+		tokenSyncer:   newTokenSyncer(tokenURL, tokenURL, mode),
+		orderSyncer:   newOrderSyncer(tokenURL, mode),
+		productSyncer: newProductSyncer(tokenURL, mode),
+		mode:          strings.ToLower(mode),
 	}
 }
 
@@ -65,6 +67,11 @@ func (c *Service) OrderSyncer() api.OrderSyncer {
 
 func (c *Service) TokenGetter() api.TokenGetter {
 	return c.tokenSyncer
+}
+
+// ProductSearcher 返回商品查询能力
+func (c *Service) ProductSearcher() api.Product {
+	return c.productSyncer
 }
 
 // CheckLoginState 返回授权地址，前端跳转后完成OAuth授权
