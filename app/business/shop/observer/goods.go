@@ -8,12 +8,14 @@ import (
 )
 
 type ShopObserver struct {
-	goodsService shopservice.IShopGoodsService
+	goodsService     shopservice.IShopGoodsService
+	orderSendService shopservice.IShopOrderSendService
 }
 
-func NewShopObserver(goodsService shopservice.IShopGoodsService) *ShopObserver {
+func NewShopObserver(goodsService shopservice.IShopGoodsService, orderSendService shopservice.IShopOrderSendService) *ShopObserver {
 	return &ShopObserver{
-		goodsService: goodsService,
+		goodsService:     goodsService,
+		orderSendService: orderSendService,
 	}
 }
 
@@ -33,5 +35,11 @@ func (s *ShopObserver) OnStockChanged(event event.StockEvent) error {
 
 // OnOrderChanged 订单变更回调，当订单创建或状态变更（付款、发货等）时触发
 func (s *ShopObserver) OnOrderChanged(event event.OrderEvent) error {
+	return nil
+}
+
+// OnOrderSendChange 订单发货变化
+func (s *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
+	s.orderSendService.Set(sendEvent)
 	return nil
 }

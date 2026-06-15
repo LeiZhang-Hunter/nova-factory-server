@@ -6,6 +6,7 @@ package service
 
 import (
 	"nova-factory-server/app/business/datasyncapi/gjpqqd/models"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo"
 	"nova-factory-server/app/utils/store/goods"
 
 	"github.com/gin-gonic/gin"
@@ -24,11 +25,11 @@ type GjpQqdService interface {
 	// ValidAccessToken 校验 access_token 是否有效且未过期，并与 appKey 匹配
 	ValidAccessToken(ctx *gin.Context, token, appKey string) bool
 	// ValidSign 校验请求的 MD5 签名是否与预期一致
-	ValidSign(params map[string]string, body, sign string, config *models.QQDConfig) bool
+	ValidSign(params map[string]string, body, sign string, config *guanjiapo.ConfigSnapshot) bool
 	// ProductList 分页查询商品列表，返回管家婆 API 兼容的响应格式
 	ProductList(ctx *gin.Context, request *models.ProductListRequest) goods.DataResult
 	// GetConfig 读取配置
-	GetConfig(ctx *gin.Context) (*models.QQDConfig, error)
+	GetConfig(ctx *gin.Context) (*guanjiapo.ConfigSnapshot, error)
 	// GetProductCategory 读取分类列表
 	GetProductCategory(ctx *gin.Context, request *models.CategorySearchRequest) goods.DataCategoryResult
 }

@@ -30,6 +30,26 @@ func NewAPI(service service.GjpQqdService, db *gorm.DB) *API {
 
 // API 处理全渠道 API 的统一入口
 // 流程：解析请求参数 -> 校验 access_token -> 校验签名 -> 按 method 分发
+// @Summary 全渠道 API 统一入口
+// @Description 统一的 API 调用入口，通过 method 参数分发到不同的业务功能。
+// 支持的 method：
+// - selfmall.product.list.get: 获取商品列表
+// - selfmall.product.add: 新增商品
+// - selfmall.productstock.list.update: 库存更新
+// - selfmall.sellercats.list.get: 获取商品分类
+// - selfmall.order.send: 订单发货
+// - selfmall.afterorder.status.sync: 售后状态同步
+// @Tags 数据同步API/管家婆全渠道
+// @Param method formData string true "API 方法名"
+// @Param app_key formData string true "应用 key"
+// @Param access_token formData string true "访问令牌"
+// @Param sign formData string true "MD5 签名"
+// @Param pageno formData int false "页码"
+// @Param pagesize formData int false "每页数量"
+// @Produce application/json
+// @Success 200 {object} models.ErrorResponse "调用结果"
+// @Failure 400 {object} models.ErrorResponse "参数错误"
+// @Router /api/v1/erp-api/qqd/api [post]
 func (q *API) API(c *gin.Context) {
 	if err := c.Request.ParseForm(); err != nil {
 		zap.L().Error("parse qqd api form failed", zap.Error(err))
@@ -97,6 +117,11 @@ func (q *API) API(c *gin.Context) {
 		}
 		response := q.service.GetProductCategory(c, categoryReq)
 		c.JSON(http.StatusOK, response)
+	case "selfmall.order.send":
+		q.syncOrderSend(c)
+		break
+	case "selfmall.afterorder.status.sync":
+		break
 	case "selfmall.product.query",
 		"selfmall.order.ship",
 		"selfmall.stock.update",
@@ -179,5 +204,40 @@ func (q *API) productAdd(c *gin.Context) {
 		"errormsg": "ok",
 		"result":   result,
 		"total":    len(result),
+	})
+}
+
+// syncOrderSend 订单发货
+func (q *API) syncOrderSend(c *gin.Context) {
+	orderSendReq := new(models.OrderSendReq)
+	err := c.ShouldBind(orderSendReq)
+	if err != nil {
+		zap.L().Error("should bind error", zap.Error(err))
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: err.Error(),
+		})
+		return
+	}
+
+	err = observer.GetNotifier().OnOrderSendChange(orderSendReq)
+	if err != nil {
+		zap.L().Error("order send change failed", zap.Error(err))
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: err.Error(),
+		})
+		return
+	}
+	subtids := make([]string, 0, len(orderSendReq.Details))
+	for _, d := range orderSendReq.Details {
+		subtids = append(subtids, d.SubTid)
+	}
+	c.JSON(http.StatusOK, models.OrderSendResponse{
+		Iserror:  false,
+		Errormsg: "ok",
+		Tid:      orderSendReq.Tid,
+		Issplit:  orderSendReq.Issplit,
+		Subtids:  strings.Join(subtids, ","),
 	})
 }

@@ -14,13 +14,13 @@ type IssueTokenReq struct {
 // IssueTokenResponse Token 签发成功响应
 // ReExpireDate 复用 ExpireDate，SelfMallAccount 为商家自建商城账号标识
 type IssueTokenResponse struct {
-	IsError         bool        `json:"iserror"`
-	ErrorMsg        string      `json:"errormsg"`
-	Token           interface{} `json:"token"`
-	ExpireDate      interface{} `json:"expiredate"`
-	RefreshToken    interface{} `json:"refresh_token"`
-	ReExpireDate    interface{} `json:"re_expiredate"`
-	AppKey          interface{} `json:"appkey"`
-	AppSecret       interface{} `json:"appsecret"`
-	SelfMallAccount interface{} `json:"selfmallaccount"`
+	IsError         bool   `json:"iserror"`
+	ErrorMsg        string `json:"errormsg"`
+	Token           string `json:"token"`
+	ExpireDate      string `json:"expiredate"`
+	RefreshToken    string `json:"refresh_token"`
+	ReExpireDate    string `json:"re_expiredate"`
+	AppKey          string `json:"appkey"`
+	AppSecret       string `json:"appsecret"`
+	SelfMallAccount string `json:"selfmallaccount"`
 }

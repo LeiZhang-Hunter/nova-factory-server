@@ -17,11 +17,13 @@ import (
 	shopconfigController "nova-factory-server/app/business/shop/config/controller"
 	homeController "nova-factory-server/app/business/shop/home/controller"
 	shopobserver "nova-factory-server/app/business/shop/observer"
+	shopOrderController "nova-factory-server/app/business/shop/order/controller"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
 	userController "nova-factory-server/app/business/shop/user/controller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
+	_ "nova-factory-server/app/utils/observer/integration/adapter/guanjiapo"
 	"nova-factory-server/app/utils/observer/integration/observer"
 )
 
@@ -44,6 +46,7 @@ func NewGinEngine(
 	favoriteController *favorite.Favorite,
 	apiActivityController *apiActivityController.Controller,
 	apiCompanyController *apiCompanyController.Controller,
+	shopOrderController *shopOrderController.Controller,
 	shopObserver *shopobserver.ShopObserver,
 ) *Shop {
 	group := app.Engine.Group("")
@@ -113,6 +116,7 @@ func NewGinEngine(
 		controller.Sku.PrivateRoutes(adminGroup)
 		userController.DiscountRule.PrivateRoutes(adminGroup)
 		userController.User.PrivateRoutes(adminGroup)
+		shopOrderController.Order.PrivateRoutes(adminGroup)
 	}
 
 	// 加载MCP

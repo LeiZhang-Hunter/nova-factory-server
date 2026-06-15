@@ -117,7 +117,6 @@ func NewGinEngine(
 		// 组态管理
 		configuration.Configuration.PrivateRoutes(group)
 
-		alert.Runner.Run()
 	}
 
 	// mpc
