@@ -31,6 +31,19 @@ func NewToken(gjpService service.GjpQqdService) *Token {
 // - authorization_code: 使用 OAuth 授权码换取 access_token
 // - refresh_token: 使用 refresh_token 刷新 access_token
 // 校验失败时返回已知错误码，未知错误统一返回 "generate token failed"
+// @Summary Token 签发/刷新
+// @Description 支持 authorization_code 和 refresh_token 两种 grant_type，校验后签发或刷新 access_token
+// @Tags 数据同步API/管家婆全渠道
+// @Param appkey formData string true "应用 key"
+// @Param appsecret formData string true "应用 secret"
+// @Param grant_type formData string true "授权类型 (authorization_code / refresh_token)"
+// @Param code formData string false "授权码 (grant_type=authorization_code 时必填)"
+// @Param refresh_token formData string false "刷新令牌 (grant_type=refresh_token 时必填)"
+// @Produce application/json
+// @Success 200 {object} models.IssueTokenResponse "签发成功"
+// @Failure 400 {object} models.ErrorResponse "参数错误"
+// @Failure 200 {object} models.ErrorResponse "业务错误（如无效授权码、无效 refresh_token 等）"
+// @Router /api/v1/erp-api/qqd/oauth/token [post]
 func (q *Token) Token(c *gin.Context) {
 	req := new(models.IssueTokenReq)
 	err := c.ShouldBind(req)

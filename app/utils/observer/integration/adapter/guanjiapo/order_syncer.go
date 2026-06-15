@@ -43,14 +43,14 @@ func (s *orderSyncer) makeSign(timestamp string, token string, cfg *ConfigSnapsh
 func (s *orderSyncer) SyncOrders(ctx context.Context, req event.OrderEvent) (result.OrderSyncResponse, error) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 
-	if req == nil || len(req.Orders()) == 0 {
+	if req == nil || len(req.GetOrders()) == 0 {
 		return nil, errors.New("orders不能为空")
 	}
 	snapshot, err := parseSnapshot(req.Config())
 	if err != nil {
 		return nil, err
 	}
-	token, err := resolveAccessToken(ctx, snapshot, req.Cache())
+	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (s *orderSyncer) SyncOrders(ctx context.Context, req event.OrderEvent) (res
 	params.Set("timestamp", timestamp)
 	params.Set("token", token)
 	body := map[string]any{
-		"orders": req.Orders(),
+		"orders": req.GetOrders(),
 	}
 	payload, err := json.Marshal(body)
 	if err != nil {

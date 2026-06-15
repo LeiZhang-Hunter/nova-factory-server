@@ -17,6 +17,7 @@ import (
 	"nova-factory-server/app/business/erp/setting/settingdao"
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo"
 	"nova-factory-server/app/utils/store/goods"
 	"strconv"
 	"strings"
@@ -66,7 +67,7 @@ func NewIQQDServiceImpl(configDao settingdao.IIntegrationConfigDao, cache cache.
 
 // GetConfig 从集成配置表加载管家婆配置到 s.cfg
 // 每次业务操作前调用，确保使用最新配置
-func (s *IQQDServiceImpl) GetConfig(ctx *gin.Context) (*models.QQDConfig, error) {
+func (s *IQQDServiceImpl) GetConfig(ctx *gin.Context) (*guanjiapo.ConfigSnapshot, error) {
 	enabled, err := s.configDao.GetEnabled(ctx)
 	if err != nil {
 		zap.L().Error("get integration config fail", zap.Error(err))
@@ -76,13 +77,13 @@ func (s *IQQDServiceImpl) GetConfig(ctx *gin.Context) (*models.QQDConfig, error)
 		return nil, errors.New("integration config disabled")
 	}
 
-	var cfg models.QQDConfig
-	cfg.ApplyDefaults()
+	var cfg guanjiapo.ConfigSnapshot
 	err = json.Unmarshal([]byte(enabled.Data), &cfg)
 	if err != nil {
 		zap.L().Error("parse qqd config fail", zap.Error(err))
 		return nil, err
 	}
+	cfg.ApplyDefaults()
 	return &cfg, nil
 }
 
@@ -168,11 +169,11 @@ func (s *IQQDServiceImpl) ValidAccessToken(ctx *gin.Context, token, appKey strin
 
 // ValidSign 校验请求的 MD5 签名
 // 使用缓存的 AppSecret 生成期望签名，与请求中的 sign 做不区分大小写比较
-func (s *IQQDServiceImpl) ValidSign(params map[string]string, body, sign string, config *models.QQDConfig) bool {
+func (s *IQQDServiceImpl) ValidSign(params map[string]string, body, sign string, config *guanjiapo.ConfigSnapshot) bool {
 	if sign == "" {
 		return false
 	}
-	expected, err := GenerateMD5Sign(params, body, config.AppSecret)
+	expected, err := GenerateMD5Sign(params, body, config.Credentials.AppSecret)
 	if err != nil {
 		zap.L().Error("generate qqd sign failed", zap.Error(err))
 		return false
@@ -190,7 +191,7 @@ func (s *IQQDServiceImpl) GetProductCategory(ctx *gin.Context, request *models.C
 }
 
 // issueTokenResponse 生成新的 access_token 和 refresh_token，存入缓存并返回
-func (s *IQQDServiceImpl) issueTokenResponse(ctx *gin.Context, appKey string, config *models.QQDConfig) (models.TokenResponse, error) {
+func (s *IQQDServiceImpl) issueTokenResponse(ctx *gin.Context, appKey string, config *guanjiapo.ConfigSnapshot) (models.TokenResponse, error) {
 	token, err := randomToken()
 	if err != nil {
 		return models.TokenResponse{}, fmt.Errorf("generate token: %w", err)
@@ -217,8 +218,8 @@ func (s *IQQDServiceImpl) issueTokenResponse(ctx *gin.Context, appKey string, co
 		ExpireDate:      FormatQQDTime(expireAt),
 		RefreshToken:    newRefreshToken,
 		RefreshExpireAt: FormatQQDTime(refreshExpireAt),
-		AppKey:          config.AppKey,
-		AppSecret:       config.AppSecret,
+		AppKey:          config.Credentials.AppKey,
+		AppSecret:       config.Credentials.AppSecret,
 		SelfMallAccount: config.Selfmallaccount,
 	}, nil
 }
@@ -255,13 +256,13 @@ func (s *IQQDServiceImpl) useRefreshToken(ctx *gin.Context, token string) (token
 }
 
 // validCredential 使用恒定时间比较校验 appKey 和 appSecret，防止时序攻击
-func (s *IQQDServiceImpl) validCredential(appKey, appSecret string, config *models.QQDConfig) bool {
-	if config.AppKey == "" || config.AppSecret == "" {
+func (s *IQQDServiceImpl) validCredential(appKey, appSecret string, config *guanjiapo.ConfigSnapshot) bool {
+	if config.Credentials.AppKey == "" || config.Credentials.AppSecret == "" {
 		zap.L().Error("integration config is not enabled")
 		return false
 	}
-	return subtle.ConstantTimeCompare([]byte(appKey), []byte(config.AppKey)) == 1 &&
-		subtle.ConstantTimeCompare([]byte(appSecret), []byte(config.AppSecret)) == 1
+	return subtle.ConstantTimeCompare([]byte(appKey), []byte(config.Credentials.AppKey)) == 1 &&
+		subtle.ConstantTimeCompare([]byte(appSecret), []byte(config.Credentials.AppSecret)) == 1
 }
 
 // setJSON 将对象序列化为 JSON 并存入缓存，支持 TTL 过期

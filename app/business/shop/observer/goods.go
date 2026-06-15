@@ -8,12 +8,14 @@ import (
 )
 
 type ShopObserver struct {
-	goodsService shopservice.IShopGoodsService
+	goodsService     shopservice.IShopGoodsService
+	orderSendService shopservice.IShopOrderSendService
 }
 
-func NewShopObserver(goodsService shopservice.IShopGoodsService) *ShopObserver {
+func NewShopObserver(goodsService shopservice.IShopGoodsService, orderSendService shopservice.IShopOrderSendService) *ShopObserver {
 	return &ShopObserver{
-		goodsService: goodsService,
+		goodsService:     goodsService,
+		orderSendService: orderSendService,
 	}
 }
 
@@ -37,6 +39,7 @@ func (s *ShopObserver) OnOrderChanged(event event.OrderEvent) error {
 }
 
 // OnOrderSendChange 订单发货变化
-func (o *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
+func (s *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
+	s.orderSendService.Set(sendEvent)
 	return nil
 }

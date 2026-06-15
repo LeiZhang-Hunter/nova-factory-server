@@ -1,6 +1,7 @@
 package salemodels
 
 import (
+	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
@@ -11,6 +12,22 @@ type OrderSyncRequest struct {
 	cfg    config.Config     `json:"-"`
 	action event.EventType   `json:"-"`
 	c      cache.Cache       `json:"-"`
+	db     *gorm.DB          `json:"-"`
+}
+
+func (o *OrderSyncRequest) WithDB(db *gorm.DB) {
+	o.db = db
+}
+
+func (o *OrderSyncRequest) GetDB() *gorm.DB {
+	return o.db
+}
+func (o *OrderSyncRequest) GetTransaction() bool {
+	return false
+}
+
+func (o *OrderSyncRequest) GetCache() cache.Cache {
+	return nil
 }
 
 func (o *OrderSyncRequest) GetCallback() event.Callback {

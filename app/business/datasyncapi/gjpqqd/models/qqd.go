@@ -15,20 +15,6 @@ type QQDConfig struct {
 	RefreshTokenTTL string `json:"refreshTokenTTL"`
 }
 
-// ApplyDefaults 为未配置的 TTL 字段填充默认值
-// codeTTL 默认 10 分钟，tokenTTL 默认 24 小时，refreshTokenTTL 默认 720 小时（30天）
-func (c *QQDConfig) ApplyDefaults() {
-	if c.CodeTTL == "" {
-		c.CodeTTL = "10m"
-	}
-	if c.TokenTTL == "" {
-		c.TokenTTL = "24h"
-	}
-	if c.RefreshTokenTTL == "" {
-		c.RefreshTokenTTL = "720h"
-	}
-}
-
 // QQDProductTable 商品数据表模型，对应数据库中的 goods 表
 type QQDProductTable struct {
 	GoodsID        string    `gorm:"column:goods_id"`

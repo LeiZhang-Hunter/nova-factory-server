@@ -28,6 +28,19 @@ func NewAuthorize(qqdService service.GjpQqdService) *Authorize {
 // - 校验 app 凭据有效性
 // - 生成一次性授权码并写入缓存
 // - 执行 302 重定向，将授权码和 state 带回 redirect_uri
+// @Summary OAuth 授权码获取
+// @Description 第三方系统跳转授权页面，校验 appkey/appsecret 后生成一次性授权码，302 重定向回 redirect_uri 并携带授权码和 state
+// @Tags 数据同步API/管家婆全渠道
+// @Param appkey query string true "应用 key"
+// @Param appsecret query string true "应用 secret"
+// @Param redirect_uri query string true "回调地址"
+// @Param state query string false "状态参数"
+// @Produce application/json
+// @Success 302 "重定向到 redirect_uri 并携带授权码"
+// @Failure 400 {object} map[string]interface{} "参数错误或回调地址无效"
+// @Failure 401 {object} map[string]interface{} "无效凭据"
+// @Failure 500 {object} map[string]interface{} "生成授权码失败"
+// @Router /api/v1/erp-api/qqd/oauth/authorize [get]
 func (q *Authorize) Authorize(c *gin.Context) {
 	req := new(models.AuthorizeReq)
 	err := c.BindQuery(req)

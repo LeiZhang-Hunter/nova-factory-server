@@ -22,6 +22,7 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
+	_ "nova-factory-server/app/utils/observer/integration/adapter/guanjiapo"
 	"nova-factory-server/app/utils/observer/integration/observer"
 )
 
