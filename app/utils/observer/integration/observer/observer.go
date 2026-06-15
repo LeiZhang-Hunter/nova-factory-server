@@ -24,4 +24,7 @@ type Observer interface {
 
 	// OnOrderChanged 订单变更回调，当订单创建或状态变更（付款、发货等）时触发
 	OnOrderChanged(event event.OrderEvent) error
+
+	// OnOrderSendChange 订单发货变化
+	OnOrderSendChange(sendEvent event.OrderSendEvent) error
 }

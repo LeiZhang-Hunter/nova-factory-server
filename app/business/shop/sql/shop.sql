@@ -600,3 +600,55 @@ CREATE TABLE IF NOT EXISTS `shop_order_account` (
     INDEX `idx_shop_order_account_tid` (`tid`) USING BTREE,
     INDEX `idx_shop_order_account_finance_code` (`finance_code`) USING BTREE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ERP订单账户表';
+
+
+CREATE TABLE IF NOT EXISTS `shop_order_send` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `order_id` BIGINT UNSIGNED NOT NULL COMMENT '订单主表ID，对应shop_order.id',
+    `tid` VARCHAR(50) NOT NULL COMMENT '网店订单编号',
+    `is_split` TINYINT NOT NULL DEFAULT 0 COMMENT '是否拆单：0未拆单，1拆单',
+    `subtid` VARCHAR(1000) DEFAULT NULL COMMENT '子订单号，多个以逗号分隔（拆单时必填）',
+    `company_code` VARCHAR(100) DEFAULT NULL COMMENT '物流公司编码（如圆通YTO，申通STO）',
+    `outsid` VARCHAR(100) DEFAULT NULL COMMENT '物流单号',
+    `sync_status` TINYINT NOT NULL DEFAULT 0 COMMENT '同步状态：0待同步，1成功，2失败',
+    `sync_message` VARCHAR(500) DEFAULT NULL COMMENT '同步结果描述',
+    `sync_time` DATETIME(0) DEFAULT NULL COMMENT '同步时间',
+    `ext_json` TEXT DEFAULT NULL COMMENT '扩展字段，JSON格式',
+
+    `dept_id` BIGINT(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` BIGINT(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+    `update_by` BIGINT(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
+    `state` TINYINT(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+
+    PRIMARY KEY (`id`),
+    INDEX `idx_shop_order_send_order_id` (`order_id`) USING BTREE,
+    INDEX `idx_shop_order_send_tid` (`tid`) USING BTREE,
+    INDEX `idx_shop_order_send_outsid` (`outsid`) USING BTREE,
+    INDEX `idx_shop_order_send_sync_status` (`sync_status`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='订单发货主表';
+
+
+CREATE TABLE IF NOT EXISTS `shop_order_send_detail` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `send_id` BIGINT UNSIGNED NOT NULL COMMENT '发货主表ID，对应shop_order_send.id',
+    `order_id` BIGINT UNSIGNED NOT NULL COMMENT '订单主表ID，对应shop_order.id',
+    `tid` VARCHAR(50) NOT NULL COMMENT '网店订单编号',
+    `oid` VARCHAR(50) NOT NULL COMMENT '网店订单明细编号（子订单号subtid）',
+    `qty` DECIMAL(18,4) NOT NULL COMMENT '发货数量',
+    `ext_json` TEXT DEFAULT NULL COMMENT '扩展字段，JSON格式',
+
+    `dept_id` BIGINT(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` BIGINT(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+    `update_by` BIGINT(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
+    `state` TINYINT(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+
+    PRIMARY KEY (`id`),
+    INDEX `idx_shop_order_send_detail_send_id` (`send_id`) USING BTREE,
+    INDEX `idx_shop_order_send_detail_order_id` (`order_id`) USING BTREE,
+    INDEX `idx_shop_order_send_detail_tid` (`tid`) USING BTREE,
+    INDEX `idx_shop_order_send_detail_oid` (`oid`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='订单发货明细表';

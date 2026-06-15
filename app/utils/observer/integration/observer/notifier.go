@@ -115,8 +115,8 @@ func (n *Notifier) OnStockChanged(ev event.TransactionEvent[event.StockEvent]) e
 
 // OnOrderChanged 向所有观察者分发订单变更事件。
 // 由 Notifier 统一开启事务，并将 tx 显式传给每个观察者，保证全员原子一致。
-func (n *Notifier) OnOrderChanged(ev event.TransactionEvent[event.OrderEvent], transaction bool) error {
-	if ev.GetDB() == nil || !transaction {
+func (n *Notifier) OnOrderChanged(ev event.TransactionEvent[event.OrderEvent]) error {
+	if ev.GetDB() == nil {
 		return n.notify(func(ob Observer) error {
 			err := ob.OnOrderChanged(ev.ToEvent())
 			if err != nil {
@@ -130,6 +130,30 @@ func (n *Notifier) OnOrderChanged(ev event.TransactionEvent[event.OrderEvent], t
 		ev.WithDB(tx)
 		return n.notify(func(ob Observer) error {
 			err := ob.OnOrderChanged(ev.ToEvent())
+			if err != nil {
+				zap.L().Error("Observer OnOrderChanged", zap.Error(err))
+				return err
+			}
+			return nil
+		})
+	})
+}
+
+func (n *Notifier) OnOrderSendChange(ev event.TransactionEvent[event.OrderSendEvent]) error {
+	if ev.GetDB() == nil {
+		return n.notify(func(ob Observer) error {
+			err := ob.OnOrderSendChange(ev.ToEvent())
+			if err != nil {
+				zap.L().Error("Observer OnOrderChanged", zap.Error(err))
+				return err
+			}
+			return nil
+		})
+	}
+	return ev.GetDB().Transaction(func(tx *gorm.DB) error {
+		ev.WithDB(tx)
+		return n.notify(func(ob Observer) error {
+			err := ob.OnOrderSendChange(ev.ToEvent())
 			if err != nil {
 				zap.L().Error("Observer OnOrderChanged", zap.Error(err))
 				return err

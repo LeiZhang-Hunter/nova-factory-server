@@ -97,6 +97,11 @@ func (q *API) API(c *gin.Context) {
 		}
 		response := q.service.GetProductCategory(c, categoryReq)
 		c.JSON(http.StatusOK, response)
+	case "selfmall.order.send":
+		q.syncOrderSend(c)
+		break
+	case "selfmall.afterorder.status.sync":
+		break
 	case "selfmall.product.query",
 		"selfmall.order.ship",
 		"selfmall.stock.update",
@@ -179,5 +184,33 @@ func (q *API) productAdd(c *gin.Context) {
 		"errormsg": "ok",
 		"result":   result,
 		"total":    len(result),
+	})
+}
+
+// syncOrderSend 订单发货
+func (q *API) syncOrderSend(c *gin.Context) {
+	orderSendReq := new(models.OrderSendReq)
+	err := c.ShouldBind(orderSendReq)
+	if err != nil {
+		zap.L().Error("should bind error", zap.Error(err))
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: err.Error(),
+		})
+		return
+	}
+
+	err = observer.GetNotifier().OnOrderSendChange(orderSendReq)
+	if err != nil {
+		zap.L().Error("order send change failed", zap.Error(err))
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, models.ErrorResponse{
+		Iserror:  false,
+		Errormsg: "ok",
 	})
 }

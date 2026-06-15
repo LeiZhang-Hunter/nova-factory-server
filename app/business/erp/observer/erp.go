@@ -120,3 +120,8 @@ func (o *ERPObserver) OnOrderChanged(event event.OrderEvent) error {
 	//o.orderService.Sync(event)
 	return nil
 }
+
+// OnOrderSendChange 订单发货变化
+func (o *ERPObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
+	return nil
+}

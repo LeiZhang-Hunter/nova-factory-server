@@ -35,3 +35,8 @@ func (s *ShopObserver) OnStockChanged(event event.StockEvent) error {
 func (s *ShopObserver) OnOrderChanged(event event.OrderEvent) error {
 	return nil
 }
+
+// OnOrderSendChange 订单发货变化
+func (o *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
+	return nil
+}
