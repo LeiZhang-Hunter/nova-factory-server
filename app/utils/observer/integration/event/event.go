@@ -5,9 +5,10 @@
 package event
 
 import (
-	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
+
+	"gorm.io/gorm"
 )
 
 // Base 事件数据基础接口，所有业务数据载体（ProductData、StockData、OrderData）均需实现。
@@ -43,6 +44,8 @@ type TransactionEvent[T Event] interface {
 	GetDB() *gorm.DB
 	// WithDB 设置DB
 	WithDB(tx *gorm.DB)
+	// WithCache 设置缓存
+	WithCache(cache *cache.Cache)
 	// ToEvent 转换为具体业务事件
 	ToEvent() T
 }

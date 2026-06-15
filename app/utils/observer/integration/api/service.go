@@ -23,23 +23,43 @@ type Service interface {
 	OrderSyncer() OrderSyncer
 	// TokenGetter 返回 Token（OAuth 令牌）管理能力接口
 	TokenGetter() TokenGetter
+	// ProductSearcher 搜索商品
+	ProductSearcher() Product
 }
 
 // OrderSyncer 订单同步能力接口，具备此能力的 Service 可将订单推送至第三方系统。
 type OrderSyncer interface {
 	// SyncOrders 将订单事件中的订单数据同步至第三方系统
 	SyncOrders(ctx context.Context, event event.OrderEvent) (result.OrderSyncResponse, error)
+	// SyncOrderStatus 将订单状态变更同步至第三方系统（emall.orderstatus.synchronize）
+	SyncOrderStatus(ctx context.Context, req event.ZOrderStatusSyncReqEvent) (result.OrderStatusSyncResponse, error)
+	// SyncAfterSaleOrders 将售后订单数据同步至第三方系统（emall.afterorder.synchronize）
+	SyncAfterSaleOrders(ctx context.Context, req event.ZAfterSaleOrderSyncReqEvent) (result.AfterSaleOrderSyncResponse, error)
+	// GetOrderStatus 从第三方系统查询订单状态（emall.orderstatus.get）
+	GetOrderStatus(ctx context.Context, req event.ZOrderStatusGetReqEvent) (result.OrderStatusGetResponse, error)
 }
 
-//// ProductSyncer 商品同步能力接口（预留，暂未启用）
-//type ProductSyncer interface {
-//	SyncProducts(ctx context.Context, event event.ProductEvent) (*ProductSyncResponse, error)
-//}
-//
-//// StockSyncer 库存同步能力接口（预留，暂未启用）
-//type StockSyncer interface {
-//	SyncStocks(ctx context.Context, event event.StockEvent) (*StockSyncResponse, error)
-//}
+// StockSearcher 库存查询能力接口。
+type StockSearcher interface {
+	// SearchStocks 从第三方系统查询库存数据（emall.stock.get）
+	SearchStocks(ctx context.Context, req event.ZStockGetReqEvent) (result.StockGetResponse, error)
+}
+
+// BtypeSearcher 往来单位查询能力接口。
+type BtypeSearcher interface {
+	// GetBtypes 从第三方系统查询往来单位数据（emall.btype.get）
+	GetBtypes(ctx context.Context, req event.ZBtypeGetReqEvent) (result.BtypeGetResponse, error)
+}
+
+// Product 商品查询能力接口，具备此能力的 Service 可查询第三方系统的商品数据。
+type Product interface {
+	// SearchProducts 按请求条件查询第三方系统商品，返回商品查询响应
+	SearchProducts(ctx context.Context, req event.ZProductGetReqEvent) (result.GoodsGetResponse, error)
+	// UpdateProductRemark 按请求更新第三方系统商品备注，返回条目级更新结果
+	UpdateProductRemark(ctx context.Context, req event.ZProductUpdateReqEvent) (result.ProductRemarkUpdateResponse, error)
+	// ProductRelationQuery 查询商品对应关系（emall.goodsrelation.get）
+	ProductRelationQuery(ctx context.Context, req event.ZProductRelationQueryReqEvent) (result.ProductRelationQueryResponse, error)
+}
 
 // TokenGetter Token 管理接口，负责 OAuth 令牌的获取、缓存读写。
 // 管家婆等 OAuth 授权流程中，需通过 oauthcode 换取 token 并存入缓存复用。

@@ -5,24 +5,28 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"gopkg.in/errgo.v2/errors"
 	"io"
 	"net/http"
 	"net/url"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/model"
 	"nova-factory-server/app/utils/observer/integration/api"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
 	"strings"
 	"time"
+
+	"gopkg.in/errgo.v2/errors"
 )
 
 type orderSyncer struct {
 	tokenURL string
+	mode     string
 }
 
-func newOrderSyncer(tokenURL string) api.OrderSyncer {
+func newOrderSyncer(tokenURL string, mode string) api.OrderSyncer {
 	return &orderSyncer{
 		tokenURL: tokenURL,
+		mode:     mode,
 	}
 }
 
@@ -43,14 +47,14 @@ func (s *orderSyncer) makeSign(timestamp string, token string, cfg *ConfigSnapsh
 func (s *orderSyncer) SyncOrders(ctx context.Context, req event.OrderEvent) (result.OrderSyncResponse, error) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 
-	if req == nil || len(req.Orders()) == 0 {
+	if req == nil || len(req.GetOrders()) == 0 {
 		return nil, errors.New("orders不能为空")
 	}
 	snapshot, err := parseSnapshot(req.Config())
 	if err != nil {
 		return nil, err
 	}
-	token, err := resolveAccessToken(ctx, snapshot, req.Cache())
+	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +75,7 @@ func (s *orderSyncer) SyncOrders(ctx context.Context, req event.OrderEvent) (res
 	params.Set("timestamp", timestamp)
 	params.Set("token", token)
 	body := map[string]any{
-		"orders": req.Orders(),
+		"orders": req.GetOrders(),
 	}
 	payload, err := json.Marshal(body)
 	if err != nil {
@@ -109,6 +113,96 @@ func (s *orderSyncer) SyncOrders(ctx context.Context, req event.OrderEvent) (res
 			msg = string(respBytes)
 		}
 		return nil, errors.New("订单同步失败: " + msg)
+	}
+	if ret.Code != 0 {
+		return nil, errors.New(ret.Message)
+	}
+	return ret, nil
+}
+
+// SyncOrderStatus 订单状态同步（emall.orderstatus.synchronize）。
+func (s *orderSyncer) SyncOrderStatus(ctx context.Context, req event.ZOrderStatusSyncReqEvent) (result.OrderStatusSyncResponse, error) {
+	if req == nil || req.GetOrders() == nil {
+		return nil, errors.New("orders不能为空")
+	}
+	snapshot, err := parseSnapshot(req.Config())
+	if err != nil {
+		return nil, err
+	}
+	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
+	if err != nil {
+		return nil, err
+	}
+	body := map[string]any{
+		"orders": *req.GetOrders(),
+	}
+	respBytes, err := doSignedPost(ctx, s.tokenURL, snapshot, token, "emall.orderstatus.synchronize", body)
+	if err != nil {
+		return nil, err
+	}
+	ret := &model.OrderStatusSyncResponse{}
+	if err = json.Unmarshal(respBytes, ret); err != nil {
+		return nil, errors.New("订单状态同步响应解析失败: " + strings.TrimSpace(string(respBytes)))
+	}
+	if ret.Code != 0 {
+		return nil, errors.New(ret.Message)
+	}
+	return ret, nil
+}
+
+// SyncAfterSaleOrders 售后订单同步（emall.afterorder.synchronize）。
+func (s *orderSyncer) SyncAfterSaleOrders(ctx context.Context, req event.ZAfterSaleOrderSyncReqEvent) (result.AfterSaleOrderSyncResponse, error) {
+	if req == nil || req.GetOrders() == nil {
+		return nil, errors.New("orders不能为空")
+	}
+	snapshot, err := parseSnapshot(req.Config())
+	if err != nil {
+		return nil, err
+	}
+	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
+	if err != nil {
+		return nil, err
+	}
+	body := map[string]any{
+		"orders": *req.GetOrders(),
+	}
+	respBytes, err := doSignedPost(ctx, s.tokenURL, snapshot, token, "emall.afterorder.synchronize", body)
+	if err != nil {
+		return nil, err
+	}
+	ret := &model.AfterSaleOrderSyncResponse{}
+	if err = json.Unmarshal(respBytes, ret); err != nil {
+		return nil, errors.New("售后订单同步响应解析失败: " + strings.TrimSpace(string(respBytes)))
+	}
+	if ret.Code != 0 {
+		return nil, errors.New(ret.Message)
+	}
+	return ret, nil
+}
+
+// GetOrderStatus 查询订单状态（emall.orderstatus.get）。
+func (s *orderSyncer) GetOrderStatus(ctx context.Context, req event.ZOrderStatusGetReqEvent) (result.OrderStatusGetResponse, error) {
+	if req.GetOrderCodes() == nil {
+		return nil, errors.New("ordercodes不能为空")
+	}
+	snapshot, err := parseSnapshot(req.Config())
+	if err != nil {
+		return nil, err
+	}
+	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
+	if err != nil {
+		return nil, err
+	}
+	body := map[string]any{
+		"ordercodes": *req.GetOrderCodes(),
+	}
+	respBytes, err := doSignedPost(ctx, s.tokenURL, snapshot, token, "emall.orderstatus.get", body)
+	if err != nil {
+		return nil, err
+	}
+	ret := &model.OrderStatusGetResponse{}
+	if err = json.Unmarshal(respBytes, ret); err != nil {
+		return nil, errors.New("订单状态查询响应解析失败: " + strings.TrimSpace(string(respBytes)))
 	}
 	if ret.Code != 0 {
 		return nil, errors.New(ret.Message)
