@@ -2,6 +2,7 @@ package shopmodels
 
 import (
 	"nova-factory-server/app/baize"
+	goodsstore "nova-factory-server/app/utils/store/goods"
 	"time"
 )
 
@@ -56,16 +57,18 @@ type GoodsUpsert struct {
 
 // GoodsQuery 商品查询参数
 type GoodsQuery struct {
-	ID         int64  `form:"id"`         // 主键ID
-	GoodsName  string `form:"goodsName"`  // 商品名称
-	GoodsCode  string `form:"goodsCode"`  // 商品编码
-	OuterID    string `form:"outerId"`    // 外部系统ID
-	IsOnSale   *bool  `form:"isOnSale"`   // 是否上架
-	CategoryId int64  `form:"categoryId"` // 商品分类ID
-	SortBy     string `form:"sortBy"`     // 排序字段
-	SortOrder  string `form:"sortOrder"`  // 排序方向 asc/desc
-	Page       int64  `form:"page"`       // 页码
-	Size       int64  `form:"size"`       // 每页数量
+	ID            int64  `form:"id"`            // 主键ID
+	GoodsName     string `form:"goodsName"`     // 商品名称
+	GoodsCode     string `form:"goodsCode"`     // 商品编码
+	OuterID       string `form:"outerId"`       // 外部系统ID
+	IsOnSale      *bool  `form:"isOnSale"`      // 是否上架
+	CategoryId    int64  `form:"categoryId"`    // 商品分类ID
+	StartModified string `form:"startModified"` // 起始修改时间
+	EndModified   string `form:"endModified"`   // 结束修改时间
+	SortBy        string `form:"sortBy"`        // 排序字段
+	SortOrder     string `form:"sortOrder"`     // 排序方向 asc/desc
+	Page          int64  `form:"page"`          // 页码
+	Size          int64  `form:"size"`          // 每页数量
 }
 
 // GoodsListData 商品列表结果
@@ -133,3 +136,138 @@ type Unit struct {
 	Price4   float64 `json:"price4"`
 	Price5   float64 `json:"price5"`
 }
+
+// GoodsProductData 适配 shopmodels.Goods 为 goods.ProductData 接口，json tag 对齐管家婆 API 标准。
+type GoodsProductData struct {
+	Cid        int                     `json:"cid"`
+	CatName    string                  `json:"catname"`
+	ProductId  int64                   `json:"productid"`
+	Name       string                  `json:"name"`
+	OuterId    string                  `json:"outerid"`
+	PicPath    string                  `json:"picpath"`
+	Price      int                     `json:"price"`
+	BarcodeStr string                  `json:"barcodestr"`
+	Created    string                  `json:"created"`
+	Desc       string                  `json:"desc"`
+	Modified   string                  `json:"modified"`
+	Status     string                  `json:"status"`
+	Quantity   int                     `json:"quantity"`
+	Skus       []goodsstore.ProductSku `json:"skus"`
+}
+
+func (g *GoodsProductData) GetCid() int                      { return g.Cid }
+func (g *GoodsProductData) GetCatName() string               { return g.CatName }
+func (g *GoodsProductData) GetProductId() int64              { return g.ProductId }
+func (g *GoodsProductData) GetName() string                  { return g.Name }
+func (g *GoodsProductData) GetOuterId() string               { return g.OuterId }
+func (g *GoodsProductData) GetPicPath() string               { return g.PicPath }
+func (g *GoodsProductData) GetPrice() int                    { return g.Price }
+func (g *GoodsProductData) GetBarcodeStr() string            { return g.BarcodeStr }
+func (g *GoodsProductData) GetCreated() string               { return g.Created }
+func (g *GoodsProductData) GetDesc() string                  { return g.Desc }
+func (g *GoodsProductData) GetModified() string              { return g.Modified }
+func (g *GoodsProductData) GetStatus() string                { return g.Status }
+func (g *GoodsProductData) GetQuantity() int                 { return g.Quantity }
+func (g *GoodsProductData) GetSkus() []goodsstore.ProductSku { return g.Skus }
+
+// GoodsProductSku 适配 shopmodels.GoodsSku 为 goods.ProductSku 接口，json tag 对齐管家婆 API 标准。
+type GoodsProductSku struct {
+	SkuId      int64  `json:"skuid"`
+	SkuName    string `json:"skuname"`
+	ProductId  int    `json:"productid"`
+	OuterId    string `json:"outerid"`
+	Price      int    `json:"price"`
+	Quantity   int    `json:"quantity"`
+	Created    string `json:"created"`
+	Modified   string `json:"modified"`
+	Properties string `json:"properties"`
+}
+
+func (g *GoodsProductSku) GetSkuId() int64       { return g.SkuId }
+func (g *GoodsProductSku) GetSkuName() string    { return g.SkuName }
+func (g *GoodsProductSku) GetProductId() int     { return g.ProductId }
+func (g *GoodsProductSku) GetOuterId() string    { return g.OuterId }
+func (g *GoodsProductSku) GetPrice() int         { return g.Price }
+func (g *GoodsProductSku) GetQuantity() int      { return g.Quantity }
+func (g *GoodsProductSku) GetCreated() string    { return g.Created }
+func (g *GoodsProductSku) GetModified() string   { return g.Modified }
+func (g *GoodsProductSku) GetProperties() string { return g.Properties }
+
+// GoodsDataResult 实现 goods.DataResult 接口，json tag 对齐管家婆 API 标准。
+type GoodsDataResult struct {
+	IsError      bool                     `json:"iserror"`
+	ErrorMsg     string                   `json:"errormsg"`
+	TotalResults int                      `json:"totalresults"`
+	ProductInfo  []goodsstore.ProductData `json:"productinfo"`
+}
+
+func (r *GoodsDataResult) GetIsError() bool                         { return r.IsError }
+func (r *GoodsDataResult) GetErrorMsg() string                      { return r.ErrorMsg }
+func (r *GoodsDataResult) GetTotalResults() int                     { return r.TotalResults }
+func (r *GoodsDataResult) GetProductInfo() []goodsstore.ProductData { return r.ProductInfo }
+
+// GoodsSyncUpsert 商品同步 upsert 参数，用于 SyncEvent 等场景。
+// 只包含同步所需的字段，不含 GalleryImages、VideoURL 等非同步字段。
+type GoodsSyncUpsert struct {
+	GoodsID     string  // 商品业务ID
+	GoodsName   string  // 商品名称
+	GoodsCode   string  // 商品编码
+	OuterID     string  // 外部系统ID
+	ImageURL    string  // 主图地址
+	Description string  // 商品描述
+	Unit        string  // 销售单位
+	IsOnSale    int32   // 是否上架
+	RetailPrice float64 // 零售价
+	WeightUnit  string  // 重量单位
+	Quantity    int64   // 库存数量
+}
+
+// ToSyncMap 转换为数据库字段映射，用于 GORM Create/Updates，仅包含非空/非零字段
+func (r *GoodsSyncUpsert) ToSyncMap(now *time.Time) map[string]any {
+	m := map[string]any{"update_time": now}
+	if r.GoodsID != "" {
+		m["goods_id"] = r.GoodsID
+	}
+	if r.GoodsName != "" {
+		m["goods_name"] = r.GoodsName
+	}
+	if r.GoodsCode != "" {
+		m["goods_code"] = r.GoodsCode
+	}
+	if r.OuterID != "" {
+		m["outer_id"] = r.OuterID
+	}
+	if r.ImageURL != "" {
+		m["image_url"] = r.ImageURL
+	}
+	if r.Description != "" {
+		m["description"] = r.Description
+	}
+	if r.Unit != "" {
+		m["unit"] = r.Unit
+	}
+	if r.IsOnSale != 0 {
+		m["is_on_sale"] = r.IsOnSale
+	}
+	if r.RetailPrice != 0 {
+		m["retail_price"] = r.RetailPrice
+	}
+	if r.WeightUnit != "" {
+		m["weight_unit"] = r.WeightUnit
+	}
+	if r.Quantity != 0 {
+		m["quantity"] = r.Quantity
+	}
+	return m
+}
+
+// SyncProductResponse 接口的默认实现
+type SyncProductResponse struct {
+	Code    int
+	Message string
+	Meta    map[string]any
+}
+
+func (r *SyncProductResponse) GetCode() int                { return r.Code }
+func (r *SyncProductResponse) GetMessage() string          { return r.Message }
+func (r *SyncProductResponse) GetMetadata() map[string]any { return r.Meta }

@@ -3,7 +3,7 @@ package shopcategory
 import (
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/constant/shop"
-	"nova-factory-server/app/utils/store"
+	store "nova-factory-server/app/utils/store/category"
 	"nova-factory-server/app/utils/vectorsearch/normalization/api"
 	"nova-factory-server/app/utils/vectorsearch/normalization/util"
 	"sort"

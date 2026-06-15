@@ -4,6 +4,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopmodels"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type IShopSkuService interface {
@@ -12,4 +13,5 @@ type IShopSkuService interface {
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*shopmodels.GoodsSku, error)
 	List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*shopmodels.GoodsSkuListData, error)
+	UpdateStock(db *gorm.DB, req *shopmodels.GoodsSkuUpsert) error
 }

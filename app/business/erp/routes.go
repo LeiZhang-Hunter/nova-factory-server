@@ -4,9 +4,10 @@
 package erp
 
 import (
-	"nova-factory-server/app/business/erp/erpobserver"
+	"github.com/google/wire"
 	"nova-factory-server/app/business/erp/finance/financecontroller"
 	"nova-factory-server/app/business/erp/master/mastercontroller"
+	"nova-factory-server/app/business/erp/observer"
 	"nova-factory-server/app/business/erp/purchase/purchasecontroller"
 	"nova-factory-server/app/business/erp/sale/salecontroller"
 	"nova-factory-server/app/business/erp/setting/settingcontroller"
@@ -14,8 +15,7 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
-
-	"github.com/google/wire"
+	observer2 "nova-factory-server/app/utils/observer/integration/observer"
 )
 
 var GinProviderSet = wire.NewSet(NewGinEngine)
@@ -29,8 +29,11 @@ func NewGinEngine(
 	sale *salecontroller.Controller,
 	stock *stockcontroller.Controller,
 	setting *settingcontroller.Controller,
-	_ *erpobserver.ErpObserver,
+	erpObserver *observer.ERPObserver,
 ) *Erp {
+
+	observer2.GetNotifier().Register(erpObserver)
+
 	group := app.Engine.Group("")
 	{
 		setting.IntegrationConfig.PublicRoutes(group)

@@ -2,6 +2,7 @@ package stockserviceimpl
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 	"nova-factory-server/app/business/erp/stock/stockdao"
 	"nova-factory-server/app/business/erp/stock/stockmodels"
 	"nova-factory-server/app/business/erp/stock/stockservice"
+	"nova-factory-server/app/utils/observer/integration/event"
 
 	"github.com/gin-gonic/gin"
 )
@@ -388,4 +390,23 @@ func stockFieldValue(target any, name string) reflect.Value {
 		return reflect.Value{}
 	}
 	return value.FieldByName(name)
+}
+
+func (s *StockServiceImpl) SyncStock(stock event.StockEvent) error {
+	if stock.GetDB() == nil {
+		return errors.New("库存同步需要事务DB")
+	}
+	if len(stock.GetStocks()) == 0 {
+		return nil
+	}
+
+	for _, e := range stock.GetStocks() {
+		productID := e.SkuID()
+		afterQty := e.AfterQty()
+		if err := s.dao.UpdateStockByProductIDWithDB(stock.GetDB(), productID, afterQty); err != nil {
+			return fmt.Errorf("更新ERP库存失败 productId=%d: %w", productID, err)
+		}
+	}
+
+	return nil
 }

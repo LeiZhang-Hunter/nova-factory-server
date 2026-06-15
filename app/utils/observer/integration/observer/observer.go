@@ -11,6 +11,7 @@ import (
 
 // Observer 观察者接口，各第三方系统（管家婆、金蝶等）实现此接口以接收业务变更事件。
 // 当网店发生商品变动、库存变化、订单变更时，Notifier 会调用对应方法通知所有已注册的 Observer。
+// 事务由 Notifier 统一开启，并以首参 tx 显式传入；observer 需要事务时使用该 tx，否则可忽略。
 type Observer interface {
 	// Name 返回观察者名称（即集成系统类型标识），用于日志区分与调试
 	Name() kind.Kind

@@ -1,4 +1,4 @@
-package store
+package category
 
 type ShopCategoryData interface {
 	CategoryID() int64

@@ -2,6 +2,7 @@ package shopmodels
 
 import (
 	"nova-factory-server/app/baize"
+	"time"
 )
 
 // GoodsSku 商品规格信息
@@ -66,4 +67,54 @@ type GoodsSkuQuery struct {
 type GoodsSkuListData struct {
 	Rows  []*GoodsSku `json:"rows"`  // 数据列表
 	Total int64       `json:"total"` // 总数
+}
+
+// GoodsSkuSyncUpsert SKU 同步 upsert 参数，用于 SyncEvent 等场景。
+type GoodsSkuSyncUpsert struct {
+	GoodsID     string  // 商品业务ID
+	SkuID       string  // 规格业务ID
+	SkuName     string  // 规格名称
+	SkuCode     string  // 规格编码
+	OuterID     string  // 外部系统ID
+	Barcode     string  // 条码
+	RetailPrice float64 // 零售价
+	Weight      float64 // 重量
+	WeightUnit  string  // 重量单位
+	Quantity    int64   // 库存数量
+}
+
+// ToSyncMap 转换为数据库字段映射，用于 GORM Create/Updates，仅包含非空/非零字段
+func (r *GoodsSkuSyncUpsert) ToSyncMap(now *time.Time) map[string]any {
+	m := map[string]any{"update_time": now}
+	if r.GoodsID != "" {
+		m["goods_id"] = r.GoodsID
+	}
+	if r.SkuID != "" {
+		m["sku_id"] = r.SkuID
+	}
+	if r.SkuName != "" {
+		m["sku_name"] = r.SkuName
+	}
+	if r.SkuCode != "" {
+		m["sku_code"] = r.SkuCode
+	}
+	if r.OuterID != "" {
+		m["outer_id"] = r.OuterID
+	}
+	if r.Barcode != "" {
+		m["barcode"] = r.Barcode
+	}
+	if r.RetailPrice != 0 {
+		m["retail_price"] = r.RetailPrice
+	}
+	if r.Weight != 0 {
+		m["weight"] = r.Weight
+	}
+	if r.WeightUnit != "" {
+		m["weight_unit"] = r.WeightUnit
+	}
+	if r.Quantity != 0 {
+		m["quantity"] = r.Quantity
+	}
+	return m
 }

@@ -16,12 +16,13 @@ import (
 	"nova-factory-server/app/business/shop/api/controller/product"
 	shopconfigController "nova-factory-server/app/business/shop/config/controller"
 	homeController "nova-factory-server/app/business/shop/home/controller"
+	shopobserver "nova-factory-server/app/business/shop/observer"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
-	"nova-factory-server/app/business/shop/product/shopobserver"
 	userController "nova-factory-server/app/business/shop/user/controller"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
+	"nova-factory-server/app/utils/observer/integration/observer"
 )
 
 var GinProviderSet = wire.NewSet(NewGinEngine)
@@ -43,9 +44,12 @@ func NewGinEngine(
 	favoriteController *favorite.Favorite,
 	apiActivityController *apiActivityController.Controller,
 	apiCompanyController *apiCompanyController.Controller,
-	_ *shopobserver.ShopObserver,
+	shopObserver *shopobserver.ShopObserver,
 ) *Shop {
 	group := app.Engine.Group("")
+
+	//观察者注册
+	observer.GetNotifier().Register(shopObserver)
 
 	//不做鉴权的（可选认证：携带有效token时自动提取用户信息，用于折扣计算等场景）
 	publicGroup := group.Group("")

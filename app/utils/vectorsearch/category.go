@@ -2,7 +2,7 @@ package vectorsearch
 
 import (
 	"nova-factory-server/app/constant/shop"
-	"nova-factory-server/app/utils/store"
+	store "nova-factory-server/app/utils/store/category"
 	"strings"
 )
 

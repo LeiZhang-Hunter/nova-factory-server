@@ -1,3 +1,5 @@
+//go:build datasyncapi
+
 // 管家婆全渠道控制器入口，汇总 OAuth、Token、API 三个子控制器。
 // 通过 wire 注入服务接口，统一管理 /api/v1/erp-api/qqd 下的所有路由。
 package controller

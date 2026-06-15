@@ -1,14 +1,11 @@
 package observer
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/business/erp/sale/saleservice"
+	"nova-factory-server/app/business/erp/stock/stockservice"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
-	observerapi "nova-factory-server/app/utils/observer/integration/observer"
 	"nova-factory-server/app/utils/observer/integration/result"
 )
 
@@ -23,15 +20,16 @@ import (
 type ERPObserver struct {
 	orderService   saleservice.IOrderService
 	productService masterservice.IProductService
+	stockService   stockservice.IStockService
 }
 
 // NewERPObserver 创建 ERP 观察者。
-func NewERPObserver(orderService saleservice.IOrderService, productService masterservice.IProductService, observer observerapi.Observer, stockService masterservice.IStockService) observerapi.Observer {
+func NewERPObserver(orderService saleservice.IOrderService, productService masterservice.IProductService, stockService stockservice.IStockService) *ERPObserver {
 	s := &ERPObserver{
 		orderService:   orderService,
 		productService: productService,
+		stockService:   stockService,
 	}
-	observer.GetNotifier().Register(s)
 	return s
 }
 
@@ -46,82 +44,60 @@ func (o *ERPObserver) Name() kind.Kind {
 //
 // 当前 ERP 商品事件同步尚未接入，先安全跳过。
 func (o *ERPObserver) OnProductChanged(event event.ProductEvent) (result.SyncProductResponse, error) {
-	products := event.GetProducts()
-	if len(products) == 0 {
-		return nil, nil
-	}
-
-	c := &gin.Context{}
-
-	for _, product := range products {
-		skus := product.GetSkus()
-		if len(skus) == 0 {
-			continue
-		}
-
-		for _, sku := range skus {
-			skuID := sku.GetSkuId()
-
-			productUpdates := map[string]any{
-				"name":       product.GetGoodsName(),
-				"bar_code":   sku.GetBarcode(),
-				"weight":     sku.GetWeight(),
-				"sale_price": sku.GetPrice(),
-				"standard":   sku.GetSkuName(),
-			}
-			if code := product.GetGoodsCode(); code != "" {
-				productUpdates["product_code"] = code
-			}
-
-			if err := o.productDao.UpsertByID(c, skuID, productUpdates); err != nil {
-				zap.L().Error("ErpObserver: 同步ERP产品失败",
-					zap.Int64("skuId", skuID),
-					zap.Error(err))
-				return nil, fmt.Errorf("同步ERP产品失败 skuId=%d: %w", skuID, err)
-			}
-
-			stockUpdates := map[string]any{
-				"product_id": skuID,
-				"count":      float64(sku.GetQuantity()),
-			}
-
-			if err := s.stockDao.UpsertByID(c, skuID, stockUpdates); err != nil {
-				zap.L().Error("ErpObserver: 同步ERP库存失败",
-					zap.Int64("skuId", skuID),
-					zap.Error(err))
-				return nil, fmt.Errorf("同步ERP库存失败 skuId=%d: %w", skuID, err)
-			}
-		}
-	}
+	//products := event.GetProducts()
+	//if len(products) == 0 {
+	//	return nil, nil
+	//}
+	//
+	//c := &gin.Context{}
+	//
+	//for _, product := range products {
+	//	skus := product.GetSkus()
+	//	if len(skus) == 0 {
+	//		continue
+	//	}
+	//
+	//	for _, sku := range skus {
+	//		skuID := sku.GetSkuId()
+	//
+	//		productUpdates := map[string]any{
+	//			"name":       product.GetGoodsName(),
+	//			"bar_code":   sku.GetBarcode(),
+	//			"weight":     sku.GetWeight(),
+	//			"sale_price": sku.GetPrice(),
+	//			"standard":   sku.GetSkuName(),
+	//		}
+	//		if code := product.GetGoodsCode(); code != "" {
+	//			productUpdates["product_code"] = code
+	//		}
+	//
+	//		if err := o.productDao.UpsertByID(c, skuID, productUpdates); err != nil {
+	//			zap.L().Error("ErpObserver: 同步ERP产品失败",
+	//				zap.Int64("skuId", skuID),
+	//				zap.Error(err))
+	//			return nil, fmt.Errorf("同步ERP产品失败 skuId=%d: %w", skuID, err)
+	//		}
+	//
+	//		stockUpdates := map[string]any{
+	//			"product_id": skuID,
+	//			"count":      float64(sku.GetQuantity()),
+	//		}
+	//
+	//		if err := s.stockDao.UpsertByID(c, skuID, stockUpdates); err != nil {
+	//			zap.L().Error("ErpObserver: 同步ERP库存失败",
+	//				zap.Int64("skuId", skuID),
+	//				zap.Error(err))
+	//			return nil, fmt.Errorf("同步ERP库存失败 skuId=%d: %w", skuID, err)
+	//		}
+	//	}
+	//}
 
 	return nil, nil
 }
 
 // OnStockChanged 处理库存变更事件。
-//
-// 当前 ERP 库存事件同步尚未接入，先安全跳过。
-func (o *ERPObserver) OnStockChanged(event event.StockEvent) error {
-	stocks := event.GetStocks()
-	if len(stocks) == 0 {
-		return nil
-	}
-
-	c := &gin.Context{}
-
-	for _, stock := range stocks {
-		id := stock.SkuID()
-		afterQty := stock.AfterQty()
-
-		if err := o.stockDao.UpdateStockByID(c, id, afterQty); err != nil {
-			zap.L().Error("ErpObserver: 更新ERP库存失败",
-				zap.Int64("id", id),
-				zap.Float64("count", afterQty),
-				zap.Error(err))
-			return fmt.Errorf("更新ERP库存失败 id=%d: %w", id, err)
-		}
-	}
-
-	return nil
+func (o *ERPObserver) OnStockChanged(ev event.StockEvent) error {
+	return o.stockService.SyncStock(ev)
 }
 
 // OnOrderChanged 处理订单变更事件。
@@ -129,18 +105,18 @@ func (o *ERPObserver) OnStockChanged(event event.StockEvent) error {
 // Observer 只负责把事件分发给 ERP 订单 service，不在这里做订单转换和保存。
 // 具体同步逻辑由 saleservice.IOrderService.Sync(event event.OrderEvent) 承担。
 func (o *ERPObserver) OnOrderChanged(event event.OrderEvent) error {
-	if event == nil {
-		return nil
-	}
-	orders := event.GetOrders()
-	if len(orders) == 0 {
-		return nil
-	}
-	if o.orderService == nil {
-		zap.L().Warn("ERP观察者订单服务为空，跳过订单事件", zap.Int("orders", len(orders)))
-		return nil
-	}
-
-	o.orderService.Sync(event)
+	//if event == nil {
+	//	return nil
+	//}
+	//orders := event.GetOrders()
+	//if len(orders) == 0 {
+	//	return nil
+	//}
+	//if o.orderService == nil {
+	//	zap.L().Warn("ERP观察者订单服务为空，跳过订单事件", zap.Int("orders", len(orders)))
+	//	return nil
+	//}
+	//
+	//o.orderService.Sync(event)
 	return nil
 }

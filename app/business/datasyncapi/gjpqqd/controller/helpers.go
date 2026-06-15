@@ -4,14 +4,8 @@ package controller
 
 import (
 	"bytes"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
-	"nova-factory-server/app/business/datasyncapi/gjpqqd/models"
-	"strings"
-
 	"github.com/gin-gonic/gin"
+	"io"
 )
 
 // qqdError 构造管家婆 API 风格的标准错误响应
@@ -21,14 +15,6 @@ func qqdError(message string) gin.H {
 		"iserror":  true,
 		"errormsg": message,
 	}
-}
-
-// qqdParam 从请求中获取参数值，优先 PostForm，其次 Query
-func qqdParam(c *gin.Context, key string) string {
-	if value := c.PostForm(key); value != "" {
-		return value
-	}
-	return c.Query(key)
 }
 
 // readAndRestoreRequestBody 读取请求 Body 并重新填充，支持多次读取
@@ -54,65 +40,4 @@ func formValues(c *gin.Context) map[string]string {
 		}
 	}
 	return params
-}
-
-// parseProductAddGoodsInfos 解析商品新增请求中的 goodsinfos 数据
-// 优先从 PostForm("goodsinfos") 解析 JSON 字符串，
-// 若为空则从请求 Body 的 JSON 中按 goodsinfos 字段解析
-func parseProductAddGoodsInfos(c *gin.Context) ([]map[string]any, error) {
-	if rawGoodsInfos := c.PostForm("goodsinfos"); rawGoodsInfos != "" {
-		var goodsInfos []map[string]any
-		if err := json.Unmarshal([]byte(rawGoodsInfos), &goodsInfos); err != nil {
-			return nil, fmt.Errorf("invalid goodsinfos: %w", err)
-		}
-		if len(goodsInfos) == 0 {
-			return nil, errors.New("goodsinfos is empty")
-		}
-		return goodsInfos, nil
-	}
-
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read request body: %w", err)
-	}
-	if len(strings.TrimSpace(string(body))) == 0 {
-		return nil, errors.New("goodsinfos is required")
-	}
-
-	var payload struct {
-		GoodsInfos []map[string]any `json:"goodsinfos"`
-	}
-	if err := json.Unmarshal(body, &payload); err != nil {
-		return nil, fmt.Errorf("invalid request body: %w", err)
-	}
-	if len(payload.GoodsInfos) == 0 {
-		return nil, errors.New("goodsinfos is empty")
-	}
-	return payload.GoodsInfos, nil
-}
-
-// parseProductStockUpdateRequest 解析库存更新请求参数
-// 支持 form 和 JSON 两种格式，返回 ProductStockUpdateRequest 结构
-func parseProductStockUpdateRequest(c *gin.Context) (models.ProductStockUpdateRequest, error) {
-	var req struct {
-		ProductID  string `form:"productid" json:"productid"`
-		ProductQty any    `form:"productqty" json:"productqty"`
-		Skus       string `form:"skus" json:"skus"`
-	}
-	if err := c.ShouldBind(&req); err != nil {
-		return models.ProductStockUpdateRequest{}, fmt.Errorf("invalid request: %w", err)
-	}
-	return models.ProductStockUpdateRequest{
-		ProductID:  req.ProductID,
-		ProductQty: toString(req.ProductQty),
-		Skus:       req.Skus,
-	}, nil
-}
-
-// toString 将任意值转换为字符串，nil 返回空字符串
-func toString(value any) string {
-	if value == nil {
-		return ""
-	}
-	return fmt.Sprintf("%v", value)
 }

@@ -2,6 +2,7 @@ package stockservice
 
 import (
 	"nova-factory-server/app/business/erp/stock/stockmodels"
+	"nova-factory-server/app/utils/observer/integration/event"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,4 +14,5 @@ type IStockService interface {
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*stockmodels.Stock, error)
 	List(c *gin.Context, req *stockmodels.StockQuery) (*stockmodels.StockListData, error)
+	SyncStock(stock event.StockEvent) error
 }

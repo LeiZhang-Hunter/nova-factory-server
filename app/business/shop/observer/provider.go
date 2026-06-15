@@ -1,4 +1,4 @@
-package shopobserver
+package observer
 
 import "github.com/google/wire"
 

@@ -4,6 +4,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopmodels"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type IShopSkuDao interface {
@@ -19,7 +20,10 @@ type IShopSkuDao interface {
 	ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.GoodsSku, error)
 	ListBySkuIDs(c *gin.Context, skuIDs []string) ([]*shopmodels.GoodsSku, error)
 	List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*shopmodels.GoodsSkuListData, error)
+	UpdateStockBySkuIDWithDB(db *gorm.DB, skuID string, quantity int64) error
 	UpdateStockBySkuID(c *gin.Context, skuID string, quantity int64) error
 	SumStockByGoodsID(c *gin.Context, goodsID string) (int64, error)
-	UpsertBySkuID(c *gin.Context, skuID string, updates map[string]any) error
+	UpsertBySkuID(c *gin.Context, skuID string, req *shopmodels.GoodsSkuSyncUpsert) error
+	UpsertBySkuIDWithDB(db *gorm.DB, skuID string, req *shopmodels.GoodsSkuSyncUpsert) error
+	LockStockRows(db *gorm.DB, goodsIDs []string) error
 }

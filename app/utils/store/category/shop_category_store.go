@@ -1,4 +1,4 @@
-package store
+package category
 
 import (
 	"go.uber.org/zap"

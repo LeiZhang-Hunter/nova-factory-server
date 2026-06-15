@@ -2,14 +2,17 @@ package shopdaoimpl
 
 import (
 	"errors"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/utils/fileUtils"
 	"strings"
+	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ShopSkuDaoImpl struct {
@@ -190,6 +193,25 @@ func (s *ShopSkuDaoImpl) List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*s
 	}, nil
 }
 
+// UpdateStockBySkuIDWithDB 更新商品规格库存
+func (s *ShopSkuDaoImpl) UpdateStockBySkuIDWithDB(db *gorm.DB, skuID string, quantity int64) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+
+	var sku shopmodels.GoodsSku
+	if err := db.Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("sku_id = ?", skuID).
+		First(&sku).Error; err != nil {
+		return err
+	}
+
+	return db.Table(s.tableName).
+		Where("sku_id = ?", skuID).
+		Update("quantity", quantity).Error
+}
+
 func (s *ShopSkuDaoImpl) UpdateStockBySkuID(c *gin.Context, skuID string, quantity int64) error {
 	return s.db.WithContext(c).Table(s.tableName).
 		Where("sku_id = ?", skuID).
@@ -205,14 +227,53 @@ func (s *ShopSkuDaoImpl) SumStockByGoodsID(c *gin.Context, goodsID string) (int6
 	return total, err
 }
 
-func (s *ShopSkuDaoImpl) UpsertBySkuID(c *gin.Context, skuID string, updates map[string]any) error {
+// LockStockRows 锁定指定商品的SKU库存行，防止并发更新
+func (s *ShopSkuDaoImpl) LockStockRows(db *gorm.DB, goodsIDs []string) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+	if len(goodsIDs) == 0 {
+		return nil
+	}
+	skus := make([]shopmodels.GoodsSku, 0)
+	return db.Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("goods_id IN ?", goodsIDs).
+		Order("goods_id ASC, sku_id ASC").
+		Find(&skus).Error
+}
+
+func (s *ShopSkuDaoImpl) UpsertBySkuID(c *gin.Context, skuID string, req *shopmodels.GoodsSkuSyncUpsert) error {
+	now := time.Now()
+	updates := req.ToSyncMap(&now)
 	var count int64
 	s.db.WithContext(c).Table(s.tableName).Where("sku_id = ?", skuID).Count(&count)
 	if count == 0 {
 		updates["sku_id"] = skuID
+		updates["create_by"] = int64(1)
+		updates["create_time"] = &now
 		return s.db.WithContext(c).Table(s.tableName).Create(updates).Error
 	}
 	return s.db.WithContext(c).Table(s.tableName).Where("sku_id = ?", skuID).Updates(updates).Error
+}
+
+// UpsertBySkuIDWithDB 使用外部传入的 db 操作 SKU upsert，用于事务场景
+func (s *ShopSkuDaoImpl) UpsertBySkuIDWithDB(db *gorm.DB, skuID string, req *shopmodels.GoodsSkuSyncUpsert) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+	now := time.Now()
+	updates := req.ToSyncMap(&now)
+	var count int64
+	if err := db.Table(s.tableName).Where("sku_id = ?", skuID).Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		updates["sku_id"] = skuID
+		updates["create_time"] = &now
+		return db.Table(s.tableName).Create(updates).Error
+	}
+	return db.Table(s.tableName).Where("sku_id = ?", skuID).Updates(updates).Error
 }
 
 func buildImages(galleryImagesArray []string) string {

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"nova-factory-server/app/business/datasyncapi/gjpqqd/callback"
 	"nova-factory-server/app/business/datasyncapi/gjpqqd/models"
 	"nova-factory-server/app/business/datasyncapi/gjpqqd/service"
 	"nova-factory-server/app/utils/baizeContext"
@@ -10,21 +11,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 // API 全渠道 API 调用控制器，负责鉴权、签名校验及方法分发
-// 管家婆全渠道 API 调用控制器。
-// 处理 POST /api 请求，通过 method 参数分发到不同子功能，
-// 包括商品列表查询、商品新增、库存更新等。
-// 调用前先校验 access_token 和签名。
 type API struct {
 	service service.GjpQqdService
+	db      *gorm.DB
 }
 
 // NewAPI 创建 API 控制器实例
-func NewAPI(service service.GjpQqdService) *API {
+func NewAPI(service service.GjpQqdService, db *gorm.DB) *API {
 	return &API{
 		service: service,
+		db:      db,
 	}
 }
 
@@ -46,6 +46,12 @@ func (q *API) API(c *gin.Context) {
 		c.JSON(http.StatusOK, qqdError("method is required"))
 		return
 	}
+
+	config, err := q.service.GetConfig(c)
+	if err != nil || config == nil {
+		c.JSON(http.StatusOK, qqdError("后台没有配置参数"))
+		return
+	}
 	// 校验 access_token 是否有效
 	if !q.service.ValidAccessToken(c, req.AccessToken, req.AppKey) {
 		c.JSON(http.StatusOK, qqdError(models.ErrInvalidAccessToken.Error()))
@@ -60,7 +66,7 @@ func (q *API) API(c *gin.Context) {
 		return
 	}
 	// MD5 签名校验
-	if !q.service.ValidSign(formValues(c), body, req.Sign) {
+	if !q.service.ValidSign(formValues(c), body, req.Sign, config) {
 		c.JSON(http.StatusOK, qqdError(models.ErrInvalidSign.Error()))
 		return
 	}
@@ -68,22 +74,30 @@ func (q *API) API(c *gin.Context) {
 	// 按 method 分发到不同业务处理逻辑
 	switch strings.ToLower(req.Method) {
 	case "selfmall.product.list.get":
-		response, err := q.service.ProductList(c, models.ProductListRequest{
-			PageNo:   req.PageNo,
-			PageSize: req.PageSize,
-		})
-		if err != nil {
-			zap.L().Error("load qqd product list failed", zap.Error(err))
-			c.JSON(http.StatusOK, qqdError("load product list failed: "+err.Error()))
+		productReq := new(models.ProductListRequest)
+		if err := c.ShouldBind(productReq); err != nil {
+			zap.L().Error("bind qqd product list request failed", zap.Error(err))
+			c.JSON(http.StatusOK, qqdError(err.Error()))
 			return
 		}
+		productReq.PageSize = req.PageSize
+		productReq.PageNo = req.PageNo
+		response := q.service.ProductList(c, productReq)
 		c.JSON(http.StatusOK, response)
 	case "selfmall.product.add":
 		q.productAdd(c)
 	case "selfmall.productstock.list.update":
 		q.productStockUpdate(c)
+	case "selfmall.sellercats.list.get":
+		categoryReq := new(models.CategorySearchRequest)
+		if err := c.ShouldBind(categoryReq); err != nil {
+			zap.L().Error("bind qqd product list request failed", zap.Error(err))
+			c.JSON(http.StatusOK, qqdError(err.Error()))
+			return
+		}
+		response := q.service.GetProductCategory(c, categoryReq)
+		c.JSON(http.StatusOK, response)
 	case "selfmall.product.query",
-		"selfmall.sellercats.list.get",
 		"selfmall.order.ship",
 		"selfmall.stock.update",
 		"selfmall.sale.status.write":
@@ -94,20 +108,29 @@ func (q *API) API(c *gin.Context) {
 }
 
 // productStockUpdate 处理 selfmall.productstock.list.update 请求
-// 解析请求中的 productid、productqty 和 skus，调用服务层执行库存更新
 func (q *API) productStockUpdate(c *gin.Context) {
-	request, err := parseProductStockUpdateRequest(c)
-	if err != nil {
+	req := new(models.ProductStockUpdateRequest)
+	if err := c.ShouldBind(req); err != nil {
 		c.JSON(http.StatusOK, qqdError(err.Error()))
 		return
 	}
 
-	response, err := q.service.ProductStockUpdate(c, request)
-	if err != nil {
-		c.JSON(http.StatusOK, qqdError(err.Error()))
+	if req.ProductID != "" {
+		req.ProductID = "0" + req.ProductID
+	}
+
+	stockReq := req.ToStockSyncReq()
+	stockReq.WithDB(q.db)
+	if err := observer.GetNotifier().OnStockChanged(stockReq); err != nil {
+		zap.L().Error("stock changed notify failed", zap.Error(err))
+		c.JSON(http.StatusOK, qqdError("stock sync failed: "+err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, response)
+
+	c.JSON(http.StatusOK, models.ErrorResponse{
+		Iserror:  false,
+		Errormsg: "ok",
+	})
 }
 
 // productAdd 处理 selfmall.product.add 请求
@@ -117,36 +140,44 @@ func (q *API) productAdd(c *gin.Context) {
 	goodsInfos := new(models.GoodsSyncReq)
 	err := c.ShouldBind(goodsInfos)
 	if err != nil {
-		baizeContext.ParameterError(c)
+		zap.L().Error("should bind error", zap.Error(err))
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: err.Error(),
+		})
 		return
 	}
-
 	if len(goodsInfos.GoodsInfos) == 0 {
-		baizeContext.Waring(c, "goodsinfo is required")
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: "goodsinfo is required",
+		})
 		return
 	}
-
-	// 通过全局 Notifier 分发商品变更事件，所有已注册的 Observer 均会收到通知
-	err = observer.GetNotifier().OnProductChanged(goodsInfos)
-
-	if err != nil {
-		zap.L().Error("save qqd product add payload failed", zap.Error(err))
-		c.JSON(http.StatusOK, qqdError("save product failed: "+err.Error()))
-		return
-	}
-
 	result := make([]gin.H, 0, len(goodsInfos.GoodsInfos))
-	for _, goods := range goodsInfos.GoodsInfos {
+	for _, goods := range goodsInfos.GetProducts() {
 		result = append(result, gin.H{
-			"goodsid":  goods.Goodsid,
+			"goodsid":  goods.GetGoodsId(),
 			"errormsg": "",
 		})
+	}
+
+	call := callback.NewGoodsCallback()
+	goodsInfos.WIthCallback(call)
+	goodsInfos.WithDB(q.db)
+	err = observer.GetNotifier().OnProductChanged(goodsInfos)
+	if err != nil {
+		c.JSON(http.StatusOK, models.ErrorResponse{
+			Iserror:  true,
+			Errormsg: err.Error(),
+		})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"iserror":  false,
 		"errormsg": "ok",
 		"result":   result,
-		"total":    len(storedGoods),
+		"total":    len(result),
 	})
 }

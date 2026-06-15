@@ -1,12 +1,11 @@
 package file
 
 import (
-	"bytes"
 	"io"
 	"mime/multipart"
 )
 
-func CreatFormFiles(b *bytes.Buffer, form *multipart.Form, w *multipart.Writer) error {
+func CreatFormFiles(form *multipart.Form, w *multipart.Writer) error {
 	for name, files := range form.File {
 		for _, file := range files {
 			f, err := file.Open()

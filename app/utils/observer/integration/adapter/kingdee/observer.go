@@ -7,8 +7,11 @@ import (
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
 	"nova-factory-server/app/utils/observer/integration/observer"
+	"nova-factory-server/app/utils/observer/integration/result"
 
 	"go.uber.org/zap"
+	"gorm.io/gorm"
+
 )
 
 // init 包初始化时自动将金蝶观察者注册到全局事件分发器
@@ -35,18 +38,18 @@ func (o *SyncObserver) Name() kind.Kind {
 
 // OnProductChanged 商品变更回调，当前为占位实现。
 // 若无集成配置则跳过，否则记录日志（待实现具体同步）。
-func (o *SyncObserver) OnProductChanged(event event.ProductEvent) error {
+func (o *SyncObserver) OnProductChanged(tx *gorm.DB, event event.ProductEvent) (result.SyncProductResponse, error) {
 	if event.Config() == nil {
 		zap.L().Debug("未传入集成配置，跳过金蝶商品同步")
-		return nil
+		return nil, nil
 	}
 	zap.L().Info("金蝶商品同步待实现", zap.String("action", string(event.Action())))
-	return nil
+	return nil, nil
 }
 
 // OnStockChanged 库存变更回调，当前为占位实现。
-func (o *SyncObserver) OnStockChanged(event event.StockEvent) error {
-	if event.Config == nil {
+func (o *SyncObserver) OnStockChanged(tx *gorm.DB, event event.StockEvent) error {
+	if event.Config() == nil {
 		zap.L().Debug("未传入集成配置，跳过金蝶库存同步")
 		return nil
 	}
@@ -55,7 +58,7 @@ func (o *SyncObserver) OnStockChanged(event event.StockEvent) error {
 }
 
 // OnOrderChanged 订单变更回调，当前为占位实现。
-func (o *SyncObserver) OnOrderChanged(event event.OrderEvent) error {
+func (o *SyncObserver) OnOrderChanged(tx *gorm.DB, event event.OrderEvent) error {
 	if event.Config() == nil {
 		zap.L().Debug("未传入集成配置，跳过金蝶订单同步")
 		return nil

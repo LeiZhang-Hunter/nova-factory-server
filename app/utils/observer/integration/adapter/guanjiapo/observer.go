@@ -57,12 +57,6 @@ func (o *SyncObserver) OnOrderChanged(event event.OrderEvent) error {
 }
 
 //
-//// OnProductChanged 商品变更同步（管家婆暂不支持）
-//func (o *SyncObserver) OnProductChanged(event *event.ProductEvent) error {
-//	zap.L().Debug("管家婆暂不支持商品同步", zap.String("action", string(event.Action)))
-//	return nil
-//}
-//
 //// OnStockChanged 库存变更同步（管家婆暂不支持）
 //func (o *SyncObserver) OnStockChanged(event *observer.StockEvent) error {
 //	zap.L().Debug("管家婆暂不支持库存同步", zap.String("action", string(event.Action)))

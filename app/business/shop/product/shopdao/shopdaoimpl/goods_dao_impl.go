@@ -3,7 +3,6 @@ package shopdaoimpl
 import (
 	"encoding/json"
 	"errors"
-	"go.uber.org/zap"
 	homeDao "nova-factory-server/app/business/shop/home/dao"
 	homeModels "nova-factory-server/app/business/shop/home/models"
 	"nova-factory-server/app/business/shop/product/shopdao"
@@ -13,8 +12,11 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ShopGoodsDaoImpl struct {
@@ -201,6 +203,12 @@ func (s *ShopGoodsDaoImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*sh
 	if req.CategoryId > 0 {
 		db = db.Where("shop_category_id = ?", req.CategoryId)
 	}
+	if req.StartModified != "" {
+		db = db.Where("update_time >= ?", req.StartModified)
+	}
+	if req.EndModified != "" {
+		db = db.Where("update_time <= ?", req.EndModified)
+	}
 
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	if req.Page <= 0 {
@@ -308,14 +316,54 @@ func (s *ShopGoodsDaoImpl) UpdateStockByGoodsID(c *gin.Context, goodsID string, 
 		Update("quantity", quantity).Error
 }
 
-func (s *ShopGoodsDaoImpl) UpsertByGoodsID(c *gin.Context, goodsID string, updates map[string]any) error {
+func (s *ShopGoodsDaoImpl) UpsertByGoodsID(c *gin.Context, goodsID string, req *shopmodels.GoodsSyncUpsert) error {
+	now := time.Now()
+	updates := req.ToSyncMap(&now)
 	var count int64
 	s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Count(&count)
 	if count == 0 {
 		updates["goods_id"] = goodsID
+		updates["create_by"] = int64(1)
+		updates["create_time"] = &now
 		return s.db.WithContext(c).Table(s.tableName).Create(updates).Error
 	}
 	return s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Updates(updates).Error
+}
+
+// UpsertByGoodsIDWithDB 使用外部传入的 db 操作商品 upsert，用于事务场景
+func (s *ShopGoodsDaoImpl) UpsertByGoodsIDWithDB(db *gorm.DB, goodsID string, req *shopmodels.GoodsSyncUpsert) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+	now := time.Now()
+	updates := req.ToSyncMap(&now)
+	var count int64
+	if err := db.Table(s.tableName).Where("goods_id = ?", goodsID).Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		updates["goods_id"] = goodsID
+		updates["create_by"] = int64(1)
+		updates["create_time"] = &now
+		return db.Table(s.tableName).Create(updates).Error
+	}
+	return db.Table(s.tableName).Where("goods_id = ?", goodsID).Updates(updates).Error
+}
+
+// LockStockRows 锁定指定商品的库存行，防止并发更新
+func (s *ShopGoodsDaoImpl) LockStockRows(db *gorm.DB, goodsIDs []string) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+	if len(goodsIDs) == 0 {
+		return nil
+	}
+	goodsRows := make([]shopmodels.Goods, 0)
+	return db.Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("goods_id IN ?", goodsIDs).
+		Order("goods_id ASC").
+		Find(&goodsRows).Error
 }
 
 func (s *ShopGoodsDaoImpl) attachHomeModuleIDs(c *gin.Context, rows []*shopmodels.Goods) error {
@@ -337,4 +385,22 @@ func (s *ShopGoodsDaoImpl) attachHomeModuleIDs(c *gin.Context, rows []*shopmodel
 		row.HomeModuleIDs = moduleMap[row.ID]
 	}
 	return nil
+}
+
+func (s *ShopGoodsDaoImpl) UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID string, quantity int64) error {
+	if db == nil {
+		return errors.New("db不能为空")
+	}
+
+	var goods shopmodels.Goods
+	if err := db.Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("goods_id = ?", goodsID).
+		First(&goods).Error; err != nil {
+		return err
+	}
+
+	return db.Table(s.tableName).
+		Where("goods_id = ?", goodsID).
+		Update("quantity", quantity).Error
 }
