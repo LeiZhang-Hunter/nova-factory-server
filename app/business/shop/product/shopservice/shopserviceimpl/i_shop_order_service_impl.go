@@ -169,3 +169,56 @@ func prepareOrderForSave(order *shopmodels.Order, now *time.Time) error {
 	order.State = commonStatus.NORMAL
 	return nil
 }
+
+// SyncOrderStatus 同步订单状态
+func (i *IShopOrderServiceImpl) SyncOrderStatus(event event.OrderStratusEvent) error {
+	if event == nil || len(event.GetOrders()) == 0 {
+		return nil
+	}
+	if event.GetDB() == nil {
+		return nil
+	}
+
+	now := time.Now()
+	for _, item := range event.GetOrders() {
+		if item == nil {
+			continue
+		}
+
+		tid := strings.TrimSpace(item.GetTid())
+		status := strings.TrimSpace(item.GetStatus())
+		if tid == "" {
+			return errors.New("订单tid不能为空")
+		}
+		if status == "" {
+			continue
+		}
+
+		order, err := i.orderDao.GetByTid(event.GetDB(), tid)
+		if err != nil {
+			zap.L().Error("商城订单状态同步失败：查询订单失败", zap.String("tid", tid), zap.Error(err))
+			return err
+		}
+		if order == nil {
+			zap.L().Debug("商城订单状态同步跳过不存在订单", zap.String("tid", tid), zap.String("status", status))
+			continue
+		}
+		if !shouldUpdateOrderStatus(order.Status, status) {
+			zap.L().Debug("商城订单状态同步跳过状态更新",
+				zap.String("tid", tid),
+				zap.String("current_status", order.Status),
+				zap.String("incoming_status", status),
+			)
+			continue
+		}
+
+		if err := i.orderDao.UpdateByID(event.GetDB(), order.ID, map[string]any{
+			"status":      status,
+			"update_time": &now,
+		}); err != nil {
+			zap.L().Error("商城订单状态同步失败：更新订单状态失败", zap.String("tid", tid), zap.Uint64("order_id", order.ID), zap.Error(err))
+			return err
+		}
+	}
+	return nil
+}

@@ -54,6 +54,6 @@ func (s *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
 }
 
 // OnOrderStatusChange 订单发货变化
-func (o *ShopObserver) OnOrderStatusChange(sendEvent event.OrderStratusEvent) error {
-	return nil
+func (o *ShopObserver) OnOrderStatusChange(event event.OrderStratusEvent) error {
+	return o.orderService.SyncOrderStatus(event)
 }
