@@ -77,3 +77,35 @@ func GetStatusText(status int32) string {
 		return "未知"
 	}
 }
+
+// OrderStatusRank 返回订单状态推进优先级。
+func OrderStatusRank(status string) (int, bool) {
+	switch strings.TrimSpace(status) {
+	case ERPStatusNoPay:
+		return 1, true
+	case ERPStatusPayed:
+		return 2, true
+	case ERPStatusPartSend:
+		return 3, true
+	case ERPStatusSended:
+		return 4, true
+	case ERPStatusTradeSuccess,
+		ERPStatusTradeClosed,
+		ERPStatusAftersale:
+		return 5, true
+	default:
+		return 0, false
+	}
+}
+
+// IsFinalOrderStatus 判断订单是否已经进入本地终态。
+func IsFinalOrderStatus(status string) bool {
+	switch strings.TrimSpace(status) {
+	case ERPStatusTradeSuccess,
+		ERPStatusTradeClosed,
+		ERPStatusAftersale:
+		return true
+	default:
+		return false
+	}
+}
