@@ -10,6 +10,7 @@ import (
 	models2 "nova-factory-server/app/business/shop/activity/models"
 	shopordermodels "nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/business/shop/product/shopmodels"
+	shopusermodels "nova-factory-server/app/business/shop/user/models"
 	orderConstant "nova-factory-server/app/constant/order"
 	shopConstant "nova-factory-server/app/constant/shop"
 	"nova-factory-server/app/datasource/objectFile"
@@ -18,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"nova-factory-server/app/business/shop/api/models"
+	apimodels "nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/utils/fileUtils"
 	order2 "nova-factory-server/app/utils/order"
 
@@ -37,7 +38,7 @@ const (
 )
 
 // Confirm 根据 cartId 构建确认单，内部生成 orderKey 并写入预订单缓存。
-func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *models.OrderConfirmReq) (*models.OrderConfirmResp, error) {
+func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *apimodels.OrderConfirmReq) (*apimodels.OrderConfirmResp, error) {
 	if userID == 0 {
 		return nil, errors.New("用户未登录")
 	}
@@ -58,7 +59,7 @@ func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *mo
 		return nil, err
 	}
 	goodsAmount := sumCacheItems(items)
-	cacheData := &models.OrderCacheData{
+	cacheData := &apimodels.OrderCacheData{
 		OrderKey:       order2.GenerateOrderNo(),
 		UserID:         userID,
 		Items:          items,
@@ -82,7 +83,7 @@ func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *mo
 		return nil, err
 	}
 
-	return &models.OrderConfirmResp{
+	return &apimodels.OrderConfirmResp{
 		OrderKey:       cacheData.OrderKey,
 		Address:        address,
 		Items:          cacheData.Items,
@@ -96,7 +97,7 @@ func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *mo
 }
 
 // getItemAvailableStock 读取商品当前可用库存，活动商品按活动库存与 SKU 库存的较小值返回。
-func (s *IApiShopOrderServiceImpl) getItemAvailableStock(c *gin.Context, item *models.OrderCacheItem) (int64, error) {
+func (s *IApiShopOrderServiceImpl) getItemAvailableStock(c *gin.Context, item *apimodels.OrderCacheItem) (int64, error) {
 	if item == nil || item.SkuID <= 0 {
 		return 0, nil
 	}
@@ -123,7 +124,7 @@ func (s *IApiShopOrderServiceImpl) getItemAvailableStock(c *gin.Context, item *m
 }
 
 // fillOrderItemsStock 填充确认单商品的实时库存，并标记是否库存不足。
-func (s *IApiShopOrderServiceImpl) fillOrderItemsStock(c *gin.Context, items []*models.OrderCacheItem) error {
+func (s *IApiShopOrderServiceImpl) fillOrderItemsStock(c *gin.Context, items []*apimodels.OrderCacheItem) error {
 	skuMap, err := s.loadOrderItemSkuMap(c, items)
 	if err != nil {
 		return err
@@ -142,7 +143,7 @@ func (s *IApiShopOrderServiceImpl) fillOrderItemsStock(c *gin.Context, items []*
 }
 
 // validateCreateItemsStock 在正式扣减库存前统一校验商品库存，并返回明确的不足提示。
-func (s *IApiShopOrderServiceImpl) validateCreateItemsStock(c *gin.Context, items []*models.OrderCacheItem) error {
+func (s *IApiShopOrderServiceImpl) validateCreateItemsStock(c *gin.Context, items []*apimodels.OrderCacheItem) error {
 	if err := s.fillOrderItemsStock(c, items); err != nil {
 		return err
 	}
@@ -161,7 +162,7 @@ func (s *IApiShopOrderServiceImpl) validateCreateItemsStock(c *gin.Context, item
 }
 
 // loadOrderItemSkuMap 批量读取订单商品对应的 SKU 数据。
-func (s *IApiShopOrderServiceImpl) loadOrderItemSkuMap(c *gin.Context, items []*models.OrderCacheItem) (map[int64]*shopmodels.GoodsSku, error) {
+func (s *IApiShopOrderServiceImpl) loadOrderItemSkuMap(c *gin.Context, items []*apimodels.OrderCacheItem) (map[int64]*shopmodels.GoodsSku, error) {
 	skuIDs := collectOrderItemSkuIDs(items)
 	if len(skuIDs) == 0 {
 		return map[int64]*shopmodels.GoodsSku{}, nil
@@ -183,7 +184,7 @@ func (s *IApiShopOrderServiceImpl) loadOrderItemSkuMap(c *gin.Context, items []*
 }
 
 // calcItemAvailableStock 计算单个商品当前可用库存，活动商品按活动库存与 SKU 库存的较小值返回。
-func (s *IApiShopOrderServiceImpl) calcItemAvailableStock(item *models.OrderCacheItem, sku *shopmodels.GoodsSku) int64 {
+func (s *IApiShopOrderServiceImpl) calcItemAvailableStock(item *apimodels.OrderCacheItem, sku *shopmodels.GoodsSku) int64 {
 	if item == nil || sku == nil {
 		return 0
 	}
@@ -202,7 +203,7 @@ func (s *IApiShopOrderServiceImpl) calcItemAvailableStock(item *models.OrderCach
 }
 
 // buildStockInsufficientMessage 组装单个商品的库存不足提示。
-func (s *IApiShopOrderServiceImpl) buildStockInsufficientMessage(item *models.OrderCacheItem) string {
+func (s *IApiShopOrderServiceImpl) buildStockInsufficientMessage(item *apimodels.OrderCacheItem) string {
 	if item == nil {
 		return ""
 	}
@@ -219,7 +220,7 @@ func (s *IApiShopOrderServiceImpl) buildStockInsufficientMessage(item *models.Or
 }
 
 // Create 正式创建订单，读取预订单缓存并落库。
-func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *models.OrderCreateReq) (*models.Order, error) {
+func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *apimodels.OrderCreateReq) (*shopordermodels.Order, error) {
 	if userID == 0 {
 		return nil, errors.New("用户未登录")
 	}
@@ -250,7 +251,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 	}
 	defer s.cache.Del(context.Background(), lockKey)
 
-	if existingOrder, err := s.orderDao.GetByTid(c, req.OrderKey); err != nil {
+	if existingOrder, err := s.apiOrderDao.GetByTid(c, req.OrderKey); err != nil {
 		return nil, errors.New("读取订单信息失败")
 	} else if existingOrder != nil {
 		if !s.isOrderOwnedByUser(existingOrder, shopUser) {
@@ -259,7 +260,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 		if err := s.ensureExistingOrderCreated(existingOrder); err != nil {
 			return nil, err
 		}
-		return s.toShopOrder(existingOrder), nil
+		return existingOrder, nil
 	}
 
 	cacheData, err := s.getOrderCache(c, req.OrderKey)
@@ -335,36 +336,36 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 		return nil, errors.New(err.Error())
 	}
 
-	latestOrder, err := s.orderDao.GetByTid(c, orderNo)
+	latestOrder, err := s.apiOrderDao.GetByTid(c, orderNo)
 	if err != nil || latestOrder == nil {
 		return nil, errors.New("读取订单信息失败")
 	}
-	return s.toShopOrder(latestOrder), nil
+	return latestOrder, nil
 }
 
 // GetByID 获取订单详情，包含商品明细。
-func (s *IApiShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*models.OrderVO, error) {
+func (s *IApiShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*apimodels.OrderVO, error) {
 	if id == 0 {
 		return nil, errors.New("订单ID不能为空")
 	}
 
-	order, err := s.orderDao.GetByID(c, uint64(id))
+	order, err := s.apiOrderDao.GetByID(c, uint64(id))
 	if err != nil {
 		return nil, errors.New("订单不存在")
 	}
 	if order == nil {
 		return nil, errors.New("订单不存在")
 	}
-	return s.toShopOrderVO(order), nil
+	return apimodels.ToShopOrderVO(order), nil
 }
 
 // List 获取当前用户的订单列表。
-func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *models.OrderQuery) (*models.OrderListData, error) {
+func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *apimodels.OrderQuery) (*apimodels.OrderListData, error) {
 	if userID == 0 {
 		return nil, errors.New("用户未登录")
 	}
 	if query == nil {
-		query = &models.OrderQuery{}
+		query = &apimodels.OrderQuery{}
 	}
 
 	query.UserID = userID
@@ -390,7 +391,7 @@ func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *mod
 }
 
 // UpdateStatus 更新订单状态，验证状态流转合法性。
-func (s *IApiShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, req *models.OrderStatusReq) error {
+func (s *IApiShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, req *apimodels.OrderStatusReq) error {
 	if userID == 0 {
 		return errors.New("用户未登录")
 	}
@@ -403,7 +404,7 @@ func (s *IApiShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, re
 	if err != nil || shopUser == nil {
 		return errors.New("商城用户不存在")
 	}
-	order, err := s.orderDao.GetByID(c, uint64(req.ID))
+	order, err := s.apiOrderDao.GetByID(c, uint64(req.ID))
 	if err != nil {
 		return errors.New("订单不存在")
 	}
@@ -416,7 +417,7 @@ func (s *IApiShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, re
 	}
 
 	// 验证状态流转
-	currentStatus := s.erpStatusToShopStatus(order.Status)
+	currentStatus := orderConstant.ErpStatusToShopStatus(order.Status)
 	if !s.isValidStatusTransition(currentStatus, req.Status) {
 		return errors.New("非法的状态流转")
 	}
@@ -433,7 +434,7 @@ func (s *IApiShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, re
 }
 
 // Pay 支付订单，调用微信V3 JSAPI预下单并返回调起支付参数。
-func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (*models.OrderPayResp, error) {
+func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (*apimodels.OrderPayResp, error) {
 	if userID == 0 {
 		return nil, errors.New("用户未登录")
 	}
@@ -444,14 +445,14 @@ func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
-	order, err := s.orderDao.GetByID(c, uint64(id))
+	order, err := s.apiOrderDao.GetByID(c, uint64(id))
 	if err != nil || order == nil {
 		return nil, errors.New("订单不存在")
 	}
 	if !s.isOrderOwnedByUser(order, shopUser) {
 		return nil, errors.New("无权操作此订单")
 	}
-	if s.erpStatusToShopStatus(order.Status) != orderConstant.OrderStatusPending {
+	if orderConstant.ErpStatusToShopStatus(order.Status) != orderConstant.OrderStatusPending {
 		return nil, errors.New("只能支付待支付的订单")
 	}
 	//if order.SyncStatus != shopConstant.OrderSyncStatusSuccess {
@@ -520,7 +521,7 @@ func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (
 		return nil, fmt.Errorf("生成支付签名失败: %v", err)
 	}
 
-	return &models.OrderPayResp{
+	return &apimodels.OrderPayResp{
 		AppId:     paySign.AppId,
 		TimeStamp: paySign.TimeStamp,
 		NonceStr:  paySign.NonceStr,
@@ -555,7 +556,7 @@ func (s *IApiShopOrderServiceImpl) loadWechatConfig(c *gin.Context) (map[string]
 
 // HandleWechatNotify 处理微信支付回调。
 func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo, transactionId, notifyRaw, mchId, appid, payerOpenid string, notifyTotalInt int64) error {
-	order, err := s.orderDao.GetByTid(c, outTradeNo)
+	order, err := s.apiOrderDao.GetByTid(c, outTradeNo)
 	if err != nil || order == nil {
 		return errors.New("订单不存在")
 	}
@@ -601,7 +602,7 @@ func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64
 	if err != nil || shopUser == nil {
 		return errors.New("商城用户不存在")
 	}
-	order, err := s.orderDao.GetByID(c, uint64(id))
+	order, err := s.apiOrderDao.GetByID(c, uint64(id))
 	if err != nil {
 		return errors.New("订单不存在")
 	}
@@ -613,7 +614,7 @@ func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64
 		return errors.New("无权操作此订单")
 	}
 
-	if s.erpStatusToShopStatus(order.Status) != orderConstant.OrderStatusPending {
+	if orderConstant.ErpStatusToShopStatus(order.Status) != orderConstant.OrderStatusPending {
 		return errors.New("只能取消待支付的订单")
 	}
 
@@ -641,7 +642,7 @@ func (s *IApiShopOrderServiceImpl) ConfirmReceive(c *gin.Context, userID int64, 
 	if err != nil || shopUser == nil {
 		return errors.New("商城用户不存在")
 	}
-	order, err := s.orderDao.GetByID(c, uint64(id))
+	order, err := s.apiOrderDao.GetByID(c, uint64(id))
 	if err != nil {
 		return errors.New("订单不存在")
 	}
@@ -653,7 +654,7 @@ func (s *IApiShopOrderServiceImpl) ConfirmReceive(c *gin.Context, userID int64, 
 		return errors.New("无权操作此订单")
 	}
 
-	if s.erpStatusToShopStatus(order.Status) != orderConstant.OrderStatusShipped {
+	if orderConstant.ErpStatusToShopStatus(order.Status) != orderConstant.OrderStatusShipped {
 		return errors.New("只能确认已发货的订单")
 	}
 
@@ -677,7 +678,7 @@ func isOrderStockError(err error) bool {
 }
 
 // deductOrderItemStockWithLock 在事务内锁定 SKU 行，确认库存充足后再扣减。
-func (s *IApiShopOrderServiceImpl) deductOrderItemStockWithLock(c *gin.Context, item *models.OrderCacheItem) error {
+func (s *IApiShopOrderServiceImpl) deductOrderItemStockWithLock(c *gin.Context, item *apimodels.OrderCacheItem) error {
 	if item == nil {
 		return nil
 	}
@@ -703,7 +704,7 @@ func (s *IApiShopOrderServiceImpl) deductOrderItemStockWithLock(c *gin.Context, 
 }
 
 // deductOrderItemActivityStockWithLock 在事务内锁定活动库存行，确认库存充足后再扣减。
-func (s *IApiShopOrderServiceImpl) deductOrderItemActivityStockWithLock(c *gin.Context, item *models.OrderCacheItem) error {
+func (s *IApiShopOrderServiceImpl) deductOrderItemActivityStockWithLock(c *gin.Context, item *apimodels.OrderCacheItem) error {
 	if item == nil {
 		return nil
 	}
@@ -743,7 +744,7 @@ func (s *IApiShopOrderServiceImpl) deductOrderItemActivityStockWithLock(c *gin.C
 }
 
 // GetStatistics 获取当前用户各状态订单数量统计。
-func (s *IApiShopOrderServiceImpl) GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error) {
+func (s *IApiShopOrderServiceImpl) GetStatistics(c *gin.Context, userID int64) (*apimodels.OrderStatistics, error) {
 	if userID == 0 {
 		return nil, errors.New("用户未登录")
 	}
@@ -754,7 +755,7 @@ func (s *IApiShopOrderServiceImpl) GetStatistics(c *gin.Context, userID int64) (
 	return s.apiOrderDao.GetERPOrderStatistics(c, shopUser)
 }
 
-func (s *IApiShopOrderServiceImpl) syncCreatedOrder(tx *gorm.DB, c *gin.Context, order *shopordermodels.OrderSet, cacheData *models.OrderCacheData) error {
+func (s *IApiShopOrderServiceImpl) syncCreatedOrder(tx *gorm.DB, c *gin.Context, order *shopordermodels.OrderSet, cacheData *apimodels.OrderCacheData) error {
 	if order == nil {
 		return errors.New("订单不存在")
 	}
@@ -810,7 +811,7 @@ func (s *IApiShopOrderServiceImpl) buildOrderCacheKey(orderKey string) string {
 	return orderCachePrefix + orderKey
 }
 
-func (s *IApiShopOrderServiceImpl) saveOrderCache(c *gin.Context, data *models.OrderCacheData) error {
+func (s *IApiShopOrderServiceImpl) saveOrderCache(c *gin.Context, data *apimodels.OrderCacheData) error {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -819,31 +820,31 @@ func (s *IApiShopOrderServiceImpl) saveOrderCache(c *gin.Context, data *models.O
 	return nil
 }
 
-func (s *IApiShopOrderServiceImpl) getOrderCache(c *gin.Context, orderKey string) (*models.OrderCacheData, error) {
+func (s *IApiShopOrderServiceImpl) getOrderCache(c *gin.Context, orderKey string) (*apimodels.OrderCacheData, error) {
 	val, err := s.cache.Get(context.Background(), s.buildOrderCacheKey(orderKey))
 	if err != nil {
 		return nil, errors.New("预订单已失效，请重新确认商品")
 	}
-	var data models.OrderCacheData
+	var data apimodels.OrderCacheData
 	if err := json.Unmarshal([]byte(val), &data); err != nil {
 		return nil, errors.New("预订单数据异常")
 	}
 	return &data, nil
 }
 
-func (s *IApiShopOrderServiceImpl) getBuyNowCartCache(c *gin.Context, cartID string) (*models.OrderCacheData, error) {
+func (s *IApiShopOrderServiceImpl) getBuyNowCartCache(c *gin.Context, cartID string) (*apimodels.OrderCacheData, error) {
 	val, err := s.cache.Get(context.Background(), buildBuyNowCartCacheKey(cartID))
 	if err != nil {
 		return nil, errors.New("立即购买商品已失效，请重新选择商品")
 	}
-	var data models.OrderCacheData
+	var data apimodels.OrderCacheData
 	if err := json.Unmarshal([]byte(val), &data); err != nil {
 		return nil, errors.New("立即购买商品数据异常")
 	}
 	return &data, nil
 }
 
-func (s *IApiShopOrderServiceImpl) buildConfirmCacheItems(c *gin.Context, userID int64, req *models.OrderConfirmReq) ([]*models.OrderCacheItem, []int64, error) {
+func (s *IApiShopOrderServiceImpl) buildConfirmCacheItems(c *gin.Context, userID int64, req *apimodels.OrderConfirmReq) ([]*apimodels.OrderCacheItem, []int64, error) {
 	if req == nil {
 		return nil, nil, errors.New("参数不能为空")
 	}
@@ -872,7 +873,7 @@ func (s *IApiShopOrderServiceImpl) buildConfirmCacheItems(c *gin.Context, userID
 	return items, idList, nil
 }
 
-func (s *IApiShopOrderServiceImpl) buildCartCacheItemsByState(c *gin.Context, userID int64, idList []int64, buyNow bool) ([]*models.OrderCacheItem, error) {
+func (s *IApiShopOrderServiceImpl) buildCartCacheItemsByState(c *gin.Context, userID int64, idList []int64, buyNow bool) ([]*apimodels.OrderCacheItem, error) {
 	if userID == 0 {
 		return nil, errors.New("用户未登录")
 	}
@@ -892,14 +893,14 @@ func (s *IApiShopOrderServiceImpl) buildCartCacheItemsByState(c *gin.Context, us
 		return nil, errors.New("购物车商品不存在")
 	}
 
-	cartMap := make(map[int64]*models.CartDto, len(cartList))
+	cartMap := make(map[int64]*apimodels.CartDto, len(cartList))
 	for _, cart := range cartList {
 		if cart != nil {
 			cartMap[cart.ID] = cart
 		}
 	}
 
-	items := make([]*models.OrderCacheItem, 0, len(idList))
+	items := make([]*apimodels.OrderCacheItem, 0, len(idList))
 	for _, id := range idList {
 		cartInfo, ok := cartMap[id]
 		if !ok {
@@ -915,7 +916,7 @@ func (s *IApiShopOrderServiceImpl) buildCartCacheItemsByState(c *gin.Context, us
 	return items, nil
 }
 
-func (s *IApiShopOrderServiceImpl) buildCartInfoCacheItem(c *gin.Context, userID int64, cartInfo *models.CartDto) (*models.OrderCacheItem, error) {
+func (s *IApiShopOrderServiceImpl) buildCartInfoCacheItem(c *gin.Context, userID int64, cartInfo *apimodels.CartDto) (*apimodels.OrderCacheItem, error) {
 	if cartInfo == nil {
 		return nil, errors.New("购物车商品不存在")
 	}
@@ -938,7 +939,7 @@ func (s *IApiShopOrderServiceImpl) parseCartIDString(cartID string) ([]int64, er
 	return s.parseCartIDs(strings.Split(cartID, ","))
 }
 
-func (s *IApiShopOrderServiceImpl) resolveConfirmDeliveryType(req *models.OrderConfirmReq) string {
+func (s *IApiShopOrderServiceImpl) resolveConfirmDeliveryType(req *apimodels.OrderConfirmReq) string {
 	if req == nil {
 		return defaultDeliveryType
 	}
@@ -974,7 +975,7 @@ func (s *IApiShopOrderServiceImpl) parseCartIDs(cartIDs []string) ([]int64, erro
 }
 
 // buildSeckillCacheItem 构建秒杀商品预下单快照。
-func (s *IApiShopOrderServiceImpl) buildSeckillCacheItem(c *gin.Context, secKillID int64, skuID int64, quantity int64) (*models.OrderCacheItem, error) {
+func (s *IApiShopOrderServiceImpl) buildSeckillCacheItem(c *gin.Context, secKillID int64, skuID int64, quantity int64) (*apimodels.OrderCacheItem, error) {
 	if skuID <= 0 {
 		return nil, errors.New("商品规格不能为空")
 	}
@@ -1011,7 +1012,7 @@ func (s *IApiShopOrderServiceImpl) buildSeckillCacheItem(c *gin.Context, secKill
 }
 
 // buildCombinationCacheItem 构建拼团商品预下单快照。
-func (s *IApiShopOrderServiceImpl) buildCombinationCacheItem(c *gin.Context, combinationID int64, skuID int64, quantity int64) (*models.OrderCacheItem, error) {
+func (s *IApiShopOrderServiceImpl) buildCombinationCacheItem(c *gin.Context, combinationID int64, skuID int64, quantity int64) (*apimodels.OrderCacheItem, error) {
 	if skuID <= 0 {
 		return nil, errors.New("商品规格不能为空")
 	}
@@ -1048,7 +1049,7 @@ func (s *IApiShopOrderServiceImpl) buildCombinationCacheItem(c *gin.Context, com
 }
 
 // buildDirectCacheItem 构建普通立即购买商品预下单快照。
-func (s *IApiShopOrderServiceImpl) buildDirectCacheItem(c *gin.Context, userID int64, skuID int64, quantity int64) (*models.OrderCacheItem, error) {
+func (s *IApiShopOrderServiceImpl) buildDirectCacheItem(c *gin.Context, userID int64, skuID int64, quantity int64) (*apimodels.OrderCacheItem, error) {
 	if skuID <= 0 {
 		return nil, errors.New("商品规格不能为空")
 	}
@@ -1074,7 +1075,7 @@ func (s *IApiShopOrderServiceImpl) buildDirectCacheItem(c *gin.Context, userID i
 }
 
 // loadGoodsAndSkuByGoodsID 按商品主键和规格ID加载商品快照所需数据。
-func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsID(c *gin.Context, goodsID int64, skuID int64, quantity int64) (*models.Goods, *shopmodels.GoodsSku, error) {
+func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsID(c *gin.Context, goodsID int64, skuID int64, quantity int64) (*apimodels.Goods, *shopmodels.GoodsSku, error) {
 	goods, err := s.goodsDao.GetByID(c, goodsID)
 	if err != nil {
 		return nil, nil, errors.New("读取商品信息失败")
@@ -1102,7 +1103,7 @@ func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsID(c *gin.Context, good
 }
 
 // loadGoodsAndSkuByGoodsCode 按商品业务ID和规格ID加载商品快照所需数据。
-func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsCode(c *gin.Context, goodsCode string, skuID int64, quantity int64) (*models.Goods, *shopmodels.GoodsSku, error) {
+func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsCode(c *gin.Context, goodsCode string, skuID int64, quantity int64) (*apimodels.Goods, *shopmodels.GoodsSku, error) {
 	if goodsCode == "" {
 		return nil, nil, errors.New("活动商品数据异常")
 	}
@@ -1135,13 +1136,13 @@ func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsCode(c *gin.Context, go
 // assembleCacheItem 统一组装预下单缓存项，优先保留活动价和活动展示信息。
 func (s *IApiShopOrderServiceImpl) assembleCacheItem(
 	c *gin.Context,
-	goods *models.Goods,
+	goods *apimodels.Goods,
 	sku *shopmodels.GoodsSku,
 	quantity int64,
 	price float64,
 	goodsName string,
 	imageURL string,
-) *models.OrderCacheItem {
+) *apimodels.OrderCacheItem {
 	finalGoodsName := strings.TrimSpace(goodsName)
 	if finalGoodsName == "" {
 		finalGoodsName = goods.GoodsName
@@ -1155,7 +1156,7 @@ func (s *IApiShopOrderServiceImpl) assembleCacheItem(
 	if finalImageURL == "" {
 		finalImageURL = strings.TrimSpace(sku.ImageURL)
 	}
-	return &models.OrderCacheItem{
+	return &apimodels.OrderCacheItem{
 		GoodsID:     goods.ID,
 		SkuID:       int64(sku.ID),
 		GoodsName:   finalGoodsName,
@@ -1167,7 +1168,7 @@ func (s *IApiShopOrderServiceImpl) assembleCacheItem(
 	}
 }
 
-func (s *IApiShopOrderServiceImpl) buildSingleCacheItem(c *gin.Context, userID int64, goodsID int64, skuID int64, quantity int64) (*models.OrderCacheItem, error) {
+func (s *IApiShopOrderServiceImpl) buildSingleCacheItem(c *gin.Context, userID int64, goodsID int64, skuID int64, quantity int64) (*apimodels.OrderCacheItem, error) {
 	goods, err := s.goodsDao.GetByID(c, goodsID)
 	if err != nil {
 		return nil, errors.New("读取商品信息失败")
@@ -1186,7 +1187,7 @@ func (s *IApiShopOrderServiceImpl) buildSingleCacheItem(c *gin.Context, userID i
 		return nil, err
 	}
 	price := s.applyGoodsDiscount(c, userID, goods, sku.SkuID, sku.RetailPrice)
-	item := &models.OrderCacheItem{
+	item := &apimodels.OrderCacheItem{
 		GoodsID:     goodsID,
 		SkuID:       skuID,
 		GoodsName:   goods.GoodsName,
@@ -1228,7 +1229,7 @@ func (s *IApiShopOrderServiceImpl) buildStockInsufficientDetail(goodsName string
 	return fmt.Sprintf("%s(购买%d，剩余%d)", name, quantity, availableStock)
 }
 
-func (s *IApiShopOrderServiceImpl) resolveConfirmAddress(c *gin.Context, userID int64, addressID int64) (*models.ShopUserAddressApp, error) {
+func (s *IApiShopOrderServiceImpl) resolveConfirmAddress(c *gin.Context, userID int64, addressID int64) (*apimodels.ShopUserAddressApp, error) {
 	if addressID > 0 {
 		address, err := s.addressDao.GetByID(c, addressID)
 		if err != nil {
@@ -1254,7 +1255,7 @@ func (s *IApiShopOrderServiceImpl) resolveConfirmAddress(c *gin.Context, userID 
 	return list.Rows[0], nil
 }
 
-func (s *IApiShopOrderServiceImpl) recalculateOrderAmounts(c *gin.Context, userID int64, data *models.OrderCacheData) {
+func (s *IApiShopOrderServiceImpl) recalculateOrderAmounts(c *gin.Context, userID int64, data *apimodels.OrderCacheData) {
 	data.GoodsAmount = sumCacheItems(data.Items)
 	if data.DeliveryType == "" {
 		data.DeliveryType = defaultDeliveryType
@@ -1271,7 +1272,7 @@ func (s *IApiShopOrderServiceImpl) recalculateOrderAmounts(c *gin.Context, userI
 }
 
 // applyGoodsDiscount 对单个商品应用用户折扣，返回折扣后价格
-func (s *IApiShopOrderServiceImpl) applyGoodsDiscount(c *gin.Context, userID int64, goods *models.Goods, skuID string, price float64) float64 {
+func (s *IApiShopOrderServiceImpl) applyGoodsDiscount(c *gin.Context, userID int64, goods *apimodels.Goods, skuID string, price float64) float64 {
 	if s.discountService == nil || userID == 0 || goods == nil || price <= 0 {
 		return price
 	}
@@ -1283,7 +1284,7 @@ func (s *IApiShopOrderServiceImpl) applyGoodsDiscount(c *gin.Context, userID int
 	return price
 }
 
-func sumCacheItems(items []*models.OrderCacheItem) float64 {
+func sumCacheItems(items []*apimodels.OrderCacheItem) float64 {
 	var total float64
 	for _, item := range items {
 		if item != nil {
@@ -1302,7 +1303,7 @@ func minInt64(a, b int64) int64 {
 }
 
 // collectOrderItemSkuIDs 收集订单商品中的 SKU ID 并去重。
-func collectOrderItemSkuIDs(items []*models.OrderCacheItem) []int64 {
+func collectOrderItemSkuIDs(items []*apimodels.OrderCacheItem) []int64 {
 	result := make([]int64, 0, len(items))
 	seen := make(map[int64]struct{}, len(items))
 	for _, item := range items {
@@ -1319,7 +1320,7 @@ func collectOrderItemSkuIDs(items []*models.OrderCacheItem) []int64 {
 }
 
 // buildOrderBuyerNick 生成商城订单在 ERP 表中的买家标识。
-func (s *IApiShopOrderServiceImpl) buildOrderBuyerNick(shopUser *models.User) string {
+func (s *IApiShopOrderServiceImpl) buildOrderBuyerNick(shopUser *shopusermodels.User) string {
 	if shopUser == nil {
 		return ""
 	}
@@ -1327,7 +1328,7 @@ func (s *IApiShopOrderServiceImpl) buildOrderBuyerNick(shopUser *models.User) st
 }
 
 // buildOrderOwnerCandidates 构造商城用户在 ERP 订单中的可能归属标识。
-func (s *IApiShopOrderServiceImpl) buildOrderOwnerCandidates(shopUser *models.User) []string {
+func (s *IApiShopOrderServiceImpl) buildOrderOwnerCandidates(shopUser *shopusermodels.User) []string {
 	if shopUser == nil {
 		return []string{""}
 	}
@@ -1357,7 +1358,7 @@ func (s *IApiShopOrderServiceImpl) buildOrderOwnerCandidates(shopUser *models.Us
 }
 
 // isOrderOwnedByUser 校验 ERP 订单是否属于当前商城用户。
-func (s *IApiShopOrderServiceImpl) isOrderOwnedByUser(order *shopordermodels.Order, shopUser *models.User) bool {
+func (s *IApiShopOrderServiceImpl) isOrderOwnedByUser(order *shopordermodels.Order, shopUser *shopusermodels.User) bool {
 	if order == nil || shopUser == nil {
 		return false
 	}
@@ -1367,48 +1368,4 @@ func (s *IApiShopOrderServiceImpl) isOrderOwnedByUser(order *shopordermodels.Ord
 		}
 	}
 	return false
-}
-
-// shopStatusToERPStatus 将商城订单状态转换为 ERP 状态值。
-func (s *IApiShopOrderServiceImpl) shopStatusToERPStatus(status int32) string {
-	switch status {
-	case orderConstant.OrderStatusPending:
-		return orderConstant.ERPStatusNoPay
-	case orderConstant.OrderStatusPaid:
-		return orderConstant.ERPStatusPayed
-	case orderConstant.OrderStatusShipped:
-		return orderConstant.ERPStatusSended
-	case orderConstant.OrderStatusPartShipped:
-		return orderConstant.ERPStatusPartSend
-	case orderConstant.OrderStatusCompleted:
-		return orderConstant.ERPStatusTradeSuccess
-	case orderConstant.OrderStatusCancelled:
-		return orderConstant.ERPStatusTradeClosed
-	case orderConstant.OrderStatusAftersale:
-		return orderConstant.ERPStatusAftersale
-	default:
-		return orderConstant.ERPStatusNoPay
-	}
-}
-
-// erpStatusToShopStatus 将 ERP 状态值转换为商城订单状态。
-func (s *IApiShopOrderServiceImpl) erpStatusToShopStatus(status string) int32 {
-	switch strings.TrimSpace(status) {
-	case orderConstant.ERPStatusNoPay:
-		return orderConstant.OrderStatusPending
-	case orderConstant.ERPStatusPayed:
-		return orderConstant.OrderStatusPaid
-	case orderConstant.ERPStatusSended:
-		return orderConstant.OrderStatusShipped
-	case orderConstant.ERPStatusPartSend:
-		return orderConstant.OrderStatusPartShipped
-	case orderConstant.ERPStatusTradeSuccess:
-		return orderConstant.OrderStatusCompleted
-	case orderConstant.ERPStatusTradeClosed:
-		return orderConstant.OrderStatusCancelled
-	case orderConstant.ERPStatusAftersale:
-		return orderConstant.OrderStatusAftersale
-	default:
-		return orderConstant.OrderStatusPending
-	}
 }

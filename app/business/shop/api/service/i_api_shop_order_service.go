@@ -2,6 +2,7 @@ package service
 
 import (
 	"nova-factory-server/app/business/shop/api/models"
+	shopordermodels "nova-factory-server/app/business/shop/order/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,7 +10,7 @@ import (
 // IApiShopOrderService   订单服务接口
 type IApiShopOrderService interface {
 	Confirm(c *gin.Context, userID int64, req *models.OrderConfirmReq) (*models.OrderConfirmResp, error)
-	Create(c *gin.Context, userID int64, req *models.OrderCreateReq) (*models.Order, error)
+	Create(c *gin.Context, userID int64, req *models.OrderCreateReq) (*shopordermodels.Order, error)
 	GetByID(c *gin.Context, id int64) (*models.OrderVO, error)
 	List(c *gin.Context, userID int64, query *models.OrderQuery) (*models.OrderListData, error)
 	UpdateStatus(c *gin.Context, userID int64, req *models.OrderStatusReq) error

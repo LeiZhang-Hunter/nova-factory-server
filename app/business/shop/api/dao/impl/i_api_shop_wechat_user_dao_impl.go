@@ -3,6 +3,7 @@ package impl
 import (
 	"errors"
 	"fmt"
+	shopusermodels "nova-factory-server/app/business/shop/user/models"
 
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
@@ -28,8 +29,8 @@ func NewIApiShopWechatUserDaoImpl(ms *gorm.DB) dao.IApiShopWechatUserDao {
 }
 
 // GetByOpenid 根据微信openid查询商城用户。
-func (s *IApiShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (*models.User, error) {
-	var item models.User
+func (s *IApiShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (*shopusermodels.User, error) {
+	var item shopusermodels.User
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("wechat_openid = ?", openid).
 		Where("state = ?", commonStatus.NORMAL).
@@ -43,10 +44,10 @@ func (s *IApiShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (
 }
 
 // CreateWechatUser 创建微信用户。
-func (s *IApiShopWechatUserDaoImpl) CreateWechatUser(c *gin.Context, req *models.WechatUserCreate) (*models.User, error) {
+func (s *IApiShopWechatUserDaoImpl) CreateWechatUser(c *gin.Context, req *models.WechatUserCreate) (*shopusermodels.User, error) {
 	// 微信登录无 session，使用默认 dept_id=0
 	const defaultDeptID int64 = 0
-	model := &models.User{
+	model := &shopusermodels.User{
 		ID:           snowflake.GenID(),
 		UserID:       fmt.Sprintf("%d", snowflake.GenID()),
 		Username:     req.Username,
@@ -69,8 +70,8 @@ func (s *IApiShopWechatUserDaoImpl) CreateWechatUser(c *gin.Context, req *models
 }
 
 // GetByID 根据用户ID查询商城用户（不带 dept_id 过滤，用于小程序）。
-func (s *IApiShopWechatUserDaoImpl) GetByID(c *gin.Context, id int64) (*models.User, error) {
-	var item models.User
+func (s *IApiShopWechatUserDaoImpl) GetByID(c *gin.Context, id int64) (*shopusermodels.User, error) {
+	var item shopusermodels.User
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("id = ?", id).
 		Where("state = ?", commonStatus.NORMAL).
@@ -82,8 +83,8 @@ func (s *IApiShopWechatUserDaoImpl) GetByID(c *gin.Context, id int64) (*models.U
 	}
 	return &item, nil
 }
-func (s *IApiShopWechatUserDaoImpl) GetByUserID(c *gin.Context, userId int64) (*models.User, error) {
-	var item models.User
+func (s *IApiShopWechatUserDaoImpl) GetByUserID(c *gin.Context, userId int64) (*shopusermodels.User, error) {
+	var item shopusermodels.User
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("user_id = ?", userId).
 		Where("state = ?", commonStatus.NORMAL).

@@ -3,11 +3,9 @@ package impl
 import (
 	"errors"
 	"fmt"
-	"nova-factory-server/app/business/datasyncapi/gjpqqd/models"
 	apimodels "nova-factory-server/app/business/shop/api/models"
 	shopordermodels "nova-factory-server/app/business/shop/order/models"
 	shopusermodels "nova-factory-server/app/business/shop/user/models"
-	"nova-factory-server/app/utils/stringUtils"
 	"strings"
 	"time"
 
@@ -33,6 +31,22 @@ func NewIApiShopOrderDaoImpl(db *gorm.DB) dao.IApiShopOrderDao {
 	}
 }
 
+// GetByID 查询 shop 订单详情。
+func (o *IApiShopOrderDaoImpl) GetByID(c *gin.Context, id uint64) (*shopordermodels.Order, error) {
+	var row *shopordermodels.Order
+	if err := o.db.WithContext(c).Table(o.table).
+		Where("id = ?", id).
+		//Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&row).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return row, nil
+}
+
 // ListShopOrders 分页查询当前商城用户在 shop_order 表中的订单列表。
 func (i *IApiShopOrderDaoImpl) ListShopOrders(c *gin.Context, shopUser *shopusermodels.User, query *apimodels.OrderQuery) (*apimodels.OrderListData, error) {
 	if i == nil || i.db == nil {
@@ -42,13 +56,13 @@ func (i *IApiShopOrderDaoImpl) ListShopOrders(c *gin.Context, shopUser *shopuser
 		return nil, errors.New("商城用户不存在")
 	}
 	if query == nil {
-		query = &models.OrderQuery{}
+		query = &apimodels.OrderQuery{}
 	}
 
 	db := i.db.WithContext(c).
 		Table(i.table).
 		Where("state = ?", commonStatus.NORMAL).
-		Where("buyer_nick = ?", buildOrderBuyerNick(shopUser))
+		Where("buyer_nick = ?", apimodels.BuildOrderBuyerNick(shopUser))
 	if query.Status != nil {
 		db = db.Where("status = ?", orderConstant.ShopStatusToOrderStatus(*query.Status))
 	}
@@ -88,21 +102,16 @@ func (i *IApiShopOrderDaoImpl) ListShopOrders(c *gin.Context, shopUser *shopuser
 		if row == nil {
 			continue
 		}
-		data.Rows = append(data.Rows, toShopOrderVO(row))
+		data.Rows = append(data.Rows, apimodels.ToShopOrderVO(row))
 	}
 	return data, nil
-}
-
-// DeleteByIDs 删除 ERP 订单。
-func (i *IApiShopOrderDaoImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
-	return nil
 }
 
 // UpdateERPOrderStatus 更新当前商城用户的 shop_order 订单状态。
 func (i *IApiShopOrderDaoImpl) UpdateERPOrderStatus(c *gin.Context, id int64, shopUser *shopusermodels.User, status int32) (int64, error) {
 	result := i.db.Table(i.table).
 		Where("id = ?", id).
-		Where("buyer_nick = ?", buildOrderBuyerNick(shopUser)).
+		Where("buyer_nick = ?", apimodels.BuildOrderBuyerNick(shopUser)).
 		Updates(map[string]interface{}{
 			"status":      orderConstant.ShopStatusToOrderStatus(status),
 			"update_time": gorm.Expr("NOW()"),
@@ -111,10 +120,10 @@ func (i *IApiShopOrderDaoImpl) UpdateERPOrderStatus(c *gin.Context, id int64, sh
 }
 
 // CancelERPOrder 将当前商城用户的 shop_order 订单标记为已取消。
-func (i *IApiShopOrderDaoImpl) CancelERPOrder(c *gin.Context, id int64, shopUser *models.User, reason string) (int64, error) {
+func (i *IApiShopOrderDaoImpl) CancelERPOrder(c *gin.Context, id int64, shopUser *shopusermodels.User, reason string) (int64, error) {
 	result := i.db.Table(i.table).
 		Where("id = ?", id).
-		Where("buyer_nick = ?", buildOrderBuyerNick(shopUser)).
+		Where("buyer_nick = ?", apimodels.BuildOrderBuyerNick(shopUser)).
 		Updates(map[string]interface{}{
 			"status":      orderConstant.ShopStatusToOrderStatus(orderConstant.OrderStatusCancelled),
 			"seller_memo": strings.TrimSpace(reason),
@@ -124,9 +133,9 @@ func (i *IApiShopOrderDaoImpl) CancelERPOrder(c *gin.Context, id int64, shopUser
 }
 
 // GetERPOrderStatistics 统计当前商城用户的 shop_order 订单状态数量。
-func (i *IApiShopOrderDaoImpl) GetERPOrderStatistics(c *gin.Context, shopUser *models.User) (*models.OrderStatistics, error) {
-	stats := &models.OrderStatistics{}
-	baseQuery := i.db.Table(i.table).Where("buyer_nick = ?", buildOrderBuyerNick(shopUser))
+func (i *IApiShopOrderDaoImpl) GetERPOrderStatistics(c *gin.Context, shopUser *shopusermodels.User) (*apimodels.OrderStatistics, error) {
+	stats := &apimodels.OrderStatistics{}
+	baseQuery := i.db.Table(i.table).Where("buyer_nick = ?", apimodels.BuildOrderBuyerNick(shopUser))
 	if err := baseQuery.Session(&gorm.Session{}).
 		Where("status = ?", orderConstant.ShopStatusToOrderStatus(orderConstant.OrderStatusPending)).
 		Count(&stats.PendingPay).Error; err != nil {
@@ -184,8 +193,8 @@ func (i *IApiShopOrderDaoImpl) MarkOrderPaidWithTx(c *gin.Context, tx *gorm.DB, 
 		}).Error
 }
 
-func (o *IApiShopOrderDaoImpl) GetByTid(c *gin.Context, tid string) (*models.Order, error) {
-	var row *models.Order
+func (o *IApiShopOrderDaoImpl) GetByTid(c *gin.Context, tid string) (*shopordermodels.Order, error) {
+	var row *shopordermodels.Order
 	if err := o.db.WithContext(c).Table(o.table).
 		Where("tid = ?", strings.TrimSpace(tid)).
 		Where("state = ?", commonStatus.NORMAL).
@@ -195,10 +204,7 @@ func (o *IApiShopOrderDaoImpl) GetByTid(c *gin.Context, tid string) (*models.Ord
 		}
 		return nil, err
 	}
-	if err := o.attachChildren(c, []*models.Order{&item}); err != nil {
-		return nil, err
-	}
-	return &item, nil
+	return row, nil
 }
 
 func (i *IApiShopOrderDaoImpl) attachShopOrderDetails(c *gin.Context, orders []*shopordermodels.Order) error {
@@ -238,80 +244,4 @@ func (i *IApiShopOrderDaoImpl) attachShopOrderDetails(c *gin.Context, orders []*
 		order.Details = detailMap[order.ID]
 	}
 	return nil
-}
-
-func toShopOrderVO(order *shopordermodels.Order) *models.OrderVO {
-	if order == nil {
-		return nil
-	}
-	items := make([]*models.OrderItem, 0, len(order.Details))
-	for _, detail := range order.Details {
-		if detail == nil {
-			continue
-		}
-		items = append(items, toShopOrderItem(detail))
-	}
-	return &models.OrderVO{
-		Order: *toShopOrder(order),
-		Items: items,
-	}
-}
-
-func toShopOrder(order *shopordermodels.Order) *models.Order {
-	if order == nil {
-		return nil
-	}
-	return &models.Order{
-		ID:                    int64(order.ID),
-		OrderNo:               order.Tid,
-		TotalAmount:           order.Total,
-		PayAmount:             order.Total - order.Privilege + order.PostFee,
-		FreightAmount:         order.PostFee,
-		DiscountAmount:        order.Privilege,
-		Status:                orderConstant.OrderStatusToShopStatus(order.Status),
-		PayTime:               order.PayTime,
-		ReceiverName:          order.ReceiverName,
-		ReceiverPhone:         stringUtils.FirstNonEmpty(order.ReceiverMobile, order.ReceiverPhone),
-		ReceiverProvince:      stringUtils.FirstNonEmpty(order.ReceiverProvinceName, order.ReceiverProvince),
-		ReceiverCity:          stringUtils.FirstNonEmpty(order.ReceiverCityName, order.ReceiverCity),
-		ReceiverDistrict:      stringUtils.FirstNonEmpty(order.ReceiverDistrictName, order.ReceiverDistrict),
-		ReceiverDetailAddress: order.ReceiverAddress,
-		Remark:                stringUtils.FirstNonEmpty(order.SellerMemo, order.BuyerMessage),
-		DeptID:                order.DeptID,
-		State:                 order.State,
-		BaseEntity:            order.BaseEntity,
-	}
-}
-
-func toShopOrderItem(detail *shopordermodels.OrderDetail) *models.OrderItem {
-	if detail == nil {
-		return nil
-	}
-	price := detail.Payment
-	if detail.Num > 0 {
-		price = detail.Payment / detail.Num
-	}
-	return &models.OrderItem{
-		ID:          int64(detail.ID),
-		OrderID:     int64(detail.OrderID),
-		OrderNo:     detail.Tid,
-		GoodsID:     stringUtils.FirstNonEmpty(detail.EShopGoodsID, fmt.Sprintf("%d", detail.NumIID)),
-		SkuID:       stringUtils.FirstNonEmpty(detail.EShopSkuID, fmt.Sprintf("%d", detail.SkuID)),
-		GoodsName:   detail.EShopGoodsName,
-		SkuName:     detail.EShopSkuName,
-		ImageURL:    detail.PicPath,
-		Price:       price,
-		Quantity:    int32(detail.Num),
-		TotalAmount: detail.Payment,
-		DeptID:      detail.DeptID,
-		State:       detail.State,
-		BaseEntity:  detail.BaseEntity,
-	}
-}
-
-func buildOrderBuyerNick(shopUser *models.User) string {
-	if shopUser == nil {
-		return ""
-	}
-	return fmt.Sprintf("shop-user-%s", shopUser.UserID)
 }
