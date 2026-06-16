@@ -188,7 +188,7 @@ func TestGetOrderStatus(t *testing.T) {
 	var cfg IntegrationConfig
 	ev.cfg = &cfg
 
-	codes := []string{"test001"}
+	codes := []string{"EO-20260615-00029"}
 	req := event.ZOrderStatusGetReqEvent{
 		Event:                      ev,
 		OrderStatusGetReqDataEvent: &testOrderStatusGetReqData{orderCodes: &codes},

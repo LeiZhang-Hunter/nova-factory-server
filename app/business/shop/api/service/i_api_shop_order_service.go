@@ -11,7 +11,7 @@ import (
 type IApiShopOrderService interface {
 	Confirm(c *gin.Context, userID int64, req *models.OrderConfirmReq) (*models.OrderConfirmResp, error)
 	Create(c *gin.Context, userID int64, req *models.OrderCreateReq) (*shopordermodels.Order, error)
-	GetByID(c *gin.Context, id int64) (*models.OrderVO, error)
+	GetByID(c *gin.Context, id int64) (*models.ApiOrderVO, error)
 	List(c *gin.Context, userID int64, query *models.OrderQuery) (*models.OrderListData, error)
 	UpdateStatus(c *gin.Context, userID int64, req *models.OrderStatusReq) error
 	Pay(c *gin.Context, userID int64, id int64) (*models.OrderPayResp, error)

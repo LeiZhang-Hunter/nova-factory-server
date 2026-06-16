@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 
 	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/client"
@@ -89,8 +90,12 @@ func (s *productSyncer) UpdateProductRemark(ctx context.Context, req event.ZProd
 	}
 	items := make([]map[string]any, 0, len(*req.GetItems()))
 	for _, item := range *req.GetItems() {
+		parseInt, err := strconv.ParseInt(item.GetGoodsID(), 10, 64)
+		if err != nil {
+			return nil, err
+		}
 		items = append(items, map[string]any{
-			"goodsid": item.GetGoodsID(),
+			"goodsid": parseInt,
 			"remark":  item.GetRemark(),
 		})
 	}

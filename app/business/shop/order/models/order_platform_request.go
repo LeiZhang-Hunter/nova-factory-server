@@ -1,10 +1,15 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
+	"nova-factory-server/app/utils/observer/integration/result"
+	"nova-factory-server/app/utils/store/integration"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type OrderSyncRequest struct {
@@ -14,6 +19,57 @@ type OrderSyncRequest struct {
 	c           cache.Cache       `json:"-"`
 	db          *gorm.DB          `json:"-"`
 	transaction bool              `json:"-"`
+	callback    event.Callback
+}
+type OrderOrderSyncRequestCallback struct {
+	ctx        *gin.Context
+	orderEvent *OrderSyncRequest
+	isErr      bool
+	order      *OrderSet
+}
+
+func NewOrderSyncRequestCallback(c *gin.Context, orderEvent *OrderSyncRequest, order *OrderSet) *OrderOrderSyncRequestCallback {
+	return &OrderOrderSyncRequestCallback{
+		ctx:        c,
+		orderEvent: orderEvent,
+		order:      order,
+	}
+}
+func (s *OrderOrderSyncRequestCallback) OnSuccess(T event.Event, response result.SyncProductResponse) {
+	//TODO implement me
+	return
+}
+
+func (s *OrderOrderSyncRequestCallback) OnError(T event.Event, response result.SyncProductResponse, err error) {
+	//TODO implement me
+	s.isErr = true
+	return
+}
+
+// OnFinish 同步完成触发
+func (s *OrderOrderSyncRequestCallback) OnFinish(ev event.Event) {
+	if s.isErr {
+		return
+	}
+	order := s.orderEvent.ToEvent()
+	getService, serviceConfig, err := integration.GetStore().GetService(s.ctx)
+	if err != nil {
+		zap.L().Error("获取集成商服务失败", zap.Error(err))
+		return
+	}
+	if getService == nil {
+		return
+	}
+	if serviceConfig == nil {
+		return
+	}
+	s.orderEvent.WithConfig(serviceConfig)
+	_, err = getService.OrderSyncer().SyncOrders(s.ctx, order)
+	if err != nil {
+		zap.L().Error("同步订单失败", zap.Error(err))
+		return
+	}
+
 }
 
 func (o *OrderSyncRequest) WithDB(db *gorm.DB) {
@@ -39,9 +95,11 @@ func (o *OrderSyncRequest) GetCache() cache.Cache {
 }
 
 func (o *OrderSyncRequest) GetCallback() event.Callback {
-	return nil
+	return o.callback
 }
-
+func (o *OrderSyncRequest) WithCallback(callback event.Callback) {
+	o.callback = callback
+}
 func (o *OrderSyncRequest) GetOrders() []event.OrderData {
 	if o.Orders == nil {
 		return make([]event.OrderData, 0)

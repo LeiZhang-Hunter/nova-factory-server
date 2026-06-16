@@ -44,5 +44,6 @@ type Cache interface {
 	Subscribe(ctx context.Context, channels ...string) *redis.PubSub
 	ZRangeByScore(ctx context.Context, key string, opt *redis.ZRangeBy) *redis.StringSliceCmd
 	ZAdd(ctx context.Context, key string, members ...redis.Z) *redis.IntCmd
+	ZRem(ctx context.Context, key string, members ...any) *redis.IntCmd
 	MGet(ctx context.Context, keys []string) *redis.SliceCmd
 }

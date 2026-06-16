@@ -4,6 +4,8 @@
 package shop
 
 import (
+	"context"
+
 	"github.com/google/wire"
 	activityController "nova-factory-server/app/business/shop/activity/controller"
 	apiActivityController "nova-factory-server/app/business/shop/api/controller/activity"
@@ -18,6 +20,7 @@ import (
 	homeController "nova-factory-server/app/business/shop/home/controller"
 	shopobserver "nova-factory-server/app/business/shop/observer"
 	shopOrderController "nova-factory-server/app/business/shop/order/controller"
+	shopOrderService "nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
 	userController "nova-factory-server/app/business/shop/user/controller"
 	"nova-factory-server/app/datasource/cache"
@@ -47,12 +50,16 @@ func NewGinEngine(
 	apiActivityController *apiActivityController.Controller,
 	apiCompanyController *apiCompanyController.Controller,
 	shopOrderController *shopOrderController.Controller,
+	orderTimeoutService shopOrderService.IOrderTimeoutService,
 	shopObserver *shopobserver.ShopObserver,
 ) *Shop {
 	group := app.Engine.Group("")
 
 	//观察者注册
 	observer.GetNotifier().Register(shopObserver)
+
+	// 启动订单超时自动取消 Consumer（主路径，每秒轮询 Redis 延迟队列）
+	go orderTimeoutService.StartConsumer(context.Background())
 
 	//不做鉴权的（可选认证：携带有效token时自动提取用户信息，用于折扣计算等场景）
 	publicGroup := group.Group("")
@@ -66,6 +73,7 @@ func NewGinEngine(
 		productController.Product.PublicRoutes(publicGroup)
 		apiCompanyController.CompanyInfo.PublicRoutes(publicGroup)
 		orderNotifyController.PublicRoutes(publicGroup)
+		shopOrderController.AutoCancel.PublicRoutes(publicGroup)
 
 	}
 

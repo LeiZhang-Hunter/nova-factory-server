@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"math"
 	models2 "nova-factory-server/app/business/shop/activity/models"
 	shopordermodels "nova-factory-server/app/business/shop/order/models"
@@ -18,6 +17,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 
 	apimodels "nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/utils/fileUtils"
@@ -262,7 +263,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 		}
 		return existingOrder, nil
 	}
-
+	// 读取预订单缓存
 	cacheData, err := s.getOrderCache(c, req.OrderKey)
 	if err != nil {
 		return nil, err
@@ -276,7 +277,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 	if len(cacheData.Items) == 0 {
 		return nil, errors.New("预订单商品不能为空")
 	}
-
+	// 读取收货地址
 	address, err := s.resolveConfirmAddress(c, userID, cacheData.AddressID)
 	if err != nil {
 		return nil, err
@@ -284,11 +285,11 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 	if address == nil {
 		return nil, errors.New("请先选择收货地址")
 	}
-
+	// 验证商品库存
 	if err := s.validateCreateItemsStock(c, cacheData.Items); err != nil {
 		return nil, err
 	}
-
+	// 重新计算订单金额
 	s.recalculateOrderAmounts(c, userID, cacheData)
 
 	orderNo := req.OrderKey
@@ -305,15 +306,17 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 			if item.Quantity <= 0 {
 				return errors.New("下单库存不能为负数")
 			}
+			// 扣除商品库存
 			if err := s.deductOrderItemStockWithLock(c, item); err != nil {
 				return err
 			}
+			// 扣除活动库存
 			if err := s.deductOrderItemActivityStockWithLock(c, item); err != nil {
 				return err
 			}
 		}
-
 		orderData := s.buildERPOrderSet(orderNo, shopUser, address, cacheData, req)
+		// 创建订单
 		if err := s.syncCreatedOrder(tx, c, orderData, cacheData); err != nil {
 			return fmt.Errorf("创建订单失败")
 		}
@@ -323,7 +326,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 				return fmt.Errorf("删除购物车记录失败: %v", err)
 			}
 		}
-
+		// 删除订单缓存
 		s.cache.Del(context.Background(), s.buildOrderCacheKey(req.OrderKey))
 		return nil
 	})
@@ -344,7 +347,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 }
 
 // GetByID 获取订单详情，包含商品明细。
-func (s *IApiShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*apimodels.OrderVO, error) {
+func (s *IApiShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*apimodels.ApiOrderVO, error) {
 	if id == 0 {
 		return nil, errors.New("订单ID不能为空")
 	}
@@ -362,14 +365,14 @@ func (s *IApiShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*apimodels
 	if err != nil {
 		return nil, err
 	}
-	accounts, err := s.accountDao.ListByOrderIDs(c, orderIDs)
-	if err != nil {
-		return nil, err
-	}
+	//accounts, err := s.accountDao.ListByOrderIDs(c, orderIDs)
+	//if err != nil {
+	//	return nil, err
+	//}
 	order.Details = details
-	order.Accounts = accounts
+	//order.Accounts = accounts
 
-	return apimodels.ToShopOrderVO(order), nil
+	return apimodels.ToApiShopOrderVO(order), nil
 }
 
 // List 获取当前用户的订单列表。
@@ -775,6 +778,8 @@ func (s *IApiShopOrderServiceImpl) syncCreatedOrder(tx *gorm.DB, c *gin.Context,
 	orderEvent := shopordermodels.BuildShopOrderSyncEvent(order)
 	orderEvent.WithCache(s.cache)
 	orderEvent.WithDB(tx)
+
+	orderEvent.WithCallback(shopordermodels.NewOrderSyncRequestCallback(c, orderEvent, order))
 	if err := observer.GetNotifier().OnOrderChanged(orderEvent); err != nil {
 		return fmt.Errorf("订单同步观察者失败: %v", err)
 	}
