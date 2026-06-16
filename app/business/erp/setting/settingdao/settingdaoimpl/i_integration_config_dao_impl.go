@@ -2,6 +2,9 @@ package settingdaoimpl
 
 import (
 	"errors"
+	"nova-factory-server/app/utils/observer/integration/api"
+	"nova-factory-server/app/utils/observer/integration/config"
+	"nova-factory-server/app/utils/store/integration"
 
 	"nova-factory-server/app/business/erp/setting/settingdao"
 	"nova-factory-server/app/business/erp/setting/settingmodels"
@@ -18,10 +21,12 @@ type IntegrationConfigDaoImpl struct {
 }
 
 func NewIntegrationConfigDao(db *gorm.DB) settingdao.IIntegrationConfigDao {
-	return &IntegrationConfigDaoImpl{
+	i := &IntegrationConfigDaoImpl{
 		db:    db,
 		table: "erp_integration_config",
 	}
+	integration.RegisterStore(i)
+	return i
 }
 
 func (i *IntegrationConfigDaoImpl) Set(c *gin.Context, req *settingmodels.IntegrationConfigSet) (*settingmodels.IntegrationConfig, error) {
@@ -134,4 +139,21 @@ func (i *IntegrationConfigDaoImpl) GetEnabled(c *gin.Context) (*settingmodels.In
 		return nil, err
 	}
 	return &item, nil
+}
+
+func (i *IntegrationConfigDaoImpl) GetService(c *gin.Context) (api.Service, config.Config, error) {
+	var item settingmodels.IntegrationConfig
+	err := i.db.WithContext(c).Table(i.table).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("status = ?", true).
+		Order("id DESC").
+		First(&item).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil, nil
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+	service, err := item.Service()
+	return service, &item, nil
 }
