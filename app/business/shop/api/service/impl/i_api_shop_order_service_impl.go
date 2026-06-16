@@ -1,15 +1,12 @@
-//go:build erp
-// +build erp
-
 package impl
 
 import (
 	"gorm.io/gorm"
-	erporderdao "nova-factory-server/app/business/erp/sale/saledao"
 	activityDao "nova-factory-server/app/business/shop/activity/dao"
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/service"
 	discountservice "nova-factory-server/app/business/shop/discount/service"
+	orderDao "nova-factory-server/app/business/shop/order/dao"
 	"nova-factory-server/app/datasource/cache"
 )
 
@@ -17,7 +14,8 @@ import (
 type IApiShopOrderServiceImpl struct {
 	cache           cache.Cache
 	db              *gorm.DB
-	orderDao        erporderdao.IOrderDao
+	apiOrderDao     dao.IApiShopOrderDao
+	orderDao        orderDao.IOrderDao
 	userDao         dao.IApiShopWechatUserDao
 	addressDao      dao.IApiShopAddressDao
 	cartDao         dao.IApiShopCartDao
@@ -34,7 +32,8 @@ type IApiShopOrderServiceImpl struct {
 func NewIApiShopOrderServiceImpl(
 	cache cache.Cache,
 	db *gorm.DB,
-	orderDao erporderdao.IOrderDao,
+	apiOrderDao dao.IApiShopOrderDao,
+	orderDao orderDao.IOrderDao,
 	userDao dao.IApiShopWechatUserDao,
 	addressDao dao.IApiShopAddressDao,
 	cartDao dao.IApiShopCartDao,
@@ -49,6 +48,7 @@ func NewIApiShopOrderServiceImpl(
 	return &IApiShopOrderServiceImpl{
 		cache:           cache,
 		db:              db,
+		apiOrderDao:     apiOrderDao,
 		orderDao:        orderDao,
 		userDao:         userDao,
 		addressDao:      addressDao,

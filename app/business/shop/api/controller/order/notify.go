@@ -11,6 +11,8 @@ import (
 	"os"
 	"time"
 
+	"go.uber.org/zap"
+
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/service"
 
@@ -50,19 +52,19 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	// 读取原始请求体
 	bodyBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "读取请求体失败"})
+		writeWechatNotifyFail(c, "读取请求体失败", zap.Error(err))
 		return
 	}
 	c.Request.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 
 	if err := writeWechatNotifyRequestFile(c, bodyBytes); err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "写入请求数据失败"})
+		writeWechatNotifyFail(c, "写入请求数据失败", zap.Error(err), zap.Int("body_bytes", len(bodyBytes)))
 		return
 	}
 	// 读微信配置
 	cfgMap, err := s.loadNotifyConfig(c)
 	if err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "配置读取失败"})
+		writeWechatNotifyFail(c, "配置读取失败", zap.Error(err))
 		return
 	}
 	appId := cfgMap["wechat_mini_program_app_id"]
@@ -80,29 +82,31 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	file := objectFile.NewConfig()
 	privateKeyData, err := file.ReadPrivateFile(c, privateKeyPath)
 	if err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "私钥读取失败"})
+		writeWechatNotifyFail(c, "私钥读取失败", zap.Error(err), zap.String("private_key_path", privateKeyPath))
 		return
 	}
 	client, err := gopayWechat.NewClientV3(mchId, serialNo, apiV3Key, string(privateKeyData))
 	if err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "初始化微信客户端失败"})
+		writeWechatNotifyFail(c, "初始化微信客户端失败", zap.Error(err), zap.String("mch_id", mchId), zap.String("serial_no", serialNo))
 		return
 	}
 	platformPublicKeyData, err := file.ReadPrivateFile(c, platformPublicKeyPath)
 	if err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "微信支付公钥读取失败"})
+		writeWechatNotifyFail(c, "微信支付公钥读取失败", zap.Error(err), zap.String("platform_public_key_path", platformPublicKeyPath))
 		return
 	}
 	if err := client.AutoVerifySignByPublicKey(platformPublicKeyData, platformPublicKeyID); err != nil {
-		_ = writeWechatNotifyErrorFile("auto_verify_sign_by_public_key", err)
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "验签初始化失败"})
+		if fileErr := writeWechatNotifyErrorFile("auto_verify_sign_by_public_key", err); fileErr != nil {
+			zap.L().Error("write wechat notify error file failed", zap.Error(fileErr))
+		}
+		writeWechatNotifyFail(c, "验签初始化失败", zap.Error(err), zap.String("platform_public_key_id", platformPublicKeyID))
 		return
 	}
 
 	// 解析回调
 	notifyReq, err := gopayWechat.V3ParseNotify(c.Request)
 	if err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "解析失败"})
+		writeWechatNotifyFail(c, "解析失败", zap.Error(err))
 		return
 	}
 	// 获取微信平台证书
@@ -110,8 +114,10 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	// 验证异步通知的签名
 	err = notifyReq.VerifySignByPKMap(certMap)
 	if err != nil {
-		_ = writeWechatNotifyErrorFile("verify_sign", err)
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "验签失败"})
+		if fileErr := writeWechatNotifyErrorFile("verify_sign", err); fileErr != nil {
+			zap.L().Error("write wechat notify error file failed", zap.Error(fileErr))
+		}
+		writeWechatNotifyFail(c, "验签失败", zap.Error(err))
 		return
 	}
 
@@ -131,21 +137,22 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	}
 	var nd notifyData
 	if err := notifyReq.DecryptCipherTextToStruct(apiV3Key, &nd); err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "解密失败"})
+		writeWechatNotifyFail(c, "解密失败", zap.Error(err))
 		return
 	}
 
 	// 校验
 	if nd.TradeState != "SUCCESS" {
+		zap.L().Warn("wechat pay notify ignored", zap.String("trade_state", nd.TradeState), zap.String("out_trade_no", nd.OutTradeNo), zap.String("transaction_id", nd.TransactionID))
 		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "SUCCESS", Message: "非支付成功通知"})
 		return
 	}
 	if nd.AppID != appId {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "appid不匹配"})
+		writeWechatNotifyFail(c, "appid不匹配", zap.String("expected_appid", appId), zap.String("actual_appid", nd.AppID), zap.String("out_trade_no", nd.OutTradeNo))
 		return
 	}
 	if nd.MchID != mchId {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: "mchid不匹配"})
+		writeWechatNotifyFail(c, "mchid不匹配", zap.String("expected_mch_id", mchId), zap.String("actual_mch_id", nd.MchID), zap.String("out_trade_no", nd.OutTradeNo))
 		return
 	}
 
@@ -155,11 +162,22 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 
 	// 更新订单状态
 	if err := s.service.HandleWechatNotify(c, nd.OutTradeNo, nd.TransactionID, notifyRaw, nd.MchID, nd.AppID, nd.Payer.Openid, nd.Amount.Total); err != nil {
-		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: err.Error()})
+		writeWechatNotifyFail(c, err.Error(), zap.Error(err), zap.String("out_trade_no", nd.OutTradeNo), zap.String("transaction_id", nd.TransactionID), zap.Int64("notify_total", nd.Amount.Total))
 		return
 	}
 
 	c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "SUCCESS", Message: "成功"})
+}
+
+func writeWechatNotifyFail(c *gin.Context, message string, fields ...zap.Field) {
+	baseFields := []zap.Field{
+		zap.String("message", message),
+		zap.String("method", c.Request.Method),
+		zap.String("path", c.Request.URL.Path),
+		zap.String("client_ip", c.ClientIP()),
+	}
+	zap.L().Error("wechat pay notify failed", append(baseFields, fields...)...)
+	c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "FAIL", Message: message})
 }
 
 func writeWechatNotifyRequestFile(c *gin.Context, bodyBytes []byte) error {

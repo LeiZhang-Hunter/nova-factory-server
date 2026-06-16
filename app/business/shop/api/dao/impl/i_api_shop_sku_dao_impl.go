@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // IApiShopSkuDaoImpl 提供 App 端下单所需的 SKU 数据访问能力。
@@ -29,6 +30,23 @@ func (s *IApiShopSkuDaoImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Good
 	var item shopmodels.GoodsSku
 	if err := getCurrentDB(c, s.db).WithContext(c).
 		Table(s.tableName).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
+// GetByIDForUpdate 在当前事务中按主键锁定 SKU 行。
+func (s *IApiShopSkuDaoImpl) GetByIDForUpdate(c *gin.Context, id int64) (*shopmodels.GoodsSku, error) {
+	var item shopmodels.GoodsSku
+	if err := getCurrentDB(c, s.db).WithContext(c).
+		Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("id = ?", id).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {

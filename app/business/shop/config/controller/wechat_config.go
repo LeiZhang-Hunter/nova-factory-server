@@ -20,12 +20,14 @@ const (
 	wechatKeyPaySerialNo          = "wechat_pay_serial_no"
 	wechatKeyPayPrivateKey        = "wechat_pay_private_key_path"
 	wechatKeyPayPlatformPublicKey = "wechat_pay_platform_public_key_path"
+	wechatPayPlatformPublicKeyId  = "wechat_pay_platform_public_key_id"
 )
 
 var wechatAllKeys = []string{
 	wechatKeyAppID, wechatKeyAppSecret, wechatKeyToken, wechatKeyEncodingAESKey,
 	wechatKeyPayMchID, wechatKeyPayNotifyURL,
 	wechatKeyPayAPIv3Key, wechatKeyPaySerialNo, wechatKeyPayPrivateKey, wechatKeyPayPlatformPublicKey,
+	wechatPayPlatformPublicKeyId,
 }
 
 // WechatConfig 微信小程序配置控制器

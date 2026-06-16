@@ -173,23 +173,27 @@ func (o *OrderServiceImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 
 // SynchronizeSalesOrders 调用集成客户端接口同步销售订单。
 func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *models.OrderSyncRequest) (result.OrderSyncResponse, error) {
-	//cfg, err := o.integrationConfigDao.GetEnabled(c)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if cfg == nil {
-	//	return nil, errors.New("未找到管家婆启用配置")
-	//}
-	//service, err := cfg.Service()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if service == nil {
-	//	return nil, errors.New("没有配置集成商")
-	//}
-	//
-	//return service.OrderSyncer().SyncOrders(c, req)
-	return nil, nil
+	cfg, err := o.integrationConfigDao.GetEnabled(c)
+	if err != nil {
+		return nil, err
+	}
+	if cfg == nil {
+		return nil, errors.New("未找到管家婆启用配置")
+	}
+	cfgService, err := cfg.Service()
+	if err != nil {
+		return nil, err
+	}
+	if cfgService == nil {
+		return nil, errors.New("没有配置集成商")
+	}
+
+	for _, info := range req.Orders {
+		info.Tid = strings.TrimSpace(info.Tid)
+	}
+	req.WithConfig(cfg)
+	req.WithCache(o.cache)
+	return cfgService.OrderSyncer().SyncOrders(c, req)
 }
 
 // Sync 同步销售订单事件数据。
