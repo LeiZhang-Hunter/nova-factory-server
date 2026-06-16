@@ -60,3 +60,8 @@ func (o *SyncObserver) OnOrderChanged(event event.OrderEvent) error {
 func (o *SyncObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
 	return nil
 }
+
+// OnOrderStatusChange 订单发货变化
+func (o *SyncObserver) OnOrderStatusChange(sendEvent event.OrderStratusEvent) error {
+	return nil
+}

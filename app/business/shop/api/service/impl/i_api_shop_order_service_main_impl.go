@@ -634,6 +634,7 @@ func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64
 		return errors.New("只能取消待支付的订单")
 	}
 
+	//observer.GetNotifier().OnOrderChanged()
 	rowsAffected, err := s.apiOrderDao.CancelERPOrder(c, id, shopUser, reason)
 	if err != nil {
 		return fmt.Errorf("取消订单失败: %v", err)
