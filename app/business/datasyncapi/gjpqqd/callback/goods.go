@@ -8,6 +8,10 @@ import (
 type GoodsCallback struct {
 }
 
+func NewGoodsCallback() *GoodsCallback {
+	return &GoodsCallback{}
+}
+
 func (callback *GoodsCallback) OnSuccess(T event.Event, response result.SyncProductResponse) {
 	//TODO implement me
 	panic("implement me")
