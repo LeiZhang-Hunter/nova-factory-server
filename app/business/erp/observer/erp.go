@@ -125,3 +125,8 @@ func (o *ERPObserver) OnOrderChanged(event event.OrderEvent) error {
 func (o *ERPObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
 	return nil
 }
+
+// OnOrderStatusChange 订单发货变化
+func (o *ERPObserver) OnOrderStatusChange(sendEvent event.OrderStratusEvent) error {
+	return nil
+}
