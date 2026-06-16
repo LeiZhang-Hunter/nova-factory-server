@@ -16,6 +16,7 @@ import (
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/fileUtils"
 	orderUtils "nova-factory-server/app/utils/order"
+	"nova-factory-server/app/utils/stringUtils"
 	"strconv"
 	"strings"
 	"time"
@@ -140,15 +141,15 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			return nil, err
 		}
 		availableStock := minCartStock(seckill.Stock, sku.Quantity)
-		if err := validateCartStock(firstNonEmpty(seckill.Title, goods.GoodsName), sku.SkuName, req.Quantity, availableStock); err != nil {
+		if err := validateCartStock(stringUtils.FirstNonEmpty(seckill.Title, goods.GoodsName), sku.SkuName, req.Quantity, availableStock); err != nil {
 			return nil, err
 		}
 		item = &cartResolvedItem{
 			GoodsID:        goods.ID,
 			SkuID:          int64(sku.ID),
-			GoodsName:      firstNonEmpty(seckill.Title, goods.GoodsName),
+			GoodsName:      stringUtils.FirstNonEmpty(seckill.Title, goods.GoodsName),
 			SkuName:        sku.SkuName,
-			ImageURL:       firstNonEmpty(seckill.Image, sku.ImageURL, goods.ImageURL),
+			ImageURL:       stringUtils.FirstNonEmpty(seckill.Image, sku.ImageURL, goods.ImageURL),
 			Price:          seckill.Price,
 			Quantity:       req.Quantity,
 			AvailableStock: availableStock,
@@ -244,15 +245,15 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			return nil, errors.New("商品与拼团活动不匹配")
 		}
 		availableStock := minCartStock(combination.Stock, sku.Quantity)
-		if err := validateCartStock(firstNonEmpty(combination.Title, goods.GoodsName), sku.SkuName, req.Quantity, availableStock); err != nil {
+		if err := validateCartStock(stringUtils.FirstNonEmpty(combination.Title, goods.GoodsName), sku.SkuName, req.Quantity, availableStock); err != nil {
 			return nil, err
 		}
 		item = &cartResolvedItem{
 			GoodsID:        goods.ID,
 			SkuID:          int64(sku.ID),
-			GoodsName:      firstNonEmpty(combination.Title, goods.GoodsName),
+			GoodsName:      stringUtils.FirstNonEmpty(combination.Title, goods.GoodsName),
 			SkuName:        sku.SkuName,
-			ImageURL:       firstNonEmpty(combination.Image, sku.ImageURL, goods.ImageURL),
+			ImageURL:       stringUtils.FirstNonEmpty(combination.Image, sku.ImageURL, goods.ImageURL),
 			Price:          combination.Price,
 			Quantity:       req.Quantity,
 			AvailableStock: availableStock,
@@ -313,7 +314,7 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			SkuID:          int64(sku.ID),
 			GoodsName:      goods.GoodsName,
 			SkuName:        sku.SkuName,
-			ImageURL:       firstNonEmpty(sku.ImageURL, goods.ImageURL),
+			ImageURL:       stringUtils.FirstNonEmpty(sku.ImageURL, goods.ImageURL),
 			Price:          price,
 			Quantity:       req.Quantity,
 			AvailableStock: availableStock,
@@ -469,16 +470,6 @@ func minCartStock(values ...int64) int64 {
 		}
 	}
 	return min
-}
-
-// firstNonEmpty 返回第一个非空字符串，用于活动图、SKU 图、商品图等展示字段兜底。
-func firstNonEmpty(values ...string) string {
-	for _, value := range values {
-		if trimmed := strings.TrimSpace(value); trimmed != "" {
-			return trimmed
-		}
-	}
-	return ""
 }
 
 func boolToInt64(ok bool, value int64) int64 {
