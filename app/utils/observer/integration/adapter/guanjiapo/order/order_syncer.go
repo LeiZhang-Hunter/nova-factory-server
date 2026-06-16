@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"strings"
 
-	"gopkg.in/errgo.v2/errors"
 	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/client"
 	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/model"
 	"nova-factory-server/app/utils/observer/integration/api"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
+
+	"gopkg.in/errgo.v2/errors"
 )
 
 type orderSyncer struct {
@@ -49,6 +50,11 @@ func (s *orderSyncer) SyncOrders(ctx context.Context, req event.OrderEvent) (res
 	}
 	if ret.Code != 0 {
 		return nil, errors.New(ret.Message)
+	}
+	for _, o := range ret.Orders {
+		if o.BillCode == "" {
+			return nil, errors.New(o.Message)
+		}
 	}
 	return ret, nil
 }

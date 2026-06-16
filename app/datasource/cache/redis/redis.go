@@ -126,6 +126,10 @@ func (r *RedisCache) ZAdd(ctx context.Context, key string, members ...redis.Z) *
 	return r.client.ZAdd(ctx, key, members...)
 }
 
+func (r *RedisCache) ZRem(ctx context.Context, key string, members ...any) *redis.IntCmd {
+	return r.client.ZRem(ctx, key, members...)
+}
+
 func (r *RedisCache) MGet(ctx context.Context, keys []string) *redis.SliceCmd {
 	result := r.client.MGet(ctx, keys...)
 	return result

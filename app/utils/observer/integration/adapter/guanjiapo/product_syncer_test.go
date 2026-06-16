@@ -101,7 +101,7 @@ func TestSearchProducts(t *testing.T) {
 
 	req := event.ZProductGetReqEvent{
 		Event:                  ev,
-		ProductGetReqDataEvent: &testProductGetReqData{page: 1, pageSize: 10},
+		ProductGetReqDataEvent: &testProductGetReqData{page: 1, pageSize: 10, goodsCode: &[]string{"123123"}},
 	}
 	service := New()
 	data, err := service.ProductSearcher().SearchProducts(context.Background(), req)
@@ -121,7 +121,7 @@ func TestUpdateProductRemark(t *testing.T) {
 
 	bs := new(testBase)
 	items := []event.ZProductUpdateReqData{
-		&testProdUpdateReqData{goodsID: "1001", remark: "测试备注"},
+		&testProdUpdateReqData{goodsID: "13707931", remark: "测试更新备注"},
 	}
 	req := &testZProductUpdateReq{
 		testEvent: ev,

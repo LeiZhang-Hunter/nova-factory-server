@@ -237,6 +237,9 @@ func (b *BuildInMapCache) ZRangeByScore(ctx context.Context, key string, opt *re
 func (b *BuildInMapCache) ZAdd(ctx context.Context, key string, members ...redis.Z) *redis.IntCmd {
 	panic("local 不支持请切换redis")
 }
+func (b *BuildInMapCache) ZRem(ctx context.Context, key string, members ...any) *redis.IntCmd {
+	panic("local 不支持请切换redis")
+}
 func (b *BuildInMapCache) MGet(ctx context.Context, keys []string) *redis.SliceCmd {
 	panic("local 不支持请切换redis")
 }

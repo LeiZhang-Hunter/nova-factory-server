@@ -7,6 +7,7 @@ import (
 	orderConstant "nova-factory-server/app/constant/order"
 	shopConstant "nova-factory-server/app/constant/shop"
 	"strings"
+	"time"
 
 	shopordermodels "nova-factory-server/app/business/shop/order/models"
 )
@@ -39,6 +40,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 	}
 
 	return &shopordermodels.OrderSet{
+		PayTime:              time.Now().Format("2006-01-02 15:04:05"),
 		Tid:                  orderNo,
 		BuyerNick:            s.buildOrderBuyerNick(shopUser),
 		BuyerMessage:         strings.TrimSpace(req.Remark),
@@ -61,7 +63,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 		Details:              details,
 		Accounts: []*shopordermodels.OrderAccountSet{
 			{
-				FinanceCode: "PAY_AMOUNT",
+				FinanceCode: "0168",
 				Total:       cacheData.PayAmount,
 			},
 		},
