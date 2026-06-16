@@ -232,7 +232,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
-	if existingOrder, err := s.orderDao.GetByTid(c, req.OrderKey); err != nil {
+	if existingOrder, err := s.apiOrderDao.GetByTid(c, req.OrderKey); err != nil {
 		return nil, errors.New("读取订单信息失败")
 	} else if existingOrder != nil {
 		if !s.isOrderOwnedByUser(existingOrder, shopUser) {
@@ -241,7 +241,7 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 		if err := s.ensureExistingOrderCreated(existingOrder); err != nil {
 			return nil, err
 		}
-		return s.toShopOrder(existingOrder), nil
+		return existingOrder, nil
 	}
 
 	lockKey := orderCreateLockPrefix + req.OrderKey
@@ -758,7 +758,7 @@ func (s *IApiShopOrderServiceImpl) syncCreatedOrder(tx *gorm.DB, c *gin.Context,
 	if order == nil {
 		return errors.New("订单不存在")
 	}
-	orderEvent := s.buildShopOrderSyncEvent(order)
+	orderEvent := shopordermodels.BuildShopOrderSyncEvent(order)
 	orderEvent.WithCache(s.cache)
 	orderEvent.WithDB(tx)
 	if err := observer.GetNotifier().OnOrderChanged(orderEvent); err != nil {
@@ -1318,78 +1318,6 @@ func collectOrderItemSkuIDs(items []*models.OrderCacheItem) []int64 {
 	return result
 }
 
-// toShopOrder 将 ERP 订单模型转换为商城订单模型。
-func (s *IApiShopOrderServiceImpl) toShopOrder(order *shopordermodels.Order) *models.Order {
-	if order == nil {
-		return nil
-	}
-	return &models.Order{
-		ID:                    int64(order.ID),
-		OrderNo:               order.Tid,
-		TotalAmount:           order.Total,
-		PayAmount:             order.Total - order.Privilege + order.PostFee,
-		FreightAmount:         order.PostFee,
-		DiscountAmount:        order.Privilege,
-		Status:                s.erpStatusToShopStatus(order.Status),
-		PayTime:               order.PayTime,
-		ReceiverName:          order.ReceiverName,
-		ReceiverPhone:         s.firstNonEmpty(order.ReceiverMobile, order.ReceiverPhone),
-		ReceiverProvince:      s.firstNonEmpty(order.ReceiverProvinceName, order.ReceiverProvince),
-		ReceiverCity:          s.firstNonEmpty(order.ReceiverCityName, order.ReceiverCity),
-		ReceiverDistrict:      s.firstNonEmpty(order.ReceiverDistrictName, order.ReceiverDistrict),
-		ReceiverDetailAddress: order.ReceiverAddress,
-		Remark:                s.firstNonEmpty(order.SellerMemo, order.BuyerMessage),
-		DeptID:                order.DeptID,
-		State:                 order.State,
-		BaseEntity:            order.BaseEntity,
-	}
-}
-
-// toShopOrderVO 将 ERP 订单详情转换为商城订单视图。
-func (s *IApiShopOrderServiceImpl) toShopOrderVO(order *shopordermodels.Order) *models.OrderVO {
-	if order == nil {
-		return nil
-	}
-	items := make([]*models.OrderItem, 0, len(order.Details))
-	for _, detail := range order.Details {
-		if detail == nil {
-			continue
-		}
-		items = append(items, s.toShopOrderItem(detail))
-	}
-	return &models.OrderVO{
-		Order: *s.toShopOrder(order),
-		Items: items,
-	}
-}
-
-// toShopOrderItem 将 ERP 订单明细转换为商城订单商品明细。
-func (s *IApiShopOrderServiceImpl) toShopOrderItem(detail *shopordermodels.OrderDetail) *models.OrderItem {
-	if detail == nil {
-		return nil
-	}
-	price := detail.Payment
-	if detail.Num > 0 {
-		price = detail.Payment / detail.Num
-	}
-	return &models.OrderItem{
-		ID:          int64(detail.ID),
-		OrderID:     int64(detail.OrderID),
-		OrderNo:     detail.Tid,
-		GoodsID:     s.firstNonEmpty(detail.EShopGoodsID, fmt.Sprintf("%d", detail.NumIID)),
-		SkuID:       s.firstNonEmpty(detail.EShopSkuID, fmt.Sprintf("%d", detail.SkuID)),
-		GoodsName:   detail.EShopGoodsName,
-		SkuName:     detail.EShopSkuName,
-		ImageURL:    detail.PicPath,
-		Price:       price,
-		Quantity:    int32(detail.Num),
-		TotalAmount: detail.Payment,
-		DeptID:      detail.DeptID,
-		State:       detail.State,
-		BaseEntity:  detail.BaseEntity,
-	}
-}
-
 // buildOrderBuyerNick 生成商城订单在 ERP 表中的买家标识。
 func (s *IApiShopOrderServiceImpl) buildOrderBuyerNick(shopUser *models.User) string {
 	if shopUser == nil {
@@ -1483,14 +1411,4 @@ func (s *IApiShopOrderServiceImpl) erpStatusToShopStatus(status string) int32 {
 	default:
 		return orderConstant.OrderStatusPending
 	}
-}
-
-// firstNonEmpty 返回第一个非空字符串。
-func (s *IApiShopOrderServiceImpl) firstNonEmpty(values ...string) string {
-	for _, value := range values {
-		if strings.TrimSpace(value) != "" {
-			return strings.TrimSpace(value)
-		}
-	}
-	return ""
 }

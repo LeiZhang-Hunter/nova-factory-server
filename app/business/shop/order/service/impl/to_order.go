@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/shop/order/models"
+	"nova-factory-server/app/utils/stringUtils"
 	"strings"
 	"time"
 )
@@ -61,9 +62,9 @@ func toOrderSyncOrder(orderInfo *models.Order) *models.OrderSyncOrder {
 		Privilege:        orderInfo.Privilege,
 		PostFee:          orderInfo.PostFee,
 		ReceiverName:     orderInfo.ReceiverName,
-		ReceiverState:    firstNonEmpty(orderInfo.ReceiverProvinceName, orderInfo.ReceiverProvince),
-		ReceiverCity:     firstNonEmpty(orderInfo.ReceiverCityName, orderInfo.ReceiverCity),
-		ReceiverDistrict: firstNonEmpty(orderInfo.ReceiverDistrictName, orderInfo.ReceiverDistrict),
+		ReceiverState:    stringUtils.FirstNonEmpty(orderInfo.ReceiverProvinceName, orderInfo.ReceiverProvince),
+		ReceiverCity:     stringUtils.FirstNonEmpty(orderInfo.ReceiverCityName, orderInfo.ReceiverCity),
+		ReceiverDistrict: stringUtils.FirstNonEmpty(orderInfo.ReceiverDistrictName, orderInfo.ReceiverDistrict),
 		ReceiverAddress:  orderInfo.ReceiverAddress,
 		ReceiverPhone:    orderInfo.ReceiverPhone,
 		ReceiverMobile:   orderInfo.ReceiverMobile,
@@ -134,14 +135,4 @@ func formatOrderSyncTime(value *time.Time) string {
 		return ""
 	}
 	return value.Format("2006-01-02 15:04:05")
-}
-
-func firstNonEmpty(values ...string) string {
-	for _, value := range values {
-		value = strings.TrimSpace(value)
-		if value != "" {
-			return value
-		}
-	}
-	return ""
 }

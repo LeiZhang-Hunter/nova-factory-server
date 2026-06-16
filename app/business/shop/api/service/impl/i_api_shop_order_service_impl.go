@@ -6,7 +6,6 @@ import (
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/service"
 	discountservice "nova-factory-server/app/business/shop/discount/service"
-	orderDao "nova-factory-server/app/business/shop/order/dao"
 	"nova-factory-server/app/datasource/cache"
 )
 
@@ -15,7 +14,6 @@ type IApiShopOrderServiceImpl struct {
 	cache           cache.Cache
 	db              *gorm.DB
 	apiOrderDao     dao.IApiShopOrderDao
-	orderDao        orderDao.IOrderDao
 	userDao         dao.IApiShopWechatUserDao
 	addressDao      dao.IApiShopAddressDao
 	cartDao         dao.IApiShopCartDao
@@ -33,7 +31,6 @@ func NewIApiShopOrderServiceImpl(
 	cache cache.Cache,
 	db *gorm.DB,
 	apiOrderDao dao.IApiShopOrderDao,
-	orderDao orderDao.IOrderDao,
 	userDao dao.IApiShopWechatUserDao,
 	addressDao dao.IApiShopAddressDao,
 	cartDao dao.IApiShopCartDao,
@@ -49,7 +46,6 @@ func NewIApiShopOrderServiceImpl(
 		cache:           cache,
 		db:              db,
 		apiOrderDao:     apiOrderDao,
-		orderDao:        orderDao,
 		userDao:         userDao,
 		addressDao:      addressDao,
 		cartDao:         cartDao,

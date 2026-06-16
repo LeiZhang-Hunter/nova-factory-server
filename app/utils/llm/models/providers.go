@@ -9,6 +9,7 @@ import (
 	"io"
 	"maps"
 	"net/http"
+	"nova-factory-server/app/utils/stringUtils"
 	"os"
 	"strings"
 	"time"
@@ -386,7 +387,7 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 }
 
 func createVertexAnthropicProvider(ctx context.Context, config *ProviderConfig, modelName string) (*ProviderResult, error) {
-	projectID := firstNonEmpty(
+	projectID := stringUtils.FirstNonEmpty(
 		os.Getenv("GOOGLE_VERTEX_PROJECT"),
 		os.Getenv("ANTHROPIC_VERTEX_PROJECT_ID"),
 		os.Getenv("GOOGLE_CLOUD_PROJECT"),
@@ -397,7 +398,7 @@ func createVertexAnthropicProvider(ctx context.Context, config *ProviderConfig, 
 		return nil, fmt.Errorf("google Vertex project ID not provided, set ANTHROPIC_VERTEX_PROJECT_ID, GOOGLE_CLOUD_PROJECT, or GCLOUD_PROJECT environment variable")
 	}
 
-	region := firstNonEmpty(
+	region := stringUtils.FirstNonEmpty(
 		os.Getenv("GOOGLE_VERTEX_LOCATION"),
 		os.Getenv("ANTHROPIC_VERTEX_REGION"),
 		os.Getenv("CLOUD_ML_REGION"),
@@ -456,7 +457,7 @@ func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName
 }
 
 func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName string) (*ProviderResult, error) {
-	apiKey := firstNonEmpty(
+	apiKey := stringUtils.FirstNonEmpty(
 		config.ProviderAPIKey,
 		os.Getenv("GOOGLE_API_KEY"),
 		os.Getenv("GEMINI_API_KEY"),
@@ -918,14 +919,4 @@ func (t *oauthTransport) injectClaudeCodePrompt(body []byte) ([]byte, error) {
 	}
 
 	return json.Marshal(data)
-}
-
-// firstNonEmpty returns the first non-empty string from the arguments.
-func firstNonEmpty(values ...string) string {
-	for _, v := range values {
-		if v != "" {
-			return v
-		}
-	}
-	return ""
 }

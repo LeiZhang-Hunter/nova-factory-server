@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// ToOrder 转化订单
+// ToOrder 转化订单 为数据库Order
 func ToOrder(event event.OrderEvent) []*Order {
 	if event == nil {
 		return nil

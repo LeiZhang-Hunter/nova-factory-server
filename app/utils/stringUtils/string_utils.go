@@ -100,3 +100,13 @@ func ReMatchingStr(text string, pattern string) bool {
 	}
 	return re.MatchString(text)
 }
+
+// FirstNonEmpty 返回第一个非空字符串。
+func FirstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
+}
