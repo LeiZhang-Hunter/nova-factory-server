@@ -173,6 +173,9 @@ func (o *OrderServiceImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 
 // SynchronizeSalesOrders 调用集成客户端接口同步销售订单。
 func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *models.OrderSyncRequest) (result.OrderSyncResponse, error) {
+	if req == nil {
+		return nil, errors.New("参数不能为空")
+	}
 	cfg, err := o.integrationConfigDao.GetEnabled(c)
 	if err != nil {
 		return nil, err
@@ -187,13 +190,154 @@ func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *models.Or
 	if cfgService == nil {
 		return nil, errors.New("没有配置集成商")
 	}
+	syncer := cfgService.OrderSyncer()
+	if syncer == nil {
+		return nil, errors.New("集成商未实现订单同步能力")
+	}
 
-	for _, info := range req.Orders {
-		info.Tid = strings.TrimSpace(info.Tid)
+	if err := o.fillOrderSyncRequestFromDB(c, req); err != nil {
+		return nil, err
 	}
 	req.WithConfig(cfg)
 	req.WithCache(o.cache)
-	return cfgService.OrderSyncer().SyncOrders(c, req)
+	return syncer.SyncOrders(c, req)
+}
+
+func (o *OrderServiceImpl) fillOrderSyncRequestFromDB(c *gin.Context, req *models.OrderSyncRequest) error {
+	if req == nil || len(req.Orders) == 0 {
+		return errors.New("orders不能为空")
+	}
+
+	orders := make([]*models.OrderSyncOrder, 0, len(req.Orders))
+	seen := make(map[string]struct{}, len(req.Orders))
+	for _, info := range req.Orders {
+		if info == nil {
+			continue
+		}
+		tid := strings.TrimSpace(info.Tid)
+		info.Tid = tid
+		if tid == "" {
+			return errors.New("tid不能为空")
+		}
+		if _, ok := seen[tid]; ok {
+			continue
+		}
+		seen[tid] = struct{}{}
+
+		orderInfo, err := o.orderDao.GetByTid(c, tid)
+		if err != nil {
+			return err
+		}
+		if orderInfo == nil {
+			return fmt.Errorf("订单不存在: %s", tid)
+		}
+		orders = append(orders, toOrderSyncOrder(orderInfo))
+	}
+	if len(orders) == 0 {
+		return errors.New("orders不能为空")
+	}
+	req.Orders = orders
+	return nil
+}
+
+func toOrderSyncOrder(orderInfo *models.Order) *models.OrderSyncOrder {
+	if orderInfo == nil {
+		return nil
+	}
+	return &models.OrderSyncOrder{
+		Tid:              orderInfo.Tid,
+		Weight:           orderInfo.Weight,
+		Size:             orderInfo.Size,
+		BuyerNick:        orderInfo.BuyerNick,
+		BuyerMessage:     orderInfo.BuyerMessage,
+		SellerMemo:       orderInfo.SellerMemo,
+		Total:            orderInfo.Total,
+		Privilege:        orderInfo.Privilege,
+		PostFee:          orderInfo.PostFee,
+		ReceiverName:     orderInfo.ReceiverName,
+		ReceiverState:    firstNonEmpty(orderInfo.ReceiverProvinceName, orderInfo.ReceiverProvince),
+		ReceiverCity:     firstNonEmpty(orderInfo.ReceiverCityName, orderInfo.ReceiverCity),
+		ReceiverDistrict: firstNonEmpty(orderInfo.ReceiverDistrictName, orderInfo.ReceiverDistrict),
+		ReceiverAddress:  orderInfo.ReceiverAddress,
+		ReceiverPhone:    orderInfo.ReceiverPhone,
+		ReceiverMobile:   orderInfo.ReceiverMobile,
+		Created:          formatOrderSyncTime(orderInfo.CreateTime),
+		Status:           orderInfo.Status,
+		Type:             orderInfo.Type,
+		InvoiceName:      orderInfo.InvoiceName,
+		SellerFlag:       orderInfo.SellerFlag,
+		PayTime:          formatOrderSyncTime(orderInfo.PayTime),
+		LogistBTypeCode:  orderInfo.LogistBTypeCode,
+		LogistBillCode:   orderInfo.LogistBillCode,
+		BTypeCode:        orderInfo.BTypeCode,
+		Details:          toOrderSyncDetails(orderInfo.Details),
+		Accounts:         toOrderSyncAccounts(orderInfo.Accounts),
+	}
+}
+
+func toOrderSyncDetails(details []*models.OrderDetail) []*models.OrderSyncDetail {
+	if len(details) == 0 {
+		return []*models.OrderSyncDetail{}
+	}
+	result := make([]*models.OrderSyncDetail, 0, len(details))
+	for _, detail := range details {
+		if detail == nil {
+			continue
+		}
+		result = append(result, &models.OrderSyncDetail{
+			OID:            detail.OID,
+			Barcode:        detail.Barcode,
+			EShopGoodsID:   detail.EShopGoodsID,
+			OuterIID:       detail.OuterIID,
+			EShopGoodsName: detail.EShopGoodsName,
+			EShopSKUId:     detail.EShopSkuID,
+			EShopSKUName:   detail.EShopSkuName,
+			NumIID:         detail.NumIID,
+			SKUId:          detail.SkuID,
+			Num:            detail.Num,
+			Payment:        detail.Payment,
+			PicPath:        detail.PicPath,
+			Weight:         detail.Weight,
+			Size:           detail.Size,
+			UnitID:         detail.UnitID,
+			UnitQty:        detail.UnitQty,
+		})
+	}
+	return result
+}
+
+func toOrderSyncAccounts(accounts []*models.OrderAccount) []*models.OrderSyncAccount {
+	if len(accounts) == 0 {
+		return []*models.OrderSyncAccount{}
+	}
+	result := make([]*models.OrderSyncAccount, 0, len(accounts))
+	for _, account := range accounts {
+		if account == nil {
+			continue
+		}
+		result = append(result, &models.OrderSyncAccount{
+			FinanceCode: account.FinanceCode,
+			Total:       account.Total,
+		})
+	}
+	return result
+}
+
+func formatOrderSyncTime(value *time.Time) string {
+	if value == nil {
+		return ""
+	}
+	return value.Format("2006-01-02 15:04:05")
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 // Sync 同步销售订单事件数据。
