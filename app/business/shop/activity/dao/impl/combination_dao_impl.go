@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ShopCombinationDaoImpl struct {
@@ -62,6 +63,23 @@ func (s *ShopCombinationDaoImpl) GetByID(c *gin.Context, id int64) (*models.Comb
 		return nil, err
 	}
 	if err := s.attachHomeModuleIDs(c, []*models.Combination{&item}); err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+// GetByIDForUpdate 在当前事务中按主键锁定拼团商品行。
+func (s *ShopCombinationDaoImpl) GetByIDForUpdate(c *gin.Context, id int64) (*models.Combination, error) {
+	var item models.Combination
+	if err := activityCurrentDB(c, s.db).WithContext(c).
+		Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &item, nil

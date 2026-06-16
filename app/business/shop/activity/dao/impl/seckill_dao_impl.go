@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ShopSeckillDaoImpl struct {
@@ -111,6 +112,24 @@ func (s *ShopSeckillDaoImpl) GetByID(c *gin.Context, id int64) (*models.Seckill,
 	var item models.Seckill
 	if err := s.baseQuery(c).
 		Where("id = ?", id).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
+// GetByIDForUpdate 在当前事务中按主键锁定秒杀商品行。
+func (s *ShopSeckillDaoImpl) GetByIDForUpdate(c *gin.Context, id int64) (*models.Seckill, error) {
+	var item models.Seckill
+	if err := activityCurrentDB(c, s.db).WithContext(c).
+		Table(s.tableName).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("id = ?", id).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("is_del = ?", 0).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

@@ -8,11 +8,12 @@ import (
 )
 
 type OrderSyncRequest struct {
-	Orders []*OrderSyncOrder `json:"orders"`
-	cfg    config.Config     `json:"-"`
-	action event.EventType   `json:"-"`
-	c      cache.Cache       `json:"-"`
-	db     *gorm.DB          `json:"-"`
+	Orders      []*OrderSyncOrder `json:"orders"`
+	cfg         config.Config     `json:"-"`
+	action      event.EventType   `json:"-"`
+	c           cache.Cache       `json:"-"`
+	db          *gorm.DB          `json:"-"`
+	transaction bool              `json:"-"`
 }
 
 func (o *OrderSyncRequest) WithDB(db *gorm.DB) {
@@ -22,12 +23,19 @@ func (o *OrderSyncRequest) WithDB(db *gorm.DB) {
 func (o *OrderSyncRequest) GetDB() *gorm.DB {
 	return o.db
 }
+func (o *OrderSyncRequest) ToEvent() event.OrderEvent {
+	return o
+}
 func (o *OrderSyncRequest) GetTransaction() bool {
-	return false
+	return o.transaction
+}
+
+func (o *OrderSyncRequest) WithTransaction(transaction bool) {
+	o.transaction = transaction
 }
 
 func (o *OrderSyncRequest) GetCache() cache.Cache {
-	return nil
+	return o.c
 }
 
 func (o *OrderSyncRequest) GetCallback() event.Callback {
