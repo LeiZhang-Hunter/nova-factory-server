@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/service"
 	discountservice "nova-factory-server/app/business/shop/discount/service"
+	orderdao "nova-factory-server/app/business/shop/order/dao"
 	"nova-factory-server/app/datasource/cache"
 )
 
@@ -22,6 +23,8 @@ type IApiShopOrderServiceImpl struct {
 	goodsDao        dao.IApiShopGoodsDao
 	skuDao          dao.IApiShopSkuDao
 	configDao       dao.IApiShopSysConfigDao
+	detailDao       orderdao.IOrderDetailDao
+	accountDao      orderdao.IOrderAccountDao
 	discountService discountservice.IDiscountCalculateService
 	orderSync       *shopOrderSyncService
 }
@@ -39,6 +42,8 @@ func NewIApiShopOrderServiceImpl(
 	goodsDao dao.IApiShopGoodsDao,
 	skuDao dao.IApiShopSkuDao,
 	configDao dao.IApiShopSysConfigDao,
+	detailDao orderdao.IOrderDetailDao,
+	accountDao orderdao.IOrderAccountDao,
 	discountService discountservice.IDiscountCalculateService,
 	orderSync *shopOrderSyncService,
 ) service.IApiShopOrderService {
@@ -54,6 +59,8 @@ func NewIApiShopOrderServiceImpl(
 		goodsDao:        goodsDao,
 		skuDao:          skuDao,
 		configDao:       configDao,
+		detailDao:       detailDao,
+		accountDao:      accountDao,
 		discountService: discountService,
 		orderSync:       orderSync,
 	}
