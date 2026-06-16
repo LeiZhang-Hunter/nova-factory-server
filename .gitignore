@@ -34,3 +34,4 @@ wire_gen.go
 *.exe
 private
 .llm_factories.initialized
+pay.txt
