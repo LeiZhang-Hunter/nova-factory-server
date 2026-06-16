@@ -356,6 +356,19 @@ func (s *IApiShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*apimodels
 	if order == nil {
 		return nil, errors.New("订单不存在")
 	}
+
+	orderIDs := []uint64{order.ID}
+	details, err := s.detailDao.ListByOrderIDs(c, orderIDs)
+	if err != nil {
+		return nil, err
+	}
+	accounts, err := s.accountDao.ListByOrderIDs(c, orderIDs)
+	if err != nil {
+		return nil, err
+	}
+	order.Details = details
+	order.Accounts = accounts
+
 	return apimodels.ToShopOrderVO(order), nil
 }
 
