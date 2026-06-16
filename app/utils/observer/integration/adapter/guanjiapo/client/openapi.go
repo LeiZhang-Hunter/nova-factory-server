@@ -1,4 +1,4 @@
-package guanjiapo
+package client
 
 import (
 	"bytes"
@@ -12,25 +12,21 @@ import (
 	"time"
 )
 
-// resolveOpenAPIURL 解析管家婆 OpenAPI 请求地址。
-// 优先使用配置快照中的 baseUrl（追加 /openapi），否则回退到默认 tokenURL。
-func resolveOpenAPIURL(defaultURL string, snapshot *ConfigSnapshot) string {
+// ResolveOpenAPIURL 解析管家婆 OpenAPI 请求地址。
+func ResolveOpenAPIURL(defaultURL string, snapshot *ConfigSnapshot) string {
 	if snapshot != nil && strings.TrimSpace(snapshot.BaseURL) != "" {
 		return strings.TrimRight(strings.TrimSpace(snapshot.BaseURL), "/") + "/openapi"
 	}
 	return defaultURL
 }
 
-// doSignedPost 执行一次签名后的管家婆 OpenAPI POST 请求。
-// 复用订单同步链路中的通用流程：构建 query 参数 -> JSON 编码 body ->
-// 生成 MD5 签名 -> POST -> 读取响应。返回原始响应字节，由调用方反序列化并校验业务状态码。
-// 当传输失败或 HTTP 状态非 2xx 时返回错误（错误信息包含原始响应体）。
-func doSignedPost(ctx context.Context, defaultURL string, snapshot *ConfigSnapshot, token string, method string, body any) ([]byte, error) {
+// DoSignedPost 执行一次签名后的管家婆 OpenAPI POST 请求。
+func DoSignedPost(ctx context.Context, defaultURL string, snapshot *ConfigSnapshot, token string, method string, body any) ([]byte, error) {
 	if snapshot == nil {
 		return nil, errors.New("管家婆配置不能为空")
 	}
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
-	openapiURL := resolveOpenAPIURL(defaultURL, snapshot)
+	openapiURL := ResolveOpenAPIURL(defaultURL, snapshot)
 	parse, err := url.Parse(openapiURL)
 	if err != nil {
 		return nil, err
@@ -50,7 +46,7 @@ func doSignedPost(ctx context.Context, defaultURL string, snapshot *ConfigSnapsh
 		"timestamp":   timestamp,
 		"token":       token,
 	}
-	sign, err := generateMD5Sign(signParams, string(payload), snapshot.Credentials.AppSecret)
+	sign, err := GenerateMD5Sign(signParams, string(payload), snapshot.Credentials.AppSecret)
 	if err != nil {
 		return nil, err
 	}

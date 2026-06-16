@@ -1,68 +1,12 @@
 package guanjiapo
 
-import (
-	"encoding/json"
-	"errors"
-	"nova-factory-server/app/utils/observer/integration/config"
-	"nova-factory-server/app/utils/observer/integration/kind"
-	"strings"
+import "nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/client"
+
+// KindGuanJiaPo 管家婆集成类型标识，保持 gjp_v1 稳定。
+const KindGuanJiaPo = client.KindGuanJiaPo
+
+// 以下类型别名保持外部调用方兼容，实际定义在 client 包。
+type (
+	ConfigSnapshot = client.ConfigSnapshot
+	Credentials    = client.Credentials
 )
-
-// Kind 集成系统类型标识
-
-const (
-	KindGuanJiaPo kind.Kind = "gjp_v1"
-)
-
-// Credentials 管家婆应用授权信息
-type Credentials struct {
-	AppKey          string `json:"appKey"`
-	AppSecret       string `json:"appSecret"`
-	Selfmallaccount string `json:"selfmallaccount"`
-}
-
-// ConfigSnapshot 管家婆集成配置快照
-type ConfigSnapshot struct {
-	SystemName      string            `json:"systemName"`
-	Credentials     Credentials       `json:"credentials"`
-	CheckURL        string            `json:"checkUrl"`
-	BaseURL         string            `json:"baseUrl"`
-	RedirectURL     string            `json:"redirect_url"`
-	State           string            `json:"state"`
-	Token           string            `json:"token"`
-	AccessToken     string            `json:"accessToken"`
-	Cookie          string            `json:"cookie"`
-	Headers         map[string]string `json:"headers"`
-	CodeTTL         string            `json:"codeTTL"`
-	TokenTTL        string            `json:"tokenTTL"`
-	RefreshTokenTTL string            `json:"refreshTokenTTL"`
-}
-
-// parseSnapshot 解析集成配置JSON为配置快照
-func parseSnapshot(cfg config.Config) (*ConfigSnapshot, error) {
-	if cfg == nil {
-		return nil, errors.New("integration config不能为空")
-	}
-	s := &ConfigSnapshot{}
-	if strings.TrimSpace(cfg.GetData()) == "" {
-		return s, nil
-	}
-	if err := json.Unmarshal([]byte(cfg.GetData()), s); err != nil {
-		return nil, err
-	}
-	return s, nil
-}
-
-// ApplyDefaults 为未配置的 TTL 字段填充默认值
-// codeTTL 默认 10 分钟，tokenTTL 默认 24 小时，refreshTokenTTL 默认 720 小时（30天）
-func (c *ConfigSnapshot) ApplyDefaults() {
-	if c.CodeTTL == "" {
-		c.CodeTTL = "10m"
-	}
-	if c.TokenTTL == "" {
-		c.TokenTTL = "24h"
-	}
-	if c.RefreshTokenTTL == "" {
-		c.RefreshTokenTTL = "720h"
-	}
-}

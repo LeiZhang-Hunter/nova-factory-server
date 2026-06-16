@@ -14,7 +14,7 @@ type GoodsGetResponse interface {
 }
 
 type GoodsGetResponseData interface {
-	GetGoodsid() int
+	GetGoodsid() string
 	GetEshopgoodsid() string
 	GetGoodscode() string
 	GetGoodsname() string
@@ -24,29 +24,29 @@ type GoodsGetResponseData interface {
 	GetUnits() []GoodsGetResponseDataUnit
 }
 type GoodsGetResponseDataSku interface {
-	GetSkuid() int
+	GetSkuid() int64
 	GetSkucode() string
 	GetSkuname() string
 	GetBarcode() string
 	GetLcmccode() string
-	GetWeight() int
-	GetSize() int
-	GetPrice() int
-	GetPrice2() int
-	GetPrice3() int
-	GetPrice4() int
-	GetPrice5() int
+	GetWeight() float64
+	GetSize() float64
+	GetPrice() float64
+	GetPrice2() float64
+	GetPrice3() float64
+	GetPrice4() float64
+	GetPrice5() float64
 }
 
 type GoodsGetResponseDataUnit interface {
 	GetUnitname() string
 	GetBarcode() string
-	GetRate() int
-	GetPrice() int
-	GetPrice2() int
-	GetPrice3() int
-	GetPrice4() int
-	GetPrice5() int
+	GetRate() float64
+	GetPrice() float64
+	GetPrice2() float64
+	GetPrice3() float64
+	GetPrice4() float64
+	GetPrice5() float64
 }
 
 // 商品备注更新

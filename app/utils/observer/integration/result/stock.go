@@ -10,7 +10,7 @@ type StockGetResponse interface {
 
 // StockGetResponseData 单条库存数据接口，对应 stocks[{goodsid, ..., whsname}]。
 type StockGetResponseData interface {
-	GetGoodsid() int64
+	GetGoodsid() string
 	GetGoodscode() string
 	GetGoodsname() string
 	GetSkuid() string

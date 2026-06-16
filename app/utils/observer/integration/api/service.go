@@ -25,6 +25,10 @@ type Service interface {
 	TokenGetter() TokenGetter
 	// ProductSearcher 搜索商品
 	ProductSearcher() Product
+	// StockSearcher 库存查询
+	StockSearcher() StockSearcher
+	// BtypeSearcher 往来单位查询
+	BtypeSearcher() BtypeSearcher
 }
 
 // OrderSyncer 订单同步能力接口，具备此能力的 Service 可将订单推送至第三方系统。

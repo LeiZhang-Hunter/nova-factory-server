@@ -1,30 +1,30 @@
-package guanjiapo
+package product
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
+
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/client"
 	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/model"
 	"nova-factory-server/app/utils/observer/integration/api"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
-	"strings"
 )
 
 const (
-	// methodProductGet 管家婆商品查询接口方法名
-	methodProductGet = "emall.goods.get"
-	// methodProductUpdate 管家婆商品备注更新接口方法名
+	methodProductGet    = "emall.goods.get"
 	methodProductUpdate = "emall.goods.update"
 )
 
-// productSyncer 管家婆商品查询与备注更新能力实现。
 type productSyncer struct {
 	tokenURL string
 	mode     string
 }
 
-func newProductSyncer(tokenURL string, mode string) api.Product {
+// New 创建管家婆商品查询能力实现。
+func New(tokenURL string, mode string) api.Product {
 	return &productSyncer{
 		tokenURL: tokenURL,
 		mode:     mode,
@@ -39,11 +39,11 @@ func (s *productSyncer) SearchProducts(ctx context.Context, req event.ZProductGe
 	if req.GetPageSize() < 1 {
 		return nil, errors.New("pagesize不能小于1")
 	}
-	snapshot, err := parseSnapshot(req.Config())
+	snapshot, err := client.ParseSnapshot(req.Config())
 	if err != nil {
 		return nil, err
 	}
-	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
+	token, err := client.ResolveAccessToken(ctx, snapshot, req.GetCache())
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (s *productSyncer) SearchProducts(ctx context.Context, req event.ZProductGe
 	if req.GetGoodsCode() != nil {
 		body["goodscode"] = req.GetGoodsCode()
 	}
-	respBytes, err := doSignedPost(ctx, s.tokenURL, snapshot, token, methodProductGet, body)
+	respBytes, err := client.DoSignedPost(ctx, s.tokenURL, snapshot, token, methodProductGet, body)
 	if err != nil {
 		return nil, err
 	}
@@ -79,11 +79,11 @@ func (s *productSyncer) UpdateProductRemark(ctx context.Context, req event.ZProd
 	if req.GetItems() == nil {
 		return nil, errors.New("items不能为空")
 	}
-	snapshot, err := parseSnapshot(req.Config())
+	snapshot, err := client.ParseSnapshot(req.Config())
 	if err != nil {
 		return nil, err
 	}
-	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
+	token, err := client.ResolveAccessToken(ctx, snapshot, req.GetCache())
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (s *productSyncer) UpdateProductRemark(ctx context.Context, req event.ZProd
 	body := map[string]any{
 		"items": items,
 	}
-	respBytes, err := doSignedPost(ctx, s.tokenURL, snapshot, token, methodProductUpdate, body)
+	respBytes, err := client.DoSignedPost(ctx, s.tokenURL, snapshot, token, methodProductUpdate, body)
 	if err != nil {
 		return nil, err
 	}
@@ -119,11 +119,11 @@ func (s *productSyncer) ProductRelationQuery(ctx context.Context, req event.ZPro
 	if req.GetPageSize() < 1 {
 		return nil, errors.New("pagesize不能小于1")
 	}
-	snapshot, err := parseSnapshot(req.Config())
+	snapshot, err := client.ParseSnapshot(req.Config())
 	if err != nil {
 		return nil, err
 	}
-	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
+	token, err := client.ResolveAccessToken(ctx, snapshot, req.GetCache())
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (s *productSyncer) ProductRelationQuery(ctx context.Context, req event.ZPro
 	if req.GetGoodsName() != nil {
 		body["goodsname"] = *req.GetGoodsName()
 	}
-	respBytes, err := doSignedPost(ctx, s.tokenURL, snapshot, token, "emall.goodsrelation.get", body)
+	respBytes, err := client.DoSignedPost(ctx, s.tokenURL, snapshot, token, "emall.goodsrelation.get", body)
 	if err != nil {
 		return nil, err
 	}
