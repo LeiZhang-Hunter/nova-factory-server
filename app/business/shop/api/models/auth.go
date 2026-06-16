@@ -1,5 +1,7 @@
 package models
 
+import shopusermodels "nova-factory-server/app/business/shop/user/models"
+
 // ShopAuthUserInfo 商城登录用户信息
 type ShopAuthUserInfo struct {
 	ID           int64  `json:"id,string"`    // 用户ID
@@ -20,7 +22,7 @@ type ShopGetInfoResp struct {
 }
 
 // UserToAuthUserInfo converts a User model to ShopAuthUserInfo
-func UserToAuthUserInfo(user *User) *ShopAuthUserInfo {
+func UserToAuthUserInfo(user *shopusermodels.User) *ShopAuthUserInfo {
 	if user == nil {
 		return nil
 	}

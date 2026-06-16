@@ -410,51 +410,19 @@ func shouldUpdateOrderStatus(current, incoming string) bool {
 		return false
 	}
 
-	incomingRank, incomingKnown := orderStatusRank(incoming)
+	incomingRank, incomingKnown := orderConstant.OrderStatusRank(incoming)
 	if !incomingKnown {
 		return false
 	}
 	if current == "" {
 		return true
 	}
-	if isFinalOrderStatus(current) {
+	if orderConstant.IsFinalOrderStatus(current) {
 		return false
 	}
-	currentRank, currentKnown := orderStatusRank(current)
+	currentRank, currentKnown := orderConstant.OrderStatusRank(current)
 	if !currentKnown {
 		return true
 	}
 	return incomingRank >= currentRank
-}
-
-// isFinalOrderStatus 判断订单是否已经进入本地终态。
-func isFinalOrderStatus(status string) bool {
-	switch strings.TrimSpace(status) {
-	case orderConstant.ERPStatusTradeSuccess,
-		orderConstant.ERPStatusTradeClosed,
-		orderConstant.ERPStatusAftersale:
-		return true
-	default:
-		return false
-	}
-}
-
-// orderStatusRank 返回订单状态推进优先级。
-func orderStatusRank(status string) (int, bool) {
-	switch strings.TrimSpace(status) {
-	case orderConstant.ERPStatusNoPay:
-		return 1, true
-	case orderConstant.ERPStatusPayed:
-		return 2, true
-	case orderConstant.ERPStatusPartSend:
-		return 3, true
-	case orderConstant.ERPStatusSended:
-		return 4, true
-	case orderConstant.ERPStatusTradeSuccess,
-		orderConstant.ERPStatusTradeClosed,
-		orderConstant.ERPStatusAftersale:
-		return 5, true
-	default:
-		return 0, false
-	}
 }

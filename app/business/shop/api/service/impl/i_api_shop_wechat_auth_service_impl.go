@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	shopusermodels "nova-factory-server/app/business/shop/user/models"
 	"time"
 
 	"nova-factory-server/app/business/shop/api/dao"
@@ -150,7 +151,7 @@ func (s *IApiShopWechatAuthServiceImpl) getWechatOpenid(c *gin.Context, appID, a
 }
 
 // createWechatUser 创建微信用户
-func (s *IApiShopWechatAuthServiceImpl) createWechatUser(c *gin.Context, openid, nickname, avatar string) (*models.User, error) {
+func (s *IApiShopWechatAuthServiceImpl) createWechatUser(c *gin.Context, openid, nickname, avatar string) (*shopusermodels.User, error) {
 	// 生成随机用户名
 	nickname = fmt.Sprintf("用户-%s", openid[len(openid)-4:])
 	userType := int32(1) // 默认代理商类型
@@ -169,7 +170,7 @@ func (s *IApiShopWechatAuthServiceImpl) createWechatUser(c *gin.Context, openid,
 }
 
 // getUserDisplayName 获取用户显示名称
-func (s *IApiShopWechatAuthServiceImpl) getUserDisplayName(user *models.User) string {
+func (s *IApiShopWechatAuthServiceImpl) getUserDisplayName(user *shopusermodels.User) string {
 	if user == nil {
 		return ""
 	}

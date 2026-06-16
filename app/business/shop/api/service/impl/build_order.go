@@ -3,6 +3,7 @@ package impl
 import (
 	"fmt"
 	"nova-factory-server/app/business/shop/api/models"
+	shopusermodels "nova-factory-server/app/business/shop/user/models"
 	orderConstant "nova-factory-server/app/constant/order"
 	shopConstant "nova-factory-server/app/constant/shop"
 	"strings"
@@ -13,7 +14,7 @@ import (
 // buildERPOrderSet 将商城订单请求转换为 ERP 订单保存参数。
 func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 	orderNo string,
-	shopUser *models.User,
+	shopUser *shopusermodels.User,
 	address *models.ShopUserAddressApp,
 	cacheData *models.OrderCacheData,
 	req *models.OrderCreateReq,
@@ -55,7 +56,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 		ReceiverAddress:      address.DetailAddress,
 		ReceiverPhone:        address.ReceiverMobile,
 		ReceiverMobile:       address.ReceiverMobile,
-		Status:               s.shopStatusToERPStatus(orderConstant.OrderStatusPending),
+		Status:               orderConstant.ShopStatusToERPStatus(orderConstant.OrderStatusPending),
 		OrderType:            shopConstant.NoCod,
 		Details:              details,
 		Accounts: []*shopordermodels.OrderAccountSet{
