@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"math"
-	erpordermodels "nova-factory-server/app/business/erp/sale/salemodels"
 	models2 "nova-factory-server/app/business/shop/activity/models"
+	shopordermodels "nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/business/shop/product/shopmodels"
-	"nova-factory-server/app/constant/commonStatus"
 	orderConstant "nova-factory-server/app/constant/order"
 	shopConstant "nova-factory-server/app/constant/shop"
 	"nova-factory-server/app/datasource/objectFile"
+	"nova-factory-server/app/utils/observer/integration/observer"
 	"strconv"
 	"strings"
 	"time"
@@ -25,7 +26,6 @@ import (
 	"github.com/go-pay/gopay"
 	"github.com/go-pay/gopay/wechat/v3"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 const (
@@ -266,6 +266,9 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 	if err != nil {
 		return nil, err
 	}
+	if cacheData == nil {
+		return nil, errors.New("支付订单已经失效")
+	}
 	if cacheData.UserID != userID {
 		return nil, errors.New("无权操作该预订单")
 	}
@@ -291,7 +294,6 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 	if s.db == nil {
 		return nil, errors.New("数据库连接不存在")
 	}
-	var createdOrder *erpordermodels.Order
 	err = s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
 		c.Set("db", tx)
 		defer c.Set("db", nil)
@@ -299,41 +301,40 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *mod
 			if item == nil {
 				continue
 			}
-			if err := s.skuDao.DeductStock(c, item.SkuID, item.Quantity); err != nil {
-				return fmt.Errorf("扣减库存失败: %v", err)
+			if item.Quantity <= 0 {
+				return errors.New("下单库存不能为负数")
 			}
-			if item.SecKillId > 0 {
-				if err := s.seckillDao.DeductStock(c, item.SecKillId, item.Quantity); err != nil {
-					return fmt.Errorf("扣减秒杀库存失败: %v", err)
-				}
+			if err := s.deductOrderItemStockWithLock(c, item); err != nil {
+				return err
 			}
-			if item.CombinationId > 0 {
-				if err := s.combDao.DeductStock(c, item.CombinationId, item.Quantity); err != nil {
-					return fmt.Errorf("扣减拼团库存失败: %v", err)
-				}
+			if err := s.deductOrderItemActivityStockWithLock(c, item); err != nil {
+				return err
 			}
 		}
-		var createErr error
-		createdOrder, createErr = s.orderDao.SetWithTx(c, tx, s.buildERPOrderSet(orderNo, shopUser, address, cacheData, req))
-		if createErr != nil {
-			return fmt.Errorf("创建订单失败: %v", createErr)
+
+		orderData := s.buildERPOrderSet(orderNo, shopUser, address, cacheData, req)
+		if err := s.syncCreatedOrder(tx, c, orderData, cacheData); err != nil {
+			return fmt.Errorf("创建订单失败")
 		}
+
+		if len(cacheData.CartIDs) > 0 {
+			if err := s.cartDao.DeleteByIds(c, userID, cacheData.CartIDs); err != nil {
+				return fmt.Errorf("删除购物车记录失败: %v", err)
+			}
+		}
+
+		s.cache.Del(context.Background(), s.buildOrderCacheKey(req.OrderKey))
 		return nil
 	})
+
 	if err != nil {
-		return nil, err
-	}
-
-	if err := s.syncCreatedOrder(c, createdOrder, cacheData); err != nil {
-		return nil, err
-	}
-
-	if len(cacheData.CartIDs) > 0 {
-		if err := s.cartDao.DeleteByIds(c, userID, cacheData.CartIDs); err != nil {
-			return nil, fmt.Errorf("删除购物车记录失败: %v", err)
+		if isOrderStockError(err) {
+			return nil, err
 		}
+		zap.L().Error("订单创建失败", zap.Error(err))
+		return nil, errors.New(err.Error())
 	}
-	s.cache.Del(context.Background(), s.buildOrderCacheKey(req.OrderKey))
+
 	latestOrder, err := s.orderDao.GetByTid(c, orderNo)
 	if err != nil || latestOrder == nil {
 		return nil, errors.New("读取订单信息失败")
@@ -372,7 +373,10 @@ func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *mod
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
-	list, err := s.listERPOrders(c, shopUser, query)
+	if s.apiOrderDao == nil {
+		return nil, errors.New("订单DAO不存在")
+	}
+	list, err := s.apiOrderDao.ListShopOrders(c, shopUser, query)
 	if err != nil {
 		return nil, err
 	}
@@ -417,7 +421,7 @@ func (s *IApiShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, re
 		return errors.New("非法的状态流转")
 	}
 
-	rowsAffected, err := s.updateERPOrderStatus(c, req.ID, shopUser, req.Status)
+	rowsAffected, err := s.apiOrderDao.UpdateERPOrderStatus(c, req.ID, shopUser, req.Status)
 	if err != nil {
 		return fmt.Errorf("更新订单状态失败: %v", err)
 	}
@@ -450,9 +454,9 @@ func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (
 	if s.erpStatusToShopStatus(order.Status) != orderConstant.OrderStatusPending {
 		return nil, errors.New("只能支付待支付的订单")
 	}
-	if order.SyncStatus != shopConstant.OrderSyncStatusSuccess {
-		return nil, errors.New("订单尚未同步管家婆，暂不能支付")
-	}
+	//if order.SyncStatus != shopConstant.OrderSyncStatusSuccess {
+	//	return nil, errors.New("订单尚未同步管家婆，暂不能支付")
+	//}
 	if shopUser.WechatOpenid == "" {
 		return nil, errors.New("用户未绑定微信")
 	}
@@ -580,24 +584,7 @@ func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo
 	order.Status = orderConstant.ERPStatusPayed
 
 	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
-		var orderModel models.Order
-
-		if err = tx.Table("erp_order").Clauses(clause.Locking{Strength: "UPDATE"}).First(&orderModel).Error; err != nil {
-			return fmt.Errorf("订单不存在: %v", err)
-		}
-		return tx.Table("erp_order").
-			Where("id = ?", order.ID).
-			Where("status = ?", orderConstant.ERPStatusNoPay).
-			Updates(map[string]interface{}{
-				"status":         orderConstant.ERPStatusPayed,
-				"pay_time":       order.PayTime,
-				"transaction_id": transactionId,
-				"notify_raw":     notifyRaw,
-				"mch_id":         mchId,
-				"appid":          appid,
-				"payer_openid":   payerOpenid,
-				"pay_channel":    1,
-			}).Error
+		return s.apiOrderDao.MarkOrderPaidWithTx(c, tx, order.ID, order.PayTime, transactionId, notifyRaw, mchId, appid, payerOpenid)
 	})
 }
 
@@ -630,7 +617,7 @@ func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64
 		return errors.New("只能取消待支付的订单")
 	}
 
-	rowsAffected, err := s.cancelERPOrder(c, id, shopUser, reason)
+	rowsAffected, err := s.apiOrderDao.CancelERPOrder(c, id, shopUser, reason)
 	if err != nil {
 		return fmt.Errorf("取消订单失败: %v", err)
 	}
@@ -670,7 +657,7 @@ func (s *IApiShopOrderServiceImpl) ConfirmReceive(c *gin.Context, userID int64, 
 		return errors.New("只能确认已发货的订单")
 	}
 
-	rowsAffected, err := s.updateERPOrderStatus(c, id, shopUser, orderConstant.OrderStatusCompleted)
+	rowsAffected, err := s.apiOrderDao.UpdateERPOrderStatus(c, id, shopUser, orderConstant.OrderStatusCompleted)
 	if err != nil {
 		return fmt.Errorf("确认收货失败: %v", err)
 	}
@@ -678,6 +665,80 @@ func (s *IApiShopOrderServiceImpl) ConfirmReceive(c *gin.Context, userID int64, 
 		return errors.New("订单状态已更新，请刷新后重试")
 	}
 
+	return nil
+}
+
+func isOrderStockError(err error) bool {
+	if err == nil {
+		return false
+	}
+	message := err.Error()
+	return strings.Contains(message, "库存不足") || strings.Contains(message, "购买数量必须大于0")
+}
+
+// deductOrderItemStockWithLock 在事务内锁定 SKU 行，确认库存充足后再扣减。
+func (s *IApiShopOrderServiceImpl) deductOrderItemStockWithLock(c *gin.Context, item *models.OrderCacheItem) error {
+	if item == nil {
+		return nil
+	}
+	if item.Quantity <= 0 {
+		return errors.New("购买数量必须大于0")
+	}
+
+	sku, err := s.skuDao.GetByIDForUpdate(c, item.SkuID)
+	if err != nil {
+		return errors.New("读取商品库存失败")
+	}
+	if sku == nil {
+		return errors.New("sku不存在")
+	}
+	availableStock := sku.Quantity
+	if item.Quantity > availableStock {
+		return errors.New("下单失败，库存不足: " + s.buildStockInsufficientDetail(item.GoodsName, item.SkuName, item.Quantity, availableStock))
+	}
+	if err := s.skuDao.DeductStock(c, item.SkuID, item.Quantity); err != nil {
+		return fmt.Errorf("扣减库存失败: %v", err)
+	}
+	return nil
+}
+
+// deductOrderItemActivityStockWithLock 在事务内锁定活动库存行，确认库存充足后再扣减。
+func (s *IApiShopOrderServiceImpl) deductOrderItemActivityStockWithLock(c *gin.Context, item *models.OrderCacheItem) error {
+	if item == nil {
+		return nil
+	}
+	if item.SecKillId > 0 {
+		seckill, err := s.seckillDao.GetByIDForUpdate(c, item.SecKillId)
+		if err != nil {
+			return errors.New("读取秒杀库存失败")
+		}
+		availableStock := int64(0)
+		if seckill != nil {
+			availableStock = seckill.Stock
+		}
+		if item.Quantity > availableStock {
+			return errors.New("下单失败，库存不足: " + s.buildStockInsufficientDetail(item.GoodsName, item.SkuName, item.Quantity, availableStock))
+		}
+		if err := s.seckillDao.DeductStock(c, item.SecKillId, item.Quantity); err != nil {
+			return fmt.Errorf("扣减秒杀库存失败: %v", err)
+		}
+	}
+	if item.CombinationId > 0 {
+		combination, err := s.combDao.GetByIDForUpdate(c, item.CombinationId)
+		if err != nil {
+			return errors.New("读取拼团库存失败")
+		}
+		availableStock := int64(0)
+		if combination != nil {
+			availableStock = combination.Stock
+		}
+		if item.Quantity > availableStock {
+			return errors.New("下单失败，库存不足: " + s.buildStockInsufficientDetail(item.GoodsName, item.SkuName, item.Quantity, availableStock))
+		}
+		if err := s.combDao.DeductStock(c, item.CombinationId, item.Quantity); err != nil {
+			return fmt.Errorf("扣减拼团库存失败: %v", err)
+		}
+	}
 	return nil
 }
 
@@ -690,27 +751,23 @@ func (s *IApiShopOrderServiceImpl) GetStatistics(c *gin.Context, userID int64) (
 	if err != nil || shopUser == nil {
 		return nil, errors.New("商城用户不存在")
 	}
-	return s.getERPOrderStatistics(c, shopUser)
+	return s.apiOrderDao.GetERPOrderStatistics(c, shopUser)
 }
 
-func (s *IApiShopOrderServiceImpl) syncCreatedOrder(c *gin.Context, order *erpordermodels.Order, cacheData *models.OrderCacheData) error {
+func (s *IApiShopOrderServiceImpl) syncCreatedOrder(tx *gorm.DB, c *gin.Context, order *shopordermodels.OrderSet, cacheData *models.OrderCacheData) error {
 	if order == nil {
 		return errors.New("订单不存在")
 	}
-	if s.orderSync == nil {
-		return nil
-	}
-	if err := s.orderSync.SyncCreatedOrder(c, order.Tid); err != nil {
-		compensateErr := s.compensateCreateOrderSyncFailure(c, order, cacheData, err)
-		if compensateErr != nil {
-			return fmt.Errorf("订单同步管家婆失败: %v；补偿失败: %v", err, compensateErr)
-		}
-		return fmt.Errorf("订单同步管家婆失败: %v", err)
+	orderEvent := s.buildShopOrderSyncEvent(order)
+	orderEvent.WithCache(s.cache)
+	orderEvent.WithDB(tx)
+	if err := observer.GetNotifier().OnOrderChanged(orderEvent); err != nil {
+		return fmt.Errorf("订单同步观察者失败: %v", err)
 	}
 	return nil
 }
 
-func (s *IApiShopOrderServiceImpl) ensureExistingOrderCreated(order *erpordermodels.Order) error {
+func (s *IApiShopOrderServiceImpl) ensureExistingOrderCreated(order *shopordermodels.Order) error {
 	if order == nil {
 		return errors.New("订单不存在")
 	}
@@ -724,56 +781,6 @@ func (s *IApiShopOrderServiceImpl) ensureExistingOrderCreated(order *erpordermod
 		return errors.New("订单尚未同步管家婆，请稍后重试")
 	}
 	return nil
-}
-
-func (s *IApiShopOrderServiceImpl) compensateCreateOrderSyncFailure(c *gin.Context, order *erpordermodels.Order, cacheData *models.OrderCacheData, syncErr error) error {
-	if s.db == nil {
-		return errors.New("数据库连接不存在")
-	}
-	if order == nil {
-		return errors.New("订单不存在")
-	}
-	message := "订单同步管家婆失败"
-	if syncErr != nil {
-		message = syncErr.Error()
-	}
-	now := time.Now()
-	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
-		c.Set("db", tx)
-		defer c.Set("db", nil)
-		if err := tx.Table("erp_order").
-			Where("id = ?", order.ID).
-			Updates(map[string]interface{}{
-				"status":       orderConstant.ERPStatusTradeClosed,
-				"sync_status":  shopConstant.OrderSyncStatusFailed,
-				"sync_message": truncateSyncMessage(message),
-				"sync_time":    &now,
-				"update_time":  &now,
-			}).Error; err != nil {
-			return err
-		}
-		if cacheData != nil {
-			for _, item := range cacheData.Items {
-				if item == nil {
-					continue
-				}
-				if err := s.skuDao.RestoreStock(c, item.SkuID, item.Quantity); err != nil {
-					return fmt.Errorf("回补库存失败: %v", err)
-				}
-				if item.SecKillId > 0 {
-					if err := s.seckillDao.RestoreStock(c, item.SecKillId, item.Quantity); err != nil {
-						return fmt.Errorf("回补秒杀库存失败: %v", err)
-					}
-				}
-				if item.CombinationId > 0 {
-					if err := s.combDao.RestoreStock(c, item.CombinationId, item.Quantity); err != nil {
-						return fmt.Errorf("回补拼团库存失败: %v", err)
-					}
-				}
-			}
-		}
-		return nil
-	})
 }
 
 // isValidStatusTransition 验证订单状态流转是否合法。
@@ -1318,13 +1325,13 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 	address *models.ShopUserAddressApp,
 	cacheData *models.OrderCacheData,
 	req *models.OrderCreateReq,
-) *erpordermodels.OrderSet {
-	details := make([]*erpordermodels.OrderDetailSet, 0, len(cacheData.Items))
+) *shopordermodels.OrderSet {
+	details := make([]*shopordermodels.OrderDetailSet, 0, len(cacheData.Items))
 	for index, item := range cacheData.Items {
 		if item == nil {
 			continue
 		}
-		details = append(details, &erpordermodels.OrderDetailSet{
+		details = append(details, &shopordermodels.OrderDetailSet{
 			OID:            fmt.Sprintf("%s-%d", orderNo, index+1),
 			EShopGoodsID:   fmt.Sprintf("%d", item.GoodsID),
 			EShopGoodsName: item.GoodsName,
@@ -1338,7 +1345,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 		})
 	}
 
-	return &erpordermodels.OrderSet{
+	return &shopordermodels.OrderSet{
 		Tid:                  orderNo,
 		BuyerNick:            s.buildOrderBuyerNick(shopUser),
 		BuyerMessage:         strings.TrimSpace(req.Remark),
@@ -1359,7 +1366,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 		Status:               s.shopStatusToERPStatus(orderConstant.OrderStatusPending),
 		OrderType:            "shop",
 		Details:              details,
-		Accounts: []*erpordermodels.OrderAccountSet{
+		Accounts: []*shopordermodels.OrderAccountSet{
 			{
 				FinanceCode: "PAY_AMOUNT",
 				Total:       cacheData.PayAmount,
@@ -1369,7 +1376,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 }
 
 // toShopOrder 将 ERP 订单模型转换为商城订单模型。
-func (s *IApiShopOrderServiceImpl) toShopOrder(order *erpordermodels.Order) *models.Order {
+func (s *IApiShopOrderServiceImpl) toShopOrder(order *shopordermodels.Order) *models.Order {
 	if order == nil {
 		return nil
 	}
@@ -1396,7 +1403,7 @@ func (s *IApiShopOrderServiceImpl) toShopOrder(order *erpordermodels.Order) *mod
 }
 
 // toShopOrderVO 将 ERP 订单详情转换为商城订单视图。
-func (s *IApiShopOrderServiceImpl) toShopOrderVO(order *erpordermodels.Order) *models.OrderVO {
+func (s *IApiShopOrderServiceImpl) toShopOrderVO(order *shopordermodels.Order) *models.OrderVO {
 	if order == nil {
 		return nil
 	}
@@ -1414,7 +1421,7 @@ func (s *IApiShopOrderServiceImpl) toShopOrderVO(order *erpordermodels.Order) *m
 }
 
 // toShopOrderItem 将 ERP 订单明细转换为商城订单商品明细。
-func (s *IApiShopOrderServiceImpl) toShopOrderItem(detail *erpordermodels.OrderDetail) *models.OrderItem {
+func (s *IApiShopOrderServiceImpl) toShopOrderItem(detail *shopordermodels.OrderDetail) *models.OrderItem {
 	if detail == nil {
 		return nil
 	}
@@ -1438,154 +1445,6 @@ func (s *IApiShopOrderServiceImpl) toShopOrderItem(detail *erpordermodels.OrderD
 		State:       detail.State,
 		BaseEntity:  detail.BaseEntity,
 	}
-}
-
-// listERPOrders 查询当前商城用户在 ERP 表中的订单列表。
-func (s *IApiShopOrderServiceImpl) listERPOrders(c *gin.Context, shopUser *models.User, query *models.OrderQuery) (*models.OrderListData, error) {
-	db := s.erpOrderBaseQuery(c).Where("buyer_nick = ?", s.buildOrderBuyerNick(shopUser))
-	if query.Status != nil {
-		db = db.Where("status = ?", s.shopStatusToERPStatus(*query.Status))
-	}
-	if strings.TrimSpace(query.OrderNo) != "" {
-		db = db.Where("tid LIKE ?", "%"+strings.TrimSpace(query.OrderNo)+"%")
-	}
-	page := query.Page
-	if page < 1 {
-		page = 1
-	}
-	size := query.Size
-	if size < 1 {
-		size = 10
-	}
-	var total int64
-	if err := db.Count(&total).Error; err != nil {
-		return nil, err
-	}
-	rows := make([]*erpordermodels.Order, 0)
-	if err := db.Order("id DESC").
-		Offset(int((page - 1) * size)).
-		Limit(int(size)).
-		Find(&rows).Error; err != nil {
-		return nil, err
-	}
-	if err := s.attachERPOrderDetails(c, rows); err != nil {
-		return nil, err
-	}
-	data := &models.OrderListData{
-		Rows:  make([]*models.OrderVO, 0, len(rows)),
-		Total: total,
-	}
-	for _, row := range rows {
-		if row == nil {
-			continue
-		}
-		data.Rows = append(data.Rows, s.toShopOrderVO(row))
-	}
-	return data, nil
-}
-
-// updateERPOrderStatus 更新 ERP 订单状态。
-func (s *IApiShopOrderServiceImpl) updateERPOrderStatus(c *gin.Context, id int64, shopUser *models.User, status int32) (int64, error) {
-	result := s.erpOrderBaseQuery(c).
-		Where("id = ?", id).
-		Where("buyer_nick = ?", s.buildOrderBuyerNick(shopUser)).
-		Updates(map[string]interface{}{
-			"status":      s.shopStatusToERPStatus(status),
-			"update_time": gorm.Expr("NOW()"),
-		})
-	return result.RowsAffected, result.Error
-}
-
-// cancelERPOrder 将 ERP 订单标记为已取消。
-func (s *IApiShopOrderServiceImpl) cancelERPOrder(c *gin.Context, id int64, shopUser *models.User, reason string) (int64, error) {
-	result := s.erpOrderBaseQuery(c).
-		Where("id = ?", id).
-		Where("buyer_nick = ?", s.buildOrderBuyerNick(shopUser)).
-		Updates(map[string]interface{}{
-			"status":      s.shopStatusToERPStatus(orderConstant.OrderStatusCancelled),
-			"seller_memo": strings.TrimSpace(reason),
-			"update_time": gorm.Expr("NOW()"),
-		})
-	return result.RowsAffected, result.Error
-}
-
-// getERPOrderStatistics 统计当前商城用户在 ERP 表中的订单状态数量。
-func (s *IApiShopOrderServiceImpl) getERPOrderStatistics(c *gin.Context, shopUser *models.User) (*models.OrderStatistics, error) {
-	stats := &models.OrderStatistics{}
-	baseQuery := s.erpOrderBaseQuery(c).Where("buyer_nick = ?", s.buildOrderBuyerNick(shopUser))
-	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusPending)).
-		Count(&stats.PendingPay).Error; err != nil {
-		return nil, err
-	}
-	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusPaid)).
-		Count(&stats.PendingSend).Error; err != nil {
-		return nil, err
-	}
-	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusShipped)).
-		Count(&stats.PendingReceive).Error; err != nil {
-		return nil, err
-	}
-	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusCompleted)).
-		Count(&stats.Completed).Error; err != nil {
-		return nil, err
-	}
-	if err := baseQuery.Session(&gorm.Session{}).
-		Where("status = ?", s.shopStatusToERPStatus(orderConstant.OrderStatusCancelled)).
-		Count(&stats.Cancelled).Error; err != nil {
-		return nil, err
-	}
-	return stats, nil
-}
-
-// attachERPOrderDetails 批量挂载 ERP 订单明细。
-func (s *IApiShopOrderServiceImpl) attachERPOrderDetails(c *gin.Context, orders []*erpordermodels.Order) error {
-	if len(orders) == 0 {
-		return nil
-	}
-	orderIDs := make([]uint64, 0, len(orders))
-	for _, order := range orders {
-		if order == nil {
-			continue
-		}
-		orderIDs = append(orderIDs, order.ID)
-	}
-	if len(orderIDs) == 0 {
-		return nil
-	}
-	details := make([]*erpordermodels.OrderDetail, 0)
-	if err := s.db.WithContext(c).
-		Table("erp_order_detail").
-		Where("order_id IN ?", orderIDs).
-		Where("state = ?", commonStatus.NORMAL).
-		Order("id ASC").
-		Find(&details).Error; err != nil {
-		return err
-	}
-	detailMap := make(map[uint64][]*erpordermodels.OrderDetail)
-	for _, detail := range details {
-		if detail == nil {
-			continue
-		}
-		detailMap[detail.OrderID] = append(detailMap[detail.OrderID], detail)
-	}
-	for _, order := range orders {
-		if order == nil {
-			continue
-		}
-		order.Details = detailMap[order.ID]
-	}
-	return nil
-}
-
-// erpOrderBaseQuery 构建 ERP 订单表基础查询。
-func (s *IApiShopOrderServiceImpl) erpOrderBaseQuery(c *gin.Context) *gorm.DB {
-	return s.db.WithContext(c).
-		Table("erp_order").
-		Where("state = ?", commonStatus.NORMAL)
 }
 
 // buildOrderBuyerNick 生成商城订单在 ERP 表中的买家标识。
@@ -1627,7 +1486,7 @@ func (s *IApiShopOrderServiceImpl) buildOrderOwnerCandidates(shopUser *models.Us
 }
 
 // isOrderOwnedByUser 校验 ERP 订单是否属于当前商城用户。
-func (s *IApiShopOrderServiceImpl) isOrderOwnedByUser(order *erpordermodels.Order, shopUser *models.User) bool {
+func (s *IApiShopOrderServiceImpl) isOrderOwnedByUser(order *shopordermodels.Order, shopUser *models.User) bool {
 	if order == nil || shopUser == nil {
 		return false
 	}

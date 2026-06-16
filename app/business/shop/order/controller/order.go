@@ -153,6 +153,9 @@ func (o *Order) SynchronizeSalesOrders(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+	if len(req.GetOrders()) == 0 {
+
+	}
 	data, err := o.service.SynchronizeSalesOrders(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
