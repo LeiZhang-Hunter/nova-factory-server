@@ -159,7 +159,10 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	// 序列化回调原文（排障用）
 	rawBytes, _ := json.Marshal(nd)
 	notifyRaw := string(rawBytes)
-
+	//m := new(models.OrderStatusEvent)
+	//m.WithMetadata(gin.H{"nd": nd, "notify_raw": notifyRaw})
+	//m.WithDB(s.db)
+	//observer.GetNotifier().OnOrderStatusChange(m)
 	// 更新订单状态
 	if err := s.service.HandleWechatNotify(c, nd.OutTradeNo, nd.TransactionID, notifyRaw, nd.MchID, nd.AppID, nd.Payer.Openid, nd.Amount.Total); err != nil {
 		writeWechatNotifyFail(c, err.Error(), zap.Error(err), zap.String("out_trade_no", nd.OutTradeNo), zap.String("transaction_id", nd.TransactionID), zap.Int64("notify_total", nd.Amount.Total))

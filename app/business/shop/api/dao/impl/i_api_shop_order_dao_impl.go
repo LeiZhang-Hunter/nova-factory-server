@@ -95,14 +95,14 @@ func (i *IApiShopOrderDaoImpl) ListShopOrders(c *gin.Context, shopUser *shopuser
 	}
 
 	data := &apimodels.OrderListData{
-		Rows:  make([]*apimodels.OrderVO, 0, len(rows)),
+		Rows:  make([]*apimodels.ApiOrderVO, 0, len(rows)),
 		Total: total,
 	}
 	for _, row := range rows {
 		if row == nil {
 			continue
 		}
-		data.Rows = append(data.Rows, apimodels.ToShopOrderVO(row))
+		data.Rows = append(data.Rows, apimodels.ToApiShopOrderVO(row))
 	}
 	return data, nil
 }

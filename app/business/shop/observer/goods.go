@@ -1,6 +1,7 @@
 package observer
 
 import (
+	apiService "nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
@@ -11,17 +12,20 @@ type ShopObserver struct {
 	goodsService     shopservice.IShopGoodsService
 	orderService     shopservice.IShopOrderService
 	orderSendService shopservice.IShopOrderSendService
+	apiOrderService  apiService.IApiShopOrderService
 }
 
 func NewShopObserver(
 	goodsService shopservice.IShopGoodsService,
 	orderService shopservice.IShopOrderService,
 	orderSendService shopservice.IShopOrderSendService,
+	apiOrderService apiService.IApiShopOrderService,
 ) *ShopObserver {
 	return &ShopObserver{
 		goodsService:     goodsService,
 		orderService:     orderService,
 		orderSendService: orderSendService,
+		apiOrderService:  apiOrderService,
 	}
 }
 

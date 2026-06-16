@@ -1,9 +1,9 @@
 package event
 
 type OrderStratusEventData interface {
-	Tid() string
-	Status() string
-	Refundstatus() string
+	GetTid() string
+	GetStatus() string
+	GetRefundstatus() string
 }
 
 type OrderStratusEvent interface {
