@@ -1,15 +1,16 @@
-package guanjiapo
+package stock
 
 import (
 	"context"
 	"encoding/json"
+	"strings"
+
+	"gopkg.in/errgo.v2/errors"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/client"
 	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/model"
 	"nova-factory-server/app/utils/observer/integration/api"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
-	"strings"
-
-	"gopkg.in/errgo.v2/errors"
 )
 
 type stockSyncer struct {
@@ -17,7 +18,8 @@ type stockSyncer struct {
 	mode     string
 }
 
-func newStockSyncer(tokenURL string, mode string) api.StockSearcher {
+// New 创建管家婆库存查询能力实现。
+func New(tokenURL string, mode string) api.StockSearcher {
 	return &stockSyncer{tokenURL: tokenURL, mode: mode}
 }
 
@@ -29,11 +31,11 @@ func (s *stockSyncer) SearchStocks(ctx context.Context, req event.ZStockGetReqEv
 	if req.GetPageSize() < 1 {
 		return nil, errors.New("pagesize不能小于1")
 	}
-	snapshot, err := parseSnapshot(req.Config())
+	snapshot, err := client.ParseSnapshot(req.Config())
 	if err != nil {
 		return nil, err
 	}
-	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
+	token, err := client.ResolveAccessToken(ctx, snapshot, req.GetCache())
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +55,7 @@ func (s *stockSyncer) SearchStocks(ctx context.Context, req event.ZStockGetReqEv
 	if req.GetIsContainWhs() != nil {
 		body["iscontainwhs"] = *req.GetIsContainWhs()
 	}
-	respBytes, err := doSignedPost(ctx, s.tokenURL, snapshot, token, "emall.stock.get", body)
+	respBytes, err := client.DoSignedPost(ctx, s.tokenURL, snapshot, token, "emall.stock.get", body)
 	if err != nil {
 		return nil, err
 	}

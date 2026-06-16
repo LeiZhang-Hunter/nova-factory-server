@@ -1,4 +1,4 @@
-package guanjiapo
+package client
 
 import "encoding/json"
 

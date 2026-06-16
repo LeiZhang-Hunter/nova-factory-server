@@ -4,14 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"nova-factory-server/app/utils/observer/integration/api"
-	"nova-factory-server/app/utils/observer/integration/config"
-	"nova-factory-server/app/utils/observer/integration/kind"
-	"nova-factory-server/app/utils/observer/integration/observer"
 	"strings"
 	"time"
 
 	"github.com/spf13/viper"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/auth"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/btype"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/client"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/order"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/product"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/stock"
+	"nova-factory-server/app/utils/observer/integration/api"
+	"nova-factory-server/app/utils/observer/integration/config"
+	"nova-factory-server/app/utils/observer/integration/kind"
 )
 
 // Service 管家婆全渠道集成客户端
@@ -22,6 +27,8 @@ type Service struct {
 	tokenSyncer   api.TokenGetter
 	orderSyncer   api.OrderSyncer
 	productSyncer api.Product
+	stockSyncer   api.StockSearcher
+	btypeSyncer   api.BtypeSearcher
 }
 
 // New 创建管家婆集成客户端
@@ -39,9 +46,11 @@ func New() api.Service {
 	return &Service{
 		oauthURL:      oauthURL,
 		tokenURL:      tokenURL,
-		tokenSyncer:   newTokenSyncer(tokenURL, tokenURL, mode),
-		orderSyncer:   newOrderSyncer(tokenURL, mode),
-		productSyncer: newProductSyncer(tokenURL, mode),
+		tokenSyncer:   auth.New(tokenURL, oauthURL, mode),
+		orderSyncer:   order.New(tokenURL, mode),
+		productSyncer: product.New(tokenURL, mode),
+		stockSyncer:   stock.New(tokenURL, mode),
+		btypeSyncer:   btype.New(tokenURL, mode),
 		mode:          strings.ToLower(mode),
 	}
 }
@@ -54,8 +63,8 @@ func (c *Service) Kind() kind.Kind {
 func init() {
 	_ = api.Register(KindGuanJiaPo, func() api.Service {
 		service := New()
-		observerInstance := newSyncObserver(service)
-		observer.GetNotifier().Register(observerInstance)
+		//observerInstance := newSyncObserver(service)
+		//observer.GetNotifier().Register(observerInstance)
 		return service
 	})
 
@@ -74,9 +83,19 @@ func (c *Service) ProductSearcher() api.Product {
 	return c.productSyncer
 }
 
+// StockSearcher 返回库存查询能力
+func (c *Service) StockSearcher() api.StockSearcher {
+	return c.stockSyncer
+}
+
+// BtypeSearcher 返回往来单位查询能力
+func (c *Service) BtypeSearcher() api.BtypeSearcher {
+	return c.btypeSyncer
+}
+
 // CheckLoginState 返回授权地址，前端跳转后完成OAuth授权
 func (c *Service) CheckLoginState(cfg config.Config, overrideRedirectURL string) (api.LoginState, error) {
-	snapshot, err := parseSnapshot(cfg)
+	snapshot, err := client.ParseSnapshot(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +111,7 @@ func (c *Service) CheckLoginState(cfg config.Config, overrideRedirectURL string)
 	}, nil
 }
 
-// BuildOAuthURL 生成管家婆授权跳转地址
+// buildOAuthURL 生成管家婆授权跳转地址
 func (c *Service) buildOAuthURL(overrideRedirectURL string, snapshot *ConfigSnapshot) (string, error) {
 	if snapshot == nil {
 		return "", errors.New("管家婆配置不能为空")

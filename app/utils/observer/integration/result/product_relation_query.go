@@ -12,7 +12,7 @@ type ProductRelationQueryResponse interface {
 type ProductRelationQueryData interface {
 	GetEshopGoodsID() string
 	GetEshopSkuID() string
-	GetGoodsID() int64
+	GetGoodsID() string
 	GetGoodsCode() string
 	GetGoodsName() string
 	GetSkuID() int64

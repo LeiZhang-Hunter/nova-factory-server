@@ -2,6 +2,7 @@ package model
 
 import (
 	"nova-factory-server/app/utils/observer/integration/result"
+	"strconv"
 )
 
 // ProductRemarkUpdateResult 单条商品备注更新结果，实现 result.ProductRemarkUpdateResult。
@@ -32,57 +33,63 @@ func (p *ProductRemarkUpdateResponse) GetItems() []result.ProductRemarkUpdateRes
 
 // ProductSearchResponseSku SKU数据，实现 result.GoodsGetResponseDataSku。
 type ProductSearchResponseSku struct {
-	SkuID    int    `json:"skuid"`
-	SkuCode  string `json:"skucode"`
-	SkuName  string `json:"skuname"`
-	Barcode  string `json:"barcode"`
-	LCMCCode string `json:"lcmccode"`
-	Weight   int    `json:"weight"`
-	Size     int    `json:"size"`
-	Price    int    `json:"price"`
-	Price2   int    `json:"price2"`
-	Price3   int    `json:"price3"`
-	Price4   int    `json:"price4"`
-	Price5   int    `json:"price5"`
+	SkuID    string  `json:"skuid"`
+	SkuCode  string  `json:"skucode"`
+	SkuName  string  `json:"skuname"`
+	Barcode  string  `json:"barcode"`
+	LCMCCode string  `json:"lcmccode"`
+	Weight   float64 `json:"weight"`
+	Size     float64 `json:"size"`
+	Price    float64 `json:"price"`
+	Price2   float64 `json:"price2"`
+	Price3   float64 `json:"price3"`
+	Price4   float64 `json:"price4"`
+	Price5   float64 `json:"price5"`
 }
 
-func (s *ProductSearchResponseSku) GetSkuid() int       { return s.SkuID }
+func (s *ProductSearchResponseSku) GetSkuid() int64 {
+	parseInt, err := strconv.ParseInt(s.SkuID, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return parseInt
+}
 func (s *ProductSearchResponseSku) GetSkucode() string  { return s.SkuCode }
 func (s *ProductSearchResponseSku) GetSkuname() string  { return s.SkuName }
 func (s *ProductSearchResponseSku) GetBarcode() string  { return s.Barcode }
 func (s *ProductSearchResponseSku) GetLcmccode() string { return s.LCMCCode }
-func (s *ProductSearchResponseSku) GetWeight() int      { return s.Weight }
-func (s *ProductSearchResponseSku) GetSize() int        { return s.Size }
-func (s *ProductSearchResponseSku) GetPrice() int       { return s.Price }
-func (s *ProductSearchResponseSku) GetPrice2() int      { return s.Price2 }
-func (s *ProductSearchResponseSku) GetPrice3() int      { return s.Price3 }
-func (s *ProductSearchResponseSku) GetPrice4() int      { return s.Price4 }
-func (s *ProductSearchResponseSku) GetPrice5() int      { return s.Price5 }
+func (s *ProductSearchResponseSku) GetWeight() float64  { return s.Weight }
+func (s *ProductSearchResponseSku) GetSize() float64    { return s.Size }
+func (s *ProductSearchResponseSku) GetPrice() float64   { return s.Price }
+func (s *ProductSearchResponseSku) GetPrice2() float64  { return s.Price2 }
+func (s *ProductSearchResponseSku) GetPrice3() float64  { return s.Price3 }
+func (s *ProductSearchResponseSku) GetPrice4() float64  { return s.Price4 }
+func (s *ProductSearchResponseSku) GetPrice5() float64  { return s.Price5 }
 
 // ProductSearchResponseUnit 单位数据，实现 result.GoodsGetResponseDataUnit。
 type ProductSearchResponseUnit struct {
-	UnitName string `json:"unitname"`
-	Barcode  string `json:"barcode"`
-	Rate     int    `json:"rate"`
-	Price    int    `json:"price"`
-	Price2   int    `json:"price2"`
-	Price3   int    `json:"price3"`
-	Price4   int    `json:"price4"`
-	Price5   int    `json:"price5"`
+	UnitName string  `json:"unitname"`
+	Barcode  string  `json:"barcode"`
+	Rate     float64 `json:"rate"`
+	Price    float64 `json:"price"`
+	Price2   float64 `json:"price2"`
+	Price3   float64 `json:"price3"`
+	Price4   float64 `json:"price4"`
+	Price5   float64 `json:"price5"`
 }
 
 func (u *ProductSearchResponseUnit) GetUnitname() string { return u.UnitName }
 func (u *ProductSearchResponseUnit) GetBarcode() string  { return u.Barcode }
-func (u *ProductSearchResponseUnit) GetRate() int        { return u.Rate }
-func (u *ProductSearchResponseUnit) GetPrice() int       { return u.Price }
-func (u *ProductSearchResponseUnit) GetPrice2() int      { return u.Price2 }
-func (u *ProductSearchResponseUnit) GetPrice3() int      { return u.Price3 }
-func (u *ProductSearchResponseUnit) GetPrice4() int      { return u.Price4 }
-func (u *ProductSearchResponseUnit) GetPrice5() int      { return u.Price5 }
+func (u *ProductSearchResponseUnit) GetRate() float64    { return u.Rate }
+func (u *ProductSearchResponseUnit) GetPrice() float64   { return u.Price }
+func (u *ProductSearchResponseUnit) GetPrice2() float64  { return u.Price2 }
+func (u *ProductSearchResponseUnit) GetPrice3() float64  { return u.Price3 }
+func (u *ProductSearchResponseUnit) GetPrice4() float64  { return u.Price4 }
+func (u *ProductSearchResponseUnit) GetPrice5() float64  { return u.Price5 }
 
 // ProductSearchResponseData 商品数据，实现 result.GoodsGetResponseData。
 type ProductSearchResponseData struct {
-	GoodsID      int                          `json:"goodsid"`
+	GoodsID      string                       `json:"goodsid"`
 	EshopGoodsID string                       `json:"eshopgoodsid"`
 	GoodsCode    string                       `json:"goodscode"`
 	GoodsName    string                       `json:"goodsname"`
@@ -92,7 +99,7 @@ type ProductSearchResponseData struct {
 	Units        []*ProductSearchResponseUnit `json:"units"`
 }
 
-func (d *ProductSearchResponseData) GetGoodsid() int         { return d.GoodsID }
+func (d *ProductSearchResponseData) GetGoodsid() string      { return d.GoodsID }
 func (d *ProductSearchResponseData) GetEshopgoodsid() string { return d.EshopGoodsID }
 func (d *ProductSearchResponseData) GetGoodscode() string    { return d.GoodsCode }
 func (d *ProductSearchResponseData) GetGoodsname() string    { return d.GoodsName }

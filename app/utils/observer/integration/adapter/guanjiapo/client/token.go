@@ -1,14 +1,15 @@
-package guanjiapo
+package client
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/spf13/viper"
 	"nova-factory-server/app/constant/redis"
 	"nova-factory-server/app/datasource/cache"
-	"strings"
 )
 
 // GetLoginTokenFromCache 从缓存读取管家婆登录态
@@ -29,8 +30,8 @@ func GetLoginTokenFromCache(ctx context.Context, cacheStore cache.Cache) (*OAuth
 	return ret, nil
 }
 
-// resolveAccessToken 解析可用token，优先配置，其次缓存
-func resolveAccessToken(ctx context.Context, snapshot *ConfigSnapshot, cacheStore cache.Cache) (string, error) {
+// ResolveAccessToken 解析可用token，优先配置，其次缓存
+func ResolveAccessToken(ctx context.Context, snapshot *ConfigSnapshot, cacheStore cache.Cache) (string, error) {
 	if snapshot == nil {
 		return "", errors.New("管家婆配置不能为空")
 	}

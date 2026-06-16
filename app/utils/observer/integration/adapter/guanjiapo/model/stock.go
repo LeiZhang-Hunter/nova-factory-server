@@ -4,7 +4,7 @@ import "nova-factory-server/app/utils/observer/integration/result"
 
 // StockGetData 单条库存数据，实现 result.StockGetResponseData。
 type StockGetData struct {
-	GoodsID   int64   `json:"goodsid"`
+	GoodsID   string  `json:"goodsid"`
 	GoodsCode string  `json:"goodscode"`
 	GoodsName string  `json:"goodsname"`
 	SkuID     string  `json:"skuid"`
@@ -17,7 +17,7 @@ type StockGetData struct {
 	WhsName   string  `json:"whsname"`
 }
 
-func (d *StockGetData) GetGoodsid() int64     { return d.GoodsID }
+func (d *StockGetData) GetGoodsid() string    { return d.GoodsID }
 func (d *StockGetData) GetGoodscode() string  { return d.GoodsCode }
 func (d *StockGetData) GetGoodsname() string  { return d.GoodsName }
 func (d *StockGetData) GetSkuid() string      { return d.SkuID }

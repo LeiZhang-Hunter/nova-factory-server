@@ -1,15 +1,16 @@
-package guanjiapo
+package btype
 
 import (
 	"context"
 	"encoding/json"
+	"strings"
+
+	"gopkg.in/errgo.v2/errors"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/client"
 	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/model"
 	"nova-factory-server/app/utils/observer/integration/api"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
-	"strings"
-
-	"gopkg.in/errgo.v2/errors"
 )
 
 type btypeSyncer struct {
@@ -17,7 +18,8 @@ type btypeSyncer struct {
 	mode     string
 }
 
-func newBtypeSyncer(tokenURL string, mode string) api.BtypeSearcher {
+// New 创建管家婆往来单位查询能力实现。
+func New(tokenURL string, mode string) api.BtypeSearcher {
 	return &btypeSyncer{tokenURL: tokenURL, mode: mode}
 }
 
@@ -29,11 +31,11 @@ func (s *btypeSyncer) GetBtypes(ctx context.Context, req event.ZBtypeGetReqEvent
 	if req.GetPageSize() < 1 {
 		return nil, errors.New("pagesize不能小于1")
 	}
-	snapshot, err := parseSnapshot(req.Config())
+	snapshot, err := client.ParseSnapshot(req.Config())
 	if err != nil {
 		return nil, err
 	}
-	token, err := resolveAccessToken(ctx, snapshot, req.GetCache())
+	token, err := client.ResolveAccessToken(ctx, snapshot, req.GetCache())
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +52,7 @@ func (s *btypeSyncer) GetBtypes(ctx context.Context, req event.ZBtypeGetReqEvent
 	if req.GetTel() != nil {
 		body["tel"] = *req.GetTel()
 	}
-	respBytes, err := doSignedPost(ctx, s.tokenURL, snapshot, token, "emall.btype.get", body)
+	respBytes, err := client.DoSignedPost(ctx, s.tokenURL, snapshot, token, "emall.btype.get", body)
 	if err != nil {
 		return nil, err
 	}

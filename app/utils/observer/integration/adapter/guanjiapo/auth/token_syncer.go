@@ -1,4 +1,4 @@
-package guanjiapo
+package auth
 
 import (
 	"bytes"
@@ -9,13 +9,15 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
+
 	"nova-factory-server/app/constant/redis"
 	"nova-factory-server/app/datasource/cache"
+	"nova-factory-server/app/utils/observer/integration/adapter/guanjiapo/client"
 	"nova-factory-server/app/utils/observer/integration/api"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/result"
-	"strings"
-	"time"
 )
 
 type tokenSyncer struct {
@@ -24,7 +26,8 @@ type tokenSyncer struct {
 	mode     string
 }
 
-func newTokenSyncer(tokenURL string, oauthURL string, mode string) api.TokenGetter {
+// New 创建管家婆 Token 管理能力实现。
+func New(tokenURL string, oauthURL string, mode string) api.TokenGetter {
 	return &tokenSyncer{
 		tokenURL: tokenURL,
 		oauthURL: oauthURL,
@@ -34,7 +37,7 @@ func newTokenSyncer(tokenURL string, oauthURL string, mode string) api.TokenGett
 
 // GetTokenByCode 使用oauthcode换取访问令牌
 func (c *tokenSyncer) GetTokenByCode(ctx context.Context, cfg config.Config, oauthCode string) (result.OAuthTokenResponse, error) {
-	snapshot, err := parseSnapshot(cfg)
+	snapshot, err := client.ParseSnapshot(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +85,7 @@ func (c *tokenSyncer) GetTokenByCode(ctx context.Context, cfg config.Config, oau
 	if err != nil {
 		return nil, err
 	}
-	ret := &OAuthTokenResponse{}
+	ret := &client.OAuthTokenResponse{}
 	if err = json.Unmarshal(respBytes, ret); err != nil {
 		return nil, err
 	}
@@ -104,7 +107,7 @@ func (c *tokenSyncer) SaveTokenToCache(ctx context.Context, cacheStore cache.Cac
 	if token == nil {
 		return errors.New("token不能为空")
 	}
-	cacheKey := fmt.Sprintf(redis.IntegrationLoginCacheKeyPattern, c.mode, KindGuanJiaPo)
+	cacheKey := fmt.Sprintf(redis.IntegrationLoginCacheKeyPattern, c.mode, client.KindGuanJiaPo)
 	value, err := json.Marshal(token)
 	if err != nil {
 		return err
@@ -113,16 +116,17 @@ func (c *tokenSyncer) SaveTokenToCache(ctx context.Context, cacheStore cache.Cac
 	return nil
 }
 
+// GetTokenByCache 从缓存读取管家婆登录态
 func (c *tokenSyncer) GetTokenByCache(ctx context.Context, cacheStore cache.Cache) (result.OAuthTokenResponse, error) {
 	if cacheStore == nil {
 		return nil, errors.New("cache不能为空")
 	}
-	cacheKey := fmt.Sprintf(redis.IntegrationLoginCacheKeyPattern, c.mode, KindGuanJiaPo)
+	cacheKey := fmt.Sprintf(redis.IntegrationLoginCacheKeyPattern, c.mode, client.KindGuanJiaPo)
 	cacheValue, err := cacheStore.Get(ctx, cacheKey)
 	if err != nil || strings.TrimSpace(cacheValue) == "" {
 		return nil, err
 	}
-	ret := new(OAuthTokenResponse)
+	ret := new(client.OAuthTokenResponse)
 	if err = json.Unmarshal([]byte(cacheValue), ret); err != nil {
 		return nil, err
 	}

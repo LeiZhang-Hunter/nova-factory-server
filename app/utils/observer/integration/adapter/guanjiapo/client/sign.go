@@ -1,4 +1,4 @@
-package guanjiapo
+package client
 
 import (
 	"crypto/md5"
@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// generateMD5Sign 按管家婆开放接口的 MD5 规则生成签名
-func generateMD5Sign(params map[string]string, body string, appSecret string) (string, error) {
+// GenerateMD5Sign 按管家婆开放接口的 MD5 规则生成签名
+func GenerateMD5Sign(params map[string]string, body string, appSecret string) (string, error) {
 	if appSecret == "" {
 		return "", fmt.Errorf("appSecret is required")
 	}
