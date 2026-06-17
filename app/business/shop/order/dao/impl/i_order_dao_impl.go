@@ -27,6 +27,7 @@ type OrderDaoImpl struct {
 // shopOrderRow shop 订单主表行模型，显式绑定真实表字段名。
 type shopOrderRow struct {
 	ID                   uint64     `gorm:"column:id"`
+	UserId               uint64     `gorm:"column:user_id"`
 	Tid                  string     `gorm:"column:tid"`
 	Weight               float64    `gorm:"column:weight"`
 	Size                 float64    `gorm:"column:size"`
@@ -400,6 +401,7 @@ func buildOrderRow(data *models.Order) *shopOrderRow {
 	}
 	return &shopOrderRow{
 		ID:                   data.ID,
+		UserId:               data.UserId,
 		Tid:                  data.Tid,
 		Weight:               data.Weight,
 		Size:                 data.Size,

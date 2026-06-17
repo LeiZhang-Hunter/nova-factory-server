@@ -24,6 +24,7 @@ func ToOrder(event event.OrderEvent) []*Order {
 
 		order := &Order{
 			Tid:                  eventOrder.GetOrderNo(),
+			UserId:               eventOrder.GetUserId(),
 			Weight:               eventOrder.GetWeight(),
 			Size:                 eventOrder.GetSize(),
 			BuyerNick:            eventOrder.GetBuyerNick(),

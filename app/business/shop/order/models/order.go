@@ -22,6 +22,7 @@ type CheckLoginStateResp struct {
 type Order struct {
 	ID                   uint64          `json:"id,string" gorm:"column:id"`
 	Tid                  string          `json:"tid" gorm:"column:tid"`
+	UserId               uint64          `json:"user_id" gorm:"column:user_id"`
 	Weight               float64         `json:"weight" gorm:"column:weight"`
 	Size                 float64         `json:"size" gorm:"column:size"`
 	BuyerNick            string          `json:"buyer_nick" gorm:"column:buyer_nick"`
