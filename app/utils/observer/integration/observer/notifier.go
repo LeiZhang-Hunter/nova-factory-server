@@ -4,10 +4,11 @@
 package observer
 
 import (
-	"gorm.io/gorm"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
 	"sync"
+
+	"gorm.io/gorm"
 
 	"go.uber.org/zap"
 )
@@ -216,7 +217,7 @@ func (n *Notifier) OnOrderSendChange(ev event.TransactionEvent[event.OrderSendEv
 
 // OnOrderStatusChange 向所有观察者分发订单变更事件。
 // 由 Notifier 统一开启事务，并将 tx 显式传给每个观察者，保证全员原子一致。
-func (n *Notifier) OnOrderStatusChange(ev event.TransactionEvent[event.OrderStratusEvent]) error {
+func (n *Notifier) OnOrderStatusChange(ev event.TransactionEvent[event.ZOrderStatusSyncReqEvent]) error {
 	if ev.GetDB() == nil {
 		err := n.notify(func(ob Observer) error {
 			err := ob.OnOrderStatusChange(ev.ToEvent())

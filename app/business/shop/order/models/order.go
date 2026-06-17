@@ -174,6 +174,7 @@ type OrderAccount struct {
 type OrderSet struct {
 	ID           uint64  `json:"id,string"`
 	Tid          string  `json:"tid"`
+	UserID       int64   `json:"user_id"`
 	Weight       float64 `json:"weight"`
 	Size         float64 `json:"size"`
 	BuyerNick    string  `json:"buyer_nick"`

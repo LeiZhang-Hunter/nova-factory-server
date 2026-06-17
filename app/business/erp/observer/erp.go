@@ -127,6 +127,6 @@ func (o *ERPObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
 }
 
 // OnOrderStatusChange 订单发货变化
-func (o *ERPObserver) OnOrderStatusChange(sendEvent event.OrderStratusEvent) error {
+func (o *ERPObserver) OnOrderStatusChange(sendEvent event.ZOrderStatusSyncReqEvent) error {
 	return nil
 }

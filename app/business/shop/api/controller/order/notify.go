@@ -7,11 +7,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"nova-factory-server/app/business/shop/api/callback"
+	"nova-factory-server/app/business/shop/api/models"
+	"nova-factory-server/app/constant/order"
 	"nova-factory-server/app/datasource/objectFile"
+	"nova-factory-server/app/utils/observer/integration/observer"
 	"os"
 	"time"
 
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/service"
@@ -24,11 +29,12 @@ import (
 type OrderNotify struct {
 	service   service.IApiShopOrderService
 	configDao dao.IApiShopSysConfigDao
+	db        *gorm.DB
 }
 
 // NewOrderNotify 创建微信支付回调控制器。
-func NewOrderNotify(service service.IApiShopOrderService, configDao dao.IApiShopSysConfigDao) *OrderNotify {
-	return &OrderNotify{service: service, configDao: configDao}
+func NewOrderNotify(service service.IApiShopOrderService, configDao dao.IApiShopSysConfigDao, db *gorm.DB) *OrderNotify {
+	return &OrderNotify{service: service, configDao: configDao, db: db}
 }
 
 // PublicRoutes 注册微信支付回调路由到 publicGroup（不鉴权）。
@@ -122,20 +128,7 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	}
 
 	// 解密回调内容
-	type notifyData struct {
-		OutTradeNo    string `json:"out_trade_no"`
-		TransactionID string `json:"transaction_id"`
-		TradeState    string `json:"trade_state"`
-		AppID         string `json:"appid"`
-		MchID         string `json:"mchid"`
-		Amount        struct {
-			Total int64 `json:"total"`
-		} `json:"amount"`
-		Payer struct {
-			Openid string `json:"openid"`
-		} `json:"payer"`
-	}
-	var nd notifyData
+	var nd models.PayNotifyData
 	if err := notifyReq.DecryptCipherTextToStruct(apiV3Key, &nd); err != nil {
 		writeWechatNotifyFail(c, "解密失败", zap.Error(err))
 		return
@@ -157,17 +150,26 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	}
 
 	// 序列化回调原文（排障用）
-	rawBytes, _ := json.Marshal(nd)
-	notifyRaw := string(rawBytes)
-	//m := new(models.OrderStatusEvent)
-	//m.WithMetadata(gin.H{"nd": nd, "notify_raw": notifyRaw})
-	//m.WithDB(s.db)
-	//observer.GetNotifier().OnOrderStatusChange(m)
+	//rawBytes, _ := json.Marshal(nd)
+	//notifyRaw := string(rawBytes)
+	m := new(models.OrderStatusEvent)
+	//erpOrderInfo := models.OrderStatusData{
+	//	Tid:          nd.OutTradeNo,
+	//	Status:       order.ERPStatusPayed,
+	//	RefundStatus: order.REFUNDStatusNormal,
+	//}
+	data := models.NewOrderStatusData(nd.OutTradeNo, order.ERPStatusPayed, order.REFUNDStatusNormal)
+	m.WithOrders(data)
+	m.WithMetadata(gin.H{"order": nd})
+	m.WithCtx(c)
+	m.WithDB(s.db)
+	m.WithCallback(callback.NewShopApiCallback(m))
+	observer.GetNotifier().OnOrderStatusChange(m)
 	// 更新订单状态
-	if err := s.service.HandleWechatNotify(c, nd.OutTradeNo, nd.TransactionID, notifyRaw, nd.MchID, nd.AppID, nd.Payer.Openid, nd.Amount.Total); err != nil {
-		writeWechatNotifyFail(c, err.Error(), zap.Error(err), zap.String("out_trade_no", nd.OutTradeNo), zap.String("transaction_id", nd.TransactionID), zap.Int64("notify_total", nd.Amount.Total))
-		return
-	}
+	//if err := s.service.HandleWechatNotify(c, nd.OutTradeNo, nd.TransactionID, notifyRaw, nd.MchID, nd.AppID, nd.Payer.Openid, nd.Amount.Total); err != nil {
+	//	writeWechatNotifyFail(c, err.Error(), zap.Error(err), zap.String("out_trade_no", nd.OutTradeNo), zap.String("transaction_id", nd.TransactionID), zap.Int64("notify_total", nd.Amount.Total))
+	//	return
+	//}
 
 	c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "SUCCESS", Message: "成功"})
 }

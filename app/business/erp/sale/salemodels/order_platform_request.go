@@ -1,10 +1,12 @@
 package salemodels
 
 import (
-	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type OrderSyncRequest struct {
@@ -13,6 +15,7 @@ type OrderSyncRequest struct {
 	action event.EventType   `json:"-"`
 	c      cache.Cache       `json:"-"`
 	db     *gorm.DB          `json:"-"`
+	ctx    *gin.Context
 }
 
 func (o *OrderSyncRequest) WithDB(db *gorm.DB) {
@@ -33,7 +36,9 @@ func (o *OrderSyncRequest) GetCache() cache.Cache {
 func (o *OrderSyncRequest) GetCallback() event.Callback {
 	return nil
 }
-
+func (o *OrderSyncRequest) GetCtx() *gin.Context {
+	return o.ctx
+}
 func (o *OrderSyncRequest) GetOrders() []event.OrderData {
 	if o.Orders == nil {
 		return make([]event.OrderData, 0)
@@ -105,6 +110,10 @@ type OrderSyncOrder struct {
 	BTypeCode        string              `json:"btypecode"`
 	Details          []*OrderSyncDetail  `json:"details"`
 	Accounts         []*OrderSyncAccount `json:"accounts,omitempty"`
+}
+
+func (o *OrderSyncOrder) GetUserId() uint64 {
+	return 0
 }
 
 func (o *OrderSyncOrder) Metadata() map[string]any {

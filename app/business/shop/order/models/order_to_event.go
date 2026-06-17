@@ -53,6 +53,7 @@ func BuildShopOrderSyncEvent(order *OrderSet) *OrderSyncRequest {
 		Orders: []*OrderSyncOrder{
 			{
 				Tid:              order.Tid,
+				UserId:           order.UserID,
 				Weight:           order.Weight,
 				Size:             order.Size,
 				BuyerNick:        order.BuyerNick,

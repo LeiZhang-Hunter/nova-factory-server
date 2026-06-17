@@ -5,10 +5,12 @@ package models
 
 import (
 	"encoding/json"
-	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // GoodsSyncReq 商品同步请求，实现 event.ProductEvent 接口
@@ -20,6 +22,7 @@ type GoodsSyncReq struct {
 	Callback       event.Callback      `json:"-" form:"-"`
 	DB             *gorm.DB            `json:"-" form:"-"`
 	Transaction    bool                `json:"-" form:"-"`
+	ctx            *gin.Context
 }
 
 // GetProducts 实现 event.ProductEvent 接口，将内部 GoodsInfoReq 转换为 event.ProductData 列表
@@ -52,7 +55,9 @@ func (g *GoodsSyncReq) WithDB(tx *gorm.DB) {
 func (g *GoodsSyncReq) ToEvent() event.ProductEvent {
 	return g
 }
-
+func (g *GoodsSyncReq) GetCtx() *gin.Context {
+	return g.ctx
+}
 func (g *GoodsSyncReq) GetTransaction() bool {
 	return g.Transaction
 }

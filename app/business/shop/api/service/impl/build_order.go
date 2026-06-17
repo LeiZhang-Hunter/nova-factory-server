@@ -40,6 +40,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 	}
 
 	return &shopordermodels.OrderSet{
+		UserID:               shopUser.ID,
 		PayTime:              time.Now().Format("2006-01-02 15:04:05"),
 		Tid:                  orderNo,
 		BuyerNick:            s.buildOrderBuyerNick(shopUser),

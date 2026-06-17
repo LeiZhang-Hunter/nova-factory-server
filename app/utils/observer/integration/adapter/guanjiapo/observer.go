@@ -3,12 +3,13 @@ package guanjiapo
 import (
 	"context"
 	"errors"
-	"go.uber.org/zap"
 	"nova-factory-server/app/utils/observer/integration/api"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
 	"nova-factory-server/app/utils/observer/integration/observer"
 	"nova-factory-server/app/utils/observer/integration/result"
+
+	"go.uber.org/zap"
 )
 
 // SyncObserver 管家婆同步观察者，实现 observer.Observer 接口
@@ -62,6 +63,6 @@ func (o *SyncObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
 }
 
 // OnOrderStatusChange 订单发货变化
-func (o *SyncObserver) OnOrderStatusChange(sendEvent event.OrderStratusEvent) error {
+func (o *SyncObserver) OnOrderStatusChange(sendEvent event.ZOrderStatusSyncReqEvent) error {
 	return nil
 }

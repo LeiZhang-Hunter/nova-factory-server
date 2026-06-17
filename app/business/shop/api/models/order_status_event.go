@@ -5,78 +5,96 @@ import (
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
+// OrderStatusData 订单状态变更数据，实现 event.OrderStratusEventData 接口。
+type OrderStatusData struct {
+	Tid          string `json:"tid"`
+	Status       string `json:"status"`
+	RefundStatus string `json:"refund_status"`
+}
+
+//GetTid() string
+//GetStatus() string
+//GetRefundstatus() string
+
+func NewOrderStatusData(tid, status, refundstatus string) []event.ZOrderStatusSyncReqData {
+	return []event.ZOrderStatusSyncReqData{
+		&OrderStatusData{
+			Tid:          tid,
+			Status:       status,
+			RefundStatus: refundstatus,
+		},
+	}
+}
+func (d *OrderStatusData) GetTid() string          { return d.Tid }
+func (d *OrderStatusData) GetStatus() string       { return d.Status }
+func (d *OrderStatusData) GetRefundstatus() string { return d.RefundStatus }
+
+// OrderStatusEvent 订单状态变更事件，同时实现 TransactionEvent[OrderStratusEvent] 和 OrderStratusEvent。
 type OrderStatusEvent struct {
-	db       *gorm.DB       `json:"-" form:"-"`
-	cache    cache.Cache    `json:"-"`
-	callback event.Callback `json:"-"`
-	metadata map[string]any
+	db          *gorm.DB
+	cache       cache.Cache
+	callback    event.Callback
+	metadata    map[string]any
+	cfg         config.Config
+	action      event.EventType
+	transaction bool
+	orders      []event.ZOrderStatusSyncReqData
+	ctx         *gin.Context
 }
 
-func (o *OrderStatusEvent) WithDB(tx *gorm.DB) {
-	o.db = tx
+// -- TransactionEvent[OrderStratusEvent] --
+
+func (e *OrderStatusEvent) GetDB() *gorm.DB                         { return e.db }
+func (e *OrderStatusEvent) WithDB(tx *gorm.DB)                      { e.db = tx }
+func (e *OrderStatusEvent) ToEvent() event.ZOrderStatusSyncReqEvent { return e }
+
+// -- Event --
+
+func (e *OrderStatusEvent) Config() config.Config       { return e.cfg }
+func (e *OrderStatusEvent) Action() event.EventType     { return e.action }
+func (e *OrderStatusEvent) GetCache() cache.Cache       { return e.cache }
+func (e *OrderStatusEvent) GetCallback() event.Callback { return e.callback }
+func (e *OrderStatusEvent) GetTransaction() bool        { return e.transaction }
+func (e *OrderStatusEvent) GetCtx() *gin.Context        { return e.ctx }
+func (e *OrderStatusEvent) WithCtx(ctx *gin.Context) {
+	e.ctx = ctx
 }
 
-func (o *OrderStatusEvent) Config() config.Config {
-	return nil
+// -- Base --
+
+func (e *OrderStatusEvent) Metadata() map[string]any {
+	if e.metadata == nil {
+		return make(map[string]any)
+	}
+	return e.metadata
+}
+func (e *OrderStatusEvent) Ptr() any { return e }
+
+// -- OrderStratusEvent --
+
+func (e *OrderStatusEvent) GetOrders() []event.ZOrderStatusSyncReqData {
+	if e.orders == nil {
+		return make([]event.ZOrderStatusSyncReqData, 0)
+	}
+	return e.orders
 }
 
-func (o *OrderStatusEvent) Action() event.EventType {
-	return ""
+// -- Builder --
+
+func (e *OrderStatusEvent) WithOrders(orders []event.ZOrderStatusSyncReqData) *OrderStatusEvent {
+	e.orders = orders
+	return e
 }
 
-func (o *OrderStatusEvent) GetCache() cache.Cache {
-	return o.cache
+func (e *OrderStatusEvent) WithMetadata(m map[string]any) *OrderStatusEvent {
+	e.metadata = m
+	return e
 }
 
-func (o *OrderStatusEvent) GetCallback() event.Callback {
-	return o.callback
-}
-
-func (o *OrderStatusEvent) GetTransaction() bool {
-	return true
-}
-
-func (o *OrderStatusEvent) Metadata() map[string]any {
-	return o.metadata
-}
-func (o *OrderStatusEvent) WithMetadata(metadata map[string]any) {
-	o.metadata = metadata
-}
-
-func (o *OrderStatusEvent) Ptr() any {
-	return o
-}
-
-func (o *OrderStatusEvent) Orders() []event.OrderStratusEventData {
-	return nil
-}
-
-func (o *OrderStatusEvent) GetDB() *gorm.DB {
-	return o.db
-}
-
-func (o *OrderStatusEvent) ToEvent() event.OrderStratusEvent {
-	return o
-}
-
-type OrderStatusEventData struct {
-	tid          string
-	status       string
-	refundstatus string
-}
-
-func NewOrderStatusEventData(tid, status, refundstatus string) *OrderStatusEventData {
-	return &OrderStatusEventData{tid: tid, status: status, refundstatus: refundstatus}
-}
-func (o *OrderStatusEventData) GetTid() string {
-	return o.tid
-}
-func (o *OrderStatusEventData) GetStatus() string {
-	return o.status
-}
-func (o *OrderStatusEventData) GetRefundstatus() string {
-	return o.refundstatus
+func (e *OrderStatusEvent) WithCallback(f event.Callback) {
+	e.callback = f
 }

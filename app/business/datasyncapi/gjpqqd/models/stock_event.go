@@ -1,10 +1,12 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type StockSyncReq struct {
@@ -13,6 +15,7 @@ type StockSyncReq struct {
 	Callback    event.Callback `json:"-"`
 	DB          *gorm.DB       `json:"-"`
 	Transaction bool           `json:"-"`
+	ctx         *gin.Context
 }
 
 func (s *StockSyncReq) GetDB() *gorm.DB {
@@ -23,6 +26,9 @@ func (s *StockSyncReq) WithDB(tx *gorm.DB) {
 }
 func (s *StockSyncReq) ToEvent() event.StockEvent {
 	return s
+}
+func (s *StockSyncReq) GetCtx() *gin.Context {
+	return s.ctx
 }
 
 func (s *StockSyncReq) GetTransaction() bool {

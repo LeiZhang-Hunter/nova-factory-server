@@ -29,5 +29,5 @@ type Observer interface {
 	OnOrderSendChange(sendEvent event.OrderSendEvent) error
 
 	// OnOrderStatusChange 订单状态更新
-	OnOrderStatusChange(sendEvent event.OrderStratusEvent) error
+	OnOrderStatusChange(sendEvent event.ZOrderStatusSyncReqEvent) error
 }

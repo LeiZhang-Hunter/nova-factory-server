@@ -9,6 +9,7 @@ import (
 // Order ERP订单主表
 type Order struct {
 	ID                   uint64          `json:"id,string" gorm:"column:id"`
+	UserId               uint64          `json:"user_id,string" gorm:"column:user_id"`
 	Tid                  string          `json:"tid" gorm:"column:tid"`
 	Weight               float64         `json:"weight" gorm:"column:weight"`
 	Size                 float64         `json:"size" gorm:"column:size"`
@@ -119,6 +120,7 @@ func ToOrder(event event.OrderEvent) []*Order {
 
 		order := &Order{
 			Tid:                  eventOrder.GetOrderNo(),
+			UserId:               eventOrder.GetUserId(),
 			Weight:               eventOrder.GetWeight(),
 			Size:                 eventOrder.GetSize(),
 			BuyerNick:            eventOrder.GetBuyerNick(),

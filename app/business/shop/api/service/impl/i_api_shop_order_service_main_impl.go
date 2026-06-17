@@ -13,6 +13,7 @@ import (
 	orderConstant "nova-factory-server/app/constant/order"
 	shopConstant "nova-factory-server/app/constant/shop"
 	"nova-factory-server/app/datasource/objectFile"
+	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/observer"
 	"strconv"
 	"strings"
@@ -571,8 +572,16 @@ func (s *IApiShopOrderServiceImpl) loadWechatConfig(c *gin.Context) (map[string]
 }
 
 // HandleWechatNotify 处理微信支付回调。
-func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo, transactionId, notifyRaw, mchId, appid, payerOpenid string, notifyTotalInt int64) error {
-	order, err := s.apiOrderDao.GetByTid(c, outTradeNo)
+// func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo, transactionId, notifyRaw, mchId, appid, payerOpenid string, notifyTotalInt int64) error {
+func (s *IApiShopOrderServiceImpl) HandleWechatNotify(e event.ZOrderStatusSyncReqEvent) error {
+	c := e.GetCtx()
+	var notifyData apimodels.PayNotifyData
+	if orderInfo, ok := e.Metadata()["order"]; ok {
+		notifyData = orderInfo.(apimodels.PayNotifyData)
+	} else {
+		return errors.New("订单信息不存在")
+	}
+	order, err := s.apiOrderDao.GetByTid(c, notifyData.OutTradeNo)
 	if err != nil || order == nil {
 		return errors.New("订单不存在")
 	}
@@ -584,24 +593,24 @@ func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo
 	if order.Status != orderConstant.ERPStatusNoPay {
 		return errors.New("订单状态错误")
 	}
-
+	rawBytes, _ := json.Marshal(notifyData)
+	notifyRaw := string(rawBytes)
 	// 金额校验
 	orderTotal := int64(math.Round(order.Total * 100))
-	if orderTotal != notifyTotalInt {
-		return fmt.Errorf("金额校验失败: 订单金额%d分, 回调金额%d分", orderTotal, notifyTotalInt)
+	if orderTotal != notifyData.Amount.Total {
+		return fmt.Errorf("金额校验失败: 订单金额%d分, 回调金额%d分", orderTotal, notifyData.Amount.Total)
 	}
 
 	now := time.Now()
-	order.TransactionID = transactionId
+	order.TransactionID = notifyData.TransactionID
 	order.NotifyRaw = notifyRaw
-	order.MchID = mchId
-	order.AppID = appid
-	order.PayerOpenid = payerOpenid
+	order.MchID = notifyData.MchID
+	order.AppID = notifyData.AppID
+	order.PayerOpenid = notifyData.Payer.Openid
 	order.PayTime = &now
 	order.Status = orderConstant.ERPStatusPayed
-
 	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
-		return s.apiOrderDao.MarkOrderPaidWithTx(c, tx, order.ID, order.PayTime, transactionId, notifyRaw, mchId, appid, payerOpenid)
+		return s.apiOrderDao.MarkOrderPaidWithTx(c, tx, order.ID, order.PayTime, notifyData.TransactionID, notifyRaw, notifyData.MchID, notifyData.AppID, notifyData.Payer.Openid)
 	})
 }
 

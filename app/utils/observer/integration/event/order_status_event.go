@@ -9,5 +9,5 @@ type OrderStratusEventData interface {
 type OrderStratusEvent interface {
 	Event
 	Base
-	Orders() []OrderStratusEventData
+	GetOrders() []OrderStratusEventData
 }

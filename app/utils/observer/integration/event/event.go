@@ -8,6 +8,7 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -35,6 +36,8 @@ type Event interface {
 	GetDB() *gorm.DB
 	// GetTransaction 是否打开事物
 	GetTransaction() bool
+	// GetCtx 获取gin.Context
+	GetCtx() *gin.Context
 }
 
 // TransactionEvent 事务事件。
