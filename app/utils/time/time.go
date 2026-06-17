@@ -179,3 +179,11 @@ func FirstTime(value *time.Time, fallback *time.Time) *time.Time {
 	}
 	return fallback
 }
+
+// FormatTime 格式化时间
+func FormatTime(value *time.Time) string {
+	if value == nil {
+		return ""
+	}
+	return value.Format("2006-01-02 15:04:05")
+}

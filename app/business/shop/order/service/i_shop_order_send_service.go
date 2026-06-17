@@ -1,4 +1,4 @@
-package shopservice
+package service
 
 import (
 	"nova-factory-server/app/utils/observer/integration/event"

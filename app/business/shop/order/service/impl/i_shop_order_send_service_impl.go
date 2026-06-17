@@ -1,15 +1,15 @@
-package shopserviceimpl
+package impl
 
 import (
 	"errors"
+	"nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"strings"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"nova-factory-server/app/business/shop/product/shopdao"
-	"nova-factory-server/app/business/shop/product/shopmodels"
-	"nova-factory-server/app/business/shop/product/shopservice"
+	"nova-factory-server/app/business/shop/order/dao"
+	"nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/constant/commonStatus"
 )
 
@@ -22,15 +22,15 @@ import (
 // 4. 批量写入发货明细；
 // 5. 任一步失败时返回 error，触发事务回滚。
 type ShopOrderSendServiceImpl struct {
-	sendDao   shopdao.IShopOrderSendDao
-	detailDao shopdao.IShopOrderSendDetailDao
+	sendDao   dao.IShopOrderSendDao
+	detailDao dao.IShopOrderSendDetailDao
 }
 
 // NewShopOrderSendService 创建订单发货服务。
 func NewShopOrderSendService(
-	sendDao shopdao.IShopOrderSendDao,
-	detailDao shopdao.IShopOrderSendDetailDao,
-) shopservice.IShopOrderSendService {
+	sendDao dao.IShopOrderSendDao,
+	detailDao dao.IShopOrderSendDetailDao,
+) service.IShopOrderSendService {
 	return &ShopOrderSendServiceImpl{
 		sendDao:   sendDao,
 		detailDao: detailDao,
@@ -43,7 +43,7 @@ func (s *ShopOrderSendServiceImpl) Set(sendEvent event.OrderSendEvent) error {
 		return errors.New("发货数据不能为空")
 	}
 
-	send := shopmodels.ToOrderSendByEvent(sendEvent)
+	send := models.ToOrderSendByEvent(sendEvent)
 	if send == nil {
 		return errors.New("发货事件转换失败")
 	}

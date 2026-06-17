@@ -4,14 +4,13 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
-	"nova-factory-server/app/utils/observer/integration/result"
-	"nova-factory-server/app/utils/store/integration"
+	"nova-factory-server/app/utils/stringUtils"
+	"nova-factory-server/app/utils/time"
 
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
+// OrderSyncRequest 同步请求
 type OrderSyncRequest struct {
 	Orders      []*OrderSyncOrder `json:"orders"`
 	cfg         config.Config     `json:"-"`
@@ -21,56 +20,6 @@ type OrderSyncRequest struct {
 	transaction bool              `json:"-"`
 	callback    event.Callback
 	ctx         *gin.Context
-}
-type OrderOrderSyncRequestCallback struct {
-	ctx        *gin.Context
-	orderEvent *OrderSyncRequest
-	isErr      bool
-	order      *OrderSet
-}
-
-func NewOrderSyncRequestCallback(c *gin.Context, orderEvent *OrderSyncRequest, order *OrderSet) *OrderOrderSyncRequestCallback {
-	return &OrderOrderSyncRequestCallback{
-		ctx:        c,
-		orderEvent: orderEvent,
-		order:      order,
-	}
-}
-func (s *OrderOrderSyncRequestCallback) OnSuccess(T event.Event, response result.SyncProductResponse) {
-	//TODO implement me
-	return
-}
-
-func (s *OrderOrderSyncRequestCallback) OnError(T event.Event, response result.SyncProductResponse, err error) {
-	//TODO implement me
-	s.isErr = true
-	return
-}
-
-// OnFinish 同步完成触发
-func (s *OrderOrderSyncRequestCallback) OnFinish(ev event.Event) {
-	if s.isErr {
-		return
-	}
-	order := s.orderEvent.ToEvent()
-	getService, serviceConfig, err := integration.GetStore().GetService(s.ctx)
-	if err != nil {
-		zap.L().Error("获取集成商服务失败", zap.Error(err))
-		return
-	}
-	if getService == nil {
-		return
-	}
-	if serviceConfig == nil {
-		return
-	}
-	s.orderEvent.WithConfig(serviceConfig)
-	_, err = getService.OrderSyncer().SyncOrders(s.ctx, order)
-	if err != nil {
-		zap.L().Error("同步订单失败", zap.Error(err))
-		return
-	}
-
 }
 
 func (o *OrderSyncRequest) WithDB(db *gorm.DB) {
@@ -450,4 +399,87 @@ type OrderSyncResult struct {
 	Tid      string `json:"tid"`
 	BillCode string `json:"billcode"`
 	Message  string `json:"message"`
+}
+
+func ToOrderSyncOrder(orderInfo *Order) *OrderSyncOrder {
+	if orderInfo == nil {
+		return nil
+	}
+	return &OrderSyncOrder{
+		Tid:              orderInfo.Tid,
+		Weight:           orderInfo.Weight,
+		Size:             orderInfo.Size,
+		BuyerNick:        orderInfo.BuyerNick,
+		BuyerMessage:     orderInfo.BuyerMessage,
+		SellerMemo:       orderInfo.SellerMemo,
+		Total:            orderInfo.Total,
+		Privilege:        orderInfo.Privilege,
+		PostFee:          orderInfo.PostFee,
+		ReceiverName:     orderInfo.ReceiverName,
+		ReceiverState:    stringUtils.FirstNonEmpty(orderInfo.ReceiverProvinceName, orderInfo.ReceiverProvince),
+		ReceiverCity:     stringUtils.FirstNonEmpty(orderInfo.ReceiverCityName, orderInfo.ReceiverCity),
+		ReceiverDistrict: stringUtils.FirstNonEmpty(orderInfo.ReceiverDistrictName, orderInfo.ReceiverDistrict),
+		ReceiverAddress:  orderInfo.ReceiverAddress,
+		ReceiverPhone:    orderInfo.ReceiverPhone,
+		ReceiverMobile:   orderInfo.ReceiverMobile,
+		Created:          time.FormatTime(orderInfo.CreateTime),
+		Status:           orderInfo.Status,
+		Type:             orderInfo.Type,
+		InvoiceName:      orderInfo.InvoiceName,
+		SellerFlag:       orderInfo.SellerFlag,
+		PayTime:          time.FormatTime(orderInfo.PayTime),
+		LogistBTypeCode:  orderInfo.LogistBTypeCode,
+		LogistBillCode:   orderInfo.LogistBillCode,
+		BTypeCode:        orderInfo.BTypeCode,
+		Details:          toOrderSyncDetails(orderInfo.Details),
+		Accounts:         toOrderSyncAccounts(orderInfo.Accounts),
+	}
+}
+
+func toOrderSyncDetails(details []*OrderDetail) []*OrderSyncDetail {
+	if len(details) == 0 {
+		return []*OrderSyncDetail{}
+	}
+	result := make([]*OrderSyncDetail, 0, len(details))
+	for _, detail := range details {
+		if detail == nil {
+			continue
+		}
+		result = append(result, &OrderSyncDetail{
+			OID:            detail.OID,
+			Barcode:        detail.Barcode,
+			EShopGoodsID:   detail.EShopGoodsID,
+			OuterIID:       detail.OuterIID,
+			EShopGoodsName: detail.EShopGoodsName,
+			EShopSKUId:     detail.EShopSkuID,
+			EShopSKUName:   detail.EShopSkuName,
+			NumIID:         detail.NumIID,
+			SKUId:          detail.SkuID,
+			Num:            detail.Num,
+			Payment:        detail.Payment,
+			PicPath:        detail.PicPath,
+			Weight:         detail.Weight,
+			Size:           detail.Size,
+			UnitID:         detail.UnitID,
+			UnitQty:        detail.UnitQty,
+		})
+	}
+	return result
+}
+
+func toOrderSyncAccounts(accounts []*OrderAccount) []*OrderSyncAccount {
+	if len(accounts) == 0 {
+		return []*OrderSyncAccount{}
+	}
+	result := make([]*OrderSyncAccount, 0, len(accounts))
+	for _, account := range accounts {
+		if account == nil {
+			continue
+		}
+		result = append(result, &OrderSyncAccount{
+			FinanceCode: account.FinanceCode,
+			Total:       account.Total,
+		})
+	}
+	return result
 }
