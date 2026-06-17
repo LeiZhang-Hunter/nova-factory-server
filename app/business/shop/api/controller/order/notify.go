@@ -12,6 +12,7 @@ import (
 	orderDao "nova-factory-server/app/business/shop/order/dao"
 	models2 "nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/constant/order"
+	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/objectFile"
 	"nova-factory-server/app/utils/observer/integration/observer"
 	"os"
@@ -33,13 +34,16 @@ type OrderNotify struct {
 	configDao dao.IApiShopSysConfigDao
 	orderDao  orderDao.IOrderDao
 	db        *gorm.DB
+	cache     cache.Cache
 }
 
 // NewOrderNotify 创建微信支付回调控制器。
-func NewOrderNotify(service service.IApiShopOrderService, configDao dao.IApiShopSysConfigDao, orderDao orderDao.IOrderDao, db *gorm.DB) *OrderNotify {
+func NewOrderNotify(service service.IApiShopOrderService, configDao dao.IApiShopSysConfigDao,
+	orderDao orderDao.IOrderDao, db *gorm.DB, cache cache.Cache) *OrderNotify {
 	return &OrderNotify{service: service,
 		configDao: configDao, db: db,
 		orderDao: orderDao,
+		cache:    cache,
 	}
 }
 
@@ -158,17 +162,17 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	// 序列化回调原文（排障用）
 	//rawBytes, _ := json.Marshal(nd)
 	//notifyRaw := string(rawBytes)
-	m := new(models.OrderStatusEvent)
+	//m := new(models.OrderStatusEvent)
 	//erpOrderInfo := models.OrderStatusData{
 	//	Tid:          nd.OutTradeNo,
 	//	Status:       order.ERPStatusPayed,
 	//	RefundStatus: order.REFUNDStatusNormal,
 	//}
-	data := models.NewOrderStatusData(nd.OutTradeNo, order.ERPStatusPayed, order.REFUNDStatusNormal)
-	m.WithOrders(data)
-	m.WithMetadata(gin.H{"order": nd})
-	m.WithCtx(c)
-	m.WithDB(s.db)
+	//data := models.NewOrderStatusData(nd.OutTradeNo, order.ERPStatusPayed, order.REFUNDStatusNormal)
+	//m.WithOrders(data)
+	//m.WithMetadata(gin.H{"order": nd})
+	//m.WithCtx(c)
+	//m.WithDB(s.db)
 
 	info, err := s.orderDao.GetByTid(c, nd.OutTradeNo)
 	if err != nil {
@@ -181,12 +185,17 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 		writeWechatNotifyFail(c, "订单不存在", zap.String("tid", nd.OutTradeNo))
 		return
 	}
+	info.Status = order.ERPStatusPayed
+	now := time.Now()
+	info.PayTime = &now
 	var request models2.OrderSyncRequest
 	request.Orders = []*models2.OrderSyncOrder{
 		models2.ToOrderSyncOrder(info),
 	}
-	m.WithCallback(callback.NewOrderSyncRequestCallback(c, &request))
 
+	request.WithCallback(callback.NewOrderSyncRequestCallback(c, &request))
+	request.WithDB(s.db)
+	request.WithCache(s.cache)
 	//m.WithCallback(callback.NewShopApiCallback(m))
 	err = observer.GetNotifier().OnOrderChanged(&request)
 	if err != nil {

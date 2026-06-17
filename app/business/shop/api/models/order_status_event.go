@@ -48,8 +48,11 @@ type OrderStatusEvent struct {
 
 // -- TransactionEvent[OrderStratusEvent] --
 
-func (e *OrderStatusEvent) GetDB() *gorm.DB                         { return e.db }
-func (e *OrderStatusEvent) WithDB(tx *gorm.DB)                      { e.db = tx }
+func (e *OrderStatusEvent) GetDB() *gorm.DB    { return e.db }
+func (e *OrderStatusEvent) WithDB(tx *gorm.DB) { e.db = tx }
+func (e *OrderStatusEvent) WithCache(c cache.Cache) {
+	e.cache = c
+}
 func (e *OrderStatusEvent) ToEvent() event.ZOrderStatusSyncReqEvent { return e }
 
 // -- Event --
@@ -58,8 +61,13 @@ func (e *OrderStatusEvent) Config() config.Config       { return e.cfg }
 func (e *OrderStatusEvent) Action() event.EventType     { return e.action }
 func (e *OrderStatusEvent) GetCache() cache.Cache       { return e.cache }
 func (e *OrderStatusEvent) GetCallback() event.Callback { return e.callback }
-func (e *OrderStatusEvent) GetTransaction() bool        { return e.transaction }
-func (e *OrderStatusEvent) GetCtx() *gin.Context        { return e.ctx }
+
+func (e *OrderStatusEvent) WithCallback(f event.Callback) {
+	e.callback = f
+}
+
+func (e *OrderStatusEvent) GetTransaction() bool { return e.transaction }
+func (e *OrderStatusEvent) GetCtx() *gin.Context { return e.ctx }
 func (e *OrderStatusEvent) WithCtx(ctx *gin.Context) {
 	e.ctx = ctx
 }
@@ -93,8 +101,4 @@ func (e *OrderStatusEvent) WithOrders(orders []event.ZOrderStatusSyncReqData) *O
 func (e *OrderStatusEvent) WithMetadata(m map[string]any) *OrderStatusEvent {
 	e.metadata = m
 	return e
-}
-
-func (e *OrderStatusEvent) WithCallback(f event.Callback) {
-	e.callback = f
 }
