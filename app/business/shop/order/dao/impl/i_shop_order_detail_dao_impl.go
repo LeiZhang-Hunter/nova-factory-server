@@ -22,35 +22,6 @@ type OrderDetailDaoImpl struct {
 	table string
 }
 
-// shopOrderDetailRow shop 订单明细表行模型，显式绑定真实表字段名。
-type shopOrderDetailRow struct {
-	ID             uint64     `gorm:"column:id"`
-	OrderID        uint64     `gorm:"column:order_id"`
-	Tid            string     `gorm:"column:tid"`
-	OID            string     `gorm:"column:oid"`
-	Barcode        string     `gorm:"column:barcode"`
-	EShopGoodsID   string     `gorm:"column:eshop_goods_id"`
-	OuterIID       string     `gorm:"column:outer_iid"`
-	EShopGoodsName string     `gorm:"column:eshop_goods_name"`
-	EShopSkuID     string     `gorm:"column:eshop_sku_id"`
-	EShopSkuName   string     `gorm:"column:eshop_sku_name"`
-	NumIID         int64      `gorm:"column:num_iid"`
-	SkuID          int64      `gorm:"column:sku_id"`
-	Num            float64    `gorm:"column:num"`
-	Payment        float64    `gorm:"column:payment"`
-	PicPath        string     `gorm:"column:pic_path"`
-	Weight         float64    `gorm:"column:weight"`
-	Size           float64    `gorm:"column:size"`
-	UnitID         int64      `gorm:"column:unit_id"`
-	UnitQty        float64    `gorm:"column:unit_qty"`
-	DeptID         int64      `gorm:"column:dept_id"`
-	CreateBy       int64      `gorm:"column:create_by"`
-	CreateTime     *time.Time `gorm:"column:create_time"`
-	UpdateBy       int64      `gorm:"column:update_by"`
-	UpdateTime     *time.Time `gorm:"column:update_time"`
-	State          int32      `gorm:"column:state"`
-}
-
 // NewOrderDetailDao 创建 shop 订单明细 DAO。
 func NewOrderDetailDao(db *gorm.DB) dao.IOrderDetailDao {
 	return newOrderDetailDaoImpl(db)
@@ -72,12 +43,12 @@ func (d *OrderDetailDaoImpl) BatchCreate(tx *gorm.DB, c *gin.Context, orderID ui
 	if err := d.validateOIDs(tx, orderID, details); err != nil {
 		return err
 	}
-	rows := make([]*shopOrderDetailRow, 0, len(details))
+	rows := make([]*models.OrderDetail, 0, len(details))
 	for _, item := range details {
 		if item == nil {
 			continue
 		}
-		row := &shopOrderDetailRow{
+		row := &models.OrderDetail{
 			OrderID:        orderID,
 			Tid:            tid,
 			OID:            item.OID,
@@ -116,12 +87,12 @@ func (d *OrderDetailDaoImpl) BatchCreateByOrder(tx *gorm.DB, orderID uint64, ord
 	if order == nil || len(order.Details) == 0 {
 		return nil
 	}
-	rows := make([]*shopOrderDetailRow, 0, len(order.Details))
+	rows := make([]*models.OrderDetail, 0, len(order.Details))
 	for _, item := range order.Details {
 		if item == nil {
 			continue
 		}
-		row := &shopOrderDetailRow{
+		row := &models.OrderDetail{
 			OrderID:        orderID,
 			Tid:            order.Tid,
 			OID:            item.OID,
@@ -141,11 +112,13 @@ func (d *OrderDetailDaoImpl) BatchCreateByOrder(tx *gorm.DB, orderID uint64, ord
 			UnitID:         item.UnitID,
 			UnitQty:        item.UnitQty,
 			DeptID:         order.DeptID,
-			CreateBy:       order.CreateBy,
-			CreateTime:     now,
-			UpdateBy:       order.UpdateBy,
-			UpdateTime:     now,
-			State:          commonStatus.NORMAL,
+			BaseEntity: baize.BaseEntity{
+				CreateBy:   order.CreateBy,
+				CreateTime: now,
+				UpdateBy:   order.UpdateBy,
+				UpdateTime: now,
+			},
+			State: commonStatus.NORMAL,
 		}
 		rows = append(rows, row)
 	}
@@ -159,7 +132,7 @@ func (d *OrderDetailDaoImpl) BatchCreateByOrder(tx *gorm.DB, orderID uint64, ord
 func (d *OrderDetailDaoImpl) DeleteByOrderID(tx *gorm.DB, orderID uint64) error {
 	return tx.Table(d.table).
 		Where("order_id = ?", orderID).
-		Delete(&shopOrderDetailRow{}).Error
+		Delete(&models.OrderDetail{}).Error
 }
 
 // DeleteByOrderIDs 按订单ID集合删除明细记录。
@@ -200,7 +173,7 @@ func (d *OrderDetailDaoImpl) DeleteByTidAndOIDs(tx *gorm.DB, tid string, details
 	return tx.Table(d.table).
 		Where("tid = ?", tid).
 		Where("oid IN ?", oids).
-		Delete(&shopOrderDetailRow{}).Error
+		Delete(&models.OrderDetail{}).Error
 }
 
 // ListByOrderIDs 按订单ID集合查询明细记录。
@@ -212,8 +185,7 @@ func (d *OrderDetailDaoImpl) listByOrderIDsWithDB(c *gin.Context, db *gorm.DB, o
 	if len(orderIDs) == 0 {
 		return []*models.OrderDetail{}, nil
 	}
-	rows := make([]*models.OrderDetail, 0)
-	rowList := make([]*shopOrderDetailRow, 0)
+	rowList := make([]*models.OrderDetail, 0)
 	if err := db.Table(d.table).
 		Where("order_id IN ?", orderIDs).
 		Where("state = ?", commonStatus.NORMAL).
@@ -221,14 +193,7 @@ func (d *OrderDetailDaoImpl) listByOrderIDsWithDB(c *gin.Context, db *gorm.DB, o
 		Find(&rowList).Error; err != nil {
 		return nil, err
 	}
-	for _, row := range rowList {
-		if row == nil {
-			continue
-		}
-		item := row.toModel()
-		rows = append(rows, &item)
-	}
-	return rows, nil
+	return rowList, nil
 }
 
 // validateOIDs 校验订单明细 OID 的唯一性。
@@ -253,7 +218,7 @@ func (d *OrderDetailDaoImpl) validateOIDs(tx *gorm.DB, orderID uint64, details [
 		return nil
 	}
 
-	var exists shopOrderDetailRow
+	var exists *models.OrderDetail
 	db := tx.Table(d.table).Where("oid IN ?", oids)
 	if orderID > 0 {
 		db = db.Where("order_id <> ?", orderID)
@@ -265,40 +230,4 @@ func (d *OrderDetailDaoImpl) validateOIDs(tx *gorm.DB, orderID uint64, details [
 		return err
 	}
 	return fmt.Errorf("订单明细oid已存在: %s", exists.OID)
-}
-
-// toModel 将真实表结构行模型转换为领域模型。
-func (r *shopOrderDetailRow) toModel() models.OrderDetail {
-	if r == nil {
-		return models.OrderDetail{}
-	}
-	return models.OrderDetail{
-		ID:             r.ID,
-		OrderID:        r.OrderID,
-		Tid:            r.Tid,
-		OID:            r.OID,
-		Barcode:        r.Barcode,
-		EShopGoodsID:   r.EShopGoodsID,
-		OuterIID:       r.OuterIID,
-		EShopGoodsName: r.EShopGoodsName,
-		EShopSkuID:     r.EShopSkuID,
-		EShopSkuName:   r.EShopSkuName,
-		NumIID:         r.NumIID,
-		SkuID:          r.SkuID,
-		Num:            r.Num,
-		Payment:        r.Payment,
-		PicPath:        r.PicPath,
-		Weight:         r.Weight,
-		Size:           r.Size,
-		UnitID:         r.UnitID,
-		UnitQty:        r.UnitQty,
-		DeptID:         r.DeptID,
-		BaseEntity: baize.BaseEntity{
-			CreateBy:   r.CreateBy,
-			CreateTime: r.CreateTime,
-			UpdateBy:   r.UpdateBy,
-			UpdateTime: r.UpdateTime,
-		},
-		State: r.State,
-	}
 }

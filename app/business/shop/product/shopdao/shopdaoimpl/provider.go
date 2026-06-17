@@ -5,5 +5,4 @@ import (
 )
 
 var ProviderSet = wire.NewSet(NewShopCategoryDao, NewShopGoodsDao, NewShopGoodsVectorDao,
-	NewShopSkuDao, NewIShopOrderDaoImpl, NewShopOrderDetailDaoImpl, NewShopOrderAccountDaoImpl,
-	NewShopOrderSendDaoImpl, NewShopOrderSendDetailDaoImpl)
+	NewShopSkuDao)

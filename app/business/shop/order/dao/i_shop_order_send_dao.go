@@ -1,8 +1,8 @@
-package shopdao
+package dao
 
 import (
 	"gorm.io/gorm"
-	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/business/shop/order/models"
 )
 
 // IShopOrderSendDao 订单发货主表数据访问接口。
@@ -16,5 +16,5 @@ type IShopOrderSendDao interface {
 	Transaction(fn func(tx *gorm.DB) error) error
 
 	// Create 新增发货主表记录。
-	Create(tx *gorm.DB, send *shopmodels.OrderSend) error
+	Create(tx *gorm.DB, send *models.OrderSend) error
 }
