@@ -119,8 +119,10 @@ func (o *OrderDaoImpl) Create(tx *gorm.DB, order *models.Order) error {
 	if order.ID == 0 {
 		order.ID = uint64(snowflake.GenID())
 	}
-	row := buildOrderRow(order)
-	return tx.Table(o.table).Create(row).Error
+	now := time.Now()
+	order.CreateTime = &now
+	order.UpdateTime = &now
+	return tx.Table(o.table).Create(order).Error
 }
 
 // UpdateByID 在事务内按 ID 更新 shop 订单主表记录。

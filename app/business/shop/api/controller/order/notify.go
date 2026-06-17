@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"nova-factory-server/app/business/shop/api/callback"
 	"nova-factory-server/app/business/shop/api/models"
+	"nova-factory-server/app/business/shop/order/callback"
+	orderDao "nova-factory-server/app/business/shop/order/dao"
+	models2 "nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/constant/order"
 	"nova-factory-server/app/datasource/objectFile"
 	"nova-factory-server/app/utils/observer/integration/observer"
@@ -29,12 +31,16 @@ import (
 type OrderNotify struct {
 	service   service.IApiShopOrderService
 	configDao dao.IApiShopSysConfigDao
+	orderDao  orderDao.IOrderDao
 	db        *gorm.DB
 }
 
 // NewOrderNotify 创建微信支付回调控制器。
-func NewOrderNotify(service service.IApiShopOrderService, configDao dao.IApiShopSysConfigDao, db *gorm.DB) *OrderNotify {
-	return &OrderNotify{service: service, configDao: configDao, db: db}
+func NewOrderNotify(service service.IApiShopOrderService, configDao dao.IApiShopSysConfigDao, orderDao orderDao.IOrderDao, db *gorm.DB) *OrderNotify {
+	return &OrderNotify{service: service,
+		configDao: configDao, db: db,
+		orderDao: orderDao,
+	}
 }
 
 // PublicRoutes 注册微信支付回调路由到 publicGroup（不鉴权）。
@@ -163,8 +169,30 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	m.WithMetadata(gin.H{"order": nd})
 	m.WithCtx(c)
 	m.WithDB(s.db)
-	m.WithCallback(callback.NewShopApiCallback(m))
-	observer.GetNotifier().OnOrderStatusChange(m)
+
+	info, err := s.orderDao.GetByTid(c, nd.OutTradeNo)
+	if err != nil {
+		zap.L().Error("获取订单失败", zap.Error(err), zap.String("tid", nd.OutTradeNo))
+		writeWechatNotifyFail(c, "获取订单失败", zap.Error(err), zap.String("tid", nd.OutTradeNo))
+		return
+	}
+	if info == nil {
+		zap.L().Error("订单不存在", zap.String("tid", nd.OutTradeNo))
+		writeWechatNotifyFail(c, "订单不存在", zap.String("tid", nd.OutTradeNo))
+		return
+	}
+	var request models2.OrderSyncRequest
+	request.Orders = []*models2.OrderSyncOrder{
+		models2.ToOrderSyncOrder(info),
+	}
+	m.WithCallback(callback.NewOrderSyncRequestCallback(c, &request))
+
+	//m.WithCallback(callback.NewShopApiCallback(m))
+	err = observer.GetNotifier().OnOrderChanged(&request)
+	if err != nil {
+		writeWechatNotifyFail(c, "订单同步观察者失败", zap.Error(err))
+		return
+	}
 	// 更新订单状态
 	//if err := s.service.HandleWechatNotify(c, nd.OutTradeNo, nd.TransactionID, notifyRaw, nd.MchID, nd.AppID, nd.Payer.Openid, nd.Amount.Total); err != nil {
 	//	writeWechatNotifyFail(c, err.Error(), zap.Error(err), zap.String("out_trade_no", nd.OutTradeNo), zap.String("transaction_id", nd.TransactionID), zap.Int64("notify_total", nd.Amount.Total))

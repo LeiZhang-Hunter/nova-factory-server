@@ -81,7 +81,13 @@ func ToShopOrder(order *shopordermodels.Order) *Order {
 		ReceiverCity:          stringUtils.FirstNonEmpty(order.ReceiverCityName, order.ReceiverCity),
 		ReceiverDistrict:      stringUtils.FirstNonEmpty(order.ReceiverDistrictName, order.ReceiverDistrict),
 		ReceiverDetailAddress: order.ReceiverAddress,
-		Remark:                stringUtils.FirstNonEmpty(order.SellerMemo, order.BuyerMessage),
+		BaseEntity: baize.BaseEntity{
+			CreateBy:   order.CreateBy,
+			CreateTime: order.CreateTime,
+			UpdateBy:   order.UpdateBy,
+			UpdateTime: order.UpdateTime,
+		},
+		Remark: stringUtils.FirstNonEmpty(order.SellerMemo, order.BuyerMessage),
 	}
 }
 

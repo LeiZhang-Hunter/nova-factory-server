@@ -3,13 +3,11 @@ package impl
 import (
 	"fmt"
 	"nova-factory-server/app/business/shop/api/models"
+	shopordermodels "nova-factory-server/app/business/shop/order/models"
 	shopusermodels "nova-factory-server/app/business/shop/user/models"
 	orderConstant "nova-factory-server/app/constant/order"
 	shopConstant "nova-factory-server/app/constant/shop"
 	"strings"
-	"time"
-
-	shopordermodels "nova-factory-server/app/business/shop/order/models"
 )
 
 // buildERPOrderSet 将商城订单请求转换为 ERP 订单保存参数。
@@ -40,8 +38,8 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 	}
 
 	return &shopordermodels.OrderSet{
-		UserID:               shopUser.ID,
-		PayTime:              time.Now().Format("2006-01-02 15:04:05"),
+		UserID: shopUser.ID,
+		//PayTime:              time.Now().Format("2006-01-02 15:04:05"),
 		Tid:                  orderNo,
 		BuyerNick:            s.buildOrderBuyerNick(shopUser),
 		BuyerMessage:         strings.TrimSpace(req.Remark),
