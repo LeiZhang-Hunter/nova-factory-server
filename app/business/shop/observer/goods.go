@@ -1,6 +1,7 @@
 package observer
 
 import (
+	"nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
@@ -9,14 +10,14 @@ import (
 
 type ShopObserver struct {
 	goodsService     shopservice.IShopGoodsService
-	orderService     shopservice.IShopOrderService
-	orderSendService shopservice.IShopOrderSendService
+	orderService     service.IOrderService
+	orderSendService service.IShopOrderSendService
 }
 
 func NewShopObserver(
 	goodsService shopservice.IShopGoodsService,
-	orderService shopservice.IShopOrderService,
-	orderSendService shopservice.IShopOrderSendService,
+	orderService service.IOrderService,
+	orderSendService service.IShopOrderSendService,
 ) *ShopObserver {
 	return &ShopObserver{
 		goodsService:     goodsService,
@@ -54,6 +55,6 @@ func (s *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
 }
 
 // OnOrderStatusChange 订单发货变化
-func (o *ShopObserver) OnOrderStatusChange(sendEvent event.OrderStratusEvent) error {
-	return nil
+func (o *ShopObserver) OnOrderStatusChange(event event.OrderStratusEvent) error {
+	return o.orderService.SyncOrderStatus(event)
 }

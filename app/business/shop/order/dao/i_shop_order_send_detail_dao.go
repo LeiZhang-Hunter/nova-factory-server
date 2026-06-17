@@ -1,8 +1,8 @@
-package shopdao
+package dao
 
 import (
 	"gorm.io/gorm"
-	"nova-factory-server/app/business/shop/product/shopmodels"
+	"nova-factory-server/app/business/shop/order/models"
 )
 
 // IShopOrderSendDetailDao 订单发货明细表数据访问接口。
@@ -16,5 +16,5 @@ type IShopOrderSendDetailDao interface {
 	// - tx：外层事务；
 	// - sendID：发货主表 ID，用于填充明细 send_id；
 	// - details：本次写入的发货明细列表。
-	BatchCreate(tx *gorm.DB, sendID uint64, details []*shopmodels.OrderSendDetail) error
+	BatchCreate(tx *gorm.DB, sendID uint64, details []*models.OrderSendDetail) error
 }

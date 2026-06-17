@@ -1,8 +1,8 @@
-package shopdaoimpl
+package impl
 
 import (
-	"nova-factory-server/app/business/shop/product/shopdao"
-	"nova-factory-server/app/business/shop/product/shopmodels"
+	shopdao "nova-factory-server/app/business/shop/order/dao"
+	shopmodels "nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/constant/commonStatus"
 
 	"gorm.io/gorm"

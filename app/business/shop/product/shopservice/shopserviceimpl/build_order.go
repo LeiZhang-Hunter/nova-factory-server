@@ -2,7 +2,7 @@ package shopserviceimpl
 
 import (
 	"go.uber.org/zap"
-	"nova-factory-server/app/business/shop/product/shopmodels"
+	shopmodels "nova-factory-server/app/business/shop/order/models"
 	orderConstant "nova-factory-server/app/constant/order"
 	"strings"
 )

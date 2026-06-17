@@ -16,6 +16,12 @@ type IOrderService interface {
 	DeleteByIDs(c *gin.Context, ids []uint64) error
 	SynchronizeSalesOrders(c *gin.Context, req *models.OrderSyncRequest) (result.OrderSyncResponse, error)
 
-	// Sync 同步销售订单
-	Sync(event event.OrderEvent)
+	// SyncOrder 同步订单事件。
+	//
+	// 实现层会把事件转为商城订单模型，并在一个事务里完成主表和子表同步。
+	// 任一 DAO 操作返回错误时，service 会返回该错误并触发事务回滚。
+	SyncOrder(event event.OrderEvent) error
+
+	// SyncOrderStatus 同步订单状态
+	SyncOrderStatus(event event.OrderStratusEvent) error
 }

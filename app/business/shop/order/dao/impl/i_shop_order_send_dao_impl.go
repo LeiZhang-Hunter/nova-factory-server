@@ -1,11 +1,11 @@
-package shopdaoimpl
+package impl
 
 import (
 	"errors"
 
 	"gorm.io/gorm"
-	"nova-factory-server/app/business/shop/product/shopdao"
-	"nova-factory-server/app/business/shop/product/shopmodels"
+	shopdao "nova-factory-server/app/business/shop/order/dao"
+	shopmodels "nova-factory-server/app/business/shop/order/models"
 )
 
 // ShopOrderSendDaoImpl 订单发货主表 DAO 实现。

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	models2 "nova-factory-server/app/business/shop/activity/models"
+	"nova-factory-server/app/business/shop/order/callback"
 	shopordermodels "nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	shopusermodels "nova-factory-server/app/business/shop/user/models"
@@ -780,7 +781,7 @@ func (s *IApiShopOrderServiceImpl) syncCreatedOrder(tx *gorm.DB, c *gin.Context,
 	orderEvent.WithCache(s.cache)
 	orderEvent.WithDB(tx)
 
-	orderEvent.WithCallback(shopordermodels.NewOrderSyncRequestCallback(c, orderEvent, order))
+	orderEvent.WithCallback(callback.NewOrderSyncRequestCallback(c, orderEvent, order))
 	if err := observer.GetNotifier().OnOrderChanged(orderEvent); err != nil {
 		return fmt.Errorf("订单同步观察者失败: %v", err)
 	}
