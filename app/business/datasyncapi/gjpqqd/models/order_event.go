@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -77,6 +78,10 @@ type OrderItem struct {
 	db               *gorm.DB
 }
 
+func (o *OrderItem) GetUserId() uint64 {
+	return 0
+}
+
 func (o *OrderItem) GetOrderNo() string          { return o.OrderNo }
 func (o *OrderItem) GetWeight() float64          { return o.Weight }
 func (o *OrderItem) GetSize() float64            { return o.Size }
@@ -128,6 +133,7 @@ type OrderSendReq struct {
 	Subtid      string            `json:"subtid" form:"subtid"`
 	Details     []OrderSendDetail `json:"details" form:"details"`
 	DB          *gorm.DB          `json:"-" form:"-"`
+	ctx         *gin.Context
 }
 
 func (o *OrderSendReq) GetDetails() []event.OrderSendDetail {
@@ -162,6 +168,10 @@ func (o *OrderSendReq) WithDB(tx *gorm.DB) {
 }
 func (o *OrderSendReq) ToEvent() event.OrderSendEvent {
 	return o
+}
+
+func (o *OrderSendReq) GetCtx() *gin.Context {
+	return o.ctx
 }
 
 // Config 返回本次事件关联的集成配置，可能为 nil（表示未配置集成）

@@ -1,12 +1,13 @@
 package callback
 
 import (
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
 	"nova-factory-server/app/utils/store/integration"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // OrderOrderSyncRequestCallback 订单回调处理
@@ -14,14 +15,12 @@ type OrderOrderSyncRequestCallback struct {
 	ctx        *gin.Context
 	orderEvent *models.OrderSyncRequest
 	isErr      bool
-	order      *models.OrderSet
 }
 
-func NewOrderSyncRequestCallback(c *gin.Context, orderEvent *models.OrderSyncRequest, order *models.OrderSet) *OrderOrderSyncRequestCallback {
+func NewOrderSyncRequestCallback(c *gin.Context, orderEvent *models.OrderSyncRequest) *OrderOrderSyncRequestCallback {
 	return &OrderOrderSyncRequestCallback{
 		ctx:        c,
 		orderEvent: orderEvent,
-		order:      order,
 	}
 }
 func (s *OrderOrderSyncRequestCallback) OnSuccess(T event.Event, response result.SyncProductResponse) {

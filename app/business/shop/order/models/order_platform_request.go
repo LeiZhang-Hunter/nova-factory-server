@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/utils/stringUtils"
 	"nova-factory-server/app/utils/time"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -19,6 +20,7 @@ type OrderSyncRequest struct {
 	db          *gorm.DB          `json:"-"`
 	transaction bool              `json:"-"`
 	callback    event.Callback
+	ctx         *gin.Context
 }
 
 func (o *OrderSyncRequest) WithDB(db *gorm.DB) {
@@ -30,6 +32,9 @@ func (o *OrderSyncRequest) GetDB() *gorm.DB {
 }
 func (o *OrderSyncRequest) ToEvent() event.OrderEvent {
 	return o
+}
+func (o *OrderSyncRequest) GetCtx() *gin.Context {
+	return o.ctx
 }
 func (o *OrderSyncRequest) GetTransaction() bool {
 	return o.transaction
@@ -94,6 +99,7 @@ func (o *OrderSyncRequest) Cache() cache.Cache {
 
 type OrderSyncOrder struct {
 	Tid              string              `json:"tid"`
+	UserId           int64               `json:"user_id"`
 	Weight           float64             `json:"weight"`
 	Size             float64             `json:"size"`
 	BuyerNick        string              `json:"buyernick"`
@@ -235,6 +241,9 @@ func (o *OrderSyncOrder) GetLogIstBillCode() string {
 // GetBTypeCode 往来单位编码
 func (o *OrderSyncOrder) GetBTypeCode() string {
 	return o.BTypeCode
+}
+func (o *OrderSyncOrder) GetUserId() uint64 {
+	return uint64(o.UserId)
 }
 
 // Details 订单商品信息

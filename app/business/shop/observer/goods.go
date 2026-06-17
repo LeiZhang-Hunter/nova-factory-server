@@ -1,7 +1,8 @@
 package observer
 
 import (
-	"nova-factory-server/app/business/shop/order/service"
+	apiService "nova-factory-server/app/business/shop/api/service"
+	orderservice "nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
@@ -9,20 +10,20 @@ import (
 )
 
 type ShopObserver struct {
-	goodsService     shopservice.IShopGoodsService
-	orderService     service.IOrderService
-	orderSendService service.IShopOrderSendService
+	goodsService    shopservice.IShopGoodsService
+	orderService    orderservice.IOrderService
+	apiOrderService apiService.IApiShopOrderService
 }
 
 func NewShopObserver(
 	goodsService shopservice.IShopGoodsService,
-	orderService service.IOrderService,
-	orderSendService service.IShopOrderSendService,
+	orderService orderservice.IOrderService,
+	apiOrderService apiService.IApiShopOrderService,
 ) *ShopObserver {
 	return &ShopObserver{
-		goodsService:     goodsService,
-		orderService:     orderService,
-		orderSendService: orderSendService,
+		goodsService:    goodsService,
+		orderService:    orderService,
+		apiOrderService: apiOrderService,
 	}
 }
 
@@ -50,11 +51,15 @@ func (s *ShopObserver) OnOrderChanged(event event.OrderEvent) error {
 
 // OnOrderSendChange 订单发货变化
 func (s *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
-	s.orderSendService.Set(sendEvent)
+	//s.orderService.Set(sendEvent)
 	return nil
 }
 
 // OnOrderStatusChange 订单发货变化
-func (o *ShopObserver) OnOrderStatusChange(event event.OrderStratusEvent) error {
-	return o.orderService.SyncOrderStatus(event)
+func (o *ShopObserver) OnOrderStatusChange(statusEvent event.ZOrderStatusSyncReqEvent) error {
+	err := o.apiOrderService.HandleWechatNotify(statusEvent)
+	if err != nil {
+		return err
+	}
+	return nil
 }

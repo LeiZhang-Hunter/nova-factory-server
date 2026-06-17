@@ -10,6 +10,11 @@ const (
 	ERPStatusTradeSuccess string = "TradeSuccess" // 交易成功
 	ERPStatusTradeClosed  string = "TradeClosed"  // 交易关闭
 	ERPStatusAftersale    string = "Aftersale"    // 售后/退款
+	//	订单退款状态
+	REFUNDStatusNormal        string = "Normal"        // 正常
+	REFUNDStatusRefunding     string = "Refunding"     // 退款中
+	REFUNDStatusRefundSuccess string = "RefundSuccess" // 退款成功
+	REFUNDStatusRefundClosed  string = "RefundClosed"  // 退款关闭
 )
 
 // ShopStatusToERPStatus 将商城订单状态转换为 ERP 状态值。

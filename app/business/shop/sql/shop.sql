@@ -652,3 +652,7 @@ CREATE TABLE IF NOT EXISTS `shop_order_send_detail` (
     INDEX `idx_shop_order_send_detail_tid` (`tid`) USING BTREE,
     INDEX `idx_shop_order_send_detail_oid` (`oid`) USING BTREE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='订单发货明细表';
+
+ALTER TABLE nova.shop_order ADD user_id BIGINT NOT NULL COMMENT '用户id';
+ALTER TABLE nova.shop_order CHANGE user_id user_id BIGINT NOT NULL COMMENT '用户id' AFTER tid;
+CREATE INDEX shop_order_user_id_IDX USING BTREE ON nova.shop_order (user_id);

@@ -24,6 +24,7 @@ func ToOrder(event event.OrderEvent) []*Order {
 
 		order := &Order{
 			Tid:                  eventOrder.GetOrderNo(),
+			UserId:               eventOrder.GetUserId(),
 			Weight:               eventOrder.GetWeight(),
 			Size:                 eventOrder.GetSize(),
 			BuyerNick:            eventOrder.GetBuyerNick(),
@@ -49,8 +50,9 @@ func ToOrder(event event.OrderEvent) []*Order {
 			LogistBTypeCode:      eventOrder.GetLogIstBTypeCode(),
 			LogistBillCode:       eventOrder.GetLogIstBillCode(),
 			BTypeCode:            eventOrder.GetBTypeCode(),
-			Details:              toOrderDetails(eventOrder.GetOrderNo(), eventOrder.GetDetails()),
-			Accounts:             toOrderAccounts(eventOrder.GetOrderNo(), eventOrder.GetAccounts()),
+
+			Details:  toOrderDetails(eventOrder.GetOrderNo(), eventOrder.GetDetails()),
+			Accounts: toOrderAccounts(eventOrder.GetOrderNo(), eventOrder.GetAccounts()),
 		}
 
 		if payTime := parseOrderTime(eventOrder.GetPayTime()); payTime != nil {

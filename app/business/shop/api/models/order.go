@@ -62,8 +62,8 @@ type OrderQuery struct {
 
 // OrderListData 订单列表结果
 type OrderListData struct {
-	Rows  []*OrderVO `json:"rows"`  // 数据列表
-	Total int64      `json:"total"` // 总数
+	Rows  []*ApiOrderVO `json:"rows"`  // 数据列表
+	Total int64         `json:"total"` // 总数
 }
 
 // OrderVO 订单视图对象（包含商品明细）

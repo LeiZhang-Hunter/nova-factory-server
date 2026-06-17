@@ -59,6 +59,8 @@ type GoodsDetail interface {
 type OrderData interface {
 	// GetOrderNo 订单号，所有业务模块都必须提供
 	GetOrderNo() string
+	// GetUserId 买家ID
+	GetUserId() uint64
 	// GetWeight 订单总重量
 	GetWeight() float64
 	// GetSize 订单总尺寸/体积

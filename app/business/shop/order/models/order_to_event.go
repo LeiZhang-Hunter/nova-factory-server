@@ -47,12 +47,11 @@ func BuildShopOrderSyncEvent(order *OrderSet) *OrderSyncRequest {
 	}
 
 	created := time.Now().Format("2006-01-02 15:04:05")
-	payTime := order.PayTime
-
 	return &OrderSyncRequest{
 		Orders: []*OrderSyncOrder{
 			{
 				Tid:              order.Tid,
+				UserId:           order.UserID,
 				Weight:           order.Weight,
 				Size:             order.Size,
 				BuyerNick:        order.BuyerNick,
@@ -73,7 +72,6 @@ func BuildShopOrderSyncEvent(order *OrderSet) *OrderSyncRequest {
 				Type:             order.OrderType,
 				InvoiceName:      order.InvoiceName,
 				SellerFlag:       order.SellerFlag,
-				PayTime:          payTime,
 				LogistBTypeCode:  order.LogistBTypeCode,
 				LogistBillCode:   order.LogistBillCode,
 				BTypeCode:        order.BTypeCode,

@@ -73,7 +73,7 @@ func (s *orderSyncer) SyncOrderStatus(ctx context.Context, req event.ZOrderStatu
 		return nil, err
 	}
 	body := map[string]any{
-		"orders": *req.GetOrders(),
+		"orders": req.GetOrders(),
 	}
 	respBytes, err := client.DoSignedPost(ctx, s.tokenURL, snapshot, token, "emall.orderstatus.synchronize", body)
 	if err != nil {

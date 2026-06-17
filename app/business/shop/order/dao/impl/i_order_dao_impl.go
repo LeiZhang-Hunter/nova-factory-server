@@ -27,6 +27,7 @@ type OrderDaoImpl struct {
 // shopOrderRow shop 订单主表行模型，显式绑定真实表字段名。
 type shopOrderRow struct {
 	ID                   uint64     `gorm:"column:id"`
+	UserId               uint64     `gorm:"column:user_id"`
 	Tid                  string     `gorm:"column:tid"`
 	Weight               float64    `gorm:"column:weight"`
 	Size                 float64    `gorm:"column:size"`
@@ -118,8 +119,10 @@ func (o *OrderDaoImpl) Create(tx *gorm.DB, order *models.Order) error {
 	if order.ID == 0 {
 		order.ID = uint64(snowflake.GenID())
 	}
-	row := buildOrderRow(order)
-	return tx.Table(o.table).Create(row).Error
+	now := time.Now()
+	order.CreateTime = &now
+	order.UpdateTime = &now
+	return tx.Table(o.table).Create(order).Error
 }
 
 // UpdateByID 在事务内按 ID 更新 shop 订单主表记录。
@@ -400,6 +403,7 @@ func buildOrderRow(data *models.Order) *shopOrderRow {
 	}
 	return &shopOrderRow{
 		ID:                   data.ID,
+		UserId:               data.UserId,
 		Tid:                  data.Tid,
 		Weight:               data.Weight,
 		Size:                 data.Size,
