@@ -9,6 +9,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/fileUtils"
+	"nova-factory-server/app/utils/snowflake"
 	"strings"
 	"time"
 
@@ -224,10 +225,8 @@ func (s *ShopGoodsDaoImpl) List(c *gin.Context, req *shopmodels.GoodsQuery) (*sh
 	rows := make([]*shopmodels.Goods, 0)
 
 	// 构建排序
-	orderClause := "id DESC"
-	if req.SortBy == "retailPrice" && req.SortOrder != "" {
-		orderClause = "retail_price " + req.SortOrder
-	}
+	orderClause := "update_time DESC"
+
 	if err := db.Offset(int((req.Page - 1) * req.Size)).Limit(int(req.Size)).Order(orderClause).Find(&rows).Error; err != nil {
 		return nil, err
 	}
@@ -342,6 +341,7 @@ func (s *ShopGoodsDaoImpl) UpsertByGoodsIDWithDB(db *gorm.DB, goodsID string, re
 		return err
 	}
 	if count == 0 {
+		updates["id"] = snowflake.GenID()
 		updates["goods_id"] = goodsID
 		updates["create_by"] = int64(1)
 		updates["create_time"] = &now
