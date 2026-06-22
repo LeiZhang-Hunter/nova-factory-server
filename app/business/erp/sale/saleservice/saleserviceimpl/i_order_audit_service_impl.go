@@ -489,11 +489,11 @@ func (o *OrderAuditServiceImpl) fillOrderAuditDetails(c *gin.Context, info *sale
 		Queries: queries,
 		Limit:   3,
 		Embedding: &mastermodels.ProductEmbeddingConfig{
-			ProviderType: embeddingInfo.APIType,
-			ProviderID:   embeddingInfo.LLMFactory,
-			APIEndpoint:  embeddingInfo.APIBase,
-			ModelID:      embeddingInfo.LLMName,
-			ApiKey:       embeddingInfo.APIKey,
+			ProviderType: embeddingInfo.GetAPIType(),
+			ProviderID:   embeddingInfo.GetLLMFactory(),
+			APIEndpoint:  embeddingInfo.GetAPIBase(),
+			ModelID:      embeddingInfo.GetLLMName(),
+			ApiKey:       embeddingInfo.GetAPIKey(),
 		},
 	})
 	if err != nil {

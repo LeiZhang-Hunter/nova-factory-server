@@ -1,12 +1,7 @@
-//go:build erp
-// +build erp
-
 package impl
 
 import (
 	"errors"
-	erporderdao "nova-factory-server/app/business/erp/sale/saledao"
-	"nova-factory-server/app/business/erp/sale/saleservice"
 	shopConstant "nova-factory-server/app/constant/shop"
 	"nova-factory-server/app/datasource/cache"
 	"strings"
@@ -22,23 +17,17 @@ const (
 )
 
 type shopOrderSyncService struct {
-	cache           cache.Cache
-	db              *gorm.DB
-	orderDao        erporderdao.IOrderDao
-	erpOrderService saleservice.IOrderService
+	cache cache.Cache
+	db    *gorm.DB
 }
 
 func NewShopOrderSyncService(
 	cache cache.Cache,
 	db *gorm.DB,
-	orderDao erporderdao.IOrderDao,
-	erpOrderService saleservice.IOrderService,
 ) *shopOrderSyncService {
 	return &shopOrderSyncService{
-		cache:           cache,
-		db:              db,
-		orderDao:        orderDao,
-		erpOrderService: erpOrderService,
+		cache: cache,
+		db:    db,
 	}
 }
 

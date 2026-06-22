@@ -13,16 +13,15 @@ func NewGoodsCallback() *GoodsCallback {
 }
 
 func (callback *GoodsCallback) OnSuccess(T event.Event, response result.SyncProductResponse) {
-	//TODO implement me
-	panic("implement me")
+	return
 }
 
 func (callback *GoodsCallback) OnError(T event.Event, response result.SyncProductResponse, err error) {
 	//TODO implement me
-	panic("implement me")
+	return
 }
 
 func (callback *GoodsCallback) OnFinish(T event.Event) {
 	//TODO implement me
-	panic("implement me")
+	return
 }

@@ -2,6 +2,7 @@ package shopmodels
 
 import (
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/constant/commonStatus"
 	goodsstore "nova-factory-server/app/utils/store/goods"
 	"time"
 )
@@ -258,6 +259,7 @@ func (r *GoodsSyncUpsert) ToSyncMap(now *time.Time) map[string]any {
 	if r.Quantity != 0 {
 		m["quantity"] = r.Quantity
 	}
+	m["state"] = commonStatus.NORMAL
 	return m
 }
 

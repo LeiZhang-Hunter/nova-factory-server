@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/utils/llm/embedding"
+	"nova-factory-server/app/utils/store/embedder"
 )
 
 type IAiModelProviderServiceImpl struct {
@@ -17,18 +18,20 @@ type IAiModelProviderServiceImpl struct {
 func NewIAiModelProviderServiceImpl(dao aidatasetdao.IAiModelProviderDao,
 	settingDao aidatasetdao.IAiLLMSettingDao,
 	userLlmDao aidatasetdao.IAiUserLLMDao) aidatasetservice.IAiModelProviderService {
-	return &IAiModelProviderServiceImpl{
+	i := &IAiModelProviderServiceImpl{
 		dao:        dao,
 		settingDao: settingDao,
 		userLlmDao: userLlmDao,
 	}
+	embedder.RegisterStore(i)
+	return i
 }
 
 func (i *IAiModelProviderServiceImpl) ListWithLLM(c *gin.Context, req *aidatasetmodels.SysAiModelProviderListReq) (*aidatasetmodels.SysAiModelProviderListData, error) {
 	return i.dao.ListWithLLM(c, req)
 }
 
-func (i *IAiModelProviderServiceImpl) EmbeddingWithLLM(c *gin.Context) (*aidatasetmodels.SysUserLLM, error) {
+func (i *IAiModelProviderServiceImpl) EmbeddingWithLLM(c *gin.Context) (embedder.EmbedderLlm, error) {
 	info, err := i.settingDao.Get(c, &aidatasetmodels.GetSysAiLLMSettingReq{
 		ID: 1,
 	})

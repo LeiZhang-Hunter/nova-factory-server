@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/spf13/viper"
+	"nova-factory-server/app/utils/store/integration"
 	"strings"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"nova-factory-server/app/business/erp/setting/settingdao"
 	"nova-factory-server/app/business/shop/order/dao"
 	"nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/business/shop/order/service"
@@ -27,12 +27,11 @@ import (
 
 // OrderServiceImpl 提供 ERP 订单的业务实现与同步能力。
 type OrderServiceImpl struct {
-	orderDao             dao.IOrderDao
-	detailDao            dao.IOrderDetailDao
-	accountDao           dao.IOrderAccountDao
-	integrationConfigDao settingdao.IIntegrationConfigDao
-	cache                cache.Cache
-	host                 string
+	orderDao   dao.IOrderDao
+	detailDao  dao.IOrderDetailDao
+	accountDao dao.IOrderAccountDao
+	cache      cache.Cache
+	host       string
 }
 
 // NewOrderService 创建 ERP 订单服务。
@@ -40,17 +39,15 @@ func NewOrderService(
 	orderDao dao.IOrderDao,
 	detailDao dao.IOrderDetailDao,
 	accountDao dao.IOrderAccountDao,
-	integrationConfigDao settingdao.IIntegrationConfigDao,
 	cache cache.Cache,
 ) service.IOrderService {
 	host := viper.GetString("host")
 	return &OrderServiceImpl{
-		orderDao:             orderDao,
-		detailDao:            detailDao,
-		accountDao:           accountDao,
-		cache:                cache,
-		host:                 host,
-		integrationConfigDao: integrationConfigDao,
+		orderDao:   orderDao,
+		detailDao:  detailDao,
+		accountDao: accountDao,
+		cache:      cache,
+		host:       host,
 	}
 }
 
@@ -176,21 +173,18 @@ func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *models.Or
 	if req == nil {
 		return nil, errors.New("参数不能为空")
 	}
-	cfg, err := o.integrationConfigDao.GetEnabled(c)
+	intergrationService, cfg, err := integration.GetStore().GetService(c)
 	if err != nil {
 		return nil, err
 	}
 	if cfg == nil {
 		return nil, errors.New("未找到管家婆启用配置")
 	}
-	cfgService, err := cfg.Service()
-	if err != nil {
-		return nil, err
+	if intergrationService == nil {
+		return nil, errors.New("未找到管家婆启用配置")
 	}
-	if cfgService == nil {
-		return nil, errors.New("没有配置集成商")
-	}
-	syncer := cfgService.OrderSyncer()
+
+	syncer := intergrationService.OrderSyncer()
 	if syncer == nil {
 		return nil, errors.New("集成商未实现订单同步能力")
 	}
