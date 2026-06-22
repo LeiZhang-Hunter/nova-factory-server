@@ -349,7 +349,11 @@ func (d *ShopGoodsVectorDaoImpl) BatchSearch(c *gin.Context, req *shopmodels.Goo
 		if quantityFilterExpr == "" {
 			filterExpr = quantityFilterExpr
 		} else {
-			filterExpr = "(" + filterExpr + ") and " + quantityFilterExpr
+			if filterExpr != "" {
+				filterExpr = "(" + filterExpr + ") and " + quantityFilterExpr
+			} else {
+				filterExpr = quantityFilterExpr
+			}
 		}
 
 		runtimeQueries = append(runtimeQueries, goodsSearchRuntimeQuery{
