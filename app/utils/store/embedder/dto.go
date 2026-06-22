@@ -1,6 +1,19 @@
-package aidatasetmodels
+package embedder
 
-type SysUserLLM struct {
+type EmbedderLlm interface {
+	GetUserID() int64
+	GetLLMFactory() string
+	GetModelType() string
+	GetLLMName() string
+	GetAPIType() string
+	GetAPIKey() string
+	GetAPIBase() string
+	GetMaxTokens() int64
+	GetUsedTokens() int64
+	GetStatus() string
+}
+
+type EmbedderLlmData struct {
 	UserID     int64  `gorm:"column:user_id;primaryKey" json:"user_id,string"`
 	LLMFactory string `gorm:"column:llm_factory;primaryKey" json:"llm_factory"`
 	ModelType  string `gorm:"column:model_type" json:"model_type"`
@@ -13,44 +26,33 @@ type SysUserLLM struct {
 	Status     string `gorm:"column:status" json:"status"`
 }
 
-func (e *SysUserLLM) GetUserID() int64 {
+func (e *EmbedderLlmData) GetUserID() int64 {
 	return e.UserID
 }
-func (e *SysUserLLM) GetLLMFactory() string {
+func (e *EmbedderLlmData) GetLLMFactory() string {
 	return e.LLMFactory
 }
-func (e *SysUserLLM) GetModelType() string {
+func (e *EmbedderLlmData) GetModelType() string {
 	return e.ModelType
 }
-func (e *SysUserLLM) GetLLMName() string {
+func (e *EmbedderLlmData) GetLLMName() string {
 	return e.LLMName
 }
-func (e *SysUserLLM) GetAPIType() string {
+func (e *EmbedderLlmData) GetAPIType() string {
 	return e.APIType
 }
-func (e *SysUserLLM) GetAPIKey() string {
+func (e *EmbedderLlmData) GetAPIKey() string {
 	return e.APIKey
 }
-func (e *SysUserLLM) GetAPIBase() string {
+func (e *EmbedderLlmData) GetAPIBase() string {
 	return e.APIBase
 }
-func (e *SysUserLLM) GetMaxTokens() int64 {
+func (e *EmbedderLlmData) GetMaxTokens() int64 {
 	return e.MaxTokens
 }
-func (e *SysUserLLM) GetUsedTokens() int64 {
+func (e *EmbedderLlmData) GetUsedTokens() int64 {
 	return e.UsedTokens
 }
-func (e *SysUserLLM) GetStatus() string {
+func (e *EmbedderLlmData) GetStatus() string {
 	return e.Status
-}
-
-type SetSysUserLLM struct {
-	LLMFactory string `json:"llm_factory"`
-	APIKey     string `json:"api_key"`
-	APIBase    string `json:"api_base"`
-	APIType    string `json:"api_type"`
-}
-
-type GetSysUserLLMReq struct {
-	LLMFactory string `form:"llm_factory"`
 }
