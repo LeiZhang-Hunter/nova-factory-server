@@ -2,8 +2,6 @@ package gatewaydaoimpl
 
 import (
 	"errors"
-	"time"
-
 	"nova-factory-server/app/business/ai/gateway/gatewaydao"
 	"nova-factory-server/app/business/ai/gateway/gatewaymodels"
 	"nova-factory-server/app/constant/commonStatus"
@@ -58,13 +56,9 @@ func (a *AgentConfigKeyDaoImpl) Update(c *gin.Context, req *gatewaymodels.AgentC
 }
 
 func (a *AgentConfigKeyDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
-	now := time.Now()
-	return a.db.WithContext(c).Table(a.table).Where("id IN ?", ids).Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Updates(map[string]interface{}{
-			"state":       commonStatus.DELETE,
-			"update_by":   baizeContext.GetUserId(c),
-			"update_time": now,
-		}).Error
+	var key gatewaymodels.AgentConfigKey
+	return a.db.WithContext(c).Table(a.table).Where("id IN ?", ids).Where("create_by = ?", baizeContext.GetUserId(c)).
+		Delete(&key).Error
 }
 
 func (a *AgentConfigKeyDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.AgentConfigKey, error) {
