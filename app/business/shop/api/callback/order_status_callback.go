@@ -1,7 +1,7 @@
 package callback
 
 import (
-	"nova-factory-server/app/business/shop/api/models"
+	shopmodels "nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
 	"nova-factory-server/app/utils/store/integration"
@@ -11,10 +11,10 @@ import (
 
 type ShopApiCallback struct {
 	isErr bool
-	e     *models.OrderStatusEvent
+	e     *shopmodels.OrderStatusSyncEvent
 }
 
-func NewShopApiCallback(e *models.OrderStatusEvent) *ShopApiCallback {
+func NewShopOrderStatusApiCallback(e *shopmodels.OrderStatusSyncEvent) *ShopApiCallback {
 	return &ShopApiCallback{e: e}
 
 }
@@ -43,5 +43,9 @@ func (s *ShopApiCallback) OnFinish(t event.Event) {
 		return
 	}
 	//s.e.w
-	service.OrderSyncer().SyncOrderStatus(t.GetCtx(), s.e)
+	status, err := service.OrderSyncer().SyncOrderStatus(t.GetCtx(), s.e)
+	if err != nil {
+		return
+	}
+	zap.L().Info("update status success", zap.Any("status", status))
 }

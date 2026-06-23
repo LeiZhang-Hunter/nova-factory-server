@@ -9,6 +9,7 @@ type ZOrderStatusSyncReqEvent interface {
 
 // ZOrderStatusSyncReqData 单条订单状态同步数据，对应 {tid, status, refundstatus}。
 type ZOrderStatusSyncReqData interface {
+	GetDBID() int64
 	GetTid() string
 	GetStatus() string
 	GetRefundstatus() string

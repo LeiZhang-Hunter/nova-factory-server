@@ -245,3 +245,27 @@ func (i *IApiShopOrderDaoImpl) attachShopOrderDetails(c *gin.Context, orders []*
 	}
 	return nil
 }
+
+// GetByIDs 根据id批量读取
+func (i *IApiShopOrderDaoImpl) GetByIDs(c *gin.Context, ids []int64) ([]*shopordermodels.Order, error) {
+	orders := make([]*shopordermodels.Order, 0)
+	ret := i.db.WithContext(c).Table(i.table).Where("id IN ?", ids).Where("state = ?", commonStatus.NORMAL).Find(&orders)
+	if ret.Error != nil {
+		if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+			return orders, nil
+		}
+	}
+	return orders, nil
+}
+
+// BatchUpdateERPOrderStatus 批量更新当前商城用户的 shop_order 订单状态。
+func (i *IApiShopOrderDaoImpl) BatchUpdateERPOrderStatus(c *gin.Context, ids []int64, shopUser *shopusermodels.User, status int32) (int64, error) {
+	result := i.db.Table(i.table).
+		Where("id in (?)", ids).
+		Where("buyer_nick = ?", apimodels.BuildOrderBuyerNick(shopUser)).
+		Updates(map[string]interface{}{
+			"status":      orderConstant.ShopStatusToOrderStatus(status),
+			"update_time": gorm.Expr("NOW()"),
+		})
+	return result.RowsAffected, result.Error
+}

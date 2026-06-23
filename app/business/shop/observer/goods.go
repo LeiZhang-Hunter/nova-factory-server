@@ -1,9 +1,13 @@
 package observer
 
 import (
+	"go.uber.org/zap"
+	"nova-factory-server/app/business/shop/api/models"
 	apiService "nova-factory-server/app/business/shop/api/service"
 	orderservice "nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/business/shop/product/shopservice"
+	orderConstant "nova-factory-server/app/constant/order"
+	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/kind"
 	"nova-factory-server/app/utils/observer/integration/result"
@@ -57,8 +61,18 @@ func (s *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
 
 // OnOrderStatusChange 订单发货变化
 func (o *ShopObserver) OnOrderStatusChange(statusEvent event.ZOrderStatusSyncReqEvent) error {
-	err := o.apiOrderService.HandleWechatNotify(statusEvent)
+	uid := baizeContext.GetUserId(statusEvent.GetCtx())
+	//BatchUpdateStatus(c *gin.Context, userID int64, req *apimodels.BatchOrderStatusReq) error
+	var statusList []models.OrderStatus = make([]models.OrderStatus, 0)
+	for _, v := range statusEvent.GetOrders() {
+		statusList = append(statusList, models.OrderStatus{
+			ID:     v.GetDBID(),
+			Status: orderConstant.ErpStatusToShopStatus(v.GetStatus()),
+		})
+	}
+	err := o.apiOrderService.BatchUpdateStatus(statusEvent.GetCtx(), uid, statusList)
 	if err != nil {
+		zap.L().Error("batch update status error", zap.Error(err))
 		return err
 	}
 	return nil

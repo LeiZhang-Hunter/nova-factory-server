@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	models2 "nova-factory-server/app/business/shop/activity/models"
+	"nova-factory-server/app/business/shop/api/callback"
 	shopordermodels "nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	shopusermodels "nova-factory-server/app/business/shop/user/models"
@@ -450,6 +451,71 @@ func (s *IApiShopOrderServiceImpl) UpdateStatus(c *gin.Context, userID int64, re
 	return nil
 }
 
+// BatchUpdateStatus 更新订单状态，验证状态流转合法性,从观察者里触发，调用观察者 OnOrderStatusChange,就不要再调用这个函数了，防止多次更新
+func (s *IApiShopOrderServiceImpl) BatchUpdateStatus(c *gin.Context, userID int64, statuses []apimodels.OrderStatus) error {
+	if userID == 0 {
+		return errors.New("用户未登录")
+	}
+	if len(statuses) == 0 {
+		return errors.New("订单ID不能为空")
+	}
+
+	var ids []int64 = make([]int64, 0, len(statuses))
+	for _, status := range statuses {
+		ids = append(ids, int64(status.ID))
+	}
+
+	statusesMap := make(map[int64]apimodels.OrderStatus)
+	for _, status := range statuses {
+		statusesMap[status.ID] = status
+	}
+
+	// 验证用户权限
+	shopUser, err := s.userDao.GetByUserID(c, userID)
+	if err != nil || shopUser == nil {
+		return errors.New("商城用户不存在")
+	}
+	orders, err := s.apiOrderDao.GetByIDs(c, ids)
+	if err != nil {
+		return errors.New("订单不存在")
+	}
+
+	orderList := make(map[int32][]int64)
+
+	for _, order := range orders {
+		if !s.isOrderOwnedByUser(order, shopUser) {
+			zap.L().Error("无权操作此订单")
+			continue
+		}
+		requestStatus, ok := statusesMap[int64(order.ID)]
+		if !ok {
+			continue
+		}
+		// 验证状态流转
+		currentStatus := orderConstant.ErpStatusToShopStatus(order.Status)
+		if !s.isValidStatusTransition(currentStatus, requestStatus.Status) {
+			zap.L().Error("非法的状态流转")
+			continue
+		}
+		_, ok = orderList[currentStatus]
+		if !ok {
+			orderList[currentStatus] = make([]int64, 0)
+		}
+	}
+
+	for status, idsArr := range orderList {
+		rowsAffected, err := s.apiOrderDao.BatchUpdateERPOrderStatus(c, idsArr, shopUser, status)
+		if err != nil {
+			return fmt.Errorf("更新订单状态失败: %v", err)
+		}
+		if rowsAffected == 0 {
+			continue
+		}
+	}
+
+	return nil
+}
+
 // Pay 支付订单，调用微信V3 JSAPI预下单并返回调起支付参数。
 func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (*apimodels.OrderPayResp, error) {
 	if userID == 0 {
@@ -643,7 +709,19 @@ func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64
 		return errors.New("只能取消待支付的订单")
 	}
 
-	//observer.GetNotifier().OnOrderChanged()
+	orderEvent := shopordermodels.NewOrderStatusSyncEvent([]*shopordermodels.Order{
+		order,
+	})
+	orderEvent.WithCache(s.cache)
+	orderEvent.WithDB(s.db)
+	orderEvent.WithCtx(c)
+	orderEvent.WithCallback(callback.NewShopOrderStatusApiCallback(orderEvent))
+	err = observer.GetNotifier().OnOrderStatusChange(orderEvent)
+	if err != nil {
+		zap.L().Error("on order status change err", zap.Error(err))
+		return err
+	}
+
 	rowsAffected, err := s.apiOrderDao.CancelERPOrder(c, id, shopUser, reason)
 	if err != nil {
 		return fmt.Errorf("取消订单失败: %v", err)
