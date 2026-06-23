@@ -67,7 +67,7 @@ func (fs *FileService) UploadFilesRandomName(c *gin.Context, files []*multipart.
 func (fs *FileService) UploadFileOriginalName(c *gin.Context, file *multipart.FileHeader) string {
 	open, _ := file.Open()
 	defer open.Close()
-	name := fileUtils.GetRandomPath(baizeContext.GetUserId(c), filepath.Ext(file.Filename))
+	name := fileUtils.GetRandomPath(baizeContext.GetUserId(c), file.Filename)
 	url, err := fs.of.PublicUploadFile(c, open, name)
 	if err != nil {
 		panic(err)

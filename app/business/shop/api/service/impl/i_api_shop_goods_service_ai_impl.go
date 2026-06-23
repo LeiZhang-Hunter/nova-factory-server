@@ -1,13 +1,10 @@
-//go:build ai
-// +build ai
-
 package impl
 
 import (
 	"errors"
+	"nova-factory-server/app/utils/store/embedder"
 
 	"github.com/gin-gonic/gin"
-	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
@@ -23,20 +20,17 @@ type IApiShopGoodsServiceImpl struct {
 	skuDao           dao.IApiShopSkuDao
 	shopGoodsService shopservice.IShopGoodsService
 	discountService  discountservice.IDiscountCalculateService
-	// service 读取模型
-	service aidatasetservice.IAiModelProviderService
 }
 
 // NewIApiShopGoodsServiceImpl  创建商品服务
 func NewIApiShopGoodsServiceImpl(dao dao.IApiShopGoodsDao,
 	shopGoodsService shopservice.IShopGoodsService,
-	discountService discountservice.IDiscountCalculateService, service aidatasetservice.IAiModelProviderService,
+	discountService discountservice.IDiscountCalculateService,
 	skuDao dao.IApiShopSkuDao) service.IApiShopGoodsService {
 	return &IApiShopGoodsServiceImpl{
 		dao:              dao,
 		shopGoodsService: shopGoodsService,
 		discountService:  discountService,
-		service:          service,
 		skuDao:           skuDao,
 	}
 }
@@ -50,7 +44,7 @@ func (s *IApiShopGoodsServiceImpl) Search(c *gin.Context, req *models.GoodsSearc
 		return nil, errors.New("商品名称不能为空")
 	}
 
-	embeddingInfo, err := s.service.EmbeddingWithLLM(c)
+	embeddingInfo, err := embedder.GetStore().EmbeddingWithLLM(c)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return nil, err
@@ -62,11 +56,11 @@ func (s *IApiShopGoodsServiceImpl) Search(c *gin.Context, req *models.GoodsSearc
 
 	// 将当前模型提供方配置转换为商品向量检索使用的 embedding 参数。
 	embeddingModel := shopmodels.EmbeddingConfig{
-		ProviderType: embeddingInfo.APIType,
-		ProviderID:   embeddingInfo.LLMFactory,
-		APIEndpoint:  embeddingInfo.APIBase,
-		ModelID:      embeddingInfo.LLMName,
-		ApiKey:       embeddingInfo.APIKey,
+		ProviderType: embeddingInfo.GetAPIType(),
+		ProviderID:   embeddingInfo.GetLLMFactory(),
+		APIEndpoint:  embeddingInfo.GetAPIBase(),
+		ModelID:      embeddingInfo.GetLLMName(),
+		ApiKey:       embeddingInfo.GetAPIKey(),
 	}
 
 	limit := normalizeGoodsSearchLimit(req.Limit)

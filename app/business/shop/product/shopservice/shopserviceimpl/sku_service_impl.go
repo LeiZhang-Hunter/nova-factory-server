@@ -2,12 +2,12 @@ package shopserviceimpl
 
 import (
 	"fmt"
-	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/utils/fileUtils"
 	embeddingutil "nova-factory-server/app/utils/llm/embedding"
+	"nova-factory-server/app/utils/store/embedder"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -15,11 +15,10 @@ import (
 )
 
 type ShopSkuServiceImpl struct {
-	dao                  shopdao.IShopSkuDao
-	goodsDao             shopdao.IShopGoodsDao
-	categoryDao          shopdao.IShopCategoryDao
-	vectorDao            shopdao.IShopGoodsVectorDao
-	modelProviderService aidatasetservice.IAiModelProviderService
+	dao         shopdao.IShopSkuDao
+	goodsDao    shopdao.IShopGoodsDao
+	categoryDao shopdao.IShopCategoryDao
+	vectorDao   shopdao.IShopGoodsVectorDao
 }
 
 // NewShopSkuService 创建商品规格服务。
@@ -27,13 +26,12 @@ type ShopSkuServiceImpl struct {
 // 用于在规格发生变化后同步维护商品向量数据。
 func NewShopSkuService(dao shopdao.IShopSkuDao, goodsDao shopdao.IShopGoodsDao,
 	categoryDao shopdao.IShopCategoryDao, vectorDao shopdao.IShopGoodsVectorDao,
-	modelProviderService aidatasetservice.IAiModelProviderService) shopservice.IShopSkuService {
+) shopservice.IShopSkuService {
 	return &ShopSkuServiceImpl{
-		dao:                  dao,
-		goodsDao:             goodsDao,
-		categoryDao:          categoryDao,
-		vectorDao:            vectorDao,
-		modelProviderService: modelProviderService,
+		dao:         dao,
+		goodsDao:    goodsDao,
+		categoryDao: categoryDao,
+		vectorDao:   vectorDao,
 	}
 }
 
@@ -188,19 +186,16 @@ func (s *ShopSkuServiceImpl) syncGoodsVectorAfterSkuChange(c *gin.Context, skuDa
 // loadGoodsVectorEmbeddingConfig 从当前用户可用的 embedding 模型配置中提取向量模型参数。
 // 这里优先走模型配置服务返回的 SysUserLLM，避免在 SKU service 里再额外维护一套静态配置读取逻辑。
 func (s *ShopSkuServiceImpl) loadGoodsVectorEmbeddingConfig(c *gin.Context) *shopmodels.EmbeddingConfig {
-	if s == nil || s.modelProviderService == nil {
-		return nil
-	}
-	info, err := s.modelProviderService.EmbeddingWithLLM(c)
+	info, err := embedder.GetStore().EmbeddingWithLLM(c)
 	if err != nil || info == nil {
 		return nil
 	}
 	return &shopmodels.EmbeddingConfig{
-		ProviderType: strings.TrimSpace(info.APIType),
-		ProviderID:   strings.TrimSpace(info.LLMFactory),
-		APIEndpoint:  strings.TrimSpace(info.APIBase),
-		ModelID:      strings.TrimSpace(info.LLMName),
-		ApiKey:       strings.TrimSpace(info.APIKey),
+		ProviderType: strings.TrimSpace(info.GetAPIType()),
+		ProviderID:   strings.TrimSpace(info.GetLLMFactory()),
+		APIEndpoint:  strings.TrimSpace(info.GetAPIBase()),
+		ModelID:      strings.TrimSpace(info.GetLLMName()),
+		ApiKey:       strings.TrimSpace(info.GetAPIKey()),
 	}
 }
 

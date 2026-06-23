@@ -957,6 +957,8 @@ func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) (result.SyncP
 		}
 	}
 
+	// 生成向量
+
 	return &shopmodels.SyncProductResponse{Code: 0, Message: "ok"}, nil
 }
 

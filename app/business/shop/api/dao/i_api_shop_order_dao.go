@@ -26,4 +26,9 @@ type IApiShopOrderDao interface {
 	GetByTid(c *gin.Context, tid string) (*shopordermodels.Order, error)
 
 	GetByID(c *gin.Context, id uint64) (*shopordermodels.Order, error)
+	// GetByIDs 根据id批量读取订单
+	GetByIDs(c *gin.Context, ids []int64) ([]*shopordermodels.Order, error)
+
+	// BatchUpdateERPOrderStatus 批量更新当前商城用户的 shop_order 订单状态。
+	BatchUpdateERPOrderStatus(c *gin.Context, ids []int64, shopUser *shopusermodels.User, status int32) (int64, error)
 }

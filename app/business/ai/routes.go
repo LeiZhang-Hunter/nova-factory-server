@@ -54,6 +54,7 @@ func NewGinEngine(
 		gateway.MCPServer.PrivateRoutes(group)
 		gateway.Message.PrivateRoutes(group)
 		gateway.ConfigPublishHistory.PrivateRoutes(group)
+		gateway.AgentConfigKey.PrivateRoutes(group)
 		ai.Config.PrivateHttpRoutes(group)
 	}
 
