@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 
 	apimodels "nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/utils/fileUtils"
