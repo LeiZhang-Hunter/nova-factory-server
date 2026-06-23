@@ -1,6 +1,7 @@
 package callback
 
 import (
+	"errors"
 	shopmodels "nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
@@ -14,7 +15,7 @@ type ShopApiCallback struct {
 	e     *shopmodels.OrderStatusSyncEvent
 }
 
-func NewShopOrderStatusApiCallback(e *shopmodels.OrderStatusSyncEvent) *ShopApiCallback {
+func NewShopOrderStatusApiCallback(e *shopmodels.OrderStatusSyncEvent) event.Callback {
 	return &ShopApiCallback{e: e}
 
 }
@@ -30,22 +31,25 @@ func (s *ShopApiCallback) OnError(t event.Event, response result.SyncProductResp
 }
 
 // OnFinish 同步完成触发
-func (s *ShopApiCallback) OnFinish(t event.Event) {
+func (s *ShopApiCallback) OnFinish(t event.Event) error {
 	if s.isErr {
-		return
+		return nil
 	}
-	service, _, err := integration.GetStore().GetService(t.GetCtx())
+	service, cfg, err := integration.GetStore().GetService(t.GetCtx())
 	if err != nil {
 		zap.L().Error("获取集成商服务失败", zap.Error(err))
-		return
+		return err
 	}
 	if service == nil {
-		return
+		return errors.New("获取集成商服务失败,集成商不能为空")
 	}
 	//s.e.w
+	s.e.WithConfig(cfg)
+	s.e.WithCache(t.GetCache())
 	status, err := service.OrderSyncer().SyncOrderStatus(t.GetCtx(), s.e)
 	if err != nil {
-		return
+		return err
 	}
 	zap.L().Info("update status success", zap.Any("status", status))
+	return nil
 }

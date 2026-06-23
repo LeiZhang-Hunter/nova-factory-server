@@ -21,7 +21,7 @@ func (callback *GoodsCallback) OnError(T event.Event, response result.SyncProduc
 	return
 }
 
-func (callback *GoodsCallback) OnFinish(T event.Event) {
+func (callback *GoodsCallback) OnFinish(T event.Event) error {
 	//TODO implement me
-	return
+	return nil
 }

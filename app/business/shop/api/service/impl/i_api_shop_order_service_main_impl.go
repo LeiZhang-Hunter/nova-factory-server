@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	apimodels "nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/utils/fileUtils"
@@ -709,12 +710,15 @@ func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64
 		return errors.New("只能取消待支付的订单")
 	}
 
+	order.ID = uint64(id)
+	order.Status = orderConstant.ShopStatusToERPStatus(orderConstant.OrderStatusCancelled)
 	orderEvent := shopordermodels.NewOrderStatusSyncEvent([]*shopordermodels.Order{
 		order,
-	})
+	}, orderConstant.Normal)
 	orderEvent.WithCache(s.cache)
 	orderEvent.WithDB(s.db)
 	orderEvent.WithCtx(c)
+	orderEvent.WithTransaction(true)
 	orderEvent.WithCallback(callback.NewShopOrderStatusApiCallback(orderEvent))
 	err = observer.GetNotifier().OnOrderStatusChange(orderEvent)
 	if err != nil {
@@ -804,6 +808,10 @@ func (s *IApiShopOrderServiceImpl) deductOrderItemStockWithLock(c *gin.Context, 
 	if err := s.skuDao.DeductStock(c, item.SkuID, item.Quantity); err != nil {
 		return fmt.Errorf("扣减库存失败: %v", err)
 	}
+	// 扣减 SKU 库存后重新计算商品总库存
+	if err := s.recalcGoodsStockByGoodsID(c, sku.GoodsID); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -826,6 +834,16 @@ func (s *IApiShopOrderServiceImpl) deductOrderItemActivityStockWithLock(c *gin.C
 		}
 		if err := s.seckillDao.DeductStock(c, item.SecKillId, item.Quantity); err != nil {
 			return fmt.Errorf("扣减秒杀库存失败: %v", err)
+		}
+		// 扣减秒杀库存后重新计算商品总库存
+		var goods apimodels.Goods
+		if err := s.getTxDB(c).WithContext(c).Table("shop_goods").
+			Where("id = ?", seckill.ProductID).
+			First(&goods).Error; err != nil {
+			return fmt.Errorf("查询商品信息失败: %v", err)
+		}
+		if err := s.recalcGoodsStockByGoodsID(c, goods.GoodsID); err != nil {
+			return err
 		}
 	}
 	if item.CombinationId > 0 {
@@ -1473,4 +1491,32 @@ func (s *IApiShopOrderServiceImpl) isOrderOwnedByUser(order *shopordermodels.Ord
 		}
 	}
 	return false
+}
+
+// getTxDB 获取上下文中事务 db，若无则返回默认 db。
+func (s *IApiShopOrderServiceImpl) getTxDB(c *gin.Context) *gorm.DB {
+	if tx, ok := c.Get("db"); ok {
+		if txDB, ok := tx.(*gorm.DB); ok {
+			return txDB
+		}
+	}
+	return s.db
+}
+
+// recalcGoodsStockByGoodsID 根据 goodsID 汇总所有 SKU 库存并更新商品总库存。
+func (s *IApiShopOrderServiceImpl) recalcGoodsStockByGoodsID(c *gin.Context, goodsID string) error {
+	skus, err := s.skuDao.ListByGoodsIDs(c, []string{goodsID})
+	if err != nil {
+		return fmt.Errorf("查询商品SKU列表失败: %v", err)
+	}
+	var totalStock int64
+	for _, sk := range skus {
+		totalStock += sk.Quantity
+	}
+	if err := s.getTxDB(c).WithContext(c).Table("shop_goods").
+		Where("goods_id = ?", goodsID).
+		Update("quantity", totalStock).Error; err != nil {
+		return fmt.Errorf("更新商品总库存失败: %v", err)
+	}
+	return nil
 }
