@@ -71,6 +71,7 @@ type GoodsSkuListData struct {
 
 // GoodsSkuSyncUpsert SKU 同步 upsert 参数，用于 SyncEvent 等场景。
 type GoodsSkuSyncUpsert struct {
+	GoodsDBId   int64   // 商品数据库id
 	GoodsID     string  // 商品业务ID
 	SkuID       string  // 规格业务ID
 	SkuName     string  // 规格名称
@@ -115,6 +116,9 @@ func (r *GoodsSkuSyncUpsert) ToSyncMap(now *time.Time) map[string]any {
 	}
 	if r.Quantity != 0 {
 		m["quantity"] = r.Quantity
+	}
+	if r.GoodsDBId != 0 {
+		m["goods_db_id"] = r.GoodsDBId
 	}
 	return m
 }

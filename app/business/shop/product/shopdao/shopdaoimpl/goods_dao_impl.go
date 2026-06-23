@@ -157,7 +157,7 @@ func (s *ShopGoodsDaoImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Goods,
 // GetByGoodsID 根据商品业务ID查询商品
 func (s *ShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error) {
 	var item shopmodels.Goods
-	if err := s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).First(&item).Error; err != nil {
+	if err := s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Where("state = ?", commonStatus.NORMAL).First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -301,9 +301,9 @@ func buildGoodsUpdates(c *gin.Context, req *shopmodels.GoodsUpsert) map[string]i
 		"description":      req.Description,
 		"weight":           req.Weight,
 		"weight_unit":      req.WeightUnit,
+		"quantity":         req.Quantity,
 		"unit":             req.Unit,
 		"is_on_sale":       req.IsOnSale,
-		"quantity":         req.Quantity,
 		"shop_category_id": req.ShopCategoryId,
 		"home_module_ids":  strings.Join(req.HomeModuleIDs, ","),
 	}
@@ -330,24 +330,24 @@ func (s *ShopGoodsDaoImpl) UpsertByGoodsID(c *gin.Context, goodsID string, req *
 }
 
 // UpsertByGoodsIDWithDB 使用外部传入的 db 操作商品 upsert，用于事务场景
-func (s *ShopGoodsDaoImpl) UpsertByGoodsIDWithDB(db *gorm.DB, goodsID string, req *shopmodels.GoodsSyncUpsert) error {
+func (s *ShopGoodsDaoImpl) UpsertByGoodsIDWithDB(db *gorm.DB, goodsID string, req *shopmodels.GoodsSyncUpsert) (int64, error) {
 	if db == nil {
-		return errors.New("db不能为空")
+		return 0, errors.New("db不能为空")
 	}
 	now := time.Now()
 	updates := req.ToSyncMap(&now)
-	var count int64
-	if err := db.Table(s.tableName).Where("goods_id = ?", goodsID).Count(&count).Error; err != nil {
-		return err
+	var info *shopmodels.Goods
+	if err := db.Table(s.tableName).Where("goods_id = ?", goodsID).First(&info).Error; err != nil {
+		return 0, err
 	}
-	if count == 0 {
+	if info == nil {
 		updates["id"] = snowflake.GenID()
 		updates["goods_id"] = goodsID
 		updates["create_by"] = int64(1)
 		updates["create_time"] = &now
-		return db.Table(s.tableName).Create(updates).Error
+		return snowflake.GenID(), db.Table(s.tableName).Create(updates).Error
 	}
-	return db.Table(s.tableName).Where("goods_id = ?", goodsID).Updates(updates).Error
+	return info.ID, db.Table(s.tableName).Where("goods_id = ?", goodsID).Updates(updates).Error
 }
 
 // LockStockRows 锁定指定商品的库存行，防止并发更新
@@ -403,4 +403,16 @@ func (s *ShopGoodsDaoImpl) UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID strin
 	return db.Table(s.tableName).
 		Where("goods_id = ?", goodsID).
 		Update("quantity", quantity).Error
+}
+
+// GetDBInfoByGoodsID 根据商品业务ID查询商品
+func (s *ShopGoodsDaoImpl) GetDBInfoByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error) {
+	var item shopmodels.Goods
+	if err := s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Where("state = ?", commonStatus.NORMAL).First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
 }

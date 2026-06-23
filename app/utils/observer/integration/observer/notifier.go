@@ -75,10 +75,11 @@ func notifyError(ev event.Event, response result.SyncProductResponse, err error)
 	}
 }
 
-func notifyFinish(ev event.Event) {
+func notifyFinish(ev event.Event) error {
 	if ev != nil && ev.GetCallback() != nil {
-		ev.GetCallback().OnFinish(ev)
+		return ev.GetCallback().OnFinish(ev)
 	}
+	return nil
 }
 
 // OnProductChanged 向所有观察者分发商品变更事件。
@@ -95,7 +96,11 @@ func (n *Notifier) OnProductChanged(ev event.TransactionEvent[event.ProductEvent
 			notifySuccess(ev.ToEvent(), ret)
 			return nil
 		})
-		notifyFinish(ev.ToEvent())
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
 		return err
 	}
 	return ev.GetDB().Transaction(func(tx *gorm.DB) error {
@@ -110,7 +115,11 @@ func (n *Notifier) OnProductChanged(ev event.TransactionEvent[event.ProductEvent
 			notifySuccess(ev.ToEvent(), ret)
 			return nil
 		})
-		notifyFinish(ev.ToEvent())
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
 		return err
 	})
 }
@@ -129,7 +138,11 @@ func (n *Notifier) OnStockChanged(ev event.TransactionEvent[event.StockEvent]) e
 			notifySuccess(ev.ToEvent(), nil)
 			return nil
 		})
-		notifyFinish(ev.ToEvent())
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
 		return err
 	}
 	err := ev.GetDB().Transaction(func(tx *gorm.DB) error {
@@ -145,7 +158,11 @@ func (n *Notifier) OnStockChanged(ev event.TransactionEvent[event.StockEvent]) e
 			return nil
 		})
 	})
-	notifyFinish(ev.ToEvent())
+	err = notifyFinish(ev.ToEvent())
+	if err != nil {
+		zap.L().Error("Observer OnProductChanged", zap.Error(err))
+		return err
+	}
 	return err
 }
 
@@ -163,7 +180,11 @@ func (n *Notifier) OnOrderChanged(ev event.TransactionEvent[event.OrderEvent]) e
 			notifySuccess(ev.ToEvent(), nil)
 			return nil
 		})
-		notifyFinish(ev.ToEvent())
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
 		return err
 	}
 	return ev.GetDB().Transaction(func(tx *gorm.DB) error {
@@ -178,7 +199,11 @@ func (n *Notifier) OnOrderChanged(ev event.TransactionEvent[event.OrderEvent]) e
 			notifySuccess(ev.ToEvent(), nil)
 			return nil
 		})
-		notifyFinish(ev.ToEvent())
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
 		return err
 	})
 }
@@ -195,7 +220,11 @@ func (n *Notifier) OnOrderSendChange(ev event.TransactionEvent[event.OrderSendEv
 			notifySuccess(ev.ToEvent(), nil)
 			return nil
 		})
-		notifyFinish(ev.ToEvent())
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
 		return err
 	}
 	return ev.GetDB().Transaction(func(tx *gorm.DB) error {
@@ -210,7 +239,11 @@ func (n *Notifier) OnOrderSendChange(ev event.TransactionEvent[event.OrderSendEv
 			notifySuccess(ev.ToEvent(), nil)
 			return nil
 		})
-		notifyFinish(ev.ToEvent())
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
 		return err
 	})
 }
@@ -229,7 +262,11 @@ func (n *Notifier) OnOrderStatusChange(ev event.TransactionEvent[event.ZOrderSta
 			notifySuccess(ev.ToEvent(), nil)
 			return nil
 		})
-		notifyFinish(ev.ToEvent())
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
 		return err
 	}
 	return ev.GetDB().Transaction(func(tx *gorm.DB) error {
@@ -244,7 +281,11 @@ func (n *Notifier) OnOrderStatusChange(ev event.TransactionEvent[event.ZOrderSta
 			notifySuccess(ev.ToEvent(), nil)
 			return nil
 		})
-		notifyFinish(ev.ToEvent())
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnProductChanged", zap.Error(err))
+			return err
+		}
 		return err
 	})
 }
