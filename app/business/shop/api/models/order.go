@@ -147,3 +147,13 @@ func BuildOrderBuyerNick(shopUser *shopusermodels.User) string {
 	}
 	return fmt.Sprintf("shop-user-%s", shopUser.UserID)
 }
+
+type OrderStatus struct {
+	ID     int64 `json:"id,omitempty"`
+	Status int32 `json:"status,omitempty"`
+}
+
+// BatchOrderStatusReq 订单状态更新请求
+type BatchOrderStatusReq struct {
+	IDs []OrderStatus `json:"id,string" binding:"required"` // 订单ID
+}

@@ -20,4 +20,5 @@ type IApiShopOrderService interface {
 	Cancel(c *gin.Context, userID int64, id int64, reason string) error
 	ConfirmReceive(c *gin.Context, userID int64, id int64) error
 	GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error)
+	BatchUpdateStatus(c *gin.Context, userID int64, req []models.OrderStatus) error
 }
