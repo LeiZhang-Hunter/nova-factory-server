@@ -52,6 +52,10 @@ func (g *GoodsSyncReq) WithDB(tx *gorm.DB) {
 	return
 }
 
+func (g *GoodsSyncReq) WithCtx(ctx *gin.Context) {
+	g.ctx = ctx
+}
+
 func (g *GoodsSyncReq) ToEvent() event.ProductEvent {
 	return g
 }
@@ -161,7 +165,10 @@ func (g *GoodsInfoReq) GetOuterId() string {
 
 // GetSkus 实现 event.ProductData 接口，返回 SKU 列表
 func (g *GoodsInfoReq) GetSkus() []event.ProductSku {
-	skus := make([]event.ProductSku, 0)
+	skus := make([]event.ProductSku, 0, len(g.Skus))
+	for i := range g.Skus {
+		skus = append(skus, &g.Skus[i])
+	}
 	return skus
 }
 

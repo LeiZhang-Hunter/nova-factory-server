@@ -190,8 +190,10 @@ func (q *API) productAdd(c *gin.Context) {
 	call := callback.NewGoodsCallback()
 	goodsInfos.WIthCallback(call)
 	goodsInfos.WithDB(q.db)
+	goodsInfos.WithCtx(c)
 	err = observer.GetNotifier().OnProductChanged(goodsInfos)
 	if err != nil {
+		zap.L().Error("product change error", zap.Error(err))
 		c.JSON(http.StatusOK, models.ErrorResponse{
 			Iserror:  true,
 			Errormsg: err.Error(),

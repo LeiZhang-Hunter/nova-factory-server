@@ -1,6 +1,7 @@
 package callback
 
 import (
+	"errors"
 	"nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/result"
@@ -35,27 +36,27 @@ func (s *OrderOrderSyncRequestCallback) OnError(T event.Event, response result.S
 }
 
 // OnFinish 同步完成触发
-func (s *OrderOrderSyncRequestCallback) OnFinish(ev event.Event) {
+func (s *OrderOrderSyncRequestCallback) OnFinish(ev event.Event) error {
 	if s.isErr {
-		return
+		return nil
 	}
 	order := s.orderEvent.ToEvent()
 	getService, serviceConfig, err := integration.GetStore().GetService(s.ctx)
 	if err != nil {
 		zap.L().Error("获取集成商服务失败", zap.Error(err))
-		return
+		return err
 	}
 	if getService == nil {
-		return
+		return errors.New("集成商配置不能为空, getService == nil")
 	}
 	if serviceConfig == nil {
-		return
+		return errors.New("集成商配置不能为空 serviceConfig == nil")
 	}
 	s.orderEvent.WithConfig(serviceConfig)
 	_, err = getService.OrderSyncer().SyncOrders(s.ctx, order)
 	if err != nil {
 		zap.L().Error("同步订单失败", zap.Error(err))
-		return
+		return err
 	}
-
+	return nil
 }

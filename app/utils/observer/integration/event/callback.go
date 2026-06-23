@@ -9,5 +9,5 @@ type Callback interface {
 	// OnError 同步处理失败时调用
 	OnError(T Event, response result.SyncProductResponse, err error)
 	// OnFinish 同步完成触发
-	OnFinish(T Event)
+	OnFinish(T Event) error
 }

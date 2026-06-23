@@ -101,7 +101,11 @@ func (s *ShopGoodsServiceImpl) Update(c *gin.Context, req *shopmodels.GoodsUpser
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+	info, err := s.dao.GetByID(c, req.ID)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
 }
 
 // DeleteByIDs 批量删除商品。
@@ -933,12 +937,24 @@ func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) (result.SyncP
 		}
 
 		for _, ge := range goodsList {
-			if err := s.dao.UpsertByGoodsIDWithDB(tx, ge.goodsID, ge.req); err != nil {
+			if _, err := s.dao.UpsertByGoodsIDWithDB(tx, ge.goodsID, ge.req); err != nil {
 				return fmt.Errorf("同步商品失败 goodsId=%s: %w", ge.goodsID, err)
 			}
 		}
 
 		for _, se := range skuList {
+			if se.req == nil {
+				continue
+			}
+			info, err := s.dao.GetDBInfoByGoodsID(event.GetCtx(), se.req.GoodsID)
+			if err != nil {
+				zap.L().Error("get db info error", zap.Error(err))
+				continue
+			}
+			if info == nil {
+				continue
+			}
+			se.req.GoodsDBId = info.ID
 			if err := s.skuDao.UpsertBySkuIDWithDB(tx, se.skuID, se.req); err != nil {
 				return fmt.Errorf("同步SKU失败 skuId=%s: %w", se.skuID, err)
 			}
