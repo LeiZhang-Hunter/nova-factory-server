@@ -3,6 +3,7 @@ package shopdaoimpl
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/milvus-io/milvus/client/v2/entity"
@@ -671,9 +672,9 @@ func getFloat64ColumnValue(resultSet *milvusclient.ResultSet, fieldName string, 
 
 // buildGoodsVectorRows 将商品及 SKU 数据展开为 Milvus 列式写入所需结构。
 func buildGoodsVectorRows(goods *shopmodels.Goods, items []*shopmodels.GoodsVectorUpsertItem, extractor *goods.MetadataExtractor) (*goodsVectorRows, error) {
-	goodsPK := strings.TrimSpace(goods.GoodsID)
-	if goodsPK == "" {
-		goodsPK = strconv.FormatInt(goods.ID, 10)
+	goodsPK := goods.GoodsID
+	if goodsPK == 0 {
+		return nil, errors.New("商品id不能为空")
 	}
 
 	rows := &goodsVectorRows{}

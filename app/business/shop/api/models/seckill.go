@@ -2,7 +2,7 @@ package models
 
 type SeckillSku struct {
 	ID             uint64   `json:"id,string"`
-	SkuID          string   `json:"skuId"`
+	SkuID          int64    `json:"skuId"`
 	SkuName        string   `json:"skuName"`
 	ImageURL       string   `json:"imageUrl"`
 	GalleryImages  []string `json:"galleryImages" gorm:"-"`
@@ -21,7 +21,7 @@ type Seckill struct {
 	ID           int64         `json:"id,string" gorm:"column:id"`
 	ActivityID   int64         `json:"activityId,string" gorm:"column:activity_id"`
 	ProductID    int64         `json:"productId,string" gorm:"column:product_id"`
-	GoodsID      string        `json:"goodsId" gorm:"-"`
+	GoodsID      int64         `json:"goodsId,string" gorm:"-"`
 	Image        string        `json:"image" gorm:"column:image"`
 	Images       string        `json:"images" gorm:"column:images"`
 	Gallery      []string      `json:"gallery" gorm:"-"`

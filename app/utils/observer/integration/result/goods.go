@@ -14,7 +14,7 @@ type GoodsGetResponse interface {
 }
 
 type GoodsGetResponseData interface {
-	GetGoodsid() string
+	GetGoodsid() int64
 	GetEshopgoodsid() string
 	GetGoodscode() string
 	GetGoodsname() string

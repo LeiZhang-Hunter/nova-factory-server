@@ -15,13 +15,13 @@ type IShopGoodsDao interface {
 	BatchUpdate(c *gin.Context, reqs []*shopmodels.GoodsUpsert, batchSize int) error
 	DeleteByIDs(c *gin.Context, ids []int64) error
 	GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error)
-	GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error)
-	ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.Goods, error)
+	GetByGoodsID(c *gin.Context, goodsID int64) (*shopmodels.Goods, error)
+	ListByGoodsIDs(c *gin.Context, goodsIDs []int64) ([]*shopmodels.Goods, error)
 	List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error)
-	UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID string, quantity int64) error
+	UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID int64, quantity int64) error
 	UpdateStockByGoodsID(c *gin.Context, goodsID string, quantity int64) error
 	UpsertByGoodsID(c *gin.Context, goodsID string, req *shopmodels.GoodsSyncUpsert) error
-	UpsertByGoodsIDWithDB(db *gorm.DB, goodsID string, req *shopmodels.GoodsSyncUpsert) (int64, error)
-	LockStockRows(db *gorm.DB, goodsIDs []string) error
-	GetDBInfoByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error)
+	UpsertByGoodsIDWithDB(db *gorm.DB, goodsID int64, req *shopmodels.GoodsSyncUpsert) (int64, error)
+	LockStockRows(db *gorm.DB, goodsIDs []int64) error
+	GetDBInfoByGoodsID(c *gin.Context, goodsID int64) (*shopmodels.Goods, error)
 }

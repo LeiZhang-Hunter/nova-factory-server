@@ -26,7 +26,7 @@ func NewDiscountRuleDao(ms *gorm.DB) dao.IDiscountRuleDao {
 	}
 }
 
-func (s *DiscountRuleDaoImpl) GetValidRule(c *gin.Context, userID int64, targetType string, targetID string) (*models.UserDiscountRule, error) {
+func (s *DiscountRuleDaoImpl) GetValidRule(c *gin.Context, userID int64, targetType string, targetID int64) (*models.UserDiscountRule, error) {
 	var item models.UserDiscountRule
 	now := time.Now()
 	if err := s.db.WithContext(c).Table(s.tableName).
@@ -46,7 +46,7 @@ func (s *DiscountRuleDaoImpl) GetValidRule(c *gin.Context, userID int64, targetT
 }
 
 // ListByUserAndGoods 查询用户对商品的折扣规则（优先）和分类折扣规则
-func (s *DiscountRuleDaoImpl) ListByUserAndGoods(c *gin.Context, userID int64, goodsID string, categoryID string) (*models.UserDiscountRule, error) {
+func (s *DiscountRuleDaoImpl) ListByUserAndGoods(c *gin.Context, userID int64, goodsID int64, categoryID int64) (*models.UserDiscountRule, error) {
 	// 优先查询商品级折扣
 	goodsRule, err := s.GetValidRule(c, userID, "goods", goodsID)
 	if err != nil {
@@ -56,7 +56,7 @@ func (s *DiscountRuleDaoImpl) ListByUserAndGoods(c *gin.Context, userID int64, g
 		return goodsRule, nil
 	}
 	// 其次查询分类级折扣
-	if categoryID != "" {
+	if categoryID != 0 {
 		categoryRule, err := s.GetValidRule(c, userID, "category", categoryID)
 		if err != nil {
 			return nil, err
@@ -67,7 +67,7 @@ func (s *DiscountRuleDaoImpl) ListByUserAndGoods(c *gin.Context, userID int64, g
 }
 
 // ListValidRulesByTargets 批量查询用户的有效折扣规则（用于列表场景消除 N+1）
-func (s *DiscountRuleDaoImpl) ListValidRulesByTargets(c *gin.Context, userID int64, targetType string, targetIDs []string) ([]*models.UserDiscountRule, error) {
+func (s *DiscountRuleDaoImpl) ListValidRulesByTargets(c *gin.Context, userID int64, targetType string, targetIDs []int64) ([]*models.UserDiscountRule, error) {
 	if len(targetIDs) == 0 {
 		return nil, nil
 	}

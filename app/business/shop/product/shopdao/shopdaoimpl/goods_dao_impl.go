@@ -155,7 +155,7 @@ func (s *ShopGoodsDaoImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Goods,
 }
 
 // GetByGoodsID 根据商品业务ID查询商品
-func (s *ShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error) {
+func (s *ShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID int64) (*shopmodels.Goods, error) {
 	var item shopmodels.Goods
 	if err := s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Where("state = ?", commonStatus.NORMAL).First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -170,7 +170,7 @@ func (s *ShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID string) (*shopmo
 }
 
 // ListByGoodsIDs 根据商品业务ID批量查询商品
-func (s *ShopGoodsDaoImpl) ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.Goods, error) {
+func (s *ShopGoodsDaoImpl) ListByGoodsIDs(c *gin.Context, goodsIDs []int64) ([]*shopmodels.Goods, error) {
 	if len(goodsIDs) == 0 {
 		return []*shopmodels.Goods{}, nil
 	}
@@ -330,7 +330,7 @@ func (s *ShopGoodsDaoImpl) UpsertByGoodsID(c *gin.Context, goodsID string, req *
 }
 
 // UpsertByGoodsIDWithDB 使用外部传入的 db 操作商品 upsert，用于事务场景
-func (s *ShopGoodsDaoImpl) UpsertByGoodsIDWithDB(db *gorm.DB, goodsID string, req *shopmodels.GoodsSyncUpsert) (int64, error) {
+func (s *ShopGoodsDaoImpl) UpsertByGoodsIDWithDB(db *gorm.DB, goodsID int64, req *shopmodels.GoodsSyncUpsert) (int64, error) {
 	if db == nil {
 		return 0, errors.New("db不能为空")
 	}
@@ -354,7 +354,7 @@ func (s *ShopGoodsDaoImpl) UpsertByGoodsIDWithDB(db *gorm.DB, goodsID string, re
 }
 
 // LockStockRows 锁定指定商品的库存行，防止并发更新
-func (s *ShopGoodsDaoImpl) LockStockRows(db *gorm.DB, goodsIDs []string) error {
+func (s *ShopGoodsDaoImpl) LockStockRows(db *gorm.DB, goodsIDs []int64) error {
 	if db == nil {
 		return errors.New("db不能为空")
 	}
@@ -390,7 +390,7 @@ func (s *ShopGoodsDaoImpl) attachHomeModuleIDs(c *gin.Context, rows []*shopmodel
 	return nil
 }
 
-func (s *ShopGoodsDaoImpl) UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID string, quantity int64) error {
+func (s *ShopGoodsDaoImpl) UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID int64, quantity int64) error {
 	if db == nil {
 		return errors.New("db不能为空")
 	}
@@ -409,7 +409,7 @@ func (s *ShopGoodsDaoImpl) UpdateStockByGoodsIDWithDB(db *gorm.DB, goodsID strin
 }
 
 // GetDBInfoByGoodsID 根据商品业务ID查询商品
-func (s *ShopGoodsDaoImpl) GetDBInfoByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error) {
+func (s *ShopGoodsDaoImpl) GetDBInfoByGoodsID(c *gin.Context, goodsID int64) (*shopmodels.Goods, error) {
 	var item shopmodels.Goods
 	if err := s.db.WithContext(c).Table(s.tableName).Where("goods_id = ?", goodsID).Where("state = ?", commonStatus.NORMAL).First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

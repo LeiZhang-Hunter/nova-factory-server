@@ -7,9 +7,9 @@ import (
 // ShopUserGoodsFavorite 用户商品收藏
 type ShopUserGoodsFavorite struct {
 	gorm.Model
-	ID      int64  `json:"id,string" gorm:"id"`     // 主键ID
-	UserID  int64  `json:"userId" gorm:"user_id"`   // 用户ID
-	GoodsID string `json:"goodsId" gorm:"goods_id"` // 商品ID (VARCHAR)
+	ID      int64 `json:"id,string" gorm:"id"`            // 主键ID
+	UserID  int64 `json:"userId,string" gorm:"user_id"`   // 用户ID
+	GoodsID int64 `json:"goodsId,string" gorm:"goods_id"` // 商品ID (VARCHAR)
 }
 
 // FavoriteStatusResp 收藏状态查询响应
@@ -19,5 +19,5 @@ type FavoriteStatusResp struct {
 
 // FavoriteAddReq 添加收藏请求
 type FavoriteAddReq struct {
-	GoodsId string `json:"goodsId" binding:"required"` // 商品ID (VARCHAR)
+	GoodsId int64 `json:"goodsId,string" binding:"required"` // 商品ID (VARCHAR)
 }

@@ -5,7 +5,6 @@ package models
 
 import (
 	"encoding/json"
-	"fmt"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
@@ -133,8 +132,8 @@ func (g *GoodsInfoReq) Ptr() any {
 }
 
 // 实现 event.ProductData 接口的各 getter 方法
-func (g *GoodsInfoReq) GetGoodsId() string {
-	return fmt.Sprintf("%d", g.Goodsid)
+func (g *GoodsInfoReq) GetGoodsId() int64 {
+	return g.Goodsid
 }
 func (g *GoodsInfoReq) GetGoodsName() string {
 	return g.Goodsname

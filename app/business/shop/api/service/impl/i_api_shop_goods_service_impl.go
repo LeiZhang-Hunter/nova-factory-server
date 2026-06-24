@@ -2,13 +2,11 @@ package impl
 
 import (
 	"math"
-	"nova-factory-server/app/utils/fileUtils"
-	"strconv"
-
 	"nova-factory-server/app/business/shop/api/models"
 	discountservice "nova-factory-server/app/business/shop/discount/service"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/fileUtils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -85,7 +83,7 @@ func (s *IApiShopGoodsServiceImpl) applyDiscountPrice(c *gin.Context, goods *sho
 				RetailPrice: sku.RetailPrice,
 			})
 		}
-		discountedSkus, err := s.discountService.CalculateSkuDiscountPrice(c, userID, strconv.FormatInt(goods.ShopCategoryId, 10), skuPrices)
+		discountedSkus, err := s.discountService.CalculateSkuDiscountPrice(c, userID, goods.ShopCategoryId, skuPrices)
 		if err == nil && discountedSkus != nil {
 			skuMap := make(map[int64]float64, len(discountedSkus))
 			for _, ds := range discountedSkus {
@@ -99,7 +97,7 @@ func (s *IApiShopGoodsServiceImpl) applyDiscountPrice(c *gin.Context, goods *sho
 		}
 	} else if goods.RetailPrice > 0 {
 		// 没有SKU的情况，直接计算商品零售价的折扣
-		discountedPrice, hasDiscount := s.discountService.CalculateDiscountPrice(c, userID, goods.GoodsID, "", strconv.FormatInt(goods.ShopCategoryId, 10), goods.RetailPrice)
+		discountedPrice, hasDiscount := s.discountService.CalculateDiscountPrice(c, userID, goods.GoodsID, 0, goods.ShopCategoryId, goods.RetailPrice)
 		if hasDiscount {
 			goods.RetailPrice = math.Round(discountedPrice*100) / 100
 		}
@@ -116,7 +114,7 @@ func (s *IApiShopGoodsServiceImpl) applyDiscountPriceSimple(c *gin.Context, good
 		return
 	}
 	if goods.RetailPrice > 0 {
-		discountedPrice, hasDiscount := s.discountService.CalculateDiscountPrice(c, userID, goods.GoodsID, "", strconv.FormatInt(goods.ShopCategoryId, 10), goods.RetailPrice)
+		discountedPrice, hasDiscount := s.discountService.CalculateDiscountPrice(c, userID, goods.GoodsID, 0, goods.ShopCategoryId, goods.RetailPrice)
 		if hasDiscount {
 			goods.RetailPrice = math.Round(discountedPrice*100) / 100
 		}
@@ -139,8 +137,8 @@ func (s *IApiShopGoodsServiceImpl) applyDiscountPriceForList(c *gin.Context, goo
 			// 列表场景暂无 SKU 信息，先传空数组
 			batchGoods = append(batchGoods, &discountservice.GoodsWithPrice{
 				GoodsID:     goods.GoodsID,
-				SkuIDs:      []string{},
-				CategoryID:  strconv.FormatInt(goods.ShopCategoryId, 10),
+				SkuIDs:      []int64{},
+				CategoryID:  goods.ShopCategoryId,
 				RetailPrice: goods.RetailPrice,
 			})
 		}
@@ -201,7 +199,7 @@ func (s *IApiShopGoodsServiceImpl) loadSearchGoodsMap(c *gin.Context, rows []*sh
 		goods.GoodsDBID = v.GoodsDBID
 		//goods.GoodsName = names[k]
 		goods.GoodsName = v.SkuName
-		goods.GoodsCode = v.GoodsID
+		goods.GoodsCode = v.GoodsCode
 		goods.OuterID = v.OuterID
 		goods.Description = v.Description
 		goods.Weight = v.Weight

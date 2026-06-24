@@ -17,13 +17,13 @@ type IShopSkuDao interface {
 	GetByID(c *gin.Context, id int64) (*shopmodels.GoodsSku, error)
 	ListByIDs(c *gin.Context, ids []int64) ([]*shopmodels.GoodsSku, error)
 	GetBySkuID(c *gin.Context, skuID string) (*shopmodels.GoodsSku, error)
-	ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.GoodsSku, error)
-	ListBySkuIDs(c *gin.Context, skuIDs []string) ([]*shopmodels.GoodsSku, error)
+	ListByGoodsIDs(c *gin.Context, goodsIDs []int64) ([]*shopmodels.GoodsSku, error)
+	ListBySkuIDs(c *gin.Context, skuIDs []int64) ([]*shopmodels.GoodsSku, error)
 	List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*shopmodels.GoodsSkuListData, error)
 	UpdateStockBySkuIDWithDB(db *gorm.DB, skuID string, quantity int64) error
 	UpdateStockBySkuID(c *gin.Context, skuID string, quantity int64) error
 	SumStockByGoodsID(c *gin.Context, goodsID string) (int64, error)
 	UpsertBySkuID(c *gin.Context, skuID string, req *shopmodels.GoodsSkuSyncUpsert) error
 	UpsertBySkuIDWithDB(db *gorm.DB, skuID string, req *shopmodels.GoodsSkuSyncUpsert) error
-	LockStockRows(db *gorm.DB, goodsIDs []string) error
+	LockStockRows(db *gorm.DB, goodsIDs []int64) error
 }

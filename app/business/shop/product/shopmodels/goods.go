@@ -10,7 +10,7 @@ import (
 // Goods 商品信息
 type Goods struct {
 	ID                 int64       `json:"id,string" gorm:"id"`                           // 主键ID
-	GoodsID            string      `json:"goodsId" gorm:"goods_id"`                       // 商品业务ID
+	GoodsID            int64       `json:"goodsId,string" gorm:"goods_id"`                // 商品业务ID
 	ShopCategoryId     int64       `json:"shopCategoryId,string" gorm:"shop_category_id"` // 商品分类id
 	ShopCategoryName   string      `json:"shopCategoryName" gorm:"-" gorm:"-"`            // 商品分类名称
 	GoodsName          string      `json:"goodsName" gorm:"goods_name"`                   // 商品名称
@@ -37,7 +37,7 @@ type Goods struct {
 // GoodsUpsert 商品新增修改参数
 type GoodsUpsert struct {
 	ID             int64    `json:"id,string"`                                     // 主键ID
-	GoodsID        string   `json:"goodsId" binding:"required"`                    // 商品业务ID
+	GoodsID        int64    `json:"goodsId" binding:"required"`                    // 商品业务ID
 	ShopCategoryId int64    `json:"shopCategoryId,string" gorm:"shop_category_id"` // 商品分类id
 	GoodsName      string   `json:"goodsName" binding:"required"`                  // 商品名称
 	GoodsCode      string   `json:"goodsCode"`                                     // 商品编码
@@ -80,7 +80,7 @@ type GoodsListData struct {
 
 type GoodsVectorResult struct {
 	GoodsDBID  int64  `json:"goodsDbId"`
-	GoodsID    string `json:"goodsId"`
+	GoodsID    int64  `json:"goodsId"`
 	Collection string `json:"collection"`
 	Dimension  int    `json:"dimension"`
 	SkuCount   int    `json:"skuCount"`
@@ -94,7 +94,7 @@ type ImportGoodsList struct {
 
 // ImportGoodsRecord 导入商品结果
 type ImportGoodsRecord struct {
-	ExternalID string             `json:"external_id"`
+	ExternalID int64              `json:"external_id"`
 	Source     string             `json:"source"`
 	Entity     string             `json:"entity"`
 	Data       ImportGoodsRawData `json:"data"`
@@ -112,7 +112,7 @@ type ImportGoodsSkuRawData struct {
 	Price5   float64 `json:"price5"`
 	Size     float64 `json:"size"`
 	Skucode  string  `json:"skucode"`
-	Skuid    string  `json:"skuid"`
+	Skuid    int64   `json:"skuid"`
 	Skuname  string  `json:"skuname"`
 	Weight   float64 `json:"weight"`
 }
@@ -210,7 +210,7 @@ func (r *GoodsDataResult) GetProductInfo() []goodsstore.ProductData { return r.P
 // GoodsSyncUpsert 商品同步 upsert 参数，用于 SyncEvent 等场景。
 // 只包含同步所需的字段，不含 GalleryImages、VideoURL 等非同步字段。
 type GoodsSyncUpsert struct {
-	GoodsID     string  // 商品业务ID
+	GoodsID     int64   // 商品业务ID
 	GoodsName   string  // 商品名称
 	GoodsCode   string  // 商品编码
 	OuterID     string  // 外部系统ID
@@ -226,7 +226,7 @@ type GoodsSyncUpsert struct {
 // ToSyncMap 转换为数据库字段映射，用于 GORM Create/Updates，仅包含非空/非零字段
 func (r *GoodsSyncUpsert) ToSyncMap(now *time.Time) map[string]any {
 	m := map[string]any{"update_time": now}
-	if r.GoodsID != "" {
+	if r.GoodsID != 0 {
 		m["goods_id"] = r.GoodsID
 	}
 	if r.GoodsName != "" {
