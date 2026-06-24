@@ -338,9 +338,12 @@ func (s *ShopGoodsDaoImpl) UpsertByGoodsIDWithDB(db *gorm.DB, goodsID string, re
 	updates := req.ToSyncMap(&now)
 	var info *shopmodels.Goods
 	if err := db.Table(s.tableName).Where("goods_id = ?", goodsID).First(&info).Error; err != nil {
-		return 0, err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, err
+		}
+
 	}
-	if info == nil {
+	if info == nil || info.ID == 0 {
 		updates["id"] = snowflake.GenID()
 		updates["goods_id"] = goodsID
 		updates["create_by"] = int64(1)
