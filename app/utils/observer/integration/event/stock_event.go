@@ -7,7 +7,7 @@ package event
 // 包含变更前后的数量，便于 ERP 系统进行增量或全量同步。
 type StockData interface {
 	// ProductID 商品ID
-	ProductID() string
+	ProductID() int64
 	// SkuID SKU ID，无SKU时为0
 	SkuID() int64
 	// WarehouseID 仓库ID，标识库存在哪个仓库

@@ -60,7 +60,7 @@ func (s *IApiShopGoodsDaoImpl) ListByIDs(c *gin.Context, ids []int64) ([]*models
 }
 
 // GetByGoodsID 根据商品业务ID查询
-func (s *IApiShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID string) (*models.Goods, error) {
+func (s *IApiShopGoodsDaoImpl) GetByGoodsID(c *gin.Context, goodsID int64) (*models.Goods, error) {
 	var item models.Goods
 	if err := s.db.WithContext(c).Table(s.tableName).
 		Where("goods_id = ?", goodsID).

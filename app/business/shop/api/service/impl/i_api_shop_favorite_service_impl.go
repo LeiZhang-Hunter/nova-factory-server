@@ -23,12 +23,12 @@ func NewIApiShopFavoriteServiceImpl(favoriteDao dao.IApiShopFavoriteDao, goodsDa
 }
 
 // AddFavorite 添加收藏
-func (s *IApiShopFavoriteServiceImpl) AddFavorite(c *gin.Context, userId int64, goodsId string) error {
+func (s *IApiShopFavoriteServiceImpl) AddFavorite(c *gin.Context, userId int64, goodsId int64) error {
 	return s.favoriteDao.Add(c, userId, goodsId)
 }
 
 // RemoveFavorite 移除收藏
-func (s *IApiShopFavoriteServiceImpl) RemoveFavorite(c *gin.Context, userId int64, goodsId string) error {
+func (s *IApiShopFavoriteServiceImpl) RemoveFavorite(c *gin.Context, userId int64, goodsId int64) error {
 	return s.favoriteDao.Remove(c, userId, goodsId)
 }
 

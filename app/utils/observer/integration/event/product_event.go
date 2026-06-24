@@ -29,7 +29,7 @@ type ProductSku interface {
 // 包含商品基本信息及下属SKU列表，各业务模块实现此接口以接入商品同步。
 type ProductData interface {
 	// GetGoodsId 商品ID
-	GetGoodsId() string
+	GetGoodsId() int64
 	// GetGoodsName 商品名称
 	GetGoodsName() string
 	// GetGoodsCode 商品编码

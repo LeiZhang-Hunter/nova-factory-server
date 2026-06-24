@@ -51,7 +51,7 @@ type SeckillActivityProductInfo struct {
 
 // SeckillActivityProductInfoAttr 秒杀活动中的商品规格活动信息。
 type SeckillActivityProductInfoAttr struct {
-	SkuID   string  `json:"skuId"`   // 规格业务ID
+	SkuID   int64   `json:"skuId"`   // 规格业务ID
 	Status  int32   `json:"status"`  // 是否参与活动
 	Price   float64 `json:"price"`   // 活动价
 	Cost    float64 `json:"cost"`    // 成本价

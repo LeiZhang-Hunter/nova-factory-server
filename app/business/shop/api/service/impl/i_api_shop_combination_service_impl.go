@@ -6,7 +6,6 @@ import (
 	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/business/shop/product/shopservice"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -55,24 +54,20 @@ func (s *IApiShopCombinationServiceImpl) applyCombinationDetail(c *gin.Context, 
 	if s.shopGoodsService == nil {
 		return
 	}
-	goodsKey := strings.TrimSpace(combination.ProductID)
-	if goodsKey == "" {
+	goodsKey := combination.ProductID
+	if goodsKey == 0 {
 		return
 	}
 
 	product, err := s.shopGoodsService.GetByGoodsID(c, goodsKey)
 	if err != nil || product == nil {
-		productIDInt, parseErr := strconv.ParseInt(goodsKey, 10, 64)
-		if parseErr != nil {
-			return
-		}
-		product, err = s.shopGoodsService.GetByID(c, productIDInt)
+		product, err = s.shopGoodsService.GetByID(c, goodsKey)
 		if err != nil || product == nil {
 			return
 		}
 	}
 
-	combination.ProductID = strconv.FormatInt(product.ID, 10)
+	combination.ProductID = product.ID
 	combination.GoodsID = product.GoodsID
 	combination.GoodsName = product.GoodsName
 	combination.VideoURL = product.VideoURL

@@ -137,14 +137,8 @@ func (s *ShopSkuServiceImpl) syncGoodsVectorAfterSkuChange(c *gin.Context, skuDa
 		return nil
 	}
 
-	goodsID := ""
-	if sku != nil {
-		goodsID = strings.TrimSpace(sku.GoodsID)
-	}
-	if goodsID == "" && req != nil {
-		goodsID = strings.TrimSpace(req.GoodsID)
-	}
-	if goodsID == "" {
+	goodsID := sku.GoodsID
+	if goodsID == 0 {
 		return nil
 	}
 

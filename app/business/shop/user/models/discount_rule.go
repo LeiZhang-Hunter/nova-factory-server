@@ -34,7 +34,7 @@ type UserDiscountRule struct {
 	ID           int64      `json:"id,string" gorm:"primaryKey;autoIncrement"`      // 主键
 	UserID       int64      `json:"userId,string" gorm:"index;not null"`            // 用户ID
 	TargetType   string     `json:"targetType" gorm:"type:varchar(20);not null"`    // sku=SKU折扣, category=分类折扣
-	TargetID     string     `json:"targetId" gorm:"index;not null"`                 // SKU ID 或分类 ID
+	TargetID     int64      `json:"targetId" gorm:"index;not null"`                 // SKU ID 或分类 ID
 	DiscountRate float64    `json:"discountRate" gorm:"type:decimal(5,2);not null"` // 折扣率 (0.85 = 85折)
 	ValidFrom    *time.Time `json:"validFrom" gorm:"type:datetime"`                 // 有效期开始
 	ValidTo      *time.Time `json:"validTo" gorm:"type:datetime"`                   // 有效期结束
@@ -52,7 +52,7 @@ type UserDiscountRuleUpsert struct {
 	ID           int64  `json:"id,string"`     // 主键ID
 	UserID       int64  `json:"userId,string"` // 用户ID
 	TargetType   string `json:"targetType"`    // goods=商品, category=分类
-	TargetID     string `json:"targetId"`      // 商品ID或分类ID
+	TargetID     int64  `json:"targetId"`      // 商品ID或分类ID
 	DiscountRate int64  `json:"discountRate"`  // 折扣率
 	ValidFrom    string `json:"validFrom"`     // 有效期开始 (格式: 2006-01-02 15:04:05)
 	ValidTo      string `json:"validTo"`       // 有效期结束 (格式: 2006-01-02 15:04:05)
@@ -77,7 +77,7 @@ type UserDiscountRuleListData struct {
 type BatchDiscountRuleCreate struct {
 	UserIDs      []int64    `json:"userIds"`      // 用户ID列表
 	TargetType   string     `json:"targetType"`   // goods=商品, category=分类
-	TargetIDs    []string   `json:"targetIds"`    // 商品ID或分类ID列表
+	TargetIDs    []int64    `json:"targetIds"`    // 商品ID或分类ID列表
 	DiscountRate float64    `json:"discountRate"` // 折扣率
 	ValidFrom    *time.Time `json:"validFrom"`    // 有效期开始
 	ValidTo      *time.Time `json:"validTo"`      // 有效期结束

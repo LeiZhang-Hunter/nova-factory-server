@@ -114,14 +114,14 @@ func (s *ShopGoodsServiceImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 		return nil
 	}
 	if s.skuDao != nil {
-		goodsIDs := make([]string, 0, len(ids))
-		seen := make(map[string]struct{}, len(ids))
+		goodsIDs := make([]int64, 0, len(ids))
+		seen := make(map[int64]struct{}, len(ids))
 		for _, id := range ids {
 			goods, err := s.dao.GetByID(c, id)
 			if err != nil {
 				return err
 			}
-			if goods == nil || strings.TrimSpace(goods.GoodsID) == "" {
+			if goods == nil || (goods.GoodsID) == 0 {
 				continue
 			}
 			if _, ok := seen[goods.GoodsID]; ok {
@@ -163,7 +163,7 @@ func (s *ShopGoodsServiceImpl) GetByID(c *gin.Context, id int64) (*shopmodels.Go
 }
 
 // GetByGoodsID 按业务商品 ID 查询商品，并补齐分类名、SKU 和媒体绝对地址。
-func (s *ShopGoodsServiceImpl) GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error) {
+func (s *ShopGoodsServiceImpl) GetByGoodsID(c *gin.Context, goodsID int64) (*shopmodels.Goods, error) {
 	data, err := s.dao.GetByGoodsID(c, goodsID)
 	if err != nil {
 		return nil, err
@@ -341,7 +341,7 @@ func writeGoodsCSVRows(csvWriter *csv.Writer, rows []*shopmodels.Goods) error {
 func buildGoodsCSVRecord(row *shopmodels.Goods, sku *shopmodels.GoodsSku) []string {
 	record := []string{
 		strconv.FormatInt(row.ID, 10),
-		row.GoodsID,
+		strconv.FormatInt(row.GoodsID, 10),
 		row.GoodsName,
 		row.GoodsCode,
 		row.OuterID,
@@ -364,7 +364,7 @@ func buildGoodsCSVRecord(row *shopmodels.Goods, sku *shopmodels.GoodsSku) []stri
 	} else {
 		record = append(record,
 			strconv.FormatUint(sku.ID, 10),
-			sku.SkuID,
+			strconv.FormatInt(sku.SkuID, 10),
 			sku.SkuName,
 			sku.SkuCode,
 			sku.OuterID,
@@ -483,11 +483,8 @@ func (s *ShopGoodsServiceImpl) Import(c *gin.Context, records []shopmodels.Impor
 // buildGoodsUpsert 组装商品导入参数
 func buildGoodsUpsert(record shopmodels.ImportGoodsRecord) (*shopmodels.GoodsUpsert, error) {
 	// 商品业务 ID 优先取 external_id，其次回退到 product_code。
-	goodsID := strings.TrimSpace(record.ExternalID)
-	if goodsID == "" {
-		goodsID = strings.TrimSpace(record.Data.ProductCode)
-	}
-	if goodsID == "" {
+	goodsID := record.ExternalID
+	if goodsID == 0 {
 		return nil, errors.New("导入商品缺少external_id或product_code")
 	}
 
@@ -511,7 +508,7 @@ func buildGoodsUpsert(record shopmodels.ImportGoodsRecord) (*shopmodels.GoodsUps
 		GoodsID:       goodsID,
 		GoodsName:     strings.TrimSpace(record.Data.ProductName),
 		GoodsCode:     strings.TrimSpace(record.Data.ProductCode),
-		OuterID:       strings.TrimSpace(record.ExternalID),
+		OuterID:       strconv.FormatInt(record.ExternalID, 10),
 		Description:   strings.TrimSpace(record.Data.Remark),
 		Weight:        weight,
 		WeightUnit:    "kg",
@@ -530,16 +527,10 @@ func buildGoodsUpsert(record shopmodels.ImportGoodsRecord) (*shopmodels.GoodsUps
 }
 
 // buildGoodsSkuUpsert 组装商品规格导入参数
-func buildGoodsSkuUpsert(goodsID string, record shopmodels.ImportGoodsRecord, sku shopmodels.ImportGoodsSkuRawData) (*shopmodels.GoodsSkuUpsert, bool) {
+func buildGoodsSkuUpsert(goodsID int64, record shopmodels.ImportGoodsRecord, sku shopmodels.ImportGoodsSkuRawData) (*shopmodels.GoodsSkuUpsert, bool) {
 	// SKU 业务 ID 允许从多个候选字段回退，尽可能吸收外部数据源的不一致格式。
-	skuID := strings.TrimSpace(sku.Skuid)
-	if skuID == "" {
-		skuID = strings.TrimSpace(sku.Skucode)
-	}
-	if skuID == "" {
-		skuID = strings.TrimSpace(sku.Barcode)
-	}
-	if skuID == "" {
+	skuID := sku.Skuid
+	if skuID == 0 {
 		return nil, false
 	}
 	now := time.Now()
@@ -605,10 +596,10 @@ func splitImportRecords(records []shopmodels.ImportGoodsRecord, batchSize int) [
 }
 
 // buildImportBatch 构建单批次导入的商品与规格数据
-func buildImportBatch(records []shopmodels.ImportGoodsRecord) (map[string]*shopmodels.GoodsUpsert, map[string]*shopmodels.GoodsSkuUpsert, error) {
+func buildImportBatch(records []shopmodels.ImportGoodsRecord) (map[int64]*shopmodels.GoodsUpsert, map[int64]*shopmodels.GoodsSkuUpsert, error) {
 	// 同一批次内以业务 ID 做 key，天然具备去重效果；后出现的数据会覆盖前一条。
-	goodsMap := make(map[string]*shopmodels.GoodsUpsert, len(records))
-	skuMap := make(map[string]*shopmodels.GoodsSkuUpsert)
+	goodsMap := make(map[int64]*shopmodels.GoodsUpsert, len(records))
+	skuMap := make(map[int64]*shopmodels.GoodsSkuUpsert)
 	for _, record := range records {
 		goodsUpsert, err := buildGoodsUpsert(record)
 		if err != nil {
@@ -627,7 +618,7 @@ func buildImportBatch(records []shopmodels.ImportGoodsRecord) (map[string]*shopm
 }
 
 // diffGoods 比对单批次商品数据的新增和更新列表
-func (s *ShopGoodsServiceImpl) diffGoods(c *gin.Context, goodsMap map[string]*shopmodels.GoodsUpsert) ([]*shopmodels.GoodsUpsert, []*shopmodels.GoodsUpsert, error) {
+func (s *ShopGoodsServiceImpl) diffGoods(c *gin.Context, goodsMap map[int64]*shopmodels.GoodsUpsert) ([]*shopmodels.GoodsUpsert, []*shopmodels.GoodsUpsert, error) {
 	if len(goodsMap) == 0 {
 		return nil, nil, nil
 	}
@@ -635,7 +626,7 @@ func (s *ShopGoodsServiceImpl) diffGoods(c *gin.Context, goodsMap map[string]*sh
 	if err != nil {
 		return nil, nil, err
 	}
-	existingMap := make(map[string]*shopmodels.Goods, len(existingRows))
+	existingMap := make(map[int64]*shopmodels.Goods, len(existingRows))
 	for _, row := range existingRows {
 		existingMap[row.GoodsID] = row
 	}
@@ -658,7 +649,7 @@ func (s *ShopGoodsServiceImpl) diffGoods(c *gin.Context, goodsMap map[string]*sh
 }
 
 // diffSkus 比对单批次规格数据的新增和更新列表
-func (s *ShopGoodsServiceImpl) diffSkus(c *gin.Context, skuMap map[string]*shopmodels.GoodsSkuUpsert) ([]*shopmodels.GoodsSkuUpsert, []*shopmodels.GoodsSkuUpsert, error) {
+func (s *ShopGoodsServiceImpl) diffSkus(c *gin.Context, skuMap map[int64]*shopmodels.GoodsSkuUpsert) ([]*shopmodels.GoodsSkuUpsert, []*shopmodels.GoodsSkuUpsert, error) {
 	if len(skuMap) == 0 {
 		return nil, nil, nil
 	}
@@ -666,7 +657,7 @@ func (s *ShopGoodsServiceImpl) diffSkus(c *gin.Context, skuMap map[string]*shopm
 	if err != nil {
 		return nil, nil, err
 	}
-	existingMap := make(map[string]*shopmodels.GoodsSku, len(existingRows))
+	existingMap := make(map[int64]*shopmodels.GoodsSku, len(existingRows))
 	for _, row := range existingRows {
 		existingMap[row.SkuID] = row
 	}
@@ -735,8 +726,8 @@ func sameSku(current *shopmodels.GoodsSku, req *shopmodels.GoodsSkuUpsert) bool 
 }
 
 // mapKeys 获取映射中的全部键
-func mapKeys[T any](data map[string]T) []string {
-	keys := make([]string, 0, len(data))
+func mapKeys[T any](data map[int64]T) []int64 {
+	keys := make([]int64, 0, len(data))
 	for key := range data {
 		keys = append(keys, key)
 	}
@@ -744,11 +735,11 @@ func mapKeys[T any](data map[string]T) []string {
 }
 
 // goodsIDsFromRows 提取商品列表中的商品业务ID
-func goodsIDsFromRows(rows []*shopmodels.Goods) []string {
-	goodsIDs := make([]string, 0, len(rows))
-	seen := make(map[string]struct{}, len(rows))
+func goodsIDsFromRows(rows []*shopmodels.Goods) []int64 {
+	goodsIDs := make([]int64, 0, len(rows))
+	seen := make(map[int64]struct{}, len(rows))
 	for _, row := range rows {
-		if row == nil || row.GoodsID == "" {
+		if row == nil || row.GoodsID == 0 {
 			continue
 		}
 		if _, ok := seen[row.GoodsID]; ok {
@@ -770,8 +761,8 @@ func (s *ShopGoodsServiceImpl) attachSkus(c *gin.Context, rows []*shopmodels.Goo
 	if err != nil {
 		return err
 	}
-	skuMap := make(map[string][]*shopmodels.GoodsSku, len(rows))
-	skuQuantity := make(map[string]int64, len(rows))
+	skuMap := make(map[int64][]*shopmodels.GoodsSku, len(rows))
+	skuQuantity := make(map[int64]int64, len(rows))
 	for _, sku := range skus {
 		skuQuantity[sku.GoodsID] += sku.Quantity
 		skuMap[sku.GoodsID] = append(skuMap[sku.GoodsID], sku)
@@ -839,7 +830,7 @@ func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) (result.SyncP
 	}
 
 	type goodsEntry struct {
-		goodsID string
+		goodsID int64
 		req     *shopmodels.GoodsSyncUpsert
 	}
 	type skuEntry struct {
@@ -850,12 +841,12 @@ func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) (result.SyncP
 	var goodsList []goodsEntry
 	var skuList []skuEntry
 
-	goodsIDSet := make(map[string]struct{})
+	goodsIDSet := make(map[int64]struct{})
 
 	for _, product := range products {
 		goodsID := product.GetGoodsId()
-		if goodsID == "" || goodsID == "0" {
-			zap.L().Warn("SyncEvent: 跳过无效商品", zap.String("goodsId", product.GetGoodsId()))
+		if goodsID == 0 {
+			zap.L().Warn("SyncEvent: 跳过无效商品", zap.Int64("goodsId", product.GetGoodsId()))
 			continue
 		}
 		goodsIDSet[goodsID] = struct{}{}
@@ -915,23 +906,22 @@ func (s *ShopGoodsServiceImpl) SyncEvent(event event.ProductEvent) (result.SyncP
 		}
 	}
 
-	goodsIDs := make([]string, 0, len(goodsIDSet))
+	goodsIDs := make([]int64, 0, len(goodsIDSet))
 	for gid := range goodsIDSet {
 		goodsIDs = append(goodsIDs, gid)
 	}
-	sort.Strings(goodsIDs)
 
 	fn := func(tx *gorm.DB) error {
 		if err := s.skuDao.LockStockRows(tx, goodsIDs); err != nil {
 			zap.L().Error("SyncEvent: 锁定SKU商品行失败",
-				zap.Strings("goodsIds", goodsIDs),
+				zap.Int64s("goodsIds", goodsIDs),
 				zap.Error(err))
 			return fmt.Errorf("锁定SKU库存行失败: %w", err)
 		}
 
 		if err := s.dao.LockStockRows(tx, goodsIDs); err != nil {
 			zap.L().Error("SyncEvent: 锁定商品行失败",
-				zap.Strings("goodsIds", goodsIDs),
+				zap.Int64s("goodsIds", goodsIDs),
 				zap.Error(err))
 			return fmt.Errorf("锁定商品库存行失败: %w", err)
 		}
@@ -992,13 +982,13 @@ func (s *ShopGoodsServiceImpl) SyncStock(event event.StockEvent) error {
 
 	type stockUpdate struct {
 		skuID    string
-		goodsID  string
+		goodsID  int64
 		afterQty int64
 	}
 
 	updates := make([]stockUpdate, 0, len(event.GetStocks()))
-	goodsIDSet := make(map[string]struct{})
-	goodsStockMap := make(map[string]int64)
+	goodsIDSet := make(map[int64]struct{})
+	goodsStockMap := make(map[int64]int64)
 	for _, stock := range event.GetStocks() {
 		skuID := strconv.FormatInt(stock.SkuID(), 10)
 		goodsID := stock.ProductID()
@@ -1014,19 +1004,18 @@ func (s *ShopGoodsServiceImpl) SyncStock(event event.StockEvent) error {
 	}
 
 	goodsIDs := mapKeys(goodsIDSet)
-	sort.Strings(goodsIDs)
 
 	fn := func(tx *gorm.DB) error {
 		if err := s.skuDao.LockStockRows(tx, goodsIDs); err != nil {
 			zap.L().Error("SyncStock: 锁定SKU库存行失败",
-				zap.Strings("goodsIds", goodsIDs),
+				zap.Int64s("goodsIds", goodsIDs),
 				zap.Error(err))
 			return fmt.Errorf("锁定SKU库存行失败: %w", err)
 		}
 
 		if err := s.dao.LockStockRows(tx, goodsIDs); err != nil {
 			zap.L().Error("SyncStock: 锁定商品库存行失败",
-				zap.Strings("goodsIds", goodsIDs),
+				zap.Int64s("goodsIds", goodsIDs),
 				zap.Error(err))
 			return fmt.Errorf("锁定商品库存行失败: %w", err)
 		}
@@ -1045,7 +1034,7 @@ func (s *ShopGoodsServiceImpl) SyncStock(event event.StockEvent) error {
 			totalStock := goodsStockMap[goodsID]
 			if err := s.dao.UpdateStockByGoodsIDWithDB(tx, goodsID, totalStock); err != nil {
 				zap.L().Error("SyncStock: 更新商品总库存失败",
-					zap.String("goodsId", goodsID),
+					zap.Int64("goodsId", goodsID),
 					zap.Int64("quantity", totalStock),
 					zap.Error(err))
 				return fmt.Errorf("更新商品总库存失败 goodsId=%s: %w", goodsID, err)
@@ -1186,19 +1175,10 @@ func toGoodsProductData(row *shopmodels.Goods) *shopmodels.GoodsProductData {
 		skus = append(skus, toGoodsProductSku(sku))
 	}
 
-	var goodsId int64 = 0
-	parseInt, err := strconv.ParseInt(row.GoodsID, 10, 64)
-	if err != nil {
-		goodsId = int64(row.ID)
-		zap.L().Error("convert sku id error", zap.Error(err))
-	} else {
-		goodsId = parseInt
-	}
-
 	return &shopmodels.GoodsProductData{
 		Cid:        int(row.ShopCategoryId),
 		CatName:    row.ShopCategoryName,
-		ProductId:  goodsId,
+		ProductId:  row.GoodsID,
 		Name:       row.GoodsName,
 		OuterId:    row.OuterID,
 		PicPath:    row.ImageURL,
@@ -1223,16 +1203,8 @@ func toGoodsProductSku(sku *shopmodels.GoodsSku) *shopmodels.GoodsProductSku {
 	if sku.UpdateTime != nil {
 		modified = sku.UpdateTime.Format("2006-01-02 15:04:05")
 	}
-	var skuId int64 = 0
-	parseInt, err := strconv.ParseInt(sku.SkuID, 10, 64)
-	if err != nil {
-		skuId = int64(sku.ID)
-		zap.L().Error("convert sku id error", zap.Error(err))
-	} else {
-		skuId = parseInt
-	}
 	return &shopmodels.GoodsProductSku{
-		SkuId:      skuId,
+		SkuId:      sku.SkuID,
 		SkuName:    sku.SkuName,
 		ProductId:  int(sku.GoodsDBID),
 		OuterId:    sku.OuterID,

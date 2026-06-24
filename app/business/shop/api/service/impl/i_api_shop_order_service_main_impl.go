@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 
 	apimodels "nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/utils/fileUtils"
@@ -1153,7 +1152,7 @@ func (s *IApiShopOrderServiceImpl) buildCombinationCacheItem(c *gin.Context, com
 		return nil, errors.New("超过拼团单次限购数量")
 	}
 
-	goods, sku, err := s.loadGoodsAndSkuByGoodsCode(c, strings.TrimSpace(combination.ProductID), skuID, quantity)
+	goods, sku, err := s.loadGoodsAndSkuByGoodsCode(c, combination.ProductID, skuID, quantity)
 	if err != nil {
 		return nil, err
 	}
@@ -1226,11 +1225,11 @@ func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsID(c *gin.Context, good
 }
 
 // loadGoodsAndSkuByGoodsCode 按商品业务ID和规格ID加载商品快照所需数据。
-func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsCode(c *gin.Context, goodsCode string, skuID int64, quantity int64) (*apimodels.Goods, *shopmodels.GoodsSku, error) {
-	if goodsCode == "" {
+func (s *IApiShopOrderServiceImpl) loadGoodsAndSkuByGoodsCode(c *gin.Context, goodsId int64, skuID int64, quantity int64) (*apimodels.Goods, *shopmodels.GoodsSku, error) {
+	if goodsId == 0 {
 		return nil, nil, errors.New("活动商品数据异常")
 	}
-	goods, err := s.goodsDao.GetByGoodsID(c, goodsCode)
+	goods, err := s.goodsDao.GetByGoodsID(c, goodsId)
 	if err != nil {
 		return nil, nil, errors.New("读取商品信息失败")
 	}
@@ -1395,12 +1394,12 @@ func (s *IApiShopOrderServiceImpl) recalculateOrderAmounts(c *gin.Context, userI
 }
 
 // applyGoodsDiscount 对单个商品应用用户折扣，返回折扣后价格
-func (s *IApiShopOrderServiceImpl) applyGoodsDiscount(c *gin.Context, userID int64, goods *apimodels.Goods, skuID string, price float64) float64 {
+func (s *IApiShopOrderServiceImpl) applyGoodsDiscount(c *gin.Context, userID int64, goods *apimodels.Goods, skuID int64, price float64) float64 {
 	if s.discountService == nil || userID == 0 || goods == nil || price <= 0 {
 		return price
 	}
 	discountedPrice, hasDiscount := s.discountService.CalculateDiscountPrice(
-		c, userID, goods.GoodsID, skuID, strconv.FormatInt(goods.ShopCategoryId, 10), price)
+		c, userID, goods.GoodsID, skuID, goods.ShopCategoryId, price)
 	if hasDiscount {
 		return discountedPrice
 	}
@@ -1504,8 +1503,8 @@ func (s *IApiShopOrderServiceImpl) getTxDB(c *gin.Context) *gorm.DB {
 }
 
 // recalcGoodsStockByGoodsID 根据 goodsID 汇总所有 SKU 库存并更新商品总库存。
-func (s *IApiShopOrderServiceImpl) recalcGoodsStockByGoodsID(c *gin.Context, goodsID string) error {
-	skus, err := s.skuDao.ListByGoodsIDs(c, []string{goodsID})
+func (s *IApiShopOrderServiceImpl) recalcGoodsStockByGoodsID(c *gin.Context, goodsID int64) error {
+	skus, err := s.skuDao.ListByGoodsIDs(c, []int64{goodsID})
 	if err != nil {
 		return fmt.Errorf("查询商品SKU列表失败: %v", err)
 	}

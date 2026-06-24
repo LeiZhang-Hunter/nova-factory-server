@@ -75,7 +75,7 @@ func (s *IApiShopSkuDaoImpl) ListByIDs(c *gin.Context, ids []int64) ([]*shopmode
 	return rows, nil
 }
 
-func (s *IApiShopSkuDaoImpl) ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.GoodsSku, error) {
+func (s *IApiShopSkuDaoImpl) ListByGoodsIDs(c *gin.Context, goodsIDs []int64) ([]*shopmodels.GoodsSku, error) {
 	if len(goodsIDs) == 0 {
 		return make([]*shopmodels.GoodsSku, 0), nil
 	}

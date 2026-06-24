@@ -132,8 +132,8 @@ func (g *GoodsInfoReq) Ptr() any {
 }
 
 // 实现 event.ProductData 接口的各 getter 方法
-func (g *GoodsInfoReq) GetGoodsId() string {
-	return g.Goodscode
+func (g *GoodsInfoReq) GetGoodsId() int64 {
+	return g.Goodsid
 }
 func (g *GoodsInfoReq) GetGoodsName() string {
 	return g.Goodsname

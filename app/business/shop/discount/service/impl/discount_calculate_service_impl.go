@@ -21,13 +21,13 @@ func NewDiscountCalculateService(dao dao.IDiscountRuleDao) discountservice.IDisc
 }
 
 // CalculateDiscountPrice 计算商品折扣价
-func (s *DiscountCalculateServiceImpl) CalculateDiscountPrice(c *gin.Context, userID int64, goodsID string, skuID string, categoryID string, originalPrice float64) (float64, bool) {
+func (s *DiscountCalculateServiceImpl) CalculateDiscountPrice(c *gin.Context, userID int64, goodsID int64, skuID int64, categoryID int64, originalPrice float64) (float64, bool) {
 	if userID == 0 || originalPrice <= 0 {
 		return originalPrice, false
 	}
 
 	// 优先查 SKU 级折扣
-	if skuID != "" {
+	if skuID != 0 {
 		skuRule, err := s.dao.GetValidRule(c, userID, "sku", skuID)
 		if err == nil && skuRule != nil {
 			// discountRate 直接使用（存储的是小数，如 0.50 表示 50%）
@@ -37,7 +37,7 @@ func (s *DiscountCalculateServiceImpl) CalculateDiscountPrice(c *gin.Context, us
 	}
 
 	// 其次查分类级折扣
-	if categoryID != "" {
+	if categoryID != 0 {
 		categoryRule, err := s.dao.GetValidRule(c, userID, "category", categoryID)
 		if err == nil && categoryRule != nil {
 			discountedPrice := math.Round(originalPrice*categoryRule.DiscountRate*100) / 100
@@ -49,29 +49,29 @@ func (s *DiscountCalculateServiceImpl) CalculateDiscountPrice(c *gin.Context, us
 }
 
 // CalculateSkuDiscountPrice 计算SKU的折扣价
-func (s *DiscountCalculateServiceImpl) CalculateSkuDiscountPrice(c *gin.Context, userID int64, categoryID string, skus []*discountservice.SkuPrice) ([]*discountservice.SkuPrice, error) {
+func (s *DiscountCalculateServiceImpl) CalculateSkuDiscountPrice(c *gin.Context, userID int64, categoryID int64, skus []*discountservice.SkuPrice) ([]*discountservice.SkuPrice, error) {
 	if len(skus) == 0 || userID == 0 {
 		return skus, nil
 	}
 
 	// 构建 SKU ID 列表
-	skuIDs := make([]string, 0, len(skus))
+	skuIDs := make([]int64, 0, len(skus))
 	for _, sku := range skus {
-		if sku != nil && sku.SkuID != "" {
+		if sku != nil && sku.SkuID != 0 {
 			skuIDs = append(skuIDs, sku.SkuID)
 		}
 	}
 
 	// 1. 批量查询 SKU 规则
 	skuRules, _ := s.dao.ListValidRulesByTargets(c, userID, "sku", skuIDs)
-	skuRuleMap := make(map[string]*models.UserDiscountRule, len(skuRules))
+	skuRuleMap := make(map[int64]*models.UserDiscountRule, len(skuRules))
 	for _, r := range skuRules {
 		skuRuleMap[r.TargetID] = r
 	}
 
 	// 2. 查分类规则（兜底）
 	var categoryRule *models.UserDiscountRule
-	if categoryID != "" {
+	if categoryID != 0 {
 		categoryRule, _ = s.dao.GetValidRule(c, userID, "category", categoryID)
 	}
 
@@ -93,29 +93,29 @@ func (s *DiscountCalculateServiceImpl) CalculateSkuDiscountPrice(c *gin.Context,
 }
 
 // BatchCalculateDiscountPrices 批量计算商品折扣价（内部批量查库一次，用于列表场景消除 N+1）
-func (s *DiscountCalculateServiceImpl) BatchCalculateDiscountPrices(c *gin.Context, userID int64, goods []*discountservice.GoodsWithPrice) map[string]float64 {
+func (s *DiscountCalculateServiceImpl) BatchCalculateDiscountPrices(c *gin.Context, userID int64, goods []*discountservice.GoodsWithPrice) map[int64]float64 {
 	if len(goods) == 0 || userID == 0 {
 		return nil
 	}
 
 	// 1. 收集所有 SKU ID 和分类 ID
-	skuIDSet := make(map[string]struct{})
-	catIDSet := make(map[string]struct{})
+	skuIDSet := make(map[int64]struct{})
+	catIDSet := make(map[int64]struct{})
 	for _, g := range goods {
 		for _, skuID := range g.SkuIDs {
-			if skuID != "" {
+			if skuID != 0 {
 				skuIDSet[skuID] = struct{}{}
 			}
 		}
-		if g.CategoryID != "" {
+		if g.CategoryID != 0 {
 			catIDSet[g.CategoryID] = struct{}{}
 		}
 	}
-	skuIDs := make([]string, 0, len(skuIDSet))
+	skuIDs := make([]int64, 0, len(skuIDSet))
 	for id := range skuIDSet {
 		skuIDs = append(skuIDs, id)
 	}
-	catIDs := make([]string, 0, len(catIDSet))
+	catIDs := make([]int64, 0, len(catIDSet))
 	for id := range catIDSet {
 		catIDs = append(catIDs, id)
 	}
@@ -125,17 +125,17 @@ func (s *DiscountCalculateServiceImpl) BatchCalculateDiscountPrices(c *gin.Conte
 	catRules, _ := s.dao.ListValidRulesByTargets(c, userID, "category", catIDs)
 
 	// 3. 构建内存 Map
-	skuRuleMap := make(map[string]*models.UserDiscountRule, len(skuRules))
+	skuRuleMap := make(map[int64]*models.UserDiscountRule, len(skuRules))
 	for _, r := range skuRules {
 		skuRuleMap[r.TargetID] = r
 	}
-	catRuleMap := make(map[string]*models.UserDiscountRule, len(catRules))
+	catRuleMap := make(map[int64]*models.UserDiscountRule, len(catRules))
 	for _, r := range catRules {
 		catRuleMap[r.TargetID] = r
 	}
 
 	// 4. 内存中计算折扣价（按 SKU 级别）
-	result := make(map[string]float64, len(goods))
+	result := make(map[int64]float64, len(goods))
 	for _, g := range goods {
 		var rate float64 = 1.0
 		found := false
@@ -150,7 +150,7 @@ func (s *DiscountCalculateServiceImpl) BatchCalculateDiscountPrices(c *gin.Conte
 		}
 
 		// SKU 没有匹配，再匹配分类折扣
-		if !found && g.CategoryID != "" {
+		if !found && g.CategoryID != 0 {
 			if rule, ok := catRuleMap[g.CategoryID]; ok {
 				rate = rule.DiscountRate
 				found = true
