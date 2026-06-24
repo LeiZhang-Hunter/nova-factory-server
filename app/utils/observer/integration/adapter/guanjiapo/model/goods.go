@@ -89,7 +89,7 @@ func (u *ProductSearchResponseUnit) GetPrice5() float64  { return u.Price5 }
 
 // ProductSearchResponseData 商品数据，实现 result.GoodsGetResponseData。
 type ProductSearchResponseData struct {
-	GoodsID      string                       `json:"goodsid"`
+	GoodsID      int64                        `json:"goodsid"`
 	EshopGoodsID string                       `json:"eshopgoodsid"`
 	GoodsCode    string                       `json:"goodscode"`
 	GoodsName    string                       `json:"goodsname"`
@@ -99,7 +99,7 @@ type ProductSearchResponseData struct {
 	Units        []*ProductSearchResponseUnit `json:"units"`
 }
 
-func (d *ProductSearchResponseData) GetGoodsid() string      { return d.GoodsID }
+func (d *ProductSearchResponseData) GetGoodsid() int64       { return d.GoodsID }
 func (d *ProductSearchResponseData) GetEshopgoodsid() string { return d.EshopGoodsID }
 func (d *ProductSearchResponseData) GetGoodscode() string    { return d.GoodsCode }
 func (d *ProductSearchResponseData) GetGoodsname() string    { return d.GoodsName }

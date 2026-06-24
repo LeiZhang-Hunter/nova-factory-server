@@ -24,7 +24,7 @@ func NewIApiShopFavoriteDaoImpl(ms *gorm.DB) dao.IApiShopFavoriteDao {
 }
 
 // Add 添加收藏
-func (d *IApiShopFavoriteDaoImpl) Add(c *gin.Context, userId int64, goodsId string) error {
+func (d *IApiShopFavoriteDaoImpl) Add(c *gin.Context, userId int64, goodsId int64) error {
 	favorite := &models.ShopUserGoodsFavorite{
 		UserID:  userId,
 		GoodsID: goodsId,
@@ -33,7 +33,7 @@ func (d *IApiShopFavoriteDaoImpl) Add(c *gin.Context, userId int64, goodsId stri
 }
 
 // Remove 移除收藏
-func (d *IApiShopFavoriteDaoImpl) Remove(c *gin.Context, userId int64, goodsId string) error {
+func (d *IApiShopFavoriteDaoImpl) Remove(c *gin.Context, userId int64, goodsId int64) error {
 	return d.db.WithContext(c).Table(d.tableName).
 		Where("user_id = ? AND goods_id = ?", userId, goodsId).
 		Delete(nil).Error

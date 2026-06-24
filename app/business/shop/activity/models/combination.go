@@ -4,7 +4,7 @@ import "nova-factory-server/app/baize"
 
 type CombinationMainInfo struct {
 	ID            int64   `json:"id,string" gorm:"id"`
-	ProductID     string  `json:"productId" gorm:"product_id"`
+	ProductID     int64   `json:"productId,string" gorm:"product_id"`
 	MerID         int64   `json:"merId,string" gorm:"mer_id"`
 	Attr          string  `json:"attr" gorm:"attr"`
 	Price         float64 `json:"price" gorm:"price"`
@@ -66,7 +66,7 @@ func FormatCombinationMainInfo(sec *Combination) *CombinationMainInfo {
 
 type Combination struct {
 	ID            int64   `json:"id,string" gorm:"id"`
-	ProductID     string  `json:"productId" gorm:"product_id"`
+	ProductID     int64   `json:"productId" gorm:"product_id"`
 	MerID         int64   `json:"merId,string" gorm:"mer_id"`
 	Image         string  `json:"image" gorm:"image"`
 	Images        string  `json:"images" gorm:"images"`
@@ -102,7 +102,7 @@ type Combination struct {
 
 type CombinationSet struct {
 	ID            int64    `json:"id,string"`
-	ProductID     string   `json:"productId" binding:"required"`
+	ProductID     int64    `json:"productId" binding:"required"`
 	MerID         int64    `json:"merId,string"`
 	Image         string   `json:"image" binding:"required"`
 	Images        string   `json:"images"`

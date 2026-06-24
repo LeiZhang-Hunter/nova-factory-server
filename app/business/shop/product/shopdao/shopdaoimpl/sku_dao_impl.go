@@ -133,7 +133,7 @@ func (s *ShopSkuDaoImpl) GetBySkuID(c *gin.Context, skuID string) (*shopmodels.G
 }
 
 // ListByGoodsIDs 根据商品业务ID批量查询商品规格
-func (s *ShopSkuDaoImpl) ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*shopmodels.GoodsSku, error) {
+func (s *ShopSkuDaoImpl) ListByGoodsIDs(c *gin.Context, goodsIDs []int64) ([]*shopmodels.GoodsSku, error) {
 	if len(goodsIDs) == 0 {
 		return []*shopmodels.GoodsSku{}, nil
 	}
@@ -145,7 +145,7 @@ func (s *ShopSkuDaoImpl) ListByGoodsIDs(c *gin.Context, goodsIDs []string) ([]*s
 }
 
 // ListBySkuIDs 根据规格业务ID批量查询商品规格
-func (s *ShopSkuDaoImpl) ListBySkuIDs(c *gin.Context, skuIDs []string) ([]*shopmodels.GoodsSku, error) {
+func (s *ShopSkuDaoImpl) ListBySkuIDs(c *gin.Context, skuIDs []int64) ([]*shopmodels.GoodsSku, error) {
 	if len(skuIDs) == 0 {
 		return []*shopmodels.GoodsSku{}, nil
 	}
@@ -158,7 +158,7 @@ func (s *ShopSkuDaoImpl) ListBySkuIDs(c *gin.Context, skuIDs []string) ([]*shopm
 
 func (s *ShopSkuDaoImpl) List(c *gin.Context, req *shopmodels.GoodsSkuQuery) (*shopmodels.GoodsSkuListData, error) {
 	db := s.db.WithContext(c).Table(s.tableName)
-	if req.GoodsID != "" {
+	if req.GoodsID != 0 {
 		db = db.Where("goods_id = ?", req.GoodsID)
 	}
 	if req.SkuName != "" {
@@ -228,7 +228,7 @@ func (s *ShopSkuDaoImpl) SumStockByGoodsID(c *gin.Context, goodsID string) (int6
 }
 
 // LockStockRows 锁定指定商品的SKU库存行，防止并发更新
-func (s *ShopSkuDaoImpl) LockStockRows(db *gorm.DB, goodsIDs []string) error {
+func (s *ShopSkuDaoImpl) LockStockRows(db *gorm.DB, goodsIDs []int64) error {
 	if db == nil {
 		return errors.New("db不能为空")
 	}

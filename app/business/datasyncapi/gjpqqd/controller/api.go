@@ -140,10 +140,6 @@ func (q *API) productStockUpdate(c *gin.Context) {
 		return
 	}
 
-	if req.ProductID != "" {
-		req.ProductID = "0" + req.ProductID
-	}
-
 	stockReq := req.ToStockSyncReq()
 	stockReq.WithDB(q.db)
 	if err := observer.GetNotifier().OnStockChanged(stockReq); err != nil {

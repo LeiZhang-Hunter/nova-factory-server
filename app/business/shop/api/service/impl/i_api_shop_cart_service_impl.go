@@ -226,8 +226,8 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 		}
 
 		// 拼团表中的 ProductID 是基础商品的 goods_code，需要通过 goods_code 找回商品。
-		goodsCode := strings.TrimSpace(combination.ProductID)
-		if goodsCode == "" {
+		goodsCode := combination.ProductID
+		if goodsCode == 0 {
 			return nil, errors.New("活动商品数据异常")
 		}
 		goods, err := s.goodsDao.GetByGoodsID(c, goodsCode)
@@ -304,7 +304,7 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 		price := sku.RetailPrice
 		if s.discountService != nil && userId != 0 && price > 0 {
 			discountedPrice, hasDiscount := s.discountService.CalculateDiscountPrice(
-				c, userId, goods.GoodsID, sku.SkuID, strconv.FormatInt(goods.ShopCategoryId, 10), price)
+				c, userId, goods.GoodsID, sku.SkuID, goods.ShopCategoryId, price)
 			if hasDiscount {
 				price = discountedPrice
 			}
@@ -423,7 +423,7 @@ func (s *IApiShopCartServiceImpl) loadSkuForGoods(c *gin.Context, goods *api.Goo
 	if goods.IsOnSale != 1 {
 		return nil, nil, errors.New("商品已下架")
 	}
-	if strings.TrimSpace(goods.GoodsID) == "" {
+	if (goods.GoodsID) == 0 {
 		return nil, nil, errors.New("商品数据异常")
 	}
 	sku, err := s.goodsSkuDao.GetByID(c, skuID)

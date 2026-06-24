@@ -3,7 +3,7 @@ package models
 // CombinationSku 拼团商品SKU
 type CombinationSku struct {
 	ID             uint64   `json:"id,string"`
-	SkuID          string   `json:"skuId"`
+	SkuID          int64    `json:"skuId,string"`
 	SkuName        string   `json:"skuName"`
 	ImageURL       string   `json:"imageUrl"`
 	GalleryImages  []string `json:"galleryImages" gorm:"-"`
@@ -20,7 +20,7 @@ type CombinationSku struct {
 // Combination 拼团商品
 type Combination struct {
 	ID            int64   `json:"id,string" gorm:"column:id"`
-	ProductID     string  `json:"productId" gorm:"column:product_id"`
+	ProductID     int64   `json:"productId,string" gorm:"column:product_id"`
 	MerID         int64   `json:"merId,string" gorm:"column:mer_id"`
 	Image         string  `json:"image" gorm:"column:image"`
 	Images        string  `json:"images" gorm:"column:images"`
@@ -53,7 +53,7 @@ type Combination struct {
 	HomeModuleIDs string  `json:"homeModuleIds" gorm:"column:home_module_ids"`
 	PinkCount     int64   `json:"pinkCount" gorm:"column:pink_count"`
 	// 扩展字段（非数据库映射）
-	GoodsID  string            `json:"goodsId" gorm:"-"`
+	GoodsID  int64             `json:"goodsId" gorm:"-"`
 	Gallery  []string          `json:"gallery" gorm:"-"`
 	VideoURL string            `json:"videoUrl" gorm:"-"`
 	Skus     []*CombinationSku `json:"skus" gorm:"-"`

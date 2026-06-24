@@ -9,8 +9,9 @@ import (
 type GoodsSku struct {
 	ID                 uint64   `json:"id,string" gorm:"id"`                 // 主键ID
 	GoodsDBID          int64    `json:"goodsDBId,string" gorm:"goods_db_id"` // 商品业务ID
-	GoodsID            string   `json:"goodsId" gorm:"goods_id"`             // 商品业务ID
-	SkuID              string   `json:"skuId" gorm:"sku_id"`                 // 规格业务ID
+	GoodsID            int64    `json:"goodsId,string" gorm:"goods_id"`      // 商品业务ID
+	GoodsCode          string   `json:"goodsCode" gorm:"goods_code"`         // 商品编码
+	SkuID              int64    `json:"skuId,string" gorm:"sku_id"`          // 规格业务ID
 	SkuName            string   `json:"skuName" gorm:"sku_name"`             // 规格名称
 	SkuCode            string   `json:"skuCode" gorm:"sku_code"`             // 规格编码
 	OuterID            string   `json:"outerId" gorm:"outer_id"`             // 外部系统ID
@@ -33,8 +34,8 @@ type GoodsSku struct {
 // GoodsSkuUpsert 商品规格新增修改参数
 type GoodsSkuUpsert struct {
 	ID                 uint64   `json:"id,string"`                           // 主键ID
-	GoodsID            string   `json:"goodsId" binding:"required"`          // 商品业务ID
-	SkuID              string   `json:"skuId" binding:"required"`            // 规格业务ID
+	GoodsID            int64    `json:"goodsId,string" binding:"required"`   // 商品业务ID
+	SkuID              int64    `json:"skuId,string" binding:"required"`     // 规格业务ID
 	GoodsDBID          int64    `json:"goodsDBId,string" gorm:"goods_db_id"` // 商品业务ID
 	SkuName            string   `json:"skuName"`                             // 规格名称
 	SkuCode            string   `json:"skuCode"`                             // 规格编码
@@ -54,7 +55,7 @@ type GoodsSkuUpsert struct {
 
 // GoodsSkuQuery 商品规格查询参数
 type GoodsSkuQuery struct {
-	GoodsID string `form:"goodsId"` // 商品业务ID
+	GoodsID int64  `form:"goodsId"` // 商品业务ID
 	SkuName string `form:"skuName"` // 规格名称
 	SkuCode string `form:"skuCode"` // 规格编码
 	OuterID string `form:"outerId"` // 外部系统ID
@@ -72,7 +73,7 @@ type GoodsSkuListData struct {
 // GoodsSkuSyncUpsert SKU 同步 upsert 参数，用于 SyncEvent 等场景。
 type GoodsSkuSyncUpsert struct {
 	GoodsDBId   int64   // 商品数据库id
-	GoodsID     string  // 商品业务ID
+	GoodsID     int64   // 商品业务ID
 	SkuID       string  // 规格业务ID
 	SkuName     string  // 规格名称
 	SkuCode     string  // 规格编码
@@ -87,7 +88,7 @@ type GoodsSkuSyncUpsert struct {
 // ToSyncMap 转换为数据库字段映射，用于 GORM Create/Updates，仅包含非空/非零字段
 func (r *GoodsSkuSyncUpsert) ToSyncMap(now *time.Time) map[string]any {
 	m := map[string]any{"update_time": now}
-	if r.GoodsID != "" {
+	if r.GoodsID != 0 {
 		m["goods_id"] = r.GoodsID
 	}
 	if r.SkuID != "" {

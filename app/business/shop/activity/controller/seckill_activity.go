@@ -262,7 +262,7 @@ func validateSeckillActivityProducts(productInfos []*models.SeckillActivityProdu
 			if attr == nil {
 				continue
 			}
-			if strings.TrimSpace(attr.SkuID) == "" {
+			if (attr.SkuID) == 0 {
 				return fmt.Errorf("商品规格不能为空: %d", productInfo.ID)
 			}
 			if attr.Status < 0 {

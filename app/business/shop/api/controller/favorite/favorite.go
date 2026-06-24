@@ -4,6 +4,7 @@ import (
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/utils/baizeContext"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
@@ -48,7 +49,7 @@ func (f *Favorite) Add(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	if req.GoodsId == "" {
+	if req.GoodsId == 0 {
 		baizeContext.ParameterError(c)
 		return
 	}
@@ -76,7 +77,12 @@ func (f *Favorite) Remove(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	err := f.service.RemoveFavorite(c, userId, goodsId)
+	goodsIdInt, err := strconv.ParseInt(goodsId, 10, 64)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	err = f.service.RemoveFavorite(c, userId, goodsIdInt)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return

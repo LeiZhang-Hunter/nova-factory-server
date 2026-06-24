@@ -4,7 +4,7 @@ package models
 type Goods struct {
 	ID               int64    `json:"id,string" gorm:"id"`                           // 主键ID
 	GoodsDBID        int64    `json:"goodsDBId,string" gorm:"goods_db_id"`           // 商品业务ID
-	GoodsID          string   `json:"goodsId" gorm:"goods_id"`                       // 商品业务ID
+	GoodsID          int64    `json:"goodsId,string" gorm:"goods_id"`                // 商品业务ID
 	ShopCategoryId   int64    `json:"shopCategoryId,string" gorm:"shop_category_id"` // 商品分类id
 	ShopCategoryName string   `json:"shopCategoryName" gorm:"-" gorm:"-"`            // 商品分类名称
 	GoodsName        string   `json:"goodsName" gorm:"goods_name"`                   // 商品名称

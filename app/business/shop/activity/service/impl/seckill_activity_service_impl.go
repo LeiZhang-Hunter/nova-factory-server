@@ -144,8 +144,8 @@ func compactProductAttrs(attrs []*models.SeckillActivityProductInfoAttr) []*mode
 		if attr == nil {
 			continue
 		}
-		attr.SkuID = strings.TrimSpace(attr.SkuID)
-		if attr.SkuID == "" {
+		attr.SkuID = attr.SkuID
+		if attr.SkuID == 0 {
 			continue
 		}
 		result = append(result, attr)
@@ -176,11 +176,11 @@ func (s *ShopSeckillActivityServiceImpl) loadActivityGoods(
 func (s *ShopSeckillActivityServiceImpl) loadActivitySkus(
 	c *gin.Context,
 	goodsMap map[int64]*shopmodels.Goods,
-) (map[int64]map[string]*shopmodels.GoodsSku, error) {
-	goodsIDs := make([]string, 0, len(goodsMap))
-	goodsIndex := make(map[string]int64, len(goodsMap))
+) (map[int64]map[int64]*shopmodels.GoodsSku, error) {
+	goodsIDs := make([]int64, 0, len(goodsMap))
+	goodsIndex := make(map[int64]int64, len(goodsMap))
 	for id, goods := range goodsMap {
-		if goods == nil || strings.TrimSpace(goods.GoodsID) == "" {
+		if goods == nil || (goods.GoodsID) == 0 {
 			continue
 		}
 		goodsIDs = append(goodsIDs, goods.GoodsID)
@@ -192,7 +192,7 @@ func (s *ShopSeckillActivityServiceImpl) loadActivitySkus(
 		return nil, err
 	}
 
-	result := make(map[int64]map[string]*shopmodels.GoodsSku, len(goodsMap))
+	result := make(map[int64]map[int64]*shopmodels.GoodsSku, len(goodsMap))
 	for _, sku := range skuRows {
 		if sku == nil {
 			continue
@@ -202,7 +202,7 @@ func (s *ShopSeckillActivityServiceImpl) loadActivitySkus(
 			continue
 		}
 		if result[productID] == nil {
-			result[productID] = make(map[string]*shopmodels.GoodsSku)
+			result[productID] = make(map[int64]*shopmodels.GoodsSku)
 		}
 		result[productID][sku.SkuID] = sku
 	}
@@ -213,7 +213,7 @@ func (s *ShopSeckillActivityServiceImpl) loadActivitySkus(
 func validateActivityProductAttrs(
 	productInfos []*models.SeckillActivityProductInfo,
 	goodsMap map[int64]*shopmodels.Goods,
-	skuMap map[int64]map[string]*shopmodels.GoodsSku,
+	skuMap map[int64]map[int64]*shopmodels.GoodsSku,
 ) error {
 	for _, productInfo := range productInfos {
 		goods := goodsMap[productInfo.ID]
@@ -256,7 +256,7 @@ func (s *ShopSeckillActivityServiceImpl) syncActivitySeckillGoods(
 	activity *models.SeckillActivity,
 	req *models.SeckillActivitySet,
 	goodsMap map[int64]*shopmodels.Goods,
-	skuMap map[int64]map[string]*shopmodels.GoodsSku,
+	skuMap map[int64]map[int64]*shopmodels.GoodsSku,
 ) error {
 	currentRows, err := s.findSeckillsByActivityID(c, activity.ID)
 	if err != nil {
@@ -370,7 +370,7 @@ func buildSeckillSetFromActivity(
 	req *models.SeckillActivitySet,
 	productInfo *models.SeckillActivityProductInfo,
 	goods *shopmodels.Goods,
-	productSkus map[string]*shopmodels.GoodsSku,
+	productSkus map[int64]*shopmodels.GoodsSku,
 	current *models.Seckill,
 ) *models.SeckillSet {
 	images := normalizeGoodsGalleryImages(goods.GalleryImages)
@@ -457,7 +457,7 @@ type seckillStats struct {
 func buildSeckillStats(
 	goods *shopmodels.Goods,
 	productInfo *models.SeckillActivityProductInfo,
-	productSkus map[string]*shopmodels.GoodsSku,
+	productSkus map[int64]*shopmodels.GoodsSku,
 ) seckillStats {
 	result := seckillStats{
 		Price:   goods.RetailPrice,

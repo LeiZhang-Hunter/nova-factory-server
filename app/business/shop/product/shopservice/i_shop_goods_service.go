@@ -26,7 +26,7 @@ type IShopGoodsService interface {
 	GetByID(c *gin.Context, id int64) (*shopmodels.Goods, error)
 
 	// GetByGoodsID 按业务商品 ID 查询单个商品详情。
-	GetByGoodsID(c *gin.Context, goodsID string) (*shopmodels.Goods, error)
+	GetByGoodsID(c *gin.Context, goodsID int64) (*shopmodels.Goods, error)
 
 	// List 分页查询商品列表。
 	List(c *gin.Context, req *shopmodels.GoodsQuery) (*shopmodels.GoodsListData, error)

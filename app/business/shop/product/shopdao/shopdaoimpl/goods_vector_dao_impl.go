@@ -7,7 +7,6 @@ import (
 	"nova-factory-server/app/utils/vectorsearch"
 	"nova-factory-server/app/utils/vectorsearch/goods"
 	"nova-factory-server/app/utils/vectorsearch/normalization"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -115,9 +114,9 @@ func (d *ShopGoodsVectorDaoImpl) Upsert(c *gin.Context, goods *shopmodels.Goods,
 		return nil, fmt.Errorf("写入 Milvus 失败: %w", err)
 	}
 
-	goodsPK := strings.TrimSpace(goods.GoodsID)
-	if goodsPK == "" {
-		goodsPK = strconv.FormatInt(goods.ID, 10)
+	goodsPK := goods.GoodsID
+	if goodsPK == 0 {
+		goodsPK = goods.ID
 	}
 
 	return &shopmodels.GoodsVectorResult{

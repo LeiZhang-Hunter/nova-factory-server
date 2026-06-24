@@ -69,14 +69,14 @@ func (s *StockSyncReq) GetCallback() event.Callback {
 
 // StockItem 单条库存变更数据，实现 event.StockData 接口
 type StockItem struct {
-	ProductId     string  `json:"productid" form:"productid"`
+	ProductId     int64   `json:"productid" form:"productid"`
 	SkuId         int64   `json:"skuid" form:"skuid"`
 	WarehouseId   int64   `json:"warehouseid" form:"warehouseid"`
 	Qty           float64 `json:"quantity" form:"quantity"`
 	AfterQuantity float64 `json:"afterqty" form:"afterqty"`
 }
 
-func (s *StockItem) ProductID() string {
+func (s *StockItem) ProductID() int64 {
 	return s.ProductId
 }
 

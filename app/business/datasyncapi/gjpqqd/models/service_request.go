@@ -32,7 +32,7 @@ func (r *ProductListRequest) GetPageSize() int         { return r.PageSize }
 // productqty: 商品库存数量（无规格时必填，有规格时为空）
 // skus: 规格库存，格式 "skuID:qty,skuID:qty"（无规格时为空）
 type ProductStockUpdateRequest struct {
-	ProductID  string `form:"productid" json:"productid" binding:"required"`
+	ProductID  int64  `form:"productid" json:"productid" binding:"required"`
 	ProductQty int64  `form:"productqty" json:"productqty"`
 	Skus       string `form:"skus" json:"skus"`
 }

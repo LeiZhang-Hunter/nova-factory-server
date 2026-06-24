@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `shop_category` (
 CREATE TABLE IF NOT EXISTS `shop_goods` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `shop_category_id`  bigint(20) NOT NULL DEFAULT 0 COMMENT '分类id',
-  `goods_id` VARCHAR(64) NOT NULL COMMENT '商品ID，对应goodsID',
+  `goods_id` bigint(20) NOT NULL COMMENT '商品ID，对应goodsID',
   `goods_name` VARCHAR(255) NOT NULL COMMENT '商品名称',
   `goods_code` VARCHAR(128) DEFAULT NULL COMMENT '商品编码',
   `outer_id` VARCHAR(128) DEFAULT NULL COMMENT '商品商家编码',
@@ -59,8 +59,9 @@ CREATE TABLE IF NOT EXISTS `shop_goods` (
 CREATE TABLE IF NOT EXISTS `shop_goods_sku` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `goods_db_id` bigint(20) NOT NULL COMMENT '商品DB ID，对应shop_goods.goods_db_id',
-  `goods_id` VARCHAR(64) NOT NULL COMMENT '商品ID，对应shop_goods.goods_id',
-  `sku_id` VARCHAR(64) NOT NULL COMMENT 'SKU ID，对应skuID',
+  `goods_id` bigint(20) NOT NULL COMMENT '商品ID，对应shop_goods.goods_id',
+    `goods_code` VARCHAR(128) DEFAULT NULL COMMENT '商品编码',
+  `sku_id` bigint(20) NOT NULL COMMENT 'SKU ID，对应skuID',
   `sku_name` VARCHAR(255) DEFAULT NULL COMMENT 'SKU名称',
   `sku_code` VARCHAR(128) DEFAULT NULL COMMENT 'SKU编码',
   `outer_id` VARCHAR(128) DEFAULT NULL COMMENT '规格商家编码',
