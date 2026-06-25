@@ -279,7 +279,8 @@ CREATE TABLE IF NOT EXISTS ai_conversations (
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (id),
     KEY idx_create_time (create_time),
-    KEY idx_update_time (update_time)
+    KEY idx_update_time (update_time),
+    KEY idx_create_by (create_by)
 ) ENGINE = InnoDB
 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '会话表';
 
