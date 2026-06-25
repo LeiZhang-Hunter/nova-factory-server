@@ -1,10 +1,10 @@
-package settingserviceimpl
+package impl
 
 import (
 	"errors"
-	"nova-factory-server/app/business/erp/setting/settingdao"
-	"nova-factory-server/app/business/erp/setting/settingmodels"
-	"nova-factory-server/app/business/erp/setting/settingservice"
+	"nova-factory-server/app/business/shop/config/dao"
+	"nova-factory-server/app/business/shop/config/models"
+	"nova-factory-server/app/business/shop/config/service"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -12,16 +12,16 @@ import (
 
 // LogisticsCompanyServiceImpl 提供 ERP 物流公司业务实现。
 type LogisticsCompanyServiceImpl struct {
-	dao settingdao.ILogisticsCompanyDao
+	dao dao.ILogisticsCompanyDao
 }
 
 // NewLogisticsCompanyService 创建 ERP 物流公司服务。
-func NewLogisticsCompanyService(dao settingdao.ILogisticsCompanyDao) settingservice.ILogisticsCompanyService {
+func NewLogisticsCompanyService(dao dao.ILogisticsCompanyDao) service.ILogisticsCompanyService {
 	return &LogisticsCompanyServiceImpl{dao: dao}
 }
 
 // Create 新增 ERP 物流公司。
-func (l *LogisticsCompanyServiceImpl) Create(c *gin.Context, req *settingmodels.LogisticsCompanyUpsert) (*settingmodels.LogisticsCompany, error) {
+func (l *LogisticsCompanyServiceImpl) Create(c *gin.Context, req *models.LogisticsCompanyUpsert) (*models.LogisticsCompany, error) {
 	if err := l.validateUniqueFields(c, req); err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (l *LogisticsCompanyServiceImpl) Create(c *gin.Context, req *settingmodels.
 }
 
 // Update 修改 ERP 物流公司。
-func (l *LogisticsCompanyServiceImpl) Update(c *gin.Context, req *settingmodels.LogisticsCompanyUpsert) (*settingmodels.LogisticsCompany, error) {
+func (l *LogisticsCompanyServiceImpl) Update(c *gin.Context, req *models.LogisticsCompanyUpsert) (*models.LogisticsCompany, error) {
 	if err := l.validateUniqueFields(c, req); err != nil {
 		return nil, err
 	}
@@ -42,26 +42,26 @@ func (l *LogisticsCompanyServiceImpl) DeleteByIDs(c *gin.Context, ids []int64) e
 }
 
 // GetByID 查询 ERP 物流公司详情。
-func (l *LogisticsCompanyServiceImpl) GetByID(c *gin.Context, id int64) (*settingmodels.LogisticsCompany, error) {
+func (l *LogisticsCompanyServiceImpl) GetByID(c *gin.Context, id int64) (*models.LogisticsCompany, error) {
 	return l.dao.GetByID(c, id)
 }
 
 // GetByCode 根据编码查询 ERP 物流公司。
-func (l *LogisticsCompanyServiceImpl) GetByCode(c *gin.Context, code string) (*settingmodels.LogisticsCompany, error) {
+func (l *LogisticsCompanyServiceImpl) GetByCode(c *gin.Context, code string) (*models.LogisticsCompany, error) {
 	return l.dao.GetByCode(c, code)
 }
 
 // GetByName 根据名称查询 ERP 物流公司。
-func (l *LogisticsCompanyServiceImpl) GetByName(c *gin.Context, name string) (*settingmodels.LogisticsCompany, error) {
+func (l *LogisticsCompanyServiceImpl) GetByName(c *gin.Context, name string) (*models.LogisticsCompany, error) {
 	return l.dao.GetByName(c, name)
 }
 
 // List 分页查询 ERP 物流公司。
-func (l *LogisticsCompanyServiceImpl) List(c *gin.Context, req *settingmodels.LogisticsCompanyQuery) (*settingmodels.LogisticsCompanyListData, error) {
+func (l *LogisticsCompanyServiceImpl) List(c *gin.Context, req *models.LogisticsCompanyQuery) (*models.LogisticsCompanyListData, error) {
 	return l.dao.List(c, req)
 }
 
-func (l *LogisticsCompanyServiceImpl) validateUniqueFields(c *gin.Context, req *settingmodels.LogisticsCompanyUpsert) error {
+func (l *LogisticsCompanyServiceImpl) validateUniqueFields(c *gin.Context, req *models.LogisticsCompanyUpsert) error {
 	req.Code = strings.TrimSpace(req.Code)
 	req.Name = strings.TrimSpace(req.Name)
 	if req.Code == "" {

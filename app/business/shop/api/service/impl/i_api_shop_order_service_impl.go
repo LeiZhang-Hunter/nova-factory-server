@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/service"
 	discountservice "nova-factory-server/app/business/shop/discount/service"
+	financeDao "nova-factory-server/app/business/shop/finance/dao"
 	orderdao "nova-factory-server/app/business/shop/order/dao"
 	"nova-factory-server/app/datasource/cache"
 )
@@ -27,6 +28,8 @@ type IApiShopOrderServiceImpl struct {
 	accountDao      orderdao.IOrderAccountDao
 	discountService discountservice.IDiscountCalculateService
 	orderSync       *shopOrderSyncService
+	// iAccountDao 结算账户
+	iAccountDao financeDao.IAccountDao
 }
 
 // NewIApiShopOrderServiceImpl 创建订单服务实现。
@@ -46,6 +49,7 @@ func NewIApiShopOrderServiceImpl(
 	accountDao orderdao.IOrderAccountDao,
 	discountService discountservice.IDiscountCalculateService,
 	orderSync *shopOrderSyncService,
+	iAccountDao financeDao.IAccountDao,
 ) service.IApiShopOrderService {
 	return &IApiShopOrderServiceImpl{
 		cache:           cache,
@@ -63,5 +67,6 @@ func NewIApiShopOrderServiceImpl(
 		accountDao:      accountDao,
 		discountService: discountService,
 		orderSync:       orderSync,
+		iAccountDao:     iAccountDao,
 	}
 }

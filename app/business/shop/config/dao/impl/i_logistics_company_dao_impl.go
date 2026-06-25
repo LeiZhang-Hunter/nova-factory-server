@@ -1,4 +1,4 @@
-package settingdaoimpl
+package impl
 
 import (
 	"errors"
@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"nova-factory-server/app/business/erp/setting/settingdao"
-	"nova-factory-server/app/business/erp/setting/settingmodels"
+	"nova-factory-server/app/business/shop/config/dao"
+	"nova-factory-server/app/business/shop/config/models"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
@@ -22,16 +22,16 @@ type LogisticsCompanyDaoImpl struct {
 }
 
 // NewLogisticsCompanyDao 创建 ERP 物流公司 DAO。
-func NewLogisticsCompanyDao(db *gorm.DB) settingdao.ILogisticsCompanyDao {
+func NewLogisticsCompanyDao(db *gorm.DB) dao.ILogisticsCompanyDao {
 	return &LogisticsCompanyDaoImpl{
 		db:    db,
-		table: "erp_logistics_company",
+		table: "shop_logistics_company",
 	}
 }
 
 // Create 新增 ERP 物流公司记录。
-func (l *LogisticsCompanyDaoImpl) Create(c *gin.Context, req *settingmodels.LogisticsCompanyUpsert) (*settingmodels.LogisticsCompany, error) {
-	model := &settingmodels.LogisticsCompany{
+func (l *LogisticsCompanyDaoImpl) Create(c *gin.Context, req *models.LogisticsCompanyUpsert) (*models.LogisticsCompany, error) {
+	model := &models.LogisticsCompany{
 		ID:      snowflake.GenID(),
 		Code:    strings.TrimSpace(req.Code),
 		Name:    strings.TrimSpace(req.Name),
@@ -67,8 +67,8 @@ func (l *LogisticsCompanyDaoImpl) Create(c *gin.Context, req *settingmodels.Logi
 }
 
 // Update 修改 ERP 物流公司记录。
-func (l *LogisticsCompanyDaoImpl) Update(c *gin.Context, req *settingmodels.LogisticsCompanyUpsert) (*settingmodels.LogisticsCompany, error) {
-	model := &settingmodels.LogisticsCompany{
+func (l *LogisticsCompanyDaoImpl) Update(c *gin.Context, req *models.LogisticsCompanyUpsert) (*models.LogisticsCompany, error) {
+	model := &models.LogisticsCompany{
 		ID:      req.ID,
 		Code:    strings.TrimSpace(req.Code),
 		Name:    strings.TrimSpace(req.Name),
@@ -116,8 +116,8 @@ func (l *LogisticsCompanyDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error
 }
 
 // GetByID 根据主键查询 ERP 物流公司记录。
-func (l *LogisticsCompanyDaoImpl) GetByID(c *gin.Context, id int64) (*settingmodels.LogisticsCompany, error) {
-	var item settingmodels.LogisticsCompany
+func (l *LogisticsCompanyDaoImpl) GetByID(c *gin.Context, id int64) (*models.LogisticsCompany, error) {
+	var item models.LogisticsCompany
 	if err := l.db.WithContext(c).Table(l.table).
 		Where("id = ?", id).
 		Where("state = 0").
@@ -131,8 +131,8 @@ func (l *LogisticsCompanyDaoImpl) GetByID(c *gin.Context, id int64) (*settingmod
 }
 
 // GetByCode 根据编码查询 ERP 物流公司记录。
-func (l *LogisticsCompanyDaoImpl) GetByCode(c *gin.Context, code string) (*settingmodels.LogisticsCompany, error) {
-	var item settingmodels.LogisticsCompany
+func (l *LogisticsCompanyDaoImpl) GetByCode(c *gin.Context, code string) (*models.LogisticsCompany, error) {
+	var item models.LogisticsCompany
 	if err := l.db.WithContext(c).Table(l.table).
 		Where("code = ?", strings.TrimSpace(code)).
 		Where("state = 0").
@@ -146,8 +146,8 @@ func (l *LogisticsCompanyDaoImpl) GetByCode(c *gin.Context, code string) (*setti
 }
 
 // GetByName 根据名称查询 ERP 物流公司记录。
-func (l *LogisticsCompanyDaoImpl) GetByName(c *gin.Context, name string) (*settingmodels.LogisticsCompany, error) {
-	var item settingmodels.LogisticsCompany
+func (l *LogisticsCompanyDaoImpl) GetByName(c *gin.Context, name string) (*models.LogisticsCompany, error) {
+	var item models.LogisticsCompany
 	if err := l.db.WithContext(c).Table(l.table).
 		Where("name = ?", strings.TrimSpace(name)).
 		Where("state = 0").
@@ -161,7 +161,7 @@ func (l *LogisticsCompanyDaoImpl) GetByName(c *gin.Context, name string) (*setti
 }
 
 // List 分页查询 ERP 物流公司记录。
-func (l *LogisticsCompanyDaoImpl) List(c *gin.Context, req *settingmodels.LogisticsCompanyQuery) (*settingmodels.LogisticsCompanyListData, error) {
+func (l *LogisticsCompanyDaoImpl) List(c *gin.Context, req *models.LogisticsCompanyQuery) (*models.LogisticsCompanyListData, error) {
 	db := l.db.WithContext(c).Table(l.table).Where("state = 0")
 	if req.Code != "" {
 		db = db.Where("code LIKE ?", "%"+strings.TrimSpace(req.Code)+"%")
@@ -182,14 +182,14 @@ func (l *LogisticsCompanyDaoImpl) List(c *gin.Context, req *settingmodels.Logist
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
 	}
-	rows := make([]*settingmodels.LogisticsCompany, 0)
+	rows := make([]*models.LogisticsCompany, 0)
 	if err := db.Order("sort ASC, id DESC").
 		Offset(int((req.Page - 1) * req.Size)).
 		Limit(int(req.Size)).
 		Find(&rows).Error; err != nil {
 		return nil, err
 	}
-	return &settingmodels.LogisticsCompanyListData{
+	return &models.LogisticsCompanyListData{
 		Rows:  rows,
 		Total: total,
 	}, nil
