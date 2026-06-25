@@ -48,6 +48,7 @@ type cartResolvedItem struct {
 	PinkID          int64                               // 拼团团队 ID，仅拼团加入已有团队时有值。
 	SeckillInfo     *activityModels.SeckillMainInfo     // 立即购买确认页需要的秒杀活动快照。
 	CombinationInfo *activityModels.CombinationMainInfo // 立即购买确认页需要的拼团活动快照。
+	OuterID         string                              // SKU 外部系统ID，用于订单落库时写入 outer_iid。
 }
 
 type IApiShopCartServiceImpl struct {
@@ -145,8 +146,8 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			return nil, err
 		}
 		item = &cartResolvedItem{
-			GoodsID:        goods.ID,
-			SkuID:          int64(sku.ID),
+			GoodsID:        goods.GoodsID,
+			SkuID:          sku.SkuID,
 			GoodsName:      stringUtils.FirstNonEmpty(seckill.Title, goods.GoodsName),
 			SkuName:        sku.SkuName,
 			ImageURL:       stringUtils.FirstNonEmpty(seckill.Image, sku.ImageURL, goods.ImageURL),
@@ -155,6 +156,7 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			AvailableStock: availableStock,
 			ProductType:    shopConstant.CartProductTypeSeckill,
 			ActivityID:     req.SecKillID,
+			OuterID:        sku.OuterID,
 			SeckillInfo: &activityModels.SeckillMainInfo{
 				ID:         seckill.ID,
 				ActivityID: seckill.ActivityID,
@@ -249,8 +251,8 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			return nil, err
 		}
 		item = &cartResolvedItem{
-			GoodsID:        goods.ID,
-			SkuID:          int64(sku.ID),
+			GoodsID:        goods.GoodsID,
+			SkuID:          sku.SkuID,
 			GoodsName:      stringUtils.FirstNonEmpty(combination.Title, goods.GoodsName),
 			SkuName:        sku.SkuName,
 			ImageURL:       stringUtils.FirstNonEmpty(combination.Image, sku.ImageURL, goods.ImageURL),
@@ -260,6 +262,7 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			ProductType:    shopConstant.CartProductTypeCombination,
 			ActivityID:     req.CombinationID,
 			PinkID:         req.PinkID,
+			OuterID:        sku.OuterID,
 			CombinationInfo: &activityModels.CombinationMainInfo{
 				ID:            combination.ID,
 				ProductID:     combination.ProductID,
@@ -310,8 +313,8 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			}
 		}
 		item = &cartResolvedItem{
-			GoodsID:        goods.ID,
-			SkuID:          int64(sku.ID),
+			GoodsID:        goods.GoodsID,
+			SkuID:          sku.SkuID,
 			GoodsName:      goods.GoodsName,
 			SkuName:        sku.SkuName,
 			ImageURL:       stringUtils.FirstNonEmpty(sku.ImageURL, goods.ImageURL),
@@ -319,6 +322,7 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			Quantity:       req.Quantity,
 			AvailableStock: availableStock,
 			ProductType:    shopConstant.CartProductTypeNormal,
+			OuterID:        sku.OuterID,
 		}
 	}
 
@@ -376,6 +380,7 @@ func (s *IApiShopCartServiceImpl) saveBuyNowCartSnapshot(c *gin.Context, userID 
 		SeckillInfo:       item.SeckillInfo,
 		CombinationInfo:   item.CombinationInfo,
 		PinkId:            item.PinkID,
+		OuterIid:          item.OuterID,
 		GoodsID:           item.GoodsID,
 		SkuID:             item.SkuID,
 		GoodsName:         item.GoodsName,

@@ -49,7 +49,7 @@ type ProductData interface {
 type ProductSku interface {
 	GetSkuId() int64
 	GetSkuName() string
-	GetProductId() int
+	GetProductId() int64
 	GetOuterId() string
 	GetPrice() int
 	GetQuantity() int

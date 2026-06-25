@@ -171,9 +171,13 @@ func (s *IApiShopOrderServiceImpl) loadOrderItemSkuMap(c *gin.Context, items []*
 		return map[int64]*shopmodels.GoodsSku{}, nil
 	}
 
-	skuList, err := s.skuDao.ListByIDs(c, skuIDs)
+	skuList, err := s.skuDao.ListBySkuIDs(c, skuIDs)
 	if err != nil {
 		return nil, errors.New("读取商品库存失败")
+	}
+
+	if len(skuList) == 0 {
+		return nil, errors.New("商品规格不存在")
 	}
 
 	skuMap := make(map[int64]*shopmodels.GoodsSku, len(skuList))
@@ -181,7 +185,7 @@ func (s *IApiShopOrderServiceImpl) loadOrderItemSkuMap(c *gin.Context, items []*
 		if sku == nil {
 			continue
 		}
-		skuMap[int64(sku.ID)] = sku
+		skuMap[sku.SkuID] = sku
 	}
 	return skuMap, nil
 }
@@ -793,7 +797,7 @@ func (s *IApiShopOrderServiceImpl) deductOrderItemStockWithLock(c *gin.Context, 
 		return errors.New("购买数量必须大于0")
 	}
 
-	sku, err := s.skuDao.GetByIDForUpdate(c, item.SkuID)
+	sku, err := s.skuDao.GetBySkuIDForUpdate(c, item.SkuID)
 	if err != nil {
 		return errors.New("读取商品库存失败")
 	}
@@ -804,7 +808,7 @@ func (s *IApiShopOrderServiceImpl) deductOrderItemStockWithLock(c *gin.Context, 
 	if item.Quantity > availableStock {
 		return errors.New("下单失败，库存不足: " + s.buildStockInsufficientDetail(item.GoodsName, item.SkuName, item.Quantity, availableStock))
 	}
-	if err := s.skuDao.DeductStock(c, item.SkuID, item.Quantity); err != nil {
+	if err := s.skuDao.DeductStockBySkuId(c, item.SkuID, item.Quantity); err != nil {
 		return fmt.Errorf("扣减库存失败: %v", err)
 	}
 	// 扣减 SKU 库存后重新计算商品总库存
@@ -1279,14 +1283,15 @@ func (s *IApiShopOrderServiceImpl) assembleCacheItem(
 		finalImageURL = strings.TrimSpace(sku.ImageURL)
 	}
 	return &apimodels.OrderCacheItem{
-		GoodsID:     goods.ID,
-		SkuID:       int64(sku.ID),
+		GoodsID:     goods.GoodsID,
+		SkuID:       int64(sku.SkuID),
 		GoodsName:   finalGoodsName,
 		SkuName:     sku.SkuName,
 		ImageURL:    fileUtils.BuildAbsoluteURL(c, finalImageURL),
 		Price:       price,
 		Quantity:    quantity,
 		TotalAmount: price * float64(quantity),
+		OuterIid:    sku.OuterID,
 	}
 }
 
@@ -1318,6 +1323,7 @@ func (s *IApiShopOrderServiceImpl) buildSingleCacheItem(c *gin.Context, userID i
 		Price:       price,
 		Quantity:    quantity,
 		TotalAmount: price * float64(quantity),
+		OuterIid:    sku.OuterID,
 	}
 	return item, nil
 }

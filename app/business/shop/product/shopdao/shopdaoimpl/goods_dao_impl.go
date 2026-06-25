@@ -244,7 +244,7 @@ func buildGoodsModel(req *shopmodels.GoodsUpsert) *shopmodels.Goods {
 	if err != nil {
 		zap.L().Error("buildGoodsModel json.Marshal", zap.Error(err))
 	}
-	return &shopmodels.Goods{
+	g := &shopmodels.Goods{
 		GoodsID:       req.GoodsID,
 		GoodsName:     req.GoodsName,
 		GoodsCode:     req.GoodsCode,
@@ -261,6 +261,10 @@ func buildGoodsModel(req *shopmodels.GoodsUpsert) *shopmodels.Goods {
 		Quantity:      req.Quantity,
 		HomeModuleIDs: strings.Join(req.HomeModuleIDs, ","),
 	}
+	if req.ID != 0 {
+		g.ID = req.ID
+	}
+	return g
 }
 
 func buildGoodsUpdates(c *gin.Context, req *shopmodels.GoodsUpsert) map[string]interface{} {
