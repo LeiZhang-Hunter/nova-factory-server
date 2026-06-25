@@ -4,4 +4,4 @@ import (
 	"github.com/google/wire"
 )
 
-var ProviderSet = wire.NewSet(NewShopSysConfigDao)
+var ProviderSet = wire.NewSet(NewShopSysConfigDao, NewLogisticsCompanyDao)
