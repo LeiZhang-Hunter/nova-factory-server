@@ -333,7 +333,9 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 				return err
 			}
 		}
-		orderData := s.buildERPOrderSet(orderNo, shopUser, address, cacheData, req)
+		// 读取默认账户信息
+		defaultAccount := s.iAccountDao.GetDefaultAccountNo(c)
+		orderData := s.buildERPOrderSet(orderNo, shopUser, address, cacheData, req, defaultAccount)
 		// 创建订单
 		if err := s.syncCreatedOrder(tx, c, orderData, cacheData); err != nil {
 			return fmt.Errorf("创建订单失败")

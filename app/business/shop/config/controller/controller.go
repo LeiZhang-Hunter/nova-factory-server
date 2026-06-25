@@ -4,6 +4,7 @@ import "github.com/google/wire"
 
 type Controller struct {
 	WechatConfig *WechatConfig
+	Logistics    *Logistics
 }
 
-var ProviderSet = wire.NewSet(NewWechatConfig, wire.Struct(new(Controller), "*"))
+var ProviderSet = wire.NewSet(NewWechatConfig, NewLogistics, wire.Struct(new(Controller), "*"))

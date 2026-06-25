@@ -226,40 +226,7 @@ CREATE TABLE IF NOT EXISTS `erp_order_account` (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ERP订单账户表';
 
 
-CREATE TABLE IF NOT EXISTS `erp_logistics_company` (
-    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `code` VARCHAR(64) NOT NULL COMMENT '物流公司编码',
-    `company` VARCHAR(128) NOT NULL COMMENT '关联公司',
-    `name` VARCHAR(128) NOT NULL COMMENT '物流公司名称',
-    `short_name` VARCHAR(64) DEFAULT NULL COMMENT '物流公司简称',
-    `contact_name` VARCHAR(64) DEFAULT NULL COMMENT '联系人',
-    `contact_phone` VARCHAR(32) DEFAULT NULL COMMENT '联系电话',
-    `address` VARCHAR(255) DEFAULT NULL COMMENT '联系地址',
-    
-    `province_code` VARCHAR(32) DEFAULT NULL COMMENT '省编码',
-    `province_name` VARCHAR(64) NOT NULL COMMENT '省名称',
-    `city_code` VARCHAR(32) DEFAULT NULL COMMENT '市编码',
-    `city_name` VARCHAR(64) NOT NULL COMMENT '市名称',
-    `district_code` VARCHAR(32) DEFAULT NULL COMMENT '区编码',
-    `district_name` VARCHAR(64) NOT NULL COMMENT '区名称',
-    `street_code` VARCHAR(32) DEFAULT NULL COMMENT '街道编码',
-    `street_name` VARCHAR(64) DEFAULT NULL COMMENT '街道名称',
 
-    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
-    `sort` INT NOT NULL DEFAULT 0 COMMENT '排序值',
-    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
-    `dept_id` BIGINT(20) NULL DEFAULT NULL COMMENT '部门ID',
-    `create_by` BIGINT(20) NULL DEFAULT NULL COMMENT '创建者',
-    `create_time` DATETIME(0) NULL DEFAULT NULL COMMENT '创建时间',
-    `update_by` BIGINT(20) NULL DEFAULT NULL COMMENT '更新者',
-    `update_time` DATETIME(0) NULL DEFAULT NULL COMMENT '更新时间',
-    `state` TINYINT(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
-    PRIMARY KEY (`id`),
-    UNIQUE INDEX `uk_erp_logistics_company_code` (`code`) USING BTREE,
-    UNIQUE INDEX `uk_erp_logistics_company_name` (`name`) USING BTREE,
-    INDEX `idx_erp_logistics_company_status` (`status`) USING BTREE,
-    INDEX `idx_erp_logistics_company_sort` (`sort`) USING BTREE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ERP物流公司管理表';
 
 
 -- 根据 ERP 模块 DO 实体自动生成的 MySQL 建表语句

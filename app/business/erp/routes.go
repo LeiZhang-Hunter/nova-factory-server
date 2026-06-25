@@ -45,7 +45,6 @@ func NewGinEngine(
 		stock.PrivateRoutes(group)
 		setting.AgentConfig.PrivateRoutes(group)
 		setting.IntegrationConfig.PrivateRoutes(group)
-		setting.Logistics.PrivateRoutes(group)
 	}
 
 	{
