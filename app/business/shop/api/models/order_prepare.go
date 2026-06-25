@@ -9,6 +9,7 @@ type OrderCacheItem struct {
 	SeckillInfo       *models.SeckillMainInfo     `json:"seckillInfo"`
 	CombinationInfo   *models.CombinationMainInfo `json:"combinationMainInfo"`
 	PinkId            int64                       `json:"pinkId,string"`
+	OuterIid          string                      `json:"outerIid"`
 	GoodsID           int64                       `json:"goodsId,string"`
 	SkuID             int64                       `json:"skuId,string"`
 	GoodsName         string                      `json:"goodsName"`

@@ -16,22 +16,22 @@ func BuildShopOrderSyncEvent(order *OrderSet) *OrderSyncRequest {
 			continue
 		}
 		details = append(details, &OrderSyncDetail{
-			OID:            detail.OID,
-			Barcode:        detail.Barcode,
-			EShopGoodsID:   detail.EShopGoodsID,
+			OID:     detail.OID,
+			Barcode: detail.Barcode,
+			//EShopGoodsID:   detail.EShopGoodsID,
 			OuterIID:       detail.OuterIID,
 			EShopGoodsName: detail.EShopGoodsName,
-			EShopSKUId:     detail.EShopSkuID,
-			EShopSKUName:   detail.EShopSkuName,
-			NumIID:         detail.NumIID,
-			SKUId:          detail.SkuID,
-			Num:            detail.Num,
-			Payment:        detail.Payment,
-			PicPath:        detail.PicPath,
-			Weight:         detail.Weight,
-			Size:           detail.Size,
-			UnitID:         detail.UnitID,
-			UnitQty:        detail.UnitQty,
+			//EShopSKUId:     detail.EShopSkuID,
+			//EShopSKUName: detail.EShopSkuName,
+			NumIID:  detail.NumIID,
+			SKUId:   detail.SkuID,
+			Num:     detail.Num,
+			Payment: detail.Payment,
+			PicPath: detail.PicPath,
+			Weight:  detail.Weight,
+			Size:    detail.Size,
+			UnitID:  detail.UnitID,
+			UnitQty: detail.UnitQty,
 		})
 	}
 

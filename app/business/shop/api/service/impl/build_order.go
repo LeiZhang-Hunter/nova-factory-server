@@ -26,6 +26,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 		details = append(details, &shopordermodels.OrderDetailSet{
 			OID:            fmt.Sprintf("%s-%d", orderNo, index+1),
 			EShopGoodsID:   fmt.Sprintf("%d", item.GoodsID),
+			OuterIID:       item.OuterIid,
 			EShopGoodsName: item.GoodsName,
 			EShopSkuID:     fmt.Sprintf("%d", item.SkuID),
 			EShopSkuName:   item.SkuName,

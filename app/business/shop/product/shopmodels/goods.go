@@ -94,7 +94,7 @@ type ImportGoodsList struct {
 
 // ImportGoodsRecord 导入商品结果
 type ImportGoodsRecord struct {
-	ExternalID int64              `json:"external_id"`
+	ExternalID int64              `json:"external_id,string"`
 	Source     string             `json:"source"`
 	Entity     string             `json:"entity"`
 	Data       ImportGoodsRawData `json:"data"`
@@ -112,7 +112,7 @@ type ImportGoodsSkuRawData struct {
 	Price5   float64 `json:"price5"`
 	Size     float64 `json:"size"`
 	Skucode  string  `json:"skucode"`
-	Skuid    int64   `json:"skuid"`
+	Skuid    int64   `json:"skuid,string"`
 	Skuname  string  `json:"skuname"`
 	Weight   float64 `json:"weight"`
 }
@@ -175,7 +175,7 @@ func (g *GoodsProductData) GetSkus() []goodsstore.ProductSku { return g.Skus }
 type GoodsProductSku struct {
 	SkuId      int64  `json:"skuid"`
 	SkuName    string `json:"skuname"`
-	ProductId  int    `json:"productid"`
+	ProductId  int64  `json:"productid"`
 	OuterId    string `json:"outerid"`
 	Price      int    `json:"price"`
 	Quantity   int    `json:"quantity"`
@@ -186,7 +186,7 @@ type GoodsProductSku struct {
 
 func (g *GoodsProductSku) GetSkuId() int64       { return g.SkuId }
 func (g *GoodsProductSku) GetSkuName() string    { return g.SkuName }
-func (g *GoodsProductSku) GetProductId() int     { return g.ProductId }
+func (g *GoodsProductSku) GetProductId() int64   { return g.ProductId }
 func (g *GoodsProductSku) GetOuterId() string    { return g.OuterId }
 func (g *GoodsProductSku) GetPrice() int         { return g.Price }
 func (g *GoodsProductSku) GetQuantity() int      { return g.Quantity }

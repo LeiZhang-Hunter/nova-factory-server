@@ -666,6 +666,7 @@ func (s *ShopGoodsServiceImpl) diffSkus(c *gin.Context, skuMap map[int64]*shopmo
 	for skuID, req := range skuMap {
 		current := existingMap[skuID]
 		if current == nil {
+			req.ID = uint64(snowflake.GenID())
 			creates = append(creates, req)
 			continue
 		}
@@ -1172,13 +1173,15 @@ func toGoodsProductData(row *shopmodels.Goods) *shopmodels.GoodsProductData {
 		if sku == nil {
 			continue
 		}
-		skus = append(skus, toGoodsProductSku(sku))
+		skus = append(skus, toGoodsProductSku(sku, row.ID))
 	}
 
 	return &shopmodels.GoodsProductData{
-		Cid:        int(row.ShopCategoryId),
-		CatName:    row.ShopCategoryName,
-		ProductId:  row.GoodsID,
+		Cid:     int(row.ShopCategoryId),
+		CatName: row.ShopCategoryName,
+		//
+		ProductId: row.GoodsID,
+		//ProductId:  row.GoodsID,
 		Name:       row.GoodsName,
 		OuterId:    row.OuterID,
 		PicPath:    row.ImageURL,
@@ -1194,7 +1197,7 @@ func toGoodsProductData(row *shopmodels.Goods) *shopmodels.GoodsProductData {
 }
 
 // toGoodsProductSku 将 shopmodels.GoodsSku 转为 goodsProductSku。
-func toGoodsProductSku(sku *shopmodels.GoodsSku) *shopmodels.GoodsProductSku {
+func toGoodsProductSku(sku *shopmodels.GoodsSku, productId int64) *shopmodels.GoodsProductSku {
 	created := ""
 	if sku.CreateTime != nil {
 		created = sku.CreateTime.Format("2006-01-02 15:04:05")
@@ -1204,9 +1207,11 @@ func toGoodsProductSku(sku *shopmodels.GoodsSku) *shopmodels.GoodsProductSku {
 		modified = sku.UpdateTime.Format("2006-01-02 15:04:05")
 	}
 	return &shopmodels.GoodsProductSku{
-		SkuId:      sku.SkuID,
-		SkuName:    sku.SkuName,
-		ProductId:  int(sku.GoodsDBID),
+		SkuId:   sku.SkuID,
+		SkuName: sku.SkuName,
+		//ProductId:  int(sku.GoodsDBID),
+		//ProductId:  int(sku.ID),
+		ProductId:  productId,
 		OuterId:    sku.OuterID,
 		Price:      int(sku.RetailPrice),
 		Quantity:   int(sku.Quantity),

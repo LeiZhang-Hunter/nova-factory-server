@@ -2,6 +2,7 @@ package shopdaoimpl
 
 import (
 	"errors"
+	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/shop/product/shopdao"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/utils/fileUtils"
@@ -302,8 +303,8 @@ func buildSkuModel(req *shopmodels.GoodsSkuUpsert) *shopmodels.GoodsSku {
 	if req.VideoURL != "" {
 		req.VideoURL, _ = fileUtils.NormalizeResourcePath(req.VideoURL)
 	}
-
-	return &shopmodels.GoodsSku{
+	now := time.Now()
+	sku := &shopmodels.GoodsSku{
 		GoodsID:       req.GoodsID,
 		SkuID:         req.SkuID,
 		SkuName:       req.SkuName,
@@ -320,7 +321,15 @@ func buildSkuModel(req *shopmodels.GoodsSkuUpsert) *shopmodels.GoodsSku {
 		WeightUnit:    req.WeightUnit,
 		Unit:          req.Unit,
 		Quantity:      req.Quantity,
+		BaseEntity: baize.BaseEntity{
+			CreateTime: &now,
+			UpdateTime: &now,
+		},
 	}
+	if req.ID != 0 {
+		sku.ID = req.ID
+	}
+	return sku
 }
 
 func buildSkuUpdates(req *shopmodels.GoodsSkuUpsert) map[string]interface{} {
