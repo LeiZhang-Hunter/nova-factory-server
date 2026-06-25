@@ -29,6 +29,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-pay/gopay"
 	"github.com/go-pay/gopay/wechat/v3"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -36,6 +37,7 @@ const (
 	orderCachePrefix      = "shop:app:order:cache:"
 	orderCreateLockPrefix = "shop:app:order:create:"
 	orderCacheTTL         = 10 * time.Minute
+	orderAutoCancelTTL    = 10 * time.Minute
 	orderCreateLockTTL    = 15 * time.Second
 	defaultDeliveryType   = "express"
 )
@@ -62,6 +64,9 @@ func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *ap
 		return nil, err
 	}
 	goodsAmount := sumCacheItems(items)
+	if goodsAmount <= 0 {
+		return nil, errors.New("订单商品金额不能小于等于0")
+	}
 	cacheData := &apimodels.OrderCacheData{
 		OrderKey:       order2.GenerateOrderNo(),
 		UserID:         userID,
@@ -78,7 +83,8 @@ func (s *IApiShopOrderServiceImpl) Confirm(c *gin.Context, userID int64, req *ap
 		cacheData.AddressID = address.ID
 	}
 	if err := s.fillOrderItemsStock(c, cacheData.Items); err != nil {
-		return nil, err
+		zap.L().Error("订单商品库存不足", zap.Error(err))
+		return nil, errors.New("订单商品库存不足")
 	}
 
 	s.recalculateOrderAmounts(c, userID, cacheData)
@@ -234,6 +240,9 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 	if req == nil || strings.TrimSpace(req.OrderKey) == "" {
 		return nil, errors.New("orderKey不能为空")
 	}
+	if req.AddressID <= 0 {
+		return nil, errors.New("请选择收货地址")
+	}
 	req.OrderKey = strings.TrimSpace(req.OrderKey)
 
 	shopUser, err := s.userDao.GetByUserID(c, userID)
@@ -272,16 +281,21 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 	// 读取预订单缓存
 	cacheData, err := s.getOrderCache(c, req.OrderKey)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("确认单已失效，请重新确认")
 	}
 	if cacheData == nil {
-		return nil, errors.New("支付订单已经失效")
+		return nil, errors.New("确认单已失效，请重新确认")
 	}
 	if cacheData.UserID != userID {
 		return nil, errors.New("无权操作该预订单")
 	}
 	if len(cacheData.Items) == 0 {
 		return nil, errors.New("预订单商品不能为空")
+	}
+	// 以请求传入的地址覆盖缓存中的地址
+	if req.AddressID != cacheData.AddressID {
+		cacheData.AddressID = req.AddressID
+		s.recalculateOrderAmounts(c, userID, cacheData)
 	}
 	// 读取收货地址
 	address, err := s.resolveConfirmAddress(c, userID, cacheData.AddressID)
@@ -295,8 +309,6 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 	if err := s.validateCreateItemsStock(c, cacheData.Items); err != nil {
 		return nil, err
 	}
-	// 重新计算订单金额
-	s.recalculateOrderAmounts(c, userID, cacheData)
 
 	orderNo := req.OrderKey
 	if s.db == nil {
@@ -349,6 +361,12 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 	if err != nil || latestOrder == nil {
 		return nil, errors.New("读取订单信息失败")
 	}
+	// 写入延迟取消队列
+	cancelScore := float64(time.Now().Unix() + int64(orderAutoCancelTTL/time.Second))
+	s.cache.ZAdd(context.Background(), orderConstant.DelayCancelKey, redis.Z{
+		Score:  cancelScore,
+		Member: strconv.FormatUint(uint64(latestOrder.ID), 10),
+	})
 	return latestOrder, nil
 }
 
@@ -378,7 +396,14 @@ func (s *IApiShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*apimodels
 	order.Details = details
 	//order.Accounts = accounts
 
-	return apimodels.ToApiShopOrderVO(order), nil
+	vo := apimodels.ToApiShopOrderVO(order)
+	if order.Status == orderConstant.ERPStatusNoPay {
+		expireAt := order.CreateTime.Add(orderAutoCancelTTL)
+		if remaining := int64(time.Until(expireAt).Seconds()); remaining > 0 {
+			vo.ExpireSeconds = remaining
+		}
+	}
+	return vo, nil
 }
 
 // List 获取当前用户的订单列表。
@@ -718,6 +743,7 @@ func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64
 	orderEvent := shopordermodels.NewOrderStatusSyncEvent([]*shopordermodels.Order{
 		order,
 	}, orderConstant.Normal)
+	orderEvent.WithUserId(userID)
 	orderEvent.WithCache(s.cache)
 	orderEvent.WithDB(s.db)
 	orderEvent.WithCtx(c)

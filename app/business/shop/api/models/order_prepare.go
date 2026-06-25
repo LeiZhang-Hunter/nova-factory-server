@@ -70,6 +70,7 @@ func (r *OrderConfirmReq) CartIDValue() string {
 
 // OrderCreateReq 是正式创建订单请求，仅保留主链路字段。
 type OrderCreateReq struct {
-	OrderKey string `json:"orderKey" binding:"required"`
-	Remark   string `json:"remark"`
+	OrderKey  string `json:"orderKey" binding:"required"`
+	AddressID int64  `json:"addressId,string" binding:"required"`
+	Remark    string `json:"remark"`
 }

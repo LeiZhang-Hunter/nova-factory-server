@@ -35,8 +35,9 @@ type SetAiConversation struct {
 }
 
 type AiConversationQuery struct {
-	ID   int64  `form:"id,string"`
-	Name string `form:"name"`
+	ID     int64  `form:"id,string"`
+	Name   string `form:"name"`
+	UserId int64  `form:"userId,string"`
 	baize.BaseEntityDQL
 }
 
