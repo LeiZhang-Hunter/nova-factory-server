@@ -1180,7 +1180,7 @@ func toGoodsProductData(row *shopmodels.Goods) *shopmodels.GoodsProductData {
 		Cid:     int(row.ShopCategoryId),
 		CatName: row.ShopCategoryName,
 		//
-		ProductId: row.ID,
+		ProductId: row.GoodsID,
 		//ProductId:  row.GoodsID,
 		Name:       row.GoodsName,
 		OuterId:    row.OuterID,
