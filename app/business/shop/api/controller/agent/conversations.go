@@ -87,6 +87,7 @@ func (conversations *Conversations) ListConversations(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
+	req.UserId = 0
 	data, err := conversations.service.List(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())

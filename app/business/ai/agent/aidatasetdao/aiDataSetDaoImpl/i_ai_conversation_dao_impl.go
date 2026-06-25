@@ -121,7 +121,11 @@ func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiCon
 	if req.Size <= 0 {
 		req.Size = 20
 	}
-	db.Where("create_by = ?", baizeContext.GetUserId(c))
+	if req.UserId != 0 {
+		db = db.Where("create_by = ?", req.UserId)
+	} else {
+		db.Where("create_by = ?", baizeContext.GetUserId(c))
+	}
 	var total int64
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	if err := db.Count(&total).Error; err != nil {
