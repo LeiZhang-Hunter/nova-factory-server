@@ -5,6 +5,7 @@ type ZOrderStatusSyncReqEvent interface {
 	Event
 	Base
 	GetOrders() []ZOrderStatusSyncReqData
+	GetUserId() int64
 }
 
 // ZOrderStatusSyncReqData 单条订单状态同步数据，对应 {tid, status, refundstatus}。

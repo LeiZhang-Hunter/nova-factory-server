@@ -1,11 +1,12 @@
 package models
 
 import (
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // OrderStatusSyncEvent 订单状态同步事件，实现 event.ZOrderStatusSyncReqEvent 接口。
@@ -19,6 +20,7 @@ type OrderStatusSyncEvent struct {
 	transaction bool
 	orders      []OrderStatusSyncReqData
 	ctx         *gin.Context
+	userId      int64
 }
 
 func NewOrderStatusSyncEvent(orders []*Order, RefundStatus string) *OrderStatusSyncEvent {
@@ -49,9 +51,10 @@ func (d *OrderStatusSyncReqData) GetStatus() string       { return d.Status }
 func (d *OrderStatusSyncReqData) GetRefundstatus() string { return d.RefundStatus }
 
 // -- TransactionEvent --
-
-func (e *OrderStatusSyncEvent) GetDB() *gorm.DB    { return e.db }
-func (e *OrderStatusSyncEvent) WithDB(tx *gorm.DB) { e.db = tx }
+func (e *OrderStatusSyncEvent) GetUserId() int64    { return e.userId }
+func (e *OrderStatusSyncEvent) WithUserId(id int64) { e.userId = id }
+func (e *OrderStatusSyncEvent) GetDB() *gorm.DB     { return e.db }
+func (e *OrderStatusSyncEvent) WithDB(tx *gorm.DB)  { e.db = tx }
 func (e *OrderStatusSyncEvent) WithCache(c cache.Cache) {
 	e.cache = c
 }

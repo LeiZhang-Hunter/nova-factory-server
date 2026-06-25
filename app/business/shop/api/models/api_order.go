@@ -37,6 +37,7 @@ type Order struct {
 	ReceiverDistrict      string     `json:"receiverDistrict" gorm:"column:receiver_district"`            // 区县
 	ReceiverDetailAddress string     `json:"receiverDetailAddress" gorm:"column:receiver_detail_address"` // 详细地址
 	Remark                string     `json:"remark" gorm:"column:remark"`                                 // 订单备注
+	ExpireSeconds         int64      `json:"expireSeconds"`                                               // 支付剩余秒数（仅待支付时>0）
 	Version               int32      `json:"version" gorm:"column:version"`                               // 乐观锁版本号
 	DeptID                int64      `json:"deptId" gorm:"column:dept_id"`                                // 部门ID
 	baize.BaseEntity

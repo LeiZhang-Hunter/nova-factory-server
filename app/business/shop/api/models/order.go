@@ -86,6 +86,7 @@ type OrderStatistics struct {
 	PendingReceive int64 `json:"pendingReceive"` // 待收货
 	Completed      int64 `json:"completed"`      // 已完成
 	Cancelled      int64 `json:"cancelled"`      // 已取消
+	Aftersale      int64 `json:"aftersale"`      // 售后/退款
 }
 
 // OrderPayResp 支付响应（微信小程序调起支付参数）

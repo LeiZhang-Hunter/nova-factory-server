@@ -161,6 +161,11 @@ func (i *IApiShopOrderDaoImpl) GetERPOrderStatistics(c *gin.Context, shopUser *s
 		Count(&stats.Cancelled).Error; err != nil {
 		return nil, err
 	}
+	if err := baseQuery.Session(&gorm.Session{}).
+		Where("status = ?", orderConstant.ShopStatusToOrderStatus(orderConstant.OrderStatusAftersale)).
+		Count(&stats.Aftersale).Error; err != nil {
+		return nil, err
+	}
 	return stats, nil
 }
 

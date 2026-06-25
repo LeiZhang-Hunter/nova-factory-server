@@ -141,6 +141,9 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 		if err != nil {
 			return nil, err
 		}
+		if seckill.Price <= 0 {
+			return nil, errors.New("秒杀商品价格异常")
+		}
 		availableStock := minCartStock(seckill.Stock, sku.Quantity)
 		if err := validateCartStock(stringUtils.FirstNonEmpty(seckill.Title, goods.GoodsName), sku.SkuName, req.Quantity, availableStock); err != nil {
 			return nil, err
@@ -193,7 +196,9 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 		if combination.OnceNum > 0 && req.Quantity > combination.OnceNum {
 			return nil, errors.New("超过拼团单次限购数量")
 		}
-
+		if combination.Price <= 0 {
+			return nil, errors.New("拼团商品价格异常")
+		}
 		if req.PinkID > 0 {
 			pink, err := s.pinkDao.GetByID(c, req.PinkID)
 			if err != nil {
@@ -305,6 +310,9 @@ func (s *IApiShopCartServiceImpl) GenCart(c *gin.Context, req *api.CartSetDataRe
 			return nil, err
 		}
 		price := sku.RetailPrice
+		if price <= 0 {
+			return nil, errors.New("商品价格异常")
+		}
 		if s.discountService != nil && userId != 0 && price > 0 {
 			discountedPrice, hasDiscount := s.discountService.CalculateDiscountPrice(
 				c, userId, goods.GoodsID, sku.SkuID, goods.ShopCategoryId, price)
