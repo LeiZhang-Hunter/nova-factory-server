@@ -160,6 +160,21 @@ func (l *LogisticsCompanyDaoImpl) GetByName(c *gin.Context, name string) (*model
 	return &item, nil
 }
 
+// ListByCodes 根据编码批量查询 ERP 物流公司记录。
+func (l *LogisticsCompanyDaoImpl) ListByCodes(c *gin.Context, codes []string) ([]*models.LogisticsCompany, error) {
+	if len(codes) == 0 {
+		return []*models.LogisticsCompany{}, nil
+	}
+	rows := make([]*models.LogisticsCompany, 0)
+	if err := l.db.WithContext(c).Table(l.table).
+		Where("code IN ?", codes).
+		Where("state = 0").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 // List 分页查询 ERP 物流公司记录。
 func (l *LogisticsCompanyDaoImpl) List(c *gin.Context, req *models.LogisticsCompanyQuery) (*models.LogisticsCompanyListData, error) {
 	db := l.db.WithContext(c).Table(l.table).Where("state = 0")

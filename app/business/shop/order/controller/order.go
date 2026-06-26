@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/middlewares"
@@ -74,6 +75,7 @@ func (o *Order) GetByID(c *gin.Context) {
 	}
 	data, err := o.service.GetByID(c, uint64(id))
 	if err != nil {
+		zap.L().Error("get order by id failed", zap.Error(err), zap.Int64("id", id))
 		baizeContext.Waring(c, err.Error())
 		return
 	}
