@@ -679,6 +679,89 @@ CREATE TABLE `shop_order_shipment` (
     `update_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`),
+    INDEX `idx_shop_order_send_detail_send_id` (`send_id`) USING BTREE,
+    INDEX `idx_shop_order_send_detail_order_id` (`order_id`) USING BTREE,
+    INDEX `idx_shop_order_send_detail_tid` (`tid`) USING BTREE,
+    INDEX `idx_shop_order_send_detail_oid` (`oid`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='订单发货明细表';
+
+ALTER TABLE nova.shop_order ADD user_id BIGINT NOT NULL COMMENT '用户id';
+ALTER TABLE nova.shop_order CHANGE user_id user_id BIGINT NOT NULL COMMENT '用户id' AFTER tid;
+CREATE INDEX shop_order_user_id_IDX USING BTREE ON nova.shop_order (user_id);
+
+CREATE TABLE IF NOT EXISTS `shop_logistics_company` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `code` VARCHAR(64) NOT NULL COMMENT '物流公司编码',
+    `company` VARCHAR(128) NOT NULL COMMENT '关联公司',
+    `name` VARCHAR(128) NOT NULL COMMENT '物流公司名称',
+    `short_name` VARCHAR(64) DEFAULT NULL COMMENT '物流公司简称',
+    `contact_name` VARCHAR(64) DEFAULT NULL COMMENT '联系人',
+    `contact_phone` VARCHAR(32) DEFAULT NULL COMMENT '联系电话',
+    `address` VARCHAR(255) DEFAULT NULL COMMENT '联系地址',
+
+    `province_code` VARCHAR(32) DEFAULT NULL COMMENT '省编码',
+    `province_name` VARCHAR(64) NOT NULL COMMENT '省名称',
+    `city_code` VARCHAR(32) DEFAULT NULL COMMENT '市编码',
+    `city_name` VARCHAR(64) NOT NULL COMMENT '市名称',
+    `district_code` VARCHAR(32) DEFAULT NULL COMMENT '区编码',
+    `district_name` VARCHAR(64) NOT NULL COMMENT '区名称',
+    `street_code` VARCHAR(32) DEFAULT NULL COMMENT '街道编码',
+    `street_name` VARCHAR(64) DEFAULT NULL COMMENT '街道名称',
+
+    `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `sort` INT NOT NULL DEFAULT 0 COMMENT '排序值',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
+    `dept_id` BIGINT(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` BIGINT(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` DATETIME(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` BIGINT(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` DATETIME(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` TINYINT(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `uk_erp_logistics_company_code` (`code`) USING BTREE,
+    UNIQUE INDEX `uk_erp_logistics_company_name` (`name`) USING BTREE,
+    INDEX `idx_erp_logistics_company_status` (`status`) USING BTREE,
+    INDEX `idx_erp_logistics_company_sort` (`sort`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='ERP物流公司管理表';
+
+
+CREATE TABLE IF NOT EXISTS `shop_account` (
+     `id` bigint NOT NULL AUTO_INCREMENT COMMENT '结算账户编号',
+     `name` varchar(255) NULL COMMENT '账户名称',
+    `no` varchar(64) NULL COMMENT '账户编码，对接 erp_order_account.finance_code',
+    `remark` varchar(500) NULL COMMENT '备注',
+    `status` int NULL COMMENT '开启状态',
+    `sort` int NULL COMMENT '排序',
+    `default_status` TINYINT(1) NULL DEFAULT 0 COMMENT '是否默认',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+    `update_by` BIGINT(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    KEY `idx_status` (`status`),
+    KEY `idx_default_status` (`default_status`),
+    UNIQUE KEY `uk_no` (`no`),
+    PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商城 结算账户 DO';
+
+CREATE TABLE `shop_order_shipment` (
+    `id`            BIGINT(20) UNSIGNED  NOT NULL AUTO_INCREMENT  COMMENT '主键',
+    `order_id`      BIGINT(20) UNSIGNED  NOT NULL                 COMMENT '关联 shop_order.id',
+    `tid`           VARCHAR(128)     NOT NULL DEFAULT ''      COMMENT '订单编号',
+    `issplit`       TINYINT(1)          NOT NULL DEFAULT 0       COMMENT '是否拆单 0=否 1=是',
+    `outsid`        VARCHAR(128)     NOT NULL DEFAULT ''      COMMENT '物流单号（幂等去重键）',
+    `companycode`   VARCHAR(64)      NOT NULL DEFAULT ''      COMMENT '物流公司编码',
+    `subtid`        VARCHAR(256)     NOT NULL DEFAULT ''      COMMENT '子订单号列表（逗号分隔）',
+    `oid`           VARCHAR(128)     NOT NULL DEFAULT ''      COMMENT '明细 OID',
+    `qty`           DECIMAL(18,4)    NOT NULL DEFAULT 0       COMMENT '本次发货数量',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+    `update_by` BIGINT(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
     UNIQUE KEY `uk_outsid` (`outsid`),
     KEY `idx_order_id` (`order_id`),
     KEY `idx_tid` (`tid`)
