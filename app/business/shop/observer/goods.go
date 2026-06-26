@@ -55,8 +55,10 @@ func (s *ShopObserver) OnOrderChanged(event event.OrderEvent) error {
 
 // OnOrderSendChange 订单发货变化
 func (s *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
-	//s.orderService.Set(sendEvent)
-	return nil
+	if s.orderService == nil {
+		return nil
+	}
+	return s.orderService.SyncOrderSend(sendEvent)
 }
 
 // OnOrderStatusChange 订单发货变化

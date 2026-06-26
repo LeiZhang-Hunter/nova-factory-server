@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/json"
+	"go.uber.org/zap"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
@@ -126,23 +128,29 @@ func (o *OrderItem) Ptr() any {
 
 // OrderSendReq 订单发货
 type OrderSendReq struct {
-	Tid         string            `json:"tid" form:"tid"`
-	Companycode string            `json:"companycode" form:"companycode"`
-	Issplit     int               `json:"issplit" form:"issplit"`
-	Outsid      string            `json:"outsid" form:"outsid"`
-	Subtid      string            `json:"subtid" form:"subtid"`
-	Details     []OrderSendDetail `json:"details" form:"details"`
-	DB          *gorm.DB          `json:"-" form:"-"`
+	Tid         string   `json:"tid" form:"tid"`
+	Companycode string   `json:"companycode" form:"companycode"`
+	Issplit     int      `json:"issplit" form:"issplit"`
+	Outsid      string   `json:"outsid" form:"outsid"`
+	Subtid      string   `json:"subtid" form:"subtid"`
+	Details     string   `json:"details" form:"details"`
+	DB          *gorm.DB `json:"-" form:"-"`
 	ctx         *gin.Context
 }
 
 func (o *OrderSendReq) GetDetails() []event.OrderSendDetail {
-	if len(o.Details) == 0 {
+	if o.Details == "" {
 		return make([]event.OrderSendDetail, 0)
 	}
-	details := make([]event.OrderSendDetail, len(o.Details))
-	for _, detail := range o.Details {
-		details = append(details, &detail)
+	data := make([]OrderSendDetail, 0)
+	err := json.Unmarshal([]byte(o.Details), &data)
+	if err != nil {
+		zap.L().Error("json unmarshal failed", zap.Error(err))
+		return make([]event.OrderSendDetail, 0)
+	}
+	details := make([]event.OrderSendDetail, 0, len(data))
+	for i := range data {
+		details = append(details, &data[i])
 	}
 	return details
 }
@@ -215,8 +223,8 @@ func (o *OrderSendReq) GetTransaction() bool {
 }
 
 type OrderSendDetail struct {
-	SubTid string `json:"subtid" form:"subtid"`
-	Qty    int    `json:"qty" form:"qty"`
+	SubTid string  `json:"subtid" form:"subtid"`
+	Qty    float64 `json:"qty" form:"qty"`
 }
 
 func (o *OrderSendDetail) GetSubTid() string {
@@ -225,7 +233,7 @@ func (o *OrderSendDetail) GetSubTid() string {
 
 // GetQty 读取库存
 func (o *OrderSendDetail) GetQty() int {
-	return o.Qty
+	return int(o.Qty)
 }
 
 // OrderSendResponse 订单发货返回接口

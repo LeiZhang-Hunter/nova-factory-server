@@ -228,8 +228,8 @@ func (q *API) syncOrderSend(c *gin.Context) {
 		return
 	}
 	subtids := make([]string, 0, len(orderSendReq.Details))
-	for _, d := range orderSendReq.Details {
-		subtids = append(subtids, d.SubTid)
+	for _, d := range orderSendReq.GetDetails() {
+		subtids = append(subtids, d.GetSubTid())
 	}
 	c.JSON(http.StatusOK, models.OrderSendResponse{
 		Iserror:  false,

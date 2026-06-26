@@ -24,4 +24,8 @@ type IOrderService interface {
 
 	// SyncOrderStatus 同步订单状态
 	SyncOrderStatus(event event.OrderStratusEvent) error
+
+	// SyncOrderSend 处理订单发货通知（selfmall.order.send）。
+	// 校验参数、幂等判断、拆单状态判定，事务内更新物流记录和订单状态。
+	SyncOrderSend(event event.OrderSendEvent) error
 }

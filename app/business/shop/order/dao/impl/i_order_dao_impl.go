@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // OrderDaoImpl shop订单数据访问实现。
@@ -612,6 +613,22 @@ func (o *OrderDaoImpl) attachChildren(c *gin.Context, orders []*models.Order) er
 func (o *OrderDaoImpl) GetByTidTx(tx *gorm.DB, tid string) (*models.Order, error) {
 	var item models.Order
 	if err := tx.Table(o.table).
+		Where("tid = ?", tid).
+		Where("state = ?", commonStatus.NORMAL).
+		First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &item, nil
+}
+
+// GetByTidForUpdateTx 在事务内按订单编号查询并加行锁。
+func (o *OrderDaoImpl) GetByTidForUpdateTx(tx *gorm.DB, tid string) (*models.Order, error) {
+	var item models.Order
+	if err := tx.Table(o.table).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
 		Where("tid = ?", tid).
 		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
