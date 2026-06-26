@@ -1,4 +1,4 @@
-package settingmodels
+package models
 
 import "nova-factory-server/app/baize"
 
@@ -38,19 +38,19 @@ type LogisticsCompanyUpsert struct {
 	ID      int64  `json:"id,string"`
 	Code    string `json:"code" binding:"required"`
 	Name    string `json:"name" binding:"required"`
-	Company string `json:"company" binding:"required"`
+	Company string `json:"company"`
 
-	ProvinceName string `json:"provinceName" binding:"required"`
-	ProvinceCode string `json:"provinceCode" binding:"required"`
+	ProvinceName string `json:"provinceName"`
+	ProvinceCode string `json:"provinceCode"`
 
-	CityName string `json:"cityName" binding:"required"`
-	CityCode string `json:"cityCode" binding:"required"`
+	CityName string `json:"cityName"`
+	CityCode string `json:"cityCode"`
 
-	DistrictName string `json:"districtName" binding:"required"`
-	DistrictCode string `json:"districtCode" binding:"required"`
+	DistrictName string `json:"districtName"`
+	DistrictCode string `json:"districtCode"`
 
-	StreetName string `json:"streetName" binding:"required"`
-	StreetCode string `json:"streetCode" binding:"required"`
+	StreetName string `json:"streetName" `
+	StreetCode string `json:"streetCode" `
 
 	ShortName    string `json:"shortName"`
 	ContactName  string `json:"contactName"`

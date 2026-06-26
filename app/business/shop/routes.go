@@ -17,6 +17,7 @@ import (
 	"nova-factory-server/app/business/shop/api/controller/order"
 	"nova-factory-server/app/business/shop/api/controller/product"
 	shopconfigController "nova-factory-server/app/business/shop/config/controller"
+	shopFinanceController "nova-factory-server/app/business/shop/finance/controller"
 	homeController "nova-factory-server/app/business/shop/home/controller"
 	shopobserver "nova-factory-server/app/business/shop/observer"
 	shopOrderController "nova-factory-server/app/business/shop/order/controller"
@@ -52,6 +53,7 @@ func NewGinEngine(
 	shopOrderController *shopOrderController.Controller,
 	orderTimeoutService shopOrderService.IOrderTimeoutService,
 	shopObserver *shopobserver.ShopObserver,
+	shopFinance *shopFinanceController.Controller,
 ) *Shop {
 	group := app.Engine.Group("")
 
@@ -119,12 +121,14 @@ func NewGinEngine(
 		userController.Address.PrivateRoutes(adminGroup)
 		userController.Cart.PrivateRoutes(adminGroup)
 		shopConfigController.WechatConfig.PrivateRoutes(adminGroup)
+		shopConfigController.Logistics.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)
 		controller.Goods.PrivateRoutes(adminGroup)
 		controller.Sku.PrivateRoutes(adminGroup)
 		userController.DiscountRule.PrivateRoutes(adminGroup)
 		userController.User.PrivateRoutes(adminGroup)
 		shopOrderController.Order.PrivateRoutes(adminGroup)
+		shopFinance.Account.PrivateRoutes(adminGroup)
 	}
 
 	// 加载MCP

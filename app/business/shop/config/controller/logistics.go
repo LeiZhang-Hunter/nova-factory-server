@@ -1,8 +1,8 @@
-package settingcontroller
+package shopcontroller
 
 import (
-	"nova-factory-server/app/business/erp/setting/settingmodels"
-	"nova-factory-server/app/business/erp/setting/settingservice"
+	"nova-factory-server/app/business/shop/config/models"
+	"nova-factory-server/app/business/shop/config/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -12,34 +12,34 @@ import (
 
 // Logistics ERP物流公司控制器
 type Logistics struct {
-	service settingservice.ILogisticsCompanyService
+	service service.ILogisticsCompanyService
 }
 
 // NewLogistics 创建 ERP物流公司控制器。
-func NewLogistics(service settingservice.ILogisticsCompanyService) *Logistics {
+func NewLogistics(service service.ILogisticsCompanyService) *Logistics {
 	return &Logistics{service: service}
 }
 
 // PrivateRoutes 注册 ERP物流公司私有路由。
 func (l *Logistics) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/erp/setting/logistics-company")
-	group.GET("/list", middlewares.HasPermission("erp:setting:logisticsCompany:list"), l.List)
-	group.GET("/query/:id", middlewares.HasPermission("erp:setting:logisticsCompany:query"), l.GetByID)
-	group.POST("/set", middlewares.HasPermission("erp:setting:logisticsCompany:set"), l.Set)
-	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:setting:logisticsCompany:remove"), l.Delete)
+	group := router.Group("/shop/config/logistics-company")
+	group.GET("/list", middlewares.HasPermission("shop:config:logistics:company:list"), l.List)
+	group.GET("/query/:id", middlewares.HasPermission("shop:config:logistics:company:query"), l.GetByID)
+	group.POST("/set", middlewares.HasPermission("shop:config:logistics:company:set"), l.Set)
+	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:config:logistics:company:remove"), l.Delete)
 }
 
-// List 查询 ERP物流公司列表。
+// List 查询物流公司列表。
 // @Summary 查询 ERP物流公司列表
 // @Description 按条件分页查询 ERP物流公司列表
 // @Tags ERP/系统配置
 // @Security BearerAuth
-// @Param object query settingmodels.LogisticsCompanyQuery true "ERP物流公司查询参数"
+// @Param object query models.LogisticsCompanyQuery true "ERP物流公司查询参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "查询成功"
 // @Router /erp/setting/logistics-company/list [get]
 func (l *Logistics) List(c *gin.Context) {
-	req := new(settingmodels.LogisticsCompanyQuery)
+	req := new(models.LogisticsCompanyQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -52,7 +52,7 @@ func (l *Logistics) List(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// GetByID 查询 ERP物流公司详情。
+// GetByID 查询物流公司详情。
 // @Summary 查询 ERP物流公司详情
 // @Description 根据ID查询 ERP物流公司详情
 // @Tags ERP/系统配置
@@ -75,25 +75,25 @@ func (l *Logistics) GetByID(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Set 新增或修改 ERP物流公司。
-// @Summary 新增或修改 ERP物流公司
-// @Description 新增或修改 ERP物流公司
+// Set 新增或修改物流公司。
+// @Summary 新增或修改物流公司
+// @Description 新增或修改物流公司
 // @Tags ERP/系统配置
 // @Security BearerAuth
 // @Accept application/json
-// @Param body body settingmodels.LogisticsCompanyUpsert true "ERP物流公司参数"
+// @Param body body models.LogisticsCompanyUpsert true "ERP物流公司参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "设置成功"
 // @Router /erp/setting/logistics-company/set [post]
 func (l *Logistics) Set(c *gin.Context) {
-	req := new(settingmodels.LogisticsCompanyUpsert)
+	req := new(models.LogisticsCompanyUpsert)
 	if err := c.ShouldBindJSON(req); err != nil {
 		zap.L().Error("param error", zap.Error(err))
 		baizeContext.ParameterError(c)
 		return
 	}
 	var (
-		data *settingmodels.LogisticsCompany
+		data *models.LogisticsCompany
 		err  error
 	)
 	if req.ID > 0 {
@@ -108,9 +108,9 @@ func (l *Logistics) Set(c *gin.Context) {
 	baizeContext.SuccessData(c, data)
 }
 
-// Delete 删除 ERP物流公司。
-// @Summary 删除 ERP物流公司
-// @Description 根据ID删除 ERP物流公司，多个ID用逗号分隔
+// Delete 删除物流公司。
+// @Summary 删除物流公司
+// @Description 根据ID删除物流公司，多个ID用逗号分隔
 // @Tags ERP/系统配置
 // @Security BearerAuth
 // @Param ids path string true "物流公司ID，多个用逗号分隔"

@@ -17,6 +17,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 	address *models.ShopUserAddressApp,
 	cacheData *models.OrderCacheData,
 	req *models.OrderCreateReq,
+	defaultNo string,
 ) *shopordermodels.OrderSet {
 	details := make([]*shopordermodels.OrderDetailSet, 0, len(cacheData.Items))
 	for index, item := range cacheData.Items {
@@ -63,7 +64,7 @@ func (s *IApiShopOrderServiceImpl) buildERPOrderSet(
 		Details:              details,
 		Accounts: []*shopordermodels.OrderAccountSet{
 			{
-				FinanceCode: "0168",
+				FinanceCode: defaultNo,
 				Total:       cacheData.PayAmount,
 			},
 		},
