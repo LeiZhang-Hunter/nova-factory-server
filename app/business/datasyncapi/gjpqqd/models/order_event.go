@@ -79,8 +79,7 @@ type OrderItem struct {
 }
 
 func (o *OrderItem) GetTransactionId() string {
-	//TODO implement me
-	panic("implement me")
+	return ""
 }
 
 func (o *OrderItem) GetNotifyRaw() string {
