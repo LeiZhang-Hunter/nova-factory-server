@@ -126,6 +126,12 @@ type OrderSyncOrder struct {
 	BTypeCode        string              `json:"btypecode"`
 	Details          []*OrderSyncDetail  `json:"details"`
 	Accounts         []*OrderSyncAccount `json:"accounts,omitempty"`
+	TransactionId    string              `json:"transaction_id"`
+	NotifyRaw        string              `json:"notify_raw"`
+	MchId            string              `json:"mch_id"`
+	Appid            string              `json:"appid"`
+	PayerOpenid      string              `json:"payer_openid"`
+	PayChannel       int                 `json:"pay_channel"`
 }
 
 func (o *OrderSyncOrder) Metadata() map[string]any {
@@ -270,6 +276,25 @@ func (o *OrderSyncOrder) GetAccounts() []event.Account {
 	return result
 }
 
+func (o *OrderSyncOrder) GetTransactionId() string {
+	return o.TransactionId
+}
+func (o *OrderSyncOrder) GetNotifyRaw() string {
+	return o.NotifyRaw
+}
+func (o *OrderSyncOrder) GetMchId() string {
+	return o.MchId
+}
+func (o *OrderSyncOrder) GetAppid() string {
+	return o.Appid
+}
+func (o *OrderSyncOrder) GetPayerOpenid() string {
+	return o.PayerOpenid
+}
+func (o *OrderSyncOrder) GetPayChannel() int {
+	return o.PayChannel
+}
+
 type OrderSyncDetail struct {
 	OID            string  `json:"oid"`
 	Barcode        string  `json:"barcode"`
@@ -402,11 +427,11 @@ type OrderSyncResult struct {
 	Message  string `json:"message"`
 }
 
-func ToOrderSyncOrder(orderInfo *Order) *OrderSyncOrder {
+func ToOrderSyncOrder(orderInfo *Order, nd PayNotifyDataInterface) *OrderSyncOrder {
 	if orderInfo == nil {
 		return nil
 	}
-	return &OrderSyncOrder{
+	orderData := &OrderSyncOrder{
 		Tid:              orderInfo.Tid,
 		Weight:           orderInfo.Weight,
 		Size:             orderInfo.Size,
@@ -435,6 +460,15 @@ func ToOrderSyncOrder(orderInfo *Order) *OrderSyncOrder {
 		Details:          toOrderSyncDetails(orderInfo.Details),
 		Accounts:         toOrderSyncAccounts(orderInfo.Accounts),
 	}
+	if nd != nil {
+		orderData.TransactionId = nd.GetTransactionID()
+		orderData.NotifyRaw = nd.GetNotifyRaw()
+		orderData.MchId = nd.GetMchID()
+		orderData.Appid = nd.GetAppID()
+		orderData.PayerOpenid = nd.GetPayerOpenID()
+		orderData.PayChannel = nd.GetPayChannel()
+	}
+	return orderData
 }
 
 func toOrderSyncDetails(details []*OrderDetail) []*OrderSyncDetail {

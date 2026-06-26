@@ -112,6 +112,30 @@ type OrderSyncOrder struct {
 	Accounts         []*OrderSyncAccount `json:"accounts,omitempty"`
 }
 
+func (o *OrderSyncOrder) GetTransactionId() string {
+	return ""
+}
+
+func (o *OrderSyncOrder) GetNotifyRaw() string {
+	return ""
+}
+
+func (o *OrderSyncOrder) GetMchId() string {
+	return ""
+}
+
+func (o *OrderSyncOrder) GetAppid() string {
+	return ""
+}
+
+func (o *OrderSyncOrder) GetPayerOpenid() string {
+	return ""
+}
+
+func (o *OrderSyncOrder) GetPayChannel() int {
+	return 0
+}
+
 func (o *OrderSyncOrder) GetUserId() uint64 {
 	return 0
 }

@@ -14,7 +14,6 @@ import (
 	orderConstant "nova-factory-server/app/constant/order"
 	shopConstant "nova-factory-server/app/constant/shop"
 	"nova-factory-server/app/datasource/objectFile"
-	"nova-factory-server/app/utils/observer/integration/event"
 	"nova-factory-server/app/utils/observer/integration/observer"
 	"strconv"
 	"strings"
@@ -575,28 +574,23 @@ func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (
 	}
 
 	// 读取微信配置
-	cfgMap, err := s.loadWechatConfig(c)
+	config, err := s.configDao.GetWechatPayConfig(c)
 	if err != nil {
+		zap.L().Error("读取微信配置失败", zap.Error(err))
 		return nil, err
 	}
-	appId := cfgMap["wechat_mini_program_app_id"]
-	mchId := cfgMap["wechat_pay_mch_id"]
-	apiV3Key := cfgMap["wechat_pay_api_v3_key"]
-	serialNo := cfgMap["wechat_pay_serial_no"]
-	privateKeyPath := cfgMap["wechat_pay_private_key_path"]
-	notifyUrl := cfgMap["wechat_pay_notify_url"]
 	//platformPublicKeyPath := cfgMap["wechat_pay_platform_public_key_path"]
-	if appId == "" || mchId == "" || apiV3Key == "" || serialNo == "" || privateKeyPath == "" || notifyUrl == "" {
+	if config.AppId == "" || config.MchId == "" || config.ApiV3Key == "" || config.SerialNo == "" || config.PrivateKeyPath == "" || config.NotifyUrl == "" {
 		return nil, errors.New("微信支付配置不完整，请在后台管理配置微信支付参数")
 	}
 	file := objectFile.NewConfig()
-	privateKeyData, err := file.ReadPrivateFile(c, privateKeyPath)
+	privateKeyData, err := file.ReadPrivateFile(c, config.PrivateKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("读取微信支付私钥文件失败: %v", err)
 	}
 
 	// 初始化微信V3客户端
-	client, err := wechat.NewClientV3(mchId, serialNo, apiV3Key, string(privateKeyData))
+	client, err := wechat.NewClientV3(config.MchId, config.SerialNo, config.ApiV3Key, string(privateKeyData))
 	if err != nil {
 		return nil, fmt.Errorf("初始化微信支付客户端失败: %v", err)
 	}
@@ -605,12 +599,12 @@ func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (
 	total := int64(math.Round(order.Total * 100))
 	expire := time.Now().Add(10 * time.Minute).Format(time.RFC3339)
 	bm := make(gopay.BodyMap)
-	bm.Set("appid", appId).
-		Set("mchid", mchId).
+	bm.Set("appid", config.AppId).
+		Set("mchid", config.MchId).
 		Set("description", "订单支付: "+order.Tid).
 		Set("out_trade_no", order.Tid).
 		Set("time_expire", expire).
-		Set("notify_url", notifyUrl).
+		Set("notify_url", config.NotifyUrl).
 		SetBodyMap("amount", func(bm gopay.BodyMap) {
 			bm.Set("total", total).
 				Set("currency", "CNY")
@@ -628,7 +622,7 @@ func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (
 	}
 
 	// 生成小程序调起支付签名
-	paySign, err := client.PaySignOfApplet(appId, wxRsp.Response.PrepayId)
+	paySign, err := client.PaySignOfApplet(config.AppId, wxRsp.Response.PrepayId)
 	if err != nil {
 		return nil, fmt.Errorf("生成支付签名失败: %v", err)
 	}
@@ -643,71 +637,48 @@ func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (
 	}, nil
 }
 
-var wechatConfigKeys = []string{
-	"wechat_mini_program_app_id",
-	"wechat_pay_mch_id",
-	"wechat_pay_api_v3_key",
-	"wechat_pay_serial_no",
-	"wechat_pay_private_key_path",
-	"wechat_pay_notify_url",
-	"wechat_pay_platform_public_key_path",
-}
-
-// loadWechatConfig 批量读取微信配置并转为 key→value map。
-func (s *IApiShopOrderServiceImpl) loadWechatConfig(c *gin.Context) (map[string]string, error) {
-	rows, err := s.configDao.GetByConfigKeys(c, wechatConfigKeys)
-	if err != nil {
-		return nil, fmt.Errorf("读取微信支付配置失败: %v", err)
-	}
-	cfgMap := make(map[string]string)
-	for _, row := range rows {
-		cfgMap[row.ConfigKey] = row.ConfigValue
-	}
-	return cfgMap, nil
-}
-
-// HandleWechatNotify 处理微信支付回调。
-// func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo, transactionId, notifyRaw, mchId, appid, payerOpenid string, notifyTotalInt int64) error {
-func (s *IApiShopOrderServiceImpl) HandleWechatNotify(e event.ZOrderStatusSyncReqEvent) error {
-	c := e.GetCtx()
-	var notifyData apimodels.PayNotifyData
-	if orderInfo, ok := e.Metadata()["order"]; ok {
-		notifyData = orderInfo.(apimodels.PayNotifyData)
-	} else {
-		return errors.New("订单信息不存在")
-	}
-	order, err := s.apiOrderDao.GetByTid(c, notifyData.OutTradeNo)
-	if err != nil || order == nil {
-		return errors.New("订单不存在")
-	}
-
-	// 幂等：已支付则跳过
-	//if order.Status == orderConstant.ERPStatusPayed {
-	//	return nil
-	//}
-	if order.Status != orderConstant.ERPStatusNoPay {
-		return errors.New("订单状态错误")
-	}
-	rawBytes, _ := json.Marshal(notifyData)
-	notifyRaw := string(rawBytes)
-	// 金额校验
-	orderTotal := int64(math.Round(order.Total * 100))
-	if orderTotal != notifyData.Amount.Total {
-		return fmt.Errorf("金额校验失败: 订单金额%d分, 回调金额%d分", orderTotal, notifyData.Amount.Total)
-	}
-
-	now := time.Now()
-	order.TransactionID = notifyData.TransactionID
-	order.NotifyRaw = notifyRaw
-	order.MchID = notifyData.MchID
-	order.AppID = notifyData.AppID
-	order.PayerOpenid = notifyData.Payer.Openid
-	order.PayTime = &now
-	order.Status = orderConstant.ERPStatusPayed
-	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
-		return s.apiOrderDao.MarkOrderPaidWithTx(c, tx, order.ID, order.PayTime, notifyData.TransactionID, notifyRaw, notifyData.MchID, notifyData.AppID, notifyData.Payer.Openid)
-	})
-}
+//// HandleWechatNotify 处理微信支付回调。
+//// func (s *IApiShopOrderServiceImpl) HandleWechatNotify(c *gin.Context, outTradeNo, transactionId, notifyRaw, mchId, appid, payerOpenid string, notifyTotalInt int64) error {
+//func (s *IApiShopOrderServiceImpl) HandleWechatNotify(e event.ZOrderStatusSyncReqEvent) error {
+//	c := e.GetCtx()
+//	var notifyData apimodels.PayNotifyData
+//	if orderInfo, ok := e.Metadata()["order"]; ok {
+//		notifyData = orderInfo.(apimodels.PayNotifyData)
+//	} else {
+//		return errors.New("订单信息不存在")
+//	}
+//	order, err := s.apiOrderDao.GetByTid(c, notifyData.OutTradeNo)
+//	if err != nil || order == nil {
+//		return errors.New("订单不存在")
+//	}
+//
+//	// 幂等：已支付则跳过
+//	//if order.Status == orderConstant.ERPStatusPayed {
+//	//	return nil
+//	//}
+//	if order.Status != orderConstant.ERPStatusNoPay {
+//		return errors.New("订单状态错误")
+//	}
+//	rawBytes, _ := json.Marshal(notifyData)
+//	notifyRaw := string(rawBytes)
+//	// 金额校验
+//	orderTotal := int64(math.Round(order.Total * 100))
+//	if orderTotal != notifyData.Amount.Total {
+//		return fmt.Errorf("金额校验失败: 订单金额%d分, 回调金额%d分", orderTotal, notifyData.Amount.Total)
+//	}
+//
+//	now := time.Now()
+//	order.TransactionID = notifyData.TransactionID
+//	order.NotifyRaw = notifyRaw
+//	order.MchID = notifyData.MchID
+//	order.AppID = notifyData.AppID
+//	order.PayerOpenid = notifyData.Payer.Openid
+//	order.PayTime = &now
+//	order.Status = orderConstant.ERPStatusPayed
+//	return s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+//		return s.apiOrderDao.MarkOrderPaidWithTx(c, tx, order.ID, order.PayTime, notifyData.TransactionID, notifyRaw, notifyData.MchID, notifyData.AppID, notifyData.Payer.Openid)
+//	})
+//}
 
 // Cancel 取消订单，仅允许对待支付的订单进行取消。
 func (s *IApiShopOrderServiceImpl) Cancel(c *gin.Context, userID int64, id int64, reason string) error {

@@ -67,7 +67,8 @@ type Order struct {
 	Details              []*OrderDetail  `json:"details" gorm:"-"`
 	Accounts             []*OrderAccount `json:"accounts" gorm:"-"`
 	baize.BaseEntity
-	State int32 `json:"state" gorm:"column:state"`
+	State      int32 `json:"state" gorm:"column:state"`
+	PayChannel int   `json:"pay_channel" gorm:"column:pay_channel"`
 }
 
 // OrderSet ERP订单保存参数

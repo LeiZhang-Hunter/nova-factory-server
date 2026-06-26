@@ -11,4 +11,5 @@ type IApiShopSysConfigDao interface {
 	GetByConfigKey(c *gin.Context, configKey string) (*models.ShopSysConfig, error)
 	GetByConfigKeys(c *gin.Context, configKeys []string) ([]models.ShopSysConfig, error)
 	UpdateByConfigKey(c *gin.Context, configKey string, configValue string) error
+	GetWechatPayConfig(c *gin.Context) (*models.ShopSysConfigWechatPayConfigDTO, error)
 }

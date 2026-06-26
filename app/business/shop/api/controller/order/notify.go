@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"nova-factory-server/app/business/shop/api/models"
@@ -77,45 +76,38 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 		writeWechatNotifyFail(c, "写入请求数据失败", zap.Error(err), zap.Int("body_bytes", len(bodyBytes)))
 		return
 	}
-	// 读微信配置
-	cfgMap, err := s.loadNotifyConfig(c)
+	// 读取微信配置
+	config, err := s.configDao.GetWechatPayConfig(c)
 	if err != nil {
-		writeWechatNotifyFail(c, "配置读取失败", zap.Error(err))
+		zap.L().Error("读取微信配置失败", zap.Error(err))
+		writeWechatNotifyFail(c, "读取请求体失败", zap.Error(err))
 		return
 	}
-	appId := cfgMap["wechat_mini_program_app_id"]
-	mchId := cfgMap["wechat_pay_mch_id"]
-	apiV3Key := cfgMap["wechat_pay_api_v3_key"]
-	serialNo := cfgMap["wechat_pay_serial_no"]
-	privateKeyPath := cfgMap["wechat_pay_private_key_path"]
-	platformPublicKeyPath := cfgMap["wechat_pay_platform_public_key_path"]
-	platformPublicKeyID := cfgMap["wechat_pay_platform_public_key_id"]
-	//NewClientV3 初始化微信客户端 v3
-	// mchid：商户ID 或者服务商模式的 sp_mchid
-	// serialNo：商户证书的证书序列号
-	// apiV3Key：apiV3Key，商户平台获取
-	// privateKey：私钥 apiclient_key.pem 读取后的内容
+	if config.AppId == "" || config.MchId == "" || config.ApiV3Key == "" || config.SerialNo == "" || config.PrivateKeyPath == "" || config.NotifyUrl == "" {
+		writeWechatNotifyFail(c, "微信支付配置不完整，请在后台管理配置微信支付参数")
+		return
+	}
 	file := objectFile.NewConfig()
-	privateKeyData, err := file.ReadPrivateFile(c, privateKeyPath)
+	privateKeyData, err := file.ReadPrivateFile(c, config.PrivateKeyPath)
 	if err != nil {
-		writeWechatNotifyFail(c, "私钥读取失败", zap.Error(err), zap.String("private_key_path", privateKeyPath))
+		writeWechatNotifyFail(c, "私钥读取失败", zap.Error(err), zap.String("private_key_path", config.PrivateKeyPath))
 		return
 	}
-	client, err := gopayWechat.NewClientV3(mchId, serialNo, apiV3Key, string(privateKeyData))
+	client, err := gopayWechat.NewClientV3(config.MchId, config.SerialNo, config.ApiV3Key, string(privateKeyData))
 	if err != nil {
-		writeWechatNotifyFail(c, "初始化微信客户端失败", zap.Error(err), zap.String("mch_id", mchId), zap.String("serial_no", serialNo))
+		writeWechatNotifyFail(c, "初始化微信客户端失败", zap.Error(err), zap.String("mch_id", config.MchId), zap.String("serial_no", config.SerialNo))
 		return
 	}
-	platformPublicKeyData, err := file.ReadPrivateFile(c, platformPublicKeyPath)
+	platformPublicKeyData, err := file.ReadPrivateFile(c, config.PlatformPublicKeyPath)
 	if err != nil {
-		writeWechatNotifyFail(c, "微信支付公钥读取失败", zap.Error(err), zap.String("platform_public_key_path", platformPublicKeyPath))
+		writeWechatNotifyFail(c, "微信支付公钥读取失败", zap.Error(err), zap.String("platform_public_key_path", config.PlatformPublicKeyPath))
 		return
 	}
-	if err := client.AutoVerifySignByPublicKey(platformPublicKeyData, platformPublicKeyID); err != nil {
+	if err := client.AutoVerifySignByPublicKey(platformPublicKeyData, config.PlatformPublicKeyId); err != nil {
 		if fileErr := writeWechatNotifyErrorFile("auto_verify_sign_by_public_key", err); fileErr != nil {
 			zap.L().Error("write wechat notify error file failed", zap.Error(fileErr))
 		}
-		writeWechatNotifyFail(c, "验签初始化失败", zap.Error(err), zap.String("platform_public_key_id", platformPublicKeyID))
+		writeWechatNotifyFail(c, "验签初始化失败", zap.Error(err), zap.String("platform_public_key_id", config.PlatformPublicKeyId))
 		return
 	}
 
@@ -138,8 +130,8 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	}
 
 	// 解密回调内容
-	var nd models.PayNotifyData
-	if err := notifyReq.DecryptCipherTextToStruct(apiV3Key, &nd); err != nil {
+	var nd models.WechatPayNotifyData
+	if err := notifyReq.DecryptCipherTextToStruct(config.ApiV3Key, &nd); err != nil {
 		writeWechatNotifyFail(c, "解密失败", zap.Error(err))
 		return
 	}
@@ -150,24 +142,15 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 		c.JSON(http.StatusOK, &gopayWechat.V3NotifyRsp{Code: "SUCCESS", Message: "非支付成功通知"})
 		return
 	}
-	if nd.AppID != appId {
-		writeWechatNotifyFail(c, "appid不匹配", zap.String("expected_appid", appId), zap.String("actual_appid", nd.AppID), zap.String("out_trade_no", nd.OutTradeNo))
+	if nd.AppID != config.AppId {
+		writeWechatNotifyFail(c, "appid不匹配", zap.String("expected_appid", config.AppId), zap.String("actual_appid", nd.AppID), zap.String("out_trade_no", nd.OutTradeNo))
 		return
 	}
-	if nd.MchID != mchId {
-		writeWechatNotifyFail(c, "mchid不匹配", zap.String("expected_mch_id", mchId), zap.String("actual_mch_id", nd.MchID), zap.String("out_trade_no", nd.OutTradeNo))
+	if nd.MchID != config.MchId {
+		writeWechatNotifyFail(c, "mchid不匹配", zap.String("expected_mch_id", config.MchId), zap.String("actual_mch_id", nd.MchID), zap.String("out_trade_no", nd.OutTradeNo))
 		return
 	}
 
-	// 序列化回调原文（排障用）
-	//rawBytes, _ := json.Marshal(nd)
-	//notifyRaw := string(rawBytes)
-	//m := new(models.OrderStatusEvent)
-	//erpOrderInfo := models.OrderStatusData{
-	//	Tid:          nd.OutTradeNo,
-	//	Status:       order.ERPStatusPayed,
-	//	RefundStatus: order.REFUNDStatusNormal,
-	//}
 	//data := models.NewOrderStatusData(nd.OutTradeNo, order.ERPStatusPayed, order.REFUNDStatusNormal)
 	//m.WithOrders(data)
 	//m.WithMetadata(gin.H{"order": nd})
@@ -188,11 +171,11 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	info.Status = order.ERPStatusPayed
 	now := time.Now()
 	info.PayTime = &now
+	// 序列化回调原文（排障用）
 	var request models2.OrderSyncRequest
 	request.Orders = []*models2.OrderSyncOrder{
-		models2.ToOrderSyncOrder(info),
+		models2.ToOrderSyncOrder(info, &nd),
 	}
-
 	request.WithCallback(callback.NewOrderSyncRequestCallback(c, &request))
 	request.WithDB(s.db)
 	request.WithCache(s.cache)
@@ -300,16 +283,4 @@ func writeWechatNotifyErrorFile(stage string, err error) error {
 
 	_, writeErr := file.Write(payload)
 	return writeErr
-}
-
-func (s *OrderNotify) loadNotifyConfig(c *gin.Context) (map[string]string, error) {
-	rows, err := s.configDao.GetByConfigKeys(c, notifyConfigKeys)
-	if err != nil {
-		return nil, fmt.Errorf("读取微信支付配置失败: %v", err)
-	}
-	cfgMap := make(map[string]string)
-	for _, row := range rows {
-		cfgMap[row.ConfigKey] = row.ConfigValue
-	}
-	return cfgMap, nil
 }
