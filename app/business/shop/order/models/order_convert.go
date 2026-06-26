@@ -53,6 +53,13 @@ func ToOrder(event event.OrderEvent) []*Order {
 
 			Details:  toOrderDetails(eventOrder.GetOrderNo(), eventOrder.GetDetails()),
 			Accounts: toOrderAccounts(eventOrder.GetOrderNo(), eventOrder.GetAccounts()),
+
+			TransactionID: eventOrder.GetTransactionId(),
+			AppID:         eventOrder.GetAppid(),
+			MchID:         eventOrder.GetMchId(),
+			PayerOpenid:   eventOrder.GetPayerOpenid(),
+			NotifyRaw:     eventOrder.GetNotifyRaw(),
+			PayChannel:    eventOrder.GetPayChannel(),
 		}
 
 		if payTime := parseOrderTime(eventOrder.GetPayTime()); payTime != nil {

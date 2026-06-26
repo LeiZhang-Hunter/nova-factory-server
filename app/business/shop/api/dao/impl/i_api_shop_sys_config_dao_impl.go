@@ -56,3 +56,40 @@ func (s *IApiShopSysConfigDaoImpl) UpdateByConfigKey(c *gin.Context, configKey s
 		Where("state = ?", commonStatus.NORMAL).
 		Update("config_value", configValue).Error
 }
+
+// 获取微信支付配置
+func (s *IApiShopSysConfigDaoImpl) GetWechatPayConfig(c *gin.Context) (*models.ShopSysConfigWechatPayConfigDTO, error) {
+	var configKeys []string = []string{
+		"wechat_mini_program_app_id",
+		"wechat_pay_mch_id",
+		"wechat_pay_api_v3_key",
+		"wechat_pay_serial_no",
+		"wechat_pay_private_key_path",
+		"wechat_pay_notify_url",
+		"wechat_pay_platform_public_key_id",
+		"wechat_pay_platform_public_key_path",
+	}
+
+	rows, err := s.GetByConfigKeys(c, configKeys)
+	if err != nil {
+		return nil, err
+	}
+	cfgMap := make(map[string]string)
+	// 初始化空值
+	for _, v := range configKeys {
+		cfgMap[v] = ""
+	}
+	for _, row := range rows {
+		cfgMap[row.ConfigKey] = row.ConfigValue
+	}
+	return &models.ShopSysConfigWechatPayConfigDTO{
+		AppId:                 cfgMap["wechat_mini_program_app_id"],
+		MchId:                 cfgMap["wechat_pay_mch_id"],
+		ApiV3Key:              cfgMap["wechat_pay_api_v3_key"],
+		SerialNo:              cfgMap["wechat_pay_serial_no"],
+		PrivateKeyPath:        cfgMap["wechat_pay_private_key_path"],
+		NotifyUrl:             cfgMap["wechat_pay_notify_url"],
+		PlatformPublicKeyId:   cfgMap["wechat_pay_platform_public_key_id"],
+		PlatformPublicKeyPath: cfgMap["wechat_pay_platform_public_key_path"],
+	}, nil
+}
