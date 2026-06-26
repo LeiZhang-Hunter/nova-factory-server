@@ -20,6 +20,10 @@ func NewCache() (cache Cache) {
 			MinRetryBackoff: 100 * time.Millisecond, // 最小100ms重试间隔
 			MaxRetryBackoff: 5 * time.Second,        // 最大5秒重试间隔
 			MaxRetries:      5,                      // 最大重试次数
+			PoolSize:        20,                     // 连接池大小
+			MinIdleConns:    5,                      // 最小空闲连接，保持活跃重连
+			ConnMaxIdleTime: 5 * time.Minute,        // 空闲超时后关闭，迫使新请求重建连接
+			ConnMaxLifetime: 30 * time.Minute,       // 连接生存时间，定期重建
 		})
 
 		cache = redis2.NewRedisCache(r)

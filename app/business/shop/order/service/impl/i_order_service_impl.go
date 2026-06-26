@@ -27,11 +27,12 @@ import (
 
 // OrderServiceImpl 提供 ERP 订单的业务实现与同步能力。
 type OrderServiceImpl struct {
-	orderDao   dao.IOrderDao
-	detailDao  dao.IOrderDetailDao
-	accountDao dao.IOrderAccountDao
-	cache      cache.Cache
-	host       string
+	orderDao    dao.IOrderDao
+	detailDao   dao.IOrderDetailDao
+	accountDao  dao.IOrderAccountDao
+	shipmentDao dao.IOrderShipmentDao
+	cache       cache.Cache
+	host        string
 }
 
 // NewOrderService 创建 ERP 订单服务。
@@ -39,15 +40,17 @@ func NewOrderService(
 	orderDao dao.IOrderDao,
 	detailDao dao.IOrderDetailDao,
 	accountDao dao.IOrderAccountDao,
+	shipmentDao dao.IOrderShipmentDao,
 	cache cache.Cache,
 ) service.IOrderService {
 	host := viper.GetString("host")
 	return &OrderServiceImpl{
-		orderDao:   orderDao,
-		detailDao:  detailDao,
-		accountDao: accountDao,
-		cache:      cache,
-		host:       host,
+		orderDao:    orderDao,
+		detailDao:   detailDao,
+		accountDao:  accountDao,
+		shipmentDao: shipmentDao,
+		cache:       cache,
+		host:        host,
 	}
 }
 
@@ -480,4 +483,188 @@ func (i *OrderServiceImpl) SyncOrderStatus(event event.OrderStratusEvent) error 
 		}
 	}
 	return nil
+}
+
+// SyncOrderSend 处理订单发货通知（selfmall.order.send）。
+//
+// 流程：参数校验 → 开启事务 → 加行锁查订单 → 幂等判断 → 逐明细累加发货量
+// → 插入物流记录 → 判定目标状态 → 更新订单状态 → 提交。
+func (i *OrderServiceImpl) SyncOrderSend(event event.OrderSendEvent) error {
+	if event == nil {
+		return errors.New("发货事件不能为空")
+	}
+
+	tid := strings.TrimSpace(event.GetTid())
+	companycode := strings.TrimSpace(event.GetCompanyCode())
+	outsid := strings.TrimSpace(event.GetOutSid())
+	issplit := event.GetIsSplit()
+
+	if tid == "" {
+		return errors.New("订单tid不能为空")
+	}
+	if outsid == "" {
+		return errors.New("物流单号不能为空")
+	}
+
+	details := event.GetDetails()
+	if issplit == 1 && len(details) == 0 {
+		return errors.New("拆单发货时details不能为空")
+	}
+
+	return i.orderDao.Transaction(func(tx *gorm.DB) error {
+		// 1. 加行锁查询订单，防止并发发货竞态
+		order, err := i.orderDao.GetByTidForUpdateTx(tx, tid)
+		if err != nil {
+			zap.L().Error("发货同步失败：查询订单失败", zap.String("tid", tid), zap.Error(err))
+			return err
+		}
+		if order == nil {
+			return fmt.Errorf("订单不存在: %s", tid)
+		}
+
+		// 2. 幂等判断：同一物流单号不重复处理
+		exists, err := i.shipmentDao.ExistsByOutsidTx(tx, outsid)
+		if err != nil {
+			zap.L().Error("发货同步失败：查询物流单号失败", zap.String("outsid", outsid), zap.Error(err))
+			return err
+		}
+		if exists {
+			zap.L().Info("发货同步跳过：物流单号已存在", zap.String("tid", tid), zap.String("outsid", outsid))
+			return nil
+		}
+
+		// 3. 处理拆单明细：插入物流记录 + 原子累加 shipped_qty
+		now := time.Now()
+		shipments := make([]*models.OrderShipmentSet, 0, len(details))
+
+		for _, d := range details {
+			if d == nil {
+				continue
+			}
+			subTid := strings.TrimSpace(d.GetSubTid())
+			qty := float64(d.GetQty())
+			if subTid == "" || qty <= 0 {
+				continue
+			}
+
+			// 原子累加 shipped_qty（MySQL UPDATE 自带行锁，并发安全）
+			if err := i.detailDao.IncrementShippedQty(tx, order.ID, subTid, qty); err != nil {
+				zap.L().Error("发货同步失败：累加发货数量失败",
+					zap.String("tid", tid),
+					zap.String("oid", subTid),
+					zap.Float64("qty", qty),
+					zap.Error(err),
+				)
+				return err
+			}
+
+			shipments = append(shipments, &models.OrderShipmentSet{
+				OrderID:     order.ID,
+				Tid:         tid,
+				Issplit:     issplit,
+				Outsid:      outsid,
+				Companycode: companycode,
+				SubTid:      event.GetSubTid(),
+				OID:         subTid,
+				Qty:         qty,
+			})
+		}
+
+		// 4. 批量插入物流记录
+		if len(shipments) > 0 {
+			if err := i.shipmentDao.BatchInsert(tx, shipments); err != nil {
+				zap.L().Error("发货同步失败：插入物流记录失败", zap.String("tid", tid), zap.Error(err))
+				return err
+			}
+		}
+
+		// 5. 判定目标状态
+		targetStatus := i.resolveShipmentTargetStatus(tx, issplit, tid)
+		if targetStatus == "" {
+			zap.L().Info("发货同步跳过：状态无需更新",
+				zap.String("tid", tid),
+				zap.String("current_status", order.Status),
+			)
+			return nil
+		}
+
+		// 6. 状态推进校验
+		if !shouldUpdateOrderStatus(order.Status, targetStatus) {
+			zap.L().Info("发货同步跳过：状态不可推进",
+				zap.String("tid", tid),
+				zap.String("current_status", order.Status),
+				zap.String("target_status", targetStatus),
+			)
+			return nil
+		}
+
+		// 7. 更新订单主表状态
+		if err := i.orderDao.UpdateByID(tx, order.ID, map[string]any{
+			"status":      targetStatus,
+			"update_time": &now,
+		}); err != nil {
+			zap.L().Error("发货同步失败：更新订单状态失败",
+				zap.String("tid", tid),
+				zap.Uint64("order_id", order.ID),
+				zap.String("target_status", targetStatus),
+				zap.Error(err),
+			)
+			return err
+		}
+
+		zap.L().Info("发货同步成功",
+			zap.String("tid", tid),
+			zap.String("outsid", outsid),
+			zap.Int("issplit", issplit),
+			zap.String("target_status", targetStatus),
+		)
+		return nil
+	})
+}
+
+// resolveShipmentTargetStatus 对比明细的 shipped_qty 与 num，判定订单目标状态。
+//
+// issplit == 0: 整单发货 → Sended。
+// issplit == 1: 逐明细比较。
+//
+//	全部发完 → Sended，部分发完 → PartSend，无变化 → 空字符串。
+func (i *OrderServiceImpl) resolveShipmentTargetStatus(
+	tx *gorm.DB,
+	issplit int,
+	tid string,
+) string {
+	if issplit == 0 {
+		return orderConstant.ERPStatusSended
+	}
+
+	details, err := i.detailDao.ListByTidTx(tx, tid)
+	if err != nil {
+		zap.L().Error("发货同步：查询订单明细失败", zap.String("tid", tid), zap.Error(err))
+		return ""
+	}
+	if len(details) == 0 {
+		return orderConstant.ERPStatusSended
+	}
+
+	allShipped := true
+	hasShipped := false
+	for _, d := range details {
+		if d == nil {
+			continue
+		}
+		if d.ShippedQty > 0 {
+			hasShipped = true
+		}
+		if d.ShippedQty < d.Num {
+			allShipped = false
+		}
+	}
+
+	if allShipped {
+		return orderConstant.ERPStatusSended
+	}
+	if hasShipped {
+		return orderConstant.ERPStatusPartSend
+	}
+	return ""
 }

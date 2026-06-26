@@ -23,6 +23,9 @@ type IOrderDao interface {
 
 	// GetByTidTx 在事务内按订单编号查询 shop 订单主表。
 	GetByTidTx(tx *gorm.DB, tid string) (*models.Order, error)
+	// GetByTidForUpdateTx 在事务内按订单编号查询并锁定订单行。
+	// 使用 SELECT ... FOR UPDATE，防止并发发货通知产生竞态。
+	GetByTidForUpdateTx(tx *gorm.DB, tid string) (*models.Order, error)
 	// Create 在事务内创建 shop 订单主表记录。
 	Create(tx *gorm.DB, order *models.Order) error
 	// UpdateByID 在事务内按 ID 更新 shop 订单主表记录。
