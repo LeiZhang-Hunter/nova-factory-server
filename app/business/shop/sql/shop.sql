@@ -745,7 +745,7 @@ CREATE TABLE IF NOT EXISTS `shop_account` (
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商城 结算账户 DO';
 
-CREATE TABLE `shop_order_shipment` (
+CREATE TABLE IF NOT EXISTS `shop_order_shipment` (
     `id`            BIGINT(20) UNSIGNED  NOT NULL AUTO_INCREMENT  COMMENT '主键',
     `order_id`      BIGINT(20) UNSIGNED  NOT NULL                 COMMENT '关联 shop_order.id',
     `tid`           VARCHAR(128)     NOT NULL DEFAULT ''      COMMENT '订单编号',
@@ -762,7 +762,7 @@ CREATE TABLE `shop_order_shipment` (
     `update_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_outsid` (`outsid`),
+    UNIQUE KEY `uk_outsid_oid` (`outsid`, `oid`),
     KEY `idx_order_id` (`order_id`),
     KEY `idx_tid` (`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单发货物流记录';

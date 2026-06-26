@@ -27,12 +27,12 @@ import (
 
 // OrderServiceImpl 提供 ERP 订单的业务实现与同步能力。
 type OrderServiceImpl struct {
-	orderDao    dao.IOrderDao
-	detailDao   dao.IOrderDetailDao
-	accountDao  dao.IOrderAccountDao
-	shipmentDao dao.IOrderShipmentDao
-	cache       cache.Cache
-	host        string
+	orderDao        dao.IOrderDao
+	detailDao       dao.IOrderDetailDao
+	accountDao      dao.IOrderAccountDao
+	shipmentService service.IShopOrderShipmentService
+	cache           cache.Cache
+	host            string
 }
 
 // NewOrderService 创建 ERP 订单服务。
@@ -40,17 +40,17 @@ func NewOrderService(
 	orderDao dao.IOrderDao,
 	detailDao dao.IOrderDetailDao,
 	accountDao dao.IOrderAccountDao,
-	shipmentDao dao.IOrderShipmentDao,
+	shipmentService service.IShopOrderShipmentService,
 	cache cache.Cache,
 ) service.IOrderService {
 	host := viper.GetString("host")
 	return &OrderServiceImpl{
-		orderDao:    orderDao,
-		detailDao:   detailDao,
-		accountDao:  accountDao,
-		shipmentDao: shipmentDao,
-		cache:       cache,
-		host:        host,
+		orderDao:        orderDao,
+		detailDao:       detailDao,
+		accountDao:      accountDao,
+		shipmentService: shipmentService,
+		cache:           cache,
+		host:            host,
 	}
 }
 
@@ -149,7 +149,18 @@ func (o *OrderServiceImpl) GetByID(c *gin.Context, id uint64) (*models.Order, er
 	if id == 0 {
 		return nil, errors.New("id不能为空")
 	}
-	return o.orderDao.GetByID(c, id)
+	info, err := o.orderDao.GetByID(c, id)
+	if info == nil || err != nil {
+		return info, err
+	}
+	shipments, err := o.shipmentService.ListByOrderID(c, id)
+	if err != nil {
+		return nil, err
+	}
+	if len(shipments) != 0 {
+		info.Shipments = shipments
+	}
+	return info, nil
 }
 
 // List 分页查询 ERP 订单。
@@ -522,17 +533,6 @@ func (i *OrderServiceImpl) SyncOrderSend(event event.OrderSendEvent) error {
 			return fmt.Errorf("订单不存在: %s", tid)
 		}
 
-		// 2. 幂等判断：同一物流单号不重复处理
-		exists, err := i.shipmentDao.ExistsByOutsidTx(tx, outsid)
-		if err != nil {
-			zap.L().Error("发货同步失败：查询物流单号失败", zap.String("outsid", outsid), zap.Error(err))
-			return err
-		}
-		if exists {
-			zap.L().Info("发货同步跳过：物流单号已存在", zap.String("tid", tid), zap.String("outsid", outsid))
-			return nil
-		}
-
 		// 3. 处理拆单明细：插入物流记录 + 原子累加 shipped_qty
 		now := time.Now()
 		shipments := make([]*models.OrderShipmentSet, 0, len(details))
@@ -572,13 +572,13 @@ func (i *OrderServiceImpl) SyncOrderSend(event event.OrderSendEvent) error {
 
 		// 4. 批量插入物流记录
 		if len(shipments) > 0 {
-			if err := i.shipmentDao.BatchInsert(tx, shipments); err != nil {
+			if err := i.shipmentService.BatchInsert(tx, shipments); err != nil {
 				zap.L().Error("发货同步失败：插入物流记录失败", zap.String("tid", tid), zap.Error(err))
 				return err
 			}
 		}
 
-		// 5. 判定目标状态
+		// 4. 判定目标状态
 		targetStatus := i.resolveShipmentTargetStatus(tx, issplit, tid)
 		if targetStatus == "" {
 			zap.L().Info("发货同步跳过：状态无需更新",
