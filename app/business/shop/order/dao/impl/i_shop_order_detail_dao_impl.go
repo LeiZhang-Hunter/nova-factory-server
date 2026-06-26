@@ -181,6 +181,47 @@ func (d *OrderDetailDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) (
 	return d.listByOrderIDsWithDB(c, d.db.WithContext(c), orderIDs)
 }
 
+// ListByTidTx 在事务内按订单编号查询该订单所有有效明细。
+func (d *OrderDetailDaoImpl) ListByTidTx(tx *gorm.DB, tid string) ([]*models.OrderDetail, error) {
+	tid = strings.TrimSpace(tid)
+	if tid == "" {
+		return []*models.OrderDetail{}, nil
+	}
+	rowList := make([]*models.OrderDetail, 0)
+	if err := tx.Table(d.table).
+		Where("tid = ?", tid).
+		Where("state = ?", commonStatus.NORMAL).
+		Order("id ASC").
+		Find(&rowList).Error; err != nil {
+		return nil, err
+	}
+	return rowList, nil
+}
+
+// IncrementShippedQty 原子累加指定明细行的已发货数量。
+// MySQL UPDATE 语句自动持有行锁，并发安全。
+func (d *OrderDetailDaoImpl) IncrementShippedQty(tx *gorm.DB, orderID uint64, oid string, qty float64) error {
+	oid = strings.TrimSpace(oid)
+	if oid == "" {
+		return fmt.Errorf("订单明细oid不能为空")
+	}
+	if qty <= 0 {
+		return fmt.Errorf("发货数量必须大于0")
+	}
+	result := tx.Table(d.table).
+		Where("order_id = ?", orderID).
+		Where("oid = ?", oid).
+		Where("state = ?", commonStatus.NORMAL).
+		Update("shipped_qty", gorm.Expr("shipped_qty + ?", qty))
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("订单明细oid不存在: %s (order_id=%d)", oid, orderID)
+	}
+	return nil
+}
+
 func (d *OrderDetailDaoImpl) listByOrderIDsWithDB(c *gin.Context, db *gorm.DB, orderIDs []uint64) ([]*models.OrderDetail, error) {
 	if len(orderIDs) == 0 {
 		return []*models.OrderDetail{}, nil

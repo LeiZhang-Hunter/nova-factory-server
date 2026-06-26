@@ -33,6 +33,7 @@ type OrderDetail struct {
 	Size              float64 `json:"size" gorm:"column:size"`
 	UnitID            int64   `json:"unit_id" gorm:"column:unit_id"`
 	UnitQty           float64 `json:"unit_qty" gorm:"column:unit_qty"`
+	ShippedQty        float64 `json:"shipped_qty" gorm:"column:shipped_qty"`
 	DeptID            int64   `json:"dept_id" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`

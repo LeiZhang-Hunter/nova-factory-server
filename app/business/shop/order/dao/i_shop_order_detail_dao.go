@@ -24,4 +24,12 @@ type IOrderDetailDao interface {
 	DeleteByTidAndOIDs(tx *gorm.DB, tid string, details []*models.OrderDetailSet) error
 	// ListByOrderIDs 按订单 ID 集合查询明细记录。
 	ListByOrderIDs(c *gin.Context, orderIDs []uint64) ([]*models.OrderDetail, error)
+
+	// ListByTidTx 在事务内按订单编号查询该订单所有有效明细。
+	ListByTidTx(tx *gorm.DB, tid string) ([]*models.OrderDetail, error)
+
+	// IncrementShippedQty 原子累加指定明细行的已发货数量。
+	// 使用 shipped_qty = shipped_qty + qty，MySQL UPDATE 自带行锁保证并发安全。
+	// 返回受影响行数，0 表示 oid 不存在或 state 非 NORMAL。
+	IncrementShippedQty(tx *gorm.DB, orderID uint64, oid string, qty float64) error
 }
