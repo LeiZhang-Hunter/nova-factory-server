@@ -114,7 +114,18 @@ type OrderData interface {
 	GetDetails() []GoodsDetail
 	// GetAccounts 订单账户信息列表，记录收款方式与金额
 	GetAccounts() []Account
-
+	// GetTransactionId 支付订单号
+	GetTransactionId() string
+	// GetNotifyRaw 支付回调原始数据
+	GetNotifyRaw() string
+	// GetMchId 支付商户号
+	GetMchId() string
+	// GetAppid 支付应用ID
+	GetAppid() string
+	// GetPayerOpenid 支付用户标识
+	GetPayerOpenid() string
+	// GetPayChannel 支付渠道
+	GetPayChannel() int
 	Base
 }
 

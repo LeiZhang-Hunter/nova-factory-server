@@ -3,7 +3,6 @@ package service
 import (
 	"nova-factory-server/app/business/shop/api/models"
 	shopordermodels "nova-factory-server/app/business/shop/order/models"
-	"nova-factory-server/app/utils/observer/integration/event"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +15,7 @@ type IApiShopOrderService interface {
 	List(c *gin.Context, userID int64, query *models.OrderQuery) (*models.OrderListData, error)
 	UpdateStatus(c *gin.Context, userID int64, req *models.OrderStatusReq) error
 	Pay(c *gin.Context, userID int64, id int64) (*models.OrderPayResp, error)
-	HandleWechatNotify(event.ZOrderStatusSyncReqEvent) error
+	//HandleWechatNotify(event.ZOrderStatusSyncReqEvent) error
 	Cancel(c *gin.Context, userID int64, id int64, reason string) error
 	ConfirmReceive(c *gin.Context, userID int64, id int64) error
 	GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error)

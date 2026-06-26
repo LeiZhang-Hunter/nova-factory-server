@@ -3,9 +3,10 @@ package impl
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"nova-factory-server/app/business/shop/order/models"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (o *OrderServiceImpl) fillOrderSyncRequestFromDB(c *gin.Context, req *models.OrderSyncRequest) error {
@@ -36,7 +37,7 @@ func (o *OrderServiceImpl) fillOrderSyncRequestFromDB(c *gin.Context, req *model
 		if orderInfo == nil {
 			return fmt.Errorf("订单不存在: %s", tid)
 		}
-		orders = append(orders, models.ToOrderSyncOrder(orderInfo))
+		orders = append(orders, models.ToOrderSyncOrder(orderInfo, nil))
 	}
 	if len(orders) == 0 {
 		return errors.New("orders不能为空")

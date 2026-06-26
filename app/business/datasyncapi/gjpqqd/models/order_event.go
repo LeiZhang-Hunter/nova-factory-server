@@ -78,6 +78,30 @@ type OrderItem struct {
 	db               *gorm.DB
 }
 
+func (o *OrderItem) GetTransactionId() string {
+	return ""
+}
+
+func (o *OrderItem) GetNotifyRaw() string {
+	return ""
+}
+
+func (o *OrderItem) GetMchId() string {
+	return ""
+}
+
+func (o *OrderItem) GetAppid() string {
+	return ""
+}
+
+func (o *OrderItem) GetPayerOpenid() string {
+	return ""
+}
+
+func (o *OrderItem) GetPayChannel() int {
+	return 0
+}
+
 func (o *OrderItem) GetUserId() uint64 {
 	return 0
 }

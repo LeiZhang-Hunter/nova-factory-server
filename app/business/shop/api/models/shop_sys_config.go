@@ -13,3 +13,14 @@ type ShopSysConfig struct {
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state" gorm:"state"` // 操作状态
 }
+
+type ShopSysConfigWechatPayConfigDTO struct {
+	AppId                 string `json:"appId"`
+	MchId                 string `json:"mchId"`
+	ApiV3Key              string `json:"apiV3Key"`
+	SerialNo              string `json:"serialNo"`
+	PrivateKeyPath        string `json:"privateKeyPath"`
+	NotifyUrl             string `json:"notifyUrl"`
+	PlatformPublicKeyId   string `json:"platformPublicKeyId"`
+	PlatformPublicKeyPath string `json:"platformPublicKeyPath"`
+}
