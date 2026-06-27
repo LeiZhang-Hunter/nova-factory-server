@@ -4,7 +4,6 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
-	"nova-factory-server/app/utils/stringUtils"
 	"nova-factory-server/app/utils/time"
 
 	"github.com/gin-gonic/gin"
@@ -98,40 +97,45 @@ func (o *OrderSyncRequest) Cache() cache.Cache {
 }
 
 type OrderSyncOrder struct {
-	Tid              string              `json:"tid"`
-	UserId           int64               `json:"user_id"`
-	Weight           float64             `json:"weight"`
-	Size             float64             `json:"size"`
-	BuyerNick        string              `json:"buyernick"`
-	BuyerMessage     string              `json:"buyermessage"`
-	SellerMemo       string              `json:"sellermemo"`
-	Total            float64             `json:"total"`
-	Privilege        float64             `json:"privilege"`
-	PostFee          float64             `json:"postfee"`
-	ReceiverName     string              `json:"receivername"`
-	ReceiverState    string              `json:"receiverstate"`
-	ReceiverCity     string              `json:"receivercity"`
-	ReceiverDistrict string              `json:"receiverdistrict"`
-	ReceiverAddress  string              `json:"receiveraddress"`
-	ReceiverPhone    string              `json:"receiverphone"`
-	ReceiverMobile   string              `json:"receivermobile"`
-	Created          string              `json:"created"`
-	Status           string              `json:"status"`
-	Type             string              `json:"type"`
-	InvoiceName      string              `json:"invoicename"`
-	SellerFlag       string              `json:"sellerflag"`
-	PayTime          string              `json:"paytime"`
-	LogistBTypeCode  string              `json:"logistbtypecode"`
-	LogistBillCode   string              `json:"logistbillcode"`
-	BTypeCode        string              `json:"btypecode"`
-	Details          []*OrderSyncDetail  `json:"details"`
-	Accounts         []*OrderSyncAccount `json:"accounts,omitempty"`
-	TransactionId    string              `json:"transaction_id"`
-	NotifyRaw        string              `json:"notify_raw"`
-	MchId            string              `json:"mch_id"`
-	Appid            string              `json:"appid"`
-	PayerOpenid      string              `json:"payer_openid"`
-	PayChannel       int                 `json:"pay_channel"`
+	Tid          string  `json:"tid"`
+	UserId       int64   `json:"user_id"`
+	Weight       float64 `json:"weight"`
+	Size         float64 `json:"size"`
+	BuyerNick    string  `json:"buyernick"`
+	BuyerMessage string  `json:"buyermessage"`
+	SellerMemo   string  `json:"sellermemo"`
+	Total        float64 `json:"total"`
+	Privilege    float64 `json:"privilege"`
+	PostFee      float64 `json:"postfee"`
+	ReceiverName string  `json:"receivername"`
+
+	ReceiverState        string `json:"receiverstate"`
+	ReceiverStateName    string `json:"-"`
+	ReceiverCity         string `json:"receivercity"`
+	ReceiverCityName     string `json:"-"`
+	ReceiverDistrict     string `json:"receiverdistrict"`
+	ReceiverDistrictName string `json:"-"`
+
+	ReceiverAddress string              `json:"receiveraddress"`
+	ReceiverPhone   string              `json:"receiverphone"`
+	ReceiverMobile  string              `json:"receivermobile"`
+	Created         string              `json:"created"`
+	Status          string              `json:"status"`
+	Type            string              `json:"type"`
+	InvoiceName     string              `json:"invoicename"`
+	SellerFlag      string              `json:"sellerflag"`
+	PayTime         string              `json:"paytime"`
+	LogistBTypeCode string              `json:"logistbtypecode"`
+	LogistBillCode  string              `json:"logistbillcode"`
+	BTypeCode       string              `json:"btypecode"`
+	Details         []*OrderSyncDetail  `json:"details"`
+	Accounts        []*OrderSyncAccount `json:"accounts,omitempty"`
+	TransactionId   string              `json:"transaction_id"`
+	NotifyRaw       string              `json:"notify_raw"`
+	MchId           string              `json:"mch_id"`
+	Appid           string              `json:"appid"`
+	PayerOpenid     string              `json:"payer_openid"`
+	PayChannel      int                 `json:"pay_channel"`
 }
 
 func (o *OrderSyncOrder) Metadata() map[string]any {
@@ -191,12 +195,25 @@ func (o *OrderSyncOrder) GetReceiverState() string {
 	return o.ReceiverState
 }
 
+func (o *OrderSyncOrder) GetReceiverStateName() string {
+	return o.ReceiverStateName
+}
+
 func (o *OrderSyncOrder) GetReceiverCity() string {
 	return o.ReceiverCity
 }
+
+func (o *OrderSyncOrder) GetReceiverCityName() string {
+	return o.ReceiverCityName
+}
+
 func (o *OrderSyncOrder) GetReceiverDistrict() string {
 	return o.ReceiverDistrict
 }
+func (o *OrderSyncOrder) GetReceiverDistrictName() string {
+	return o.ReceiverDistrictName
+}
+
 func (o *OrderSyncOrder) GetReceiverAddress() string {
 	return o.ReceiverAddress
 }
@@ -432,33 +449,38 @@ func ToOrderSyncOrder(orderInfo *Order, nd PayNotifyDataInterface) *OrderSyncOrd
 		return nil
 	}
 	orderData := &OrderSyncOrder{
-		Tid:              orderInfo.Tid,
-		Weight:           orderInfo.Weight,
-		Size:             orderInfo.Size,
-		BuyerNick:        orderInfo.BuyerNick,
-		BuyerMessage:     orderInfo.BuyerMessage,
-		SellerMemo:       orderInfo.SellerMemo,
-		Total:            orderInfo.Total,
-		Privilege:        orderInfo.Privilege,
-		PostFee:          orderInfo.PostFee,
-		ReceiverName:     orderInfo.ReceiverName,
-		ReceiverState:    stringUtils.FirstNonEmpty(orderInfo.ReceiverProvinceName, orderInfo.ReceiverProvince),
-		ReceiverCity:     stringUtils.FirstNonEmpty(orderInfo.ReceiverCityName, orderInfo.ReceiverCity),
-		ReceiverDistrict: stringUtils.FirstNonEmpty(orderInfo.ReceiverDistrictName, orderInfo.ReceiverDistrict),
-		ReceiverAddress:  orderInfo.ReceiverAddress,
-		ReceiverPhone:    orderInfo.ReceiverPhone,
-		ReceiverMobile:   orderInfo.ReceiverMobile,
-		Created:          time.FormatTime(orderInfo.CreateTime),
-		Status:           orderInfo.Status,
-		Type:             orderInfo.Type,
-		InvoiceName:      orderInfo.InvoiceName,
-		SellerFlag:       orderInfo.SellerFlag,
-		PayTime:          time.FormatTime(orderInfo.PayTime),
-		LogistBTypeCode:  orderInfo.LogistBTypeCode,
-		LogistBillCode:   orderInfo.LogistBillCode,
-		BTypeCode:        orderInfo.BTypeCode,
-		Details:          toOrderSyncDetails(orderInfo.Details),
-		Accounts:         toOrderSyncAccounts(orderInfo.Accounts),
+		Tid:          orderInfo.Tid,
+		Weight:       orderInfo.Weight,
+		Size:         orderInfo.Size,
+		BuyerNick:    orderInfo.BuyerNick,
+		BuyerMessage: orderInfo.BuyerMessage,
+		SellerMemo:   orderInfo.SellerMemo,
+		Total:        orderInfo.Total,
+		Privilege:    orderInfo.Privilege,
+		PostFee:      orderInfo.PostFee,
+		ReceiverName: orderInfo.ReceiverName,
+
+		ReceiverState:        orderInfo.ReceiverProvince,
+		ReceiverStateName:    orderInfo.ReceiverProvinceName,
+		ReceiverCity:         orderInfo.ReceiverCity,
+		ReceiverCityName:     orderInfo.ReceiverCityName,
+		ReceiverDistrict:     orderInfo.ReceiverDistrict,
+		ReceiverDistrictName: orderInfo.ReceiverDistrictName,
+
+		ReceiverAddress: orderInfo.ReceiverAddress,
+		ReceiverPhone:   orderInfo.ReceiverPhone,
+		ReceiverMobile:  orderInfo.ReceiverMobile,
+		Created:         time.FormatTime(orderInfo.CreateTime),
+		Status:          orderInfo.Status,
+		Type:            orderInfo.Type,
+		InvoiceName:     orderInfo.InvoiceName,
+		SellerFlag:      orderInfo.SellerFlag,
+		PayTime:         time.FormatTime(orderInfo.PayTime),
+		LogistBTypeCode: orderInfo.LogistBTypeCode,
+		LogistBillCode:  orderInfo.LogistBillCode,
+		BTypeCode:       orderInfo.BTypeCode,
+		Details:         toOrderSyncDetails(orderInfo.Details),
+		Accounts:        toOrderSyncAccounts(orderInfo.Accounts),
 	}
 	if nd != nil {
 		orderData.TransactionId = nd.GetTransactionID()

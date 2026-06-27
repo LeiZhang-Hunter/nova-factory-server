@@ -37,7 +37,7 @@ type LogConfig struct {
 
 func init() {
 	// go run /app/. --config=config/config.yaml
-	path := pflag.String("config", "D:\\code\\AAAA\\nova-factory-server\\config\\config2.yaml", "配置文件路径")
+	path := pflag.String("config", "/home/zhanglei/nova-factory-server/config.yaml", "配置文件路径")
 	pflag.Parse()
 	viper.SetConfigFile(*path)
 

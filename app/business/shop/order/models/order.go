@@ -1,7 +1,10 @@
 package models
 
 import (
+	"errors"
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/constant/commonStatus"
+	time2 "nova-factory-server/app/utils/time"
 	"time"
 )
 
@@ -117,6 +120,57 @@ type OrderSet struct {
 	SyncTime        string             `json:"sync_time"`
 	Details         []*OrderDetailSet  `json:"details"`
 	Accounts        []*OrderAccountSet `json:"accounts"`
+}
+
+// BuildOrderModel 将保存参数转换为订单主表模型，并完成时间字段解析。
+func BuildOrderModel(req *OrderSet) (*Order, error) {
+	payTime, err := time2.ParseTimeStrPtr(req.PayTime)
+	if err != nil {
+		return nil, errors.New("paytime时间格式错误，要求: 2006-01-02 15:04:05")
+	}
+	syncTime, err := time2.ParseTimeStrPtr(req.SyncTime)
+	if err != nil {
+		return nil, errors.New("syncTime时间格式错误，要求: 2006-01-02 15:04:05")
+	}
+	data := &Order{
+		Tid:                  req.Tid,
+		Weight:               req.Weight,
+		Size:                 req.Size,
+		BuyerNick:            req.BuyerNick,
+		BuyerMessage:         req.BuyerMessage,
+		SellerMemo:           req.SellerMemo,
+		Total:                req.Total,
+		Privilege:            req.Privilege,
+		PostFee:              req.PostFee,
+		ReceiverName:         req.ReceiverName,
+		ReceiverProvince:     req.ReceiverProvince,
+		ReceiverProvinceName: req.ReceiverProvinceName,
+		ReceiverCity:         req.ReceiverCity,
+		ReceiverCityName:     req.ReceiverCityName,
+		ReceiverDistrict:     req.ReceiverDistrict,
+		ReceiverDistrictName: req.ReceiverDistrictName,
+		ReceiverStreet:       req.ReceiverStreet,
+		ReceiverStreetName:   req.ReceiverStreetName,
+		ReceiverAddress:      req.ReceiverAddress,
+		ReceiverPhone:        req.ReceiverPhone,
+		ReceiverMobile:       req.ReceiverMobile,
+		ReceiverZip:          req.ReceiverZip,
+		Status:               req.Status,
+		Type:                 req.OrderType,
+		InvoiceName:          req.InvoiceName,
+		SellerFlag:           req.SellerFlag,
+		PayTime:              payTime,
+		LogistBTypeCode:      req.LogistBTypeCode,
+		LogistBillCode:       req.LogistBillCode,
+		BTypeCode:            req.BTypeCode,
+		BillCode:             req.BillCode,
+		SyncMessage:          req.SyncMessage,
+		SyncStatus:           req.SyncStatus,
+		SyncTime:             syncTime,
+		//DeptID:               baizeContext.GetDeptId(c),
+		State: commonStatus.NORMAL,
+	}
+	return data, nil
 }
 
 // OrderDetailSet ERP订单明细保存参数

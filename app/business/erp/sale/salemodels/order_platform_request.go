@@ -203,6 +203,17 @@ func (o *OrderSyncOrder) GetReceiverCity() string {
 func (o *OrderSyncOrder) GetReceiverDistrict() string {
 	return o.ReceiverDistrict
 }
+
+func (o *OrderSyncOrder) GetReceiverStateName() string {
+	return ""
+}
+func (o *OrderSyncOrder) GetReceiverCityName() string {
+	return ""
+}
+func (o *OrderSyncOrder) GetReceiverDistrictName() string {
+	return ""
+}
+
 func (o *OrderSyncOrder) GetReceiverAddress() string {
 	return o.ReceiverAddress
 }

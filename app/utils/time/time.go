@@ -187,3 +187,21 @@ func FormatTime(value *time.Time) string {
 	}
 	return value.Format("2006-01-02 15:04:05")
 }
+
+// parseOrderTime 解析必填的订单时间字段。
+func parseLocalTime(value string) (*time.Time, error) {
+	t, err := time.ParseInLocation("2006-01-02 15:04:05", value, time.Local)
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
+
+// ParseTimeStrPtr 解析可为空的订单时间字段。
+func ParseTimeStrPtr(value string) (*time.Time, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil, nil
+	}
+	return parseLocalTime(value)
+}
