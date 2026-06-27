@@ -108,31 +108,43 @@ func (o *OrderItem) GetUserId() uint64 {
 	return 0
 }
 
-func (o *OrderItem) GetOrderNo() string          { return o.OrderNo }
-func (o *OrderItem) GetWeight() float64          { return o.Weight }
-func (o *OrderItem) GetSize() float64            { return o.Size }
-func (o *OrderItem) GetBuyerNick() string        { return o.BuyerNick }
-func (o *OrderItem) GetBuyerMessage() string     { return o.BuyerMessage }
-func (o *OrderItem) GetSellerMemo() string       { return o.SellerMemo }
-func (o *OrderItem) GetTotalAmount() float64     { return o.TotalAmount }
-func (o *OrderItem) GetPrivilege() float64       { return o.Privilege }
-func (o *OrderItem) GetPostFee() float64         { return o.PostFee }
-func (o *OrderItem) GetReceiverName() string     { return o.ReceiverName }
+func (o *OrderItem) GetOrderNo() string      { return o.OrderNo }
+func (o *OrderItem) GetWeight() float64      { return o.Weight }
+func (o *OrderItem) GetSize() float64        { return o.Size }
+func (o *OrderItem) GetBuyerNick() string    { return o.BuyerNick }
+func (o *OrderItem) GetBuyerMessage() string { return o.BuyerMessage }
+func (o *OrderItem) GetSellerMemo() string   { return o.SellerMemo }
+func (o *OrderItem) GetTotalAmount() float64 { return o.TotalAmount }
+func (o *OrderItem) GetPrivilege() float64   { return o.Privilege }
+func (o *OrderItem) GetPostFee() float64     { return o.PostFee }
+func (o *OrderItem) GetReceiverName() string { return o.ReceiverName }
+
 func (o *OrderItem) GetReceiverState() string    { return o.ReceiverState }
 func (o *OrderItem) GetReceiverCity() string     { return o.ReceiverCity }
 func (o *OrderItem) GetReceiverDistrict() string { return o.ReceiverDistrict }
-func (o *OrderItem) GetReceiverAddress() string  { return o.ReceiverAddress }
-func (o *OrderItem) GetReceiverPhone() string    { return o.ReceiverPhone }
-func (o *OrderItem) GetReceiverMobile() string   { return o.ReceiverMobile }
-func (o *OrderItem) GetCreated() string          { return o.Created }
-func (o *OrderItem) GetType() string             { return o.Type }
-func (o *OrderItem) GetStatus() string           { return o.Status }
-func (o *OrderItem) GetInvoiceName() string      { return o.InvoiceName }
-func (o *OrderItem) GetSellerFlag() string       { return o.SellerFlag }
-func (o *OrderItem) GetPayTime() string          { return o.PayTime }
-func (o *OrderItem) GetLogIstBTypeCode() string  { return o.LogistBTypeCode }
-func (o *OrderItem) GetLogIstBillCode() string   { return o.LogistBillCode }
-func (o *OrderItem) GetBTypeCode() string        { return o.BTypeCode }
+
+func (o *OrderItem) GetReceiverStateName() string {
+	return ""
+}
+func (o *OrderItem) GetReceiverCityName() string {
+	return ""
+}
+func (o *OrderItem) GetReceiverDistrictName() string {
+	return ""
+}
+
+func (o *OrderItem) GetReceiverAddress() string { return o.ReceiverAddress }
+func (o *OrderItem) GetReceiverPhone() string   { return o.ReceiverPhone }
+func (o *OrderItem) GetReceiverMobile() string  { return o.ReceiverMobile }
+func (o *OrderItem) GetCreated() string         { return o.Created }
+func (o *OrderItem) GetType() string            { return o.Type }
+func (o *OrderItem) GetStatus() string          { return o.Status }
+func (o *OrderItem) GetInvoiceName() string     { return o.InvoiceName }
+func (o *OrderItem) GetSellerFlag() string      { return o.SellerFlag }
+func (o *OrderItem) GetPayTime() string         { return o.PayTime }
+func (o *OrderItem) GetLogIstBTypeCode() string { return o.LogistBTypeCode }
+func (o *OrderItem) GetLogIstBillCode() string  { return o.LogistBillCode }
+func (o *OrderItem) GetBTypeCode() string       { return o.BTypeCode }
 
 func (o *OrderItem) GetDetails() []event.GoodsDetail {
 	return nil

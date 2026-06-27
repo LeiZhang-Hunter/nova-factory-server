@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/order/callback"
-	orderDao "nova-factory-server/app/business/shop/order/dao"
 	models2 "nova-factory-server/app/business/shop/order/models"
+	service2 "nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/constant/order"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/datasource/objectFile"
@@ -29,20 +29,20 @@ import (
 
 // OrderNotify 微信支付回调控制器
 type OrderNotify struct {
-	service   service.IApiShopOrderService
-	configDao dao.IApiShopSysConfigDao
-	orderDao  orderDao.IOrderDao
-	db        *gorm.DB
-	cache     cache.Cache
+	service      service.IApiShopOrderService
+	configDao    dao.IApiShopSysConfigDao
+	orderService service2.IOrderService
+	db           *gorm.DB
+	cache        cache.Cache
 }
 
 // NewOrderNotify 创建微信支付回调控制器。
 func NewOrderNotify(service service.IApiShopOrderService, configDao dao.IApiShopSysConfigDao,
-	orderDao orderDao.IOrderDao, db *gorm.DB, cache cache.Cache) *OrderNotify {
+	orderService service2.IOrderService, db *gorm.DB, cache cache.Cache) *OrderNotify {
 	return &OrderNotify{service: service,
 		configDao: configDao, db: db,
-		orderDao: orderDao,
-		cache:    cache,
+		orderService: orderService,
+		cache:        cache,
 	}
 }
 
@@ -50,16 +50,6 @@ func NewOrderNotify(service service.IApiShopOrderService, configDao dao.IApiShop
 func (s *OrderNotify) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop")
 	group.Any("/order/notify", s.HandleWechatNotify)
-}
-
-var notifyConfigKeys = []string{
-	"wechat_mini_program_app_id",
-	"wechat_pay_mch_id",
-	"wechat_pay_api_v3_key",
-	"wechat_pay_serial_no",
-	"wechat_pay_platform_public_key_path",
-	"wechat_pay_platform_public_key_id",
-	"wechat_pay_private_key_path",
 }
 
 // HandleWechatNotify 微信支付异步回调。
@@ -157,7 +147,7 @@ func (s *OrderNotify) HandleWechatNotify(c *gin.Context) {
 	//m.WithCtx(c)
 	//m.WithDB(s.db)
 
-	info, err := s.orderDao.GetByTid(c, nd.OutTradeNo)
+	info, err := s.orderService.GetByTID(c, nd.OutTradeNo)
 	if err != nil {
 		zap.L().Error("获取订单失败", zap.Error(err), zap.String("tid", nd.OutTradeNo))
 		writeWechatNotifyFail(c, "获取订单失败", zap.Error(err), zap.String("tid", nd.OutTradeNo))

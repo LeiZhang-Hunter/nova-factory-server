@@ -37,6 +37,9 @@ func (o *OrderServiceImpl) fillOrderSyncRequestFromDB(c *gin.Context, req *model
 		if orderInfo == nil {
 			return fmt.Errorf("订单不存在: %s", tid)
 		}
+		if err := o.attachChildren(c, []*models.Order{orderInfo}); err != nil {
+			return err
+		}
 		orders = append(orders, models.ToOrderSyncOrder(orderInfo, nil))
 	}
 	if len(orders) == 0 {

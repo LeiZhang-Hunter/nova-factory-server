@@ -37,9 +37,7 @@ func (s *orderSyncer) SyncOrders(ctx context.Context, req event.OrderEvent) (res
 	if err != nil {
 		return nil, err
 	}
-	body := map[string]any{
-		"orders": req.GetOrders(),
-	}
+	body := toOrderSyncOrder(req)
 	respBytes, err := client.DoSignedPost(ctx, s.tokenURL, snapshot, token, "emall.order.synchronize", body)
 	if err != nil {
 		return nil, err

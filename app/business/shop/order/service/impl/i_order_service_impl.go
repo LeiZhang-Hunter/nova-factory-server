@@ -160,7 +160,67 @@ func (o *OrderServiceImpl) GetByID(c *gin.Context, id uint64) (*models.Order, er
 	if len(shipments) != 0 {
 		info.Shipments = shipments
 	}
+	if err := o.attachChildren(c, []*models.Order{info}); err != nil {
+		return nil, err
+	}
 	return info, nil
+}
+
+func (o *OrderServiceImpl) GetByTID(c *gin.Context, tid string) (*models.Order, error) {
+	info, err := o.orderDao.GetByTid(c, tid)
+	if err != nil {
+		return nil, err
+	}
+
+	if info == nil {
+		return nil, nil
+	}
+
+	if err := o.attachChildren(c, []*models.Order{info}); err != nil {
+		return nil, err
+	}
+	return info, nil
+}
+
+// attachChildren 为订单结果批量挂载明细与账户列表。
+func (o *OrderServiceImpl) attachChildren(c *gin.Context, orders []*models.Order) error {
+	if len(orders) == 0 {
+		return nil
+	}
+	orderIDs := make([]uint64, 0, len(orders))
+	for _, item := range orders {
+		if item == nil {
+			continue
+		}
+		orderIDs = append(orderIDs, item.ID)
+	}
+	if len(orderIDs) == 0 {
+		return nil
+	}
+	details, err := o.detailDao.ListByOrderIDs(c, orderIDs)
+	if err != nil {
+		return err
+	}
+	accounts, err := o.accountDao.ListByOrderIDs(c, orderIDs)
+	if err != nil {
+		return err
+	}
+	detailMap := make(map[uint64][]*models.OrderDetail)
+	for _, detail := range details {
+		detailMap[detail.OrderID] = append(detailMap[detail.OrderID], detail)
+	}
+	accountMap := make(map[uint64][]*models.OrderAccount)
+	for _, account := range accounts {
+		accountMap[account.OrderID] = append(accountMap[account.OrderID], account)
+	}
+	for _, item := range orders {
+		if item == nil {
+			continue
+		}
+		item.Details = detailMap[item.ID]
+		item.Accounts = accountMap[item.ID]
+	}
+	return nil
 }
 
 // List 分页查询 ERP 订单。
