@@ -4,4 +4,4 @@ import (
 	"github.com/google/wire"
 )
 
-var ServiceProviderSet = wire.NewSet(NewShopSysConfigService, NewLogisticsCompanyService, NewIntegrationConfigService)
+var ServiceProviderSet = wire.NewSet(NewShopSysConfigService, NewLogisticsCompanyService, NewIntegrationConfigService, NewShopLogisticsConfigService)
