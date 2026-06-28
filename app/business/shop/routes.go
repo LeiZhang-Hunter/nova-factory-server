@@ -126,6 +126,7 @@ func NewGinEngine(
 		userController.Cart.PrivateRoutes(adminGroup)
 		shopConfigController.WechatConfig.PrivateRoutes(adminGroup)
 		shopConfigController.Logistics.PrivateRoutes(adminGroup)
+		shopConfigController.ShopErpIntegrationConfig.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)
 		controller.Goods.PrivateRoutes(adminGroup)
 		controller.Sku.PrivateRoutes(adminGroup)

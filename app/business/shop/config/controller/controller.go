@@ -3,8 +3,9 @@ package shopcontroller
 import "github.com/google/wire"
 
 type Controller struct {
-	WechatConfig *WechatConfig
-	Logistics    *Logistics
+	WechatConfig             *WechatConfig
+	Logistics                *Logistics
+	ShopErpIntegrationConfig *ShopErpIntegrationConfig
 }
 
-var ProviderSet = wire.NewSet(NewWechatConfig, NewLogistics, wire.Struct(new(Controller), "*"))
+var ProviderSet = wire.NewSet(NewWechatConfig, NewLogistics, NewShopErpIntegrationConfig, wire.Struct(new(Controller), "*"))

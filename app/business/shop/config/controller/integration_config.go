@@ -1,10 +1,11 @@
-package settingcontroller
+package shopcontroller
 
 import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/erp/setting/settingmodels"
-	"nova-factory-server/app/business/erp/setting/settingservice"
+	"nova-factory-server/app/business/shop/config/models"
+	"nova-factory-server/app/business/shop/config/service"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -12,30 +13,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type IntegrationConfig struct {
-	service settingservice.IIntegrationConfigService
+type ShopErpIntegrationConfig struct {
+	service service.ShopErpIIntegrationConfigService
 	cache   cache.Cache
 	host    string
 }
 
-func NewIntegrationConfig(service settingservice.IIntegrationConfigService, cache cache.Cache) *IntegrationConfig {
+func NewShopErpIntegrationConfig(service service.ShopErpIIntegrationConfigService, cache cache.Cache) *ShopErpIntegrationConfig {
 	host := viper.GetString("host")
 
-	return &IntegrationConfig{
+	return &ShopErpIntegrationConfig{
 		service: service,
 		host:    host,
 		cache:   cache,
 	}
 }
 
-func (i *IntegrationConfig) PublicRoutes(router *gin.RouterGroup) {
-	group := router.Group("/erp/setting/integration-config")
+func (i *ShopErpIntegrationConfig) PublicRoutes(router *gin.RouterGroup) {
+	group := router.Group("/shop/erp/setting/integration-config")
 	group.GET("/oauth/callback", i.OAuthCallback)
 	return
 }
 
-func (i *IntegrationConfig) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/erp/setting/integration-config")
+func (i *ShopErpIntegrationConfig) PrivateRoutes(router *gin.RouterGroup) {
+	group := router.Group("/shop/erp/setting/integration-config")
 	group.GET("/list",
 		middlewares.HasPermission("erp:setting:integrationConfig:list"), i.List)
 	group.GET("/check-login-state",
@@ -56,8 +57,8 @@ func (i *IntegrationConfig) PrivateRoutes(router *gin.RouterGroup) {
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "查询成功"
 // @Router /erp/setting/integration-config/list [get]
-func (i *IntegrationConfig) List(c *gin.Context) {
-	req := new(settingmodels.IntegrationConfigQuery)
+func (i *ShopErpIntegrationConfig) List(c *gin.Context) {
+	req := new(models.ShopErpIntegrationConfigQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -76,12 +77,12 @@ func (i *IntegrationConfig) List(c *gin.Context) {
 // @Tags ERP/系统配置
 // @Security BearerAuth
 // @Accept application/json
-// @Param body body settingmodels.IntegrationConfigSet true "集成配置参数"
+// @Param body body models.IntegrationConfigSet true "集成配置参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "设置成功"
 // @Router /erp/setting/integration-config/set [post]
-func (i *IntegrationConfig) Set(c *gin.Context) {
-	req := new(settingmodels.IntegrationConfigSet)
+func (i *ShopErpIntegrationConfig) Set(c *gin.Context) {
+	req := new(models.ShopErpIntegrationConfigSet)
 	if err := c.ShouldBindJSON(req); err != nil {
 		zap.L().Error("param error", zap.Error(err))
 		baizeContext.ParameterError(c)
@@ -106,8 +107,8 @@ func (i *IntegrationConfig) Set(c *gin.Context) {
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "检查成功"
 // @Router /erp/setting/integration-config/check-login-state [get]
-func (i *IntegrationConfig) CheckLoginState(c *gin.Context) {
-	req := new(settingmodels.IntegrationConfigCheckLoginReq)
+func (i *ShopErpIntegrationConfig) CheckLoginState(c *gin.Context) {
+	req := new(models.ShopErpIntegrationConfigCheckLoginReq)
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -158,8 +159,8 @@ func (i *IntegrationConfig) CheckLoginState(c *gin.Context) {
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "接收成功"
 // @Router /erp/setting/integration-config/oauth/callback [get]
-func (i *IntegrationConfig) OAuthCallback(c *gin.Context) {
-	req := new(settingmodels.IntegrationOAuthCallbackReq)
+func (i *ShopErpIntegrationConfig) OAuthCallback(c *gin.Context) {
+	req := new(models.ShopErpIntegrationOAuthCallbackReq)
 	if err := c.ShouldBindQuery(req); err != nil {
 		baizeContext.ParameterError(c)
 		return
