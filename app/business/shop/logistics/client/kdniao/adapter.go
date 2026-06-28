@@ -1,13 +1,15 @@
 package kdniao
 
 import (
+	"encoding/json"
 	"errors"
-
 	"github.com/ttlv/kdniao"
 	"github.com/ttlv/kdniao/sdk"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/logistics/client/api"
 )
+
+const Name = "kdniao"
 
 // Adapter 快递鸟客户端适配器，实现 api.ExpressClient 接口
 type Adapter struct {
@@ -15,14 +17,21 @@ type Adapter struct {
 }
 
 // NewAdapter 从 Config 创建快递鸟适配器
-func NewAdapter(cfg *Config) (api.ExpressClient, error) {
-	if cfg == nil || cfg.EBusinessID == "" || cfg.AppKey == "" {
+func NewAdapter(apiConfig api.Config) (api.ExpressClient, error) {
+	var cfg *config
+	err := json.Unmarshal([]byte(apiConfig.GetData()), &cfg)
+	if err != nil {
+		zap.L().Error("json unmarshal failed", zap.String("config", apiConfig.GetData()), zap.Error(err))
+		return nil, err
+	}
+
+	if cfg == nil || cfg.Credentials.EBusinessID == "" || cfg.Credentials.AppKey == "" {
 		return &Adapter{}, errors.New("cfg is nil")
 	}
-	config := kdniao.NewKdniaoConfig(cfg.EBusinessID, cfg.AppKey)
+	kdniaoCfg := kdniao.NewKdniaoConfig(cfg.Credentials.EBusinessID, cfg.Credentials.AppKey)
 	logger := kdniao.NewKdniaoLogger()
 	return &Adapter{
-		api: sdk.NewExpressQuery(config, logger),
+		api: sdk.NewExpressQuery(kdniaoCfg, logger),
 	}, nil
 }
 
@@ -48,5 +57,5 @@ func (a *Adapter) Query(shipperCode, logisticCode string) (api.ExpressQueryResul
 		return &errorResult{reason: reason}, nil
 	}
 
-	return &queryResultWrapper{kdResp}, nil
+	return newQueryResultWrapper(&kdResp), nil
 }

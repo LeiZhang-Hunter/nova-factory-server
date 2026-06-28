@@ -23,7 +23,8 @@ type TrackingQueryResponse struct {
 	StateDesc   string               `json:"stateDesc"`   // 状态描述
 	IsSigned    bool                 `json:"isSigned"`    // 是否已签收
 	FromCache   bool                 `json:"fromCache"`   // 是否来自缓存
-	Traces      []*TrackingTraceNode `json:"traces"`      // 轨迹节点列表
+	StateName   string               `json:"stateName"`
+	Traces      []*TrackingTraceNode `json:"traces"` // 轨迹节点列表
 }
 
 // TrackingRecordSet 物流轨迹记录保存参数

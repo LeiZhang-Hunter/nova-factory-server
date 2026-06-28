@@ -13,4 +13,6 @@ type IShopLogisticsConfigDao interface {
 	GetByID(c *gin.Context, id int64) (*models.ShopLogisticsConfig, error)
 	GetByType(c *gin.Context, typ string) (*models.ShopLogisticsConfig, error)
 	List(c *gin.Context, req *models.ShopLogisticsConfigQuery) (*models.ShopLogisticsConfigListData, error)
+	// GetEnabled 读取启动配置
+	GetEnabled(c *gin.Context) (*models.ShopLogisticsConfig, error)
 }

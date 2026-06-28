@@ -7,7 +7,26 @@ import (
 
 // queryResultWrapper 将快递鸟响应包装为 api.ExpressQueryResult
 type queryResultWrapper struct {
-	resp kdniaoResp.ExpressQueryResponse
+	resp      kdniaoResp.ExpressQueryResponse
+	StateName string
+}
+
+var stateMap = map[string]string{
+	"0": "货物暂无轨迹信息",
+	"1": "快递员已上门揽收快递",
+	"2": "货物在途中运输",
+	"3": "快件被签收",
+	"4": "货物运输途中存在异常",
+	"5": "快递被转寄到新地址",
+}
+
+func newQueryResultWrapper(resp *kdniaoResp.ExpressQueryResponse) *queryResultWrapper {
+	q := &queryResultWrapper{resp: *resp}
+	stateName, ok := stateMap[resp.State]
+	if ok {
+		q.StateName = stateName
+	}
+	return q
 }
 
 func (w *queryResultWrapper) OrderCode() string      { return w.resp.OrderCode }
@@ -17,6 +36,7 @@ func (w *queryResultWrapper) Callback() string       { return w.resp.Callback }
 func (w *queryResultWrapper) Success() bool          { return w.resp.Success }
 func (w *queryResultWrapper) Reason() string         { return w.resp.Reason }
 func (w *queryResultWrapper) State() string          { return w.resp.State }
+func (w *queryResultWrapper) GetStateName() string   { return w.StateName }
 func (w *queryResultWrapper) StateEx() string        { return w.resp.StateEx }
 func (w *queryResultWrapper) Location() string       { return w.resp.Location }
 func (w *queryResultWrapper) Station() string        { return w.resp.Station }
@@ -66,3 +86,6 @@ func (e *errorResult) DeliveryMan() string         { return "" }
 func (e *errorResult) DeliveryManTel() string      { return "" }
 func (e *errorResult) NextCity() string            { return "" }
 func (e *errorResult) Traces() []api.ExpressTraces { return nil }
+func (e *errorResult) GetStateName() string {
+	return ""
+}

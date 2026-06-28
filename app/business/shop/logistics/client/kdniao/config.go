@@ -1,6 +1,9 @@
 package kdniao
 
-type Config struct {
-	EBusinessID string `mapstructure:"e_business_id"`
-	AppKey      string `mapstructure:"app_key"`
+type config struct {
+	SystemName  string `json:"systemName"`
+	Credentials struct {
+		EBusinessID string `json:"e_business_id"`
+		AppKey      string `json:"app_key"`
+	} `json:"credentials"`
 }

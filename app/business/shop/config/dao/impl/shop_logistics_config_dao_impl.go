@@ -136,3 +136,19 @@ func (d *ShopLogisticsConfigDaoImpl) List(c *gin.Context, req *models.ShopLogist
 		Total: total,
 	}, nil
 }
+
+func (i *ShopLogisticsConfigDaoImpl) GetEnabled(c *gin.Context) (*models.ShopLogisticsConfig, error) {
+	var item models.ShopLogisticsConfig
+	err := i.db.WithContext(c).Table(i.table).
+		Where("status = ?", true).
+		Where("state = ?", commonStatus.NORMAL).
+		Order("id DESC").
+		First(&item).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
+}

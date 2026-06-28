@@ -27,7 +27,7 @@ func (t *Tracking) PrivateRoutes(router *gin.RouterGroup) {
 
 // AppRoutes 注册小程序端路由
 func (t *Tracking) AppRoutes(router *gin.RouterGroup) {
-	group := router.Group("/app/shop/logistics/tracking")
+	group := router.Group("/api/v1/app/shop/logistics/tracking")
 	group.POST("/query", t.Query)
 }
 

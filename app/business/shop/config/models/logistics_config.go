@@ -1,6 +1,10 @@
 package models
 
-import "nova-factory-server/app/baize"
+import (
+	"nova-factory-server/app/baize"
+	"nova-factory-server/app/business/shop/logistics/client/api"
+	factory "nova-factory-server/app/business/shop/logistics/client/factory"
+)
 
 // ShopLogisticsConfig 物流配置
 type ShopLogisticsConfig struct {
@@ -11,6 +15,19 @@ type ShopLogisticsConfig struct {
 	DeptID int64  `json:"deptId" gorm:"dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"state"`
+}
+
+func (i *ShopLogisticsConfig) GetData() string {
+	return i.Data
+}
+
+// GetType 返回集成类型，实现 observer.ShopErpIntegrationConfig 接口
+func (i *ShopLogisticsConfig) GetType() string {
+	return i.Type
+}
+
+func (i *ShopLogisticsConfig) Service() (api.ExpressClient, error) {
+	return factory.GetRegistry().Create(i)
 }
 
 // ShopLogisticsConfigSet 物流配置新增修改参数

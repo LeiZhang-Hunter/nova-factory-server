@@ -25,4 +25,5 @@ type ExpressQueryResult interface {
 	DeliveryMan() string // 派件快递员
 	DeliveryManTel() string
 	NextCity() string
+	GetStateName() string
 }
