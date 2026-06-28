@@ -29,19 +29,19 @@ func NewShopErpIntegrationConfig(service service.ShopErpIIntegrationConfigServic
 }
 
 func (i *ShopErpIntegrationConfig) PublicRoutes(router *gin.RouterGroup) {
-	group := router.Group("/shop/erp/setting/integration-config")
+	group := router.Group("/shop/config/erp/integration-config")
 	group.GET("/oauth/callback", i.OAuthCallback)
 	return
 }
 
 func (i *ShopErpIntegrationConfig) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/shop/erp/setting/integration-config")
+	group := router.Group("/shop/config/erp/integration-config")
 	group.GET("/list",
-		middlewares.HasPermission("erp:setting:integrationConfig:list"), i.List)
+		middlewares.HasPermission("shop:config:erp:integrationConfig:list"), i.List)
 	group.GET("/check-login-state",
-		middlewares.HasPermission("erp:setting:integrationConfig:checkLoginState"), i.CheckLoginState)
+		middlewares.HasPermission("shop:config:erp:integrationConfig:checkLoginState"), i.CheckLoginState)
 	group.POST("/set",
-		middlewares.HasPermission("erp:setting:integrationConfig:set"), i.Set)
+		middlewares.HasPermission("shop:config:erp:integrationConfig:set"), i.Set)
 }
 
 // List 集成配置列表
