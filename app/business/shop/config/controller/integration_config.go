@@ -3,7 +3,6 @@ package shopcontroller
 import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	"nova-factory-server/app/business/erp/setting/settingmodels"
 	"nova-factory-server/app/business/shop/config/models"
 	"nova-factory-server/app/business/shop/config/service"
 	"nova-factory-server/app/datasource/cache"
@@ -56,7 +55,7 @@ func (i *ShopErpIntegrationConfig) PrivateRoutes(router *gin.RouterGroup) {
 // @Param size query int false "每页条数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "查询成功"
-// @Router /erp/setting/integration-config/list [get]
+// @Router /shop/erp/setting/integration-config/list [get]
 func (i *ShopErpIntegrationConfig) List(c *gin.Context) {
 	req := new(models.ShopErpIntegrationConfigQuery)
 	if err := c.ShouldBindQuery(req); err != nil {
@@ -77,10 +76,10 @@ func (i *ShopErpIntegrationConfig) List(c *gin.Context) {
 // @Tags ERP/系统配置
 // @Security BearerAuth
 // @Accept application/json
-// @Param body body models.IntegrationConfigSet true "集成配置参数"
+// @Param body body models.ShopErpIntegrationConfigSet true "集成配置参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "设置成功"
-// @Router /erp/setting/integration-config/set [post]
+// @Router /shop/erp/setting/integration-config/set [post]
 func (i *ShopErpIntegrationConfig) Set(c *gin.Context) {
 	req := new(models.ShopErpIntegrationConfigSet)
 	if err := c.ShouldBindJSON(req); err != nil {
@@ -106,7 +105,7 @@ func (i *ShopErpIntegrationConfig) Set(c *gin.Context) {
 // @Param redirectUrl query string false "回调地址，优先级高于配置"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "检查成功"
-// @Router /erp/setting/integration-config/check-login-state [get]
+// @Router /shop/erp/setting/integration-config/check-login-state [get]
 func (i *ShopErpIntegrationConfig) CheckLoginState(c *gin.Context) {
 	req := new(models.ShopErpIntegrationConfigCheckLoginReq)
 	if err := c.ShouldBindQuery(req); err != nil {
@@ -154,11 +153,10 @@ func (i *ShopErpIntegrationConfig) CheckLoginState(c *gin.Context) {
 // @Summary 集成OAuth回调
 // @Description 接收管家婆OAuth回调的code和state
 // @Tags ERP/系统配置
-// @Param code query string true "授权码"
-// @Param state query string false "透传字段"
+// @Param object query models.ShopErpIntegrationOAuthCallbackReq true "OAuth回调参数"
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "接收成功"
-// @Router /erp/setting/integration-config/oauth/callback [get]
+// @Router /shop/erp/setting/integration-config/oauth/callback [get]
 func (i *ShopErpIntegrationConfig) OAuthCallback(c *gin.Context) {
 	req := new(models.ShopErpIntegrationOAuthCallbackReq)
 	if err := c.ShouldBindQuery(req); err != nil {
@@ -202,7 +200,7 @@ func (i *ShopErpIntegrationConfig) OAuthCallback(c *gin.Context) {
 		baizeContext.Waring(c, cacheErr.Error())
 		return
 	}
-	baizeContext.SuccessData(c, &settingmodels.IntegrationOAuthCallbackData{
+	baizeContext.SuccessData(c, &models.ShopErpIntegrationOAuthCallbackData{
 		Code:       req.Code,
 		State:      req.State,
 		Token:      tokenData.GetToken(),
