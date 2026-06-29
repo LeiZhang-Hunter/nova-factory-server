@@ -20,6 +20,26 @@ var stateMap = map[string]string{
 	"5": "快递被转寄到新地址",
 }
 
+const signedState = "3"
+
+// extractSignedTime 提取签收时间（取最后一条轨迹的时间）
+func extractSignedTime(result api.ExpressQueryResult) string {
+	traces := result.Traces()
+	if result.State() != signedState || len(traces) == 0 {
+		return ""
+	}
+	return traces[len(traces)-1].AcceptTime()
+}
+
+// extractOriginInfo 提取始发地（取第一条轨迹所在城市）
+func extractOriginInfo(result api.ExpressQueryResult) string {
+	traces := result.Traces()
+	if len(traces) > 0 {
+		return traces[0].Location()
+	}
+	return ""
+}
+
 func newQueryResultWrapper(resp *kdniaoResp.ExpressQueryResponse) *queryResultWrapper {
 	q := &queryResultWrapper{resp: *resp}
 	stateName, ok := stateMap[resp.State]
@@ -45,6 +65,12 @@ func (w *queryResultWrapper) StationAdd() string     { return w.resp.StationAdd 
 func (w *queryResultWrapper) DeliveryMan() string    { return w.resp.DeliveryMan }
 func (w *queryResultWrapper) DeliveryManTel() string { return w.resp.DeliveryManTel }
 func (w *queryResultWrapper) NextCity() string       { return w.resp.NextCity }
+func (w *queryResultWrapper) OriginInfo() string {
+	return extractOriginInfo(w)
+}
+func (w *queryResultWrapper) SignedTime() string {
+	return extractSignedTime(w)
+}
 
 func (w *queryResultWrapper) Traces() []api.ExpressTraces {
 	traces := make([]api.ExpressTraces, 0, len(w.resp.Traces))
@@ -87,5 +113,11 @@ func (e *errorResult) DeliveryManTel() string      { return "" }
 func (e *errorResult) NextCity() string            { return "" }
 func (e *errorResult) Traces() []api.ExpressTraces { return nil }
 func (e *errorResult) GetStateName() string {
+	return ""
+}
+func (e *errorResult) OriginInfo() string {
+	return ""
+}
+func (e *errorResult) SignedTime() string {
 	return ""
 }

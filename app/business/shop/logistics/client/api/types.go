@@ -26,4 +26,6 @@ type ExpressQueryResult interface {
 	DeliveryManTel() string
 	NextCity() string
 	GetStateName() string
+	OriginInfo() string
+	SignedTime() string
 }

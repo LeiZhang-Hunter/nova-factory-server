@@ -38,7 +38,7 @@ func NewAdapter(apiConfig api.Config) (api.ExpressClient, error) {
 // Query 即时查询物流轨迹，返回统一模型
 func (a *Adapter) Query(shipperCode, logisticCode string) (api.ExpressQueryResult, error) {
 	if a.api == (sdk.ApiExpressQuery{}) {
-		return &errorResult{reason: "快递鸟未配置，请在 config.yaml 中设置 kdniao.e_business_id 和 kdniao.app_key"}, nil
+		return &errorResult{reason: "快递鸟未配置，请设置 kdniao.e_business_id 和 kdniao.app_key"}, nil
 	}
 
 	req := a.api.GetRequest(logisticCode)

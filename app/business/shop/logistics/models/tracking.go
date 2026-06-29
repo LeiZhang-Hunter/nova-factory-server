@@ -1,5 +1,7 @@
 package models
 
+import "nova-factory-server/app/business/shop/logistics/client/api"
+
 // TrackingQueryRequest 即时查询物流轨迹请求
 type TrackingQueryRequest struct {
 	Outsid      string `json:"outsid" binding:"required"`      // 物流单号
@@ -26,6 +28,30 @@ type TrackingQueryResponse struct {
 	Location    string               `json:"location"`    // 所在城市
 	StateName   string               `json:"stateName"`
 	Traces      []*TrackingTraceNode `json:"traces"` // 轨迹节点列表
+}
+
+func ConvertResult(result api.ExpressQueryResult) *TrackingQueryResponse {
+	traceList := result.Traces()
+	traces := make([]*TrackingTraceNode, 0, len(traceList))
+	for _, t := range traceList {
+		traces = append(traces, &TrackingTraceNode{
+			AcceptTime:    t.AcceptTime(),
+			AcceptStation: t.AcceptStation(),
+			Location:      t.Location(),
+			Action:        t.Action(),
+		})
+	}
+
+	state := result.State()
+	return &TrackingQueryResponse{
+		Outsid:      result.LogisticCode(),
+		CompanyCode: result.ShipperCode(),
+		State:       state,
+		StateDesc:   result.GetStateName(),
+		Traces:      traces,
+		Location:    result.Location(),
+		StateName:   result.GetStateName(),
+	}
 }
 
 // TrackingRecordSet 物流轨迹记录保存参数

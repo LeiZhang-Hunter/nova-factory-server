@@ -7,7 +7,6 @@ import (
 	"time"
 
 	configDao "nova-factory-server/app/business/shop/config/dao"
-	"nova-factory-server/app/business/shop/logistics/client/api"
 	"nova-factory-server/app/business/shop/logistics/dao"
 	"nova-factory-server/app/business/shop/logistics/models"
 	"nova-factory-server/app/business/shop/logistics/service"
@@ -21,15 +20,6 @@ const (
 	// TrackingCacheTTL 物流轨迹短期缓存时间（10分钟）
 	TrackingCacheTTL = 10 * time.Minute
 )
-
-// stateDescMap 统一状态码 → 中文描述
-var stateDescMap = map[string]string{
-	"0": "暂无轨迹",
-	"1": "已揽收",
-	"2": "在途中",
-	"3": "已签收",
-	"4": "问题件",
-}
 
 // TrackingServiceImpl 物流轨迹查询服务实现
 type TrackingServiceImpl struct {
@@ -108,7 +98,7 @@ func (s *TrackingServiceImpl) Query(c *gin.Context, outsid, companyCode string) 
 	}
 
 	// 5. 统一模型 → 响应 DTO
-	resp := s.convertResult(result)
+	resp := models.ConvertResult(result)
 	resp.FromCache = false
 
 	// 6. 缓存策略
@@ -120,8 +110,8 @@ func (s *TrackingServiceImpl) Query(c *gin.Context, outsid, companyCode string) 
 			Outsid:      outsid,
 			CompanyCode: companyCode,
 			TraceJSON:   respStr,
-			SignedTime:  s.extractSignedTime(result),
-			OriginInfo:  s.extractOriginInfo(result),
+			SignedTime:  result.SignedTime(),
+			OriginInfo:  result.OriginInfo(),
 			DestInfo:    result.Location(),
 		})
 	} else {
@@ -130,49 +120,4 @@ func (s *TrackingServiceImpl) Query(c *gin.Context, outsid, companyCode string) 
 	}
 
 	return resp, nil
-}
-
-func (s *TrackingServiceImpl) convertResult(result api.ExpressQueryResult) *models.TrackingQueryResponse {
-	traceList := result.Traces()
-	traces := make([]*models.TrackingTraceNode, 0, len(traceList))
-	for _, t := range traceList {
-		traces = append(traces, &models.TrackingTraceNode{
-			AcceptTime:    t.AcceptTime(),
-			AcceptStation: t.AcceptStation(),
-			Location:      t.Location(),
-			Action:        t.Action(),
-		})
-	}
-
-	state := result.State()
-	return &models.TrackingQueryResponse{
-		Outsid:      result.LogisticCode(),
-		CompanyCode: result.ShipperCode(),
-		State:       state,
-		StateDesc:   stateDescMap[state],
-		IsSigned:    state == SignedState,
-		Traces:      traces,
-		Location:    result.Location(),
-		StateName:   result.GetStateName(),
-	}
-}
-
-const SignedState = "3"
-
-// extractSignedTime 提取签收时间（取最后一条轨迹的时间）
-func (s *TrackingServiceImpl) extractSignedTime(result api.ExpressQueryResult) string {
-	traces := result.Traces()
-	if result.State() != SignedState || len(traces) == 0 {
-		return ""
-	}
-	return traces[len(traces)-1].AcceptTime()
-}
-
-// extractOriginInfo 提取始发地（取第一条轨迹所在城市）
-func (s *TrackingServiceImpl) extractOriginInfo(result api.ExpressQueryResult) string {
-	traces := result.Traces()
-	if len(traces) > 0 {
-		return traces[0].Location()
-	}
-	return ""
 }
