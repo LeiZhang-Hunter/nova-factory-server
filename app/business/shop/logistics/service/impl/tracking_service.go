@@ -67,13 +67,13 @@ func (s *TrackingServiceImpl) Query(c *gin.Context, outsid, companyCode string) 
 
 	// 2. 查 Redis 短期缓存
 	cacheKey := redisk.MakeLogisticsTrackingCacheKey(outsid, companyCode)
-	//if cached, err := s.cache.Get(c, cacheKey); err == nil && cached != "" {
-	//	var resp models.TrackingQueryResponse
-	//	if err := json.Unmarshal([]byte(cached), &resp); err == nil {
-	//		resp.FromCache = true
-	//		return &resp, nil
-	//	}
-	//}
+	if cached, err := s.cache.Get(c, cacheKey); err == nil && cached != "" {
+		var resp models.TrackingQueryResponse
+		if err := json.Unmarshal([]byte(cached), &resp); err == nil {
+			resp.FromCache = true
+			return &resp, nil
+		}
+	}
 
 	shopLogisticsCfg, err := s.shopLogisticsConfigDao.GetEnabled(c)
 	if err != nil {
@@ -108,7 +108,7 @@ func (s *TrackingServiceImpl) Query(c *gin.Context, outsid, companyCode string) 
 	}
 
 	// 5. 统一模型 → 响应 DTO
-	resp := s.convertResult(outsid, companyCode, result)
+	resp := s.convertResult(result)
 	resp.FromCache = false
 
 	// 6. 缓存策略
@@ -132,7 +132,7 @@ func (s *TrackingServiceImpl) Query(c *gin.Context, outsid, companyCode string) 
 	return resp, nil
 }
 
-func (s *TrackingServiceImpl) convertResult(outsid, companyCode string, result api.ExpressQueryResult) *models.TrackingQueryResponse {
+func (s *TrackingServiceImpl) convertResult(result api.ExpressQueryResult) *models.TrackingQueryResponse {
 	traceList := result.Traces()
 	traces := make([]*models.TrackingTraceNode, 0, len(traceList))
 	for _, t := range traceList {
@@ -146,12 +146,13 @@ func (s *TrackingServiceImpl) convertResult(outsid, companyCode string, result a
 
 	state := result.State()
 	return &models.TrackingQueryResponse{
-		Outsid:      outsid,
-		CompanyCode: companyCode,
+		Outsid:      result.LogisticCode(),
+		CompanyCode: result.ShipperCode(),
 		State:       state,
 		StateDesc:   stateDescMap[state],
 		IsSigned:    state == SignedState,
 		Traces:      traces,
+		Location:    result.Location(),
 		StateName:   result.GetStateName(),
 	}
 }
