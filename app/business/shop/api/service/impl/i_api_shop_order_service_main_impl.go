@@ -266,17 +266,6 @@ func (s *IApiShopOrderServiceImpl) Create(c *gin.Context, userID int64, req *api
 	}
 	defer s.cache.Del(context.Background(), lockKey)
 
-	if existingOrder, err := s.apiOrderDao.GetByTid(c, req.OrderKey); err != nil {
-		return nil, errors.New("读取订单信息失败")
-	} else if existingOrder != nil {
-		if !s.isOrderOwnedByUser(existingOrder, shopUser) {
-			return nil, errors.New("无权操作该订单")
-		}
-		if err := s.ensureExistingOrderCreated(existingOrder); err != nil {
-			return nil, err
-		}
-		return existingOrder, nil
-	}
 	// 读取预订单缓存
 	cacheData, err := s.getOrderCache(c, req.OrderKey)
 	if err != nil {
@@ -897,15 +886,15 @@ func (s *IApiShopOrderServiceImpl) ensureExistingOrderCreated(order *shopordermo
 	if order == nil {
 		return errors.New("订单不存在")
 	}
-	if strings.TrimSpace(order.Status) == orderConstant.ERPStatusTradeClosed {
-		return errors.New("订单同步管家婆失败，请重新下单")
-	}
-	if order.SyncStatus == shopConstant.OrderSyncStatusFailed {
-		return errors.New("订单同步管家婆失败，请重新下单")
-	}
-	if order.SyncStatus != shopConstant.OrderSyncStatusSuccess {
-		return errors.New("订单尚未同步管家婆，请稍后重试")
-	}
+	//if strings.TrimSpace(order.Status) == orderConstant.ERPStatusTradeClosed {
+	//	return errors.New("订单同步管家婆失败，请重新下单")
+	//}
+	//if order.SyncStatus == shopConstant.OrderSyncStatusFailed {
+	//	return errors.New("订单同步管家婆失败，请重新下单")
+	//}
+	//if order.SyncStatus != shopConstant.OrderSyncStatusSuccess {
+	//	return errors.New("订单尚未同步管家婆，请稍后重试")
+	//}
 	return nil
 }
 

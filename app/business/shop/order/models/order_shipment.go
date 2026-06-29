@@ -17,7 +17,8 @@ type OrderShipment struct {
 	OID         string  `json:"oid" gorm:"column:oid"`
 	Qty         float64 `json:"qty" gorm:"column:qty"`
 	baize.BaseEntity
-	State int32 `json:"state" gorm:"column:state"`
+	State       int32  `json:"state" gorm:"column:state"`
+	CompanyName string `json:"companyName" gorm:"-"`
 }
 
 // OrderShipmentSet 订单发货物流记录保存参数。

@@ -14,4 +14,5 @@ type ILogisticsCompanyDao interface {
 	GetByCode(c *gin.Context, code string) (*models.LogisticsCompany, error)
 	GetByName(c *gin.Context, name string) (*models.LogisticsCompany, error)
 	List(c *gin.Context, req *models.LogisticsCompanyQuery) (*models.LogisticsCompanyListData, error)
+	ListByCodes(c *gin.Context, codes []string) ([]*models.LogisticsCompany, error)
 }

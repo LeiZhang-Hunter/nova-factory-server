@@ -12,20 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type integrationLoginPayload struct {
-	Type       string `json:"type"`
-	State      string `json:"state"`
-	Code       string `json:"code"`
-	Token      string `json:"token"`
-	ExpireDate string `json:"expireDate"`
-	IssueDate  string `json:"issueDate"`
-	AppKey     string `json:"appKey"`
-	AppSecret  string `json:"appSecret"`
-	ApiCode    int64  `json:"apiCode"`
-	Message    string `json:"message"`
-	UpdatedAt  string `json:"updatedAt"`
-}
-
 type IntegrationConfig struct {
 	service settingservice.IIntegrationConfigService
 	cache   cache.Cache

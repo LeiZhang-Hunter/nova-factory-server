@@ -3,6 +3,7 @@ package middlewares
 import (
 	"bytes"
 	"encoding/json"
+	"go.uber.org/zap"
 	"io"
 	"nova-factory-server/app/business/admin/monitor/monitormodels"
 	"nova-factory-server/app/constant/sessionStatus"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 type BusinessType string

@@ -56,6 +56,7 @@ func (l *LogisticsCompanyDaoImpl) Create(c *gin.Context, req *models.LogisticsCo
 		Remark:       strings.TrimSpace(req.Remark),
 		Sort:         req.Sort,
 		Status:       req.Status,
+		ThirdParty:   strings.TrimSpace(req.ThirdParty),
 		DeptID:       baizeContext.GetDeptId(c),
 		State:        commonStatus.NORMAL,
 	}
@@ -93,12 +94,13 @@ func (l *LogisticsCompanyDaoImpl) Update(c *gin.Context, req *models.LogisticsCo
 		Remark:       strings.TrimSpace(req.Remark),
 		Sort:         req.Sort,
 		Status:       req.Status,
+		ThirdParty:   strings.TrimSpace(req.ThirdParty),
 	}
 	model.SetUpdateBy(baizeContext.GetUserId(c))
 	if err := l.db.WithContext(c).Table(l.table).
 		Where("id = ?", req.ID).
 		Where("state = 0").
-		Select("code", "name", "short_name", "contact_name", "contact_phone", "address", "website", "remark", "sort", "status", "update_by", "update_time").
+		Select("code", "name", "short_name", "contact_name", "contact_phone", "address", "website", "remark", "sort", "status", "third_party", "update_by", "update_time").
 		Updates(model).Error; err != nil {
 		return nil, err
 	}
@@ -158,6 +160,21 @@ func (l *LogisticsCompanyDaoImpl) GetByName(c *gin.Context, name string) (*model
 		return nil, err
 	}
 	return &item, nil
+}
+
+// ListByCodes 根据编码批量查询 ERP 物流公司记录。
+func (l *LogisticsCompanyDaoImpl) ListByCodes(c *gin.Context, codes []string) ([]*models.LogisticsCompany, error) {
+	if len(codes) == 0 {
+		return []*models.LogisticsCompany{}, nil
+	}
+	rows := make([]*models.LogisticsCompany, 0)
+	if err := l.db.WithContext(c).Table(l.table).
+		Where("code IN ?", codes).
+		Where("state = 0").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
 }
 
 // List 分页查询 ERP 物流公司记录。

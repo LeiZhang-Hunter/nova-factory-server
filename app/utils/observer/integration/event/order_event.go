@@ -81,10 +81,13 @@ type OrderData interface {
 	GetReceiverName() string
 	// GetReceiverState 收货省份
 	GetReceiverState() string
+	GetReceiverStateName() string
 	// GetReceiverCity 收货城市
 	GetReceiverCity() string
+	GetReceiverCityName() string
 	// GetReceiverDistrict 收货区/县
 	GetReceiverDistrict() string
+	GetReceiverDistrictName() string
 	// GetReceiverAddress 收货详细地址
 	GetReceiverAddress() string
 	// GetReceiverPhone 收货人座机号码

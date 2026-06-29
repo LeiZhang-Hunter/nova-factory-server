@@ -19,6 +19,7 @@ import (
 	shopconfigController "nova-factory-server/app/business/shop/config/controller"
 	shopFinanceController "nova-factory-server/app/business/shop/finance/controller"
 	homeController "nova-factory-server/app/business/shop/home/controller"
+	logisticsController "nova-factory-server/app/business/shop/logistics/controller"
 	shopobserver "nova-factory-server/app/business/shop/observer"
 	shopOrderController "nova-factory-server/app/business/shop/order/controller"
 	shopOrderService "nova-factory-server/app/business/shop/order/service"
@@ -54,6 +55,7 @@ func NewGinEngine(
 	orderTimeoutService shopOrderService.IOrderTimeoutService,
 	shopObserver *shopobserver.ShopObserver,
 	shopFinance *shopFinanceController.Controller,
+	logisticsCtrl *logisticsController.Controller,
 ) *Shop {
 	group := app.Engine.Group("")
 
@@ -98,6 +100,8 @@ func NewGinEngine(
 		apiActivityController.Seckill.PrivateRoutes(appGroup)
 		apiActivityController.Combination.PrivateRoutes(appGroup)
 		apiActivityController.Pink.PrivateRoutes(appGroup)
+		// 小程序端物流查询
+		logisticsCtrl.Tracking.AppRoutes(appGroup)
 	}
 
 	// WebSocket 路由组 — 握手阶段即要求 Bearer 鉴权，失败时返回标准 HTTP 状态码
@@ -122,6 +126,8 @@ func NewGinEngine(
 		userController.Cart.PrivateRoutes(adminGroup)
 		shopConfigController.WechatConfig.PrivateRoutes(adminGroup)
 		shopConfigController.Logistics.PrivateRoutes(adminGroup)
+		shopConfigController.ShopErpIntegrationConfig.PrivateRoutes(adminGroup)
+		shopConfigController.LogisticsConfig.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)
 		controller.Goods.PrivateRoutes(adminGroup)
 		controller.Sku.PrivateRoutes(adminGroup)
@@ -129,6 +135,7 @@ func NewGinEngine(
 		userController.User.PrivateRoutes(adminGroup)
 		shopOrderController.Order.PrivateRoutes(adminGroup)
 		shopFinance.Account.PrivateRoutes(adminGroup)
+		logisticsCtrl.Tracking.PrivateRoutes(adminGroup)
 	}
 
 	// 加载MCP
