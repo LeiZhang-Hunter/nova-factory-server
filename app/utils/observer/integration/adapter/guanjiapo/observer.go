@@ -62,6 +62,11 @@ func (o *SyncObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
 	return nil
 }
 
+// OnAfterSaleOrderChanged 售后单变更回调
+func (o *SyncObserver) OnAfterSaleOrderChanged(event event.ZAfterSaleOrderSyncReqEvent) error {
+	return nil
+}
+
 // OnOrderStatusChange 订单发货变化
 func (o *SyncObserver) OnOrderStatusChange(sendEvent event.ZOrderStatusSyncReqEvent) error {
 	return nil

@@ -89,6 +89,11 @@ type OrderStatistics struct {
 	Aftersale      int64 `json:"aftersale"`      // 售后/退款
 }
 
+// OrderPayReq 支付请求参数
+type OrderPayReq struct {
+	PayChannel int `json:"payChannel"` // 支付通道：0=使用订单存储通道 1=微信 2=支付宝
+}
+
 // OrderPayResp 支付响应（微信小程序调起支付参数）
 type OrderPayResp struct {
 	AppId     string `json:"appId"`

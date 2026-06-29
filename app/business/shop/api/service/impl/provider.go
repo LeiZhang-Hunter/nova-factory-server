@@ -6,4 +6,5 @@ var ProviderSet = wire.NewSet(NewIApiShopCartServiceImpl, NewIApiShopWechatAuthS
 	NewIApiShopAuthServiceImpl, NewIApiShopAddressServiceImpl, NewIApiShopOrderServiceImpl, NewIApiShopGoodsServiceImpl,
 	NewIApiShopFavoriteServiceImpl, NewIApiShopSeckillServiceImpl, NewIApiShopCombinationServiceImpl,
 	NewIApiShopPinkServiceImpl, NewIApiShopASRServiceImpl, NewIApiShopVoiceServiceImpl,
-	NewIApiShopCompanyInfoServiceImpl, NewShopOrderSyncService)
+	NewIApiShopCompanyInfoServiceImpl, NewShopOrderSyncService,
+	NewIApiShopRefundService)

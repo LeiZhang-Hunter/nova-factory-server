@@ -53,6 +53,36 @@ type syncOrder struct {
 	Details          []*orderDetail  `json:"details"`
 	Accounts         []*orderAccount `json:"accounts"`
 }
+type syncAfterSaleOrders struct {
+	Rtid           string                       `json:"rtid"`
+	Tid            string                       `json:"tid"`
+	Logistbillcode string                       `json:"logistbillcode"`
+	Postfee        float64                      `json:"postfee"`
+	Total          float64                      `json:"total"`
+	Privilege      float64                      `json:"privilege"`
+	Created        string                       `json:"created"`
+	Aftsaletype    string                       `json:"aftsaletype"`
+	Reasoncode     string                       `json:"reasoncode"`
+	Aftsaleremark  string                       `json:"aftsaleremark"`
+	Details        []syncAfterSaleOrdersDetail  `json:"details"`
+	Exdetails      []syncAfterSaleOrderExdetail `json:"exdetails"`
+}
+type syncAfterSaleOrdersDetail struct {
+	Oid            string  `json:"oid"`
+	Backqty        float64 `json:"backqty"`
+	Backtotal      float64 `json:"backtotal"`
+	Outeriid       string  `json:"outeriid"`
+	Eshopgoodsname string  `json:"eshopgoodsname"`
+	Eshopskuname   string  `json:"eshopskuname"`
+}
+type syncAfterSaleOrderExdetail struct {
+	Oid            string  `json:"oid"`
+	Exchangeqty    float64 `json:"exchangeqty"`
+	Backtotal      float64 `json:"backtotal"`
+	Outeriid       string  `json:"outeriid"`
+	Eshopgoodsname string  `json:"eshopgoodsname"`
+	Eshopskuname   string  `json:"eshopskuname"`
+}
 
 // syncOrder 同步订单
 type syncOrderList struct {
@@ -142,6 +172,54 @@ func toOrderSyncAccounts(accounts []event.Account) []*orderAccount {
 		result = append(result, &orderAccount{
 			FinanceCode: account.GetFinanceCode(),
 			Total:       account.GetTotal(),
+		})
+	}
+	return result
+}
+
+func toSyncAfterSaleOrders(reqData event.ZAfterSaleOrderSyncReqDataEvent) []syncAfterSaleOrders {
+	result := make([]syncAfterSaleOrders, 0)
+	for _, v := range *reqData.GetOrders() {
+		syncAfterSaleOrderExdetails := make([]syncAfterSaleOrderExdetail, 0)
+		if v.GetExDetails() != nil {
+			for _, dv := range *v.GetExDetails() {
+				syncAfterSaleOrderExdetails = append(syncAfterSaleOrderExdetails, syncAfterSaleOrderExdetail{
+					Oid:            dv.GetOid(),
+					Exchangeqty:    dv.GetExchangeQty(),
+					Backtotal:      dv.GetBackTotal(),
+					Outeriid:       dv.GetOuterIid(),
+					Eshopgoodsname: dv.GetEshopGoodsName(),
+					Eshopskuname:   dv.GetEshopSkuName(),
+				})
+			}
+		}
+		syncAfterSaleOrdersDetails := make([]syncAfterSaleOrdersDetail, 0)
+		if v.GetDetails() != nil {
+			for _, dv := range *v.GetDetails() {
+				syncAfterSaleOrdersDetails = append(syncAfterSaleOrdersDetails, syncAfterSaleOrdersDetail{
+					Oid:            dv.GetOid(),
+					Backqty:        dv.GetBackQty(),
+					Backtotal:      dv.GetBackTotal(),
+					Outeriid:       dv.GetOuterIid(),
+					Eshopgoodsname: dv.GetEshopGoodsName(),
+					Eshopskuname:   dv.GetEshopSkuName(),
+				})
+			}
+		}
+
+		result = append(result, syncAfterSaleOrders{
+			Rtid:           v.GetRtid(),
+			Tid:            v.GetTid(),
+			Logistbillcode: v.GetLogistBillCode(),
+			Postfee:        v.GetPostFee(),
+			Total:          v.GetTotal(),
+			Privilege:      v.GetPrivilege(),
+			Created:        v.GetCreated(),
+			Aftsaletype:    v.GetAftSaleType(),
+			Reasoncode:     v.GetReasonCode(),
+			Aftsaleremark:  v.GetAftSaleRemark(),
+			Details:        syncAfterSaleOrdersDetails,
+			Exdetails:      syncAfterSaleOrderExdetails,
 		})
 	}
 	return result

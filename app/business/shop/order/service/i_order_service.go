@@ -30,4 +30,7 @@ type IOrderService interface {
 	SyncOrderSend(event event.OrderSendEvent) error
 
 	GetByTID(c *gin.Context, tid string) (*models.Order, error)
+
+	// SyncAfterSaleOrder 同步售后单事件至管家婆。
+	SyncAfterSaleOrder(event event.ZAfterSaleOrderSyncReqEvent) error
 }

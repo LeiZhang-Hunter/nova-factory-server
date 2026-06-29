@@ -1,21 +1,24 @@
 package order
 
 import (
+	"net/http"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // Order 订单控制器
 type Order struct {
-	service service.IApiShopOrderService
+	service            service.IApiShopOrderService
+	orderRefundService service.IApiShopOrderRefundService
 }
 
 // NewOrder 创建订单控制器
-func NewOrder(service service.IApiShopOrderService) *Order {
-	return &Order{service: service}
+func NewOrder(service service.IApiShopOrderService, orderRefundService service.IApiShopOrderRefundService) *Order {
+	return &Order{service: service, orderRefundService: orderRefundService}
 }
 
 // PrivateRoutes 注册商城订单路由（商城模块只检查登录，不检查权限）
@@ -29,6 +32,8 @@ func (s *Order) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/pay/:id", s.Pay)
 	group.POST("/cancel/:id", s.Cancel)
 	group.POST("/confirm/:id", s.ConfirmReceive)
+	// 售后/退款申请
+	group.POST("/refund/apply", s.Apply)
 }
 
 // List 获取订单列表
@@ -128,9 +133,10 @@ func (s *Order) Create(c *gin.Context) {
 
 // Pay 支付订单
 // @Summary 支付订单
-// @Description 支付待付款订单
+// @Description 支付待付款订单，可通过payChannel指定支付通道（0=使用订单默认通道 1=微信 2=支付宝）
 // @Tags 商城/用户订单
 // @Param id path int true "订单ID"
+// @Param object body models.OrderPayReq false "支付通道参数"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData "支付成功"
@@ -142,7 +148,9 @@ func (s *Order) Pay(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	data, err := s.service.Pay(c, userID, id)
+	var req models.OrderPayReq
+	_ = c.ShouldBindJSON(&req) // 空 body/格式错误 → PayChannel=0 → 走订单默认通道
+	data, err := s.service.Pay(c, userID, id, req.PayChannel)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -213,4 +221,33 @@ func (s *Order) GetStatistics(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, data)
+}
+
+// Apply 申请售后
+// @Summary 申请售后
+// @Description 申请售后
+// @Tags 商城/售后
+// @Param object body models.RefundApplyReq true "售后申请参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "申请成功"
+// @Router /shop/user/refund/apply [post]
+func (s *Order) Apply(c *gin.Context) {
+	var req models.RefundApplyReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误"})
+		return
+	}
+	userID := baizeContext.GetUserId(c)
+	if userID == 0 {
+		c.JSON(http.StatusOK, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	resp, err := s.orderRefundService.Apply(c, userID, &req)
+	if err != nil {
+		zap.L().Error("申请售后失败", zap.Error(err))
+		c.JSON(http.StatusOK, gin.H{"code": 500, "msg": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "success", "data": resp})
 }

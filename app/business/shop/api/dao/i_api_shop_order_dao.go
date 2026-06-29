@@ -5,9 +5,10 @@ import (
 	shopusermodels "nova-factory-server/app/business/shop/user/models"
 	"time"
 
+	models "nova-factory-server/app/business/shop/api/models"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	models "nova-factory-server/app/business/shop/api/models"
 )
 
 type IApiShopOrderDao interface {
@@ -31,4 +32,6 @@ type IApiShopOrderDao interface {
 
 	// BatchUpdateERPOrderStatus 批量更新当前商城用户的 shop_order 订单状态。
 	BatchUpdateERPOrderStatus(c *gin.Context, ids []int64, shopUser *shopusermodels.User, status int32) (int64, error)
+
+	//
 }

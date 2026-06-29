@@ -14,7 +14,7 @@ type IApiShopOrderService interface {
 	GetByID(c *gin.Context, id int64) (*models.ApiOrderVO, error)
 	List(c *gin.Context, userID int64, query *models.OrderQuery) (*models.OrderListData, error)
 	UpdateStatus(c *gin.Context, userID int64, req *models.OrderStatusReq) error
-	Pay(c *gin.Context, userID int64, id int64) (*models.OrderPayResp, error)
+	Pay(c *gin.Context, userID int64, id int64, payChannel int) (*models.OrderPayResp, error)
 	//HandleWechatNotify(event.ZOrderStatusSyncReqEvent) error
 	Cancel(c *gin.Context, userID int64, id int64, reason string) error
 	ConfirmReceive(c *gin.Context, userID int64, id int64) error
