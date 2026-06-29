@@ -33,7 +33,7 @@ type ZAfterSaleOrderDetail interface {
 	GetOid() string
 	GetEshopGoodsName() string
 	GetEshopSkuName() string
-	GetBackQty() int
+	GetBackQty() float64
 	GetBackTotal() float64
 	GetOuterIid() string
 }
@@ -43,7 +43,7 @@ type ZAfterSaleOrderExDetail interface {
 	GetOid() string
 	GetEshopGoodsName() string
 	GetEshopSkuName() string
-	GetExchangeQty() int
+	GetExchangeQty() float64
 	GetBackTotal() float64
 	GetOuterIid() string
 }

@@ -181,6 +181,10 @@ func (d *OrderDetailDaoImpl) ListByOrderIDs(c *gin.Context, orderIDs []uint64) (
 	return d.listByOrderIDsWithDB(c, d.db.WithContext(c), orderIDs)
 }
 
+func (d *OrderDetailDaoImpl) ListByOrderID(c *gin.Context, orderIDs uint64) ([]*models.OrderDetail, error) {
+	return d.listByOrderIDsWithDB(c, d.db.WithContext(c), []uint64{orderIDs})
+}
+
 // ListByTidTx 在事务内按订单编号查询该订单所有有效明细。
 func (d *OrderDetailDaoImpl) ListByTidTx(tx *gorm.DB, tid string) ([]*models.OrderDetail, error) {
 	tid = strings.TrimSpace(tid)

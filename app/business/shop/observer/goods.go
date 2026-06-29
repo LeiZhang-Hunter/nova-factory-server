@@ -61,6 +61,14 @@ func (s *ShopObserver) OnOrderSendChange(sendEvent event.OrderSendEvent) error {
 	return s.orderService.SyncOrderSend(sendEvent)
 }
 
+// OnAfterSaleOrderChanged 售后单变更回调
+func (o *ShopObserver) OnAfterSaleOrderChanged(event event.ZAfterSaleOrderSyncReqEvent) error {
+	if o.orderService == nil {
+		return nil
+	}
+	return o.orderService.SyncAfterSaleOrder(event)
+}
+
 // OnOrderStatusChange 订单发货变化
 func (o *ShopObserver) OnOrderStatusChange(statusEvent event.ZOrderStatusSyncReqEvent) error {
 	uid := statusEvent.GetUserId()

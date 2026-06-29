@@ -41,7 +41,9 @@ type Order struct {
 	Version               int32      `json:"version" gorm:"column:version"`                               // 乐观锁版本号
 	DeptID                int64      `json:"deptId" gorm:"column:dept_id"`                                // 部门ID
 	baize.BaseEntity
-	State int32 `json:"state" gorm:"column:state"` // 操作状态
+	State               int32  `json:"state" gorm:"column:state"`    // 操作状态
+	AftersaleStatus     int32  `json:"aftersaleStatus" gorm:"-"`     // 售后状态：0待审核 1已审核 2退款中 3退款成功 4退款失败 5退款关闭 6已拒绝
+	AftersaleStatusText string `json:"aftersaleStatusText" gorm:"-"` // 售后状态文本
 }
 
 // ToApiShopOrderVO 订单转换为 api订单,为了兼容小程序数据结构返回，历史原因

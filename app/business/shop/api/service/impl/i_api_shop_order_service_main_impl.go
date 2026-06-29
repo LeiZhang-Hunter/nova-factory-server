@@ -5,15 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math"
 	models2 "nova-factory-server/app/business/shop/activity/models"
 	"nova-factory-server/app/business/shop/api/callback"
 	shopordermodels "nova-factory-server/app/business/shop/order/models"
+	"nova-factory-server/app/business/shop/order/provider"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	shopusermodels "nova-factory-server/app/business/shop/user/models"
+	commonStatus "nova-factory-server/app/constant/commonStatus"
 	orderConstant "nova-factory-server/app/constant/order"
 	shopConstant "nova-factory-server/app/constant/shop"
-	"nova-factory-server/app/datasource/objectFile"
 	"nova-factory-server/app/utils/observer/integration/observer"
 	"strconv"
 	"strings"
@@ -26,8 +26,6 @@ import (
 	order2 "nova-factory-server/app/utils/order"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-pay/gopay"
-	"github.com/go-pay/gopay/wechat/v3"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -424,6 +422,30 @@ func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *api
 		}
 
 	}
+	// 批量查询退款状态，附到订单上
+	if len(list.Rows) > 0 {
+		orderIDs := make([]int64, len(list.Rows))
+		for i, o := range list.Rows {
+			orderIDs[i] = o.ID
+		}
+		var refunds []shopordermodels.OrderRefund
+		if err := s.db.Table("shop_order_refund").
+			Where("order_id IN ?", orderIDs).
+			Where("state = ?", commonStatus.NORMAL).
+			Find(&refunds).Error; err == nil {
+			refundMap := make(map[int64]*shopordermodels.OrderRefund)
+			for i := range refunds {
+				refundMap[refunds[i].OrderID] = &refunds[i]
+			}
+			for _, o := range list.Rows {
+				if r, ok := refundMap[o.ID]; ok {
+					o.AftersaleStatus = r.Status
+					o.AftersaleStatusText = orderConstant.GetAftersaleStatusText(r.Status)
+				}
+			}
+		}
+	}
+
 	return list, nil
 }
 
@@ -536,7 +558,7 @@ func (s *IApiShopOrderServiceImpl) BatchUpdateStatus(c *gin.Context, userID int6
 }
 
 // Pay 支付订单，调用微信V3 JSAPI预下单并返回调起支付参数。
-func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (*apimodels.OrderPayResp, error) {
+func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64, payChannel int) (*apimodels.OrderPayResp, error) {
 	if userID == 0 {
 		return nil, errors.New("用户未登录")
 	}
@@ -560,71 +582,46 @@ func (s *IApiShopOrderServiceImpl) Pay(c *gin.Context, userID int64, id int64) (
 	//if order.SyncStatus != shopConstant.OrderSyncStatusSuccess {
 	//	return nil, errors.New("订单尚未同步管家婆，暂不能支付")
 	//}
-	if shopUser.WechatOpenid == "" {
+
+	// caller-supplied payChannel takes priority; 0 falls back to order's stored channel
+	effectivePayChannel := payChannel
+	if effectivePayChannel == 0 {
+		effectivePayChannel = order.PayChannel
+	}
+
+	if effectivePayChannel == orderConstant.PayChannelWechat && shopUser.WechatOpenid == "" {
 		return nil, errors.New("用户未绑定微信")
 	}
 
-	// 读取微信配置
-	config, err := s.configDao.GetWechatPayConfig(c)
+	pm, err := provider.GetPaymentMethod(effectivePayChannel)
 	if err != nil {
-		zap.L().Error("读取微信配置失败", zap.Error(err))
 		return nil, err
 	}
-	//platformPublicKeyPath := cfgMap["wechat_pay_platform_public_key_path"]
-	if config.AppId == "" || config.MchId == "" || config.ApiV3Key == "" || config.SerialNo == "" || config.PrivateKeyPath == "" || config.NotifyUrl == "" {
-		return nil, errors.New("微信支付配置不完整，请在后台管理配置微信支付参数")
-	}
-	file := objectFile.NewConfig()
-	privateKeyData, err := file.ReadPrivateFile(c, config.PrivateKeyPath)
+	result, err := pm.Prepay(c, &shopordermodels.PrepayRequest{
+		Tid:         order.Tid,
+		TotalAmount: order.Total,
+		Description: "订单支付: " + order.Tid,
+		Openid:      shopUser.WechatOpenid,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("读取微信支付私钥文件失败: %v", err)
+		return nil, err
 	}
 
-	// 初始化微信V3客户端
-	client, err := wechat.NewClientV3(config.MchId, config.SerialNo, config.ApiV3Key, string(privateKeyData))
+	r, err := shopordermodels.GetPrepayResult[*shopordermodels.WechatPrepayResult](result)
 	if err != nil {
-		return nil, fmt.Errorf("初始化微信支付客户端失败: %v", err)
+		return nil, err
 	}
-
-	// 预下单（金额元转分，四舍五入防浮点截断）
-	total := int64(math.Round(order.Total * 100))
-	expire := time.Now().Add(10 * time.Minute).Format(time.RFC3339)
-	bm := make(gopay.BodyMap)
-	bm.Set("appid", config.AppId).
-		Set("mchid", config.MchId).
-		Set("description", "订单支付: "+order.Tid).
-		Set("out_trade_no", order.Tid).
-		Set("time_expire", expire).
-		Set("notify_url", config.NotifyUrl).
-		SetBodyMap("amount", func(bm gopay.BodyMap) {
-			bm.Set("total", total).
-				Set("currency", "CNY")
-		}).
-		SetBodyMap("payer", func(bm gopay.BodyMap) {
-			bm.Set("openid", shopUser.WechatOpenid)
-		})
-
-	wxRsp, err := client.V3TransactionJsapi(c.Request.Context(), bm)
-	if err != nil {
-		return nil, fmt.Errorf("微信预下单失败: %v", err)
-	}
-	if wxRsp.Code != 0 {
-		return nil, fmt.Errorf("微信预下单失败: %s", wxRsp.Error)
-	}
-
-	// 生成小程序调起支付签名
-	paySign, err := client.PaySignOfApplet(config.AppId, wxRsp.Response.PrepayId)
-	if err != nil {
-		return nil, fmt.Errorf("生成支付签名失败: %v", err)
+	if r.AppId == "" || r.TimeStamp == "" || r.NonceStr == "" || r.Package == "" || r.SignType == "" || r.PaySign == "" {
+		return nil, errors.New("支付返回参数不完整")
 	}
 
 	return &apimodels.OrderPayResp{
-		AppId:     paySign.AppId,
-		TimeStamp: paySign.TimeStamp,
-		NonceStr:  paySign.NonceStr,
-		Package:   "prepay_id=" + wxRsp.Response.PrepayId,
-		SignType:  "RSA",
-		PaySign:   paySign.PaySign,
+		AppId:     r.AppId,
+		TimeStamp: r.TimeStamp,
+		NonceStr:  r.NonceStr,
+		Package:   r.Package,
+		SignType:  r.SignType,
+		PaySign:   r.PaySign,
 	}, nil
 }
 

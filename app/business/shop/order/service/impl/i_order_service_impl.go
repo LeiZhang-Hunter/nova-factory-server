@@ -3,15 +3,17 @@ package impl
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/viper"
 	"nova-factory-server/app/utils/store/integration"
 	"strings"
 	"time"
+
+	"github.com/spf13/viper"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
+	apiDao "nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/order/dao"
 	"nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/business/shop/order/service"
@@ -31,6 +33,7 @@ type OrderServiceImpl struct {
 	detailDao       dao.IOrderDetailDao
 	accountDao      dao.IOrderAccountDao
 	shipmentService service.IShopOrderShipmentService
+	apiConfigDao    apiDao.IApiShopSysConfigDao
 	cache           cache.Cache
 	host            string
 }
@@ -456,6 +459,12 @@ func buildERPOrderUpdateMap(order *models.Order, current *models.Order) map[stri
 		"dept_id":                order.DeptID,
 		"update_by":              order.UpdateBy,
 		"update_time":            order.UpdateTime,
+		"notify_raw":             order.NotifyRaw,
+		"mch_id":                 order.MchID,
+		"appid":                  order.AppID,
+		"payer_openid":           order.PayerOpenid,
+		"pay_channel":            order.PayChannel,
+		"transaction_id":         order.TransactionID,
 	}
 
 	if shouldUpdateOrderStatus(current.Status, order.Status) {
@@ -727,4 +736,12 @@ func (i *OrderServiceImpl) resolveShipmentTargetStatus(
 		return orderConstant.ERPStatusPartSend
 	}
 	return ""
+}
+
+// SyncAfterSaleOrder 售后单同步入口，由 ShopObserver.OnAfterSaleOrderChanged 调用。
+func (s *OrderServiceImpl) SyncAfterSaleOrder(event event.ZAfterSaleOrderSyncReqEvent) error {
+	if event == nil || event.GetOrders() == nil || len(*event.GetOrders()) == 0 {
+		return nil
+	}
+	return nil
 }

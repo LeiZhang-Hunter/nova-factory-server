@@ -7,4 +7,5 @@ var ProviderSet = wire.NewSet(
 	NewOrderDetailDao,
 	NewOrderAccountDao,
 	NewOrderShipmentDao,
+	NewOrderRefundDao,
 )

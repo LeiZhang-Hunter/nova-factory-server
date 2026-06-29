@@ -1,0 +1,59 @@
+package models
+
+import (
+	"nova-factory-server/app/baize"
+	"time"
+)
+
+// OrderRefund  售后单主表
+type OrderRefund struct {
+	baize.BaseEntity
+	ID                 int64      `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键ID" json:"id"`                          // 主键ID
+	OrderID            int64      `gorm:"column:order_id;not null;comment:订单主表ID" json:"order_id"`                                 // 订单主表ID
+	Tid                string     `gorm:"column:tid;not null;comment:网店订单编号" json:"tid"`                                           // 网店订单编号
+	UserID             int64      `gorm:"column:user_id;not null;comment:申请人ID" json:"user_id"`                                    // 申请人ID
+	PayChannel         int        `gorm:"column:pay_channel;comment:原支付通道：0未知 1微信 2支付宝" json:"pay_channel"`                        // 原支付通道：0未知 1微信 2支付宝
+	RefundChannel      int        `gorm:"column:refund_channel;comment:实际退款通道：0未知 1微信 2支付宝" json:"refund_channel"`                 // 实际退款通道：0未知 1微信 2支付宝
+	OutRefundNo        string     `gorm:"column:out_refund_no;not null;comment:商户退款单号" json:"out_refund_no"`                       // 商户退款单号
+	RefundAmount       float64    `gorm:"column:refund_amount;default:0.00;comment:退款金额" json:"refund_amount"`                     // 退款金额
+	TotalAmount        float64    `gorm:"column:total_amount;default:0.00;comment:原订单金额" json:"total_amount"`                      // 原订单金额
+	Reason             string     `gorm:"column:reason;comment:退款原因" json:"reason"`                                                // 退款原因
+	PreviousStatus     string     `gorm:"column:previous_status;comment:售前订单状态" json:"previous_status"`                            // 售前订单状态
+	Status             int32      `gorm:"column:status;not null;comment:售后状态：0待审核 1已审核 2退款中 3退款成功 4退款失败 5退款关闭 6已拒绝" json:"status"` // 售后状态：0待审核 1已审核 2退款中 3退款成功 4退款失败 5退款关闭 6已拒绝
+	AuditRemark        string     `gorm:"column:audit_remark;comment:审核备注" json:"audit_remark"`                                    // 审核备注
+	AuditBy            int64      `gorm:"column:audit_by;comment:审核人" json:"audit_by"`                                             // 审核人
+	AuditTime          *time.Time `gorm:"column:audit_time;comment:审核时间" json:"audit_time"`                                        // 审核时间
+	ThirdTransactionID string     `gorm:"column:third_transaction_id;comment:三方交易号" json:"third_transaction_id"`                   // 三方交易号
+	ThirdRefundID      string     `gorm:"column:third_refund_id;comment:三方退款单号" json:"third_refund_id"`                            // 三方退款单号
+	DetailsJSON        string     `gorm:"column:details_json;comment:退款明细JSON" json:"details_json"`                                // 退款明细JSON
+	ErpPlatformID      int64      `gorm:"column:erp_platform_id;comment:erp平台ID" json:"erp_platform_id"`                           // erp平台ID
+	ErpSyncStatus      int32      `gorm:"column:erp_sync_status;not null;comment:erp同步状态：0待同步 1成功 2失败" json:"erp_sync_status"`     // erp同步状态：0待同步 1成功 2失败
+	ErpSyncMessage     string     `gorm:"column:erp_sync_message;comment:同步结果描述" json:"erp_sync_message"`                          // 同步结果描述
+	ErpSyncTime        *time.Time `gorm:"column:erp_sync_time;comment:同步时间" json:"erp_sync_time"`                                  // 同步时间
+	ErpSyncBillCode    string     `gorm:"column:erp_sync_bill_code;comment:erp返回单号" json:"erp_sync_bill_code"`                     // erp返回单号
+	State              int        `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"`                                        // 操作状态（0正常 -1删除）
+
+}
+
+// RefundQuery 售后单查询参数
+type RefundQuery struct {
+	Tid        string `form:"tid"`
+	Status     *int32 `form:"status"`
+	UserID     int64  `form:"-"`
+	SyncStatus *int32 `form:"syncStatus"`
+	Page       int64  `form:"page"`
+	Size       int64  `form:"size"`
+}
+
+// RefundListData 售后单列表结果
+type RefundListData struct {
+	Rows  []*OrderRefund `json:"rows"`
+	Total int64          `json:"total"`
+}
+
+// CreateRefundReq 创建售后单请求
+type CreateRefundReq struct {
+	Tid    string `json:"tid"`
+	Reason string `json:"reason"`
+	UserID int64  `json:"-"`
+}

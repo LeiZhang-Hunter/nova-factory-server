@@ -22,6 +22,7 @@ import (
 	logisticsController "nova-factory-server/app/business/shop/logistics/controller"
 	shopobserver "nova-factory-server/app/business/shop/observer"
 	shopOrderController "nova-factory-server/app/business/shop/order/controller"
+	shopOrderProvider "nova-factory-server/app/business/shop/order/provider"
 	shopOrderService "nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/business/shop/product/shopcontroller"
 	userController "nova-factory-server/app/business/shop/user/controller"
@@ -55,6 +56,7 @@ func NewGinEngine(
 	orderTimeoutService shopOrderService.IOrderTimeoutService,
 	shopObserver *shopobserver.ShopObserver,
 	shopFinance *shopFinanceController.Controller,
+	_ shopOrderProvider.PaymentMethod,
 	logisticsCtrl *logisticsController.Controller,
 ) *Shop {
 	group := app.Engine.Group("")

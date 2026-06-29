@@ -1,10 +1,11 @@
 package dao
 
 import (
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"nova-factory-server/app/business/shop/order/models"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // IOrderDetailDao shop订单明细数据访问接口。
@@ -24,6 +25,7 @@ type IOrderDetailDao interface {
 	DeleteByTidAndOIDs(tx *gorm.DB, tid string, details []*models.OrderDetailSet) error
 	// ListByOrderIDs 按订单 ID 集合查询明细记录。
 	ListByOrderIDs(c *gin.Context, orderIDs []uint64) ([]*models.OrderDetail, error)
+	ListByOrderID(c *gin.Context, orderIDs uint64) ([]*models.OrderDetail, error)
 
 	// ListByTidTx 在事务内按订单编号查询该订单所有有效明细。
 	ListByTidTx(tx *gorm.DB, tid string) ([]*models.OrderDetail, error)

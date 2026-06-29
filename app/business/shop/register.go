@@ -30,6 +30,7 @@ import (
 
 	shopOrderController "nova-factory-server/app/business/shop/order/controller"
 	shopOrderDaoImpl "nova-factory-server/app/business/shop/order/dao/impl"
+	shopOrderProvider "nova-factory-server/app/business/shop/order/provider"
 	shopOrderServiceImpl "nova-factory-server/app/business/shop/order/service/impl"
 
 	homeController "nova-factory-server/app/business/shop/home/controller"
@@ -79,6 +80,7 @@ var ProviderSet = wire.NewSet(
 	shopcontroller.ProviderSet,
 
 	shopOrderDaoImpl.ProviderSet,
+	shopOrderProvider.ProviderSet,
 	shopOrderServiceImpl.ProviderSet,
 	shopOrderController.ProviderSet,
 

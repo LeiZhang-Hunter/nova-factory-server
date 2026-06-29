@@ -30,4 +30,7 @@ type Observer interface {
 
 	// OnOrderStatusChange 订单状态更新
 	OnOrderStatusChange(sendEvent event.ZOrderStatusSyncReqEvent) error
+
+	// OnAfterSaleOrderChanged 售后单变更回调，当退款成功等售后事件发生时触发
+	OnAfterSaleOrderChanged(event event.ZAfterSaleOrderSyncReqEvent) error
 }

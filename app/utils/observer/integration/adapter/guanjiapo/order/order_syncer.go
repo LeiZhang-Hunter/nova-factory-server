@@ -101,7 +101,7 @@ func (s *orderSyncer) SyncAfterSaleOrders(ctx context.Context, req event.ZAfterS
 		return nil, err
 	}
 	body := map[string]any{
-		"orders": *req.GetOrders(),
+		"orders": toSyncAfterSaleOrders(req),
 	}
 	respBytes, err := client.DoSignedPost(ctx, s.tokenURL, snapshot, token, "emall.afterorder.synchronize", body)
 	if err != nil {

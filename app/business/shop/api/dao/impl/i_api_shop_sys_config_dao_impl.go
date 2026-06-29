@@ -57,7 +57,7 @@ func (s *IApiShopSysConfigDaoImpl) UpdateByConfigKey(c *gin.Context, configKey s
 		Update("config_value", configValue).Error
 }
 
-// 获取微信支付配置
+// GetWechatPayConfig 获取微信支付配置
 func (s *IApiShopSysConfigDaoImpl) GetWechatPayConfig(c *gin.Context) (*models.ShopSysConfigWechatPayConfigDTO, error) {
 	var configKeys []string = []string{
 		"wechat_mini_program_app_id",
@@ -92,4 +92,13 @@ func (s *IApiShopSysConfigDaoImpl) GetWechatPayConfig(c *gin.Context) (*models.S
 		PlatformPublicKeyId:   cfgMap["wechat_pay_platform_public_key_id"],
 		PlatformPublicKeyPath: cfgMap["wechat_pay_platform_public_key_path"],
 	}, nil
+}
+
+// GetIsAutoRefundEnabled 获取售后订单是否启用自动退款
+func (s *IApiShopSysConfigDaoImpl) GetIsAutoRefundEnabled(c *gin.Context) (bool, error) {
+	cfg, err := s.GetByConfigKey(c, "shop_auto_refund_unshipped_enabled")
+	if err != nil {
+		return false, nil // 默认关闭
+	}
+	return cfg.ConfigValue == "true", nil
 }
