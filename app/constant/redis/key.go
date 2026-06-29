@@ -24,3 +24,11 @@ func MakeAIGatewayAliveCacheKey(gatewayID int64) string {
 
 // IntegrationLoginCacheKeyPattern erp集成系统登陆数据 mode +kind
 const IntegrationLoginCacheKeyPattern = "erp:integration:login:%s:%s"
+
+// LogisticsTrackingCacheKey 物流轨迹即时查询缓存，格式: logistics:tracking:{outsid}:{companyCode}
+const LogisticsTrackingCacheKey = "logistics:tracking:%s:%s"
+
+// MakeLogisticsTrackingCacheKey 生成物流轨迹缓存 key
+func MakeLogisticsTrackingCacheKey(outsid, companyCode string) string {
+	return fmt.Sprintf(LogisticsTrackingCacheKey, outsid, companyCode)
+}

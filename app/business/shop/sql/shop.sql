@@ -627,6 +627,7 @@ CREATE TABLE IF NOT EXISTS `shop_logistics_company` (
     `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
     `sort` INT NOT NULL DEFAULT 0 COMMENT '排序值',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
+    `third_party` VARCHAR(32) NOT NULL DEFAULT 'kdniao' COMMENT '第三方查询渠道：kdniao/kuaidi100',
     `dept_id` BIGINT(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` BIGINT(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` DATETIME(0) NULL DEFAULT NULL COMMENT '创建时间',
@@ -711,6 +712,7 @@ CREATE TABLE IF NOT EXISTS `shop_logistics_company` (
     `remark` VARCHAR(500) DEFAULT NULL COMMENT '备注',
     `sort` INT NOT NULL DEFAULT 0 COMMENT '排序值',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
+    `third_party` VARCHAR(32) NOT NULL DEFAULT 'kdniao' COMMENT '第三方查询渠道：kdniao/kuaidi100',
     `dept_id` BIGINT(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` BIGINT(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` DATETIME(0) NULL DEFAULT NULL COMMENT '创建时间',
@@ -766,3 +768,57 @@ CREATE TABLE IF NOT EXISTS `shop_order_shipment` (
     KEY `idx_order_id` (`order_id`),
     KEY `idx_tid` (`tid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单发货物流记录';
+
+
+-- 物流轨迹记录表（已签收时落库，作为永久缓存，后续查询不再调第三方API）
+CREATE TABLE IF NOT EXISTS `shop_logistics_tracking_record` (
+    `id`                BIGINT(20) UNSIGNED  NOT NULL AUTO_INCREMENT  COMMENT '主键ID',
+    `outsid`            VARCHAR(128)         NOT NULL                 COMMENT '物流单号',
+    `company_code`      VARCHAR(64)          NOT NULL                 COMMENT '物流公司编码，关联 shop_logistics_company.code',
+    `trace_json`        LONGTEXT             NULL                     COMMENT '完整轨迹JSON，包含所有节点的时间、状态、描述',
+    `signed_time`       DATETIME(0)          NULL                     COMMENT '签收时间（从轨迹中提取，方便查询统计）',
+    `origin_info`       VARCHAR(500)         NULL                     COMMENT '始发地信息',
+    `dest_info`         VARCHAR(500)         NULL                     COMMENT '目的地信息',
+    `query_count`       INT                  NOT NULL DEFAULT 0       COMMENT '累计查询次数',
+    `last_query_time`   DATETIME(0)          NULL                     COMMENT '最近一次查询时间',
+    `dept_id`           BIGINT(20)           NULL DEFAULT NULL        COMMENT '部门ID',
+    `create_by`         BIGINT(20)           NULL DEFAULT NULL        COMMENT '创建者',
+    `create_time`       DATETIME(0)          NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间（首次记录时间）',
+    `update_by`         BIGINT(20)           NULL DEFAULT NULL        COMMENT '更新者',
+    `update_time`       DATETIME(0)          NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
+    `state`             TINYINT(1)           NULL DEFAULT 0           COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_outsid_company` (`outsid`, `company_code`),
+    KEY `idx_signed_time` (`signed_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='物流轨迹记录表（已签收落库，永久缓存）';
+
+
+CREATE TABLE IF NOT EXISTS `shop_erp_integration_config` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `type` VARCHAR(128) NOT NULL COMMENT '接入类型',
+    `data` TEXT  COMMENT '配置快照',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `type`(`type`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商城erp集成系统';
+
+CREATE TABLE IF NOT EXISTS `shop_logistics_config` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `type` VARCHAR(128) NOT NULL COMMENT '接入类型',
+    `data` TEXT  COMMENT '配置快照',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
+    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
+    `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
+    `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
+    `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+    `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `type`(`type`) USING BTREE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='快递物流配置';

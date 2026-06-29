@@ -28,6 +28,7 @@ type LogisticsCompany struct {
 	Remark       string `json:"remark" gorm:"remark"`
 	Sort         int32  `json:"sort" gorm:"sort"`
 	Status       *bool  `json:"status" gorm:"status"`
+	ThirdParty   string `json:"thirdParty" gorm:"third_party"` // 第三方渠道: kdniao/kuaidi100
 	DeptID       int64  `json:"deptId" gorm:"dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"state"`
@@ -59,6 +60,7 @@ type LogisticsCompanyUpsert struct {
 	Remark       string `json:"remark"`
 	Sort         int32  `json:"sort"`
 	Status       *bool  `json:"status"`
+	ThirdParty   string `json:"thirdParty"` // 第三方渠道
 }
 
 // LogisticsCompanyQuery ERP物流公司查询参数

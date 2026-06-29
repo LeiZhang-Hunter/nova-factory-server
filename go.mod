@@ -47,6 +47,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.3
 	github.com/tmaxmax/go-sse v0.11.0
+	github.com/ttlv/kdniao v0.0.0-20220119131043-fcaba08b1873
 	github.com/xuri/excelize/v2 v2.9.0
 	go.uber.org/automaxprocs v1.6.0
 	go.uber.org/zap v1.27.0
