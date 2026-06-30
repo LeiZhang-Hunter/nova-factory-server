@@ -54,30 +54,29 @@ func (s *ShopUserDaoImpl) Create(c *gin.Context, req *models.UserUpsert) (*model
 
 func (s *ShopUserDaoImpl) Update(c *gin.Context, req *models.UserUpsert) (*models.User, error) {
 	updates := &models.User{
-		ID:           req.ID,
 		Username:     req.Username,
 		Nickname:     req.Nickname,
 		Mobile:       req.Mobile,
 		Email:        req.Email,
-		Password:     req.Password,
 		UserType:     req.UserType,
 		Avatar:       req.Avatar,
 		CompanyName:  req.CompanyName,
 		ContactName:  req.ContactName,
 		ContactPhone: req.ContactPhone,
 		Status:       req.Status,
-		DeptID:       baizeContext.GetDeptId(c),
+	}
+	if req.Password != "" {
+		updates.Password = req.Password
 	}
 	if updates.Status == nil {
 		updates.Status = boolPtr(false)
 	}
 	updates.SetUpdateBy(baizeContext.GetUserId(c))
-	if err := s.db.WithContext(c).Table(s.tableName).
+	err := s.db.WithContext(c).Table(s.tableName).
 		Where("id = ?", req.ID).
-		Where("dept_id = ?", baizeContext.GetDeptId(c)).
-		Where("state = ?", commonStatus.NORMAL).
-		Select("user_id", "username", "nickname", "mobile", "email", "password", "user_type", "avatar", "company_name", "contact_name", "contact_phone", "status", "update_by", "update_time").
-		Updates(updates).Error; err != nil {
+		Select("username", "nickname", "mobile", "email", "password", "user_type", "avatar", "company_name", "contact_name", "contact_phone", "status", "update_by", "update_time").
+		Updates(updates).Error
+	if err != nil {
 		return nil, err
 	}
 	return s.GetByID(c, req.ID)

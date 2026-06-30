@@ -26,6 +26,7 @@ func NewAuth(authService shopAuthService.IApiShopAuthService, wechatAuthService 
 func (s *Auth) PublicRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop/auth")
 	group.POST("/wechat-login", s.WechatLogin)
+	group.POST("/account-login", s.AccountLogin)
 	group.POST("/refresh", s.RefreshToken)
 }
 
@@ -52,6 +53,29 @@ func (s *Auth) WechatLogin(c *gin.Context) {
 		return
 	}
 	data, err := s.wechatAuthService.WechatLogin(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
+}
+
+// AccountLogin 商城小程序账号密码登录
+// @Summary 商城小程序账号密码登录
+// @Description 使用 shop_user 账号密码登录并生成商城小程序会话 token
+// @Tags 商城/App鉴权
+// @Accept application/json
+// @Param body body models.AccountLoginReq true "账号密码登录参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "登录成功"
+// @Router /api/v1/app/shop/auth/account-login [post]
+func (s *Auth) AccountLogin(c *gin.Context) {
+	req := new(models.AccountLoginReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := s.wechatAuthService.AccountLogin(c, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
