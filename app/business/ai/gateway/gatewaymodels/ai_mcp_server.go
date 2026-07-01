@@ -72,3 +72,18 @@ type MCPServerProbeResult struct {
 	ResourceTemplates []mcp.ResourceTemplate `json:"resourceTemplates,omitempty"`
 	Warnings          []string               `json:"warnings,omitempty"`
 }
+
+// McpServerSnapshot mpc server 快照
+type McpServerSnapshot struct {
+	Name        string
+	Description string
+	Transport   string
+	Command     string
+	Args        string
+	Env         string
+	URL         string
+	Headers     string
+	Timeout     int32
+	IsCommon    bool
+	Enabled     bool
+}

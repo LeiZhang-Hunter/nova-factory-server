@@ -4,8 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	mcpTool "github.com/mark3labs/mcp-go/mcp"
+	"go.uber.org/zap"
 	"net/url"
+	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/mcp"
+	"nova-factory-server/app/utils/store/permissions"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -214,9 +220,9 @@ func isSameMCPServerConfig(current *gatewaymodels.MCPServer, req *gatewaymodels.
 	return snapshotMCPServer(current) == snapshotMCPServerRequest(req)
 }
 
-func snapshotMCPServer(current *gatewaymodels.MCPServer) mcpServerSnapshot {
+func snapshotMCPServer(current *gatewaymodels.MCPServer) gatewaymodels.McpServerSnapshot {
 	if current == nil {
-		return mcpServerSnapshot{}
+		return gatewaymodels.McpServerSnapshot{}
 	}
 	req := &gatewaymodels.MCPServerUpsert{
 		ID:          current.ID,
@@ -236,8 +242,8 @@ func snapshotMCPServer(current *gatewaymodels.MCPServer) mcpServerSnapshot {
 	return snapshotMCPServerRequest(req)
 }
 
-func snapshotMCPServerRequest(req *gatewaymodels.MCPServerUpsert) mcpServerSnapshot {
-	return mcpServerSnapshot{
+func snapshotMCPServerRequest(req *gatewaymodels.MCPServerUpsert) gatewaymodels.McpServerSnapshot {
+	return gatewaymodels.McpServerSnapshot{
 		Name:        req.Name,
 		Description: req.Description,
 		Transport:   req.Transport,
@@ -293,16 +299,65 @@ func cloneBoolPtr(v *bool) *bool {
 	return &value
 }
 
-type mcpServerSnapshot struct {
-	Name        string
-	Description string
-	Transport   string
-	Command     string
-	Args        string
-	Env         string
-	URL         string
-	Headers     string
-	Timeout     int32
-	IsCommon    bool
-	Enabled     bool
+// ProbePerm 权限探测
+func (m *MCPServerServiceImpl) ProbePerm(ctx *gin.Context, mcpServer *gin_mcp.GinMCP, req *gatewaymodels.MCPServerProbeRequest) (*gatewaymodels.MCPServerProbeResult, error) {
+	tools := mcpServer.GetTools()
+	if len(tools) == 0 {
+		return &gatewaymodels.MCPServerProbeResult{
+			Tools: make([]mcpTool.Tool, 0),
+		}, nil
+	}
+
+	// 用户权限
+	userPerms := permissions.GetStore().GetPermission(ctx, baizeContext.GetUserId(ctx))
+	if len(userPerms) == 0 {
+		return &gatewaymodels.MCPServerProbeResult{
+			Tools: make([]mcpTool.Tool, 0),
+		}, nil
+	}
+	permissionsData := mcpServer.GetAllPermissions()
+
+	// 构建用户权限映射以便快速查找
+	userPermMap := make(map[string]bool, len(userPerms))
+	for _, p := range userPerms {
+		userPermMap[p] = true
+	}
+
+	// 按权限过滤工具列表
+	// tool.Name 是 operationId (如 "GET_erp_master_product_list")
+	// 通过 m.operations 查找对应的 Method + Path
+	// 再通过 registeredPermissions 查找该路由需要的权限
+	// 最后检查用户是否拥有该权限
+	filtered := make([]mcpTool.Tool, 0)
+	for _, tool := range tools {
+		operations := mcpServer.GetOperations()
+		if operations == nil {
+			continue
+		}
+		op, ok := operations[tool.Name]
+		if !ok {
+			continue
+		}
+
+		// 构造 "METHOD path" 键来查找注册的权限
+		permKey := fmt.Sprintf("%s %s", op.Method, op.Path)
+		requiredPerm, hasRegistered := permissionsData[permKey]
+
+		if !hasRegistered {
+			continue
+		}
+
+		// 检查用户是否拥有该权限
+		if userPermMap[requiredPerm] {
+			filtered = append(filtered, gin_mcp.ToMCPTool(tool))
+		} else {
+			zap.L().Debug(fmt.Sprintf("[PermissionHook] Tool '%s' (%s) requires permission '%s', user does not have it - filtered out", tool.Name, permKey, requiredPerm))
+
+		}
+	}
+
+	return &gatewaymodels.MCPServerProbeResult{
+		Tools: filtered,
+	}, nil
+
 }

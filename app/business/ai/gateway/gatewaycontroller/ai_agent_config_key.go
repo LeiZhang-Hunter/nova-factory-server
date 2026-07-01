@@ -26,6 +26,7 @@ func (a *AgentConfigKey) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", middlewares.HasPermission("ai:agent:config:key:list"), a.List)
 	group.POST("/set", middlewares.HasPermission("ai:agent:config:key:set"), a.Set)
 	group.POST("/generate", middlewares.HasPermission("ai:agent:config:key:generate"), a.Generate)
+	group.POST("/allow/tool", middlewares.HasPermission("ai:agent:config:key:set"), a.SetMcpAllowTool)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:config:key:remove"), a.Delete)
 }
 
@@ -33,6 +34,7 @@ func (a *AgentConfigKey) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 	router.RegisterPermission("GET", "/ai/agent/config/key/list", "ai:agent:config:key:list")
 	router.RegisterPermission("POST", "/ai/agent/config/key/set", "ai:agent:config:key:set")
 	router.RegisterPermission("POST", "/ai/agent/config/key/generate", "ai:agent:config:key:generate")
+	router.RegisterPermission("POST", "/ai/agent/config/key/allow/tool", "ai:agent:config:key:set")
 	router.RegisterPermission("DELETE", "/ai/agent/config/key/remove/:ids", "ai:agent:config:key:remove")
 }
 
@@ -114,4 +116,27 @@ func (a *AgentConfigKey) Delete(c *gin.Context) {
 // @Router /ai/agent/config/key/generate [post]
 func (a *AgentConfigKey) Generate(c *gin.Context) {
 	baizeContext.SuccessData(c, a.service.Generate())
+}
+
+// SetMcpAllowTool 设置允许的 MCP 工具列表
+// @Summary 设置允许的 MCP 工具列表
+// @Description 根据 API Key ID 更新该 Key 允许使用的 MCP 工具列表，用于 MCP 服务探测后限制可暴露的工具
+// @Tags 工业智能体/ApiKey管理
+// @Param object body gatewaymodels.AgentConfigKeyToolUpsert true "API Key MCP 工具保存参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "保存成功"
+// @Router /ai/agent/config/key/allow/tool [post]
+func (a *AgentConfigKey) SetMcpAllowTool(c *gin.Context) {
+	req := new(gatewaymodels.AgentConfigKeyToolUpsert)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	data, err := a.service.SetAllowMcpTools(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, data)
 }

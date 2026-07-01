@@ -282,7 +282,7 @@ func toMCPToolInputSchema(schema *types.JSONSchema) mcp.ToolInputSchema {
 	}
 }
 
-func toMCPTool(tool types.Tool) mcp.Tool {
+func ToMCPTool(tool types.Tool) mcp.Tool {
 	return mcp.Tool{
 		Name:        tool.Name,
 		Description: tool.Description,
@@ -308,7 +308,7 @@ func (m *GinMCP) Mount() {
 	m.filterTools()
 
 	for _, tool := range m.tools {
-		m.mcpServer.AddTool(toMCPTool(tool), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		m.mcpServer.AddTool(ToMCPTool(tool), func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 			// Execute the actual Gin endpoint via internal HTTP call
 			//execResult, err := m.executeToolFunc(tool.Name, request.Params) // Use the function field
 			arguments, ok := request.Params.Arguments.(map[string]interface{})

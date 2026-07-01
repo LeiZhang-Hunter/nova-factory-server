@@ -11,7 +11,8 @@ import (
 )
 
 type MCPServer struct {
-	service gatewayservice.IMCPServerService
+	service   gatewayservice.IMCPServerService
+	mcpServer *gin_mcp.GinMCP
 }
 
 func NewMCPServer(service gatewayservice.IMCPServerService) *MCPServer {
@@ -28,6 +29,7 @@ func (m *MCPServer) PrivateRoutes(router *gin.RouterGroup) {
 }
 
 func (m *MCPServer) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	m.mcpServer = router
 	router.RegisterPermission("GET", "/ai/mcp/server/list", "ai:mcp:server:list")
 	router.RegisterPermission("POST", "/ai/mcp/server/set", "ai:mcp:server:set")
 	router.RegisterPermission("POST", "/ai/mcp/server/probe", "ai:mcp:server:probe")
@@ -126,10 +128,11 @@ func (m *MCPServer) McpProbe(c *gin.Context) {
 		return
 	}
 
-	result, err := m.service.Probe(c.Request.Context(), req)
+	result, err := m.service.ProbePerm(c, m.mcpServer, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
+
 	baizeContext.SuccessData(c, result)
 }

@@ -476,6 +476,7 @@ CREATE TABLE IF NOT EXISTS `ai_agent_config_key`
 (
     `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `key` varchar(64) NOT NULL COMMENT '密钥',
+    `allow_mcp_server_tools` longtext NULL COMMENT 'MCP服务工具列表',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '发布者',
     `create_time` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
