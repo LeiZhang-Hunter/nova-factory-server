@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitorservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,11 @@ func (d *DeviceUtilization) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/device/monitor/utilization")
 	group.POST("/stat", middlewares.HasPermission("device:monitor:utilization:stat"), d.Stat)
 	group.GET("/info", middlewares.HasPermission("device:monitor:utilization:info"), d.Info)
+}
+
+func (d *DeviceUtilization) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("POST", "/device/monitor/utilization/stat", "device:monitor:utilization:stat")
+	router.RegisterPermission("GET", "/device/monitor/utilization/info", "device:monitor:utilization:info")
 }
 
 func (d *DeviceUtilization) PublicRoutes(router *gin.RouterGroup) {

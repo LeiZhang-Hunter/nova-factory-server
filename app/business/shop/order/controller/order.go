@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,14 @@ func (o *Order) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("shop:order:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:order:remove"), o.Delete)
 	group.POST("/synchronize-sales-orders", middlewares.HasPermission("shop:order:synchronizeSalesOrders"), o.SynchronizeSalesOrders)
+}
+
+func (o *Order) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/order/list", "shop:order:list")
+	router.RegisterPermission("GET", "/shop/order/query/:id", "shop:order:query")
+	router.RegisterPermission("POST", "/shop/order/set", "shop:order:set")
+	router.RegisterPermission("DELETE", "/shop/order/remove/:ids", "shop:order:remove")
+	router.RegisterPermission("POST", "/shop/order/synchronize-sales-orders", "shop:order:synchronizeSalesOrders")
 }
 
 // List Shop订单列表

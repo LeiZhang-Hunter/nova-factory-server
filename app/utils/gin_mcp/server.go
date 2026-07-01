@@ -32,17 +32,19 @@ func isDebugMode() bool {
 
 // GinMCP represents the MCP server configuration for a Gin application
 type GinMCP struct {
-	engine            *gin.Engine
-	name              string
-	description       string
-	baseURL           string
-	tools             []types.Tool
-	operations        map[string]types.Operation
-	transport         transport.Transport
-	config            *Config
-	registeredSchemas map[string]types.RegisteredSchemaInfo
-	schemasMu         sync.RWMutex
-	path              string
+	engine                *gin.Engine
+	name                  string
+	description           string
+	baseURL               string
+	tools                 []types.Tool
+	operations            map[string]types.Operation
+	transport             transport.Transport
+	config                *Config
+	registeredSchemas     map[string]types.RegisteredSchemaInfo
+	schemasMu             sync.RWMutex
+	registeredPermissions map[string]string // key: "METHOD path", value: permission string
+	permissionsMu         sync.RWMutex
+	path                  string
 	// executeToolFunc holds the function used to execute a tool.
 	// It defaults to defaultExecuteTool but can be overridden for testing.
 	executeToolFunc func(ctx context.Context, operationID string, parameters map[string]interface{}, headers http.Header) (interface{}, error)
@@ -71,26 +73,32 @@ func New(engine *gin.Engine, config *Config) *GinMCP {
 		}
 	}
 
+	m := &GinMCP{
+		engine:                engine,
+		name:                  config.Name,
+		description:           config.Description,
+		baseURL:               config.BaseURL,
+		operations:            make(map[string]types.Operation),
+		config:                config,
+		registeredSchemas:     make(map[string]types.RegisteredSchemaInfo),
+		registeredPermissions: make(map[string]string),
+		path:                  config.Path,
+		handler:               engine,
+	}
+
+	var hooks server.Hooks
+	hooks.OnAfterListTools = append(hooks.OnAfterListTools, m.afterHook)
+
 	// Create a new MCP server
 	s := server.NewMCPServer(
 		"Calculator Demo",
 		"1.0.0",
 		server.WithToolCapabilities(false),
 		server.WithRecovery(),
+		server.WithHooks(&hooks),
 	)
 
-	m := &GinMCP{
-		engine:            engine,
-		name:              config.Name,
-		description:       config.Description,
-		baseURL:           config.BaseURL,
-		operations:        make(map[string]types.Operation),
-		config:            config,
-		registeredSchemas: make(map[string]types.RegisteredSchemaInfo),
-		path:              config.Path,
-		mcpServer:         s,
-		handler:           engine,
-	}
+	m.mcpServer = s
 
 	m.executeToolFunc = m.defaultExecuteTool // Initialize with the default implementation
 
@@ -164,6 +172,45 @@ func (m *GinMCP) RegisterSchema(method string, path string, queryType interface{
 	if isDebugMode() {
 		log.Printf("Registered schema types for route: %s", schemaKey)
 	}
+}
+
+// RegisterPermission associates a permission string with a specific route.
+// The method is automatically uppercased, and the key is "METHOD path".
+// Example: mcp.RegisterPermission("GET", "/shop/goods/list", "shop:goods:list")
+func (m *GinMCP) RegisterPermission(method string, path string, permission string) {
+	m.permissionsMu.Lock()
+	defer m.permissionsMu.Unlock()
+
+	method = strings.ToUpper(method)
+	key := fmt.Sprintf("%s %s", method, path)
+	m.registeredPermissions[key] = permission
+
+	if isDebugMode() {
+		log.Printf("Registered permission for route %s: %s", key, permission)
+	}
+}
+
+// GetPermission returns the permission string for a given route, and whether it exists.
+func (m *GinMCP) GetPermission(method string, path string) (string, bool) {
+	m.permissionsMu.RLock()
+	defer m.permissionsMu.RUnlock()
+
+	method = strings.ToUpper(method)
+	key := fmt.Sprintf("%s %s", method, path)
+	perm, ok := m.registeredPermissions[key]
+	return perm, ok
+}
+
+// GetAllPermissions returns a copy of all registered route-to-permission mappings.
+func (m *GinMCP) GetAllPermissions() map[string]string {
+	m.permissionsMu.RLock()
+	defer m.permissionsMu.RUnlock()
+
+	result := make(map[string]string, len(m.registeredPermissions))
+	for k, v := range m.registeredPermissions {
+		result[k] = v
+	}
+	return result
 }
 
 func toSchemaMap(schema *types.JSONSchema) map[string]any {

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (a *AgentConfigKey) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("ai:agent:config:key:set"), a.Set)
 	group.POST("/generate", middlewares.HasPermission("ai:agent:config:key:generate"), a.Generate)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:config:key:remove"), a.Delete)
+}
+
+func (a *AgentConfigKey) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/agent/config/key/list", "ai:agent:config:key:list")
+	router.RegisterPermission("POST", "/ai/agent/config/key/set", "ai:agent:config:key:set")
+	router.RegisterPermission("POST", "/ai/agent/config/key/generate", "ai:agent:config:key:generate")
+	router.RegisterPermission("DELETE", "/ai/agent/config/key/remove/:ids", "ai:agent:config:key:remove")
 }
 
 // List 获取 API Key 列表

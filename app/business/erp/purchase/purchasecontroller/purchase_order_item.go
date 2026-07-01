@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/purchase/purchaseservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *PurchaseOrderItem) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:purchase:orderItems:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:purchase:orderItems:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:purchase:orderItems:remove"), o.Delete)
+}
+
+func (o *PurchaseOrderItem) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/purchase/order-items/list", "erp:purchase:orderItems:list")
+	router.RegisterPermission("GET", "/erp/purchase/order-items/query/:id", "erp:purchase:orderItems:query")
+	router.RegisterPermission("POST", "/erp/purchase/order-items/set", "erp:purchase:orderItems:set")
+	router.RegisterPermission("DELETE", "/erp/purchase/order-items/remove/:ids", "erp:purchase:orderItems:remove")
 }
 
 // List 查询 ERP 采购订单项列表。

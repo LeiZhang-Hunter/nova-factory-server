@@ -62,5 +62,26 @@ func NewGinEngine(app *routes.App,
 		gc.GenTable.PrivateRoutes(group)   //代码生成
 	}
 
+	{
+		sc.User.PrivateMcpRoutes(app.McpServer)       //用户
+		sc.Dept.PrivateMcpRoutes(app.McpServer)       //部门
+		sc.DictType.PrivateMcpRoutes(app.McpServer)   //字典类型
+		sc.DictData.PrivateMcpRoutes(app.McpServer)   //地点数据
+		sc.Role.PrivateMcpRoutes(app.McpServer)       //角色
+		sc.Post.PrivateMcpRoutes(app.McpServer)       //岗位
+		sc.Permission.PrivateMcpRoutes(app.McpServer) //岗位
+		sc.Config.PrivateMcpRoutes(app.McpServer)     //配置
+		sc.Notice.PrivateMcpRoutes(app.McpServer)     //消息
+		sc.SelectBox.PrivateMcpRoutes(app.McpServer)
+		sc.Shift.PrivateMcpRoutes(app.McpServer)
+		bc.CompanyInfo.PrivateMcpRoutes(app.McpServer)
+		mc.Server.PrivateMcpRoutes(app.McpServer)     //服务器详情
+		mc.Oper.PrivateMcpRoutes(app.McpServer)       //操作日志
+		mc.UserOnline.PrivateMcpRoutes(app.McpServer) //在线用户
+		mc.Logfor.PrivateMcpRoutes(app.McpServer)     //登录日志
+		mc.Job.PrivateMcpRoutes(app.McpServer)        //定时任务
+		gc.GenTable.PrivateMcpRoutes(app.McpServer)   //代码生成
+	}
+
 	return &Admin{}
 }

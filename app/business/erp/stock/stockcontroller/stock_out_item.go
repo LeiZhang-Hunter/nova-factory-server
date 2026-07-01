@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/stock/stockservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *StockOutItem) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:stock:outItem:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:stock:outItem:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:stock:outItem:remove"), o.Delete)
+}
+
+func (o *StockOutItem) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/stock/out-item/list", "erp:stock:outItem:list")
+	router.RegisterPermission("GET", "/erp/stock/out-item/query/:id", "erp:stock:outItem:query")
+	router.RegisterPermission("POST", "/erp/stock/out-item/set", "erp:stock:outItem:set")
+	router.RegisterPermission("DELETE", "/erp/stock/out-item/remove/:ids", "erp:stock:outItem:remove")
 }
 
 // List 查询其它出库单项列表。

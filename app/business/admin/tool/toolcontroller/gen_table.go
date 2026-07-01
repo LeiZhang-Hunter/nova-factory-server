@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/tool/toolservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,18 @@ func (gc *GenTable) PrivateRoutes(router *gin.RouterGroup) {
 	genTable.DELETE("/:tableIds", middlewares.HasPermission("tool:gen:remove"), gc.GenTableRemove)
 	genTable.GET("/preview/:tableId", middlewares.HasPermission("tool:gen:code"), gc.Preview)
 	genTable.GET("/genCode/:tableId", middlewares.HasPermission("tool:gen:code"), gc.GenCode)
+}
+
+func (gc *GenTable) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/tool/gen/list", "tool:gen:list")
+	router.RegisterPermission("GET", "/tool/gen:tableId", "tool:gen:query")
+	router.RegisterPermission("GET", "/tool/gen/db/list", "tool:gen:list")
+	router.RegisterPermission("GET", "/tool/gen/column/:talbleId", "tool:gen:list")
+	router.RegisterPermission("POST", "/tool/gen/importTable", "tool:gen:list")
+	router.RegisterPermission("PUT", "/tool/gen", "tool:gen:edit")
+	router.RegisterPermission("DELETE", "/tool/gen/:tableIds", "tool:gen:remove")
+	router.RegisterPermission("GET", "/tool/gen/preview/:tableId", "tool:gen:code")
+	router.RegisterPermission("GET", "/tool/gen/genCode/:tableId", "tool:gen:code")
 }
 
 func (gc *GenTable) GenTableList(c *gin.Context) {

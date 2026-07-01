@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/iot/alert/alertservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/time"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,12 @@ func (a *AlertAction) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("alert:action:set"), a.Set)                 // 设置物料信息
 	group.DELETE("/remove/:ids", middlewares.HasPermission("alert:action:remove"), a.Remove) //删除物料
 	return
+}
+
+func (a *AlertAction) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/alert/action/list", "alert:action:list")
+	router.RegisterPermission("POST", "/alert/action/set", "alert:action:set")
+	router.RegisterPermission("DELETE", "/alert/action/remove/:ids", "alert:action:remove")
 }
 
 // List 告警动作列表

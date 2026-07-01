@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -26,6 +27,14 @@ func (pc *Permission) PrivateRoutes(router *gin.RouterGroup) {
 	systemPost.PUT("", middlewares.SetLog("权限管理", middlewares.Update), middlewares.HasPermission("system:permission:edit"), pc.PermissionEdit)
 	systemPost.DELETE("/:permissionId", middlewares.SetLog("权限管理", middlewares.Delete), middlewares.HasPermission("system:permission:remove"), pc.PermissionRemove)
 
+}
+
+func (pc *Permission) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/permission/list", "system:permission")
+	router.RegisterPermission("GET", "/system/permission/:permissionId", "system:permission:query")
+	router.RegisterPermission("POST", "/system/permission", "system:permission:add")
+	router.RegisterPermission("PUT", "/system/permission", "system:permission:edit")
+	router.RegisterPermission("DELETE", "/system/permission/:permissionId", "system:permission:remove")
 }
 
 // PermissionList 系统权限列表

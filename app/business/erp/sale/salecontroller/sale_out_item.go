@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/sale/saleservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *SaleOutItem) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:sale:outItems:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:sale:outItems:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:sale:outItems:remove"), o.Delete)
+}
+
+func (o *SaleOutItem) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/sale/out-items/list", "erp:sale:outItems:list")
+	router.RegisterPermission("GET", "/erp/sale/out-items/query/:id", "erp:sale:outItems:query")
+	router.RegisterPermission("POST", "/erp/sale/out-items/set", "erp:sale:outItems:set")
+	router.RegisterPermission("DELETE", "/erp/sale/out-items/remove/:ids", "erp:sale:outItems:remove")
 }
 
 // List 查询销售出库项列表。

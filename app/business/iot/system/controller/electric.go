@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/iot/system/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -29,6 +30,12 @@ func (e *Electric) PrivateRoutes(router *gin.RouterGroup) {
 	ele.GET("/list", middlewares.HasPermission("system:electric:list"), e.List)
 	ele.POST("/set", middlewares.HasPermissions([]string{"system:electric:set"}), e.Set)
 	ele.DELETE("/remove/:ids", middlewares.HasPermission("system:electric:remove"), e.Remove) //删除物料
+}
+
+func (e *Electric) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/electric/list", "system:electric:list")
+	router.RegisterPermission("POST", "/system/electric/set", "system:electric:set")
+	router.RegisterPermission("DELETE", "/system/electric/remove/:ids", "system:electric:remove")
 }
 
 // Set 设置设备电流配置

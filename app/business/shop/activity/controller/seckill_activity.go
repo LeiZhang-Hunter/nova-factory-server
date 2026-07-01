@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/shop/activity/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"strconv"
 	"strings"
 
@@ -30,6 +31,13 @@ func (s *SeckillActivity) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/info/:id", middlewares.HasPermission("shop:activity:seckill_activity:info"), s.Info)
 	group.POST("/set", middlewares.HasPermission("shop:activity:seckill_activity:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:activity:seckill_activity:remove"), s.Delete)
+}
+
+func (s *SeckillActivity) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/activity/seckill_activity/list", "shop:activity:seckill_activity:list")
+	router.RegisterPermission("GET", "/shop/activity/seckill_activity/info/:id", "shop:activity:seckill_activity:info")
+	router.RegisterPermission("POST", "/shop/activity/seckill_activity/set", "shop:activity:seckill_activity:set")
+	router.RegisterPermission("DELETE", "/shop/activity/seckill_activity/remove/:ids", "shop:activity:seckill_activity:remove")
 }
 
 // List 获取秒杀活动列表

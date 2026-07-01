@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,6 +28,12 @@ func (s *Shift) PrivateRoutes(router *gin.RouterGroup) {
 	ele.POST("/set", middlewares.HasPermissions([]string{"system:shift:set"}), s.Set)
 	ele.DELETE("/remove/:ids", middlewares.HasPermission("system:shift:remove"), s.Remove)
 	return
+}
+
+func (s *Shift) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/shift/list", "system:shift:list")
+	router.RegisterPermission("POST", "/system/shift/set", "system:shift:set")
+	router.RegisterPermission("DELETE", "/system/shift/remove/:ids", "system:shift:remove")
 }
 
 // Set 设置班次配置

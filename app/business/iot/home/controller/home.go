@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/home/homeservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"go.uber.org/zap"
 
@@ -27,6 +28,11 @@ func (h *Home) PrivateRoutes(r *gin.RouterGroup) {
 		group.GET("/stats", middlewares.HasPermission("home:stats"), h.GetHomeStats)
 		group.GET("/app/stats", middlewares.HasPermission("home:app:stats"), h.GetHomeStats)
 	}
+}
+
+func (h *Home) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/stats", "home:stats")
+	router.RegisterPermission("GET", "/app/stats", "home:app:stats")
 }
 
 // GetHomeStats 首页统计

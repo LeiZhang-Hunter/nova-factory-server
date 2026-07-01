@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 )
 
 type Exception struct {
@@ -25,6 +26,12 @@ func (e *Exception) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("ai:exception:set"), e.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:exception:remove"), e.Remove)
 	return
+}
+
+func (e *Exception) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/exception/list", "ai:exception:list")
+	router.RegisterPermission("POST", "/ai/exception/set", "ai:exception:set")
+	router.RegisterPermission("DELETE", "/ai/exception/remove/:ids", "ai:exception:remove")
 }
 
 // List 异常预警列表

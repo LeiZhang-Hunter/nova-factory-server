@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/shop/config/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -26,6 +27,12 @@ func (l *LogisticsConfig) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", middlewares.HasPermission("shop:config:logistics:list"), l.List)
 	group.POST("/set", middlewares.HasPermission("shop:config:logistics:set"), l.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:config:logistics:remove"), l.Remove)
+}
+
+func (l *LogisticsConfig) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/config/logistics/list", "shop:config:logistics:list")
+	router.RegisterPermission("POST", "/shop/config/logistics/set", "shop:config:logistics:set")
+	router.RegisterPermission("DELETE", "/shop/config/logistics/remove/:ids", "shop:config:logistics:remove")
 }
 
 // List 查询物流配置列表

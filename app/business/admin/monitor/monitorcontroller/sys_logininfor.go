@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/monitor/monitorservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,13 @@ func (lc *Logininfor) PrivateRoutes(router *gin.RouterGroup) {
 	logininfor.GET("/export", middlewares.HasPermission("monitor:logininfor:export"), lc.LogininforExport)
 	logininfor.DELETE("/:infoIds", middlewares.SetLog("登录日志", middlewares.Delete), middlewares.HasPermission("monitor:logininfor:remove"), lc.LogininforRemove)
 	logininfor.DELETE("/clean", middlewares.SetLog("登录日志", middlewares.Clear), middlewares.HasPermission("monitor:logininfor:remove"), lc.LogininforClean)
+}
+
+func (lc *Logininfor) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/monitor/logininfor/list", "system:monitor:logininfor")
+	router.RegisterPermission("GET", "/monitor/logininfor/export", "monitor:logininfor:export")
+	router.RegisterPermission("DELETE", "/monitor/logininfor/:infoIds", "monitor:logininfor:remove")
+	router.RegisterPermission("DELETE", "/monitor/logininfor/clean", "monitor:logininfor:remove")
 }
 
 func (lc *Logininfor) LogininforList(c *gin.Context) {

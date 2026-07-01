@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (s *Skills) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("ai:skills:query"), s.GetByID)
 	group.POST("/set", middlewares.HasPermission("ai:skills:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:skills:remove"), s.Delete)
+}
+
+func (s *Skills) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/skills/list", "ai:skills:list")
+	router.RegisterPermission("GET", "/ai/skills/query/:id", "ai:skills:query")
+	router.RegisterPermission("POST", "/ai/skills/set", "ai:skills:set")
+	router.RegisterPermission("DELETE", "/ai/skills/remove/:ids", "ai:skills:remove")
 }
 
 // List 获取已安装技能列表

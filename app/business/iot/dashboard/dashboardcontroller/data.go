@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/dashboard/dashboardservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,13 @@ func (d *Data) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("dashboard:data:set"), d.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("dashboard:data:remove"), d.Remove)
 	group.GET("/info", middlewares.HasPermission("dashboard:data:info"), d.Info)
+}
+
+func (d *Data) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/dashboard/data/list", "dashboard:manager:list")
+	router.RegisterPermission("POST", "/dashboard/data/set", "dashboard:data:set")
+	router.RegisterPermission("DELETE", "/dashboard/data/remove/:ids", "dashboard:data:remove")
+	router.RegisterPermission("GET", "/dashboard/data/info", "dashboard:data:info")
 }
 
 // Set 保存面板

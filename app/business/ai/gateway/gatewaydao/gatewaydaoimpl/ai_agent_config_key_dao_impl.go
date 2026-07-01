@@ -90,6 +90,7 @@ func (a *AgentConfigKeyDaoImpl) List(c *gin.Context, req *gatewaymodels.AgentCon
 	if req.Key != "" {
 		db = db.Where("`key` LIKE ?", "%"+req.Key+"%")
 	}
+	db = db.Where("create_by = ?", baizeContext.GetUserId(c))
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	if req.Page <= 0 {
 		req.Page = 1

@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/iot/metric/device/metricmodels"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (d *Dashboard) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("dashboard:manager:set"), d.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("dashboard:manager:remove"), d.Remove)
 	group.POST("/metric/query", middlewares.HasPermission("dashboard:manager:metric:query"), d.Query)
+}
+
+func (d *Dashboard) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/dashboard/manager/list", "dashboard:manager:list")
+	router.RegisterPermission("POST", "/dashboard/manager/set", "dashboard:manager:set")
+	router.RegisterPermission("DELETE", "/dashboard/manager/remove/:ids", "dashboard:manager:remove")
+	router.RegisterPermission("POST", "/dashboard/manager/metric/query", "dashboard:manager:metric:query")
 }
 
 // List 仪表盘列表

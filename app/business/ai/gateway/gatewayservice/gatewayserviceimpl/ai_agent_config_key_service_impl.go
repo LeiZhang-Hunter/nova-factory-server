@@ -3,6 +3,7 @@ package gatewayserviceimpl
 import (
 	"errors"
 	"fmt"
+	"nova-factory-server/app/utils/store/key"
 	uuid2 "nova-factory-server/app/utils/uuid"
 	"regexp"
 	"strings"
@@ -22,7 +23,9 @@ type AgentConfigKeyServiceImpl struct {
 
 // NewAgentConfigKeyService 创建 AgentConfigKeyServiceImpl。
 func NewAgentConfigKeyService(dao gatewaydao.IAgentConfigKeyDao) gatewayservice.IAgentConfigKeyService {
-	return &AgentConfigKeyServiceImpl{dao: dao}
+	keyConfig := &AgentConfigKeyServiceImpl{dao: dao}
+	key.RegisterStore(keyConfig)
+	return keyConfig
 }
 
 func (a *AgentConfigKeyServiceImpl) Create(c *gin.Context, req *gatewaymodels.AgentConfigKeyUpsert) (*gatewaymodels.AgentConfigKey, error) {
@@ -78,4 +81,12 @@ func (a *AgentConfigKeyServiceImpl) validateUpsert(req *gatewaymodels.AgentConfi
 		return errors.New("密钥格式不正确，需为 sk- 前缀加 32 位小写 hex")
 	}
 	return nil
+}
+
+func (a *AgentConfigKeyServiceImpl) GetUserId(key string) int64 {
+	info, err := a.dao.GetByKey(&gin.Context{}, key)
+	if err != nil {
+		return 0
+	}
+	return info.CreateBy
 }

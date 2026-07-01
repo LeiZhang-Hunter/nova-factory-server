@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/alert/alertservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,6 +26,12 @@ func (ac *AlertTemplate) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", middlewares.HasPermission("alert:template:list"), ac.List)               // 物料列表
 	group.POST("/set", middlewares.HasPermission("alert:template:set"), ac.Set)                 // 设置物料信息
 	group.DELETE("/remove/:ids", middlewares.HasPermission("alert:template:remove"), ac.Remove) //删除物料
+}
+
+func (ac *AlertTemplate) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/alert/template/list", "alert:template:list")
+	router.RegisterPermission("POST", "/alert/template/set", "alert:template:set")
+	router.RegisterPermission("DELETE", "/alert/template/remove/:ids", "alert:template:remove")
 }
 
 // List 告警模板列表

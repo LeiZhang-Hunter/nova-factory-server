@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,6 +30,12 @@ func (nc *Notice) PrivateRoutes(router *gin.RouterGroup) {
 	systemConsumptionData.PUT("/noticeReadAll", nc.NoticeReadAll)
 	systemConsumptionData.DELETE("/noticeDelete/:ids", nc.NoticeDelete)
 
+}
+
+func (nc *Notice) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/notice/list", "system:notice")
+	router.RegisterPermission("GET", "/system/notice/:id", "system:notice:query")
+	router.RegisterPermission("POST", "/system/notice", "system:notice:add")
 }
 
 // NoticeList 消息通知列表

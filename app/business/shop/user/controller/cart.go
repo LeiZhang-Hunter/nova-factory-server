@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/shop/user/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,6 +28,13 @@ func (s *Cart) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/info/:id", middlewares.HasPermission("shop:user:cart:info"), s.GetByID)
 	group.POST("/set", middlewares.HasPermission("shop:user:cart:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:user:cart:remove"), s.Remove)
+}
+
+func (s *Cart) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/user/cart/list", "shop:user:cart:list")
+	router.RegisterPermission("GET", "/shop/user/cart/info/:id", "shop:user:cart:info")
+	router.RegisterPermission("POST", "/shop/user/cart/set", "shop:user:cart:set")
+	router.RegisterPermission("DELETE", "/shop/user/cart/remove/:ids", "shop:user:cart:remove")
 }
 
 // List 获取商城用户购物车列表

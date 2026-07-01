@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/finance/financeservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *FinanceReceipt) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:finance:receipt:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:finance:receipt:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:finance:receipt:remove"), o.Delete)
+}
+
+func (o *FinanceReceipt) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/finance/receipt/list", "erp:finance:receipt:list")
+	router.RegisterPermission("GET", "/erp/finance/receipt/query/:id", "erp:finance:receipt:query")
+	router.RegisterPermission("POST", "/erp/finance/receipt/set", "erp:finance:receipt:set")
+	router.RegisterPermission("DELETE", "/erp/finance/receipt/remove/:ids", "erp:finance:receipt:remove")
 }
 
 // List 查询 ERP 收款单列表。

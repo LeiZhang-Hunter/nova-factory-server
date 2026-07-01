@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/shop/home/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (s *HomeModule) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/info/:id", middlewares.HasPermission("shop:home:module:info"), s.Info)
 	group.POST("/set", middlewares.HasPermission("shop:home:module:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:home:module:remove"), s.Delete)
+}
+
+func (s *HomeModule) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/home/module/list", "shop:home:module:list")
+	router.RegisterPermission("GET", "/shop/home/module/info/:id", "shop:home:module:info")
+	router.RegisterPermission("POST", "/shop/home/module/set", "shop:home:module:set")
+	router.RegisterPermission("DELETE", "/shop/home/module/remove/:ids", "shop:home:module:remove")
 }
 
 // List 获取首页模块列表。

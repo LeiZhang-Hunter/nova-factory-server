@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/finance/financeservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *FinancePaymentItem) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:finance:paymentItem:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:finance:paymentItem:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:finance:paymentItem:remove"), o.Delete)
+}
+
+func (o *FinancePaymentItem) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/finance/payment-item/list", "erp:finance:paymentItem:list")
+	router.RegisterPermission("GET", "/erp/finance/payment-item/query/:id", "erp:finance:paymentItem:query")
+	router.RegisterPermission("POST", "/erp/finance/payment-item/set", "erp:finance:paymentItem:set")
+	router.RegisterPermission("DELETE", "/erp/finance/payment-item/remove/:ids", "erp:finance:paymentItem:remove")
 }
 
 // List 查询 ERP 付款项列表。

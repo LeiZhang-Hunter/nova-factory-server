@@ -3,6 +3,7 @@ package aidatasetcontroller
 import (
 	//"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/ocr"
 	"strconv"
 	"strings"
@@ -32,6 +33,10 @@ func (o *OCR) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/ai/ocr")
 	//group.POST("/predict", middlewares.HasPermission("ai:ocr:predict"), o.ExtractOCR)
 	group.POST("/predict", o.ExtractOCR)
+}
+
+func (o *OCR) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("POST", "/ai/ocr/predict", "ai:ocr:predict")
 }
 
 // ExtractOCR OCR识别

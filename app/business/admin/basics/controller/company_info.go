@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/basics/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,11 @@ func (cc *CompanyInfo) PrivateRoutes(router *gin.RouterGroup) {
 	basicsCompany := router.Group("/basics/company")
 	basicsCompany.GET("/info", middlewares.HasPermission("basics:company:query"), cc.CompanyInfoGet)
 	basicsCompany.PUT("/info", middlewares.SetLog("公司信息", middlewares.Update), middlewares.HasPermission("basics:company:edit"), cc.CompanyInfoSave)
+}
+
+func (cc *CompanyInfo) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/basics/company/info", "basics:company:query")
+	router.RegisterPermission("PUT", "/basics/company/info", "basics:company:edit")
 }
 
 // CompanyInfoGet 获取公司信息

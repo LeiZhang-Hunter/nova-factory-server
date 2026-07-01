@@ -17,6 +17,7 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -51,6 +52,14 @@ func (agent *Agent) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/type/:type", middlewares.HasPermission("ai:agent:config:type"), agent.GetEnabledByType)
 	group.POST("/set", middlewares.HasPermission("ai:agent:config:set"), agent.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:config:remove"), agent.Delete)
+}
+
+func (agent *Agent) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/agent/config/list", "ai:agent:config:list")
+	router.RegisterPermission("GET", "/ai/agent/config/query/:id", "ai:agent:config:query")
+	router.RegisterPermission("GET", "/ai/agent/config/query/type/:type", "ai:agent:config:type")
+	router.RegisterPermission("POST", "/ai/agent/config/set", "ai:agent:config:set")
+	router.RegisterPermission("DELETE", "/ai/agent/config/remove/:ids", "ai:agent:config:remove")
 }
 
 // List 获取智能体列表

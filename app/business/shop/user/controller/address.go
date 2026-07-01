@@ -7,7 +7,8 @@ import (
 	"nova-factory-server/app/business/shop/user/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
-	"nova-factory-server/app/utils/region"
+	"nova-factory-server/app/utils/gin_mcp"
+	"nova-fac
 	"strconv"
 	"strings"
 	"sync"
@@ -33,6 +34,15 @@ func (s *Address) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/region", middlewares.HasPermission("shop:user:address:region"), s.Region)
 	group.POST("/set", middlewares.HasPermission("shop:user:address:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:user:address:remove"), s.Remove)
+}
+
+func (s *Address) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/user/address/list", "shop:user:address:list")
+	router.RegisterPermission("GET", "/shop/user/address/info/:id", "shop:user:address:info")
+	router.RegisterPermission("GET", "/shop/user/address/query", "shop:user:address:query")
+	router.RegisterPermission("GET", "/shop/user/address/region", "shop:user:address:region")
+	router.RegisterPermission("POST", "/shop/user/address/set", "shop:user:address:set")
+	router.RegisterPermission("DELETE", "/shop/user/address/remove/:ids", "shop:user:address:remove")
 }
 
 // List 获取商城用户地址列表

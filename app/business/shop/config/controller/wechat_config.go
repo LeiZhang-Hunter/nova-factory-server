@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/shop/config/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -45,6 +46,11 @@ func (s *WechatConfig) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/config/wechat")
 	group.GET("/get", middlewares.HasPermission("shop:config:wechat:query"), s.GetWechatConfig)
 	group.PUT("/update", middlewares.HasPermission("shop:config:wechat:edit"), s.UpdateWechatConfig)
+}
+
+func (s *WechatConfig) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/config/wechat/get", "shop:config:wechat:query")
+	router.RegisterPermission("PUT", "/shop/config/wechat/update", "shop:config:wechat:edit")
 }
 
 // GetWechatConfig 获取微信小程序配置

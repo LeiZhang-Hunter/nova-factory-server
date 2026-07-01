@@ -121,8 +121,52 @@ func NewGinEngine(
 
 	// mpc
 	{
-		dc.Info.PrivateMcpRoutes(app.McpServer) //资产管理---设备模块
+		iotSystem.Electric.PrivateMcpRoutes(app.McpServer)
+		dc.Info.PrivateMcpRoutes(app.McpServer)  //资产管理---设备模块
+		dc.Group.PrivateMcpRoutes(app.McpServer) //资产管理---设备分组
+		dc.Template.PrivateMcpRoutes(app.McpServer)
+		dc.TemplateData.PrivateMcpRoutes(app.McpServer)
+		dc.DeviceSubject.PrivateMcpRoutes(app.McpServer)
+		dc.DeviceCheckPlan.PrivateMcpRoutes(app.McpServer)
+		dc.DeviceCheckMachinery.PrivateMcpRoutes(app.McpServer)
+		dc.DeviceCheckSubject.PrivateMcpRoutes(app.McpServer)
+
+		materialC.Material.PrivateMcpRoutes(app.McpServer)    //资产管理---物料管理
+		resource.ResourceFile.PrivateMcpRoutes(app.McpServer) //资产管理---资料管理
+
+		craft.CraftRoute.PrivateMcpRoutes(app.McpServer)     //工艺路线
+		craft.Process.PrivateMcpRoutes(app.McpServer)        //工序设置
+		craft.ProcessContext.PrivateMcpRoutes(app.McpServer) //工序内容
+		craft.RouteProcess.PrivateMcpRoutes(app.McpServer)   //工艺组成
+		craft.Schedule.PrivateMcpRoutes(app.McpServer)
+
+		controller.IotAgent.PrivateMcpRoutes(app.McpServer)
+		controller.Config.PrivateMcpRoutes(app.McpServer)
+
 		deviceMonitor.DeviceMonitor.PrivateMcpRoutes(app.McpServer)
+		deviceMonitor.DeviceReport.PrivateMcpRoutes(app.McpServer)
+		deviceMonitor.DeviceUtilization.PrivateMcpRoutes(app.McpServer)
+		deviceMonitor.ControlLog.PrivateMcpRoutes(app.McpServer)
+
+		alert.AlertTemplate.PrivateMcpRoutes(app.McpServer)
+		alert.Alert.PrivateMcpRoutes(app.McpServer)
+		alert.AlertLog.PrivateMcpRoutes(app.McpServer)
+		alert.AlertAction.PrivateMcpRoutes(app.McpServer)
+		alert.AlertAiReason.PrivateMcpRoutes(app.McpServer)
+
+		building.Building.PrivateMcpRoutes(app.McpServer)
+		building.Floor.PrivateMcpRoutes(app.McpServer)
+
+		dashboard.Dashboard.PrivateMcpRoutes(app.McpServer)
+		dashboard.Data.PrivateMcpRoutes(app.McpServer)
+
+		home.PrivateMcpRoutes(app.McpServer)
+
+		// 生产管理
+		camera.Camera.PrivateMcpRoutes(app.McpServer)
+
+		// 组态管理
+		configuration.Configuration.PrivateMcpRoutes(app.McpServer)
 	}
 
 	//grpc

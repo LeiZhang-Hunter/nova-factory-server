@@ -7,6 +7,7 @@ import (
 	daemonizeService "nova-factory-server/app/business/iot/daemonize/daemonizeservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -34,6 +35,13 @@ func (c *Camera) PrivateRoutes(router *gin.RouterGroup) {
 	cameraGroup.DELETE("/remove/:ids", middlewares.HasPermission("iot:asset:camera:remove"), c.Delete)
 	cameraGroup.GET("/info/:id", middlewares.HasPermission("iot:asset:camera:info"), c.GetById)
 	cameraGroup.GET("/list", middlewares.HasPermission("iot:asset:camera:list"), c.List)
+}
+
+func (c *Camera) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("POST", "/iot/asset/camera/set", "iot:asset:camera:set")
+	router.RegisterPermission("DELETE", "/iot/asset/camera/remove/:ids", "iot:asset:camera:remove")
+	router.RegisterPermission("GET", "/iot/asset/camera/info/:id", "iot:asset:camera:info")
+	router.RegisterPermission("GET", "/iot/asset/camera/list", "iot:asset:camera:list")
 }
 
 // Set 设置摄像头信息

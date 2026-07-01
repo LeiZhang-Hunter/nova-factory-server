@@ -14,6 +14,7 @@ import (
 	"nova-factory-server/app/utils/bCryptPasswordEncoder"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
+	"nova-factory-server/app/utils/store/permissions"
 	"time"
 
 	"image/color"
@@ -35,10 +36,12 @@ type LoginService struct {
 }
 
 func NewLoginService(cache cache.Cache, ud systemDao2.IUserDao, pd systemDao2.IPermissionDao, rd systemDao2.IRoleDao, ld monitordao.ILogininforDao, cs systemService2.IConfigService) systemService2.ILoginService {
-	return &LoginService{cache: cache, userDao: ud, pd: pd, roleDao: rd, loginforDao: ld, cs: cs,
+	l := &LoginService{cache: cache, userDao: ud, pd: pd, roleDao: rd, loginforDao: ld, cs: cs,
 		driver: base64Captcha.NewDriverMath(38, 106, 0, 0, &color.RGBA{0, 0, 0, 0}, nil, []string{"wqy-microhei.ttc"}),
 		store:  base64Captcha.DefaultMemStore,
 	}
+	permissions.RegisterStore(l)
+	return l
 }
 
 func (loginService *LoginService) Login(c *gin.Context, user *systemModels2.User) *systemModels2.LoginResp {
@@ -80,6 +83,28 @@ func (loginService *LoginService) RecordLoginInfo(c *gin.Context, loginUser *mon
 		loginService.loginforDao.InserLogininfor(c, loginUser)
 	}()
 
+}
+
+func (loginService *LoginService) GetPermission(c *gin.Context, userId int64) []string {
+	manager := session.NewAdminManager(loginService.cache)
+	sess, err := manager.InitSession(c, userId)
+	if err != nil {
+		zap.L().Error("init session error", zap.Error(err))
+		return []string{}
+	}
+	c.Set(sessionStatus.SessionKey, sess)
+
+	perms := make([]string, 0)
+	roles := loginService.roleDao.SelectBasicRolesByUserId(c, userId)
+	loginRoles := loginService.RolePermissionByRoles(roles)
+	//session.Set(c, sessionStatus.Role, loginRoles)
+	baizeContext.GetSession(c).Set(c, sessionStatus.Role, loginRoles)
+	if baizeContext.IsAdmin(c) {
+		perms = loginService.pd.SelectPermissionAll(c)
+	} else {
+		perms = loginService.pd.SelectPermissionByUserId(c, userId)
+	}
+	return perms
 }
 
 func (loginService *LoginService) getPermission(c *gin.Context, userId int64) []string {

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,15 @@ func (cc *Config) PrivateRoutes(router *gin.RouterGroup) {
 	systemConfig.POST("", middlewares.SetLog("配置管理", middlewares.Insert), middlewares.HasPermission("system:config:add"), cc.ConfigAdd)
 	systemConfig.PUT("", middlewares.SetLog("配置管理", middlewares.Update), middlewares.HasPermission("system:config:edit"), cc.ConfigEdit)
 	systemConfig.DELETE("/:configId", middlewares.SetLog("配置管理", middlewares.Delete), middlewares.HasPermission("system:config:remove"), cc.ConfigRemove)
+}
+
+func (cc *Config) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/config/list", "system:config")
+	router.RegisterPermission("POST", "/system/config/export", "system:config:export")
+	router.RegisterPermission("GET", "/system/config/:configId", "system:config:query")
+	router.RegisterPermission("POST", "/system/config", "system:config:add")
+	router.RegisterPermission("PUT", "/system/config", "system:config:edit")
+	router.RegisterPermission("DELETE", "/system/config/:configId", "system:config:remove")
 }
 
 // ConfigList 查询配置列表查询

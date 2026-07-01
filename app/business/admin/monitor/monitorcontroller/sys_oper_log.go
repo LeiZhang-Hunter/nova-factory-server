@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/monitor/monitorservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,13 @@ func (ol *OperLog) PrivateRoutes(router *gin.RouterGroup) {
 	operlog.DELETE("/:operIds", middlewares.SetLog("操作日志", middlewares.Delete), middlewares.HasPermission("monitor:operlog:remove"), ol.OperLogRemove)
 	operlog.DELETE("/clean", middlewares.SetLog("操作日志", middlewares.Clear), middlewares.HasPermission("monitor:operlog:remove"), ol.OperLogClean)
 
+}
+
+func (ol *OperLog) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/monitor/operlog/list", "system:monitor:operlog")
+	router.RegisterPermission("POST", "/monitor/operlog/export", "monitor:operlog:export")
+	router.RegisterPermission("DELETE", "/monitor/operlog/:operIds", "monitor:operlog:remove")
+	router.RegisterPermission("DELETE", "/monitor/operlog/clean", "monitor:operlog:remove")
 }
 
 func (ol *OperLog) OperLogList(c *gin.Context) {

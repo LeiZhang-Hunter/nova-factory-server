@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -90,6 +91,42 @@ func (d *Dataset) PrivateRoutes(router *gin.RouterGroup) {
 	ai.POST("/session/ask", middlewares.HasPermission("ai:dataset:session:ask"), d.Ask)
 	ai.POST("/model/request", middlewares.HasPermission("ai:dataset:model:request"), d.ModelRequest)
 
+}
+
+func (d *Dataset) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/dataset/list", "ai:dataset")
+	router.RegisterPermission("GET", "/ai/dataset/info", "ai:dataset:info")
+	router.RegisterPermission("GET", "/ai/dataset/config", "ai:dataset:info")
+	router.RegisterPermission("POST", "/ai/dataset/create", "ai:dataset:create")
+	router.RegisterPermission("PUT", "/ai/dataset/update/:dataset_id", "ai:dataset:update")
+	router.RegisterPermission("DELETE", "/ai/dataset/remove/:dataset_id", "ai:dataset:remove")
+	router.RegisterPermission("POST", "/ai/dataset/upload/document/:datasetId", "ai:dataset:upload:document")
+	router.RegisterPermission("PUT", "/ai/dataset/update/document/:document_id", "ai:dataset:update:document")
+	router.RegisterPermission("GET", "/ai/dataset/download/document/:document_id", "ai:dataset:update:document")
+	router.RegisterPermission("GET", "/ai/dataset/list/document", "ai:dataset:update:document")
+	router.RegisterPermission("GET", "/ai/dataset/document/get/:doc_id", "ai:dataset:update:document")
+	router.RegisterPermission("DELETE", "/ai/dataset/remove/document", "ai:dataset:remove:document")
+	router.RegisterPermission("POST", "/ai/dataset/start/document", "ai:dataset:start:document")
+	router.RegisterPermission("POST", "/ai/dataset/stop/document", "ai:dataset:stop:document")
+	router.RegisterPermission("GET", "/ai/dataset/chunk/list", "ai:dataset:chunk")
+	router.RegisterPermission("POST", "/ai/dataset/chunk/add", "ai:dataset:chunk:add")
+	router.RegisterPermission("DELETE", "/ai/dataset/chunk/remove", "ai:dataset:chunk:remove")
+	router.RegisterPermission("PUT", "/ai/dataset/chunk/update", "ai:dataset:chunk:update")
+	router.RegisterPermission("POST", "/ai/dataset/chunk/retrieval", "ai:dataset:chunk:retrieval")
+	router.RegisterPermission("GET", "/ai/dataset/assistant/list", "ai:dataset:assistant")
+	router.RegisterPermission("PUT", "/ai/dataset/assistant/update", "ai:dataset:assistant:update")
+	router.RegisterPermission("POST", "/ai/dataset/assistant/create", "ai:dataset:chats:assistant:create")
+	router.RegisterPermission("DELETE", "/ai/dataset/assistant/remove/:assistantIds", "ai:dataset:chats:assistant:remove")
+	router.RegisterPermission("POST", "/ai/dataset/session/create", "ai:dataset:session:create")
+	router.RegisterPermission("POST", "/ai/dataset/session/update", "ai:dataset:session:update")
+	router.RegisterPermission("GET", "/ai/dataset/session/list", "ai:dataset:session:list")
+	router.RegisterPermission("DELETE", "/ai/dataset/session/remove", "ai:dataset:session:remove")
+	router.RegisterPermission("POST", "/ai/dataset/session/charts/completions", "ai:dataset:session:charts:completions")
+	router.RegisterPermission("GET", "/ai/dataset/session/agents/list", "ai:dataset:session:agents:list")
+	router.RegisterPermission("DELETE", "/ai/dataset/session/agents/delete", "ai:dataset:session:agents:delete")
+	router.RegisterPermission("POST", "/ai/dataset/session/conversation/related_questions", "ai:dataset:session:conversation:related_questions")
+	router.RegisterPermission("POST", "/ai/dataset/session/ask", "ai:dataset:session:ask")
+	router.RegisterPermission("POST", "/ai/dataset/model/request", "ai:dataset:model:request")
 }
 
 func (d *Dataset) PublicRoutes(router *gin.RouterGroup) {

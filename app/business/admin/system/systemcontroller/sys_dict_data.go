@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,15 @@ func (ddc *DictData) PrivateRoutes(router *gin.RouterGroup) {
 	systemDictData.PUT("", middlewares.SetLog("字典数据管理", middlewares.Update), middlewares.HasPermission("system:dict:edit"), ddc.DictDataEdit)
 	systemDictData.DELETE("/:dictCodes", middlewares.SetLog("字典数据管理", middlewares.Delete), middlewares.HasPermission("system:dict:remove"), ddc.DictDataRemove)
 
+}
+
+func (ddc *DictData) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/dict/data/list", "system:dict")
+	router.RegisterPermission("GET", "/system/dict/data/export", "system:dict:export")
+	router.RegisterPermission("GET", "/system/dict/data/:dictCode", "system:dict:query")
+	router.RegisterPermission("POST", "/system/dict/data", "system:dict:add")
+	router.RegisterPermission("PUT", "/system/dict/data", "system:dict:edit")
+	router.RegisterPermission("DELETE", "/system/dict/data/:dictCodes", "system:dict:remove")
 }
 
 // DictDataList 查询字典列表

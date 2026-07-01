@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/shop/activity/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +22,11 @@ func (p *Pink) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/shop/activity/pink")
 	group.GET("/list", middlewares.HasPermission("shop:activity:pink:list"), p.List)
 	group.GET("/info/:id", middlewares.HasPermission("shop:activity:pink:info"), p.GetByID)
+}
+
+func (p *Pink) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/activity/pink/list", "shop:activity:pink:list")
+	router.RegisterPermission("GET", "/shop/activity/pink/info/:id", "shop:activity:pink:info")
 }
 
 // List 获取拼团列表

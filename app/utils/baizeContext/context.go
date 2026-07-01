@@ -11,7 +11,12 @@ import (
 	"strconv"
 )
 
-func IsAdmin(c *gin.Context) bool {
+func IsAdmin(c *gin.Context) (isAdmin bool) {
+	defer func() {
+		if recover() != nil {
+			isAdmin = false
+		}
+	}()
 	for _, id := range GetRoles(c) {
 		if id == 1 {
 			return true

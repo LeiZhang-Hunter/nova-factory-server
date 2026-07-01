@@ -58,7 +58,26 @@ func NewGinEngine(
 		ai.Config.PrivateHttpRoutes(group)
 	}
 
-	ai.Auth.PrivateMcpRoutes(app.McpServer)
-	ai.Config.PrivateRoutes(app.GrpcServer)
+	// mcp
+	{
+		ai.Dataset.PrivateMcpRoutes(app.McpServer)    // 工业智能体
+		ai.Prediction.PrivateMcpRoutes(app.McpServer) // 工业智能体
+		ai.Exception.PrivateMcpRoutes(app.McpServer)  // 工业智能体
+		ai.Control.PrivateMcpRoutes(app.McpServer)
+		ai.Model.PrivateMcpRoutes(app.McpServer)
+		ai.OCR.PrivateMcpRoutes(app.McpServer)
+		ai.Role.PrivateMcpRoutes(app.McpServer)
+		ai.Auth.PrivateMcpRoutes(app.McpServer)
+		gateway.AIGateway.PrivateMcpRoutes(app.McpServer)
+		gateway.Agent.PrivateMcpRoutes(app.McpServer)
+		gateway.Orchestration.PrivateMcpRoutes(app.McpServer)
+		gateway.SubAgent.PrivateMcpRoutes(app.McpServer)
+		gateway.Conversations.PrivateMcpRoutes(app.McpServer)
+		gateway.Skills.PrivateMcpRoutes(app.McpServer)
+		gateway.MCPServer.PrivateMcpRoutes(app.McpServer)
+		gateway.Message.PrivateMcpRoutes(app.McpServer)
+		gateway.ConfigPublishHistory.PrivateMcpRoutes(app.McpServer)
+		gateway.AgentConfigKey.PrivateMcpRoutes(app.McpServer)
+	}
 	return &AI{}
 }

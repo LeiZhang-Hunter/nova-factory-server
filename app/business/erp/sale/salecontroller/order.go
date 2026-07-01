@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/sale/saleservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,15 @@ func (o *Order) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:sale:order:remove"), o.Delete)
 	group.GET("/check-login-state", middlewares.HasPermission("erp:sale:order:checkLoginState"), o.CheckLoginState)
 	group.POST("/synchronize-sales-orders", middlewares.HasPermission("erp:sale:order:synchronizeSalesOrders"), o.SynchronizeSalesOrders)
+}
+
+func (o *Order) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/sale/order/list", "erp:sale:order:list")
+	router.RegisterPermission("GET", "/erp/sale/order/query/:id", "erp:sale:order:query")
+	router.RegisterPermission("POST", "/erp/sale/order/set", "erp:sale:order:set")
+	router.RegisterPermission("DELETE", "/erp/sale/order/remove/:ids", "erp:sale:order:remove")
+	router.RegisterPermission("GET", "/erp/sale/order/check-login-state", "erp:sale:order:checkLoginState")
+	router.RegisterPermission("POST", "/erp/sale/order/synchronize-sales-orders", "erp:sale:order:synchronizeSalesOrders")
 }
 
 // List ERP订单列表

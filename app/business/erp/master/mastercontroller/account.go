@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *Account) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:master:account:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:master:account:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:account:remove"), o.Delete)
+}
+
+func (o *Account) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/master/account/list", "erp:master:account:list")
+	router.RegisterPermission("GET", "/erp/master/account/query/:id", "erp:master:account:query")
+	router.RegisterPermission("POST", "/erp/master/account/set", "erp:master:account:set")
+	router.RegisterPermission("DELETE", "/erp/master/account/remove/:ids", "erp:master:account:remove")
 }
 
 // List 查询结算账户列表。

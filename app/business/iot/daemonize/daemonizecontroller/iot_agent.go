@@ -5,6 +5,7 @@ import (
 	daemonizeService2 "nova-factory-server/app/business/iot/daemonize/daemonizeservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	v1 "github.com/novawatcher-io/nova-factory-payload/daemonize/grpc/v1"
@@ -30,6 +31,15 @@ func (i *IotAgent) PrivateRoutes(router *gin.RouterGroup) {
 	agent.POST("/process/start", middlewares.HasPermission("daemonize:agent:process:start"), i.Start) //启动进程
 	agent.POST("/process/stop", middlewares.HasPermission("daemonize:agent:process:stop"), i.Stop)    //停止进程
 	agent.GET("/info", middlewares.HasPermission("daemonize:agent:info"), i.Info)                     // agent列表
+}
+
+func (i *IotAgent) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/daemonize/agent/list", "daemonize:agent:list")
+	router.RegisterPermission("POST", "/daemonize/agent/set", "daemonize:agent:set")
+	router.RegisterPermission("DELETE", "/daemonize/agent/remove/:ids", "daemonize:agent:remove")
+	router.RegisterPermission("POST", "/daemonize/agent/process/start", "daemonize:agent:process:start")
+	router.RegisterPermission("POST", "/daemonize/agent/process/stop", "daemonize:agent:process:stop")
+	router.RegisterPermission("GET", "/daemonize/agent/info", "daemonize:agent:info")
 }
 
 // List Agent列表

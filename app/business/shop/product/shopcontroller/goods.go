@@ -11,6 +11,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,6 +42,21 @@ func (s *Goods) PrivateRoutes(router *gin.RouterGroup) {
 		middlewares.HasPermission("shop:goods:vector:generate:all:query:list"), s.GetGenerateAllProgressList)
 	group.GET("/vector/generate/all/progress/:taskId",
 		middlewares.HasPermission("shop:goods:vector:generate:all:progress"), s.GetGenerateAllProgress)
+}
+
+func (s *Goods) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/goods/list", "shop:goods:list")
+	router.RegisterPermission("GET", "/shop/goods/export/csv", "shop:goods:export:csv")
+	router.RegisterPermission("GET", "/shop/goods/info/:id", "shop:goods:info")
+	router.RegisterPermission("POST", "/shop/goods/add", "shop:goods:add")
+	router.RegisterPermission("PUT", "/shop/goods/edit", "shop:goods:edit")
+	router.RegisterPermission("DELETE", "/shop/goods/remove/:ids", "shop:goods:remove")
+	router.RegisterPermission("POST", "/shop/goods/vector/generate/:id", "shop:goods:vector:generate")
+	router.RegisterPermission("POST", "/shop/goods/vector/search", "shop:goods:vector:search")
+	router.RegisterPermission("POST", "/shop/goods/vector/search/batch", "shop:goods:vector:batch_search")
+	router.RegisterPermission("POST", "/shop/goods/vector/generate/all", "shop:goods:vector:generate:all")
+	router.RegisterPermission("GET", "/shop/goods/vector/generate/all/query/list", "shop:goods:vector:generate:all:query:list")
+	router.RegisterPermission("GET", "/shop/goods/vector/generate/all/progress/:taskId", "shop:goods:vector:generate:all:progress")
 }
 
 // PublicRoutes 导入接口注册

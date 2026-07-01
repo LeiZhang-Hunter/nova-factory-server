@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,6 +21,11 @@ func (s *SelectBox) PrivateRoutes(router *gin.RouterGroup) {
 	sb := router.Group("/system/selectBox")
 	sb.GET("/permission", middlewares.HasPermissions([]string{"system:permission:add", "system:permission:edit", "system:role:add", "system:role:edit"}), s.SelectPermission)
 	sb.GET("/dept", middlewares.HasPermissions([]string{"system:user"}), s.SelectDept)
+}
+
+func (s *SelectBox) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/selectBox/permission", "system:permission:edit")
+	router.RegisterPermission("GET", "/system/selectBox/dept", "system:user")
 }
 
 // SelectPermission 权限选择框

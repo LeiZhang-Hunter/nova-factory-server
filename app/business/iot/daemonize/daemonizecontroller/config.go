@@ -7,7 +7,8 @@ import (
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/gateway/v1/config/pipeline"
-	"nova-factory-server/app/utils/yaml"
+	"nova-factory-server/app/utils/gin_mcp"
+
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -36,6 +37,13 @@ func (c *Config) PrivateRoutes(router *gin.RouterGroup) {
 	routers.GET("/list", middlewares.HasPermission("gateway:agent:config:list"), c.List)               // 配置列表
 	routers.POST("/set", middlewares.HasPermission("gateway:agent:config:set"), c.Set)                 // 保存配置
 	routers.DELETE("/remove/:ids", middlewares.HasPermission("gateway:agent:config:remove"), c.Remove) // 删除配置
+}
+
+func (c *Config) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/gateway/agent/config/generate", "gateway:agent:config:generate")
+	router.RegisterPermission("GET", "/gateway/agent/config/list", "gateway:agent:config:list")
+	router.RegisterPermission("POST", "/gateway/agent/config/set", "gateway:agent:config:set")
+	router.RegisterPermission("DELETE", "/gateway/agent/config/remove/:ids", "gateway:agent:config:remove")
 }
 
 func (c *Config) PublicRoutes(router *gin.RouterGroup) {

@@ -5,6 +5,7 @@ import (
 	systemService2 "nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -31,6 +32,16 @@ func (dtc *DictType) PrivateRoutes(router *gin.RouterGroup) {
 	systemDictType.DELETE("/:dictIds", middlewares.SetLog("字典管理", middlewares.Delete), middlewares.HasPermission("system:dict:remove"), dtc.DictTypeRemove)
 	systemDictType.DELETE("/refreshCache", middlewares.HasPermission("system:dict:remove"), dtc.DictTypeClearCache)
 	systemDictType.GET("/optionSelect", dtc.DictTypeOptionSelect)
+}
+
+func (dtc *DictType) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/dict/type/list", "system:dict")
+	router.RegisterPermission("POST", "/system/dict/type/export", "system:dict:export")
+	router.RegisterPermission("GET", "/system/dict/type/:dictId", "system:dict:query")
+	router.RegisterPermission("POST", "/system/dict/type", "system:dict:add")
+	router.RegisterPermission("PUT", "/system/dict/type", "system:dict:edit")
+	router.RegisterPermission("DELETE", "/system/dict/type/:dictIds", "system:dict:remove")
+	router.RegisterPermission("DELETE", "/system/dict/type/refreshCache", "system:dict:remove")
 }
 
 // DictTypeList 查询字典类型列表
