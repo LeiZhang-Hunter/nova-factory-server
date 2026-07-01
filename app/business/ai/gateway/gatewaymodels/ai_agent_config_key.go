@@ -6,7 +6,7 @@ import "nova-factory-server/app/baize"
 type AgentConfigKey struct {
 	ID                  int64  `json:"id,string" gorm:"column:id"`
 	Key                 string `json:"key" gorm:"column:key"`
-	AllowMcpServerTools string `json:"-" gorm:"column:allow_mcp_server_tools"`
+	AllowMcpServerTools string `json:"tools" gorm:"column:allow_mcp_server_tools"`
 	DeptID              int64  `json:"deptId" gorm:"column:dept_id"`
 	baize.BaseEntity
 	State int32 `json:"state" gorm:"column:state"`
