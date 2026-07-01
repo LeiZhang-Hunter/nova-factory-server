@@ -8,7 +8,7 @@ import (
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/gateway/v1/config/pipeline"
 	"nova-factory-server/app/utils/gin_mcp"
-
+	"nova-factory-server/app/utils/yaml"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
