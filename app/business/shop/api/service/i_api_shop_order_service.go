@@ -18,6 +18,7 @@ type IApiShopOrderService interface {
 	//HandleWechatNotify(event.ZOrderStatusSyncReqEvent) error
 	Cancel(c *gin.Context, userID int64, id int64, reason string) error
 	ConfirmReceive(c *gin.Context, userID int64, id int64) error
+	SubmitPaymentVoucher(c *gin.Context, userID int64, req *models.PaymentVoucherReq) error
 	GetStatistics(c *gin.Context, userID int64) (*models.OrderStatistics, error)
 	BatchUpdateStatus(c *gin.Context, userID int64, req []models.OrderStatus) error
 }

@@ -108,8 +108,8 @@ func (d *OrderRefundDaoImpl) UpdateStatus(c *gin.Context, id int64, status int32
 		return d.UpdateStatusWithTx(tx, id, status, updates)
 	})
 }
-func (d *OrderRefundDaoImpl) UpdateByID(c *gin.Context, id int64, updates map[string]any) error {
-	return d.db.WithContext(c).Table(d.tableName).
+func (d *OrderRefundDaoImpl) UpdateByID(tx *gorm.DB, id int64, updates map[string]any) error {
+	return tx.Table(d.tableName).
 		Where("id = ?", id).
 		Updates(updates).Error
 }

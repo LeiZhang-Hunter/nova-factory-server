@@ -33,4 +33,10 @@ type IOrderService interface {
 
 	// SyncAfterSaleOrder 同步售后单事件至管家婆。
 	SyncAfterSaleOrder(event event.ZAfterSaleOrderSyncReqEvent) error
+
+	// UpdateAfterSaleStatus 处理ERP售后状态回写，审核通过后触发支付通道退款。
+	UpdateAfterSaleStatus(event event.ZAfterSaleStatusSyncReqEvent) error
+
+	// ReviewPaymentVoucher 审核线下打款支付凭证
+	ReviewPaymentVoucher(c *gin.Context, req *models.PaymentVoucherReviewReq) error
 }

@@ -42,6 +42,19 @@ type RefundApplyResp struct {
 	StatusText  string `json:"status_text"`
 }
 
+// SubmitReturnLogisticsReq 提交退货物流请求
+type SubmitReturnLogisticsReq struct {
+	OrderID          int64  `json:"orderId,string" binding:"required"`
+	LogisticsCompany string `json:"logisticsCompany" binding:"required"`
+	LogisticsCode    string `json:"logisticsCode" binding:"required"`
+}
+
+// SubmitReturnLogisticsResp 提交退货物流响应
+type SubmitReturnLogisticsResp struct {
+	Status     int32  `json:"status"`
+	StatusText string `json:"statusText"`
+}
+
 //// RefundDetailResp 售后单详情
 //type RefundDetailResp struct {
 //	ID                 uint64  `json:"id,string"`

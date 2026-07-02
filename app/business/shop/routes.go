@@ -130,6 +130,7 @@ func NewGinEngine(
 		shopConfigController.Logistics.PrivateRoutes(adminGroup)
 		shopConfigController.ShopErpIntegrationConfig.PrivateRoutes(adminGroup)
 		shopConfigController.LogisticsConfig.PrivateRoutes(adminGroup)
+		shopConfigController.EnterpriseAccount.PrivateRoutes(adminGroup)
 		controller.Category.PrivateRoutes(adminGroup)
 		controller.Goods.PrivateRoutes(adminGroup)
 		controller.Sku.PrivateRoutes(adminGroup)

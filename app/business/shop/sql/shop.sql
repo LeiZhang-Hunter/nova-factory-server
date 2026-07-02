@@ -523,6 +523,8 @@ CREATE TABLE IF NOT EXISTS `shop_order` (
     `appid` VARCHAR(64) DEFAULT NULL COMMENT '小程序AppID',
     `payer_openid` VARCHAR(128) DEFAULT NULL COMMENT '支付用户openid',
     `pay_channel` TINYINT DEFAULT 0 COMMENT '支付通道：0未知 1微信 2支付宝',
+    `payment_voucher` VARCHAR(500) DEFAULT NULL COMMENT '支付凭证图片URL',
+    `payment_voucher_time` DATETIME(0) DEFAULT NULL COMMENT '提交支付凭证时间',
 
     `bill_code` VARCHAR(100) DEFAULT NULL COMMENT '管家婆返回订单编号',
     `sync_message` VARCHAR(500) DEFAULT NULL COMMENT '同步结果描述',

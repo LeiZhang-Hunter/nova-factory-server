@@ -67,7 +67,12 @@ func (o *SyncObserver) OnAfterSaleOrderChanged(event event.ZAfterSaleOrderSyncRe
 	return nil
 }
 
-// OnOrderStatusChange 订单发货变化
+// OnAfterSaleStatusChanged ERP售后状态回写回调（管家婆是回调来源，不需要再次转发）
+func (o *SyncObserver) OnAfterSaleStatusChanged(event event.ZAfterSaleStatusSyncReqEvent) error {
+	return nil
+}
+
+// OnOrderStatusChange 订单状态变化
 func (o *SyncObserver) OnOrderStatusChange(sendEvent event.ZOrderStatusSyncReqEvent) error {
 	return nil
 }

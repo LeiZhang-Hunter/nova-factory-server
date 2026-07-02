@@ -121,6 +121,7 @@ func (q *API) API(c *gin.Context) {
 		q.syncOrderSend(c)
 		break
 	case "selfmall.afterorder.status.sync":
+		q.syncAfterSaleStatus(c)
 		break
 	case "selfmall.product.query",
 		"selfmall.order.ship",
@@ -237,5 +238,36 @@ func (q *API) syncOrderSend(c *gin.Context) {
 		Tid:      orderSendReq.Tid,
 		Issplit:  orderSendReq.Issplit,
 		Subtids:  strings.Join(subtids, ","),
+	})
+}
+
+// syncAfterSaleStatus 处理 selfmall.afterorder.status.sync 回调，分发至观察者。
+func (q *API) syncAfterSaleStatus(c *gin.Context) {
+	req := &models.AfterSaleStatusSyncReq{}
+	if err := c.ShouldBind(req); err != nil {
+		c.JSON(http.StatusOK, qqdError("参数绑定失败: "+err.Error()))
+		return
+	}
+	zap.L().Info("method not implemented: ", zap.Any("req", req))
+	if req.Tid == "" || req.Rtid == "" || req.Status == "" {
+		c.JSON(http.StatusOK, qqdError("tid、rtid、status 不能为空"))
+		return
+	}
+
+	req.WithDB(q.db)
+	if err := observer.GetNotifier().OnAfterSaleStatusChanged(req); err != nil {
+		zap.L().Error("after sale status sync failed",
+			zap.String("tid", req.Tid),
+			zap.String("rtid", req.Rtid),
+			zap.String("status", req.Status),
+			zap.Error(err),
+		)
+		c.JSON(http.StatusOK, qqdError("售后状态同步失败: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, models.ErrorResponse{
+		Iserror:  false,
+		Errormsg: "ok",
 	})
 }

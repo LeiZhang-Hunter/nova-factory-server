@@ -4,6 +4,7 @@ import "strings"
 
 const (
 	ERPStatusNoPay        string = "NoPay"        // 未付款
+	ERPStatusPayPending   string = "PayPending"   // 待审核付款（线下打款）
 	ERPStatusPayed        string = "Payed"        // 已付款（货到付款）
 	ERPStatusSended       string = "Sended"       // 已发货
 	ERPStatusPartSend     string = "PartSend"     // 部分发货
@@ -22,6 +23,8 @@ func ShopStatusToERPStatus(status int32) string {
 	switch status {
 	case OrderStatusPending:
 		return ERPStatusNoPay
+	case OrderStatusPayPending:
+		return ERPStatusPayPending
 	case OrderStatusPaid:
 		return ERPStatusPayed
 	case OrderStatusShipped:
@@ -44,6 +47,8 @@ func ErpStatusToShopStatus(status string) int32 {
 	switch strings.TrimSpace(status) {
 	case ERPStatusNoPay:
 		return OrderStatusPending
+	case ERPStatusPayPending:
+		return OrderStatusPayPending
 	case ERPStatusPayed:
 		return OrderStatusPaid
 	case ERPStatusSended:
@@ -66,6 +71,8 @@ func GetStatusText(status int32) string {
 	switch status {
 	case OrderStatusPending:
 		return "待支付"
+	case OrderStatusPayPending:
+		return "待审核付款"
 	case OrderStatusPaid:
 		return "已支付"
 	case OrderStatusShipped:
@@ -88,16 +95,18 @@ func OrderStatusRank(status string) (int, bool) {
 	switch strings.TrimSpace(status) {
 	case ERPStatusNoPay:
 		return 1, true
-	case ERPStatusPayed:
+	case ERPStatusPayPending:
 		return 2, true
-	case ERPStatusPartSend:
+	case ERPStatusPayed:
 		return 3, true
-	case ERPStatusSended:
+	case ERPStatusPartSend:
 		return 4, true
+	case ERPStatusSended:
+		return 5, true
 	case ERPStatusTradeSuccess,
 		ERPStatusTradeClosed,
 		ERPStatusAftersale:
-		return 5, true
+		return 6, true
 	default:
 		return 0, false
 	}

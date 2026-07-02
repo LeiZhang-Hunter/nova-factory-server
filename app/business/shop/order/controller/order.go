@@ -1,11 +1,12 @@
 package controller
 
 import (
-	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/order/models"
 	"nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,7 @@ func (o *Order) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("shop:order:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:order:remove"), o.Delete)
 	group.POST("/synchronize-sales-orders", middlewares.HasPermission("shop:order:synchronizeSalesOrders"), o.SynchronizeSalesOrders)
+	group.POST("/review-payment-voucher", middlewares.HasPermission("shop:order:reviewPaymentVoucher"), o.ReviewPaymentVoucher)
 }
 
 // List Shop订单列表
@@ -164,4 +166,28 @@ func (o *Order) SynchronizeSalesOrders(c *gin.Context) {
 		return
 	}
 	baizeContext.SuccessData(c, data)
+}
+
+// ReviewPaymentVoucher 审核支付凭证
+// @Summary 审核支付凭证
+// @Description 审核支付凭证
+// @Tags Shop/销售管理
+// @Security BearerAuth
+// @Accept application/json
+// @Param body body models.PaymentVoucherReviewReq true "支付凭证审核参数"
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "审核成功"
+// @Router /Shop/order/review-payment-voucher [post]
+func (o *Order) ReviewPaymentVoucher(c *gin.Context) {
+	req := new(models.PaymentVoucherReviewReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if err := o.service.ReviewPaymentVoucher(c, req); err != nil {
+		zap.L().Error("review payment voucher failed", zap.Error(err))
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
 }

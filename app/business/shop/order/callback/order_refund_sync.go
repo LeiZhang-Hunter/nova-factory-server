@@ -64,10 +64,9 @@ func (s *AfterSaleSyncCallback) OnFinish(ev event.Event) error {
 		s.updateSyncFailed(err.Error())
 		return err
 	}
-
 	now := time.Now()
 	billCode := extractAfterSaleBillCode(resp)
-	err = s.orderRefundDao.UpdateByID(s.ctx, s.aftersaleID, map[string]any{
+	err = s.orderRefundDao.UpdateByID(ev.GetDB(), s.aftersaleID, map[string]any{
 		"erp_sync_status":    int32(1),
 		"erp_sync_bill_code": billCode,
 		"erp_sync_time":      &now,
@@ -82,7 +81,7 @@ func (s *AfterSaleSyncCallback) OnFinish(ev event.Event) error {
 
 func (s *AfterSaleSyncCallback) updateSyncFailed(message string) {
 	now := time.Now()
-	s.orderRefundDao.UpdateStatus(s.ctx, s.aftersaleID, 0, map[string]any{
+	s.orderRefundDao.UpdateStatusWithTx(s.event.GetDB(), s.aftersaleID, 0, map[string]any{
 		"sync_status":  int32(2),
 		"sync_message": message,
 		"sync_time":    &now,

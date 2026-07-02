@@ -257,23 +257,7 @@ func (s *OrderNotify) HandleWechatRefundNotify(c *gin.Context) {
 		return
 	}
 
-	// 触发管家婆售后同步
-	order, _ := s.orderDao.GetByID(c, uint64(refunds.OrderID))
-	if order != nil {
-		event := models2.NewAftersaleSyncEvent(refunds, order)
-		cb := callback.NewAfterSaleSyncCallback(c, s.orderRefundDao, refunds.ID, event)
-		event.WithCallback(cb)
-		event.WithDB(s.db)
-
-		if err := observer.GetNotifier().OnAfterSaleOrderChanged(event); err != nil {
-			zap.L().Error("售后单同步触发失败",
-				zap.String("out_refund_no", refunds.OutRefundNo),
-				zap.Error(err),
-			)
-		}
-	}
 	c.JSON(http.StatusOK, nil)
-	return
 }
 
 func writeRefundNotifyFail(c *gin.Context, message string) {
