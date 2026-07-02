@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -27,6 +28,12 @@ func (r *Role) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", middlewares.HasPermission("ai:dataset:role:permission:list"), r.List)
 	group.POST("/set", middlewares.HasPermission("ai:dataset:role:permission:set"), r.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:dataset:role:permission:remove"), r.Remove)
+}
+
+func (r *Role) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/dataset/role/permission/list", "ai:dataset:role:permission:list")
+	router.RegisterPermission("POST", "/ai/dataset/role/permission/set", "ai:dataset:role:permission:set")
+	router.RegisterPermission("DELETE", "/ai/dataset/role/permission/remove/:ids", "ai:dataset:role:permission:remove")
 }
 
 // List 查询知识库/文档角色权限列表

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitorservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +23,10 @@ func NewControlLog(service devicemonitorservice.ControlLogService) *ControlLog {
 func (that *ControlLog) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/device/monitor/control/log")
 	group.GET("/list", middlewares.HasPermission("device:monitor:control:log:list"), that.List)
+}
+
+func (that *ControlLog) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/device/monitor/control/log/list", "device:monitor:control:log:list")
 }
 
 // List 控制记录列表

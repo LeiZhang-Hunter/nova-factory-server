@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/shop/config/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -27,6 +28,13 @@ func (l *Logistics) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("shop:config:logistics:company:query"), l.GetByID)
 	group.POST("/set", middlewares.HasPermission("shop:config:logistics:company:set"), l.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:config:logistics:company:remove"), l.Delete)
+}
+
+func (l *Logistics) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/config/logistics-company/list", "shop:config:logistics:company:list")
+	router.RegisterPermission("GET", "/shop/config/logistics-company/query/:id", "shop:config:logistics:company:query")
+	router.RegisterPermission("POST", "/shop/config/logistics-company/set", "shop:config:logistics:company:set")
+	router.RegisterPermission("DELETE", "/shop/config/logistics-company/remove/:ids", "shop:config:logistics:company:remove")
 }
 
 // List 查询物流公司列表。

@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,6 +34,16 @@ func (m *Model) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/provider/global/get", middlewares.HasPermission("ai:model:provider:global:get"), m.GetGlobalModel)
 	group.POST("/provider/global/set", middlewares.HasPermission("ai:model:provider:global:set"), m.SetGlobalModel)
 	group.DELETE("/provider/global/remove", middlewares.HasPermission("ai:model:provider:global:remove"), m.RemoveGlobalModel)
+}
+
+func (m *Model) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/model/provider/list", "ai:model:provider:list")
+	router.RegisterPermission("GET", "/ai/model/provider/embedding/config", "ai:model:provider:embedding:config")
+	router.RegisterPermission("GET", "/ai/model/provider/setting/get", "ai:model:provider:setting:get")
+	router.RegisterPermission("POST", "/ai/model/provider/setting/set", "ai:model:provider:setting:set")
+	router.RegisterPermission("GET", "/ai/model/provider/global/get", "ai:model:provider:global:get")
+	router.RegisterPermission("POST", "/ai/model/provider/global/set", "ai:model:provider:global:set")
+	router.RegisterPermission("DELETE", "/ai/model/provider/global/remove", "ai:model:provider:global:remove")
 }
 
 // ProviderList 模型供应商列表

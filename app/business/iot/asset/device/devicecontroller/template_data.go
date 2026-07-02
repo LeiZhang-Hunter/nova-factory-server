@@ -7,6 +7,7 @@ import (
 	deviceService2 "nova-factory-server/app/business/iot/asset/device/deviceservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -35,6 +36,13 @@ func (t *TemplateData) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("asset:device:template:data:set"), t.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("asset:device:template:data:remove"), t.Remove)
 	group.GET("/device", middlewares.HasPermission("asset:device:template:data:device"), t.GetDeviceTemplateData)
+}
+
+func (t *TemplateData) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/asset/device/template/data/list", "asset:device:template:data:list")
+	router.RegisterPermission("POST", "/asset/device/template/data/set", "asset:device:template:data:set")
+	router.RegisterPermission("DELETE", "/asset/device/template/data/remove/:ids", "asset:device:template:data:remove")
+	router.RegisterPermission("GET", "/asset/device/template/data/device", "asset:device:template:data:device")
 }
 
 // List 获取模板数据列表

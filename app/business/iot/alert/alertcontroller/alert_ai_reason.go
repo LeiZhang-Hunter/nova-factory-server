@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/alert/alertservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,12 @@ func (a *AlertAiReason) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("alert:reason:set"), a.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("alert:reason:remove"), a.Remove)
 	return
+}
+
+func (a *AlertAiReason) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/alert/reason/list", "alert:reason:list")
+	router.RegisterPermission("POST", "/alert/reason/set", "alert:reason:set")
+	router.RegisterPermission("DELETE", "/alert/reason/remove/:ids", "alert:reason:remove")
 }
 
 // List 告警AI推理列表

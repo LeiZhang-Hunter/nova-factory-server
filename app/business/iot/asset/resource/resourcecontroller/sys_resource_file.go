@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/asset/resource/resourceservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,12 @@ func (rf *ResourceFile) PrivateRoutes(router *gin.RouterGroup) {
 	resource.GET("/list", middlewares.HasPermission("asset:resource:list"), rf.List)               // 资料列表
 	resource.POST("/set", middlewares.HasPermission("asset:resource:set"), rf.Set)                 // 设置资料信息
 	resource.DELETE("/remove/:ids", middlewares.HasPermission("asset:resource:remove"), rf.Remove) //删除资料
+}
+
+func (rf *ResourceFile) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/asset/resource/list", "asset:resource:list")
+	router.RegisterPermission("POST", "/asset/resource/set", "asset:resource:set")
+	router.RegisterPermission("DELETE", "/asset/resource/remove/:ids", "asset:resource:remove")
 }
 
 // Set 登记资料

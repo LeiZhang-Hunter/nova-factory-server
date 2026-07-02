@@ -7,6 +7,7 @@ import (
 	metricService2 "nova-factory-server/app/business/iot/metric/device/metricservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -41,6 +42,12 @@ func (d *DeviceReport) PrivateRoutes(router *gin.RouterGroup) {
 	metric.GET("/list", middlewares.HasPermission("metric:time:seq:list"), d.SearchTimeSeqList)
 	metric.POST("/set", middlewares.HasPermission("metric:time:seq:set"), d.SetDevMap)
 	metric.DELETE("/remove", middlewares.HasPermission("metric:time:seq:remove"), d.RemoveDevMap)
+}
+
+func (d *DeviceReport) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/device/monitor/data/dev/list", "device:monitor:data:dev:list")
+	router.RegisterPermission("POST", "/device/monitor/data/list", "device:monitor:data:list")
+	router.RegisterPermission("POST", "/device/monitor/data/export", "device:monitor:data:export")
 }
 
 // DevList 设备测点列表

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/craft/craftrouteservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,12 @@ func (p *Process) PrivateRoutes(router *gin.RouterGroup) {
 	routers.GET("/list", middlewares.HasPermission("craft:process"), p.GetProcessList)                         // 工序列表
 	routers.POST("/set", middlewares.HasPermission("craft:process:set"), p.SetProcess)                         // 设置工序
 	routers.DELETE("/remove/:process_ids", middlewares.HasPermission("craft:process:remove"), p.RemoveProcess) //移除工序
+}
+
+func (p *Process) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/craft/process/list", "craft:process")
+	router.RegisterPermission("POST", "/craft/process/set", "craft:process:set")
+	router.RegisterPermission("DELETE", "/craft/process/remove/:process_ids", "craft:process:remove")
 }
 
 // GetProcessList 工序列表

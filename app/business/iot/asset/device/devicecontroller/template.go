@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/constant/protocols"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -28,6 +29,13 @@ func (t *Template) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("asset:device:template:set"), t.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("asset:device:template:remove"), t.Remove)
 	group.GET("/protocols", middlewares.HasPermission("asset:device:template:protocols"), t.Protocols)
+}
+
+func (t *Template) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/asset/device/template/list", "asset:device:template:list")
+	router.RegisterPermission("POST", "/asset/device/template/set", "asset:device:template:set")
+	router.RegisterPermission("DELETE", "/asset/device/template/remove/:ids", "asset:device:template:remove")
+	router.RegisterPermission("GET", "/asset/device/template/protocols", "asset:device:template:protocols")
 }
 
 // List 获取模板列表

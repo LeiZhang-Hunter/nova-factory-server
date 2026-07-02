@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/iot/daemonize/daemonizeservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -31,6 +32,14 @@ func (schedule *Schedule) PrivateRoutes(router *gin.RouterGroup) {
 		schedule.Remove) //移除调度
 	routers.GET("/month/list", middlewares.HasPermission("craft:route:product:month:list"), schedule.MonthList) // 调度列表
 	routers.GET("/detail", middlewares.HasPermission("craft:route:schedule:detail"), schedule.Detail)           // 调度列表
+}
+
+func (schedule *Schedule) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/craft/route/schedule/list", "craft:route:schedule:list")
+	router.RegisterPermission("POST", "/craft/route/schedule/set", "craft:route:schedule:set")
+	router.RegisterPermission("DELETE", "/craft/route/schedule/remove/:ids", "craft:route:schedule:remove")
+	router.RegisterPermission("GET", "/craft/route/schedule/month/list", "craft:route:product:month:list")
+	router.RegisterPermission("GET", "/craft/route/schedule/detail", "craft:route:schedule:detail")
 }
 
 func (schedule *Schedule) PublicRoutes(router *gin.RouterGroup) {

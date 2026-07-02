@@ -34,6 +34,13 @@ func (o *OrderAudit) PrivateRoutes(router *gin.RouterGroup) {
 
 func (o *OrderAudit) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 	router.RegisterSchema("POST", "/erp/order-audit/import", nil, salemodels.OrderAuditImportReq{})
+	router.RegisterPermission("GET", "/erp/sale/order-audit/list", "erp:sale:orderAudit:list")
+	router.RegisterPermission("GET", "/erp/sale/order-audit/query/:id", "erp:sale:orderAudit:query")
+	router.RegisterPermission("POST", "/erp/sale/order-audit/set", "erp:sale:orderAudit:set")
+	router.RegisterPermission("DELETE", "/erp/sale/order-audit/remove/:ids", "erp:sale:orderAudit:remove")
+	router.RegisterPermission("POST", "/erp/sale/order-audit/approve", "erp:sale:orderAudit:approve")
+	router.RegisterPermission("POST", "/erp/sale/order-audit/reject", "erp:sale:orderAudit:reject")
+	router.RegisterPermission("POST", "/erp/sale/order-audit/import", "erp:sale:orderAudit:import")
 }
 
 // List ERP订单审核列表

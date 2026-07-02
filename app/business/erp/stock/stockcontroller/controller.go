@@ -3,6 +3,7 @@ package stockcontroller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	"nova-factory-server/app/utils/gin_mcp"
 )
 
 var ProviderSet = wire.NewSet(
@@ -62,5 +63,38 @@ func (c *Controller) PrivateRoutes(router *gin.RouterGroup) {
 	}
 	if c.StockRecord != nil {
 		c.StockRecord.PrivateRoutes(router)
+	}
+}
+
+func (c *Controller) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	if c.Stock != nil {
+		c.Stock.PrivateMcpRoutes(router)
+	}
+	if c.StockCheck != nil {
+		c.StockCheck.PrivateMcpRoutes(router)
+	}
+	if c.StockCheckItem != nil {
+		c.StockCheckItem.PrivateMcpRoutes(router)
+	}
+	if c.StockIn != nil {
+		c.StockIn.PrivateMcpRoutes(router)
+	}
+	if c.StockInItem != nil {
+		c.StockInItem.PrivateMcpRoutes(router)
+	}
+	if c.StockMove != nil {
+		c.StockMove.PrivateMcpRoutes(router)
+	}
+	if c.StockMoveItem != nil {
+		c.StockMoveItem.PrivateMcpRoutes(router)
+	}
+	if c.StockOut != nil {
+		c.StockOut.PrivateMcpRoutes(router)
+	}
+	if c.StockOutItem != nil {
+		c.StockOutItem.PrivateMcpRoutes(router)
+	}
+	if c.StockRecord != nil {
+		c.StockRecord.PrivateMcpRoutes(router)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"nova-factory-server/app/business/admin/monitor/monitormodels"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,6 +19,10 @@ func NewInfoServer() *InfoServer {
 func (isc *InfoServer) PrivateRoutes(router *gin.RouterGroup) {
 	server := router.Group("/monitor/server")
 	server.GET("", middlewares.HasPermission("monitor:server"), isc.GetInfoServer)
+}
+
+func (isc *InfoServer) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/monitor/server", "monitor:server")
 }
 
 func (isc *InfoServer) GetInfoServer(c *gin.Context) {

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/asset/building/buildingservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,6 +26,12 @@ func (b *Building) PrivateRoutes(router *gin.RouterGroup) {
 	building.GET("/list", middlewares.HasPermission("asset:building:list"), b.List)               // 设备列表
 	building.POST("/set", middlewares.HasPermission("asset:building:set"), b.Set)                 // 设置设备信息
 	building.DELETE("/remove/:ids", middlewares.HasPermission("asset:building:remove"), b.Remove) //删除设备分组列表
+}
+
+func (b *Building) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/asset/building/list", "asset:building:list")
+	router.RegisterPermission("POST", "/asset/building/set", "asset:building:set")
+	router.RegisterPermission("DELETE", "/asset/building/remove/:ids", "asset:building:remove")
 }
 
 func (b *Building) PublicRoutes(router *gin.RouterGroup) {

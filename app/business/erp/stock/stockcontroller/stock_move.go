@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/stock/stockservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *StockMove) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:stock:move:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:stock:move:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:stock:move:remove"), o.Delete)
+}
+
+func (o *StockMove) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/stock/move/list", "erp:stock:move:list")
+	router.RegisterPermission("GET", "/erp/stock/move/query/:id", "erp:stock:move:query")
+	router.RegisterPermission("POST", "/erp/stock/move/set", "erp:stock:move:set")
+	router.RegisterPermission("DELETE", "/erp/stock/move/remove/:ids", "erp:stock:move:remove")
 }
 
 // List 查询库存调拨单列表。

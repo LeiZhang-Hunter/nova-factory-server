@@ -3,6 +3,7 @@ package purchasecontroller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	"nova-factory-server/app/utils/gin_mcp"
 )
 
 var ProviderSet = wire.NewSet(
@@ -42,5 +43,26 @@ func (c *Controller) PrivateRoutes(router *gin.RouterGroup) {
 	}
 	if c.PurchaseReturnItem != nil {
 		c.PurchaseReturnItem.PrivateRoutes(router)
+	}
+}
+
+func (c *Controller) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	if c.PurchaseIn != nil {
+		c.PurchaseIn.PrivateMcpRoutes(router)
+	}
+	if c.PurchaseInItem != nil {
+		c.PurchaseInItem.PrivateMcpRoutes(router)
+	}
+	if c.PurchaseOrder != nil {
+		c.PurchaseOrder.PrivateMcpRoutes(router)
+	}
+	if c.PurchaseOrderItem != nil {
+		c.PurchaseOrderItem.PrivateMcpRoutes(router)
+	}
+	if c.PurchaseReturn != nil {
+		c.PurchaseReturn.PrivateMcpRoutes(router)
+	}
+	if c.PurchaseReturnItem != nil {
+		c.PurchaseReturnItem.PrivateMcpRoutes(router)
 	}
 }

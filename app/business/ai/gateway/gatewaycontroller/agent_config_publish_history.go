@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,6 +28,13 @@ func (a *AgentConfigPublishHistory) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/info/:id", middlewares.HasPermission("ai:agent:config:publish:history:info"), a.Info)
 	group.POST("/set", middlewares.HasPermission("ai:agent:config:publish:history:set"), a.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:config:publish:history:remove"), a.Remove)
+}
+
+func (a *AgentConfigPublishHistory) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/agent/config/publish/history/list", "ai:agent:config:publish:history:list")
+	router.RegisterPermission("GET", "/ai/agent/config/publish/history/info/:id", "ai:agent:config:publish:history:info")
+	router.RegisterPermission("POST", "/ai/agent/config/publish/history/set", "ai:agent:config:publish:history:set")
+	router.RegisterPermission("DELETE", "/ai/agent/config/publish/history/remove/:ids", "ai:agent:config:publish:history:remove")
 }
 
 // List 获取智能体配置发布历史列表

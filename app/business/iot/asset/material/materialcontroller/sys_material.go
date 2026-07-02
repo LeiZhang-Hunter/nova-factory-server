@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/asset/material/materialservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -32,6 +33,16 @@ func (mi *MaterialInfo) PrivateRoutes(router *gin.RouterGroup) {
 
 	material.GET("/outbound/list", middlewares.HasPermission("asset:material:outbound"), mi.GetMaterialOutBoundList) // 出库登记
 	material.POST("/outbound/add", middlewares.HasPermission("asset:material:outbound:add"), mi.AddMaterialOutBound) // 出库登记
+}
+
+func (mi *MaterialInfo) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/asset/material/list", "asset:material")
+	router.RegisterPermission("POST", "/asset/material/set", "asset:material:set")
+	router.RegisterPermission("DELETE", "/asset/material/:materialIds", "asset:material:remove")
+	router.RegisterPermission("GET", "/asset/material/inbound/list", "asset:material:inbound")
+	router.RegisterPermission("POST", "/asset/material/inbound/add", "asset:material:inbound:add")
+	router.RegisterPermission("GET", "/asset/material/outbound/list", "asset:material:outbound")
+	router.RegisterPermission("POST", "/asset/material/outbound/add", "asset:material:outbound:add")
 }
 
 // GetMaterialInfoList 物料管理列表

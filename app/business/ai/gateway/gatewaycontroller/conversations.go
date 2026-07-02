@@ -9,6 +9,7 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/sse"
 	"strconv"
 	"time"
@@ -42,6 +43,14 @@ func (conversations *Conversations) PrivateRoutes(router *gin.RouterGroup) {
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:agent:conversations:remove"), conversations.RemoveConversation)
 	group.POST("/chat", middlewares.HasPermission("ai:agent:conversations:chat"), conversations.Chat)
 	group.POST("/stop-generation", middlewares.HasPermission("ai:agent:conversations:stop-generation"), conversations.StopGeneration)
+}
+
+func (conversations *Conversations) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/agent/conversations/list", "ai:agent:conversations:list")
+	router.RegisterPermission("POST", "/ai/agent/conversations/create", "ai:agent:conversations:create")
+	router.RegisterPermission("DELETE", "/ai/agent/conversations/remove/:ids", "ai:agent:conversations:remove")
+	router.RegisterPermission("POST", "/ai/agent/conversations/chat", "ai:agent:conversations:chat")
+	router.RegisterPermission("POST", "/ai/agent/conversations/stop-generation", "ai:agent:conversations:stop-generation")
 }
 
 // ListConversations 查询会话列表

@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/iot/craft/craftrouteservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -30,6 +31,14 @@ func (craft *Craft) PrivateRoutes(router *gin.RouterGroup) {
 	routers.DELETE("/remove/:craft_route_id", middlewares.HasPermission("craft:route:remove"), craft.RemoveRoute) //移除工艺路线
 	routers.GET("/detail", middlewares.HasPermission("craft:route:detail"), craft.Detail)                         // 工艺路线详情
 	routers.POST("/config/save", middlewares.HasPermission("craft:route:config:save"), craft.Save)                // 工艺路线详情
+}
+
+func (craft *Craft) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/craft/route/list", "craft:route")
+	router.RegisterPermission("POST", "/craft/route/set", "craft:route:set")
+	router.RegisterPermission("DELETE", "/craft/route/remove/:craft_route_id", "craft:route:remove")
+	router.RegisterPermission("GET", "/craft/route/detail", "craft:route:detail")
+	router.RegisterPermission("POST", "/craft/route/config/save", "craft:route:config:save")
 }
 
 // GetRouteList 读取工艺列表

@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,10 @@ func NewMessage(service gatewayservice.IAIMessageService) *Message {
 func (message *Message) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/ai/agent/messages")
 	group.GET("/list", middlewares.HasPermission("ai:agent:messages:list"), message.List)
+}
+
+func (message *Message) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/agent/messages/list", "ai:agent:messages:list")
 }
 
 // PublicRoutes 注册智能体消息公开路由。

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,6 +31,21 @@ func (rc *Role) PrivateRoutes(router *gin.RouterGroup) {
 	rr.PUT("/authUser/selectAll", middlewares.SetLog("角色管理", middlewares.Update), middlewares.HasPermission("system:role:edit"), rc.InsertAuthUser)
 	rr.PUT("/authUser/cancelAll", middlewares.SetLog("角色管理", middlewares.Update), middlewares.HasPermission("system:role:edit"), rc.CancelAuthUserAll)
 	rr.PUT("/authUser/cancel", middlewares.SetLog("角色管理", middlewares.Update), middlewares.HasPermission("system:role:edit"), rc.CancelAuthUser)
+}
+
+func (rc *Role) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/role/list", "system:role")
+	router.RegisterPermission("POST", "/system/role/export", "system:role:export")
+	router.RegisterPermission("GET", "/system/role/:roleId", "system:role")
+	router.RegisterPermission("POST", "/system/role", "system:role:add")
+	router.RegisterPermission("PUT", "/system/role", "system:role:edit")
+	router.RegisterPermission("PUT", "/system/role/changeStatus", "system:role:edit")
+	router.RegisterPermission("DELETE", "/system/role/:rolesIds", "system:role:remove")
+	router.RegisterPermission("GET", "/system/role/authUser/allocatedList", "system:role")
+	router.RegisterPermission("GET", "/system/role/authUser/unallocatedList", "system:role")
+	router.RegisterPermission("PUT", "/system/role/authUser/selectAll", "system:role:edit")
+	router.RegisterPermission("PUT", "/system/role/authUser/cancelAll", "system:role:edit")
+	router.RegisterPermission("PUT", "/system/role/authUser/cancel", "system:role:edit")
 }
 
 // RoleList 查询角色列表查询

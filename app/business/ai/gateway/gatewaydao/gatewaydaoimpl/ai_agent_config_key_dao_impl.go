@@ -55,6 +55,21 @@ func (a *AgentConfigKeyDaoImpl) Update(c *gin.Context, req *gatewaymodels.AgentC
 	return a.GetByID(c, item.ID)
 }
 
+func (a *AgentConfigKeyDaoImpl) UpdateAllowMcpTools(c *gin.Context, id int64, tools string) (*gatewaymodels.AgentConfigKey, error) {
+	item := &gatewaymodels.AgentConfigKey{
+		ID:                  id,
+		AllowMcpServerTools: tools,
+	}
+	item.SetUpdateBy(baizeContext.GetUserId(c))
+	if err := a.db.WithContext(c).Table(a.table).Where("id = ?", item.ID).Where("state = ?", commonStatus.NORMAL).
+		Where("dept_id = ?", baizeContext.GetDeptId(c)).
+		Select("allow_mcp_server_tools", "update_by", "update_time").
+		Updates(item).Error; err != nil {
+		return nil, err
+	}
+	return a.GetByID(c, item.ID)
+}
+
 func (a *AgentConfigKeyDaoImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 	var key gatewaymodels.AgentConfigKey
 	return a.db.WithContext(c).Table(a.table).Where("id IN ?", ids).Where("create_by = ?", baizeContext.GetUserId(c)).
@@ -90,6 +105,7 @@ func (a *AgentConfigKeyDaoImpl) List(c *gin.Context, req *gatewaymodels.AgentCon
 	if req.Key != "" {
 		db = db.Where("`key` LIKE ?", "%"+req.Key+"%")
 	}
+	db = db.Where("create_by = ?", baizeContext.GetUserId(c))
 	db = db.Where("state = ?", commonStatus.NORMAL)
 	if req.Page <= 0 {
 		req.Page = 1

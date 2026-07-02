@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/monitor/monitorservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,6 +30,17 @@ func (j *Job) PrivateRoutes(router *gin.RouterGroup) {
 	job.GET("/log/list", j.JobLogList)
 	job.GET("/log/:logId", j.JobLogGetInfo)
 	job.GET("/jobIdAndName", j.JobIdAndNameAll)
+}
+
+func (j *Job) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/monitor/job/list", "monitor:job")
+	router.RegisterPermission("GET", "/monitor/job/:jobId", "monitor:job:query")
+	router.RegisterPermission("POST", "/monitor/job", "monitor:job:add")
+	router.RegisterPermission("PUT", "/monitor/job", "monitor:job:edit")
+	router.RegisterPermission("PUT", "/monitor/job/changeStatus", "monitor:job:changeStatus")
+	router.RegisterPermission("PUT", "/monitor/job/run", "monitor:job:changeStatus")
+	router.RegisterPermission("DELETE", "/monitor/job/:jobIds", "monitor:job:remove")
+	router.RegisterPermission("GET", "/monitor/job/funList", "monitor:job")
 }
 
 func (j *Job) PublicRoutes(router *gin.RouterGroup) {

@@ -48,7 +48,14 @@ func NewGinEngine(
 	}
 
 	{
+		master.PrivateMcpRoutes(app.McpServer)
+		finance.PrivateMcpRoutes(app.McpServer)
+		purchase.PrivateMcpRoutes(app.McpServer)
+		setting.AgentConfig.PrivateMcpRoutes(app.McpServer)
+		setting.IntegrationConfig.PrivateMcpRoutes(app.McpServer)
+
 		sale.PrivateMcpRoutes(app.McpServer)
+		stock.PrivateMcpRoutes(app.McpServer)
 	}
 	return &Erp{}
 }
