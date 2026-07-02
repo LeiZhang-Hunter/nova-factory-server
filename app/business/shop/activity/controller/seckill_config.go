@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/fileUtils"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,13 @@ func (s *SeckillConfig) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/info/:id", middlewares.HasPermission("shop:activity:seckill_config:info"), s.Info)
 	group.POST("/set", middlewares.HasPermission("shop:activity:seckill_config:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:activity:seckill_config:remove"), s.Delete)
+}
+
+func (s *SeckillConfig) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/activity/seckill_config/list", "shop:activity:seckill_config:list")
+	router.RegisterPermission("GET", "/shop/activity/seckill_config/info/:id", "shop:activity:seckill_config:info")
+	router.RegisterPermission("POST", "/shop/activity/seckill_config/set", "shop:activity:seckill_config:set")
+	router.RegisterPermission("DELETE", "/shop/activity/seckill_config/remove/:ids", "shop:activity:seckill_config:remove")
 }
 
 // List 获取商品秒杀配置列表

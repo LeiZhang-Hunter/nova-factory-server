@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/asset/device/deviceservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,6 +26,12 @@ func (dm *DeviceCheckMachinery) PrivateRoutes(router *gin.RouterGroup) {
 	subject.GET("/list", middlewares.HasPermission("asset:device:check:machinery:list"), dm.List)               // 点检保养项目列表
 	subject.POST("/set", middlewares.HasPermission("asset:device:check:machinery:set"), dm.Set)                 // 设置点检保养项目
 	subject.DELETE("/remove/:ids", middlewares.HasPermission("asset:device:check:machinery:remove"), dm.Remove) //删除点检保养项目
+}
+
+func (dm *DeviceCheckMachinery) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/asset/device/check/machinery/list", "asset:device:check:machinery:list")
+	router.RegisterPermission("POST", "/asset/device/check/machinery/set", "asset:device:check:machinery:set")
+	router.RegisterPermission("DELETE", "/asset/device/check/machinery/remove/:ids", "asset:device:check:machinery:remove")
 }
 
 // List 设备清单列表

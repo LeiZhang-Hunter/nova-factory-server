@@ -5,12 +5,14 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
 
 type MCPServer struct {
-	service gatewayservice.IMCPServerService
+	service   gatewayservice.IMCPServerService
+	mcpServer *gin_mcp.GinMCP
 }
 
 func NewMCPServer(service gatewayservice.IMCPServerService) *MCPServer {
@@ -24,6 +26,14 @@ func (m *MCPServer) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("ai:mcp:server:set"), m.Set)
 	group.POST("/probe", middlewares.HasPermission("ai:mcp:server:probe"), m.McpProbe)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:mcp:server:remove"), m.Delete)
+}
+
+func (m *MCPServer) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	m.mcpServer = router
+	router.RegisterPermission("GET", "/ai/mcp/server/list", "ai:mcp:server:list")
+	router.RegisterPermission("POST", "/ai/mcp/server/set", "ai:mcp:server:set")
+	router.RegisterPermission("POST", "/ai/mcp/server/probe", "ai:mcp:server:probe")
+	router.RegisterPermission("DELETE", "/ai/mcp/server/remove/:ids", "ai:mcp:server:remove")
 }
 
 // List 获取MCP服务配置列表
@@ -118,10 +128,11 @@ func (m *MCPServer) McpProbe(c *gin.Context) {
 		return
 	}
 
-	result, err := m.service.Probe(c.Request.Context(), req)
+	result, err := m.service.ProbePerm(c, m.mcpServer, req)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
+
 	baizeContext.SuccessData(c, result)
 }

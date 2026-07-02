@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/asset/device/deviceservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,6 +26,12 @@ func (di *DeviceGroup) PrivateRoutes(router *gin.RouterGroup) {
 	asset.GET("/list", middlewares.HasPermission("asset:deviceGroup"), di.GetDeviceGroupList)               // 设备列表
 	asset.POST("/set", middlewares.HasPermission("asset:deviceGroup:set"), di.SetDeviceGroup)               // 设置设备信息
 	asset.DELETE("/:groupIds", middlewares.HasPermission("asset:deviceGroup:remove"), di.DeviceGroupRemove) //删除设备分组列表
+}
+
+func (di *DeviceGroup) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/asset/deviceGroup/list", "asset:deviceGroup")
+	router.RegisterPermission("POST", "/asset/deviceGroup/set", "asset:deviceGroup:set")
+	router.RegisterPermission("DELETE", "/asset/deviceGroup/:groupIds", "asset:deviceGroup:remove")
 }
 
 // GetDeviceGroupList 获取设备分组列表

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/asset/building/buildingservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,14 @@ func (b *Floor) PrivateRoutes(router *gin.RouterGroup) {
 	building.DELETE("/remove/:ids", middlewares.HasPermission("asset:floor:remove"), b.Remove)
 	building.POST("/layout/save", middlewares.HasPermission("asset:floor:layout:save"), b.SaveLayout)
 	building.GET("/layout/info", middlewares.HasPermission("asset:floor:layout:info"), b.InfoLayout)
+}
+
+func (b *Floor) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/asset/floor/list", "asset:floor:list")
+	router.RegisterPermission("POST", "/asset/floor/set", "asset:floor:set")
+	router.RegisterPermission("DELETE", "/asset/floor/remove/:ids", "asset:floor:remove")
+	router.RegisterPermission("POST", "/asset/floor/layout/save", "asset:floor:layout:save")
+	router.RegisterPermission("GET", "/asset/floor/layout/info", "asset:floor:layout:info")
 }
 
 // Set 保存楼层

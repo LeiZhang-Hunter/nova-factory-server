@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/constant/dataScopeAspect"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"nova-factory-server/app/utils/response"
 
 	"github.com/gin-gonic/gin"
@@ -45,6 +46,24 @@ func (uc *User) PrivateRoutes(router *gin.RouterGroup) {
 	systemUser.POST("/importTemplate", middlewares.HasPermission("system:user:add"), uc.ImportTemplate)
 	systemUser.POST("/export", middlewares.HasPermission("system:user:export"), uc.UserExport)
 	systemUser.PUT("/authRole", middlewares.SetLog("用户管理", middlewares.Update), middlewares.HasPermission("system:user:edit"), uc.InsertAuthRole)
+}
+
+func (uc *User) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/user/list", "system:user")
+	router.RegisterPermission("GET", "/system/user/", "system:user:query")
+	router.RegisterPermission("GET", "/system/user/authRole/:userId", "system:user:edit")
+	router.RegisterPermission("GET", "/system/user/:userId", "system:user:query")
+	router.RegisterPermission("POST", "/system/user", "system:user:add")
+	router.RegisterPermission("GET", "/system/user/dataScope/:userId", "system:user:query")
+	router.RegisterPermission("PUT", "/system/user/dataScope", "system:user:edit")
+	router.RegisterPermission("PUT", "/system/user", "system:user:edit")
+	router.RegisterPermission("PUT", "/system/user/resetPwd", "system:user:edit")
+	router.RegisterPermission("PUT", "/system/user/changeStatus", "system:user:edit")
+	router.RegisterPermission("DELETE", "/system/user/:userIds", "system:user:remove")
+	router.RegisterPermission("POST", "/system/user/importData", "system:user:import")
+	router.RegisterPermission("POST", "/system/user/importTemplate", "system:user:add")
+	router.RegisterPermission("POST", "/system/user/export", "system:user:export")
+	router.RegisterPermission("PUT", "/system/user/authRole", "system:user:edit")
 }
 
 // ChangeStatus 修改用户状态

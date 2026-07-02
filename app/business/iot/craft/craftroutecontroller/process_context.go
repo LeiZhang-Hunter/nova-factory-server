@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/craft/craftrouteservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -25,6 +26,12 @@ func (p *ProcessContext) PrivateRoutes(router *gin.RouterGroup) {
 	routers.GET("/list", middlewares.HasPermission("craft:process:context"), p.GetProcessContextList)                             // 工序内容列表
 	routers.POST("/set", middlewares.HasPermission("craft:process:context:set"), p.SetProcessContextList)                         // 设置工序内容
 	routers.DELETE("/remove/:context_ids", middlewares.HasPermission("craft:process:context:remove"), p.RemoveProcessContextList) //移除工序内容
+}
+
+func (p *ProcessContext) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/craft/process/context/list", "craft:process:context")
+	router.RegisterPermission("POST", "/craft/process/context/set", "craft:process:context:set")
+	router.RegisterPermission("DELETE", "/craft/process/context/remove/:context_ids", "craft:process:context:remove")
 }
 
 // GetProcessContextList 工序内容列表

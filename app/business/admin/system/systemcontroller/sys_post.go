@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,15 @@ func (pc *Post) PrivateRoutes(router *gin.RouterGroup) {
 	systemPost.PUT("", middlewares.SetLog("岗位管理", middlewares.Update), middlewares.HasPermission("system:post:edit"), pc.PostEdit)
 	systemPost.DELETE("/:postIds", middlewares.SetLog("岗位管理", middlewares.Delete), middlewares.HasPermission("system:post:remove"), pc.PostRemove)
 
+}
+
+func (pc *Post) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/post/list", "system:post")
+	router.RegisterPermission("POST", "/system/post/export", "system:post:export")
+	router.RegisterPermission("GET", "/system/post/:postId", "system:post:query")
+	router.RegisterPermission("POST", "/system/post", "system:post:add")
+	router.RegisterPermission("PUT", "/system/post", "system:post:edit")
+	router.RegisterPermission("DELETE", "/system/post/:postIds", "system:post:remove")
 }
 
 // PostList 查询岗位列表查询

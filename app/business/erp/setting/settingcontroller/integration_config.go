@@ -8,6 +8,7 @@ import (
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,6 +43,12 @@ func (i *IntegrationConfig) PrivateRoutes(router *gin.RouterGroup) {
 		middlewares.HasPermission("erp:setting:integrationConfig:checkLoginState"), i.CheckLoginState)
 	group.POST("/set",
 		middlewares.HasPermission("erp:setting:integrationConfig:set"), i.Set)
+}
+
+func (i *IntegrationConfig) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/setting/integration-config/list", "erp:setting:integrationConfig:list")
+	router.RegisterPermission("GET", "/erp/setting/integration-config/check-login-state", "erp:setting:integrationConfig:checkLoginState")
+	router.RegisterPermission("POST", "/erp/setting/integration-config/set", "erp:setting:integrationConfig:set")
 }
 
 // List 集成配置列表

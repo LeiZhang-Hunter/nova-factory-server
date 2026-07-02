@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/purchase/purchaseservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *PurchaseReturn) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:purchase:return:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:purchase:return:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:purchase:return:remove"), o.Delete)
+}
+
+func (o *PurchaseReturn) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/purchase/return/list", "erp:purchase:return:list")
+	router.RegisterPermission("GET", "/erp/purchase/return/query/:id", "erp:purchase:return:query")
+	router.RegisterPermission("POST", "/erp/purchase/return/set", "erp:purchase:return:set")
+	router.RegisterPermission("DELETE", "/erp/purchase/return/remove/:ids", "erp:purchase:return:remove")
 }
 
 // List 查询采购退货列表。

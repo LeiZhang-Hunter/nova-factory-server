@@ -3,6 +3,7 @@ package mastercontroller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
+	"nova-factory-server/app/utils/gin_mcp"
 )
 
 var ProviderSet = wire.NewSet(
@@ -47,5 +48,29 @@ func (c *Controller) PrivateRoutes(router *gin.RouterGroup) {
 	}
 	if c.Warehouse != nil {
 		c.Warehouse.PrivateRoutes(router)
+	}
+}
+
+func (c *Controller) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	if c.Account != nil {
+		c.Account.PrivateMcpRoutes(router)
+	}
+	if c.Customer != nil {
+		c.Customer.PrivateMcpRoutes(router)
+	}
+	if c.Product != nil {
+		c.Product.PrivateMcpRoutes(router)
+	}
+	if c.ProductCategory != nil {
+		c.ProductCategory.PrivateMcpRoutes(router)
+	}
+	if c.ProductUnit != nil {
+		c.ProductUnit.PrivateMcpRoutes(router)
+	}
+	if c.Supplier != nil {
+		c.Supplier.PrivateMcpRoutes(router)
+	}
+	if c.Warehouse != nil {
+		c.Warehouse.PrivateMcpRoutes(router)
 	}
 }

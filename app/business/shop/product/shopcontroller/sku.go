@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,14 @@ func (s *Sku) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/add", middlewares.HasPermission("shop:sku:add"), s.Create)
 	group.PUT("/update", middlewares.HasPermission("shop:sku:update"), s.Update)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:sku:remove"), s.Delete)
+}
+
+func (s *Sku) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/sku/list", "shop:sku:list")
+	router.RegisterPermission("GET", "/shop/sku/info/:id", "shop:sku:query")
+	router.RegisterPermission("POST", "/shop/sku/add", "shop:sku:add")
+	router.RegisterPermission("PUT", "/shop/sku/update", "shop:sku:update")
+	router.RegisterPermission("DELETE", "/shop/sku/remove/:ids", "shop:sku:remove")
 }
 
 // List 获取商品规格列表

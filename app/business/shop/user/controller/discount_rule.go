@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/shop/user/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,16 @@ func (s *DiscountRule) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/batch", middlewares.HasPermission("shop:user:discount:add"), s.BatchCreate)
 	group.PUT("/update", middlewares.HasPermission("shop:user:discount:update"), s.Update)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:user:discount:remove"), s.Delete)
+}
+
+func (s *DiscountRule) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/user/discount/list", "shop:user:discount:list")
+	router.RegisterPermission("GET", "/shop/user/discount/info/:id", "shop:user:discount:query")
+	router.RegisterPermission("GET", "/shop/user/discount/ids/:userId", "shop:user:discount:list")
+	router.RegisterPermission("POST", "/shop/user/discount/add", "shop:user:discount:add")
+	router.RegisterPermission("POST", "/shop/user/discount/batch", "shop:user:discount:add")
+	router.RegisterPermission("PUT", "/shop/user/discount/update", "shop:user:discount:update")
+	router.RegisterPermission("DELETE", "/shop/user/discount/remove/:ids", "shop:user:discount:remove")
 }
 
 // List 获取折扣规则列表

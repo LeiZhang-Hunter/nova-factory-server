@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/shop/product/shopservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 	"regexp"
 	"strings"
 
@@ -31,6 +32,14 @@ func (s *Category) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/add", middlewares.HasPermission("shop:category:add"), s.Create)
 	group.PUT("/update", middlewares.HasPermission("shop:category:update"), s.Update)
 	group.DELETE("/:ids", middlewares.HasPermission("shop:category:remove"), s.Delete)
+}
+
+func (s *Category) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/category/list", "shop:category:list")
+	router.RegisterPermission("GET", "/shop/category/info/:id", "shop:category:info")
+	router.RegisterPermission("POST", "/shop/category/add", "shop:category:add")
+	router.RegisterPermission("PUT", "/shop/category/update", "shop:category:update")
+	router.RegisterPermission("DELETE", "/shop/category/:ids", "shop:category:remove")
 }
 
 // List 获取商品分类列表

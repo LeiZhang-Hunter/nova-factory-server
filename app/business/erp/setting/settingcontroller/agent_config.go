@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/setting/settingservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -24,6 +25,13 @@ func (a *AgentConfig) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/:id", middlewares.HasPermission("erp:setting:sale:agentConfig:query"), a.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:setting:sale:agentConfig:set"), a.Set)
 	group.DELETE("/:ids", middlewares.HasPermission("erp:setting:sale:agentConfig:remove"), a.Delete)
+}
+
+func (a *AgentConfig) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/setting/sale/agent-config/list", "erp:setting:sale:agentConfig:list")
+	router.RegisterPermission("GET", "/erp/setting/sale/agent-config/:id", "erp:setting:sale:agentConfig:query")
+	router.RegisterPermission("POST", "/erp/setting/sale/agent-config/set", "erp:setting:sale:agentConfig:set")
+	router.RegisterPermission("DELETE", "/erp/setting/sale/agent-config/:ids", "erp:setting:sale:agentConfig:remove")
 }
 
 // List 销售订单智能体配置列表

@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 )
 
 type Prediction struct {
@@ -25,6 +26,12 @@ func (p *Prediction) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("ai:prediction:set"), p.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:prediction:remove"), p.Remove)
 	return
+}
+
+func (p *Prediction) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/prediction/list", "ai:prediction:list")
+	router.RegisterPermission("POST", "/ai/prediction/set", "ai:prediction:set")
+	router.RegisterPermission("DELETE", "/ai/prediction/remove/:ids", "ai:prediction:remove")
 }
 
 // List 智能预警列表

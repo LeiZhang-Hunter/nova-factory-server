@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/fileUtils"
+	"nova-factory-server/app/utils/gin_mcp"
 	"strings"
 	"time"
 
@@ -26,6 +27,12 @@ func (s *Seckill) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", middlewares.HasPermission("shop:activity:seckill:list"), s.List)
 	group.POST("/set", middlewares.HasPermission("shop:activity:seckill:set"), s.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:activity:seckill:remove"), s.Delete)
+}
+
+func (s *Seckill) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/activity/seckill/list", "shop:activity:seckill:list")
+	router.RegisterPermission("POST", "/shop/activity/seckill/set", "shop:activity:seckill:set")
+	router.RegisterPermission("DELETE", "/shop/activity/seckill/remove/:ids", "shop:activity:seckill:remove")
 }
 
 // List 获取秒杀商品列表

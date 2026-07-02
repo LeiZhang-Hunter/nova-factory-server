@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -26,6 +27,15 @@ func (dc *Dept) PrivateRoutes(router *gin.RouterGroup) {
 	systemDept.POST("", middlewares.SetLog("部门管理", middlewares.Insert), middlewares.HasPermission("system:dept:add"), dc.DeptAdd)
 	systemDept.PUT("", middlewares.SetLog("部门管理", middlewares.Update), middlewares.HasPermission("system:dept:edit"), dc.DeptEdit)
 	systemDept.DELETE("/:deptId", middlewares.SetLog("部门管理", middlewares.Delete), middlewares.HasPermission("system:dept:remove"), dc.DeptRemove)
+}
+
+func (dc *Dept) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/system/dept/list", "system:user")
+	router.RegisterPermission("GET", "/system/dept/:deptId", "system:dept:query")
+	router.RegisterPermission("GET", "/system/dept/roleDeptTreeSelect/:roleId", "system:dept:query")
+	router.RegisterPermission("POST", "/system/dept", "system:dept:add")
+	router.RegisterPermission("PUT", "/system/dept", "system:dept:edit")
+	router.RegisterPermission("DELETE", "/system/dept/:deptId", "system:dept:remove")
 }
 
 // DeptList 查询部门列表查询

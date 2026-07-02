@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 )
 
 type Control struct {
@@ -25,6 +26,12 @@ func (i *Control) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/set", middlewares.HasPermission("ai:control:set"), i.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:control:remove"), i.Remove)
 	return
+}
+
+func (i *Control) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/control/list", "ai:control:list")
+	router.RegisterPermission("POST", "/ai/control/set", "ai:control:set")
+	router.RegisterPermission("DELETE", "/ai/control/remove/:ids", "ai:control:remove")
 }
 
 // List 预测控制列表

@@ -6,6 +6,7 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,13 @@ func (a *AIGateway) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("ai:gateway:query"), a.GetByID)
 	group.POST("/set", middlewares.HasPermission("ai:gateway:set"), a.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:gateway:remove"), a.Delete)
+}
+
+func (a *AIGateway) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/ai/gateway/list", "ai:gateway:list")
+	router.RegisterPermission("GET", "/ai/gateway/query/:id", "ai:gateway:query")
+	router.RegisterPermission("POST", "/ai/gateway/set", "ai:gateway:set")
+	router.RegisterPermission("DELETE", "/ai/gateway/remove/:ids", "ai:gateway:remove")
 }
 
 // List 获取网关列表

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -35,6 +36,19 @@ func (o *Product) PrivateRoutes(router *gin.RouterGroup) {
 		middlewares.HasPermission("erp:master:product:vector:generate:all:progress"), o.GetGenerateAllProgress)
 	group.POST("/vector/search", middlewares.HasPermission("erp:master:product:vector:search"), o.Search)
 	group.POST("/vector/search/batch", middlewares.HasPermission("erp:master:product:vector:batch_search"), o.BatchSearch)
+}
+
+func (o *Product) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/master/product/list", "erp:master:product:list")
+	router.RegisterPermission("GET", "/erp/master/product/query/:id", "erp:master:product:query")
+	router.RegisterPermission("POST", "/erp/master/product/set", "erp:master:product:set")
+	router.RegisterPermission("DELETE", "/erp/master/product/remove/:ids", "erp:master:product:remove")
+	router.RegisterPermission("POST", "/erp/master/product/vector/generate/:id", "erp:master:product:vector:generate")
+	router.RegisterPermission("POST", "/erp/master/product/vector/generate/all", "erp:master:product:vector:generate:all")
+	router.RegisterPermission("GET", "/erp/master/product/vector/generate/all/query/list", "erp:master:product:vector:generate:all:query:list")
+	router.RegisterPermission("GET", "/erp/master/product/vector/generate/all/progress/:taskId", "erp:master:product:vector:generate:all:progress")
+	router.RegisterPermission("POST", "/erp/master/product/vector/search", "erp:master:product:vector:search")
+	router.RegisterPermission("POST", "/erp/master/product/vector/search/batch", "erp:master:product:vector:batch_search")
 }
 
 // List 查询 ERP 产品列表。

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/alert/alertservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -23,6 +24,10 @@ func NewAlertLog(service alertservice.AlertLogService) *AlertLog {
 func (log *AlertLog) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/alert/log")
 	group.GET("/list", middlewares.HasPermission("alert:log:list"), log.List)
+}
+
+func (log *AlertLog) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/alert/log/list", "alert:log:list")
 }
 
 func (log *AlertLog) PublicRoutes(router *gin.RouterGroup) {

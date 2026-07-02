@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/admin/monitor/monitorservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,11 @@ func (uoc *UserOnline) PrivateRoutes(router *gin.RouterGroup) {
 	online := router.Group("/monitor/online")
 	online.GET("/list", middlewares.HasPermission("monitor:online"), uoc.UserOnlineList)
 	online.DELETE("/:tokenId", middlewares.SetLog("在线用户", middlewares.ForcedRetreat), middlewares.HasPermission("monitor:online:forceLogout"), uoc.ForceLogout)
+}
+
+func (uoc *UserOnline) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/monitor/online/list", "monitor:online")
+	router.RegisterPermission("DELETE", "/monitor/online/:tokenId", "monitor:online:forceLogout")
 }
 
 // UserOnlineList 查询在线用户列表查询

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *ProductCategory) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:master:productCategory:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:master:productCategory:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:productCategory:remove"), o.Delete)
+}
+
+func (o *ProductCategory) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/master/product-category/list", "erp:master:productCategory:list")
+	router.RegisterPermission("GET", "/erp/master/product-category/query/:id", "erp:master:productCategory:query")
+	router.RegisterPermission("POST", "/erp/master/product-category/set", "erp:master:productCategory:set")
+	router.RegisterPermission("DELETE", "/erp/master/product-category/remove/:ids", "erp:master:productCategory:remove")
 }
 
 // List 查询 ERP 产品分类列表。

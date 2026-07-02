@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/shop/user/service"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,6 +26,14 @@ func (s *User) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/add", middlewares.HasPermission("shop:user:info:add"), s.Create)
 	group.PUT("/update", middlewares.HasPermission("shop:user:info:update"), s.Update)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:user:info:remove"), s.Delete)
+}
+
+func (s *User) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/user/info/list", "shop:user:info:list")
+	router.RegisterPermission("GET", "/shop/user/info/info/:id", "shop:user:info:query")
+	router.RegisterPermission("POST", "/shop/user/info/add", "shop:user:info:add")
+	router.RegisterPermission("PUT", "/shop/user/info/update", "shop:user:info:update")
+	router.RegisterPermission("DELETE", "/shop/user/info/remove/:ids", "shop:user:info:remove")
 }
 
 // List 获取商城用户列表

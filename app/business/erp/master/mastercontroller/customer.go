@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *Customer) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:master:customer:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:master:customer:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:customer:remove"), o.Delete)
+}
+
+func (o *Customer) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/master/customer/list", "erp:master:customer:list")
+	router.RegisterPermission("GET", "/erp/master/customer/query/:id", "erp:master:customer:query")
+	router.RegisterPermission("POST", "/erp/master/customer/set", "erp:master:customer:set")
+	router.RegisterPermission("DELETE", "/erp/master/customer/remove/:ids", "erp:master:customer:remove")
 }
 
 // List 查询客户列表。

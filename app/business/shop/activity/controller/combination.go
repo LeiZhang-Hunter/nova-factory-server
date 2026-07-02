@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/fileUtils"
+	"nova-factory-server/app/utils/gin_mcp"
 	"strings"
 	"time"
 
@@ -27,6 +28,13 @@ func (c *Combination) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/info/:id", middlewares.HasPermission("shop:activity:combination:info"), c.GetByID)
 	group.POST("/set", middlewares.HasPermission("shop:activity:combination:set"), c.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("shop:activity:combination:remove"), c.Delete)
+}
+
+func (c *Combination) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/shop/activity/combination/list", "shop:activity:combination:list")
+	router.RegisterPermission("GET", "/shop/activity/combination/info/:id", "shop:activity:combination:info")
+	router.RegisterPermission("POST", "/shop/activity/combination/set", "shop:activity:combination:set")
+	router.RegisterPermission("DELETE", "/shop/activity/combination/remove/:ids", "shop:activity:combination:remove")
 }
 
 // List 获取拼团商品列表

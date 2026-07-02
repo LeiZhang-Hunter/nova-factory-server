@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/iot/configuration/configurationservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +25,12 @@ func (c2 *Configuration) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", middlewares.HasPermission("configuration:manager:list"), c2.List)
 	group.POST("/set", middlewares.HasPermission("configuration:manager:set"), c2.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("configuration:manager:remove"), c2.Remove)
+}
+
+func (c2 *Configuration) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/configuration/manager/list", "configuration:manager:list")
+	router.RegisterPermission("POST", "/configuration/manager/set", "configuration:manager:set")
+	router.RegisterPermission("DELETE", "/configuration/manager/remove/:ids", "configuration:manager:remove")
 }
 
 // List 组态列表

@@ -5,6 +5,7 @@ import (
 	"nova-factory-server/app/business/erp/master/masterservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
+	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,6 +27,13 @@ func (o *Warehouse) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/query/:id", middlewares.HasPermission("erp:master:warehouse:query"), o.GetByID)
 	group.POST("/set", middlewares.HasPermission("erp:master:warehouse:set"), o.Set)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("erp:master:warehouse:remove"), o.Delete)
+}
+
+func (o *Warehouse) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
+	router.RegisterPermission("GET", "/erp/master/warehouse/list", "erp:master:warehouse:list")
+	router.RegisterPermission("GET", "/erp/master/warehouse/query/:id", "erp:master:warehouse:query")
+	router.RegisterPermission("POST", "/erp/master/warehouse/set", "erp:master:warehouse:set")
+	router.RegisterPermission("DELETE", "/erp/master/warehouse/remove/:ids", "erp:master:warehouse:remove")
 }
 
 // List 查询仓库列表。
