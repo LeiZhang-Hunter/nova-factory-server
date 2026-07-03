@@ -71,8 +71,17 @@ type Order struct {
 	Accounts             []*OrderAccount  `json:"accounts" gorm:"-"`
 	Shipments            []*OrderShipment `json:"shipments" gorm:"-"`
 	baize.BaseEntity
-	State      int32 `json:"state" gorm:"column:state"`
-	PayChannel int   `json:"pay_channel" gorm:"column:pay_channel"`
+	State              int32      `json:"state" gorm:"column:state"`
+	PayChannel         int        `json:"pay_channel" gorm:"column:pay_channel"`
+	PaymentVoucher     string     `json:"payment_voucher" gorm:"column:payment_voucher;type:varchar(500);comment:支付凭证图片URL"`
+	PaymentVoucherTime *time.Time `json:"payment_voucher_time" gorm:"column:payment_voucher_time;comment:提交支付凭证时间"`
+}
+
+// PaymentVoucherReviewReq 支付凭证审核请求
+type PaymentVoucherReviewReq struct {
+	ID       int64  `json:"id,string" binding:"required"`
+	Approved bool   `json:"approved"`
+	Remark   string `json:"remark"`
 }
 
 // OrderSet ERP订单保存参数

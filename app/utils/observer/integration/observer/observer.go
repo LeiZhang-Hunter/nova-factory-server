@@ -33,4 +33,7 @@ type Observer interface {
 
 	// OnAfterSaleOrderChanged 售后单变更回调，当退款成功等售后事件发生时触发
 	OnAfterSaleOrderChanged(event event.ZAfterSaleOrderSyncReqEvent) error
+
+	// OnAfterSaleStatusChanged ERP售后状态回写回调，当管家婆审核完成后回写售后单状态
+	OnAfterSaleStatusChanged(event event.ZAfterSaleStatusSyncReqEvent) error
 }

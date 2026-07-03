@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const aftSaleTypeRefundAndGoods = "RefundAndGoods"
+
 // AftersaleSyncEvent 售后同步事件，实现 event.ZAfterSaleOrderSyncReqEvent 接口。
 type AftersaleSyncEvent struct {
 	db          *gorm.DB
@@ -21,6 +23,8 @@ type AftersaleSyncEvent struct {
 	orders      []AftersaleSyncReqData
 	ctx         *gin.Context
 	userId      int64
+	aftersale   *OrderRefund
+	order       *Order
 }
 
 // AftersaleSyncReqData 单条售后同步数据，实现 event.ZAfterSaleOrderSyncReqData。
@@ -118,7 +122,22 @@ func (d AftersaleSyncExDetailWrapper) GetOuterIid() string       { return d.Oute
 func NewAftersaleSyncEvent(aftersale *OrderRefund, order *Order) *AftersaleSyncEvent {
 	data := buildAftersaleSyncData(aftersale, order)
 	return &AftersaleSyncEvent{
-		orders: []AftersaleSyncReqData{data},
+		orders:    []AftersaleSyncReqData{data},
+		aftersale: aftersale,
+		order:     order,
+	}
+}
+
+// GetAftersale 返回原始售后单数据（用于 SyncAfterSaleOrder 创建记录）。
+func (e *AftersaleSyncEvent) GetAftersale() *OrderRefund { return e.aftersale }
+
+// GetOrder 返回原始订单数据（用于 SyncAfterSaleOrder 更新订单状态）。
+func (e *AftersaleSyncEvent) GetOrder() *Order { return e.order }
+
+// SetLogistBillCode 设置退货物流单号（用于退货物流提交后再次同步ERP）。
+func (e *AftersaleSyncEvent) SetLogistBillCode(code string) {
+	if len(e.orders) > 0 {
+		e.orders[0].LogistBillCode = code
 	}
 }
 
@@ -147,10 +166,10 @@ func buildAftersaleSyncData(aftersale *OrderRefund, order *Order) AftersaleSyncR
 		Privilege:      order.Privilege,
 		PostFee:        order.PostFee,
 		Created:        created,
-		AftSaleType:    "RefundAndGoods",
+		AftSaleType:    aftSaleTypeRefundAndGoods,
 		ReasonCode:     "01",
 		AftSaleRemark:  aftersale.Reason,
-		LogistBillCode: "",
+		LogistBillCode: aftersale.ReturnLogisticsCode,
 		Details:        details,
 	}
 }

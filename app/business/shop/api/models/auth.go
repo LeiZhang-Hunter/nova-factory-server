@@ -21,6 +21,19 @@ type ShopGetInfoResp struct {
 	User *ShopAuthUserInfo `json:"user"` // 用户信息
 }
 
+// ChangePasswordReq 修改密码请求
+type ChangePasswordReq struct {
+	OldPassword string `json:"oldPassword" binding:"required"`
+	NewPassword string `json:"newPassword" binding:"required"`
+}
+
+// UpdateProfileReq 更新个人资料请求
+type UpdateProfileReq struct {
+	Nickname string `json:"nickname"`
+	Mobile   string `json:"mobile"`
+	Email    string `json:"email"`
+}
+
 // UserToAuthUserInfo converts a User model to ShopAuthUserInfo
 func UserToAuthUserInfo(user *shopusermodels.User) *ShopAuthUserInfo {
 	if user == nil {

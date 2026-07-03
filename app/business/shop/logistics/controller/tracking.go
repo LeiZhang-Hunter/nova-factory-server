@@ -25,10 +25,21 @@ func (t *Tracking) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/query", t.Query)
 }
 
-// AppRoutes 注册小程序端路由
-func (t *Tracking) AppRoutes(router *gin.RouterGroup) {
-	group := router.Group("/api/v1/app/shop/logistics/tracking")
-	group.POST("/query", t.Query)
+// CompanyList 查询小程序物流公司选择列表。
+// @Summary 查询小程序物流公司选择列表
+// @Description 查询启用的物流公司，用于小程序退货物流公司选择
+// @Tags 商城/物流查询
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "查询成功"
+// @Router /api/v1/app/shop/logistics/company/list [get]
+func (t *Tracking) CompanyList(c *gin.Context) {
+	resp, err := t.service.CompanyList(c)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, resp)
 }
 
 // Query 即时查询物流轨迹

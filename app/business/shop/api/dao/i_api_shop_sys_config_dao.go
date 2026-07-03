@@ -13,4 +13,5 @@ type IApiShopSysConfigDao interface {
 	UpdateByConfigKey(c *gin.Context, configKey string, configValue string) error
 	GetWechatPayConfig(c *gin.Context) (*models.ShopSysConfigWechatPayConfigDTO, error)
 	GetIsAutoRefundEnabled(c *gin.Context) (bool, error)
+	GetEnterpriseAccountConfig(c *gin.Context) (*models.EnterpriseAccountConfigDTO, error)
 }

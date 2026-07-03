@@ -7,5 +7,6 @@ const (
 	OrderStatusCompleted   int32 = 3  // 已完成
 	OrderStatusCancelled   int32 = 4  // 已取消
 	OrderStatusPartShipped int32 = 5  // 部分发货
+	OrderStatusPayPending  int32 = 7  // 待审核付款（线下打款）
 	OrderStatusAftersale   int32 = 99 // 售后/退款
 )

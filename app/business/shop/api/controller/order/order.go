@@ -1,7 +1,14 @@
 package order
 
 import (
+	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
+	"time"
+
+	apiDao "nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/api/models"
 	"nova-factory-server/app/business/shop/api/service"
 	"nova-factory-server/app/utils/baizeContext"
@@ -14,11 +21,12 @@ import (
 type Order struct {
 	service            service.IApiShopOrderService
 	orderRefundService service.IApiShopOrderRefundService
+	configDao          apiDao.IApiShopSysConfigDao
 }
 
 // NewOrder 创建订单控制器
-func NewOrder(service service.IApiShopOrderService, orderRefundService service.IApiShopOrderRefundService) *Order {
-	return &Order{service: service, orderRefundService: orderRefundService}
+func NewOrder(service service.IApiShopOrderService, orderRefundService service.IApiShopOrderRefundService, configDao apiDao.IApiShopSysConfigDao) *Order {
+	return &Order{service: service, orderRefundService: orderRefundService, configDao: configDao}
 }
 
 // PrivateRoutes 注册商城订单路由（商城模块只检查登录，不检查权限）
@@ -34,6 +42,14 @@ func (s *Order) PrivateRoutes(router *gin.RouterGroup) {
 	group.POST("/confirm/:id", s.ConfirmReceive)
 	// 售后/退款申请
 	group.POST("/refund/apply", s.Apply)
+	// 退货物流提交
+	group.POST("/refund/submit-logistics", s.SubmitReturnLogistics)
+	// 支付凭证提交
+	group.POST("/submit-payment-voucher", s.SubmitPaymentVoucher)
+	// 企业账户收款信息
+	router.GET("/api/v1/app/shop/config/enterprise-account", s.GetEnterpriseAccountConfig)
+	// 文件上传（支付凭证）
+	router.POST("/api/v1/app/shop/upload", s.UploadFile)
 }
 
 // List 获取订单列表
@@ -250,4 +266,102 @@ func (s *Order) Apply(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "success", "data": resp})
+}
+
+// SubmitReturnLogistics 提交退货物流信息
+// @Summary 提交退货物流信息
+// @Description 已审核的退货退款类型售后单，填写退货物流单号后再次同步ERP
+// @Tags 商城/售后
+// @Param object body models.SubmitReturnLogisticsReq true "退货物流参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "提交成功"
+// @Router /api/v1/app/shop/order/refund/submit-logistics [post]
+func (s *Order) SubmitReturnLogistics(c *gin.Context) {
+	var req models.SubmitReturnLogisticsReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误"})
+		return
+	}
+	userID := baizeContext.GetUserId(c)
+	if userID == 0 {
+		c.JSON(http.StatusOK, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	resp, err := s.orderRefundService.SubmitReturnLogistics(c, userID, &req)
+	if err != nil {
+		zap.L().Error("提交退货物流失败", zap.Error(err))
+		c.JSON(http.StatusOK, gin.H{"code": 500, "msg": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "success", "data": resp})
+}
+
+// GetEnterpriseAccountConfig 获取企业账户收款信息
+func (s *Order) GetEnterpriseAccountConfig(c *gin.Context) {
+	data, err := s.configDao.GetEnterpriseAccountConfig(c)
+	if err != nil {
+		zap.L().Error("获取企业账户配置失败", zap.Error(err))
+		c.JSON(http.StatusOK, gin.H{"code": 500, "msg": "获取失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "success", "data": data})
+}
+
+// SubmitPaymentVoucher 提交线下打款支付凭证
+func (s *Order) SubmitPaymentVoucher(c *gin.Context) {
+	var req models.PaymentVoucherReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "参数错误"})
+		return
+	}
+	userID := baizeContext.GetUserId(c)
+	if userID == 0 {
+		c.JSON(http.StatusOK, gin.H{"code": 401, "msg": "请先登录"})
+		return
+	}
+	if err := s.service.SubmitPaymentVoucher(c, userID, &req); err != nil {
+		zap.L().Error("提交支付凭证失败", zap.Error(err))
+		c.JSON(http.StatusOK, gin.H{"code": 500, "msg": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "success"})
+}
+
+// UploadFile 上传文件（支付凭证图片）
+func (s *Order) UploadFile(c *gin.Context) {
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 400, "msg": "请选择文件"})
+		return
+	}
+	defer file.Close()
+
+	ext := filepath.Ext(header.Filename)
+	if ext == "" {
+		ext = ".jpg"
+	}
+	filename := fmt.Sprintf("voucher_%d%s", time.Now().UnixNano(), ext)
+	uploadDir := "uploads/payment"
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 500, "msg": "创建上传目录失败"})
+		return
+	}
+
+	savePath := filepath.Join(uploadDir, filename)
+	out, err := os.Create(savePath)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 500, "msg": "文件保存失败"})
+		return
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, file); err != nil {
+		c.JSON(http.StatusOK, gin.H{"code": 500, "msg": "文件写入失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "success", "data": map[string]string{
+		"url": "/" + filepath.ToSlash(savePath),
+	}})
 }

@@ -16,6 +16,7 @@ import (
 	apiDao "nova-factory-server/app/business/shop/api/dao"
 	"nova-factory-server/app/business/shop/order/dao"
 	"nova-factory-server/app/business/shop/order/models"
+	"nova-factory-server/app/business/shop/order/provider"
 	"nova-factory-server/app/business/shop/order/service"
 	"nova-factory-server/app/constant/commonStatus"
 	orderConstant "nova-factory-server/app/constant/order"
@@ -36,6 +37,8 @@ type OrderServiceImpl struct {
 	apiConfigDao    apiDao.IApiShopSysConfigDao
 	cache           cache.Cache
 	host            string
+	orderRefundDao  dao.IOrderRefundDao
+	db              *gorm.DB
 }
 
 // NewOrderService 创建 ERP 订单服务。
@@ -45,6 +48,8 @@ func NewOrderService(
 	accountDao dao.IOrderAccountDao,
 	shipmentService service.IShopOrderShipmentService,
 	cache cache.Cache,
+	orderRefundDao dao.IOrderRefundDao,
+	db *gorm.DB,
 ) service.IOrderService {
 	host := viper.GetString("host")
 	return &OrderServiceImpl{
@@ -54,6 +59,8 @@ func NewOrderService(
 		shipmentService: shipmentService,
 		cache:           cache,
 		host:            host,
+		orderRefundDao:  orderRefundDao,
+		db:              db,
 	}
 }
 
@@ -243,6 +250,11 @@ func (o *OrderServiceImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 		return errors.New("请选择要删除的订单")
 	}
 	return o.orderDao.DeleteByIDs(c, ids)
+}
+
+// ListRefunds 查询售后单列表。
+func (o *OrderServiceImpl) ListRefunds(c *gin.Context, req *models.RefundQuery) (*models.RefundListData, error) {
+	return o.orderRefundDao.List(c, req)
 }
 
 // SynchronizeSalesOrders 调用集成客户端接口同步销售订单。
@@ -739,9 +751,133 @@ func (i *OrderServiceImpl) resolveShipmentTargetStatus(
 }
 
 // SyncAfterSaleOrder 售后单同步入口，由 ShopObserver.OnAfterSaleOrderChanged 调用。
+// 自行管理事务：创建售后单 + 更新订单状态。回调 OnFinish 在事务提交后执行，此处不要用 Notifier 的事务。
 func (s *OrderServiceImpl) SyncAfterSaleOrder(event event.ZAfterSaleOrderSyncReqEvent) error {
 	if event == nil || event.GetOrders() == nil || len(*event.GetOrders()) == 0 {
 		return nil
 	}
+	ae, ok := event.(*models.AftersaleSyncEvent)
+	if !ok {
+		return errors.New("SyncAfterSaleOrder: event type assertion failed")
+	}
+	aftersale := ae.GetAftersale()
+	shopOrder := ae.GetOrder()
+	if aftersale == nil || shopOrder == nil {
+		return errors.New("SyncAfterSaleOrder: aftersale or order is nil")
+	}
+	err := s.orderRefundDao.CreateWithTx(event.GetDB(), aftersale)
+	if err != nil {
+		zap.L().Error("创建售后申请失败", zap.Error(err))
+		return fmt.Errorf("创建售后申请失败: %v", err)
+	}
+	now := time.Now()
+	err = s.orderDao.UpdateByID(event.GetDB(), shopOrder.ID, map[string]any{
+		"status":      orderConstant.ERPStatusAftersale,
+		"update_time": &now,
+	})
+	if err != nil {
+		zap.L().Error("更新订单状态失败", zap.Error(err))
+		return err
+	}
 	return nil
+}
+
+// UpdateAfterSaleStatus 处理ERP售后状态回写，由 ShopObserver.OnAfterSaleStatusChanged 调用。
+func (s *OrderServiceImpl) UpdateAfterSaleStatus(event event.ZAfterSaleStatusSyncReqEvent) error {
+	ctx := event.GetCtx()
+	if ctx == nil {
+		ctx = &gin.Context{}
+	}
+
+	erpStatus := event.GetStatus()
+	rtid := event.GetRtid()
+
+	localStatus, ok := orderConstant.MapERPAfterSaleStatusToLocal(erpStatus)
+	if !ok {
+		zap.L().Warn("Unknown ERP aftersale status", zap.String("status", erpStatus))
+		return nil
+	}
+
+	aftersale, err := s.orderRefundDao.GetByOutRefundNo(ctx, rtid)
+	if err != nil {
+		return fmt.Errorf("查询售后单失败: %v", err)
+	}
+	if aftersale == nil {
+		return errors.New("售后单不存在: " + rtid)
+	}
+	if orderConstant.IsFinalAftersaleStatus(aftersale.Status) {
+		return nil // 已是终态，幂等
+	}
+
+	// 先更新售后单状态
+	if err := s.orderRefundDao.UpdateStatus(ctx, aftersale.ID, localStatus, nil); err != nil {
+		return fmt.Errorf("更新售后单状态失败: %v", err)
+	}
+
+	return nil
+}
+
+// refundViaPaymentChannel 执行支付通道退款并更新售后单状态。
+func (s *OrderServiceImpl) refundViaPaymentChannel(ctx *gin.Context, aftersale *models.OrderRefund) error {
+	order, err := s.orderDao.GetByID(ctx, uint64(aftersale.OrderID))
+	if err != nil {
+		return fmt.Errorf("查询订单失败: %v", err)
+	}
+	if order == nil {
+		return errors.New("订单不存在")
+	}
+
+	refundProvider, err := provider.GetPaymentMethod(aftersale.PayChannel)
+	if err != nil {
+		_ = s.orderRefundDao.UpdateStatus(ctx, aftersale.ID, orderConstant.AftersaleStatusRefundFailed, nil)
+		return fmt.Errorf("获取退款provider失败: %v", err)
+	}
+
+	provReq := &models.RefundRequest{
+		Tid:           order.Tid,
+		TransactionID: order.TransactionID,
+		OutRefundNo:   aftersale.OutRefundNo,
+		Reason:        aftersale.Reason,
+		RefundAmount:  aftersale.RefundAmount,
+		TotalAmount:   order.Total,
+		MchID:         order.MchID,
+		AppID:         order.AppID,
+	}
+
+	refundResult, err := refundProvider.Refund(ctx, provReq)
+	if err != nil {
+		zap.L().Error("退款发起失败", zap.Error(err))
+		_ = s.orderRefundDao.UpdateStatus(ctx, aftersale.ID, orderConstant.AftersaleStatusRefundFailed, nil)
+		return fmt.Errorf("退款失败: %v", err)
+	}
+
+	updates := map[string]any{
+		"third_refund_id": refundResult.ThirdRefundID,
+	}
+	if refundResult.ThirdTransactionID != "" {
+		updates["third_transaction_id"] = refundResult.ThirdTransactionID
+	}
+	return s.orderRefundDao.UpdateStatus(ctx, aftersale.ID, orderConstant.AftersaleStatusRefundSuccess, updates)
+}
+
+// ReviewPaymentVoucher 审核线下打款支付凭证。
+func (s *OrderServiceImpl) ReviewPaymentVoucher(c *gin.Context, req *models.PaymentVoucherReviewReq) error {
+	order, err := s.orderDao.GetByID(c, uint64(req.ID))
+	if err != nil || order == nil {
+		return errors.New("订单不存在")
+	}
+	if order.Status != orderConstant.ERPStatusPayPending {
+		return errors.New("当前订单状态不允许审核支付凭证")
+	}
+
+	targetStatus := orderConstant.ERPStatusPayed
+	if !req.Approved {
+		targetStatus = orderConstant.ERPStatusNoPay
+	}
+
+	now := time.Now()
+	return s.orderDao.UpdateByID(s.db, order.ID, map[string]any{
+		"status":      targetStatus,
+		"update_time": &now,
+	})
 }

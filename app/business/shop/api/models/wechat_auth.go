@@ -7,6 +7,13 @@ type WechatLoginReq struct {
 	Avatar   string `json:"avatar"`                  // 用户头像
 }
 
+// AccountLoginReq shop_user 账号密码登录参数
+type AccountLoginReq struct {
+	Account  string `json:"account" binding:"required"`  // 登录账号，支持用户名或手机号
+	Password string `json:"password" binding:"required"` // 登录密码
+	Code     string `json:"code" binding:"required"`     // 微信登录code，用于绑定openid
+}
+
 // RefreshTokenReq 刷新Token参数
 type RefreshTokenReq struct {
 	Token string `json:"token" binding:"required"` // 有效的JWT token

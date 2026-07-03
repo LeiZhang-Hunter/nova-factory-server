@@ -28,6 +28,7 @@ type IApiShopOrderServiceImpl struct {
 	accountDao      orderdao.IOrderAccountDao
 	discountService discountservice.IDiscountCalculateService
 	orderSync       *shopOrderSyncService
+	orderRefundDao  orderdao.IOrderRefundDao
 	// iAccountDao 结算账户
 	iAccountDao financeDao.IAccountDao
 }
@@ -49,6 +50,7 @@ func NewIApiShopOrderServiceImpl(
 	accountDao orderdao.IOrderAccountDao,
 	discountService discountservice.IDiscountCalculateService,
 	orderSync *shopOrderSyncService,
+	orderRefundDao orderdao.IOrderRefundDao,
 	iAccountDao financeDao.IAccountDao,
 ) service.IApiShopOrderService {
 	return &IApiShopOrderServiceImpl{
@@ -67,6 +69,7 @@ func NewIApiShopOrderServiceImpl(
 		accountDao:      accountDao,
 		discountService: discountService,
 		orderSync:       orderSync,
+		orderRefundDao:  orderRefundDao,
 		iAccountDao:     iAccountDao,
 	}
 }

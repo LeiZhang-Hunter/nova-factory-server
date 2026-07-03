@@ -10,4 +10,5 @@ import (
 type ITrackingService interface {
 	// Query 即时查询物流轨迹（缓存优先策略）
 	Query(c *gin.Context, outsid, companyCode string) (*models.TrackingQueryResponse, error)
+	CompanyList(c *gin.Context) ([]*models.LogisticsCompanyOption, error)
 }

@@ -13,6 +13,9 @@ type IOrderService interface {
 	Set(c *gin.Context, req *models.OrderSet) (*models.Order, error)
 	GetByID(c *gin.Context, id uint64) (*models.Order, error)
 	List(c *gin.Context, req *models.OrderQuery) (*models.OrderListData, error)
+	ListRefunds(c *gin.Context, req *models.RefundQuery) (*models.RefundListData, error)
+	ReviewRefund(c *gin.Context, req *models.RefundReviewReq) error
+	Refund(c *gin.Context, req *models.RefundManualReq) error
 	DeleteByIDs(c *gin.Context, ids []uint64) error
 	SynchronizeSalesOrders(c *gin.Context, req *models.OrderSyncRequest) (result.OrderSyncResponse, error)
 
@@ -33,4 +36,10 @@ type IOrderService interface {
 
 	// SyncAfterSaleOrder 同步售后单事件至管家婆。
 	SyncAfterSaleOrder(event event.ZAfterSaleOrderSyncReqEvent) error
+
+	// UpdateAfterSaleStatus 处理ERP售后状态回写，审核通过后触发支付通道退款。
+	UpdateAfterSaleStatus(event event.ZAfterSaleStatusSyncReqEvent) error
+
+	// ReviewPaymentVoucher 审核线下打款支付凭证
+	ReviewPaymentVoucher(c *gin.Context, req *models.PaymentVoucherReviewReq) error
 }

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	shopusermodels "nova-factory-server/app/business/shop/user/models"
+	"nova-factory-server/app/utils/bCryptPasswordEncoder"
+	"strings"
 	"time"
 
 	"nova-factory-server/app/business/shop/api/dao"
@@ -71,24 +73,49 @@ func (s *IApiShopWechatAuthServiceImpl) WechatLogin(c *gin.Context, req *models.
 		}
 	}
 
-	// 创建 Session
-	manager := session.NewShopManager(s.cache)
-	currentSession, err := manager.InitSessionWithData(c, user.ID, &session.SessionData{
-		SessionType: sessionStatus.SessionTypeShopUser,
-		UserId:      user.ID,
-		DeptId:      user.DeptID,
-		Avatar:      user.Avatar,
-		UserName:    s.getUserDisplayName(user),
-		IpAddr:      c.ClientIP(),
-		LoginTime:   time.Now().Unix(),
-	})
-	if err != nil {
-		return nil, errors.New("创建会话失败")
+	return s.createLoginSession(c, user)
+}
+
+// AccountLogin 使用 shop_user 账号密码登录。
+func (s *IApiShopWechatAuthServiceImpl) AccountLogin(c *gin.Context, req *models.AccountLoginReq) (*models.WechatLoginResp, error) {
+	if req == nil {
+		return nil, errors.New("参数不能为空")
 	}
-	return &models.WechatLoginResp{
-		Token:  currentSession.Id(),
-		UserId: user.ID,
-	}, nil
+	account := strings.TrimSpace(req.Account)
+	password := strings.TrimSpace(req.Password)
+	if account == "" {
+		return nil, errors.New("登录账号不能为空")
+	}
+	if password == "" {
+		return nil, errors.New("登录密码不能为空")
+	}
+	if strings.TrimSpace(req.Code) == "" {
+		return nil, errors.New("微信登录凭证不能为空")
+	}
+
+	user, err := s.userDao.GetByAccount(c, account)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("用户不存在或密码错误")
+	}
+	if !isShopUserEnabled(user.Status) {
+		return nil, errors.New("账号已停用")
+	}
+	if !bCryptPasswordEncoder.CheckPasswordHash(password, user.Password) {
+		return nil, errors.New("用户不存在或密码错误")
+	}
+
+	openid, err := s.getOpenidByCode(c, strings.TrimSpace(req.Code))
+	if err != nil {
+		return nil, err
+	}
+	if err := s.bindAccountOpenid(c, user, openid); err != nil {
+		return nil, err
+	}
+
+	return s.createLoginSession(c, user)
 }
 
 // RefreshToken 刷新 Session Token
@@ -121,6 +148,18 @@ func (s *IApiShopWechatAuthServiceImpl) getWechatConfig(c *gin.Context, key stri
 		return "", errors.New("配置不存在")
 	}
 	return config.ConfigValue, nil
+}
+
+func (s *IApiShopWechatAuthServiceImpl) getOpenidByCode(c *gin.Context, code string) (string, error) {
+	appID, err := s.getWechatConfig(c, "wechat_mini_program_app_id")
+	if err != nil {
+		return "", errors.New("微信配置缺失")
+	}
+	appSecret, err := s.getWechatConfig(c, "wechat_mini_program_app_secret")
+	if err != nil {
+		return "", errors.New("微信配置缺失")
+	}
+	return s.getWechatOpenid(c, appID, appSecret, code)
 }
 
 // getWechatOpenid 调用微信接口获取openid
@@ -181,4 +220,52 @@ func (s *IApiShopWechatAuthServiceImpl) getUserDisplayName(user *shopusermodels.
 		return user.ContactName
 	}
 	return user.Username
+}
+
+func (s *IApiShopWechatAuthServiceImpl) bindAccountOpenid(c *gin.Context, user *shopusermodels.User, openid string) error {
+	if user == nil {
+		return errors.New("用户不存在")
+	}
+	if user.WechatOpenid != "" {
+		if user.WechatOpenid == openid {
+			return nil
+		}
+		return errors.New("当前账号已绑定其他微信")
+	}
+	boundUser, err := s.userDao.GetByOpenid(c, openid)
+	if err != nil {
+		return errors.New("查询微信绑定状态失败")
+	}
+	if boundUser != nil && boundUser.ID != user.ID {
+		return errors.New("该微信已绑定其他账号")
+	}
+	if err := s.userDao.BindWechatOpenid(c, user.ID, openid); err != nil {
+		return errors.New("绑定微信失败")
+	}
+	user.WechatOpenid = openid
+	return nil
+}
+
+func (s *IApiShopWechatAuthServiceImpl) createLoginSession(c *gin.Context, user *shopusermodels.User) (*models.WechatLoginResp, error) {
+	manager := session.NewShopManager(s.cache)
+	currentSession, err := manager.InitSessionWithData(c, user.ID, &session.SessionData{
+		SessionType: sessionStatus.SessionTypeShopUser,
+		UserId:      user.ID,
+		DeptId:      user.DeptID,
+		Avatar:      user.Avatar,
+		UserName:    s.getUserDisplayName(user),
+		IpAddr:      c.ClientIP(),
+		LoginTime:   time.Now().Unix(),
+	})
+	if err != nil {
+		return nil, errors.New("创建会话失败")
+	}
+	return &models.WechatLoginResp{
+		Token:  currentSession.Id(),
+		UserId: user.ID,
+	}, nil
+}
+
+func isShopUserEnabled(status *bool) bool {
+	return status != nil && *status
 }

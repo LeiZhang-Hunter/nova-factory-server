@@ -177,6 +177,19 @@ func (l *LogisticsCompanyDaoImpl) ListByCodes(c *gin.Context, codes []string) ([
 	return rows, nil
 }
 
+// ListEnabled 查询启用的 ERP 物流公司记录。
+func (l *LogisticsCompanyDaoImpl) ListEnabled(c *gin.Context) ([]*models.LogisticsCompany, error) {
+	rows := make([]*models.LogisticsCompany, 0)
+	if err := l.db.WithContext(c).Table(l.table).
+		Where("state = ?", commonStatus.NORMAL).
+		Where("status = ?", 1).
+		Order("sort ASC, id DESC").
+		Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
 // List 分页查询 ERP 物流公司记录。
 func (l *LogisticsCompanyDaoImpl) List(c *gin.Context, req *models.LogisticsCompanyQuery) (*models.LogisticsCompanyListData, error) {
 	db := l.db.WithContext(c).Table(l.table).Where("state = 0")

@@ -9,6 +9,7 @@ const (
 	AftersaleStatusRefundFailed  int32 = 4 // 退款失败
 	AftersaleStatusRefundClosed  int32 = 5 // 退款关闭
 	AftersaleStatusRejected      int32 = 6 // 已拒绝
+	AftersaleStatusPendingRefund int32 = 7 // 待退款
 )
 
 // 售后同步状态常量
@@ -48,6 +49,8 @@ func GetAftersaleStatusText(status int32) string {
 		return "退款关闭"
 	case AftersaleStatusRejected:
 		return "已拒绝"
+	case AftersaleStatusPendingRefund:
+		return "待退款"
 	default:
 		return "未知"
 	}
