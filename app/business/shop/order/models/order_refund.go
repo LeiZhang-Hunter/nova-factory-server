@@ -8,7 +8,7 @@ import (
 // OrderRefund  售后单主表
 type OrderRefund struct {
 	baize.BaseEntity
-	ID                     int64      `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键ID" json:"id"`                                  // 主键ID
+	ID                     int64      `gorm:"column:id;primaryKey;autoIncrement:true;comment:主键ID" json:"id,string"`                           // 主键ID
 	OrderID                int64      `gorm:"column:order_id;not null;comment:订单主表ID" json:"order_id"`                                         // 订单主表ID
 	Tid                    string     `gorm:"column:tid;not null;comment:网店订单编号" json:"tid"`                                                   // 网店订单编号
 	UserID                 int64      `gorm:"column:user_id;not null;comment:申请人ID" json:"user_id"`                                            // 申请人ID
@@ -58,4 +58,16 @@ type CreateRefundReq struct {
 	Tid    string `json:"tid"`
 	Reason string `json:"reason"`
 	UserID int64  `json:"-"`
+}
+
+// RefundReviewReq 审核售后单请求。
+type RefundReviewReq struct {
+	ID       int64  `json:"id,string" binding:"required"`
+	Approved bool   `json:"approved"`
+	Remark   string `json:"remark"`
+}
+
+// RefundManualReq 后台手动退款请求。
+type RefundManualReq struct {
+	ID int64 `json:"id,string" binding:"required"`
 }

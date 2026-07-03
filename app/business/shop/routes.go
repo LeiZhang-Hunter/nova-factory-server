@@ -6,7 +6,6 @@ package shop
 import (
 	"context"
 
-	"github.com/google/wire"
 	activityController "nova-factory-server/app/business/shop/activity/controller"
 	apiActivityController "nova-factory-server/app/business/shop/api/controller/activity"
 	"nova-factory-server/app/business/shop/api/controller/address"
@@ -14,6 +13,7 @@ import (
 	"nova-factory-server/app/business/shop/api/controller/auth"
 	apiCompanyController "nova-factory-server/app/business/shop/api/controller/company"
 	"nova-factory-server/app/business/shop/api/controller/favorite"
+	apiLogisticsController "nova-factory-server/app/business/shop/api/controller/logistics"
 	"nova-factory-server/app/business/shop/api/controller/order"
 	"nova-factory-server/app/business/shop/api/controller/product"
 	shopconfigController "nova-factory-server/app/business/shop/config/controller"
@@ -31,6 +31,8 @@ import (
 	"nova-factory-server/app/routes"
 	_ "nova-factory-server/app/utils/observer/integration/adapter/guanjiapo"
 	"nova-factory-server/app/utils/observer/integration/observer"
+
+	"github.com/google/wire"
 )
 
 var GinProviderSet = wire.NewSet(NewGinEngine)
@@ -58,6 +60,7 @@ func NewGinEngine(
 	shopFinance *shopFinanceController.Controller,
 	_ shopOrderProvider.PaymentMethod,
 	logisticsCtrl *logisticsController.Controller,
+	apiLogisticsCtrl *apiLogisticsController.Tracking,
 ) *Shop {
 	group := app.Engine.Group("")
 
@@ -103,7 +106,7 @@ func NewGinEngine(
 		apiActivityController.Combination.PrivateRoutes(appGroup)
 		apiActivityController.Pink.PrivateRoutes(appGroup)
 		// 小程序端物流查询
-		logisticsCtrl.Tracking.AppRoutes(appGroup)
+		apiLogisticsCtrl.PrivateRoutes(appGroup)
 	}
 
 	// WebSocket 路由组 — 握手阶段即要求 Bearer 鉴权，失败时返回标准 HTTP 状态码

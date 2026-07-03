@@ -44,6 +44,23 @@ func NewTrackingService(
 	}
 }
 
+// CompanyList 查询小程序可选择的启用物流公司。
+func (s *TrackingServiceImpl) CompanyList(c *gin.Context) ([]*models.LogisticsCompanyOption, error) {
+	companies, err := s.logisticsDao.ListEnabled(c)
+	if err != nil {
+		return nil, err
+	}
+	rows := make([]*models.LogisticsCompanyOption, 0, len(companies))
+	for _, company := range companies {
+		rows = append(rows, &models.LogisticsCompanyOption{
+			Code:      company.Code,
+			Name:      company.Name,
+			ShortName: company.ShortName,
+		})
+	}
+	return rows, nil
+}
+
 // Query 即时查询物流轨迹（缓存优先策略：DB已签收记录 → Redis短期缓存 → 第三方API）
 func (s *TrackingServiceImpl) Query(c *gin.Context, outsid, companyCode string) (*models.TrackingQueryResponse, error) {
 	// 1. 查 DB 已签收记录（永久缓存，直接返回）

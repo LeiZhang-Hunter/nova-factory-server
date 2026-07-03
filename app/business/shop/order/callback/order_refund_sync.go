@@ -81,10 +81,10 @@ func (s *AfterSaleSyncCallback) OnFinish(ev event.Event) error {
 
 func (s *AfterSaleSyncCallback) updateSyncFailed(message string) {
 	now := time.Now()
-	s.orderRefundDao.UpdateStatusWithTx(s.event.GetDB(), s.aftersaleID, 0, map[string]any{
-		"sync_status":  int32(2),
-		"sync_message": message,
-		"sync_time":    &now,
+	s.orderRefundDao.UpdateByID(s.event.GetDB(), s.aftersaleID, map[string]any{
+		"erp_sync_status":  int32(2),
+		"erp_sync_message": message,
+		"erp_sync_time":    &now,
 	})
 }
 

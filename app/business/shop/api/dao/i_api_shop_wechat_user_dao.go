@@ -15,4 +15,6 @@ type IApiShopWechatUserDao interface {
 	CreateWechatUser(c *gin.Context, req *models.WechatUserCreate) (*shopusermodels.User, error)
 	GetByID(c *gin.Context, id int64) (*shopusermodels.User, error)
 	GetByUserID(c *gin.Context, userId int64) (*shopusermodels.User, error)
+	UpdatePassword(c *gin.Context, userID int64, newPassword string) error
+	UpdateProfile(c *gin.Context, userID int64, updates map[string]interface{}) error
 }

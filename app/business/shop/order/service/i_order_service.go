@@ -13,6 +13,9 @@ type IOrderService interface {
 	Set(c *gin.Context, req *models.OrderSet) (*models.Order, error)
 	GetByID(c *gin.Context, id uint64) (*models.Order, error)
 	List(c *gin.Context, req *models.OrderQuery) (*models.OrderListData, error)
+	ListRefunds(c *gin.Context, req *models.RefundQuery) (*models.RefundListData, error)
+	ReviewRefund(c *gin.Context, req *models.RefundReviewReq) error
+	Refund(c *gin.Context, req *models.RefundManualReq) error
 	DeleteByIDs(c *gin.Context, ids []uint64) error
 	SynchronizeSalesOrders(c *gin.Context, req *models.OrderSyncRequest) (result.OrderSyncResponse, error)
 

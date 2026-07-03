@@ -35,6 +35,8 @@ func (s *Auth) PrivateRoutes(router *gin.RouterGroup) {
 	group := router.Group("/api/v1/app/shop")
 	group.GET("/getInfo", s.GetInfo)
 	group.POST("/logout", s.Logout)
+	group.PUT("/updateProfile", s.UpdateProfile)
+	group.POST("/changePassword", s.ChangePassword)
 }
 
 // WechatLogin 微信小程序授权登录
@@ -133,6 +135,52 @@ func (s *Auth) GetInfo(c *gin.Context) {
 // @Router /api/v1/app/shop/logout [post]
 func (s *Auth) Logout(c *gin.Context) {
 	if err := s.authService.Logout(c); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
+}
+
+// UpdateProfile 更新商城用户个人资料
+// @Summary 更新商城用户个人资料
+// @Description 更新当前登录商城用户的昵称、手机号、邮箱
+// @Tags 商城/App鉴权
+// @Accept application/json
+// @Param body body models.UpdateProfileReq true "个人资料参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "更新成功"
+// @Router /api/v1/app/shop/updateProfile [put]
+func (s *Auth) UpdateProfile(c *gin.Context) {
+	req := new(models.UpdateProfileReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if err := s.authService.UpdateProfile(c, req); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.Success(c)
+}
+
+// ChangePassword 修改商城用户密码
+// @Summary 修改商城用户密码
+// @Description 验证旧密码后更新为新密码
+// @Tags 商城/App鉴权
+// @Accept application/json
+// @Param body body models.ChangePasswordReq true "修改密码参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "修改成功"
+// @Router /api/v1/app/shop/changePassword [post]
+func (s *Auth) ChangePassword(c *gin.Context) {
+	req := new(models.ChangePasswordReq)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+	if err := s.authService.ChangePassword(c, req); err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
 	}

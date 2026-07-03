@@ -8,6 +8,13 @@ type TrackingQueryRequest struct {
 	CompanyCode string `json:"companyCode" binding:"required"` // 物流公司编码（对接快递鸟 ShipperCode）
 }
 
+// LogisticsCompanyOption 小程序物流公司选择项。
+type LogisticsCompanyOption struct {
+	Code      string `json:"code"`
+	Name      string `json:"name"`
+	ShortName string `json:"shortName"`
+}
+
 // TrackingTraceNode 物流轨迹节点
 type TrackingTraceNode struct {
 	AcceptTime    string `json:"acceptTime"`    // 发生时间

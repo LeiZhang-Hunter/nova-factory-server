@@ -125,3 +125,23 @@ func (s *IApiShopWechatUserDaoImpl) GetByUserID(c *gin.Context, userId int64) (*
 func boolPtr(v bool) *bool {
 	return &v
 }
+
+// UpdatePassword 更新商城用户密码（bcrypt 哈希后写入）。
+func (s *IApiShopWechatUserDaoImpl) UpdatePassword(c *gin.Context, userID int64, newPassword string) error {
+	return s.db.WithContext(c).Table(s.tableName).
+		Where("id = ?", userID).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(map[string]interface{}{
+			"password":    newPassword,
+			"update_time": gorm.Expr("NOW()"),
+		}).Error
+}
+
+// UpdateProfile 更新商城用户个人资料（昵称、手机号、邮箱）。
+func (s *IApiShopWechatUserDaoImpl) UpdateProfile(c *gin.Context, userID int64, updates map[string]interface{}) error {
+	updates["update_time"] = gorm.Expr("NOW()")
+	return s.db.WithContext(c).Table(s.tableName).
+		Where("id = ?", userID).
+		Where("state = ?", commonStatus.NORMAL).
+		Updates(updates).Error
+}

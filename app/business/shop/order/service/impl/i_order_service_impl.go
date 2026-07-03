@@ -252,6 +252,11 @@ func (o *OrderServiceImpl) DeleteByIDs(c *gin.Context, ids []uint64) error {
 	return o.orderDao.DeleteByIDs(c, ids)
 }
 
+// ListRefunds 查询售后单列表。
+func (o *OrderServiceImpl) ListRefunds(c *gin.Context, req *models.RefundQuery) (*models.RefundListData, error) {
+	return o.orderRefundDao.List(c, req)
+}
+
 // SynchronizeSalesOrders 调用集成客户端接口同步销售订单。
 func (o *OrderServiceImpl) SynchronizeSalesOrders(c *gin.Context, req *models.OrderSyncRequest) (result.OrderSyncResponse, error) {
 	if req == nil {
@@ -778,7 +783,6 @@ func (s *OrderServiceImpl) SyncAfterSaleOrder(event event.ZAfterSaleOrderSyncReq
 }
 
 // UpdateAfterSaleStatus 处理ERP售后状态回写，由 ShopObserver.OnAfterSaleStatusChanged 调用。
-// Finished 状态时触发支付通道退款。
 func (s *OrderServiceImpl) UpdateAfterSaleStatus(event event.ZAfterSaleStatusSyncReqEvent) error {
 	ctx := event.GetCtx()
 	if ctx == nil {
@@ -808,11 +812,6 @@ func (s *OrderServiceImpl) UpdateAfterSaleStatus(event event.ZAfterSaleStatusSyn
 	// 先更新售后单状态
 	if err := s.orderRefundDao.UpdateStatus(ctx, aftersale.ID, localStatus, nil); err != nil {
 		return fmt.Errorf("更新售后单状态失败: %v", err)
-	}
-
-	// Finished 状态触发支付通道退款
-	if orderConstant.ERPAfterSaleStatusTriggersRefund(erpStatus) {
-		return s.refundViaPaymentChannel(ctx, aftersale)
 	}
 
 	return nil

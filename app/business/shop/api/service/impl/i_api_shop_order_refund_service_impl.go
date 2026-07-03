@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"nova-factory-server/app/business/shop/order/callback"
 	"nova-factory-server/app/datasource/cache"
-	"nova-factory-server/app/utils/observer/integration/observer"
 	"nova-factory-server/app/utils/snowflake"
 	"time"
 
@@ -15,7 +14,6 @@ import (
 	apiservice "nova-factory-server/app/business/shop/api/service"
 	orderDao "nova-factory-server/app/business/shop/order/dao"
 	"nova-factory-server/app/business/shop/order/models"
-	models2 "nova-factory-server/app/business/shop/order/models"
 	orderConstant "nova-factory-server/app/constant/order"
 	"nova-factory-server/app/utils/order"
 
@@ -112,25 +110,17 @@ func (s *IApiShopRefundServiceImpl) Apply(c *gin.Context, userID int64, req *api
 	}
 	aftersale.SetCreateBy(userID)
 
-	// 加载订单详情
-	orderDetails, err := s.orderDetailDao.ListByOrderID(c, shopOrder.ID)
-	if err != nil {
-		zap.L().Error("获取订单详情失败", zap.Error(err))
-		return nil, err
-	}
-	shopOrder.Details = orderDetails
-
-	// 通过观察者模式触发售后同步（SyncAfterSaleOrder 自行管理事务，ERP 同步回调在事务提交后执行）
-	event := models2.NewAftersaleSyncEvent(aftersale, shopOrder)
-	cb := callback.NewAfterSaleSyncCallback(c, s.orderRefundDao, aftersale.ID, event)
-	event.WithCallback(cb)
-	event.WithCache(s.cache)
-	event.WithDB(s.db)
-	event.WithCtx(c)
-	event.WithUserId(userID)
-
-	if err := observer.GetNotifier().OnAfterSaleOrderChanged(event); err != nil {
-		zap.L().Error("售后单同步触发失败",
+	if err := s.db.WithContext(c).Transaction(func(tx *gorm.DB) error {
+		if err := s.orderRefundDao.CreateWithTx(tx, aftersale); err != nil {
+			return fmt.Errorf("创建售后申请失败: %v", err)
+		}
+		now := time.Now()
+		return s.orderDao.UpdateByID(tx, shopOrder.ID, map[string]any{
+			"status":      orderConstant.ERPStatusAftersale,
+			"update_time": &now,
+		})
+	}); err != nil {
+		zap.L().Error("售后申请保存失败",
 			zap.String("out_refund_no", outRefundNo),
 			zap.Error(err),
 		)
@@ -173,8 +163,9 @@ func (s *IApiShopRefundServiceImpl) SubmitReturnLogistics(c *gin.Context, userID
 	if err := s.orderRefundDao.UpdateByID(s.db, aftersale.ID, updates); err != nil {
 		return nil, fmt.Errorf("更新退货物流信息失败: %v", err)
 	}
+	aftersale.ReturnLogisticsCompany = req.LogisticsCompany
+	aftersale.ReturnLogisticsCode = req.LogisticsCode
 
-	// 再次同步 ERP，携带 logistbillcode
 	shopOrder, err := s.orderDao.GetByID(c, uint64(aftersale.OrderID))
 	if err != nil {
 		return nil, fmt.Errorf("查询订单失败: %v", err)
@@ -182,8 +173,6 @@ func (s *IApiShopRefundServiceImpl) SubmitReturnLogistics(c *gin.Context, userID
 	if shopOrder == nil {
 		return nil, errors.New("订单不存在")
 	}
-
-	// 加载订单详情
 	orderDetails, err := s.orderDetailDao.ListByOrderID(c, shopOrder.ID)
 	if err != nil {
 		zap.L().Error("获取订单详情失败", zap.Error(err))
@@ -191,16 +180,16 @@ func (s *IApiShopRefundServiceImpl) SubmitReturnLogistics(c *gin.Context, userID
 	}
 	shopOrder.Details = orderDetails
 
-	event := models2.NewAftersaleSyncEvent(aftersale, shopOrder)
+	event := models.NewAftersaleSyncEvent(aftersale, shopOrder)
 	event.SetLogistBillCode(req.LogisticsCode)
 	cb := callback.NewAfterSaleSyncCallback(c, s.orderRefundDao, aftersale.ID, event)
 	event.WithCallback(cb)
 	event.WithCache(s.cache)
-	event.WithDB(s.db)
+	event.WithDB(s.db.WithContext(c))
 	event.WithCtx(c)
 	event.WithUserId(userID)
 
-	if err := observer.GetNotifier().OnAfterSaleOrderChanged(event); err != nil {
+	if err := cb.OnFinish(event); err != nil {
 		zap.L().Error("退货物流同步ERP失败",
 			zap.String("out_refund_no", aftersale.OutRefundNo),
 			zap.Error(err),

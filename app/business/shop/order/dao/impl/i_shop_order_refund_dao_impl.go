@@ -146,7 +146,7 @@ func (d *OrderRefundDaoImpl) List(c *gin.Context, req *models.RefundQuery) (*mod
 			db = db.Where("user_id = ?", req.UserID)
 		}
 		if req.SyncStatus != nil {
-			db = db.Where("sync_status = ?", *req.SyncStatus)
+			db = db.Where("erp_sync_status = ?", *req.SyncStatus)
 		}
 	}
 

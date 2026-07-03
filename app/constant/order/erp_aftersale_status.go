@@ -26,7 +26,7 @@ func MapERPAfterSaleStatusToLocal(erpStatus string) (int32, bool) {
 	case ERPAfterSaleStatusUnFinish:
 		return AftersaleStatusRefunding, true
 	case ERPAfterSaleStatusFinished:
-		return AftersaleStatusRefundSuccess, true
+		return AftersaleStatusPendingRefund, true
 	case ERPAfterSaleStatusAgreeInvalid:
 		return AftersaleStatusRefundClosed, true
 	case ERPAfterSaleStatusRefuseInvalid:
@@ -38,5 +38,5 @@ func MapERPAfterSaleStatusToLocal(erpStatus string) (int32, bool) {
 
 // ERPAfterSaleStatusTriggersRefund 判断 ERP 状态是否应触发支付通道退款。
 func ERPAfterSaleStatusTriggersRefund(erpStatus string) bool {
-	return erpStatus == ERPAfterSaleStatusFinished
+	return false
 }

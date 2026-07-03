@@ -1,7 +1,6 @@
 package models
 
 import (
-	orderConstant "nova-factory-server/app/constant/order"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/observer/integration/config"
 	"nova-factory-server/app/utils/observer/integration/event"
@@ -9,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+const aftSaleTypeRefundAndGoods = "RefundAndGoods"
 
 // AftersaleSyncEvent 售后同步事件，实现 event.ZAfterSaleOrderSyncReqEvent 接口。
 type AftersaleSyncEvent struct {
@@ -158,8 +159,6 @@ func buildAftersaleSyncData(aftersale *OrderRefund, order *Order) AftersaleSyncR
 		})
 	}
 
-	aftSaleType := resolveAftSaleType(order.Status)
-
 	return AftersaleSyncReqData{
 		Rtid:           aftersale.OutRefundNo,
 		Tid:            aftersale.Tid,
@@ -167,20 +166,11 @@ func buildAftersaleSyncData(aftersale *OrderRefund, order *Order) AftersaleSyncR
 		Privilege:      order.Privilege,
 		PostFee:        order.PostFee,
 		Created:        created,
-		AftSaleType:    aftSaleType,
+		AftSaleType:    aftSaleTypeRefundAndGoods,
 		ReasonCode:     "01",
 		AftSaleRemark:  aftersale.Reason,
 		LogistBillCode: aftersale.ReturnLogisticsCode,
 		Details:        details,
-	}
-}
-
-func resolveAftSaleType(orderStatus string) string {
-	switch orderStatus {
-	case orderConstant.ERPStatusSended, orderConstant.ERPStatusPartSend:
-		return "RefundAndGoods"
-	default:
-		return "JustRefund"
 	}
 }
 
