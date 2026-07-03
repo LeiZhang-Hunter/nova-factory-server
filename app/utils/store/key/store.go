@@ -1,5 +1,7 @@
 package key
 
+import "github.com/gin-gonic/gin"
+
 type emptyKeys struct{}
 
 func newEmptyPermissions() keys {
@@ -8,4 +10,8 @@ func newEmptyPermissions() keys {
 
 func (e *emptyKeys) GetUserId(key string) int64 {
 	return 0
+}
+
+func (e *emptyKeys) GetTool(c *gin.Context, key string) ([]string, error) {
+	return []string{}, nil
 }
