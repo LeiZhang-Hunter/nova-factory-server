@@ -289,7 +289,48 @@ func (n *Notifier) OnAfterSaleOrderChanged(ev event.TransactionEvent[event.ZAfte
 	})
 }
 
-// OnOrderStatusChange 向所有观察者分发订单变更事件。
+// OnAfterSaleStatusChanged 向所有观察者分发 ERP 售后状态回写事件。
+func (n *Notifier) OnAfterSaleStatusChanged(ev event.TransactionEvent[event.ZAfterSaleStatusSyncReqEvent]) error {
+	if ev.GetDB() == nil {
+		err := n.notify(func(ob Observer) error {
+			err := ob.OnAfterSaleStatusChanged(ev.ToEvent())
+			if err != nil {
+				zap.L().Error("Observer OnAfterSaleStatusChanged", zap.Error(err))
+				notifyError(ev.ToEvent(), nil, err)
+				return err
+			}
+			notifySuccess(ev.ToEvent(), nil)
+			return nil
+		})
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnAfterSaleStatusChanged finish", zap.Error(err))
+			return err
+		}
+		return err
+	}
+	return ev.GetDB().Transaction(func(tx *gorm.DB) error {
+		ev.WithDB(tx)
+		err := n.notify(func(ob Observer) error {
+			err := ob.OnAfterSaleStatusChanged(ev.ToEvent())
+			if err != nil {
+				zap.L().Error("Observer OnAfterSaleStatusChanged", zap.Error(err))
+				notifyError(ev.ToEvent(), nil, err)
+				return err
+			}
+			notifySuccess(ev.ToEvent(), nil)
+			return nil
+		})
+		err = notifyFinish(ev.ToEvent())
+		if err != nil {
+			zap.L().Error("Observer OnAfterSaleStatusChanged finish", zap.Error(err))
+			return err
+		}
+		return err
+	})
+}
+
+// OnOrderStatusChange 向所有观察者分发订单状态变更事件。
 // 由 Notifier 统一开启事务，并将 tx 显式传给每个观察者，保证全员原子一致。
 func (n *Notifier) OnOrderStatusChange(ev event.TransactionEvent[event.ZOrderStatusSyncReqEvent]) error {
 	if ev.GetDB() == nil {

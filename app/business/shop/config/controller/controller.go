@@ -7,9 +7,10 @@ type Controller struct {
 	Logistics                *Logistics
 	ShopErpIntegrationConfig *ShopErpIntegrationConfig
 	LogisticsConfig          *LogisticsConfig
+	EnterpriseAccount        *EnterpriseAccountConfig
 }
 
 var ProviderSet = wire.NewSet(
-	NewWechatConfig, NewLogistics, NewShopErpIntegrationConfig, NewLogisticsConfig,
+	NewWechatConfig, NewLogistics, NewShopErpIntegrationConfig, NewLogisticsConfig, NewEnterpriseAccountConfig,
 	wire.Struct(new(Controller), "*"),
 )

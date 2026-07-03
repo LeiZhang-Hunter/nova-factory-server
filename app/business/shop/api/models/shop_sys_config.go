@@ -24,3 +24,10 @@ type ShopSysConfigWechatPayConfigDTO struct {
 	PlatformPublicKeyId   string `json:"platformPublicKeyId"`
 	PlatformPublicKeyPath string `json:"platformPublicKeyPath"`
 }
+
+// EnterpriseAccountConfigDTO 企业账户收款信息
+type EnterpriseAccountConfigDTO struct {
+	AccountName   string `json:"accountName"`
+	AccountNumber string `json:"accountNumber"`
+	BankName      string `json:"bankName"`
+}

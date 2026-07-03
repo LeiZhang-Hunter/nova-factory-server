@@ -15,7 +15,7 @@ type IOrderRefundDao interface {
 	GetByOutRefundNo(c *gin.Context, outRefundNo string) (*models.OrderRefund, error)
 	GetByOrderId(c *gin.Context, orderId int64) (*models.OrderRefund, error)
 	UpdateStatus(c *gin.Context, id int64, status int32, updates map[string]any) error
-	UpdateByID(c *gin.Context, id int64, updates map[string]any) error
+	UpdateByID(tx *gorm.DB, id int64, updates map[string]any) error
 	UpdateStatusWithTx(tx *gorm.DB, id int64, status int32, updates map[string]any) error
 	List(c *gin.Context, req *models.RefundQuery) (*models.RefundListData, error)
 }

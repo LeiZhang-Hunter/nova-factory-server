@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS `shop_order_refund` (
     `erp_sync_message` VARCHAR(500) DEFAULT NULL COMMENT '同步结果描述',
     `erp_sync_time` DATETIME(0) DEFAULT NULL COMMENT '同步时间',
     `erp_sync_bill_code` VARCHAR(100) DEFAULT NULL COMMENT 'erp返回单号',
+    `return_logistics_company` VARCHAR(64) DEFAULT NULL COMMENT '退货物流公司',
+    `return_logistics_code` VARCHAR(128) DEFAULT NULL COMMENT '退货物流单号',
     `create_by` BIGINT(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` DATETIME(0) NULL DEFAULT NULL COMMENT '创建时间',
     `update_by` BIGINT(20) NULL DEFAULT NULL COMMENT '更新者',

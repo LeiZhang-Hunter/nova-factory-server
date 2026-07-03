@@ -385,6 +385,7 @@ func (s *IApiShopOrderServiceImpl) GetByID(c *gin.Context, id int64) (*apimodels
 	//order.Accounts = accounts
 
 	vo := apimodels.ToApiShopOrderVO(order)
+	s.attachAftersaleInfo(c, order.ID, &vo.Order)
 	if order.Status == orderConstant.ERPStatusNoPay {
 		expireAt := order.CreateTime.Add(orderAutoCancelTTL)
 		if remaining := int64(time.Until(expireAt).Seconds()); remaining > 0 {
@@ -439,8 +440,12 @@ func (s *IApiShopOrderServiceImpl) List(c *gin.Context, userID int64, query *api
 			}
 			for _, o := range list.Rows {
 				if r, ok := refundMap[o.ID]; ok {
+					o.AftersaleID = r.ID
 					o.AftersaleStatus = r.Status
 					o.AftersaleStatusText = orderConstant.GetAftersaleStatusText(r.Status)
+					o.AftersalePreviousStatus = r.PreviousStatus
+					o.ReturnLogisticsCompany = r.ReturnLogisticsCompany
+					o.ReturnLogisticsCode = r.ReturnLogisticsCode
 				}
 			}
 		}
@@ -1509,4 +1514,41 @@ func (s *IApiShopOrderServiceImpl) recalcGoodsStockByGoodsID(c *gin.Context, goo
 		return fmt.Errorf("更新商品总库存失败: %v", err)
 	}
 	return nil
+}
+
+// attachAftersaleInfo 填充订单的售后相关信息（透传给小程序）。
+func (s *IApiShopOrderServiceImpl) attachAftersaleInfo(c *gin.Context, orderID uint64, o *apimodels.Order) {
+	refund, err := s.orderRefundDao.GetByOrderId(c, int64(orderID))
+	if err != nil || refund == nil {
+		return
+	}
+	o.AftersaleID = refund.ID
+	o.AftersaleStatus = refund.Status
+	o.AftersaleStatusText = orderConstant.GetAftersaleStatusText(refund.Status)
+	o.AftersalePreviousStatus = refund.PreviousStatus
+	o.ReturnLogisticsCompany = refund.ReturnLogisticsCompany
+	o.ReturnLogisticsCode = refund.ReturnLogisticsCode
+}
+
+// SubmitPaymentVoucher 提交线下打款支付凭证。
+func (s *IApiShopOrderServiceImpl) SubmitPaymentVoucher(c *gin.Context, userID int64, req *apimodels.PaymentVoucherReq) error {
+	order, err := s.apiOrderDao.GetByID(c, uint64(req.OrderID))
+	if err != nil || order == nil {
+		return errors.New("订单不存在")
+	}
+	if order.UserId != uint64(userID) {
+		return errors.New("无权操作此订单")
+	}
+	if order.Status != orderConstant.ERPStatusNoPay {
+		return errors.New("当前订单状态不允许提交支付凭证")
+	}
+
+	now := time.Now()
+	return s.db.WithContext(c).Table("shop_order").
+		Where("id = ?", req.OrderID).
+		Updates(map[string]any{
+			"status":               orderConstant.ERPStatusPayPending,
+			"payment_voucher":      req.VoucherURL,
+			"payment_voucher_time": &now,
+		}).Error
 }

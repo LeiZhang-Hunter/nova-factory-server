@@ -41,9 +41,13 @@ type Order struct {
 	Version               int32      `json:"version" gorm:"column:version"`                               // 乐观锁版本号
 	DeptID                int64      `json:"deptId" gorm:"column:dept_id"`                                // 部门ID
 	baize.BaseEntity
-	State               int32  `json:"state" gorm:"column:state"`    // 操作状态
-	AftersaleStatus     int32  `json:"aftersaleStatus" gorm:"-"`     // 售后状态：0待审核 1已审核 2退款中 3退款成功 4退款失败 5退款关闭 6已拒绝
-	AftersaleStatusText string `json:"aftersaleStatusText" gorm:"-"` // 售后状态文本
+	State                   int32  `json:"state" gorm:"column:state"`        // 操作状态
+	AftersaleID             int64  `json:"aftersaleId,string" gorm:"-"`      // 售后单ID
+	AftersaleStatus         int32  `json:"aftersaleStatus" gorm:"-"`         // 售后状态
+	AftersaleStatusText     string `json:"aftersaleStatusText" gorm:"-"`     // 售后状态文本
+	AftersalePreviousStatus string `json:"aftersalePreviousStatus" gorm:"-"` // 售后前订单状态（判断仅退款/退货退款）
+	ReturnLogisticsCompany  string `json:"returnLogisticsCompany" gorm:"-"`  // 退货物流公司
+	ReturnLogisticsCode     string `json:"returnLogisticsCode" gorm:"-"`     // 退货物流单号
 }
 
 // ToApiShopOrderVO 订单转换为 api订单,为了兼容小程序数据结构返回，历史原因
@@ -118,4 +122,10 @@ func ToShopOrderItem(detail *shopordermodels.OrderDetail) *OrderItem {
 		State:       detail.State,
 		BaseEntity:  detail.BaseEntity,
 	}
+}
+
+// PaymentVoucherReq 提交支付凭证请求
+type PaymentVoucherReq struct {
+	OrderID    int64  `json:"orderId,string" binding:"required"`
+	VoucherURL string `json:"voucherUrl" binding:"required"`
 }

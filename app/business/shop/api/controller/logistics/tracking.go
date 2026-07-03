@@ -1,4 +1,4 @@
-package controller
+package logistics
 
 import (
 	"nova-factory-server/app/business/shop/logistics/models"
@@ -19,10 +19,11 @@ func NewTracking(service service.ITrackingService) *Tracking {
 	return &Tracking{service: service}
 }
 
-// PrivateRoutes 注册管理端路由
+// PrivateRoutes  注册小程序端路由
 func (t *Tracking) PrivateRoutes(router *gin.RouterGroup) {
-	group := router.Group("/shop/logistics/tracking")
-	group.POST("/query", t.Query)
+	group := router.Group("/api/v1/app/shop/logistics")
+	group.POST("/tracking/query", t.Query)
+	group.GET("/company/list", t.CompanyList)
 }
 
 // CompanyList 查询小程序物流公司选择列表。

@@ -19,6 +19,8 @@ func ShopStatusToOrderStatus(status int32) string {
 		return ERPStatusTradeSuccess
 	case OrderStatusCancelled:
 		return ERPStatusTradeClosed
+	case OrderStatusPayPending:
+		return ERPStatusPayPending
 	case OrderStatusAftersale:
 		return ERPStatusAftersale
 	default:
@@ -30,6 +32,8 @@ func OrderStatusToShopStatus(status string) int32 {
 	switch strings.TrimSpace(status) {
 	case ERPStatusNoPay:
 		return OrderStatusPending
+	case ERPStatusPayPending:
+		return OrderStatusPayPending
 	case ERPStatusPayed:
 		return OrderStatusPaid
 	case ERPStatusSended:

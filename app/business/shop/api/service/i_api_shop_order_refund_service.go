@@ -9,4 +9,5 @@ import (
 // IApiShopOrderRefundService  小程序售后接口。
 type IApiShopOrderRefundService interface {
 	Apply(c *gin.Context, userID int64, req *models.RefundApplyReq) (*models.RefundApplyResp, error)
+	SubmitReturnLogistics(c *gin.Context, userID int64, req *models.SubmitReturnLogisticsReq) (*models.SubmitReturnLogisticsResp, error)
 }

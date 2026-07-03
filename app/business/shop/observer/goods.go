@@ -69,7 +69,15 @@ func (o *ShopObserver) OnAfterSaleOrderChanged(event event.ZAfterSaleOrderSyncRe
 	return o.orderService.SyncAfterSaleOrder(event)
 }
 
-// OnOrderStatusChange 订单发货变化
+// OnAfterSaleStatusChanged ERP售后状态回写回调
+func (o *ShopObserver) OnAfterSaleStatusChanged(event event.ZAfterSaleStatusSyncReqEvent) error {
+	if o.orderService == nil {
+		return nil
+	}
+	return o.orderService.UpdateAfterSaleStatus(event)
+}
+
+// OnOrderStatusChange 订单状态变化
 func (o *ShopObserver) OnOrderStatusChange(statusEvent event.ZOrderStatusSyncReqEvent) error {
 	uid := statusEvent.GetUserId()
 	//BatchUpdateStatus(c *gin.Context, userID int64, req *apimodels.BatchOrderStatusReq) error

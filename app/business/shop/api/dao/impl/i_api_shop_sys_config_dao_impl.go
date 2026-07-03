@@ -94,6 +94,27 @@ func (s *IApiShopSysConfigDaoImpl) GetWechatPayConfig(c *gin.Context) (*models.S
 	}, nil
 }
 
+// GetEnterpriseAccountConfig 获取企业账户收款信息
+func (s *IApiShopSysConfigDaoImpl) GetEnterpriseAccountConfig(c *gin.Context) (*models.EnterpriseAccountConfigDTO, error) {
+	rows, err := s.GetByConfigKeys(c, []string{
+		"enterprise_account_name",
+		"enterprise_account_number",
+		"enterprise_account_bank",
+	})
+	if err != nil {
+		return nil, err
+	}
+	cfgMap := make(map[string]string)
+	for _, row := range rows {
+		cfgMap[row.ConfigKey] = row.ConfigValue
+	}
+	return &models.EnterpriseAccountConfigDTO{
+		AccountName:   cfgMap["enterprise_account_name"],
+		AccountNumber: cfgMap["enterprise_account_number"],
+		BankName:      cfgMap["enterprise_account_bank"],
+	}, nil
+}
+
 // GetIsAutoRefundEnabled 获取售后订单是否启用自动退款
 func (s *IApiShopSysConfigDaoImpl) GetIsAutoRefundEnabled(c *gin.Context) (bool, error) {
 	cfg, err := s.GetByConfigKey(c, "shop_auto_refund_unshipped_enabled")

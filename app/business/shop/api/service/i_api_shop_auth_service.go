@@ -10,4 +10,6 @@ import (
 type IApiShopAuthService interface {
 	GetInfo(c *gin.Context) (*models.ShopGetInfoResp, error)
 	Logout(c *gin.Context) error
+	ChangePassword(c *gin.Context, req *models.ChangePasswordReq) error
+	UpdateProfile(c *gin.Context, req *models.UpdateProfileReq) error
 }
