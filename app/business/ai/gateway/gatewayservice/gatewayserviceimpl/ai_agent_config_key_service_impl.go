@@ -250,3 +250,26 @@ func (a *AgentConfigKeyServiceImpl) SetAllowMcpTools(c *gin.Context, req *gatewa
 	}
 	return a.dao.UpdateAllowMcpTools(c, req.ID, string(body))
 }
+
+func (a *AgentConfigKeyServiceImpl) GetByKey(c *gin.Context, key string) (*gatewaymodels.AgentConfigKey, error) {
+	return a.dao.GetByKey(c, key)
+}
+
+func (a *AgentConfigKeyServiceImpl) GetTool(c *gin.Context, key string) ([]string, error) {
+	info, err := a.dao.GetByKey(c, key)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return make([]string, 0), nil
+	}
+	if info.AllowMcpServerTools == "" {
+		return make([]string, 0), nil
+	}
+	var tools []string = make([]string, 0)
+	err = json.Unmarshal([]byte(info.AllowMcpServerTools), &tools)
+	if err != nil {
+		return nil, err
+	}
+	return tools, nil
+}
