@@ -47,8 +47,8 @@ func (s *IApiShopWechatUserDaoImpl) GetByOpenid(c *gin.Context, openid string) (
 func (s *IApiShopWechatUserDaoImpl) GetByAccount(c *gin.Context, account string) (*shopusermodels.User, error) {
 	var item shopusermodels.User
 	if err := s.db.WithContext(c).Table(s.tableName).
-		Where("state = ?", commonStatus.NORMAL).
 		Where("(username = ? OR mobile = ?)", account, account).
+		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

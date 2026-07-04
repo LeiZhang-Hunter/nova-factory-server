@@ -7,6 +7,7 @@ import (
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -25,8 +26,10 @@ func NewShopUserDao(ms *gorm.DB) dao.IShopUserDao {
 }
 
 func (s *ShopUserDaoImpl) Create(c *gin.Context, req *models.UserUpsert) (*models.User, error) {
+	id := snowflake.GenID()
 	model := &models.User{
-		ID:           snowflake.GenID(),
+		ID:           id,
+		UserID:       strconv.FormatInt(id, 10),
 		Username:     req.Username,
 		Nickname:     req.Nickname,
 		Mobile:       req.Mobile,
@@ -126,8 +129,8 @@ func (s *ShopUserDaoImpl) GetByUserID(c *gin.Context, id int64) (*models.User, e
 func (s *ShopUserDaoImpl) GetByAccount(c *gin.Context, account string) (*models.User, error) {
 	var item models.User
 	if err := s.db.WithContext(c).Table(s.tableName).
-		Where("state = ?", commonStatus.NORMAL).
 		Where("(username = ? OR mobile = ?)", account, account).
+		Where("state = ?", commonStatus.NORMAL).
 		First(&item).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

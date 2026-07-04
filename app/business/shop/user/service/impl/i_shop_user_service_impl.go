@@ -2,6 +2,7 @@ package impl
 
 import (
 	"errors"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/shop/user/dao"
 	"nova-factory-server/app/business/shop/user/models"
 	"nova-factory-server/app/business/shop/user/service"
@@ -27,6 +28,14 @@ func NewShopUserService(cache cache.Cache, dao dao.IShopUserDao) service.IShopUs
 func (s *ShopUserServiceImpl) Create(c *gin.Context, req *models.UserUpsert) (*models.User, error) {
 	if err := s.prepareUpsert(c, req, false); err != nil {
 		return nil, err
+	}
+	account, err := s.dao.GetByAccount(c, req.Username)
+	if err != nil {
+		zap.L().Error("get account error", zap.Error(err))
+		return nil, err
+	}
+	if account != nil {
+		return nil, errors.New("账户或者手机号已经存在，不能重复创建")
 	}
 	return s.dao.Create(c, req)
 }
