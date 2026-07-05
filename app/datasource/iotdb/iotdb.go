@@ -17,6 +17,13 @@ type IotDb struct {
 	mtx  sync.Mutex
 }
 
+const (
+	// IotDBQuerySQLProperty 用于在通用 Query 接口中传入 IoTDB SQL。
+	IotDBQuerySQLProperty = "__iotdb_sql"
+	// IotDBQueryColumnProperty 用于指定 SQL 查询结果中的值列。
+	IotDBQueryColumnProperty = "__iotdb_column"
+)
+
 // IotDBMetricSeries 是 IoTDB 查询返回给 MetricResult 的序列结构。
 type IotDBMetricSeries struct {
 	Name       string
@@ -28,6 +35,39 @@ type IotDBMetricSeries struct {
 type IotDBMetricPoint struct {
 	Timestamp int64
 	Value     float64
+}
+
+type metricSample struct {
+	kind       string
+	properties map[string]string
+	ts         int64
+	val        float64
+}
+
+// NewMetricSample 创建可被通用 Appender 写入的时序样本。
+func NewMetricSample(kind string, properties map[string]string, timestamp int64, value float64) MetricSample {
+	return metricSample{
+		kind:       kind,
+		properties: copyStringMap(properties),
+		ts:         timestamp,
+		val:        value,
+	}
+}
+
+func (m metricSample) GetKind() string {
+	return m.kind
+}
+
+func (m metricSample) GetProperties() map[string]string {
+	return copyStringMap(m.properties)
+}
+
+func (m metricSample) timestamp() int64 {
+	return m.ts
+}
+
+func (m metricSample) value() float64 {
+	return m.val
 }
 
 func NewIotDb() *IotDb {
@@ -243,6 +283,9 @@ func (q *iotDBQuerier) Query(meta MetricMeta, hints *QueryHints, result MetricRe
 	if result == nil {
 		return fmt.Errorf("%w: nil metric result", errTSDBInvalidMetric)
 	}
+	if sql := meta.GetProperties()[IotDBQuerySQLProperty]; sql != "" {
+		return q.querySQL(meta, sql, meta.GetProperties()[IotDBQueryColumnProperty], result)
+	}
 
 	path, err := iotDBMetricPath(meta)
 	if err != nil {
@@ -255,25 +298,18 @@ func (q *iotDBQuerier) Query(meta MetricMeta, hints *QueryHints, result MetricRe
 	}
 	defer statement.Close()
 
-	series := IotDBMetricSeries{
-		Name:       path,
-		Properties: copyMetricProperties(meta),
-	}
-	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
-		value, err := iotDBColumnValue(statement, 0)
-		if err != nil {
-			return err
-		}
-		series.Samples = append(series.Samples, IotDBMetricPoint{
-			Timestamp: statement.GetTimestamp(),
-			Value:     value,
-		})
-	}
+	return addStatementSeries(statement, path, copyMetricProperties(meta), "", result)
+}
+
+func (q *iotDBQuerier) querySQL(meta MetricMeta, sql string, column string, result MetricResult) error {
+	var timeout int64 = 5000
+	statement, err := q.session.ExecuteQueryStatement(sql, &timeout)
 	if err != nil {
 		return err
 	}
+	defer statement.Close()
 
-	return result.AddSeries(series)
+	return addStatementSeries(statement, meta.GetKind(), copyMetricProperties(meta), column, result)
 }
 
 func (q *iotDBQuerier) QueryAndClose(meta MetricMeta, hints *QueryHints, result MetricResult) error {
@@ -314,6 +350,47 @@ func iotDBMetricPath(meta MetricMeta) (string, error) {
 	return path, nil
 }
 
+func addStatementSeries(statement *client.SessionDataSet, name string, properties map[string]string, column string, result MetricResult) error {
+	series := IotDBMetricSeries{
+		Name:       name,
+		Properties: properties,
+	}
+	for next, err := statement.Next(); ; next, err = statement.Next() {
+		if err != nil {
+			return err
+		}
+		if !next {
+			break
+		}
+		value, err := iotDBColumnValueByName(statement, column)
+		if err != nil {
+			return err
+		}
+		series.Samples = append(series.Samples, IotDBMetricPoint{
+			Timestamp: statement.GetTimestamp(),
+			Value:     value,
+		})
+	}
+	return result.AddSeries(series)
+}
+
+func iotDBColumnValueByName(statement *client.SessionDataSet, column string) (float64, error) {
+	columnIndex := 0
+	if column != "" {
+		columnIndex = -1
+		for index, columnName := range statement.GetColumnNames() {
+			if columnName == column {
+				columnIndex = index
+				break
+			}
+		}
+		if columnIndex < 0 {
+			return 0, fmt.Errorf("%w: column %q not found", errTSDBInvalidMetric, column)
+		}
+	}
+	return iotDBColumnValue(statement, columnIndex)
+}
+
 func iotDBColumnValue(statement *client.SessionDataSet, columnIndex int) (float64, error) {
 	columnName := statement.GetColumnName(columnIndex)
 	if statement.IsNull(columnName) {
@@ -340,13 +417,16 @@ func iotDBColumnValue(statement *client.SessionDataSet, columnIndex int) (float6
 }
 
 func copyMetricProperties(meta MetricMeta) map[string]string {
-	properties := meta.GetProperties()
-	if len(properties) == 0 {
+	return copyStringMap(meta.GetProperties())
+}
+
+func copyStringMap(values map[string]string) map[string]string {
+	if len(values) == 0 {
 		return nil
 	}
 
-	copied := make(map[string]string, len(properties))
-	for key, value := range properties {
+	copied := make(map[string]string, len(values))
+	for key, value := range values {
 		copied[key] = value
 	}
 	return copied

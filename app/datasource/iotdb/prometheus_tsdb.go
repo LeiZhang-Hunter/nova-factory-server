@@ -181,6 +181,18 @@ func (s *TsdbStorage) Close() error {
 	return s.db.Close()
 }
 
+// Delete 按指标类型和 labels 删除 Prometheus TSDB 中匹配的全部序列数据。
+func (s *TsdbStorage) Delete(meta MetricMeta) error {
+	if s == nil || s.db == nil {
+		return errTSDBStorageClosed
+	}
+	matchers, err := metricMatchers(meta)
+	if err != nil {
+		return err
+	}
+	return s.db.Delete(context.Background(), -1<<63, 1<<63-1, matchers...)
+}
+
 // tsdbAppender 将项目内的 MetricSample 接口适配到 Prometheus 的 storage.Appender 事务接口。
 type tsdbAppender struct {
 	appender storage.Appender

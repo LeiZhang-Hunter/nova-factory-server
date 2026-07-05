@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/apache/iotdb-client-go/client"
+	"github.com/gin-gonic/gin"
+	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
+	"go.uber.org/zap"
 	"nova-factory-server/app/business/iot/asset/device/devicemodels"
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
 	"nova-factory-server/app/business/iot/metric/device/metricmodels"
@@ -12,11 +16,7 @@ import (
 	"nova-factory-server/app/utils/math"
 	"nova-factory-server/app/utils/time"
 	"strings"
-
-	"github.com/apache/iotdb-client-go/client"
-	"github.com/gin-gonic/gin"
-	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
-	"go.uber.org/zap"
+	stdtime "time"
 )
 
 type iotDbExport struct {
@@ -24,67 +24,140 @@ type iotDbExport struct {
 }
 
 func newIotDbExport(iotDb *iotdb.IotDb) iDaoExport {
-	return &iotDbExport{
+	i := &iotDbExport{
 		iotDb: iotDb,
 	}
+	i.init()
+	return i
+}
+
+func (i *iotDbExport) init() {
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		zap.L().Error("iotdb.GetSession()", zap.Error(err))
+		panic(err)
+	}
+	defer i.iotDb.PutSession(session)
+	for {
+		statement, err := session.ExecuteStatement("count databases root.device")
+		if err != nil {
+			zap.L().Error("execute statement", zap.Error(err))
+			stdtime.Sleep(1 * stdtime.Second)
+			continue
+		}
+		hasDatabase, err := statement.Next()
+		if err != nil {
+			zap.L().Error("get hasDatabase", zap.Error(err))
+			stdtime.Sleep(1 * stdtime.Second)
+			continue
+		}
+
+		count := statement.GetInt32("count")
+		if count < 1 {
+			session.ExecuteStatement("create database root.device")
+			stdtime.Sleep(1 * stdtime.Second)
+			continue
+		}
+
+		statement, err = session.ExecuteStatement("count databases root.run_status_device")
+		if err != nil {
+			stdtime.Sleep(1 * stdtime.Second)
+			return
+		}
+		hasDatabase, err = statement.Next()
+		if err != nil {
+			zap.L().Error("get hasDatabase", zap.Error(err))
+			stdtime.Sleep(1 * stdtime.Second)
+			continue
+		}
+
+		if !hasDatabase {
+			stdtime.Sleep(1 * stdtime.Second)
+			continue
+		}
+
+		count = statement.GetInt32("count")
+		if count < 1 {
+			session.ExecuteStatement("create database root.run_status_device")
+			stdtime.Sleep(1 * stdtime.Second)
+			continue
+		}
+
+		break
+	}
+
+	// 创建设备数据采集模板
+	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (value DOUBLE)", iotdb2.NOVA_DEVICE_TEMPLATE))
+	// 创建设备运行时间统计模板
+	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (duration INT64, status INT64)", iotdb2.NOVA_DEVICE_RUN_TEMPLATE))
+
+}
+
+type iotMetricMeta struct {
+	kind       string
+	properties map[string]string
+}
+
+func (m iotMetricMeta) GetKind() string {
+	return m.kind
+}
+
+func (m iotMetricMeta) GetProperties() map[string]string {
+	return m.properties
+}
+
+type iotMetricQueryResult struct {
+	data *metricmodels.MetricQueryData
+}
+
+func (r *iotMetricQueryResult) GetKind() string {
+	return ""
+}
+
+func (r *iotMetricQueryResult) GetProperties() map[string]string {
+	return nil
+}
+
+func (r *iotMetricQueryResult) AddSeries(series iotdb.MetricSeries) error {
+	iotSeries, ok := series.(iotdb.IotDBMetricSeries)
+	if !ok {
+		return fmt.Errorf("unsupported iotdb metric series %T", series)
+	}
+	for _, sample := range iotSeries.Samples {
+		r.data.Values = append(r.data.Values, metricmodels.MetricQueryValue{
+			Time:  sample.Timestamp,
+			Value: math.RoundFloat(sample.Value, 2),
+		})
+	}
+	return nil
 }
 
 func (i *iotDbExport) Export(ctx context.Context, data []*metricmodels.NovaMetricsDevice) error {
-	session, err := i.iotDb.GetSession()
-	if err != nil {
-		return err
-	}
-	defer i.iotDb.PutSession(session)
-
-	// 变更数据结构，根据设备id分类
-	var dataMap map[uint64][]*metricmodels.NovaMetricsDevice = make(map[uint64][]*metricmodels.NovaMetricsDevice)
-	for _, d := range data {
-		_, ok := dataMap[d.DeviceId]
-		if !ok {
-			dataMap[d.DeviceId] = make([]*metricmodels.NovaMetricsDevice, 0)
-		}
-		dataMap[d.DeviceId] = append(dataMap[d.DeviceId], d)
+	if len(data) == 0 {
+		return nil
 	}
 
-	type pointData struct {
-		measurementsSlice [][]string
-		dataTypes         [][]client.TSDataType
-		values            [][]interface{}
-		timestamps        []int64
-	}
-
-	var pointDataMap map[string]*pointData = make(map[string]*pointData)
-
-	for deviceId, list := range dataMap {
-		for _, value := range list {
-			name := iotdb2.MakeDeviceTemplateName(int64(deviceId), int64(value.TemplateId), int64(value.DataId))
-			_, ok := pointDataMap[name]
-			if !ok {
-				pointDataMap[name] = &pointData{
-					measurementsSlice: make([][]string, 0),
-					dataTypes:         [][]client.TSDataType{},
-					values:            [][]interface{}{},
-					timestamps:        []int64{},
-				}
-			}
-			now := value.StartTimeUnix.UnixMilli()
-			pointDataMap[name].measurementsSlice = append(pointDataMap[name].measurementsSlice, []string{
-				"value",
-			})
-			pointDataMap[name].dataTypes = append(pointDataMap[name].dataTypes, []client.TSDataType{client.DOUBLE})
-			pointDataMap[name].values = append(pointDataMap[name].values, []interface{}{(value.Value)})
-			pointDataMap[name].timestamps = append(pointDataMap[name].timestamps, now)
-		}
-	}
-
-	for name, point := range pointDataMap {
-		_, err := session.InsertRecordsOfOneDevice(name, point.timestamps, point.measurementsSlice, point.dataTypes, point.values, false)
-		if err != nil {
-			zap.L().Error("InsertRecordsOfOneDevice error", zap.Error(err))
+	samples := make([]iotdb.MetricSample, 0, len(data))
+	for _, value := range data {
+		if value == nil || value.StartTimeUnix == nil {
 			continue
 		}
+		name := iotdb2.MakeDeviceTemplateName(int64(value.DeviceId), int64(value.TemplateId), int64(value.DataId)) + ".value"
+		samples = append(samples, iotdb.NewMetricSample(name, nil, value.StartTimeUnix.UnixMilli(), value.Value))
+	}
+	if len(samples) == 0 {
+		return nil
 	}
 
+	appender := i.iotDb.Appender()
+	if err := appender.Append(samples); err != nil {
+		zap.L().Error("iotdb appender append error", zap.Error(err))
+		return err
+	}
+	if err := appender.Commit(); err != nil {
+		zap.L().Error("iotdb appender commit error", zap.Error(err))
+		return err
+	}
 	return nil
 }
 
@@ -92,12 +165,6 @@ func (i *iotDbExport) Metric(c *gin.Context, req *metricmodels.MetricQueryReq) (
 	if req == nil {
 		return nil, nil
 	}
-
-	session, err := i.iotDb.GetSession()
-	if err != nil {
-		return nil, err
-	}
-	defer i.iotDb.PutSession(session)
 
 	var startTime string
 	if req.Start > 0 {
@@ -115,29 +182,30 @@ func (i *iotDbExport) Metric(c *gin.Context, req *metricmodels.MetricQueryReq) (
 	if req.Step <= 0 {
 		req.Step = 1
 	}
+
 	name := iotdb2.MakeDeviceTemplateName(int64(req.DeviceId), int64(req.TemplateId), int64(req.DataId))
-	var timeout int64 = 5000
-	var data *metricmodels.MetricQueryData = metricmodels.NewMetricQueryData()
+	data := metricmodels.NewMetricQueryData()
+	data.Id = name
 	sql := fmt.Sprintf("select avg(value) as value from %s group by([%s, %s), %dm, %dm);",
 		name, startTime, endTime, req.Step, req.Step)
-	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
-	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+
+	querier, err := i.iotDb.Querier(stdtime.UnixMilli(int64(req.Start)), metricEndTime(req.End))
 	if err != nil {
-		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
 		return nil, err
 	}
-	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
-		timestamp := statement.GetTimestamp()
-		v := statement.GetDouble("value")
-		data.Values = append(data.Values, metricmodels.MetricQueryValue{
-			Time:  timestamp,
-			Value: math.RoundFloat(v, 2),
-		})
-
+	result := &iotMetricQueryResult{data: data}
+	meta := iotMetricMeta{
+		kind: name,
+		properties: map[string]string{
+			iotdb.IotDBQuerySQLProperty:    sql,
+			iotdb.IotDBQueryColumnProperty: "value",
+		},
 	}
-	data.Id = name
+	if err := querier.QueryAndClose(meta, nil, result); err != nil {
+		zap.L().Error("iotdb querier query error", zap.Error(err))
+		return nil, err
+	}
 	return data, nil
-
 }
 
 // InstallDevice 安装设备模板
@@ -247,7 +315,7 @@ func (i *iotDbExport) UnInStallDevice(c *gin.Context, deviceId int64, templateId
 	}
 	defer i.iotDb.PutSession(session)
 
-	name := fmt.Sprintf(iotdb2.ROOT_DEVICE_TEMPLATE_NAME, deviceId, templateId, dataId)
+	name := iotdb2.MakeDeviceTemplateName(deviceId, templateId, dataId)
 
 	// 删除模板表示的某一组时间序列
 	_, err = session.ExecuteStatement(fmt.Sprintf("deactivate device template %s from %s", iotdb2.NOVA_DEVICE_TEMPLATE, name))
@@ -543,7 +611,7 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricmodels.MetricDataQueryReq
 	var sql string
 	if req.Type == "bar" || req.Type == "line" || req.Type == "area" || req.Type == "toplist" {
 		if req.Step != 0 {
-			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm, %dm)%s",
+			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm, %dm)%s %s",
 				req.Expression, req.Field, req.Name, startTime, endTime, interval, req.Step, level, having)
 		} else {
 			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm)%s %s",
@@ -677,85 +745,55 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricmodels.MetricDataQueryReq
 }
 
 // ExportTimeData 导入时序数据
+func metricEndTime(end uint64) stdtime.Time {
+	if end == 0 {
+		return stdtime.Now()
+	}
+	return stdtime.UnixMilli(int64(end))
+}
+
 func (i *iotDbExport) ExportTimeData(ctx context.Context, data map[string][]*v1.ResourceTimeMetrics) error {
 	if len(data) == 0 {
 		return nil
 	}
 
-	session, err := i.iotDb.GetSession()
-	if err != nil {
-		zap.L().Error("GetSession error", zap.Error(err))
+	var samples []iotdb.MetricSample
+	for table, list := range data {
+		for _, value := range list {
+			if value == nil {
+				continue
+			}
+			timestamp := time.MicroToGTime(value.TimeUnixNano).UnixMilli()
+			for _, metric := range value.Metrics {
+				if metric == nil {
+					continue
+				}
+
+				var metricValue float64
+				if metric.GetValue() == nil {
+					metricValue = 0
+				} else if _, ok := metric.GetValue().(*v1.TimeDataMetric_AsDouble); ok {
+					metricValue = metric.GetAsDouble()
+				} else {
+					metricValue = float64(metric.GetAsInt())
+				}
+
+				samples = append(samples, iotdb.NewMetricSample(table+"."+metric.Field, nil, timestamp, metricValue))
+			}
+		}
+	}
+	if len(samples) == 0 {
+		return nil
+	}
+
+	appender := i.iotDb.Appender()
+	if err := appender.Append(samples); err != nil {
+		zap.L().Error("iotdb appender append time data error", zap.Error(err))
 		return err
 	}
-	defer i.iotDb.PutSession(session)
-
-	type pointData struct {
-		measurementsSlice [][]string
-		dataTypes         [][]client.TSDataType
-		values            [][]interface{}
-		timestamps        []int64
+	if err := appender.Commit(); err != nil {
+		zap.L().Error("iotdb appender commit time data error", zap.Error(err))
+		return err
 	}
-
-	var pointDataMap map[string]*pointData = make(map[string]*pointData)
-
-	for table, list := range data {
-		name := table
-		_, ok := pointDataMap[name]
-		if !ok {
-			pointDataMap[name] = &pointData{
-				measurementsSlice: make([][]string, 0),
-				dataTypes:         [][]client.TSDataType{},
-				values:            [][]interface{}{},
-				timestamps:        []int64{},
-			}
-		}
-		for _, value := range list {
-
-			fields := make([]string, len(value.Metrics))
-			for k, metric := range value.Metrics {
-				fields[k] = metric.Field
-			}
-
-			types := make([]client.TSDataType, len(value.Metrics))
-			values := make([]interface{}, len(value.Metrics))
-			for k, metric := range value.Metrics {
-				var v int64
-				if metric.GetValue() == nil {
-					v = 0
-					types[k] = client.INT64
-				} else {
-					_, ok := metric.GetValue().(*v1.TimeDataMetric_AsDouble)
-					if ok {
-						v = int64(metric.GetAsDouble())
-						types[k] = client.DOUBLE
-					} else {
-						v = metric.GetAsInt()
-						types[k] = client.INT64
-					}
-				}
-				values[k] = v
-			}
-
-			unix := time.MicroToGTime(value.TimeUnixNano)
-
-			now := unix.UnixMilli()
-
-			pointDataMap[name].measurementsSlice = append(pointDataMap[name].measurementsSlice, fields)
-			pointDataMap[name].dataTypes = append(pointDataMap[name].dataTypes, types)
-			pointDataMap[name].values = append(pointDataMap[name].values, values)
-			pointDataMap[name].timestamps = append(pointDataMap[name].timestamps, now)
-		}
-	}
-
-	for name, point := range pointDataMap {
-		r, err := session.InsertRecordsOfOneDevice(name, point.timestamps, point.measurementsSlice, point.dataTypes, point.values, false)
-		if err != nil {
-			zap.L().Error("InsertRecordsOfOneDevice error", zap.Error(err))
-			continue
-		}
-		fmt.Println(r.Code)
-		fmt.Println(r.Message)
-	}
-
 	return nil
 }
