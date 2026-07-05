@@ -744,6 +744,370 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricmodels.MetricDataQueryReq
 	return data, nil
 }
 
+func (i *iotDbExport) CounterByTimeRange(startTime int64, endTime int64, interval string) (*metricmodels.MetricQueryData, error) {
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		zap.L().Error("读取session失败", zap.Error(err))
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	if interval == "" {
+		intervalValue := (endTime - startTime) / 60 / 30 / 1000
+		interval = fmt.Sprintf("%dm", intervalValue)
+	}
+
+	var timeout int64 = 5000
+	var data *metricmodels.MetricQueryData = metricmodels.NewMetricQueryData()
+
+	sql := fmt.Sprintf("select count(value) as value from root.device.** group by([%s, %s), %s),level=1",
+		time.GetStartTime(uint64(startTime), 0), time.GetEndTime(uint64(endTime), 0), interval)
+
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
+		return nil, err
+	}
+	if len(statement.GetColumnNames()) <= 1 {
+		for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+			timestamp := statement.GetTimestamp()
+			var v float64
+			dataType := statement.GetColumnDataType(0)
+			switch dataType {
+			case client.BOOLEAN:
+				{
+					dataValue := statement.GetBool(statement.GetColumnName(0))
+					if dataValue == true {
+						v = 1.0
+					} else {
+						v = 0.0
+					}
+					break
+				}
+			case client.INT32:
+				{
+					dataValue := statement.GetInt32(statement.GetColumnName(0))
+					v = float64(dataValue)
+					break
+				}
+			case client.INT64:
+				{
+					dataValue := statement.GetInt64(statement.GetColumnName(0))
+					v = float64(dataValue)
+					break
+				}
+			case client.FLOAT:
+				{
+					dataValue := statement.GetFloat(statement.GetColumnName(0))
+					v = float64(dataValue)
+					break
+				}
+			case client.DOUBLE:
+				{
+					dataValue := statement.GetDouble(statement.GetColumnName(0))
+					v = float64(dataValue)
+					break
+				}
+
+			}
+
+			data.Values = append(data.Values, metricmodels.MetricQueryValue{
+				Time:  timestamp,
+				Value: math.RoundFloat(v, 2),
+			})
+
+		}
+	} else {
+		data.MultiValues = make([][]metricmodels.MetricQueryValue, len(statement.GetColumnNames()))
+
+		for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+			timestamp := statement.GetTimestamp()
+
+			for k, column := range statement.GetColumnNames() {
+				var v float64
+				dataType := statement.GetColumnDataType(0)
+				switch dataType {
+				case client.BOOLEAN:
+					{
+						dataValue := statement.GetBool(column)
+						if dataValue == true {
+							v = 1.0
+						} else {
+							v = 0.0
+						}
+						break
+					}
+				case client.INT32:
+					{
+						dataValue := statement.GetInt32(column)
+						v = float64(dataValue)
+						break
+					}
+				case client.INT64:
+					{
+						dataValue := statement.GetInt64(column)
+						v = float64(dataValue)
+						break
+					}
+				case client.FLOAT:
+					{
+						dataValue := statement.GetFloat(column)
+						v = float64(dataValue)
+						break
+					}
+				case client.DOUBLE:
+					{
+						dataValue := statement.GetDouble(column)
+						v = float64(dataValue)
+						break
+					}
+
+				}
+				data.MultiValues[k] = append(data.MultiValues[k], metricmodels.MetricQueryValue{
+					Time:  timestamp,
+					Value: math.RoundFloat(v, 2),
+				})
+			}
+		}
+	}
+
+	return data, nil
+}
+
+func (i *iotDbExport) CounterByDevice(c *gin.Context, startTime int64, endTime int64, limit int) (*devicemonitormodel.TypeDeviceCounterRank, error) {
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		zap.L().Error("读取session失败", zap.Error(err))
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	var timeout int64 = 5000
+
+	sql := fmt.Sprintf("select count(value) from root.device.** where time > %s and time < %s  order by count(value) desc limit %d ALIGN BY DEVICE",
+		time.GetStartTime(uint64(startTime), 0), time.GetEndTime(uint64(endTime), 0), limit)
+
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
+		return nil, err
+	}
+
+	rank := devicemonitormodel.TypeDeviceCounterRank{
+		Rows: make([]*devicemonitormodel.TypeDeviceCounterRankValue, 0),
+	}
+
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		timestamp := statement.GetTimestamp()
+		device := statement.GetText(statement.GetColumnName(0))
+		value := statement.GetInt64(statement.GetColumnName(1))
+		rank.Rows = append(rank.Rows, &devicemonitormodel.TypeDeviceCounterRankValue{
+			Time:  timestamp,
+			Dev:   device,
+			Value: value,
+		})
+	}
+
+	return &rank, nil
+}
+
+func (i *iotDbExport) StatDeviceStatus(c *gin.Context, startTime string, endTime string,
+	status int) (*devicemonitormodel.DeviceStatusList, error) {
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		zap.L().Error("读取session失败", zap.Error(err))
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	var timeout int64 = 5000
+
+	sql := fmt.Sprintf("select sum(duration) as value from root.run_status_device.** where time > %s and time < %s and status = %d align by device",
+		startTime, endTime, status)
+
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
+		return nil, err
+	}
+	data := devicemonitormodel.NewDeviceStatusList()
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		v := statement.GetDouble("value")
+		deviceName := statement.GetText("Device")
+		var deviceId int64
+		_, err := fmt.Sscanf(deviceName, "root.run_status_device.dev%d", &deviceId)
+		if err != nil {
+			zap.L().Error("fmt Sscanf error", zap.Error(err))
+			continue
+		}
+		data.List = append(data.List, devicemonitormodel.DeviceStatus{
+			DeviceId: deviceId,
+			Value:    v,
+			Status:   status,
+		})
+	}
+
+	return data, nil
+}
+
+func (i *iotDbExport) StatDeviceProcess(c *gin.Context, startTime string, endTime string, interval string,
+	status int) (*devicemonitormodel.DeviceProcessList, error) {
+	var processList devicemonitormodel.DeviceProcessList
+	processList.List = make(map[string][]devicemonitormodel.DeviceStatus)
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		zap.L().Error("读取session失败", zap.Error(err))
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	var timeout int64 = 5000
+
+	sql := fmt.Sprintf("select sum(duration) as value from root.run_status_device.** where status = %d group by ([%s, %s), %s)  align by device",
+		status, startTime, endTime, interval)
+
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("读取设备运行过程失败:", zap.Error(err))
+		return nil, err
+	}
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		timestamp := statement.GetTimestamp()
+		deviceName := statement.GetText(statement.GetColumnName(0))
+		duration := statement.GetDouble(statement.GetColumnName(1))
+		_, ok := processList.List[deviceName]
+		if !ok {
+			processList.List[deviceName] = make([]devicemonitormodel.DeviceStatus, 0)
+		}
+		processList.List[deviceName] = append(processList.List[deviceName], devicemonitormodel.DeviceStatus{
+			Value:  duration,
+			Status: status,
+			Time:   timestamp,
+		})
+		continue
+	}
+
+	return &processList, nil
+}
+
+func (i *iotDbExport) StatDeviceRunStatus(c *gin.Context, startTime string,
+	endTime string) ([]devicemonitormodel.DeviceRunStat, error) {
+	var runStatList []devicemonitormodel.DeviceRunStat = make([]devicemonitormodel.DeviceRunStat, 0)
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		zap.L().Error("读取session失败", zap.Error(err))
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	var timeout int64 = 5000
+
+	sql := fmt.Sprintf("select last_value(status) from root.run_status_device.** where time>=%s and time < %s  align by device;",
+		startTime, endTime)
+
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("读取设备运行过程失败:", zap.Error(err))
+		return nil, err
+	}
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		timestamp := statement.GetTimestamp()
+		deviceName := statement.GetText(statement.GetColumnName(0))
+		status := statement.GetInt64(statement.GetColumnName(1))
+		var stat devicemonitormodel.DeviceRunStat = devicemonitormodel.DeviceRunStat{
+			Time:   timestamp,
+			Status: int((status)),
+			Dev:    deviceName,
+		}
+		runStatList = append(runStatList, stat)
+		continue
+	}
+
+	return runStatList, nil
+}
+
+func (i *iotDbExport) StatDeviceStatusByDeviceId(c *gin.Context, startTime string, endTime string,
+	deviceId int64, status int) (*devicemonitormodel.DeviceStatusList, error) {
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		zap.L().Error("读取session失败", zap.Error(err))
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+	deviceKey := iotdb2.MakeRunDeviceTemplateName(deviceId)
+	var timeout int64 = 5000
+
+	sql := fmt.Sprintf("select sum(duration) as value from %s where time > %s and time < %s and status = %d align by device",
+		deviceKey, startTime, endTime, status)
+
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("ExecuteQueryStatement error", zap.Error(err))
+		return nil, err
+	}
+	data := devicemonitormodel.NewDeviceStatusList()
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		v := statement.GetDouble("value")
+		deviceName := statement.GetText("Device")
+		var deviceId int64
+		_, err := fmt.Sscanf(deviceName, "root.run_status_device.dev%d", &deviceId)
+		if err != nil {
+			zap.L().Error("fmt Sscanf error", zap.Error(err))
+			continue
+		}
+		data.List = append(data.List, devicemonitormodel.DeviceStatus{
+			DeviceId: deviceId,
+			Value:    v,
+			Status:   status,
+		})
+	}
+
+	return data, nil
+}
+
+func (i *iotDbExport) StatDeviceProcessByDeviceId(c *gin.Context, startTime string, endTime string,
+	deviceId int64, interval string,
+	status int) (*devicemonitormodel.DeviceProcessList, error) {
+	var processList devicemonitormodel.DeviceProcessList
+	processList.List = make(map[string][]devicemonitormodel.DeviceStatus)
+	session, err := i.iotDb.GetSession()
+	if err != nil {
+		zap.L().Error("读取session失败", zap.Error(err))
+		return nil, err
+	}
+	defer i.iotDb.PutSession(session)
+
+	var timeout int64 = 5000
+
+	deviceKey := iotdb2.MakeRunDeviceTemplateName(deviceId)
+
+	sql := fmt.Sprintf("select sum(duration) as value from %s where status = %d group by ([%s, %s), %s)  align by device",
+		deviceKey, status, startTime, endTime, interval)
+
+	statement, err := session.ExecuteQueryStatement(sql, &timeout)
+	if err != nil {
+		zap.L().Error("读取设备运行过程失败:", zap.Error(err))
+		return nil, err
+	}
+	for next, err := statement.Next(); err == nil && next; next, err = statement.Next() {
+		timestamp := statement.GetTimestamp()
+		deviceName := statement.GetText(statement.GetColumnName(0))
+		duration := statement.GetDouble(statement.GetColumnName(1))
+		_, ok := processList.List[deviceName]
+		if !ok {
+			processList.List[deviceName] = make([]devicemonitormodel.DeviceStatus, 0)
+		}
+		processList.List[deviceName] = append(processList.List[deviceName], devicemonitormodel.DeviceStatus{
+			Value:  duration,
+			Status: status,
+			Time:   timestamp,
+		})
+		continue
+	}
+
+	return &processList, nil
+}
+
 // ExportTimeData 导入时序数据
 func metricEndTime(end uint64) stdtime.Time {
 	if end == 0 {

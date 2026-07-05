@@ -56,6 +56,76 @@ func (m *MetricDaoImpl) Metric(c *gin.Context, req *metricmodels.MetricQueryReq)
 	return m.exporter.Metric(c, req)
 }
 
+func (m *MetricDaoImpl) CounterByTimeRange(startTime int64, endTime int64, interval string) (*metricmodels.MetricQueryData, error) {
+	exporter, ok := m.exporter.(interface {
+		CounterByTimeRange(startTime int64, endTime int64, interval string) (*metricmodels.MetricQueryData, error)
+	})
+	if !ok {
+		return metricmodels.NewMetricQueryData(), nil
+	}
+	return exporter.CounterByTimeRange(startTime, endTime, interval)
+}
+
+func (m *MetricDaoImpl) CounterByDevice(c *gin.Context, startTime int64, endTime int64, limit int) (*devicemonitormodel.TypeDeviceCounterRank, error) {
+	exporter, ok := m.exporter.(interface {
+		CounterByDevice(c *gin.Context, startTime int64, endTime int64, limit int) (*devicemonitormodel.TypeDeviceCounterRank, error)
+	})
+	if !ok {
+		return &devicemonitormodel.TypeDeviceCounterRank{Rows: make([]*devicemonitormodel.TypeDeviceCounterRankValue, 0)}, nil
+	}
+	return exporter.CounterByDevice(c, startTime, endTime, limit)
+}
+
+func (m *MetricDaoImpl) StatDeviceStatus(c *gin.Context, startTime string, endTime string, status int) (*devicemonitormodel.DeviceStatusList, error) {
+	exporter, ok := m.exporter.(interface {
+		StatDeviceStatus(c *gin.Context, startTime string, endTime string, status int) (*devicemonitormodel.DeviceStatusList, error)
+	})
+	if !ok {
+		return devicemonitormodel.NewDeviceStatusList(), nil
+	}
+	return exporter.StatDeviceStatus(c, startTime, endTime, status)
+}
+
+func (m *MetricDaoImpl) StatDeviceProcess(c *gin.Context, startTime string, endTime string, interval string, status int) (*devicemonitormodel.DeviceProcessList, error) {
+	exporter, ok := m.exporter.(interface {
+		StatDeviceProcess(c *gin.Context, startTime string, endTime string, interval string, status int) (*devicemonitormodel.DeviceProcessList, error)
+	})
+	if !ok {
+		return &devicemonitormodel.DeviceProcessList{List: make(map[string][]devicemonitormodel.DeviceStatus)}, nil
+	}
+	return exporter.StatDeviceProcess(c, startTime, endTime, interval, status)
+}
+
+func (m *MetricDaoImpl) StatDeviceRunStatus(c *gin.Context, startTime string, endTime string) ([]devicemonitormodel.DeviceRunStat, error) {
+	exporter, ok := m.exporter.(interface {
+		StatDeviceRunStatus(c *gin.Context, startTime string, endTime string) ([]devicemonitormodel.DeviceRunStat, error)
+	})
+	if !ok {
+		return make([]devicemonitormodel.DeviceRunStat, 0), nil
+	}
+	return exporter.StatDeviceRunStatus(c, startTime, endTime)
+}
+
+func (m *MetricDaoImpl) StatDeviceStatusByDeviceId(c *gin.Context, startTime string, endTime string, deviceId int64, status int) (*devicemonitormodel.DeviceStatusList, error) {
+	exporter, ok := m.exporter.(interface {
+		StatDeviceStatusByDeviceId(c *gin.Context, startTime string, endTime string, deviceId int64, status int) (*devicemonitormodel.DeviceStatusList, error)
+	})
+	if !ok {
+		return devicemonitormodel.NewDeviceStatusList(), nil
+	}
+	return exporter.StatDeviceStatusByDeviceId(c, startTime, endTime, deviceId, status)
+}
+
+func (m *MetricDaoImpl) StatDeviceProcessByDeviceId(c *gin.Context, startTime string, endTime string, deviceId int64, interval string, status int) (*devicemonitormodel.DeviceProcessList, error) {
+	exporter, ok := m.exporter.(interface {
+		StatDeviceProcessByDeviceId(c *gin.Context, startTime string, endTime string, deviceId int64, interval string, status int) (*devicemonitormodel.DeviceProcessList, error)
+	})
+	if !ok {
+		return &devicemonitormodel.DeviceProcessList{List: make(map[string][]devicemonitormodel.DeviceStatus)}, nil
+	}
+	return exporter.StatDeviceProcessByDeviceId(c, startTime, endTime, deviceId, interval, status)
+}
+
 func (m *MetricDaoImpl) Predict(c *gin.Context, deviceId int64, device *devicemodels.SysModbusDeviceConfigData, req *metricmodels.MetricQueryReq) (*metricmodels.MetricQueryData, error) {
 	return m.exporter.Predict(c, deviceId, device, req)
 }
