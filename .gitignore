@@ -35,3 +35,6 @@ wire_gen.go
 private
 .llm_factories.initialized
 pay.txt
+app/business/datasyncapi
+app/business/erp
+app/business/shop
