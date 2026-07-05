@@ -7,17 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
-	"nova-factory-server/app/business/admin"
-	"nova-factory-server/app/business/ai"
-	"nova-factory-server/app/business/datasyncapi"
-	"nova-factory-server/app/business/erp"
-	"nova-factory-server/app/business/iot"
-	"nova-factory-server/app/business/shop"
+	"nova-factory-server/app/business"
 	"nova-factory-server/app/datasource"
 	"nova-factory-server/app/routes"
 )
 
-func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.Shop, _ *erp.Erp, _ *datasyncapi.DataSyncApi) *gin.Engine {
+func finalEngine(app *routes.App, _ *business.Plugins) *gin.Engine {
 	type McpConfig struct {
 		Path           string `mapstructure:"path"`
 		OperationsPath string `mapstructure:"operationsPath"`
@@ -37,12 +32,7 @@ func finalEngine(app *routes.App, _ *admin.Admin, _ *iot.Iot, _ *ai.AI, _ *shop.
 func wireApp() (*gin.Engine, func(), error) {
 	panic(wire.Build(
 		routes.ProviderSet,
-		iot.ProviderSet,
-		ai.ProviderSet,
-		shop.ProviderSet,
-		erp.ProviderSet,
-		datasyncapi.ProviderSet,
-		admin.ProviderSet,
+		business.ProviderSet,
 		datasource.ProviderSet,
 		finalEngine,
 	))

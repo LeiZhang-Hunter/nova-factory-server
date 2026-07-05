@@ -141,6 +141,19 @@ vue3演示地址：http://vue.ibaize.vip
 wire gen
 ```
 
+## 外部插件装配
+
+外部插件仓库默认路径：`/home/zhanglei/project/nova/nova-factory-addons-be`。
+
+```bash
+make wire                         # 不链接外部插件，只重新生成 Wire
+make wire-addons                  # 链接 ADDONS_DIR 下全部插件，并重新生成 Wire
+make wire-addons ADDONS="shop erp" # 只链接指定插件，并重新生成 Wire
+make wire-addons ADDONS_DIR=/path/to/nova-factory-addons-be
+```
+
+`ADDONS` 默认取 `ADDONS_DIR` 下所有非隐藏一级目录，`wire-addons` 会把插件追加到 Wire build tags。
+
 ## 重新生成swag
 
 ```
