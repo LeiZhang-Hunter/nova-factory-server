@@ -321,7 +321,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.16.0 // indirect
 	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa // indirect
-	golang.org/x/image v0.22.0 // indirect
+	golang.org/x/image v0.25.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/tools v0.45.0
@@ -334,7 +334,7 @@ require (
 
 replace go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc => go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.60.0
 
-replace google.golang.org/grpc => google.golang.org/grpc v1.68.2
+replace google.golang.org/grpc => google.golang.org/grpc v1.81.1
 
 replace google.golang.org/api => google.golang.org/api v0.278.0
 
