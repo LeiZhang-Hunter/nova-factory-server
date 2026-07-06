@@ -5,3 +5,7 @@ const (
 	CLICKHOUSE      = "clickhouse"
 	PROMETHEUS_TSDB = "prometheus_tsdb"
 )
+
+const (
+	MetricPrefix = "nova_metrics"
+)

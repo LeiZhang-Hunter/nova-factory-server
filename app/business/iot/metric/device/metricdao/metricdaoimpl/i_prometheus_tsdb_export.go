@@ -45,6 +45,11 @@ type prometheusTSDBMetricResult struct {
 	points []metricmodels.MetricQueryValue
 }
 
+func (r *prometheusTSDBMetricResult) GetName() string {
+	//TODO implement me
+	return ""
+}
+
 func (r *prometheusTSDBMetricResult) GetKind() string {
 	return ""
 }
@@ -90,6 +95,10 @@ type prometheusTSDBSeriesResult struct {
 }
 
 func (r *prometheusTSDBSeriesResult) GetKind() string {
+	return ""
+}
+
+func (r *prometheusTSDBSeriesResult) GetName() string {
 	return ""
 }
 

@@ -135,3 +135,21 @@ func (i *IDeviceDataReportDaoImpl) List(c *gin.Context, req *devicemonitormodel.
 		Total: uint64(total),
 	}, nil
 }
+
+func (i *IDeviceDataReportDaoImpl) GetByDev(c *gin.Context, dev string) (*devicemonitormodel.SysIotDbDevMap, error) {
+	if dev == "" {
+		return &devicemonitormodel.SysIotDbDevMap{}, nil
+	}
+	var info *devicemonitormodel.SysIotDbDevMap
+	ret := i.db.Table(i.tableName).WithContext(c).Where("device = ?", dev).Where("state = ?", commonStatus.NORMAL).First(&info)
+	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
+		return &devicemonitormodel.SysIotDbDevMap{}, nil
+	}
+	if info == nil {
+		return &devicemonitormodel.SysIotDbDevMap{}, nil
+	}
+	if info.ID == 0 {
+		return &devicemonitormodel.SysIotDbDevMap{}, nil
+	}
+	return info, nil
+}

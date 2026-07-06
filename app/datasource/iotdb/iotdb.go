@@ -3,6 +3,9 @@ package iotdb
 import (
 	"errors"
 	"fmt"
+	"nova-factory-server/app/constant/datasource"
+	"nova-factory-server/app/utils/uuid"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -42,6 +45,7 @@ type IotDBMetricPoint struct {
 
 type metricSample struct {
 	kind       string
+	name       string
 	properties map[string]string
 	ts         int64
 	val        float64
@@ -63,6 +67,34 @@ func (m metricSample) GetKind() string {
 
 func (m metricSample) GetProperties() map[string]string {
 	return copyStringMap(m.properties)
+}
+
+func (m metricSample) GetName() string {
+	if len(m.name) != 0 {
+		return m.name
+	}
+	if len(m.properties) == 0 {
+		return m.kind
+	}
+
+	keys := make([]string, 0, len(m.properties))
+	for key := range m.properties {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	var builder strings.Builder
+	builder.WriteString(m.kind)
+	for _, key := range keys {
+		builder.WriteString("|")
+		builder.WriteString(key)
+		builder.WriteString("=")
+		builder.WriteString(m.properties[key])
+	}
+	metricBuildStr := builder.String()
+	str := uuid.MakeMd5([]byte(metricBuildStr))
+	m.name = fmt.Sprintf("%s_%s", datasource.MetricPrefix, str)
+	return m.name
 }
 
 func (m metricSample) timestamp() int64 {

@@ -13,8 +13,6 @@ import (
 	"nova-factory-server/app/business/iot/metric/device/metricdao/metricdaoimpl"
 	"nova-factory-server/app/business/iot/metric/device/metricservice/metricserviceimpl"
 	"nova-factory-server/app/datasource/cache"
-	"nova-factory-server/app/datasource/clickhouse"
-	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/datasource/mysql"
 	"nova-factory-server/app/routes"
 )
@@ -22,15 +20,10 @@ import (
 // Injectors from wire.go:
 
 func wireApp() (*grpc.Server, func(), error) {
-	clickHouse, err := clickhouse.NewClickHouse()
-	if err != nil {
-		return nil, nil, err
-	}
-	iotDb := iotdb.NewIotDb()
-	iMetricDao := metricdaoimpl.NewMetricDaoImpl(clickHouse, iotDb)
+	iMetricDao := metricdaoimpl.NewMetricDaoImpl()
 	cacheCache := cache.NewCache()
 	iMetricService := metricserviceimpl.NewIMetricServiceImpl(iMetricDao, cacheCache)
-	iControlLogDao := metricdaoimpl.NewIControlLogDaoImpl(clickHouse)
+	iControlLogDao := metricdaoimpl.NewIControlLogDaoImpl()
 	iControlLogService := metricserviceimpl.NewIControlLogServiceImpl(iControlLogDao)
 	metric := metriccontroller.NewMetric(iMetricService, iControlLogService)
 	db := mysql.NewDB()

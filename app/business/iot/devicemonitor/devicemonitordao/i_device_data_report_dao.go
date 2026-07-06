@@ -12,4 +12,5 @@ type IDeviceDataReportDao interface {
 	Save(c *gin.Context, data *devicemonitormodel.SysIotDbDevMap) error
 	Remove(c *gin.Context, dev string) error
 	List(c *gin.Context, req *devicemonitormodel.DevListReq) (*devicemonitormodel.DevListResp, error)
+	GetByDev(c *gin.Context, dev string) (*devicemonitormodel.SysIotDbDevMap, error)
 }

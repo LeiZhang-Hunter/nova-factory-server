@@ -38,3 +38,6 @@ pay.txt
 app/business/datasyncapi
 app/business/erp
 app/business/shop
+data/tsdb
+app/cmd/otel/data/*
+app/data/*

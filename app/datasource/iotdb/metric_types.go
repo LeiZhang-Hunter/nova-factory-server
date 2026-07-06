@@ -6,6 +6,8 @@ type MetricMeta interface {
 	GetKind() string
 	// GetProperties should return the property of metric like pod_uid, container_id, gpu_device_name
 	GetProperties() map[string]string
+	// GetName 读取名字
+	GetName() string
 }
 
 // MetricSample is a sample of specified metric, e.g. '{__name__: node_cpu_usage} = <2023-04-18:20:00:00, 4.1 core>'

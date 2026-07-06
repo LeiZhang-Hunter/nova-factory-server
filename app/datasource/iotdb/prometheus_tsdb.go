@@ -222,14 +222,10 @@ func (t *tsdbAppender) Append(samples []MetricSample) error {
 	}
 
 	for _, sample := range samples {
-		metricLabels, err := metricLabels(sample)
-		if err != nil {
-			_ = t.appender.Rollback()
-			t.err = err
-			return err
-		}
-
-		if _, err := t.appender.Append(0, metricLabels, sample.timestamp(), sample.value()); err != nil {
+		l := sample.GetProperties()
+		l[metricLabelName] = sample.GetName()
+		fmt.Println(fmt.Sprintf("tsdb append sample name %s;time: %d, value: %f", sample.GetName(), sample.timestamp(), sample.value()))
+		if _, err := t.appender.Append(0, labels.FromMap(l), sample.timestamp(), sample.value()); err != nil {
 			_ = t.appender.Rollback()
 			t.err = err
 			return err
@@ -328,14 +324,15 @@ func metricLabels(meta MetricMeta) (labels.Labels, error) {
 
 // metricMatchers 与 metricLabels 保持一致，使用精确匹配器按指标类型和维度查询。
 func metricMatchers(meta MetricMeta) ([]*labels.Matcher, error) {
-	metricLabels, err := metricLabels(meta)
-	if err != nil {
-		return nil, err
+	l := meta.GetProperties()
+	if l == nil {
+		return []*labels.Matcher{}, nil
 	}
-
+	l[metricLabelName] = meta.GetName()
+	labelMap := labels.FromMap(l)
 	var matcherErr error
-	matchers := make([]*labels.Matcher, 0, metricLabels.Len())
-	metricLabels.Range(func(label labels.Label) {
+	matchers := make([]*labels.Matcher, 0, labelMap.Len())
+	labelMap.Range(func(label labels.Label) {
 		if matcherErr != nil {
 			return
 		}
