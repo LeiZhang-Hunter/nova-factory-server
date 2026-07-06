@@ -1,6 +1,6 @@
 # handler-doc-gen
 
-`gin_mcp` 模块的代码生成工具。从 Gin handler 函数的注释中提取 MCP Tool 元信息（`@summary` / `@operationId` / `@param` / `@return` / `@tags`），生成编译期嵌入的 `handlerDocMap`，使得生产环境二进制部署（无 `.go` 源码）时也能正常提供 MCP 接口的摘要、标签等元数据。
+`gin_mcp` 模块的代码生成工具。从 Gin handler 函数的注释中提取 MCP Tool 元信息（`@summary` / `@operationId` / `@param` / `@return` / `@tags`），生成编译期嵌入的 `handlerDocByIdentity`，使得生产环境二进制部署（无 `.go` 源码）时也能正常提供 MCP 接口的摘要、标签等元数据。
 
 ## 使用方式
 
@@ -32,8 +32,8 @@ go run ./tools/handler-doc-gen/
 
 ### 工作原理
 
-- **构建时**：`go generate` 遍历 `app/` 下所有 `.go` 文件，提取注释生成 `handlerDocMap`
-- **运行时**：`parseHandlerComments` 优先从 `handlerDocMap` 查表，命中后不再读磁盘源文件
+- **构建时**：`go generate` 遍历 `app/` 下所有 `.go` 文件，提取注释生成 `handlerDocByIdentity`
+- **运行时**：`ConvertRoutesToTools` 根据 `route.Handler` 解析出的 handler identity 查表，命中后不再读磁盘源文件
 
 ### 支持的注释标记
 

@@ -32,7 +32,7 @@ swag:
 
 # Generate MCP handler doc map from source comments
 gen-mcp-doc:
-	go run ./tools/handler-doc-gen
+	cd app/utils/gin_mcp/pkg/convert && go generate
 
 # Parsing protobuf files and generating go files.
 pb:

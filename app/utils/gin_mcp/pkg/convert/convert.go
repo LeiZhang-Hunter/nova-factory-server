@@ -40,8 +40,9 @@ func ConvertRoutesToTools(routes gin.RoutesInfo, registeredSchemas map[string]ty
 		operationID := strings.ToUpper(route.Method) + strings.ReplaceAll(strings.ReplaceAll(route.Path, "/", "_"), ":", "")
 
 		filePath, handlerName := getRouteHandlerInfo(route)
+		identity := parseHandlerIdentity(route.Handler)
 		// Parse handler function comments
-		handlerDoc, _ := parseHandlerComments(filePath, handlerName)
+		handlerDoc, _ := parseHandlerCommentsByIdentity(identity, filePath, handlerName)
 
 		// Override with custom @operationId if present
 		if handlerDoc != nil && handlerDoc.OperationID != "" {
@@ -471,12 +472,19 @@ type HandlerDoc struct {
 // parseHandlerComments parses function documentation from source code.
 // In production (binary-only, no source files), it falls back to build-time embedded docs.
 func parseHandlerComments(filePath string, handlerName string) (*HandlerDoc, error) {
-	// Try build-time embedded docs first (available in production without source files)
-	if docs, ok := handlerDocMap[filePath]; ok {
-		if doc, ok := docs[handlerName]; ok {
+	return parseHandlerCommentsByIdentity(handlerIdentity{}, filePath, handlerName)
+}
+
+func parseHandlerCommentsByIdentity(identity handlerIdentity, filePath string, handlerName string) (*HandlerDoc, error) {
+	if identity.HandlerName != "" {
+		if doc, ok := handlerDocByIdentity[identity]; ok {
 			dc := doc
 			return &dc, nil
 		}
+	}
+
+	if !isSourceFilePath(filePath) {
+		return nil, fmt.Errorf("source file path unavailable for handler %s: %s", handlerName, filePath)
 	}
 
 	fset := token.NewFileSet()
@@ -486,68 +494,72 @@ func parseHandlerComments(filePath string, handlerName string) (*HandlerDoc, err
 		return nil, err
 	}
 
-	var doc *HandlerDoc
-
 	// Iterate through top-level declarations
 	for _, decl := range f.Decls {
-		if fn, ok := decl.(*ast.FuncDecl); ok {
-			if fn.Name.String() == handlerName {
-				doc = &HandlerDoc{
-					Params: make(map[string]string),
-				}
-				if fn.Doc != nil {
-					// Parse comments
-					lines := strings.Split(fn.Doc.Text(), "\n")
-					for _, line := range lines {
-						lineTrim := strings.TrimSpace(line)
-						line = strings.ToLower(lineTrim)
-						switch {
-						case strings.HasPrefix(line, "@summary"):
-							doc.Summary = strings.TrimSpace(strings.TrimPrefix(lineTrim, "@summary"))
-						case strings.HasPrefix(line, "@description"):
-							doc.Description = strings.TrimSpace(strings.TrimPrefix(lineTrim, "@description"))
-						case strings.HasPrefix(line, "@param"):
-							paramText := strings.TrimSpace(strings.TrimPrefix(lineTrim, "@param"))
-							parts := strings.SplitN(paramText, " ", 2)
-							if len(parts) == 2 {
-								paramName := strings.TrimSpace(parts[0])
-								paramDesc := strings.TrimSpace(parts[1])
-								doc.Params[paramName] = paramDesc
-							}
-						case strings.HasPrefix(line, "@return"):
-							doc.Returns = strings.TrimSpace(strings.TrimPrefix(lineTrim, "@return"))
-						case strings.HasPrefix(line, "@tags"):
-							tagsText := strings.TrimSpace(strings.TrimPrefix(lineTrim, "@tags"))
-							// Split on spaces and commas, trim whitespace, ignore empty entries
-							var tags []string
-							for _, sep := range []string{",", " "} {
-								parts := strings.Split(tagsText, sep)
-								for _, part := range parts {
-									trimmed := strings.TrimSpace(part)
-									if trimmed != "" && !contains(tags, trimmed) {
-										tags = append(tags, trimmed)
-									}
-								}
-								// After first pass with commas, rejoin and split by spaces
-								if sep == "," {
-									tagsText = strings.Join(tags, " ")
-									tags = []string{}
-								}
-							}
-							doc.Tags = tags
-						case strings.HasPrefix(line, "@operationid"):
-							opID := strings.TrimSpace(strings.TrimPrefix(lineTrim, "@operationId"))
-							if opID != "" && doc.OperationID == "" {
-								doc.OperationID = opID
-							}
-						}
-					}
-				}
+		fn, ok := decl.(*ast.FuncDecl)
+		if !ok || fn.Name.String() != handlerName {
+			continue
+		}
+
+		doc := &HandlerDoc{Params: make(map[string]string)}
+		if fn.Doc != nil {
+			parsed := parseHandlerDocText(fn.Doc.Text())
+			*doc = parsed
+		}
+		return doc, nil
+	}
+
+	return nil, nil
+}
+
+func parseHandlerDocText(text string) HandlerDoc {
+	doc := HandlerDoc{Params: make(map[string]string)}
+	for _, line := range strings.Split(text, "\n") {
+		lineTrim := strings.TrimSpace(line)
+		lineLower := strings.ToLower(lineTrim)
+		switch {
+		case strings.HasPrefix(lineLower, "@summary"):
+			doc.Summary = strings.TrimSpace(lineTrim[len("@summary"):])
+		case strings.HasPrefix(lineLower, "@description"):
+			doc.Description = strings.TrimSpace(lineTrim[len("@description"):])
+		case strings.HasPrefix(lineLower, "@param"):
+			paramText := strings.TrimSpace(lineTrim[len("@param"):])
+			parts := strings.SplitN(paramText, " ", 2)
+			if len(parts) == 2 {
+				paramName := strings.TrimSpace(parts[0])
+				paramDesc := strings.TrimSpace(parts[1])
+				doc.Params[paramName] = paramDesc
+			}
+		case strings.HasPrefix(lineLower, "@return"):
+			doc.Returns = strings.TrimSpace(lineTrim[len("@return"):])
+		case strings.HasPrefix(lineLower, "@tags"):
+			doc.Tags = parseHandlerDocTags(strings.TrimSpace(lineTrim[len("@tags"):]))
+		case strings.HasPrefix(lineLower, "@operationid"):
+			opID := strings.TrimSpace(lineTrim[len("@operationid"):])
+			if opID != "" && doc.OperationID == "" {
+				doc.OperationID = opID
 			}
 		}
 	}
+	return doc
+}
 
-	return doc, nil
+func parseHandlerDocTags(raw string) []string {
+	if raw == "" {
+		return nil
+	}
+
+	parts := strings.FieldsFunc(raw, func(r rune) bool {
+		return r == ',' || r == ' ' || r == '\t'
+	})
+	tags := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" && !contains(tags, trimmed) {
+			tags = append(tags, trimmed)
+		}
+	}
+	return tags
 }
 
 func getHandlerInfo(handler gin.HandlerFunc) (string, string) {

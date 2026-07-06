@@ -2,3513 +2,3367 @@
 
 package convert
 
-var handlerDocMap = map[string]map[string]HandlerDoc{
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/device/devicecontroller/device_check_machinery.go": {
-		"List": {
-			Summary:     "@Summary 设备清单列表",
-			Description: "@Description 设备清单列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.SysDeviceCheckMachineryReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养计划/设备清单"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置设备清单",
-			Description: "@Description 设置设备清单",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemodels.SysDeviceCheckPlanVO true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养计划/设备清单"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除设备清单",
-			Description: "@Description 删除设备清单",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养计划/设备清单"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/device/devicecontroller/device_check_subject.go": {
-		"Set": {
-			Summary:     "@Summary 设置点检项目",
-			Description: "@Description 设置点检项目",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemodels.SysDeviceCheckSubjectVO true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养计划/点检项目"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除点检项目",
-			Description: "@Description 删除点检项目",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养计划/点检项目"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 点检项目列表",
-			Description: "@Description 点检项目列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.SysDeviceCheckSubjectReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养计划/点检项目"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/configuration/configurationcontroller/configuration.go": {
-		"Remove": {
-			Summary:     "@Summary 删除组态",
-			Description: "@Description 删除组态",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "组态/组态管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 组态列表",
-			Description: "@Description 组态列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query configurationmodels.SysConfigurationReq true \"组态列表参数\"",
-			},
-			Tags:        []string{"@Tags", "组态/组态管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 保存组态",
-			Description: "@Description 保存组态",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body configurationmodels.SetSysConfiguration true \"设置组态参数\"",
-			},
-			Tags:        []string{"@Tags", "组态/组态管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/monitor/monitorcontroller/job_controller.go": {
-		"JobChangeStatus": {
-			Summary:     "@Summary 修改定时任务状态",
-			Description: "@Description 修改定时任务状态",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body monitormodels.JobDML true \"修改信息\"",
-			},
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"JobRun": {
-			Summary:     "@Summary 执行定时任务",
-			Description: "@Description 执行定时任务",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body monitormodels.JobVo true \"执行信息\"",
-			},
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"JobLogList": {
-			Summary:     "@Summary 查询定时任务日志列表",
-			Description: "@Description 查询定时任务日志列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query monitormodels.JobLogDql true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"JobLogGetInfo": {
-			Summary:     "@Summary 查询定时任务日志信息",
-			Description: "@Description 查询定时任务日志信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "jobLogId path int true \"jobLogId\"",
-			},
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"JobList": {
-			Summary:     "@Summary 查询定时任务列表",
-			Description: "@Description 查询定时任务列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query monitormodels.JobDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"JobRemove": {
-			Summary:     "@Summary 删除定时任务",
-			Description: "@Description 删除定时任务",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "jobIds path string true \"jobIds\"",
-			},
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"FunList": {
-			Summary:     "@Summary 获取方法列表",
-			Description: "@Description 获取方法列表",
-			Returns:     "",
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"JobIdAndNameAll": {
-			Summary:     "@Summary 查询定时任务id和名称",
-			Description: "@Description 查询定时任务id和名称",
-			Returns:     "",
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"JobGetInfo": {
-			Summary:     "@Summary 查询定时任务信息",
-			Description: "@Description 查询定时任务信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "jobId path int true \"jobId\"",
-			},
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"JobAdd": {
-			Summary:     "@Summary 新增定时任务",
-			Description: "@Description 新增定时任务",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body monitormodels.JobDML true \"新增信息\"",
-			},
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-		"JobEdit": {
-			Summary:     "@Summary 编辑定时任务",
-			Description: "@Description 编辑定时任务",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body monitormodels.JobDML true \"编辑信息\"",
-			},
-			Tags:        []string{"@Tags", "定时任务"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_profile.go": {
-		"Profile": {
-			Summary:     "@Summary 查看个人资料",
-			Description: "@Description 查看个人资料",
-			Returns:     "",
-			Tags:        []string{"@Tags", "个人资料"},
-			OperationID: "",
-		},
-		"ProfileUpdateProfile": {
-			Summary:     "@Summary 修改个人资料",
-			Description: "@Description 修改个人资料",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysUserDML true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "个人资料"},
-			OperationID: "",
-		},
-		"ProfileUpdatePwd": {
-			Summary:     "@Summary 修改密码",
-			Description: "@Description 修改密码",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "newPassword query string true \"新密码\"",
-			},
-			Tags:        []string{"@Tags", "个人资料"},
-			OperationID: "",
-		},
-		"ProfileAvatar": {
-			Summary:     "@Summary 修改头像",
-			Description: "@Description 修改头像",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "file formData file true \"file\"",
-			},
-			Tags:        []string{"@Tags", "个人资料"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/dataset.go": {
-		"UpdateAiDataSet": {
-			Summary:     "@Summary 更新数据集",
-			Description: "@Description 更新数据集",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.UpdateDataSetRequest true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/知识库管理"},
-			OperationID: "",
-		},
-		"GetAiDataGetInfo": {
-			Summary:     "@Summary 读取数据集",
-			Description: "@Description 读取数据集",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.GetDatasetInfoReq true \"读取数据集\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/知识库管理"},
-			OperationID: "",
-		},
-		"GetAiDataGetConfig": {
-			Summary:     "@Summary 读取知识库配置",
-			Description: "@Description 读取知识库配置",
-			Returns:     "",
-			Tags:        []string{"@Tags", "工业智能体/知识库管理"},
-			OperationID: "",
-		},
-		"GetAiDataSet": {
-			Summary:     "@Summary 读取数据集列表",
-			Description: "@Description 读取数据集列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.DatasetListReq true \"设备分组列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/知识库管理"},
-			OperationID: "",
-		},
-		"CreateAiDataSet": {
-			Summary:     "@Summary 添加数据集",
-			Description: "@Description 添加数据集",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.DataSetRequest true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/知识库管理"},
-			OperationID: "",
-		},
-		"RemoveDataSet": {
-			Summary:     "@Summary 移除数据集",
-			Description: "@Description 移除数据集",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "dataset_id path int64 true \"dataset_id\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/知识库管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/document.go": {
-		"UploadDocument": {
-			Summary:     "@Summary 上传文档",
-			Description: "@Description 上传文档",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "file formData file true \"files\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/文档管理"},
-			OperationID: "",
-		},
-		"PutDocument": {
-			Summary:     "@Summary 更新文档",
-			Description: "@Description 更新文档",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.PutDocumentRequest true \"更新文档请求\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/文档管理"},
-			OperationID: "",
-		},
-		"DownloadDocument": {
-			Summary:     "@Summary 下载文档",
-			Description: "@Description 下载文档",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "document_id path int64 true \"document_id\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/文档管理"},
-			OperationID: "",
-		},
-		"ListDocument": {
-			Summary:     "@Summary 文档列表",
-			Description: "@Description 文档列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.ListDocumentRequest true \"文档列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/文档管理"},
-			OperationID: "",
-		},
-		"RemoveDocument": {
-			Summary:     "@Summary 删除文档",
-			Description: "@Description 删除文档",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.DeleteDocumentRequest true \"删除文档请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/文档管理"},
-			OperationID: "",
-		},
-		"StartParseDocument": {
-			Summary:     "@Summary 解析文档",
-			Description: "@Description 解析文档",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.ParseDocumentApiRequest true \"解析文档请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/文档管理"},
-			OperationID: "",
-		},
-		"StopParseDocument": {
-			Summary:     "@Summary 停止解析文档",
-			Description: "@Description 停止解析文档",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.ParseDocumentApiRequest true \"停止解析文档参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/文档管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/alert/alertcontroller/alert_action.go": {
-		"List": {
-			Summary:     "@Summary 告警动作列表",
-			Description: "@Description 告警动作列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query alertmodels.SysAlertActionListReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警处理管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置告警发送配置",
-			Description: "@Description 设置告警发送配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body alertmodels.SetAlertAction true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警处理管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除告警发送配置",
-			Description: "@Description 删除告警发送配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警处理管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/daemonize/daemonizecontroller/iot_agent.go": {
-		"Info": {
-			Summary:     "@Summary agent详情",
-			Description: "@Description agent详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query daemonizemodels.SysIotAgentQueryReq true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary Agent列表",
-			Description: "@Description Agent列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query daemonizemodels.SysIotAgentListReq true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置Agent",
-			Description: "@Description 设置Agent",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body daemonizemodels.SysIotAgentSetReq true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 移除Agent",
-			Description: "@Description 移除Agent",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"Stop": {
-			Summary:     "@Summary 停止Agent进程",
-			Description: "@Description 停止Agent进程",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body daemonizemodels.StartProcessReq true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"Start": {
-			Summary:     "@Summary 启动Agent进程",
-			Description: "@Description 启动Agent进程",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body daemonizemodels.StartProcessReq true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/home/controller/home.go": {
-		"GetHomeStats": {
-			Summary:     "@Summary 首页统计",
-			Description: "@Description 首页统计",
-			Returns:     "",
-			Tags:        []string{"@Tags", "首页"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/system/controller/electric.go": {
-		"List": {
-			Summary:     "@Summary 设备电流配置列表",
-			Description: "@Description 设备电流配置列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query models.SysDeviceElectricSettingDQL true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "系统管理/设备配置"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除设备电流配置",
-			Description: "@Description 删除设备电流配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "系统管理/设备配置"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置设备电流配置",
-			Description: "@Description 设置设备电流配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body models.SysDeviceElectricSettingVO true \"设备电流配置参数\"",
-			},
-			Tags:        []string{"@Tags", "系统管理/设备配置"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_sse.go": {
-		"BuildSse": {
-			Summary:     "@Summary 建立SSE链接",
-			Description: "@Description 建立SSE链接",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "token path string true \"token\"",
-			},
-			Tags:        []string{"@Tags", "建立SSE链接"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/exception.go": {
-		"List": {
-			Summary:     "@Summary 异常预警列表",
-			Description: "@Description 异常预警列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.SysAiPredictionListReq true \"异常预警参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/异常预警"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置异常预警",
-			Description: "@Description 设置异常预警",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.SysAiPredictionListReq true \"设置异常预警参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/异常预警"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除异常预警",
-			Description: "@Description 删除异常预警",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/异常预警"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/device/devicecontroller/template_data.go": {
-		"List": {
-			Summary:     "@Summary 获取模板数据列表",
-			Description: "@Description 获取模板数据列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.SysModbusDeviceConfigDataListReq true \"获取模板数据列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/设备模板管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置设备模板板数信息",
-			Description: "@Description 设置设备模板板数信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemodels.SetSysModbusDeviceConfigDataReq true \"设置设备模板板数信息参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/设备模板管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除设备数据模板",
-			Description: "@Description 删除设备数据模板",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/设备模板管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/basics/controller/company_info.go": {
-		"CompanyInfoSave": {
-			Summary:     "@Summary 保存公司信息",
-			Description: "@Description 保存公司信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body models.CompanyInfoVo true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "公司信息"},
-			OperationID: "",
-		},
-		"CompanyInfoGet": {
-			Summary:     "@Summary 获取公司信息",
-			Description: "@Description 获取公司信息",
-			Returns:     "",
-			Tags:        []string{"@Tags", "公司信息"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/assistant.go": {
-		"CreateAssistant": {
-			Summary:     "@Summary 创建助理",
-			Description: "@Description 创建助理",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.CreateAssistantRequest true \"创建助理表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/助理管理"},
-			OperationID: "",
-		},
-		"UpdateAssistant": {
-			Summary:     "@Summary 更新助理",
-			Description: "@Description 更新助理",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.UpdateAssistantRequest true \"更新助理表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/助理管理"},
-			OperationID: "",
-		},
-		"RemoveAssistant": {
-			Summary:     "@Summary 删除助理",
-			Description: "@Description 删除助理",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "assistantIds path []string true \"assistantIds\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/助理管理"},
-			OperationID: "",
-		},
-		"ListAssistant": {
-			Summary:     "@Summary 读取助理列表",
-			Description: "@Description 读取助理列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.GetAssistantRequest true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/助理管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/config_loader.go": {
-		"Publish": {
-			Summary:     "@Summary 发布智能体配置变更",
-			Description: "@Description 向集群节点广播智能体配置变更通知",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.AgentPublishReq true \"智能体发布参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体配置"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/prediction.go": {
-		"List": {
-			Summary:     "@Summary 智能预警列表",
-			Description: "@Description 智能预警列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.SysAiPredictionListReq true \"智能预警列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能预警"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置智能预警",
-			Description: "@Description 设置智能预警",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.SetSysAiPrediction true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能预警"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除智能预警",
-			Description: "@Description 删除智能预警",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能预警"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/monitor/monitorcontroller/sys_user_online.go": {
-		"UserOnlineList": {
-			Summary:     "@Summary 查询在线用户列表查询",
-			Description: "@Description 查询在线用户列表查询",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query monitormodels.SysUserOnlineDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "在线用户"},
-			OperationID: "",
-		},
-		"ForceLogout": {
-			Summary:     "@Summary 强退在线用户列表",
-			Description: "@Description 强退在线用户列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "tokenId path string true \"tokenId\"",
-			},
-			Tags:        []string{"@Tags", "在线用户"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_user.go": {
-		"UserGetInfoById": {
-			Summary:     "@Summary 根据用户ID获取用户信息",
-			Description: "@Description 根据用户ID获取用户信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path int64 true \"userId\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"InsertAuthRole": {
-			Summary:     "@Summary 授权角色",
-			Description: "@Description 授权角色",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "string query string true \"用户id\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"ChangeStatus": {
-			Summary:     "@Summary 修改用户状态",
-			Description: "@Description 修改用户状态",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.EditUserStatus true \"用户信息\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"UpdateUserDataScope": {
-			Summary:     "@Summary 修改数据权限",
-			Description: "@Description 修改数据权限",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysUserDataScope true \"用户权限信息\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"UserImportData": {
-			Summary:     "@Summary 导入用户",
-			Description: "@Description 导入用户",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "file formData file true \"file\"",
-			},
-			Tags:        []string{"@Tags", "系统用户"},
-			OperationID: "",
-		},
-		"UserExport": {
-			Summary:     "@Summary 导出用户",
-			Description: "@Description 导出用户",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysUserDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "系统用户"},
-			OperationID: "",
-		},
-		"ResetPwd": {
-			Summary:     "@Summary 重置密码",
-			Description: "@Description 重置密码",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.ResetPwd true \"密码\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"UserEdit": {
-			Summary:     "@Summary 修改用户",
-			Description: "@Description 修改用户",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysUserDML true \"用户信息\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"UserGetInfo": {
-			Summary:     "@Summary 获取当前用户信息",
-			Description: "@Description 获取当前用户信息",
-			Returns:     "",
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"UserRemove": {
-			Summary:     "@Summary 删除用户",
-			Description: "@Description 删除用户",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "userIds path []int64 true \"userIds\"",
-			},
-			Tags:        []string{"@Tags", "系统用户"},
-			OperationID: "",
-		},
-		"SelectUserDataScope": {
-			Summary:     "@Summary 查询用户数据权限",
-			Description: "@Description 查询用户数据权限",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path int64 true \"userId\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"UserAdd": {
-			Summary:     "@Summary 添加用户",
-			Description: "@Description 添加用户",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysUserDML true \"用户信息\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"UserList": {
-			Summary:     "@Summary 查询用户列表",
-			Description: "@Description 查询用户列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysUserDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"UserAuthRole": {
-			Summary:     "@Summary 根据用户编号获取授权角色",
-			Description: "@Description 根据用户编号获取授权角色",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"userId\"",
-			},
-			Tags:        []string{"@Tags", "用户相关"},
-			OperationID: "",
-		},
-		"ImportTemplate": {
-			Summary:     "@Summary 导出用户",
-			Description: "@Description 导出用户",
-			Returns:     "",
-			Tags:        []string{"@Tags", "系统用户"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/control.go": {
-		"List": {
-			Summary:     "@Summary 预测控制列表",
-			Description: "@Description 预测控制列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.SysAiPredictionControlListReq true \"智能控制列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/预测控制"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置智能控制",
-			Description: "@Description 设置智能控制",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.SetSysAiPredictionControl true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/预测控制"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除预测控制",
-			Description: "@Description 删除预测控制",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/预测控制"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/dataset_auth.go": {
-		"Auth": {
-			Summary:     "@Summary 获取知识库授权信息.",
-			Description: "@Description 在调用 MCP 工具 `ragflow_retrieval` 前先使用此工具。它会根据用户访问权限返回访问所需的 `dataset_ids` 和 `document_ids`。",
-			Returns:     "",
-			Tags:        []string{"@Tags", "工业智能体/知识库管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_permission.go": {
-		"PermissionEdit": {
-			Summary:     "@Summary 修改系统权限",
-			Description: "@Description 修改系统权限",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysPermissionEdit true \"系统权限\"",
-			},
-			Tags:        []string{"@Tags", "系统权限"},
-			OperationID: "",
-		},
-		"PermissionRemove": {
-			Summary:     "@Summary 删除系统权限",
-			Description: "@Description 删除系统权限",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "permissionId path string true \"permissionId\"",
-			},
-			Tags:        []string{"@Tags", "系统权限"},
-			OperationID: "",
-		},
-		"PermissionList": {
-			Summary:     "@Summary 系统权限列表",
-			Description: "@Description 系统权限列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysPermissionDQL false \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "系统权限"},
-			OperationID: "",
-		},
-		"PermissionGetInfo": {
-			Summary:     "@Summary 根据id查询系统权限",
-			Description: "@Description 根据id查询系统权限",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "permissionId path string true \"permissionId\"",
-			},
-			Tags:        []string{"@Tags", "系统权限"},
-			OperationID: "",
-		},
-		"PermissionListByRoleIds": {
-			Summary:     "@Summary 根据id查询系统权限",
-			Description: "@Description 根据id查询系统权限",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "roleIds path string true \"roleIds\"",
-			},
-			Tags:        []string{"@Tags", "系统权限"},
-			OperationID: "",
-		},
-		"PermissionAdd": {
-			Summary:     "@Summary 新增系统权限",
-			Description: "@Description 新增系统权限",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysPermissionAdd true \"系统权限\"",
-			},
-			Tags:        []string{"@Tags", "系统权限"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/camera/cameracontroller/camera.go": {
-		"List": {
-			Summary:     "@Summary 读取摄像头列表",
-			Description: "@Description 读取摄像头列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query cameramodels.IotCameraListReq true \"摄像头列表参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/摄像头管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller/device_data_report.go": {
-		"List": {
-			Summary:     "@Summary 实时数据",
-			Description: "@Description 实时数据",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemonitormodel.DevDataReq true \"实时数据表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"Export": {
-			Summary:     "@Summary 导出实时数据",
-			Description: "@Description 导出实时数据",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemonitormodel.DevDataReq true \"实时数据表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"SearchTimeSeqList": {
-			Summary:     "@Summary 时序数据测点",
-			Description: "@Description 时序数据测点",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.DeviceListReq true \"时序数据测点\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"SetDevMap": {
-			Summary:     "@Summary 设置测点映射",
-			Description: "@Description 设置测点映射",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemonitormodel.SetDevMapInfo true \"时序数据测点\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设置测点映射"},
-			OperationID: "",
-		},
-		"RemoveDevMap": {
-			Summary:     "@Summary 删除测点映射",
-			Description: "@Description 删除测点映射",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemonitormodel.RemoveDevMapInfo true \"时序数据测点\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/删除测点映射"},
-			OperationID: "",
-		},
-		"DevList": {
-			Summary:     "@Summary 设备测点列表",
-			Description: "@Description 设备测点列表",
-			Returns:     "",
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_dept.go": {
-		"DeptList": {
-			Summary:     "@Summary 查询部门列表查询",
-			Description: "@Description 查询部门列表查询",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysDeptDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "部门相关"},
-			OperationID: "",
-		},
-		"DeptGetInfo": {
-			Summary:     "@Summary 根据部门ID获取部门信息",
-			Description: "@Description 根据部门ID获取部门信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"deptId\"",
-			},
-			Tags:        []string{"@Tags", "部门相关"},
-			OperationID: "",
-		},
-		"RoleDeptTreeSelect": {
-			Summary:     "@Summary 获取角色部门",
-			Description: "@Description 获取角色部门",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"roleId\"",
-			},
-			Tags:        []string{"@Tags", "部门相关"},
-			OperationID: "",
-		},
-		"DeptAdd": {
-			Summary:     "@Summary 添加部门",
-			Description: "@Description 添加部门",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysDeptVo true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "部门相关"},
-			OperationID: "",
-		},
-		"DeptEdit": {
-			Summary:     "@Summary 修改部门",
-			Description: "@Description 修改部门",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysDeptVo true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "部门相关"},
-			OperationID: "",
-		},
-		"DeptRemove": {
-			Summary:     "@Summary 删除部门",
-			Description: "@Description 删除部门",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"deptId\"",
-			},
-			Tags:        []string{"@Tags", "部门相关"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/model.go": {
-		"SetSetting": {
-			Summary:     "@Summary 设置模型配置",
-			Description: "@Description 新增或修改模型配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.SetSysAiLLMSetting true \"模型配置参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/模型配置"},
-			OperationID: "",
-		},
-		"GetSetting": {
-			Summary:     "@Summary 读取模型配置",
-			Description: "@Description 根据id读取模型配置，未传id时读取当前部门最近更新配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.GetSysAiLLMSettingReq true \"模型配置读取参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/模型配置"},
-			OperationID: "",
-		},
-		"SetGlobalModel": {
-			Summary:     "@Summary 设置用户模型",
-			Description: "@Description 新增或修改用户模型配置，user_id为0表示全局设置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.SetSysUserLLM true \"全局模型配置参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/模型配置"},
-			OperationID: "",
-		},
-		"GetGlobalModel": {
-			Summary:     "@Summary 读取用户模型",
-			Description: "@Description 读取SetGlobalModel保存的用户模型配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.GetSysUserLLMReq true \"用户模型读取参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/模型配置"},
-			OperationID: "",
-		},
-		"RemoveGlobalModel": {
-			Summary:     "@Summary 删除用户模型",
-			Description: "@Description 删除 SetGlobalModel 保存的用户模型配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.GetSysUserLLMReq true \"用户模型删除参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/模型配置"},
-			OperationID: "",
-		},
-		"EmbeddingConfig": {
-			Summary:     "@Summary embedding模型信息",
-			Description: "@Description 读取支持embedding的模型供应商及其下级embedding模型信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.SysAiModelProviderListReq true \"embedding模型信息参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/模型配置"},
-			OperationID: "",
-		},
-		"ProviderList": {
-			Summary:     "@Summary 模型供应商列表",
-			Description: "@Description 读取模型供应商及其下级LLM列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.SysAiModelProviderListReq true \"模型供应商列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/模型配置"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/role.go": {
-		"Remove": {
-			Summary:     "@Summary 删除知识库/文档角色权限",
-			Description: "@Description 删除知识库/文档角色权限（软删除）",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"权限ID，多个用逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/知识库权限"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 查询知识库/文档角色权限列表",
-			Description: "@Description 查询知识库/文档角色权限列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.DatasetRolePermissionQuery true \"权限列表查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/知识库权限"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 新增或修改知识库/文档角色权限",
-			Description: "@Description 传入id时修改，不传id时新增。documentId 为0表示对整个知识库授权",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.SetDatasetRolePermission true \"权限设置参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/知识库权限"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/conversations.go": {
-		"Chat": {
-			Summary:     "@Summary 会话聊天",
-			Description: "@Description 会话聊天",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.SendMessageInput true \"发送消息参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"StopGeneration": {
-			Summary:     "@Summary 停止会话生成",
-			Description: "@Description 停止上游会话生成任务",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.StopGenerationInput true \"停止生成参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"ListConversations": {
-			Summary:     "@Summary 查询会话列表",
-			Description: "@Description 查询会话列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.AiConversationQuery true \"会话列表查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"CreateConversation": {
-			Summary:     "@Summary 创建会话",
-			Description: "@Description 创建会话",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.SetAiConversation true \"创建会话参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"RemoveConversation": {
-			Summary:     "@Summary 删除会话",
-			Description: "@Description 删除会话（软删除）",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"会话ID，多个用逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_dict_type.go": {
-		"DictTypeExport": {
-			Summary:     "@Summary 导出字典类型",
-			Description: "@Description 导出字典类型",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysDictDataDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictTypeGetInfo": {
-			Summary:     "@Summary 根据dictCode获取字典类型信息",
-			Description: "@Description 根据dictCode获取字典类型信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"dictCode\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictTypeAdd": {
-			Summary:     "@Summary 添加字典类型数据",
-			Description: "@Description 添加字典类型数据",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysDictDataVo true \"字典\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictTypeEdit": {
-			Summary:     "@Summary 修改字典类型数据",
-			Description: "@Description 修改字典类型数据",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysDictDataVo true \"字典\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictTypeRemove": {
-			Summary:     "@Summary 根据dictCode获取字典类型信息",
-			Description: "@Description 根据dictCode获取字典类型信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body []string true \"字典\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictTypeClearCache": {
-			Summary:     "@Summary 更新字典缓存",
-			Description: "@Description 更新字典缓存",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body []string true \"字典\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictTypeOptionSelect": {
-			Summary:     "@Summary 查询字典列表",
-			Description: "@Description 查询字典列表",
-			Returns:     "",
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictTypeList": {
-			Summary:     "@Summary 查询字典类型列表",
-			Description: "@Description 查询字典类型列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysDictDataDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/ocr.go": {
-		"ExtractOCR": {
-			Summary:     "@Summary OCR识别",
-			Description: "@Description 上传文件并调用OCR服务进行文字提取",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "number_words query int false \"最多返回词数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/OCR"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/agent_orchestration.go": {
-		"Info": {
-			Summary:     "@Summary 获取智能体编排详情",
-			Description: "@Description 根据智能体ID获取智能体编排详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "agentId path int true \"智能体ID\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体编排"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 保存智能体编排配置",
-			Description: "@Description 根据智能体ID保存编排配置，存在时更新，不存在时新增",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.AIAgentOrchestrationUpsert true \"智能体编排保存参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体编排"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除智能体编排配置",
-			Description: "@Description 根据智能体ID删除智能体编排配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "agentIds path string true \"智能体ID，多个以逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体编排"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/ai_gateway.go": {
-		"Set": {
-			Summary:     "@Summary 保存网关配置",
-			Description: "@Description 保存AI网关配置，id为空时新增，不为空时修改",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.AIGatewayUpsert true \"网关保存参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/网关管理"},
-			OperationID: "",
-		},
-		"Delete": {
-			Summary:     "@Summary 删除网关配置",
-			Description: "@Description 根据ID删除AI网关配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"网关ID，多个以逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/网关管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 获取网关列表",
-			Description: "@Description 获取AI网关配置列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query gatewaymodels.AIGatewayQuery true \"网关查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/网关管理"},
-			OperationID: "",
-		},
-		"GetByID": {
-			Summary:     "@Summary 获取网关详情",
-			Description: "@Description 根据ID获取AI网关配置详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path int true \"网关ID\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/网关管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/alert/alertcontroller/alert_log.go": {
-		"Export": {
-			Summary:     "@Summary 导入告警数据",
-			Description: "@Description 导入告警数据",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body alertmodels.AlertLogData true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警数据管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 告警数据列表",
-			Description: "@Description 告警数据列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body alertmodels.SysAlertLogListReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警数据管理"},
-			OperationID: "",
-		},
-		"Info": {
-			Summary:     "@Summary 告警数据详情",
-			Description: "@Description 告警数据详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query uint64 true \"objectId\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警数据管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/alert/alertcontroller/alert_template.go": {
-		"Remove": {
-			Summary:     "@Summary 删除告警发送配置",
-			Description: "@Description 删除告警发送配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警模板管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 告警模板列表",
-			Description: "@Description 告警模板列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query alertmodels.SysAlertSinkTemplateReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警模板管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置告警发送配置",
-			Description: "@Description 设置告警发送配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body alertmodels.SetSysAlertSinkTemplate true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警模板管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/building/buildingcontroller/building.go": {
-		"Remove": {
-			Summary:     "@Summary 删除建筑物",
-			Description: "@Description 删除建筑物",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/建筑物管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 读取建筑物列表",
-			Description: "@Description 读取建筑物列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query buildingmodels.SetSysBuildingListReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/建筑物管理"},
-			OperationID: "",
-		},
-		"BuildDetailList": {
-			Summary:     "@Summary 读取建筑物以及楼层详情列表",
-			Description: "@Description 读取建筑物以及楼层详情列表",
-			Returns:     "",
-			Tags:        []string{"@Tags", "资产管理/建筑物管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 保存建筑物",
-			Description: "@Description 保存建筑物",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body buildingmodels.SetSysBuilding true \"建筑物参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/建筑物管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/device/devicecontroller/device_subject.go": {
-		"List": {
-			Summary:     "@Summary 点检保养项目列表",
-			Description: "@Description 点检保养项目列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.SysDeviceSubjectReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养项目列表"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置点检保养项目",
-			Description: "@Description 设置点检保养项目",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemodels.SysDeviceSubjectVO true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/设置点检保养项目"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除点检保养项目",
-			Description: "@Description 删除点检保养项目",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/删除点检保养项目"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/select_box.go": {
-		"SelectPermission": {
-			Summary:     "@Summary 权限选择框",
-			Description: "@Description 权限选择框",
-			Returns:     "",
-			Tags:        []string{"@Tags", "下拉框选项"},
-			OperationID: "",
-		},
-		"SelectDept": {
-			Summary:     "@Summary 部门选择框",
-			Description: "@Description 部门选择框",
-			Returns:     "",
-			Tags:        []string{"@Tags", "下拉框选项"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_config.go": {
-		"ConfigList": {
-			Summary:     "@Summary 查询配置列表查询",
-			Description: "@Description 查询配置列表查询",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysConfigDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "配置相关"},
-			OperationID: "",
-		},
-		"ConfigExport": {
-			Summary:     "@Summary 导出配置",
-			Description: "@Description 导出配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysConfigDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "配置相关"},
-			OperationID: "",
-		},
-		"ConfigGetInfo": {
-			Summary:     "@Summary 根据配置ID获取配置信息",
-			Description: "@Description 根据配置ID获取配置信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"ConfigId\"",
-			},
-			Tags:        []string{"@Tags", "配置相关"},
-			OperationID: "",
-		},
-		"ConfigAdd": {
-			Summary:     "@Summary 添加配置",
-			Description: "@Description 添加配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysConfigVo true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "配置相关"},
-			OperationID: "",
-		},
-		"ConfigEdit": {
-			Summary:     "@Summary 修改配置",
-			Description: "@Description 修改配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysConfigVo true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "配置相关"},
-			OperationID: "",
-		},
-		"ConfigRemove": {
-			Summary:     "@Summary 删除配置",
-			Description: "@Description 删除配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"configId\"",
-			},
-			Tags:        []string{"@Tags", "配置相关"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_file.go": {
-		"DownloadPrivateFile": {
-			Summary:     "@Summary 租户下载私有文件",
-			Description: "@Description 租户下载私有文件",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "key query string true \"key\"",
-			},
-			Tags:        []string{"@Tags", "租户上传文件"},
-			OperationID: "",
-		},
-		"UploadFileRandomName": {
-			Summary:     "@Summary 上传文件随即文件名",
-			Description: "@Description 上传文件随即文件名",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "file formData file true \"file\"",
-			},
-			Tags:        []string{"@Tags", "租户上传文件"},
-			OperationID: "",
-		},
-		"UploadFiles": {
-			Summary:     "@Summary 上传多个文件随即文件名",
-			Description: "@Description 上传多个文件随即文件名",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "files formData file true \"files\"",
-			},
-			Tags:        []string{"@Tags", "租户上传文件"},
-			OperationID: "",
-		},
-		"UploadFileOriginalName": {
-			Summary:     "@Summary 上传文件原始文件名",
-			Description: "@Description 上传文件原始文件名",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "file formData file true \"file\"",
-			},
-			Tags:        []string{"@Tags", "租户上传文件"},
-			OperationID: "",
-		},
-		"UploadPrivateFileOriginalName": {
-			Summary:     "@Summary 上传私有文件原始文件名",
-			Description: "@Description 上传私有文件原始文件名",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "file formData file true \"file\"",
-			},
-			Tags:        []string{"@Tags", "租户上传文件"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/chats.go": {
-		"SessionUpdate": {
-			Summary:     "@Summary 更新助理会话",
-			Description: "@Description 更新助理会话",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.UpdateSessionsRequest true \"更新助理会话\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"SessionRemove": {
-			Summary:     "@Summary 删除会话",
-			Description: "@Description 删除会话",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.DeleteSessionRequest true \"删除会话\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"ChartsCompletions": {
-			Summary:     "@Summary 与聊天助手交谈",
-			Description: "@Description 与聊天助手交谈",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.ChatsCompletionsRequest true \"与聊天助手交谈\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"AgentCompletions": {
-			Summary:     "@Summary Agent聊天",
-			Description: "@Description Agent聊天",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.AgentsCompletionsRequest true \"Agent聊天\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"AgentsSessionList": {
-			Summary:     "@Summary Agent会话列表",
-			Description: "@Description Agent会话列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.ListAgentSessionsRequest true \"Agent会话列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"AgentsSessionRemove": {
-			Summary:     "@Summary 删除Agent会话",
-			Description: "@Description 删除Agent会话",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.RemoveAgentSessionsRequest true \"删除Agent会话\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"Ask": {
-			Summary:     "@Summary 智能问答",
-			Description: "@Description 智能问答",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.AskRequest true \"相关提问\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"SessionCreate": {
-			Summary:     "@Summary 创建助理会话",
-			Description: "@Description 创建助理会话",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.CreateSessionsRequest true \"使用 chat 助手创建会话\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"SessionList": {
-			Summary:     "@Summary 助理会话列表",
-			Description: "@Description 助理会话列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.ListSessionRequest true \"助理会话列表\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"AgentSessionCreate": {
-			Summary:     "@Summary 创建agent会话",
-			Description: "@Description 创建agent会话",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.SessionAgentCreate true \"创建agent会话\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"ConversationRelatedQuestions": {
-			Summary:     "@Summary 相关提问",
-			Description: "@Description 相关提问",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.ConversationRelatedQuestionsRequest true \"相关提问\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-		"AgentList": {
-			Summary:     "@Summary Agen列表",
-			Description: "@Description Agen列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.ListAgentSessionsRequest true \"Agen话列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/会话管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/device/devicecontroller/template.go": {
-		"List": {
-			Summary:     "@Summary 获取模板列表",
-			Description: "@Description 获取模板列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.SysDeviceTemplateDQL true \"获取模板列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/设备模板管理"},
-			OperationID: "",
-		},
-		"Protocols": {
-			Summary:     "@Summary 读取协议列表",
-			Description: "@Description 读取协议列表",
-			Returns:     "",
-			Tags:        []string{"@Tags", "资产管理/设备协议管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置设备模板信息",
-			Description: "@Description 设置设备模板信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemodels.SysDeviceTemplateSetReq true \"设备模板参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/设备模板管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除设备模板",
-			Description: "@Description 删除设备模板",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/设备模板管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/device/devicecontroller/device_group.go": {
-		"GetDeviceGroupList": {
-			Summary:     "@Summary 获取设备分组列表",
-			Description: "@Description 获取设备分组列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.DeviceGroupDQL true \"设备分组列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理"},
-			OperationID: "",
-		},
-		"SetDeviceGroup": {
-			Summary:     "@Summary 设置设备分组信息",
-			Description: "@Description 设置设备分组信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemodels.DeviceGroup true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理"},
-			OperationID: "",
-		},
-		"DeviceGroupRemove": {
-			Summary:     "@Summary 删除设备组",
-			Description: "@Description 删除设备组",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "groupIds path string true \"groupIds\"",
-			},
-			Tags:        []string{"@Tags", "资产管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/dashboard/dashboardcontroller/dashboard.go": {
-		"Query": {
-			Summary:     "@Summary 查询面板",
-			Description: "@Description 查询面板",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body metricmodels.MetricDataQueryReq true \"组成工序列表参数\"",
-			},
-			Tags:        []string{"@Tags", "仪表盘/仪表盘管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 仪表盘列表",
-			Description: "@Description 仪表盘列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query dashboardmodels.SysDashboardReq true \"组成工序列表参数\"",
-			},
-			Tags:        []string{"@Tags", "仪表盘/仪表盘管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 保存仪表盘",
-			Description: "@Description 保存仪表盘",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body dashboardmodels.SetSysDashboard true \"设置仪表盘参数\"",
-			},
-			Tags:        []string{"@Tags", "仪表盘/仪表盘管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除仪表盘",
-			Description: "@Description 删除仪表盘",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "仪表盘/仪表盘管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/utils/gin_mcp/pkg/convert/packages.go": {
-		"ParseTypes": {
-			Summary:     "",
-			Description: "",
-			Returns:     "@Return parsed definitions.",
-			OperationID: "",
-		},
-		"findPackagePathFromImports": {
-			Summary:     "",
-			Description: "",
-			Returns:     "the package paths of a package of @pkg.",
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/shift.go": {
-		"Set": {
-			Summary:     "@Summary 设置班次配置",
-			Description: "@Description 设置班次配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysWorkShiftSettingVO true \"班次配置参数\"",
-			},
-			Tags:        []string{"@Tags", "系统管理/班次配置"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 班次配置列表",
-			Description: "@Description 班次配置列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysWorkShiftSettingReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "系统管理/班次配置"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除班次配置",
-			Description: "@Description 删除告警AI推理发送配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/班次配置"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/alert/alertcontroller/alert_ai_reason.go": {
-		"List": {
-			Summary:     "@Summary 告警AI推理列表",
-			Description: "@Description 告警AI推理列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query alertmodels.SysAlertAiReasonReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警AI推理管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置告警AI推理发送配置",
-			Description: "@Description 设置告警AI推理发送配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body alertmodels.SetAlertAiReason true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警AI推理管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除告警AI推理发送配置",
-			Description: "@Description 删除告警AI推理发送配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警AI推理管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/craft/craftroutecontroller/process.go": {
-		"RemoveProcess": {
-			Summary:     "@Summary 删除工序",
-			Description: "@Description 删除工序",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "process_ids path string true \"process_ids\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/工序管理"},
-			OperationID: "",
-		},
-		"GetProcessList": {
-			Summary:     "@Summary 工序列表",
-			Description: "@Description 工序列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query craftroutemodels.SysProProcessListReq true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/工序管理"},
-			OperationID: "",
-		},
-		"SetProcess": {
-			Summary:     "@Summary 设置工序",
-			Description: "@Description 设置工序",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body craftroutemodels.SysProProcess true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/工序管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/message.go": {
-		"List": {
-			Summary:     "@Summary 根据会话ID读取消息列表",
-			Description: "@Description 根据会话ID查询该会话下的全部消息记录，按创建时间正序返回",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query gatewaymodels.MessageListReq true \"消息列表查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/消息管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/device/devicecontroller/sys_device.go": {
-		"GetDeviceList": {
-			Summary:     "@Summary 获取设备列表",
-			Description: "@Description 获取设备列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.DeviceListReq true \"设备列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理"},
-			OperationID: "",
-		},
-		"SetDevice": {
-			Summary:     "@Summary 设置设备信息",
-			Description: "@Description 设置设备信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemodels.DeviceInfo true \"设备参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理"},
-			OperationID: "",
-		},
-		"DeviceRemove": {
-			Summary:     "@Summary 删除设备",
-			Description: "@Description 删除设备",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "deviceIds path string true \"deviceIds\"",
-			},
-			Tags:        []string{"@Tags", "资产管理"},
-			OperationID: "",
-		},
-		"GetDeviceMetricByTag": {
-			Summary:     "@Summary 获取设备数据通过标签",
-			Description: "@Description 获取设备数据通过标签",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.DeviceListReq true \"设备列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/craft/craftroutecontroller/craft.go": {
-		"Save": {
-			Summary:     "@Summary 保存工艺制图",
-			Description: "@Description 保存工艺制图",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body craftroutemodels.ProcessTopo true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理"},
-			OperationID: "",
-		},
-		"GetRouteList": {
-			Summary:     "@Summary 读取工艺列表",
-			Description: "@Description 读取工艺列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query craftroutemodels.SysCraftRouteListReq true \"设备分组列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理"},
-			OperationID: "",
-		},
-		"SetRoute": {
-			Summary:     "@Summary 设置工艺路线",
-			Description: "@Description 设置工艺路线",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body craftroutemodels.SysCraftRouteRequest true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理"},
-			OperationID: "",
-		},
-		"RemoveRoute": {
-			Summary:     "@Summary 移除工艺",
-			Description: "@Description 移除工艺",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "craft_route_id path int64 true \"craft_route_id\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理"},
-			OperationID: "",
-		},
-		"Detail": {
-			Summary:     "@Summary 工艺详情",
-			Description: "@Description 工艺详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query craftroutemodels.SysCraftRouteDetailRequest true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller/device_utilization.go": {
-		"Stat": {
-			Summary:     "@Summary 稼动率统计",
-			Description: "@Description 稼动率统计",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body metricmodels.MetricQueryReq true \"稼动率统计\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"Search": {
-			Summary:     "@Summary 能源大屏",
-			Description: "@Description 能源大屏",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body metricmodels.MetricQueryReq true \"能源大屏\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"SearchV2": {
-			Summary:     "@Summary 能源大屏V2",
-			Description: "@Description 能源大屏V2",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body metricmodels.MetricQueryReq true \"能源大屏\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"Info": {
-			Summary:     "@Summary 设备稼动率详情",
-			Description: "@Description 设备稼动率详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "End query int false \"结束时间\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_login.go": {
-		"Login": {
-			Summary:     "@Summary 用户登录",
-			Description: "@Description 用户登录",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.LoginBody true \"登录信息\"",
-			},
-			Tags:        []string{"@Tags", "登录"},
-			OperationID: "",
-		},
-		"Register": {
-			Summary:     "@Summary 用户登录",
-			Description: "@Description 用户登录",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.LoginBody true \"登录信息\"",
-			},
-			Tags:        []string{"@Tags", "登录"},
-			OperationID: "",
-		},
-		"GetInfo": {
-			Summary:     "@Summary 获取用户个人信息",
-			Description: "@Description 获取用户个人信息",
-			Returns:     "",
-			Tags:        []string{"@Tags", "登录"},
-			OperationID: "",
-		},
-		"Logout": {
-			Summary:     "@Summary 退出",
-			Description: "@Description 退出",
-			Returns:     "",
-			Tags:        []string{"@Tags", "登录"},
-			OperationID: "",
-		},
-		"GetCode": {
-			Summary:     "@Summary 获取验证码",
-			Description: "@Description 获取验证码",
-			Returns:     "",
-			Tags:        []string{"@Tags", "登录"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_post.go": {
-		"PostExport": {
-			Summary:     "@Summary 导出岗位",
-			Description: "@Description 导出岗位",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysPostDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "岗位相关"},
-			OperationID: "",
-		},
-		"PostGetInfo": {
-			Summary:     "@Summary 根据岗位ID获取岗位信息",
-			Description: "@Description 根据岗位ID获取岗位信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"PostId\"",
-			},
-			Tags:        []string{"@Tags", "岗位相关"},
-			OperationID: "",
-		},
-		"PostAdd": {
-			Summary:     "@Summary 添加岗位",
-			Description: "@Description 添加岗位",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysPostVo true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "岗位相关"},
-			OperationID: "",
-		},
-		"PostEdit": {
-			Summary:     "@Summary 修改岗位",
-			Description: "@Description 修改岗位",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysPostVo true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "岗位相关"},
-			OperationID: "",
-		},
-		"PostRemove": {
-			Summary:     "@Summary 删除岗位",
-			Description: "@Description 删除岗位",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path []string true \"postId\"",
-			},
-			Tags:        []string{"@Tags", "岗位相关"},
-			OperationID: "",
-		},
-		"PostList": {
-			Summary:     "@Summary 查询岗位列表查询",
-			Description: "@Description 查询岗位列表查询",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysPostDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "岗位相关"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/craft/craftroutecontroller/process_context.go": {
-		"GetProcessContextList": {
-			Summary:     "@Summary 工序内容列表",
-			Description: "@Description 工序内容列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query craftroutemodels.SysProProcessContextListReq true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/工序内容管理"},
-			OperationID: "",
-		},
-		"SetProcessContextList": {
-			Summary:     "@Summary 设置工序内容",
-			Description: "@Description 设置工序内容",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body craftroutemodels.SysProSetProcessContent true \"设备分组参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/工序内容管理"},
-			OperationID: "",
-		},
-		"RemoveProcessContextList": {
-			Summary:     "@Summary 移除工序内容",
-			Description: "@Description 移除工序内容",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "context_ids path string true \"context_ids\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/工序内容管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/sub_agent.go": {
-		"Delete": {
-			Summary:     "@Summary 删除子智能体配置",
-			Description: "@Description 根据ID删除子智能体配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"子智能体ID，多个以逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/子智能体配置"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 获取子智能体配置列表",
-			Description: "@Description 获取子智能体配置列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query gatewaymodels.AISubAgentQuery true \"子智能体配置查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/子智能体配置"},
-			OperationID: "",
-		},
-		"Info": {
-			Summary:     "@Summary 获取子智能体配置详情",
-			Description: "@Description 根据ID获取子智能体配置详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path int true \"子智能体ID\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/子智能体配置"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 保存子智能体配置",
-			Description: "@Description 保存子智能体配置，id为空时新增，不为空时修改",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.AISubAgentUpsert true \"子智能体配置保存参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/子智能体配置"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/device/devicecontroller/device_check_plan.go": {
-		"List": {
-			Summary:     "@Summary 点检保养计划列表",
-			Description: "@Description 点检保养计划列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.SysDeviceCheckPlanReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养计划"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置点检保养计划",
-			Description: "@Description 设置点检保养计划",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemodels.SysDeviceCheckPlanVO true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养计划"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除点检保养计划",
-			Description: "@Description 删除点检保养计划",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "设备管理/点检保养计划"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/resource/resourcecontroller/sys_resource_file.go": {
-		"Set": {
-			Summary:     "@Summary 登记资料",
-			Description: "@Description 登记资料",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body resourcemodels.SysResourceFileDML true \"资料参数\"",
-			},
-			Tags:        []string{"@Tags", "资料管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 资料管理列表",
-			Description: "@Description 资料管理列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query resourcemodels.SysResourceFileDQL true \"资料管理列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "资料管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除资料",
-			Description: "@Description 删除资料",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "资料管理"},
-			OperationID: "",
-		},
-		"ResourceList": {
-			Summary:     "@Summary 资料管理列表",
-			Description: "@Description 资料管理列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query resourcemodels.SysResourceFileDQL true \"资料管理列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "资料管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_dict_data.go": {
-		"DictDataAdd": {
-			Summary:     "@Summary 添加字典数据",
-			Description: "@Description 添加字典数据",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysDictDataVo true \"字典\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictDataEdit": {
-			Summary:     "@Summary 修改字典数据",
-			Description: "@Description 修改字典数据",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysDictDataVo true \"字典\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictDataRemove": {
-			Summary:     "@Summary 根据dictCode获取字典信息",
-			Description: "@Description 根据dictCode获取字典信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "dictCodes path []int64 true \"dictCodes\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictDataList": {
-			Summary:     "@Summary 查询字典列表",
-			Description: "@Description 查询字典列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysDictDataDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictDataExport": {
-			Summary:     "@Summary 导出配置",
-			Description: "@Description 导出配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysConfigDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "配置相关"},
-			OperationID: "",
-		},
-		"DictDataGetInfo": {
-			Summary:     "@Summary 根据dictCode获取字典信息",
-			Description: "@Description 根据dictCode获取字典信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"dictCode\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-		"DictDataType": {
-			Summary:     "@Summary 查询字典列表",
-			Description: "@Description 查询字典列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"dictType\"",
-			},
-			Tags:        []string{"@Tags", "字典相关"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/agent/aidatasetcontroller/chunk.go": {
-		"ChunkList": {
-			Summary:     "@Summary chunk列表",
-			Description: "@Description chunk列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query aidatasetmodels.ChunkListReq true \"设备分组列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/分块管理"},
-			OperationID: "",
-		},
-		"AddChunk": {
-			Summary:     "@Summary 添加chunk",
-			Description: "@Description 添加chunk",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.AddChunkReq true \"添加chunk参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/分块管理"},
-			OperationID: "",
-		},
-		"RemoveChunk": {
-			Summary:     "@Summary 移除chunk",
-			Description: "@Description 移除chunk",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.RemoveChunkReq true \"移除chunk\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/分块管理"},
-			OperationID: "",
-		},
-		"UpdateChunk": {
-			Summary:     "@Summary 更新chunk",
-			Description: "@Description 更新chunk",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.UpdateChunkReq true \"请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/分块管理"},
-			OperationID: "",
-		},
-		"RetrievalChunk": {
-			Summary:     "@Summary 检索chunk",
-			Description: "@Description 检索chunk",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body aidatasetmodels.RetrievalListReq true \"检索chunk请求参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/分块管理"},
-			OperationID: "",
-		},
-		"GetRagFlowDocumentPreview": {
-			Summary:     "@Summary 获取 RagFlow 预览文件",
-			Description: "@Description 携带 RagFlow API Key 拉取预览资源并透传给客户端",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "doc_id path string true \"RagFlow 文档预览资源ID\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/文档管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/craft/craftroutecontroller/route_process.go": {
-		"RemoveRouteProcess": {
-			Summary:     "@Summary 删除组成工序",
-			Description: "@Description 删除组成工序",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "route_process_ids path string true \"route_process_ids\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/工序组成管理"},
-			OperationID: "",
-		},
-		"GetRouteProcessList": {
-			Summary:     "@Summary 组成工序列表",
-			Description: "@Description 组成工序列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body craftroutemodels.SysProRouteProcessListReq true \"组成工序列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/工序组成管理"},
-			OperationID: "",
-		},
-		"SetRouteProcess": {
-			Summary:     "@Summary 设置组成工序",
-			Description: "@Description 设置组成工序",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body craftroutemodels.SysProRouteProcessSetRequest true \"设置组成工序参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/工序组成管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/agent.go": {
-		"List": {
-			Summary:     "@Summary 获取智能体列表",
-			Description: "@Description 获取智能体列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query gatewaymodels.AIAgentQuery true \"智能体查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体管理"},
-			OperationID: "",
-		},
-		"GetByID": {
-			Summary:     "@Summary 获取智能体详情",
-			Description: "@Description 根据ID获取智能体详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path int true \"智能体ID\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体管理"},
-			OperationID: "",
-		},
-		"GetEnabledByType": {
-			Summary:     "@Summary 获取指定类型下已启用的智能体详情",
-			Description: "@Description 通过type查询enable=true的智能体配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "type path string true \"智能体类型\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 保存智能体",
-			Description: "@Description 保存智能体，id为空时新增，不为空时修改",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.AIAgentUpsert true \"智能体保存参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体管理"},
-			OperationID: "",
-		},
-		"Delete": {
-			Summary:     "@Summary 删除智能体",
-			Description: "@Description 删除智能体",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"智能体ID，多个以逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/agent_config_publish_history.go": {
-		"List": {
-			Summary:     "@Summary 获取智能体配置发布历史列表",
-			Description: "@Description 获取智能体配置发布历史列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query gatewaymodels.AIAgentConfigPublishHistoryQuery true \"智能体配置发布历史查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体配置发布历史"},
-			OperationID: "",
-		},
-		"Info": {
-			Summary:     "@Summary 获取智能体配置发布历史详情",
-			Description: "@Description 根据ID获取智能体配置发布历史详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path int true \"发布历史ID\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体配置发布历史"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 保存智能体配置发布历史",
-			Description: "@Description 保存智能体配置发布历史，id为空时新增，不为空时修改",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.AIAgentConfigPublishHistoryUpsert true \"智能体配置发布历史保存参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体配置发布历史"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除智能体配置发布历史",
-			Description: "@Description 根据ID删除智能体配置发布历史",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"发布历史ID，多个以逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/智能体配置发布历史"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/ai_agent_config_key.go": {
-		"List": {
-			Summary:     "@Summary 获取 API Key 列表",
-			Description: "@Description 获取 API Key 配置列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query gatewaymodels.AgentConfigKeyQuery true \"API Key 查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/ApiKey管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 新增 API Key",
-			Description: "@Description 新增 API Key",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.AgentConfigKeyUpsert true \"API Key 保存参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/ApiKey管理"},
-			OperationID: "",
-		},
-		"Delete": {
-			Summary:     "@Summary 删除 API Key",
-			Description: "@Description 根据 ID 删除 API Key",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"API Key ID，多个以逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/ApiKey管理"},
-			OperationID: "",
-		},
-		"Generate": {
-			Summary:     "@Summary 生成 API Key",
-			Description: "@Description 自动生成一个随机 API Key 并保存",
-			Returns:     "",
-			Tags:        []string{"@Tags", "工业智能体/ApiKey管理"},
-			OperationID: "",
-		},
-		"SetMcpAllowTool": {
-			Summary:     "@Summary 设置允许的 MCP 工具列表",
-			Description: "@Description 根据 API Key ID 更新该 Key 允许使用的 MCP 工具列表，用于 MCP 服务探测后限制可暴露的工具",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.AgentConfigKeyToolUpsert true \"API Key MCP 工具保存参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/ApiKey管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/material/materialcontroller/sys_material.go": {
-		"RemoveMaterialInfo": {
-			Summary:     "@Summary 删除物料",
-			Description: "@Description 删除物料",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "materialIds path string true \"materialIds\"",
-			},
-			Tags:        []string{"@Tags", "物料管理"},
-			OperationID: "",
-		},
-		"GetMaterialInBoundList": {
-			Summary:     "@Summary 物料入库列表",
-			Description: "@Description 物料入库列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query materialmodels.InboundListReq true \"物料入库管理查询条件\"",
-			},
-			Tags:        []string{"@Tags", "物料管理"},
-			OperationID: "",
-		},
-		"AddMaterialInBound": {
-			Summary:     "@Summary 登记物料入库",
-			Description: "@Description 登记物料入库",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body materialmodels.InboundInfo true \"登记物料入库参数\"",
-			},
-			Tags:        []string{"@Tags", "物料管理"},
-			OperationID: "",
-		},
-		"GetMaterialOutBoundList": {
-			Summary:     "@Summary 物料出库列表",
-			Description: "@Description 物料出库列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query materialmodels.OutboundListReq true \"物料出库列表查询条件\"",
-			},
-			Tags:        []string{"@Tags", "物料管理"},
-			OperationID: "",
-		},
-		"AddMaterialOutBound": {
-			Summary:     "@Summary 登记物料出库",
-			Description: "@Description 登记物料出库",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body materialmodels.OutboundInfo true \"登记物料出库参数\"",
-			},
-			Tags:        []string{"@Tags", "物料管理"},
-			OperationID: "",
-		},
-		"GetMaterialInfoList": {
-			Summary:     "@Summary 物料管理列表",
-			Description: "@Description 物料管理列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query materialmodels.MaterialListReq true \"物料管理列表请求参数\"",
-			},
-			Tags:        []string{"@Tags", "物料管理"},
-			OperationID: "",
-		},
-		"SetMaterialInfo": {
-			Summary:     "@Summary 登记物料",
-			Description: "@Description 登记物料",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body materialmodels.MaterialInfo true \"物料参数\"",
-			},
-			Tags:        []string{"@Tags", "物料管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/craft/craftroutecontroller/schedule.go": {
-		"Set": {
-			Summary:     "@Summary 设置调度日程",
-			Description: "@Description 设置调度日程",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body craftroutemodels.SetSysProductSchedule true \"设置调度日程参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/调度管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除调度日程",
-			Description: "@Description 删除调度日程",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/调度管理"},
-			OperationID: "",
-		},
-		"Detail": {
-			Summary:     "@Summary 调度详情",
-			Description: "@Description 调度详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query craftroutemodels.DetailSysProductSchedule true \"组成工序列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/调度管理"},
-			OperationID: "",
-		},
-		"Schedule": {
-			Summary:     "@Summary 读取调度任务",
-			Description: "@Description 读取调度任务",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body craftroutemodels.ScheduleReq true \"读取调度任务参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/生产任务管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 调度列表",
-			Description: "@Description 调度列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query craftroutemodels.SysProductScheduleListReq true \"组成工序列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/调度管理"},
-			OperationID: "",
-		},
-		"MonthList": {
-			Summary:     "@Summary 月调度列表",
-			Description: "@Description 月调度列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query craftroutemodels.SysProductScheduleReq true \"组成工序列表参数\"",
-			},
-			Tags:        []string{"@Tags", "工艺管理/调度管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/daemonize/daemonizecontroller/config.go": {
-		"Set": {
-			Summary:     "@Summary 设置Agent配置",
-			Description: "@Description 设置Agent配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body daemonizemodels.SysIotAgentConfigSetReq true \"参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"Info": {
-			Summary:     "@Summary 读取Agent配置",
-			Description: "@Description 读取Agent配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query daemonizemodels.GetGatewayConfigReq true \"参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"Bind": {
-			Summary:     "@Summary 绑定Agent配置",
-			Description: "@Description 绑定Agent配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body daemonizemodels.BindGatewayConfigReq true \"参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 移除配置",
-			Description: "@Description 移除配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"Generate": {
-			Summary:     "@Summary 生成Agent配置",
-			Description: "@Description 生成Agent配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query daemonizemodels.GenerateGatewayConfigReq true \"参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary Agent配置列表",
-			Description: "@Description Agent配置列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query daemonizemodels.SysIotAgentConfigListReq true \"参数\"",
-			},
-			Tags:        []string{"@Tags", "网关管理/Agent管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/dashboard/dashboardcontroller/data.go": {
-		"Set": {
-			Summary:     "@Summary 保存面板",
-			Description: "@Description 保存面板",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body dashboardmodels.SetSysDashboardData true \"设置仪表盘参数\"",
-			},
-			Tags:        []string{"@Tags", "仪表盘/面板管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除面板",
-			Description: "@Description 删除面板",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "仪表盘/面板管理"},
-			OperationID: "",
-		},
-		"Info": {
-			Summary:     "@Summary 读取面板",
-			Description: "@Description 读取面板",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query dashboardmodels.GetSysDashboardData true \"设置仪表盘参数\"",
-			},
-			Tags:        []string{"@Tags", "仪表盘/面板管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller/camera_offer.go": {
-		"CameraOffer": {
-			Summary:     "@Summary 摄像头 WebRTC SDP 协商",
-			Description: "@Description 提交前端 Offer，返回播放地址与 Answer",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemonitormodel.CameraOfferReq true \"摄像头协商参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/摄像头"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_role.go": {
-		"RoleRemove": {
-			Summary:     "@Summary 删除角色",
-			Description: "@Description 删除角色",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "rolesIds path []string true \"rolesIds\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"AllocatedList": {
-			Summary:     "@Summary 查询角色授权用户列表查询",
-			Description: "@Description 查询角色授权用户列表查询",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysRoleAndUserDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"UnallocatedList": {
-			Summary:     "@Summary 查询角色未授权用户列表查询",
-			Description: "@Description 查询角色未授权用户列表查询",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysRoleAndUserDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"InsertAuthUser": {
-			Summary:     "@Summary 角色授权用户",
-			Description: "@Description 角色授权用户",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "userIds query []string true \"用户Ids\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"RoleAdd": {
-			Summary:     "@Summary 添加角色",
-			Description: "@Description 添加角色",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysRoleDML true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"CancelAuthUser": {
-			Summary:     "@Summary 取消用户角色",
-			Description: "@Description 取消用户角色",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysUserRole  true  \"用户id角色id\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"CancelAuthUserAll": {
-			Summary:     "@Summary 取消角色授权用户",
-			Description: "@Description 取消角色授权用户",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "userIds query []string true \"用户Ids\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"RoleList": {
-			Summary:     "@Summary 查询角色列表查询",
-			Description: "@Description 查询角色列表查询",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.SysRoleDQL true \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"RoleGetInfo": {
-			Summary:     "@Summary 根据角色ID获取角色信息",
-			Description: "@Description 根据角色ID获取角色信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"roleId\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"RoleEdit": {
-			Summary:     "@Summary 修改角色",
-			Description: "@Description 修改角色",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysRoleDML true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-		"RoleChangeStatus": {
-			Summary:     "@Summary 修改角色状态",
-			Description: "@Description 修改角色状态",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysRoleDML true \"公司信息\"",
-			},
-			Tags:        []string{"@Tags", "角色相关"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/alert/alertcontroller/alert.go": {
-		"List": {
-			Summary:     "@Summary 告警规则列表",
-			Description: "@Description 告警规则列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query alertmodels.SysAlertListReq true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警规则管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 设置告警规则",
-			Description: "@Description 设置告警规则",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body alertmodels.SetSysAlert true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警规则管理"},
-			OperationID: "",
-		},
-		"Remove": {
-			Summary:     "@Summary 删除告警规则",
-			Description: "@Description 删除告警规则",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警规则管理"},
-			OperationID: "",
-		},
-		"Change": {
-			Summary:     "@Summary 改变告警配置",
-			Description: "@Description 改变告警配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body alertmodels.ChangeSysAlert true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "告警管理/告警规则管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/asset/building/buildingcontroller/floor.go": {
-		"Remove": {
-			Summary:     "@Summary 删除楼层",
-			Description: "@Description 删除楼层",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"ids\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/楼层管理"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 读取楼层列表",
-			Description: "@Description 读取楼层列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query buildingmodels.SetSysFloorListReq true \"楼层列表参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/楼层管理"},
-			OperationID: "",
-		},
-		"SaveLayout": {
-			Summary:     "@Summary 保存楼层布局",
-			Description: "@Description 保存楼层布局",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query buildingmodels.SetSysFloorListReq true \"楼层列表参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/楼层管理"},
-			OperationID: "",
-		},
-		"InfoLayout": {
-			Summary:     "@Summary 读取楼层布局",
-			Description: "@Description 读取楼层布局",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query buildingmodels.SetSysFloorListReq true \"楼层列表参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/楼层管理"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 保存楼层",
-			Description: "@Description 保存楼层",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body buildingmodels.SetSysFloor true \"楼层参数\"",
-			},
-			Tags:        []string{"@Tags", "资产管理/楼层管理"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller/control_log.go": {
-		"List": {
-			Summary:     "@Summary 控制记录列表",
-			Description: "@Description 控制记录列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemonitormodel.ControlLogListReq true \"控制记录列表\"",
-			},
-			Tags:        []string{"@Tags", "设备接入/控制记录"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller/device_monitor.go": {
-		"List": {
-			Summary:     "@Summary 设备监控",
-			Description: "@Description 设备监控",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query devicemodels.DeviceListReq true \"设备监控\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"Metric": {
-			Summary:     "@Summary 设备指标",
-			Description: "@Description 设备指标",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body metricmodels.MetricQueryReq true \"设备监控\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"MetricPredict": {
-			Summary:     "@Summary 导入告警数据",
-			Description: "@Description 导入告警数据",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body alertmodels.AlertLogData true \"助理列表参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"DeviceLayout": {
-			Summary:     "@Summary 设备布局",
-			Description: "@Description 设备布局",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body metricmodels.GatewayMetricDataQueryReq true \"指标预测查询参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"DeviceByBuilding": {
-			Summary:     "@Summary 通过建筑物读取设备",
-			Description: "@Description 通过建筑物读取设备",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body metricmodels.GatewayMetricDataQueryReq true \"指标预测查询参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/通过建筑物读取设备"},
-			OperationID: "",
-		},
-		"ControlStatus": {
-			Summary:     "@Summary 查询控制下发状态",
-			Description: "@Description 查询控制下发状态",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemonitormodel.ControlStatusReq true \"查询参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"Control": {
-			Summary:     "@Summary 设备控制",
-			Description: "@Description 设备控制",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemonitormodel.ControlReq true \"控制参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"Info": {
-			Summary:     "@Summary 设备监控详情",
-			Description: "@Description 根据设备id读取设备实时信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"设备id\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"Predict": {
-			Summary:     "@Summary 预测指标",
-			Description: "@Description 预测指标",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body metricmodels.MetricQueryReq true \"设备监控\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"MetricPredictQuery": {
-			Summary:     "@Summary 指标预测查询",
-			Description: "@Description 指标预测查询",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body metricmodels.GatewayMetricDataQueryReq true \"指标预测查询参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-		"InfoList": {
-			Summary:     "@Summary 批量设备监控详情",
-			Description: "@Description 根据设备id列表批量读取设备实时信息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body devicemonitormodel.DeviceIdsReq true \"查询参数\"",
-			},
-			Tags:        []string{"@Tags", "设备监控/设备监控"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/utils/gin_mcp/pkg/convert/convert_test.go": {
-		"duplicateOpHandler1": {
-			Summary:     "First handler with duplicate ID",
-			Description: "",
-			Returns:     "",
-			OperationID: "duplicateOp",
-		},
-		"duplicateOpHandler2": {
-			Summary:     "Second handler with duplicate ID",
-			Description: "",
-			Returns:     "",
-			OperationID: "duplicateOp",
-		},
-		"handler": {
-			Summary:     "测试处理器",
-			Description: "这是一个用于测试的处理器",
-			Returns:     "",
-			Params: map[string]string{
-				"id": "用户ID",
-			},
-			OperationID: "",
-		},
-		"customOpHandler": {
-			Summary:     "Custom operation handler",
-			Description: "",
-			Returns:     "",
-			OperationID: "myCustomOp",
-		},
-		"defaultOpHandler": {
-			Summary:     "Default operation handler",
-			Description: "",
-			Returns:     "",
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/admin/system/systemcontroller/sys_notice.go": {
-		"NoticeRead": {
-			Summary:     "@Summary 消费方消息修改为已读",
-			Description: "@Description 消费方消息修改为已读",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"id\"",
-			},
-			Tags:        []string{"@Tags", "消息通知"},
-			OperationID: "",
-		},
-		"NoticeReadAll": {
-			Summary:     "@Summary 消费方所有消息修改为已读",
-			Description: "@Description 消费方所有消息修改为已读",
-			Returns:     "",
-			Tags:        []string{"@Tags", "消息通知"},
-			OperationID: "",
-		},
-		"NoticeDelete": {
-			Summary:     "@Summary 消费方消息删除消息",
-			Description: "@Description 消费方消息删除消息",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"id\"",
-			},
-			Tags:        []string{"@Tags", "消息通知"},
-			OperationID: "",
-		},
-		"NoticeList": {
-			Summary:     "@Summary 消息通知列表",
-			Description: "@Description 消息通知列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.NoticeDQL false \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "消息通知"},
-			OperationID: "",
-		},
-		"NoticeAdd": {
-			Summary:     "@Summary 新增消息通知",
-			Description: "@Description 新增消息通知",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body systemmodels.SysNoticeVo true \"系统角色\"",
-			},
-			Tags:        []string{"@Tags", "消息通知"},
-			OperationID: "",
-		},
-		"UserNoticeList": {
-			Summary:     "@Summary 消费方获取消息列表",
-			Description: "@Description 消费方获取消息列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query systemmodels.ConsumptionNoticeDQL false \"查询信息\"",
-			},
-			Tags:        []string{"@Tags", "消息通知"},
-			OperationID: "",
-		},
-		"NoticeGetInfo": {
-			Summary:     "@Summary 根据id消息通知",
-			Description: "@Description 根据id消息通知",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"id\"",
-			},
-			Tags:        []string{"@Tags", "消息通知"},
-			OperationID: "",
-		},
-		"NewMessage": {
-			Summary:     "@Summary 未读消息通知数量",
-			Description: "@Description 未读消息通知数量",
-			Returns:     "",
-			Tags:        []string{"@Tags", "消息通知"},
-			OperationID: "",
-		},
-		"UserNoticeGetInfo": {
-			Summary:     "@Summary 消费方获取消息根据ID",
-			Description: "@Description 消费方获取消息根据ID",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path string true \"id\"",
-			},
-			Tags:        []string{"@Tags", "消息通知"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/mcp_server.go": {
-		"Set": {
-			Summary:     "@Summary 保存MCP服务配置",
-			Description: "@Description 保存MCP服务配置，id为空时新增，不为空时修改",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.MCPServerUpsert true \"MCP服务配置保存参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/MCP服务配置"},
-			OperationID: "",
-		},
-		"Delete": {
-			Summary:     "@Summary 删除MCP服务配置",
-			Description: "@Description 删除MCP服务配置",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"MCP服务ID，多个以逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/MCP服务配置"},
-			OperationID: "",
-		},
-		"McpProbe": {
-			Summary:     "@Summary 探测MCP服务",
-			Description: "@Description 连接指定MCP服务，完成初始化、心跳和工具探测，支持 SSE 和 Streamable HTTP",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.MCPServerProbeRequest true \"MCP服务探测参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/MCP服务配置"},
-			OperationID: "",
-		},
-		"List": {
-			Summary:     "@Summary 获取MCP服务配置列表",
-			Description: "@Description 获取MCP服务配置列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query gatewaymodels.MCPServerQuery true \"MCP服务配置查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/MCP服务配置"},
-			OperationID: "",
-		},
-	},
-	"/home/zhanglei/project/zhanglei/nova-factory-server/app/business/ai/gateway/gatewaycontroller/skills.go": {
-		"List": {
-			Summary:     "@Summary 获取已安装技能列表",
-			Description: "@Description 获取已安装技能列表",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object query gatewaymodels.InstalledSkillQuery true \"已安装技能查询参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/已安装技能"},
-			OperationID: "",
-		},
-		"GetByID": {
-			Summary:     "@Summary 获取已安装技能详情",
-			Description: "@Description 根据ID获取已安装技能详情",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "id path int true \"技能ID\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/已安装技能"},
-			OperationID: "",
-		},
-		"Set": {
-			Summary:     "@Summary 保存已安装技能",
-			Description: "@Description 保存已安装技能，id为空时新增，不为空时修改",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "object body gatewaymodels.InstalledSkillUpsert true \"已安装技能保存参数\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/已安装技能"},
-			OperationID: "",
-		},
-		"Delete": {
-			Summary:     "@Summary 删除已安装技能",
-			Description: "@Description 根据ID删除已安装技能",
-			Returns:     "",
-			Params: map[string]string{
-				"@Param": "ids path string true \"技能ID，多个以逗号分隔\"",
-			},
-			Tags:        []string{"@Tags", "工业智能体/已安装技能"},
-			OperationID: "",
-		},
+var handlerDocByIdentity = map[handlerIdentity]HandlerDoc{
+	{PackagePath: "nova-factory-server/app/business/admin/basics/controller", ReceiverName: "CompanyInfo", HandlerName: "CompanyInfoGet"}: {
+		Summary:     "获取公司信息",
+		Description: "获取公司信息",
+		Returns:     "",
+		Tags:        []string{"公司信息"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/basics/controller", ReceiverName: "CompanyInfo", HandlerName: "CompanyInfoSave"}: {
+		Summary:     "保存公司信息",
+		Description: "保存公司信息",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body models.CompanyInfoVo true \"公司信息\"",
+		},
+		Tags:        []string{"公司信息"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "FunList"}: {
+		Summary:     "获取方法列表",
+		Description: "获取方法列表",
+		Returns:     "",
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobAdd"}: {
+		Summary:     "新增定时任务",
+		Description: "新增定时任务",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body monitormodels.JobDML true \"新增信息\"",
+		},
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobChangeStatus"}: {
+		Summary:     "修改定时任务状态",
+		Description: "修改定时任务状态",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body monitormodels.JobDML true \"修改信息\"",
+		},
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobEdit"}: {
+		Summary:     "编辑定时任务",
+		Description: "编辑定时任务",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body monitormodels.JobDML true \"编辑信息\"",
+		},
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobGetInfo"}: {
+		Summary:     "查询定时任务信息",
+		Description: "查询定时任务信息",
+		Returns:     "",
+		Params: map[string]string{
+			"jobId": "path int true \"jobId\"",
+		},
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobIdAndNameAll"}: {
+		Summary:     "查询定时任务id和名称",
+		Description: "查询定时任务id和名称",
+		Returns:     "",
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobList"}: {
+		Summary:     "查询定时任务列表",
+		Description: "查询定时任务列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query monitormodels.JobDQL true \"查询信息\"",
+		},
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobLogGetInfo"}: {
+		Summary:     "查询定时任务日志信息",
+		Description: "查询定时任务日志信息",
+		Returns:     "",
+		Params: map[string]string{
+			"jobLogId": "path int true \"jobLogId\"",
+		},
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobLogList"}: {
+		Summary:     "查询定时任务日志列表",
+		Description: "查询定时任务日志列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query monitormodels.JobLogDql true \"查询信息\"",
+		},
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobRemove"}: {
+		Summary:     "删除定时任务",
+		Description: "删除定时任务",
+		Returns:     "",
+		Params: map[string]string{
+			"jobIds": "path string true \"jobIds\"",
+		},
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "Job", HandlerName: "JobRun"}: {
+		Summary:     "执行定时任务",
+		Description: "执行定时任务",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body monitormodels.JobVo true \"执行信息\"",
+		},
+		Tags:        []string{"定时任务"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "UserOnline", HandlerName: "ForceLogout"}: {
+		Summary:     "强退在线用户列表",
+		Description: "强退在线用户列表",
+		Returns:     "",
+		Params: map[string]string{
+			"tokenId": "path string true \"tokenId\"",
+		},
+		Tags:        []string{"在线用户"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/monitor/monitorcontroller", ReceiverName: "UserOnline", HandlerName: "UserOnlineList"}: {
+		Summary:     "查询在线用户列表查询",
+		Description: "查询在线用户列表查询",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query monitormodels.SysUserOnlineDQL true \"查询信息\"",
+		},
+		Tags:        []string{"在线用户"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Config", HandlerName: "ConfigAdd"}: {
+		Summary:     "添加配置",
+		Description: "添加配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysConfigVo true \"公司信息\"",
+		},
+		Tags:        []string{"配置相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Config", HandlerName: "ConfigEdit"}: {
+		Summary:     "修改配置",
+		Description: "修改配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysConfigVo true \"公司信息\"",
+		},
+		Tags:        []string{"配置相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Config", HandlerName: "ConfigExport"}: {
+		Summary:     "导出配置",
+		Description: "导出配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysConfigDQL true \"查询信息\"",
+		},
+		Tags:        []string{"配置相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Config", HandlerName: "ConfigGetInfo"}: {
+		Summary:     "根据配置ID获取配置信息",
+		Description: "根据配置ID获取配置信息",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"ConfigId\"",
+		},
+		Tags:        []string{"配置相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Config", HandlerName: "ConfigList"}: {
+		Summary:     "查询配置列表查询",
+		Description: "查询配置列表查询",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysConfigDQL true \"查询信息\"",
+		},
+		Tags:        []string{"配置相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Config", HandlerName: "ConfigRemove"}: {
+		Summary:     "删除配置",
+		Description: "删除配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"configId\"",
+		},
+		Tags:        []string{"配置相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Dept", HandlerName: "DeptAdd"}: {
+		Summary:     "添加部门",
+		Description: "添加部门",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysDeptVo true \"公司信息\"",
+		},
+		Tags:        []string{"部门相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Dept", HandlerName: "DeptEdit"}: {
+		Summary:     "修改部门",
+		Description: "修改部门",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysDeptVo true \"公司信息\"",
+		},
+		Tags:        []string{"部门相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Dept", HandlerName: "DeptGetInfo"}: {
+		Summary:     "根据部门ID获取部门信息",
+		Description: "根据部门ID获取部门信息",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"deptId\"",
+		},
+		Tags:        []string{"部门相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Dept", HandlerName: "DeptList"}: {
+		Summary:     "查询部门列表查询",
+		Description: "查询部门列表查询",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysDeptDQL true \"查询信息\"",
+		},
+		Tags:        []string{"部门相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Dept", HandlerName: "DeptRemove"}: {
+		Summary:     "删除部门",
+		Description: "删除部门",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"deptId\"",
+		},
+		Tags:        []string{"部门相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Dept", HandlerName: "RoleDeptTreeSelect"}: {
+		Summary:     "获取角色部门",
+		Description: "获取角色部门",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"roleId\"",
+		},
+		Tags:        []string{"部门相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictData", HandlerName: "DictDataAdd"}: {
+		Summary:     "添加字典数据",
+		Description: "添加字典数据",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysDictDataVo true \"字典\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictData", HandlerName: "DictDataEdit"}: {
+		Summary:     "修改字典数据",
+		Description: "修改字典数据",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysDictDataVo true \"字典\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictData", HandlerName: "DictDataExport"}: {
+		Summary:     "导出配置",
+		Description: "导出配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysConfigDQL true \"查询信息\"",
+		},
+		Tags:        []string{"配置相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictData", HandlerName: "DictDataGetInfo"}: {
+		Summary:     "根据dictCode获取字典信息",
+		Description: "根据dictCode获取字典信息",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"dictCode\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictData", HandlerName: "DictDataList"}: {
+		Summary:     "查询字典列表",
+		Description: "查询字典列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysDictDataDQL true \"查询信息\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictData", HandlerName: "DictDataRemove"}: {
+		Summary:     "根据dictCode获取字典信息",
+		Description: "根据dictCode获取字典信息",
+		Returns:     "",
+		Params: map[string]string{
+			"dictCodes": "path []int64 true \"dictCodes\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictData", HandlerName: "DictDataType"}: {
+		Summary:     "查询字典列表",
+		Description: "查询字典列表",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"dictType\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictType", HandlerName: "DictTypeAdd"}: {
+		Summary:     "添加字典类型数据",
+		Description: "添加字典类型数据",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysDictDataVo true \"字典\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictType", HandlerName: "DictTypeClearCache"}: {
+		Summary:     "更新字典缓存",
+		Description: "更新字典缓存",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body []string true \"字典\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictType", HandlerName: "DictTypeEdit"}: {
+		Summary:     "修改字典类型数据",
+		Description: "修改字典类型数据",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysDictDataVo true \"字典\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictType", HandlerName: "DictTypeExport"}: {
+		Summary:     "导出字典类型",
+		Description: "导出字典类型",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysDictDataDQL true \"查询信息\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictType", HandlerName: "DictTypeGetInfo"}: {
+		Summary:     "根据dictCode获取字典类型信息",
+		Description: "根据dictCode获取字典类型信息",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"dictCode\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictType", HandlerName: "DictTypeList"}: {
+		Summary:     "查询字典类型列表",
+		Description: "查询字典类型列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysDictDataDQL true \"查询信息\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictType", HandlerName: "DictTypeOptionSelect"}: {
+		Summary:     "查询字典列表",
+		Description: "查询字典列表",
+		Returns:     "",
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "DictType", HandlerName: "DictTypeRemove"}: {
+		Summary:     "根据dictCode获取字典类型信息",
+		Description: "根据dictCode获取字典类型信息",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body []string true \"字典\"",
+		},
+		Tags:        []string{"字典相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "File", HandlerName: "DownloadPrivateFile"}: {
+		Summary:     "租户下载私有文件",
+		Description: "租户下载私有文件",
+		Returns:     "",
+		Params: map[string]string{
+			"key": "query string true \"key\"",
+		},
+		Tags:        []string{"租户上传文件"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "File", HandlerName: "UploadFileOriginalName"}: {
+		Summary:     "上传文件原始文件名",
+		Description: "上传文件原始文件名",
+		Returns:     "",
+		Params: map[string]string{
+			"file": "formData file true \"file\"",
+		},
+		Tags:        []string{"租户上传文件"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "File", HandlerName: "UploadFileRandomName"}: {
+		Summary:     "上传文件随即文件名",
+		Description: "上传文件随即文件名",
+		Returns:     "",
+		Params: map[string]string{
+			"file": "formData file true \"file\"",
+		},
+		Tags:        []string{"租户上传文件"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "File", HandlerName: "UploadFiles"}: {
+		Summary:     "上传多个文件随即文件名",
+		Description: "上传多个文件随即文件名",
+		Returns:     "",
+		Params: map[string]string{
+			"files": "formData file true \"files\"",
+		},
+		Tags:        []string{"租户上传文件"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "File", HandlerName: "UploadPrivateFileOriginalName"}: {
+		Summary:     "上传私有文件原始文件名",
+		Description: "上传私有文件原始文件名",
+		Returns:     "",
+		Params: map[string]string{
+			"file": "formData file true \"file\"",
+		},
+		Tags:        []string{"租户上传文件"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Login", HandlerName: "GetCode"}: {
+		Summary:     "获取验证码",
+		Description: "获取验证码",
+		Returns:     "",
+		Tags:        []string{"登录"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Login", HandlerName: "GetInfo"}: {
+		Summary:     "获取用户个人信息",
+		Description: "获取用户个人信息",
+		Returns:     "",
+		Tags:        []string{"登录"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Login", HandlerName: "Login"}: {
+		Summary:     "用户登录",
+		Description: "用户登录",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.LoginBody true \"登录信息\"",
+		},
+		Tags:        []string{"登录"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Login", HandlerName: "Logout"}: {
+		Summary:     "退出",
+		Description: "退出",
+		Returns:     "",
+		Tags:        []string{"登录"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Login", HandlerName: "Register"}: {
+		Summary:     "用户登录",
+		Description: "用户登录",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.LoginBody true \"登录信息\"",
+		},
+		Tags:        []string{"登录"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Notice", HandlerName: "NewMessage"}: {
+		Summary:     "未读消息通知数量",
+		Description: "未读消息通知数量",
+		Returns:     "",
+		Tags:        []string{"消息通知"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Notice", HandlerName: "NoticeAdd"}: {
+		Summary:     "新增消息通知",
+		Description: "新增消息通知",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysNoticeVo true \"系统角色\"",
+		},
+		Tags:        []string{"消息通知"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Notice", HandlerName: "NoticeDelete"}: {
+		Summary:     "消费方消息删除消息",
+		Description: "消费方消息删除消息",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"id\"",
+		},
+		Tags:        []string{"消息通知"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Notice", HandlerName: "NoticeGetInfo"}: {
+		Summary:     "根据id消息通知",
+		Description: "根据id消息通知",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"id\"",
+		},
+		Tags:        []string{"消息通知"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Notice", HandlerName: "NoticeList"}: {
+		Summary:     "消息通知列表",
+		Description: "消息通知列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.NoticeDQL false \"查询信息\"",
+		},
+		Tags:        []string{"消息通知"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Notice", HandlerName: "NoticeRead"}: {
+		Summary:     "消费方消息修改为已读",
+		Description: "消费方消息修改为已读",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"id\"",
+		},
+		Tags:        []string{"消息通知"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Notice", HandlerName: "NoticeReadAll"}: {
+		Summary:     "消费方所有消息修改为已读",
+		Description: "消费方所有消息修改为已读",
+		Returns:     "",
+		Tags:        []string{"消息通知"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Notice", HandlerName: "UserNoticeGetInfo"}: {
+		Summary:     "消费方获取消息根据ID",
+		Description: "消费方获取消息根据ID",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"id\"",
+		},
+		Tags:        []string{"消息通知"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Notice", HandlerName: "UserNoticeList"}: {
+		Summary:     "消费方获取消息列表",
+		Description: "消费方获取消息列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.ConsumptionNoticeDQL false \"查询信息\"",
+		},
+		Tags:        []string{"消息通知"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Permission", HandlerName: "PermissionAdd"}: {
+		Summary:     "新增系统权限",
+		Description: "新增系统权限",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysPermissionAdd true \"系统权限\"",
+		},
+		Tags:        []string{"系统权限"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Permission", HandlerName: "PermissionEdit"}: {
+		Summary:     "修改系统权限",
+		Description: "修改系统权限",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysPermissionEdit true \"系统权限\"",
+		},
+		Tags:        []string{"系统权限"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Permission", HandlerName: "PermissionGetInfo"}: {
+		Summary:     "根据id查询系统权限",
+		Description: "根据id查询系统权限",
+		Returns:     "",
+		Params: map[string]string{
+			"permissionId": "path string true \"permissionId\"",
+		},
+		Tags:        []string{"系统权限"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Permission", HandlerName: "PermissionList"}: {
+		Summary:     "系统权限列表",
+		Description: "系统权限列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysPermissionDQL false \"查询信息\"",
+		},
+		Tags:        []string{"系统权限"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Permission", HandlerName: "PermissionListByRoleIds"}: {
+		Summary:     "根据id查询系统权限",
+		Description: "根据id查询系统权限",
+		Returns:     "",
+		Params: map[string]string{
+			"roleIds": "path string true \"roleIds\"",
+		},
+		Tags:        []string{"系统权限"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Permission", HandlerName: "PermissionRemove"}: {
+		Summary:     "删除系统权限",
+		Description: "删除系统权限",
+		Returns:     "",
+		Params: map[string]string{
+			"permissionId": "path string true \"permissionId\"",
+		},
+		Tags:        []string{"系统权限"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Post", HandlerName: "PostAdd"}: {
+		Summary:     "添加岗位",
+		Description: "添加岗位",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysPostVo true \"公司信息\"",
+		},
+		Tags:        []string{"岗位相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Post", HandlerName: "PostEdit"}: {
+		Summary:     "修改岗位",
+		Description: "修改岗位",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysPostVo true \"公司信息\"",
+		},
+		Tags:        []string{"岗位相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Post", HandlerName: "PostExport"}: {
+		Summary:     "导出岗位",
+		Description: "导出岗位",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysPostDQL true \"查询信息\"",
+		},
+		Tags:        []string{"岗位相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Post", HandlerName: "PostGetInfo"}: {
+		Summary:     "根据岗位ID获取岗位信息",
+		Description: "根据岗位ID获取岗位信息",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"PostId\"",
+		},
+		Tags:        []string{"岗位相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Post", HandlerName: "PostList"}: {
+		Summary:     "查询岗位列表查询",
+		Description: "查询岗位列表查询",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysPostDQL true \"查询信息\"",
+		},
+		Tags:        []string{"岗位相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Post", HandlerName: "PostRemove"}: {
+		Summary:     "删除岗位",
+		Description: "删除岗位",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path []string true \"postId\"",
+		},
+		Tags:        []string{"岗位相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Profile", HandlerName: "Profile"}: {
+		Summary:     "查看个人资料",
+		Description: "查看个人资料",
+		Returns:     "",
+		Tags:        []string{"个人资料"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Profile", HandlerName: "ProfileAvatar"}: {
+		Summary:     "修改头像",
+		Description: "修改头像",
+		Returns:     "",
+		Params: map[string]string{
+			"file": "formData file true \"file\"",
+		},
+		Tags:        []string{"个人资料"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Profile", HandlerName: "ProfileUpdateProfile"}: {
+		Summary:     "修改个人资料",
+		Description: "修改个人资料",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysUserDML true \"公司信息\"",
+		},
+		Tags:        []string{"个人资料"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Profile", HandlerName: "ProfileUpdatePwd"}: {
+		Summary:     "修改密码",
+		Description: "修改密码",
+		Returns:     "",
+		Params: map[string]string{
+			"newPassword": "query string true \"新密码\"",
+			"oldPassword": "query string true \"旧密码\"",
+		},
+		Tags:        []string{"个人资料"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "AllocatedList"}: {
+		Summary:     "查询角色授权用户列表查询",
+		Description: "查询角色授权用户列表查询",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysRoleAndUserDQL true \"查询信息\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "CancelAuthUser"}: {
+		Summary:     "取消用户角色",
+		Description: "取消用户角色",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysUserRole  true  \"用户id角色id\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "CancelAuthUserAll"}: {
+		Summary:     "取消角色授权用户",
+		Description: "取消角色授权用户",
+		Returns:     "",
+		Params: map[string]string{
+			"roleId":  "query string true \"角色Id\"",
+			"userIds": "query []string true \"用户Ids\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "InsertAuthUser"}: {
+		Summary:     "角色授权用户",
+		Description: "角色授权用户",
+		Returns:     "",
+		Params: map[string]string{
+			"roleId":  "query string true \"角色Id\"",
+			"userIds": "query []string true \"用户Ids\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "RoleAdd"}: {
+		Summary:     "添加角色",
+		Description: "添加角色",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysRoleDML true \"公司信息\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "RoleChangeStatus"}: {
+		Summary:     "修改角色状态",
+		Description: "修改角色状态",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysRoleDML true \"公司信息\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "RoleEdit"}: {
+		Summary:     "修改角色",
+		Description: "修改角色",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysRoleDML true \"公司信息\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "RoleGetInfo"}: {
+		Summary:     "根据角色ID获取角色信息",
+		Description: "根据角色ID获取角色信息",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"roleId\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "RoleList"}: {
+		Summary:     "查询角色列表查询",
+		Description: "查询角色列表查询",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysRoleDQL true \"查询信息\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "RoleRemove"}: {
+		Summary:     "删除角色",
+		Description: "删除角色",
+		Returns:     "",
+		Params: map[string]string{
+			"rolesIds": "path []string true \"rolesIds\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Role", HandlerName: "UnallocatedList"}: {
+		Summary:     "查询角色未授权用户列表查询",
+		Description: "查询角色未授权用户列表查询",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysRoleAndUserDQL true \"查询信息\"",
+		},
+		Tags:        []string{"角色相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "SelectBox", HandlerName: "SelectDept"}: {
+		Summary:     "部门选择框",
+		Description: "部门选择框",
+		Returns:     "",
+		Tags:        []string{"下拉框选项"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "SelectBox", HandlerName: "SelectPermission"}: {
+		Summary:     "权限选择框",
+		Description: "权限选择框",
+		Returns:     "",
+		Tags:        []string{"下拉框选项"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Shift", HandlerName: "List"}: {
+		Summary:     "班次配置列表",
+		Description: "班次配置列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysWorkShiftSettingReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"系统管理/班次配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Shift", HandlerName: "Remove"}: {
+		Summary:     "删除班次配置",
+		Description: "删除告警AI推理发送配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"告警管理/班次配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Shift", HandlerName: "Set"}: {
+		Summary:     "设置班次配置",
+		Description: "设置班次配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysWorkShiftSettingVO true \"班次配置参数\"",
+		},
+		Tags:        []string{"系统管理/班次配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "Sse", HandlerName: "BuildSse"}: {
+		Summary:     "建立SSE链接",
+		Description: "建立SSE链接",
+		Returns:     "",
+		Params: map[string]string{
+			"token": "path string true \"token\"",
+		},
+		Tags:        []string{"建立SSE链接"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "ChangeStatus"}: {
+		Summary:     "修改用户状态",
+		Description: "修改用户状态",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.EditUserStatus true \"用户信息\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "ImportTemplate"}: {
+		Summary:     "导出用户",
+		Description: "导出用户",
+		Returns:     "",
+		Tags:        []string{"系统用户"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "InsertAuthRole"}: {
+		Summary:     "授权角色",
+		Description: "授权角色",
+		Returns:     "",
+		Params: map[string]string{
+			"string": "query string true \"用户id\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "ResetPwd"}: {
+		Summary:     "重置密码",
+		Description: "重置密码",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.ResetPwd true \"密码\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "SelectUserDataScope"}: {
+		Summary:     "查询用户数据权限",
+		Description: "查询用户数据权限",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path int64 true \"userId\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UpdateUserDataScope"}: {
+		Summary:     "修改数据权限",
+		Description: "修改数据权限",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysUserDataScope true \"用户权限信息\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UserAdd"}: {
+		Summary:     "添加用户",
+		Description: "添加用户",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysUserDML true \"用户信息\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UserAuthRole"}: {
+		Summary:     "根据用户编号获取授权角色",
+		Description: "根据用户编号获取授权角色",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"userId\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UserEdit"}: {
+		Summary:     "修改用户",
+		Description: "修改用户",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body systemmodels.SysUserDML true \"用户信息\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UserExport"}: {
+		Summary:     "导出用户",
+		Description: "导出用户",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysUserDQL true \"查询信息\"",
+		},
+		Tags:        []string{"系统用户"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UserGetInfo"}: {
+		Summary:     "获取当前用户信息",
+		Description: "获取当前用户信息",
+		Returns:     "",
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UserGetInfoById"}: {
+		Summary:     "根据用户ID获取用户信息",
+		Description: "根据用户ID获取用户信息",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path int64 true \"userId\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UserImportData"}: {
+		Summary:     "导入用户",
+		Description: "导入用户",
+		Returns:     "",
+		Params: map[string]string{
+			"file": "formData file true \"file\"",
+		},
+		Tags:        []string{"系统用户"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UserList"}: {
+		Summary:     "查询用户列表",
+		Description: "查询用户列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query systemmodels.SysUserDQL true \"查询信息\"",
+		},
+		Tags:        []string{"用户相关"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/admin/system/systemcontroller", ReceiverName: "User", HandlerName: "UserRemove"}: {
+		Summary:     "删除用户",
+		Description: "删除用户",
+		Returns:     "",
+		Params: map[string]string{
+			"userIds": "path []int64 true \"userIds\"",
+		},
+		Tags:        []string{"系统用户"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "ConfigLoader", HandlerName: "Publish"}: {
+		Summary:     "发布智能体配置变更",
+		Description: "向集群节点广播智能体配置变更通知",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.AgentPublishReq true \"智能体发布参数\"",
+		},
+		Tags:        []string{"工业智能体/智能体配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Control", HandlerName: "List"}: {
+		Summary:     "预测控制列表",
+		Description: "预测控制列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.SysAiPredictionControlListReq true \"智能控制列表参数\"",
+		},
+		Tags:        []string{"工业智能体/预测控制"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Control", HandlerName: "Remove"}: {
+		Summary:     "删除预测控制",
+		Description: "删除预测控制",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"工业智能体/预测控制"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Control", HandlerName: "Set"}: {
+		Summary:     "设置智能控制",
+		Description: "设置智能控制",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.SetSysAiPredictionControl true \"助理列表参数\"",
+		},
+		Tags:        []string{"工业智能体/预测控制"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "DataSetAuth", HandlerName: "Auth"}: {
+		Summary:     "获取知识库授权信息.",
+		Description: "在调用 MCP 工具 `ragflow_retrieval` 前先使用此工具。它会根据用户访问权限返回访问所需的 `dataset_ids` 和 `document_ids`。",
+		Returns:     "",
+		Tags:        []string{"工业智能体/知识库管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "AddChunk"}: {
+		Summary:     "添加chunk",
+		Description: "添加chunk",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.AddChunkReq true \"添加chunk参数\"",
+		},
+		Tags:        []string{"工业智能体/分块管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "AgentCompletions"}: {
+		Summary:     "Agent聊天",
+		Description: "Agent聊天",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.AgentsCompletionsRequest true \"Agent聊天\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "AgentList"}: {
+		Summary:     "Agen列表",
+		Description: "Agen列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.ListAgentSessionsRequest true \"Agen话列表请求参数\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "AgentSessionCreate"}: {
+		Summary:     "创建agent会话",
+		Description: "创建agent会话",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.SessionAgentCreate true \"创建agent会话\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "AgentsSessionList"}: {
+		Summary:     "Agent会话列表",
+		Description: "Agent会话列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.ListAgentSessionsRequest true \"Agent会话列表请求参数\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "AgentsSessionRemove"}: {
+		Summary:     "删除Agent会话",
+		Description: "删除Agent会话",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.RemoveAgentSessionsRequest true \"删除Agent会话\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "Ask"}: {
+		Summary:     "智能问答",
+		Description: "智能问答",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.AskRequest true \"相关提问\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "ChartsCompletions"}: {
+		Summary:     "与聊天助手交谈",
+		Description: "与聊天助手交谈",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.ChatsCompletionsRequest true \"与聊天助手交谈\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "ChunkList"}: {
+		Summary:     "chunk列表",
+		Description: "chunk列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.ChunkListReq true \"设备分组列表请求参数\"",
+		},
+		Tags:        []string{"工业智能体/分块管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "ConversationRelatedQuestions"}: {
+		Summary:     "相关提问",
+		Description: "相关提问",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.ConversationRelatedQuestionsRequest true \"相关提问\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "CreateAiDataSet"}: {
+		Summary:     "添加数据集",
+		Description: "添加数据集",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.DataSetRequest true \"设备分组参数\"",
+		},
+		Tags:        []string{"工业智能体/知识库管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "CreateAssistant"}: {
+		Summary:     "创建助理",
+		Description: "创建助理",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.CreateAssistantRequest true \"创建助理表请求参数\"",
+		},
+		Tags:        []string{"工业智能体/助理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "DownloadDocument"}: {
+		Summary:     "下载文档",
+		Description: "下载文档",
+		Returns:     "",
+		Params: map[string]string{
+			"document_id": "path int64 true \"document_id\"",
+		},
+		Tags:        []string{"工业智能体/文档管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "GetAiDataGetConfig"}: {
+		Summary:     "读取知识库配置",
+		Description: "读取知识库配置",
+		Returns:     "",
+		Tags:        []string{"工业智能体/知识库管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "GetAiDataGetInfo"}: {
+		Summary:     "读取数据集",
+		Description: "读取数据集",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.GetDatasetInfoReq true \"读取数据集\"",
+		},
+		Tags:        []string{"工业智能体/知识库管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "GetAiDataSet"}: {
+		Summary:     "读取数据集列表",
+		Description: "读取数据集列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.DatasetListReq true \"设备分组列表请求参数\"",
+		},
+		Tags:        []string{"工业智能体/知识库管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "GetRagFlowDocumentPreview"}: {
+		Summary:     "获取 RagFlow 预览文件",
+		Description: "携带 RagFlow API Key 拉取预览资源并透传给客户端",
+		Returns:     "",
+		Params: map[string]string{
+			"doc_id": "path string true \"RagFlow 文档预览资源ID\"",
+		},
+		Tags:        []string{"工业智能体/文档管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "ListAssistant"}: {
+		Summary:     "读取助理列表",
+		Description: "读取助理列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.GetAssistantRequest true \"助理列表参数\"",
+		},
+		Tags:        []string{"工业智能体/助理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "ListDocument"}: {
+		Summary:     "文档列表",
+		Description: "文档列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.ListDocumentRequest true \"文档列表参数\"",
+		},
+		Tags:        []string{"工业智能体/文档管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "PutDocument"}: {
+		Summary:     "更新文档",
+		Description: "更新文档",
+		Returns:     "",
+		Params: map[string]string{
+			"document_id": "path int64 true \"document_id\"",
+			"object":      "body aidatasetmodels.PutDocumentRequest true \"更新文档请求\"",
+		},
+		Tags:        []string{"工业智能体/文档管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "RemoveAssistant"}: {
+		Summary:     "删除助理",
+		Description: "删除助理",
+		Returns:     "",
+		Params: map[string]string{
+			"assistantIds": "path []string true \"assistantIds\"",
+		},
+		Tags:        []string{"工业智能体/助理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "RemoveChunk"}: {
+		Summary:     "移除chunk",
+		Description: "移除chunk",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.RemoveChunkReq true \"移除chunk\"",
+		},
+		Tags:        []string{"工业智能体/分块管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "RemoveDataSet"}: {
+		Summary:     "移除数据集",
+		Description: "移除数据集",
+		Returns:     "",
+		Params: map[string]string{
+			"dataset_id": "path int64 true \"dataset_id\"",
+		},
+		Tags:        []string{"工业智能体/知识库管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "RemoveDocument"}: {
+		Summary:     "删除文档",
+		Description: "删除文档",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.DeleteDocumentRequest true \"删除文档请求参数\"",
+		},
+		Tags:        []string{"工业智能体/文档管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "RetrievalChunk"}: {
+		Summary:     "检索chunk",
+		Description: "检索chunk",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.RetrievalListReq true \"检索chunk请求参数\"",
+		},
+		Tags:        []string{"工业智能体/分块管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "SessionCreate"}: {
+		Summary:     "创建助理会话",
+		Description: "创建助理会话",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.CreateSessionsRequest true \"使用 chat 助手创建会话\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "SessionList"}: {
+		Summary:     "助理会话列表",
+		Description: "助理会话列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.ListSessionRequest true \"助理会话列表\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "SessionRemove"}: {
+		Summary:     "删除会话",
+		Description: "删除会话",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.DeleteSessionRequest true \"删除会话\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "SessionUpdate"}: {
+		Summary:     "更新助理会话",
+		Description: "更新助理会话",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.UpdateSessionsRequest true \"更新助理会话\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "StartParseDocument"}: {
+		Summary:     "解析文档",
+		Description: "解析文档",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.ParseDocumentApiRequest true \"解析文档请求参数\"",
+		},
+		Tags:        []string{"工业智能体/文档管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "StopParseDocument"}: {
+		Summary:     "停止解析文档",
+		Description: "停止解析文档",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.ParseDocumentApiRequest true \"停止解析文档参数\"",
+		},
+		Tags:        []string{"工业智能体/文档管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "UpdateAiDataSet"}: {
+		Summary:     "更新数据集",
+		Description: "更新数据集",
+		Returns:     "",
+		Params: map[string]string{
+			"dataset_id": "path string true \"dataset_id\"",
+			"object":     "body aidatasetmodels.UpdateDataSetRequest true \"设备分组参数\"",
+		},
+		Tags:        []string{"工业智能体/知识库管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "UpdateAssistant"}: {
+		Summary:     "更新助理",
+		Description: "更新助理",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.UpdateAssistantRequest true \"更新助理表请求参数\"",
+		},
+		Tags:        []string{"工业智能体/助理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "UpdateChunk"}: {
+		Summary:     "更新chunk",
+		Description: "更新chunk",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.UpdateChunkReq true \"请求参数\"",
+		},
+		Tags:        []string{"工业智能体/分块管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Dataset", HandlerName: "UploadDocument"}: {
+		Summary:     "上传文档",
+		Description: "上传文档",
+		Returns:     "",
+		Params: map[string]string{
+			"datasetId": "path int64 true \"datasetId\"",
+			"file":      "formData file true \"files\"",
+		},
+		Tags:        []string{"工业智能体/文档管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Exception", HandlerName: "List"}: {
+		Summary:     "异常预警列表",
+		Description: "异常预警列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.SysAiPredictionListReq true \"异常预警参数\"",
+		},
+		Tags:        []string{"工业智能体/异常预警"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Exception", HandlerName: "Remove"}: {
+		Summary:     "删除异常预警",
+		Description: "删除异常预警",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"工业智能体/异常预警"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Exception", HandlerName: "Set"}: {
+		Summary:     "设置异常预警",
+		Description: "设置异常预警",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.SysAiPredictionListReq true \"设置异常预警参数\"",
+		},
+		Tags:        []string{"工业智能体/异常预警"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Model", HandlerName: "EmbeddingConfig"}: {
+		Summary:     "embedding模型信息",
+		Description: "读取支持embedding的模型供应商及其下级embedding模型信息",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.SysAiModelProviderListReq true \"embedding模型信息参数\"",
+		},
+		Tags:        []string{"工业智能体/模型配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Model", HandlerName: "GetGlobalModel"}: {
+		Summary:     "读取用户模型",
+		Description: "读取SetGlobalModel保存的用户模型配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.GetSysUserLLMReq true \"用户模型读取参数\"",
+		},
+		Tags:        []string{"工业智能体/模型配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Model", HandlerName: "GetSetting"}: {
+		Summary:     "读取模型配置",
+		Description: "根据id读取模型配置，未传id时读取当前部门最近更新配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.GetSysAiLLMSettingReq true \"模型配置读取参数\"",
+		},
+		Tags:        []string{"工业智能体/模型配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Model", HandlerName: "ProviderList"}: {
+		Summary:     "模型供应商列表",
+		Description: "读取模型供应商及其下级LLM列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.SysAiModelProviderListReq true \"模型供应商列表参数\"",
+		},
+		Tags:        []string{"工业智能体/模型配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Model", HandlerName: "RemoveGlobalModel"}: {
+		Summary:     "删除用户模型",
+		Description: "删除 SetGlobalModel 保存的用户模型配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.GetSysUserLLMReq true \"用户模型删除参数\"",
+		},
+		Tags:        []string{"工业智能体/模型配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Model", HandlerName: "SetGlobalModel"}: {
+		Summary:     "设置用户模型",
+		Description: "新增或修改用户模型配置，user_id为0表示全局设置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.SetSysUserLLM true \"全局模型配置参数\"",
+		},
+		Tags:        []string{"工业智能体/模型配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Model", HandlerName: "SetSetting"}: {
+		Summary:     "设置模型配置",
+		Description: "新增或修改模型配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.SetSysAiLLMSetting true \"模型配置参数\"",
+		},
+		Tags:        []string{"工业智能体/模型配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "OCR", HandlerName: "ExtractOCR"}: {
+		Summary:     "OCR识别",
+		Description: "上传文件并调用OCR服务进行文字提取",
+		Returns:     "",
+		Params: map[string]string{
+			"file":         "formData file true \"上传文件\"",
+			"number_words": "query int false \"最多返回词数\"",
+			"start_page":   "query int false \"起始页码\"",
+		},
+		Tags:        []string{"工业智能体/OCR"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Prediction", HandlerName: "List"}: {
+		Summary:     "智能预警列表",
+		Description: "智能预警列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.SysAiPredictionListReq true \"智能预警列表参数\"",
+		},
+		Tags:        []string{"工业智能体/智能预警"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Prediction", HandlerName: "Remove"}: {
+		Summary:     "删除智能预警",
+		Description: "删除智能预警",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"工业智能体/智能预警"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Prediction", HandlerName: "Set"}: {
+		Summary:     "设置智能预警",
+		Description: "设置智能预警",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.SetSysAiPrediction true \"助理列表参数\"",
+		},
+		Tags:        []string{"工业智能体/智能预警"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Role", HandlerName: "List"}: {
+		Summary:     "查询知识库/文档角色权限列表",
+		Description: "查询知识库/文档角色权限列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.DatasetRolePermissionQuery true \"权限列表查询参数\"",
+		},
+		Tags:        []string{"工业智能体/知识库权限"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Role", HandlerName: "Remove"}: {
+		Summary:     "删除知识库/文档角色权限",
+		Description: "删除知识库/文档角色权限（软删除）",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"权限ID，多个用逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/知识库权限"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/agent/aidatasetcontroller", ReceiverName: "Role", HandlerName: "Set"}: {
+		Summary:     "新增或修改知识库/文档角色权限",
+		Description: "传入id时修改，不传id时新增。documentId 为0表示对整个知识库授权",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.SetDatasetRolePermission true \"权限设置参数\"",
+		},
+		Tags:        []string{"工业智能体/知识库权限"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AIGateway", HandlerName: "Delete"}: {
+		Summary:     "删除网关配置",
+		Description: "根据ID删除AI网关配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"网关ID，多个以逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/网关管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AIGateway", HandlerName: "GetByID"}: {
+		Summary:     "获取网关详情",
+		Description: "根据ID获取AI网关配置详情",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path int true \"网关ID\"",
+		},
+		Tags:        []string{"工业智能体/网关管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AIGateway", HandlerName: "List"}: {
+		Summary:     "获取网关列表",
+		Description: "获取AI网关配置列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query gatewaymodels.AIGatewayQuery true \"网关查询参数\"",
+		},
+		Tags:        []string{"工业智能体/网关管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AIGateway", HandlerName: "Set"}: {
+		Summary:     "保存网关配置",
+		Description: "保存AI网关配置，id为空时新增，不为空时修改",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.AIGatewayUpsert true \"网关保存参数\"",
+		},
+		Tags:        []string{"工业智能体/网关管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Agent", HandlerName: "Delete"}: {
+		Summary:     "删除智能体",
+		Description: "删除智能体",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"智能体ID，多个以逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/智能体管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Agent", HandlerName: "GetByID"}: {
+		Summary:     "获取智能体详情",
+		Description: "根据ID获取智能体详情",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path int true \"智能体ID\"",
+		},
+		Tags:        []string{"工业智能体/智能体管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Agent", HandlerName: "GetEnabledByType"}: {
+		Summary:     "获取指定类型下已启用的智能体详情",
+		Description: "通过type查询enable=true的智能体配置",
+		Returns:     "",
+		Params: map[string]string{
+			"type": "path string true \"智能体类型\"",
+		},
+		Tags:        []string{"工业智能体/智能体管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Agent", HandlerName: "List"}: {
+		Summary:     "获取智能体列表",
+		Description: "获取智能体列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query gatewaymodels.AIAgentQuery true \"智能体查询参数\"",
+		},
+		Tags:        []string{"工业智能体/智能体管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Agent", HandlerName: "Set"}: {
+		Summary:     "保存智能体",
+		Description: "保存智能体，id为空时新增，不为空时修改",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.AIAgentUpsert true \"智能体保存参数\"",
+		},
+		Tags:        []string{"工业智能体/智能体管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentConfigKey", HandlerName: "Delete"}: {
+		Summary:     "删除 API Key",
+		Description: "根据 ID 删除 API Key",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"API Key ID，多个以逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/ApiKey管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentConfigKey", HandlerName: "Generate"}: {
+		Summary:     "生成 API Key",
+		Description: "自动生成一个随机 API Key 并保存",
+		Returns:     "",
+		Tags:        []string{"工业智能体/ApiKey管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentConfigKey", HandlerName: "List"}: {
+		Summary:     "获取 API Key 列表",
+		Description: "获取 API Key 配置列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query gatewaymodels.AgentConfigKeyQuery true \"API Key 查询参数\"",
+		},
+		Tags:        []string{"工业智能体/ApiKey管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentConfigKey", HandlerName: "Set"}: {
+		Summary:     "新增 API Key",
+		Description: "新增 API Key",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.AgentConfigKeyUpsert true \"API Key 保存参数\"",
+		},
+		Tags:        []string{"工业智能体/ApiKey管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentConfigKey", HandlerName: "SetMcpAllowTool"}: {
+		Summary:     "设置允许的 MCP 工具列表",
+		Description: "根据 API Key ID 更新该 Key 允许使用的 MCP 工具列表，用于 MCP 服务探测后限制可暴露的工具",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.AgentConfigKeyToolUpsert true \"API Key MCP 工具保存参数\"",
+		},
+		Tags:        []string{"工业智能体/ApiKey管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentConfigPublishHistory", HandlerName: "Info"}: {
+		Summary:     "获取智能体配置发布历史详情",
+		Description: "根据ID获取智能体配置发布历史详情",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path int true \"发布历史ID\"",
+		},
+		Tags:        []string{"工业智能体/智能体配置发布历史"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentConfigPublishHistory", HandlerName: "List"}: {
+		Summary:     "获取智能体配置发布历史列表",
+		Description: "获取智能体配置发布历史列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query gatewaymodels.AIAgentConfigPublishHistoryQuery true \"智能体配置发布历史查询参数\"",
+		},
+		Tags:        []string{"工业智能体/智能体配置发布历史"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentConfigPublishHistory", HandlerName: "Remove"}: {
+		Summary:     "删除智能体配置发布历史",
+		Description: "根据ID删除智能体配置发布历史",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"发布历史ID，多个以逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/智能体配置发布历史"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentConfigPublishHistory", HandlerName: "Set"}: {
+		Summary:     "保存智能体配置发布历史",
+		Description: "保存智能体配置发布历史，id为空时新增，不为空时修改",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.AIAgentConfigPublishHistoryUpsert true \"智能体配置发布历史保存参数\"",
+		},
+		Tags:        []string{"工业智能体/智能体配置发布历史"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentOrchestration", HandlerName: "Info"}: {
+		Summary:     "获取智能体编排详情",
+		Description: "根据智能体ID获取智能体编排详情",
+		Returns:     "",
+		Params: map[string]string{
+			"agentId": "path int true \"智能体ID\"",
+		},
+		Tags:        []string{"工业智能体/智能体编排"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentOrchestration", HandlerName: "Remove"}: {
+		Summary:     "删除智能体编排配置",
+		Description: "根据智能体ID删除智能体编排配置",
+		Returns:     "",
+		Params: map[string]string{
+			"agentIds": "path string true \"智能体ID，多个以逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/智能体编排"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "AgentOrchestration", HandlerName: "Set"}: {
+		Summary:     "保存智能体编排配置",
+		Description: "根据智能体ID保存编排配置，存在时更新，不存在时新增",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.AIAgentOrchestrationUpsert true \"智能体编排保存参数\"",
+		},
+		Tags:        []string{"工业智能体/智能体编排"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Conversations", HandlerName: "Chat"}: {
+		Summary:     "会话聊天",
+		Description: "会话聊天",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.SendMessageInput true \"发送消息参数\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Conversations", HandlerName: "CreateConversation"}: {
+		Summary:     "创建会话",
+		Description: "创建会话",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.SetAiConversation true \"创建会话参数\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Conversations", HandlerName: "ListConversations"}: {
+		Summary:     "查询会话列表",
+		Description: "查询会话列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query aidatasetmodels.AiConversationQuery true \"会话列表查询参数\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Conversations", HandlerName: "RemoveConversation"}: {
+		Summary:     "删除会话",
+		Description: "删除会话（软删除）",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"会话ID，多个用逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Conversations", HandlerName: "StopGeneration"}: {
+		Summary:     "停止会话生成",
+		Description: "停止上游会话生成任务",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body aidatasetmodels.StopGenerationInput true \"停止生成参数\"",
+		},
+		Tags:        []string{"工业智能体/会话管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "MCPServer", HandlerName: "Delete"}: {
+		Summary:     "删除MCP服务配置",
+		Description: "删除MCP服务配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"MCP服务ID，多个以逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/MCP服务配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "MCPServer", HandlerName: "List"}: {
+		Summary:     "获取MCP服务配置列表",
+		Description: "获取MCP服务配置列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query gatewaymodels.MCPServerQuery true \"MCP服务配置查询参数\"",
+		},
+		Tags:        []string{"工业智能体/MCP服务配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "MCPServer", HandlerName: "McpProbe"}: {
+		Summary:     "探测MCP服务",
+		Description: "连接指定MCP服务，完成初始化、心跳和工具探测，支持 SSE 和 Streamable HTTP",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.MCPServerProbeRequest true \"MCP服务探测参数\"",
+		},
+		Tags:        []string{"工业智能体/MCP服务配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "MCPServer", HandlerName: "Set"}: {
+		Summary:     "保存MCP服务配置",
+		Description: "保存MCP服务配置，id为空时新增，不为空时修改",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.MCPServerUpsert true \"MCP服务配置保存参数\"",
+		},
+		Tags:        []string{"工业智能体/MCP服务配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Message", HandlerName: "List"}: {
+		Summary:     "根据会话ID读取消息列表",
+		Description: "根据会话ID查询该会话下的全部消息记录，按创建时间正序返回",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query gatewaymodels.MessageListReq true \"消息列表查询参数\"",
+		},
+		Tags:        []string{"工业智能体/消息管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Skills", HandlerName: "Delete"}: {
+		Summary:     "删除已安装技能",
+		Description: "根据ID删除已安装技能",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"技能ID，多个以逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/已安装技能"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Skills", HandlerName: "GetByID"}: {
+		Summary:     "获取已安装技能详情",
+		Description: "根据ID获取已安装技能详情",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path int true \"技能ID\"",
+		},
+		Tags:        []string{"工业智能体/已安装技能"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Skills", HandlerName: "List"}: {
+		Summary:     "获取已安装技能列表",
+		Description: "获取已安装技能列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query gatewaymodels.InstalledSkillQuery true \"已安装技能查询参数\"",
+		},
+		Tags:        []string{"工业智能体/已安装技能"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "Skills", HandlerName: "Set"}: {
+		Summary:     "保存已安装技能",
+		Description: "保存已安装技能，id为空时新增，不为空时修改",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.InstalledSkillUpsert true \"已安装技能保存参数\"",
+		},
+		Tags:        []string{"工业智能体/已安装技能"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "SubAgent", HandlerName: "Delete"}: {
+		Summary:     "删除子智能体配置",
+		Description: "根据ID删除子智能体配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"子智能体ID，多个以逗号分隔\"",
+		},
+		Tags:        []string{"工业智能体/子智能体配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "SubAgent", HandlerName: "Info"}: {
+		Summary:     "获取子智能体配置详情",
+		Description: "根据ID获取子智能体配置详情",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path int true \"子智能体ID\"",
+		},
+		Tags:        []string{"工业智能体/子智能体配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "SubAgent", HandlerName: "List"}: {
+		Summary:     "获取子智能体配置列表",
+		Description: "获取子智能体配置列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query gatewaymodels.AISubAgentQuery true \"子智能体配置查询参数\"",
+		},
+		Tags:        []string{"工业智能体/子智能体配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/ai/gateway/gatewaycontroller", ReceiverName: "SubAgent", HandlerName: "Set"}: {
+		Summary:     "保存子智能体配置",
+		Description: "保存子智能体配置，id为空时新增，不为空时修改",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body gatewaymodels.AISubAgentUpsert true \"子智能体配置保存参数\"",
+		},
+		Tags:        []string{"工业智能体/子智能体配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "Alert", HandlerName: "Change"}: {
+		Summary:     "改变告警配置",
+		Description: "改变告警配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body alertmodels.ChangeSysAlert true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警规则管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "Alert", HandlerName: "List"}: {
+		Summary:     "告警规则列表",
+		Description: "告警规则列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query alertmodels.SysAlertListReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警规则管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "Alert", HandlerName: "Remove"}: {
+		Summary:     "删除告警规则",
+		Description: "删除告警规则",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"告警管理/告警规则管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "Alert", HandlerName: "Set"}: {
+		Summary:     "设置告警规则",
+		Description: "设置告警规则",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body alertmodels.SetSysAlert true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警规则管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertAction", HandlerName: "List"}: {
+		Summary:     "告警动作列表",
+		Description: "告警动作列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query alertmodels.SysAlertActionListReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警处理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertAction", HandlerName: "Remove"}: {
+		Summary:     "删除告警发送配置",
+		Description: "删除告警发送配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"告警管理/告警处理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertAction", HandlerName: "Set"}: {
+		Summary:     "设置告警发送配置",
+		Description: "设置告警发送配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body alertmodels.SetAlertAction true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警处理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertAiReason", HandlerName: "List"}: {
+		Summary:     "告警AI推理列表",
+		Description: "告警AI推理列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query alertmodels.SysAlertAiReasonReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警AI推理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertAiReason", HandlerName: "Remove"}: {
+		Summary:     "删除告警AI推理发送配置",
+		Description: "删除告警AI推理发送配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"告警管理/告警AI推理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertAiReason", HandlerName: "Set"}: {
+		Summary:     "设置告警AI推理发送配置",
+		Description: "设置告警AI推理发送配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body alertmodels.SetAlertAiReason true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警AI推理管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertLog", HandlerName: "Export"}: {
+		Summary:     "导入告警数据",
+		Description: "导入告警数据",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body alertmodels.AlertLogData true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警数据管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertLog", HandlerName: "Info"}: {
+		Summary:     "告警数据详情",
+		Description: "告警数据详情",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query uint64 true \"objectId\"",
+		},
+		Tags:        []string{"告警管理/告警数据管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertLog", HandlerName: "List"}: {
+		Summary:     "告警数据列表",
+		Description: "告警数据列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body alertmodels.SysAlertLogListReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警数据管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertTemplate", HandlerName: "List"}: {
+		Summary:     "告警模板列表",
+		Description: "告警模板列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query alertmodels.SysAlertSinkTemplateReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警模板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertTemplate", HandlerName: "Remove"}: {
+		Summary:     "删除告警发送配置",
+		Description: "删除告警发送配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"告警管理/告警模板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/alert/alertcontroller", ReceiverName: "AlertTemplate", HandlerName: "Set"}: {
+		Summary:     "设置告警发送配置",
+		Description: "设置告警发送配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body alertmodels.SetSysAlertSinkTemplate true \"助理列表参数\"",
+		},
+		Tags:        []string{"告警管理/告警模板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/building/buildingcontroller", ReceiverName: "Building", HandlerName: "BuildDetailList"}: {
+		Summary:     "读取建筑物以及楼层详情列表",
+		Description: "读取建筑物以及楼层详情列表",
+		Returns:     "",
+		Tags:        []string{"资产管理/建筑物管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/building/buildingcontroller", ReceiverName: "Building", HandlerName: "List"}: {
+		Summary:     "读取建筑物列表",
+		Description: "读取建筑物列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query buildingmodels.SetSysBuildingListReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"资产管理/建筑物管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/building/buildingcontroller", ReceiverName: "Building", HandlerName: "Remove"}: {
+		Summary:     "删除建筑物",
+		Description: "删除建筑物",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"资产管理/建筑物管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/building/buildingcontroller", ReceiverName: "Building", HandlerName: "Set"}: {
+		Summary:     "保存建筑物",
+		Description: "保存建筑物",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body buildingmodels.SetSysBuilding true \"建筑物参数\"",
+		},
+		Tags:        []string{"资产管理/建筑物管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/building/buildingcontroller", ReceiverName: "Floor", HandlerName: "InfoLayout"}: {
+		Summary:     "读取楼层布局",
+		Description: "读取楼层布局",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query buildingmodels.SetSysFloorListReq true \"楼层列表参数\"",
+		},
+		Tags:        []string{"资产管理/楼层管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/building/buildingcontroller", ReceiverName: "Floor", HandlerName: "List"}: {
+		Summary:     "读取楼层列表",
+		Description: "读取楼层列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query buildingmodels.SetSysFloorListReq true \"楼层列表参数\"",
+		},
+		Tags:        []string{"资产管理/楼层管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/building/buildingcontroller", ReceiverName: "Floor", HandlerName: "Remove"}: {
+		Summary:     "删除楼层",
+		Description: "删除楼层",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"资产管理/楼层管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/building/buildingcontroller", ReceiverName: "Floor", HandlerName: "SaveLayout"}: {
+		Summary:     "保存楼层布局",
+		Description: "保存楼层布局",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query buildingmodels.SetSysFloorListReq true \"楼层列表参数\"",
+		},
+		Tags:        []string{"资产管理/楼层管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/building/buildingcontroller", ReceiverName: "Floor", HandlerName: "Set"}: {
+		Summary:     "保存楼层",
+		Description: "保存楼层",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body buildingmodels.SetSysFloor true \"楼层参数\"",
+		},
+		Tags:        []string{"资产管理/楼层管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/camera/cameracontroller", ReceiverName: "Camera", HandlerName: "List"}: {
+		Summary:     "读取摄像头列表",
+		Description: "读取摄像头列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query cameramodels.IotCameraListReq true \"摄像头列表参数\"",
+		},
+		Tags:        []string{"资产管理/摄像头管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceCheckMachinery", HandlerName: "List"}: {
+		Summary:     "设备清单列表",
+		Description: "设备清单列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.SysDeviceCheckMachineryReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"设备管理/点检保养计划/设备清单"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceCheckMachinery", HandlerName: "Remove"}: {
+		Summary:     "删除设备清单",
+		Description: "删除设备清单",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"设备管理/点检保养计划/设备清单"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceCheckMachinery", HandlerName: "Set"}: {
+		Summary:     "设置设备清单",
+		Description: "设置设备清单",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemodels.SysDeviceCheckPlanVO true \"助理列表参数\"",
+		},
+		Tags:        []string{"设备管理/点检保养计划/设备清单"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceCheckPlan", HandlerName: "List"}: {
+		Summary:     "点检保养计划列表",
+		Description: "点检保养计划列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.SysDeviceCheckPlanReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"设备管理/点检保养计划"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceCheckPlan", HandlerName: "Remove"}: {
+		Summary:     "删除点检保养计划",
+		Description: "删除点检保养计划",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"设备管理/点检保养计划"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceCheckPlan", HandlerName: "Set"}: {
+		Summary:     "设置点检保养计划",
+		Description: "设置点检保养计划",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemodels.SysDeviceCheckPlanVO true \"助理列表参数\"",
+		},
+		Tags:        []string{"设备管理/点检保养计划"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceCheckSubject", HandlerName: "List"}: {
+		Summary:     "点检项目列表",
+		Description: "点检项目列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.SysDeviceCheckSubjectReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"设备管理/点检保养计划/点检项目"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceCheckSubject", HandlerName: "Remove"}: {
+		Summary:     "删除点检项目",
+		Description: "删除点检项目",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"设备管理/点检保养计划/点检项目"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceCheckSubject", HandlerName: "Set"}: {
+		Summary:     "设置点检项目",
+		Description: "设置点检项目",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemodels.SysDeviceCheckSubjectVO true \"助理列表参数\"",
+		},
+		Tags:        []string{"设备管理/点检保养计划/点检项目"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceGroup", HandlerName: "DeviceGroupRemove"}: {
+		Summary:     "删除设备组",
+		Description: "删除设备组",
+		Returns:     "",
+		Params: map[string]string{
+			"groupIds": "path string true \"groupIds\"",
+		},
+		Tags:        []string{"资产管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceGroup", HandlerName: "GetDeviceGroupList"}: {
+		Summary:     "获取设备分组列表",
+		Description: "获取设备分组列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.DeviceGroupDQL true \"设备分组列表请求参数\"",
+		},
+		Tags:        []string{"资产管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceGroup", HandlerName: "SetDeviceGroup"}: {
+		Summary:     "设置设备分组信息",
+		Description: "设置设备分组信息",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemodels.DeviceGroup true \"设备分组参数\"",
+		},
+		Tags:        []string{"资产管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceInfo", HandlerName: "DeviceRemove"}: {
+		Summary:     "删除设备",
+		Description: "删除设备",
+		Returns:     "",
+		Params: map[string]string{
+			"deviceIds": "path string true \"deviceIds\"",
+		},
+		Tags:        []string{"资产管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceInfo", HandlerName: "GetDeviceList"}: {
+		Summary:     "获取设备列表",
+		Description: "获取设备列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.DeviceListReq true \"设备列表请求参数\"",
+		},
+		Tags:        []string{"资产管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceInfo", HandlerName: "GetDeviceMetricByTag"}: {
+		Summary:     "获取设备数据通过标签",
+		Description: "获取设备数据通过标签",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.DeviceListReq true \"设备列表请求参数\"",
+		},
+		Tags:        []string{"资产管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceInfo", HandlerName: "SetDevice"}: {
+		Summary:     "设置设备信息",
+		Description: "设置设备信息",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemodels.DeviceInfo true \"设备参数\"",
+		},
+		Tags:        []string{"资产管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceSubject", HandlerName: "List"}: {
+		Summary:     "点检保养项目列表",
+		Description: "点检保养项目列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.SysDeviceSubjectReq true \"助理列表参数\"",
+		},
+		Tags:        []string{"设备管理/点检保养项目列表"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceSubject", HandlerName: "Remove"}: {
+		Summary:     "删除点检保养项目",
+		Description: "删除点检保养项目",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"设备管理/删除点检保养项目"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "DeviceSubject", HandlerName: "Set"}: {
+		Summary:     "设置点检保养项目",
+		Description: "设置点检保养项目",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemodels.SysDeviceSubjectVO true \"助理列表参数\"",
+		},
+		Tags:        []string{"设备管理/设置点检保养项目"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "Template", HandlerName: "List"}: {
+		Summary:     "获取模板列表",
+		Description: "获取模板列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.SysDeviceTemplateDQL true \"获取模板列表请求参数\"",
+		},
+		Tags:        []string{"资产管理/设备模板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "Template", HandlerName: "Protocols"}: {
+		Summary:     "读取协议列表",
+		Description: "读取协议列表",
+		Returns:     "",
+		Tags:        []string{"资产管理/设备协议管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "Template", HandlerName: "Remove"}: {
+		Summary:     "删除设备模板",
+		Description: "删除设备模板",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"资产管理/设备模板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "Template", HandlerName: "Set"}: {
+		Summary:     "设置设备模板信息",
+		Description: "设置设备模板信息",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemodels.SysDeviceTemplateSetReq true \"设备模板参数\"",
+		},
+		Tags:        []string{"资产管理/设备模板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "TemplateData", HandlerName: "List"}: {
+		Summary:     "获取模板数据列表",
+		Description: "获取模板数据列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.SysModbusDeviceConfigDataListReq true \"获取模板数据列表请求参数\"",
+		},
+		Tags:        []string{"资产管理/设备模板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "TemplateData", HandlerName: "Remove"}: {
+		Summary:     "删除设备数据模板",
+		Description: "删除设备数据模板",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"资产管理/设备模板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/device/devicecontroller", ReceiverName: "TemplateData", HandlerName: "Set"}: {
+		Summary:     "设置设备模板板数信息",
+		Description: "设置设备模板板数信息",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemodels.SetSysModbusDeviceConfigDataReq true \"设置设备模板板数信息参数\"",
+		},
+		Tags:        []string{"资产管理/设备模板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/material/materialcontroller", ReceiverName: "MaterialInfo", HandlerName: "AddMaterialInBound"}: {
+		Summary:     "登记物料入库",
+		Description: "登记物料入库",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body materialmodels.InboundInfo true \"登记物料入库参数\"",
+		},
+		Tags:        []string{"物料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/material/materialcontroller", ReceiverName: "MaterialInfo", HandlerName: "AddMaterialOutBound"}: {
+		Summary:     "登记物料出库",
+		Description: "登记物料出库",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body materialmodels.OutboundInfo true \"登记物料出库参数\"",
+		},
+		Tags:        []string{"物料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/material/materialcontroller", ReceiverName: "MaterialInfo", HandlerName: "GetMaterialInBoundList"}: {
+		Summary:     "物料入库列表",
+		Description: "物料入库列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query materialmodels.InboundListReq true \"物料入库管理查询条件\"",
+		},
+		Tags:        []string{"物料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/material/materialcontroller", ReceiverName: "MaterialInfo", HandlerName: "GetMaterialInfoList"}: {
+		Summary:     "物料管理列表",
+		Description: "物料管理列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query materialmodels.MaterialListReq true \"物料管理列表请求参数\"",
+		},
+		Tags:        []string{"物料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/material/materialcontroller", ReceiverName: "MaterialInfo", HandlerName: "GetMaterialOutBoundList"}: {
+		Summary:     "物料出库列表",
+		Description: "物料出库列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query materialmodels.OutboundListReq true \"物料出库列表查询条件\"",
+		},
+		Tags:        []string{"物料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/material/materialcontroller", ReceiverName: "MaterialInfo", HandlerName: "RemoveMaterialInfo"}: {
+		Summary:     "删除物料",
+		Description: "删除物料",
+		Returns:     "",
+		Params: map[string]string{
+			"materialIds": "path string true \"materialIds\"",
+		},
+		Tags:        []string{"物料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/material/materialcontroller", ReceiverName: "MaterialInfo", HandlerName: "SetMaterialInfo"}: {
+		Summary:     "登记物料",
+		Description: "登记物料",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body materialmodels.MaterialInfo true \"物料参数\"",
+		},
+		Tags:        []string{"物料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/resource/resourcecontroller", ReceiverName: "ResourceFile", HandlerName: "List"}: {
+		Summary:     "资料管理列表",
+		Description: "资料管理列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query resourcemodels.SysResourceFileDQL true \"资料管理列表请求参数\"",
+		},
+		Tags:        []string{"资料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/resource/resourcecontroller", ReceiverName: "ResourceFile", HandlerName: "Remove"}: {
+		Summary:     "删除资料",
+		Description: "删除资料",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"资料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/resource/resourcecontroller", ReceiverName: "ResourceFile", HandlerName: "ResourceList"}: {
+		Summary:     "资料管理列表",
+		Description: "资料管理列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query resourcemodels.SysResourceFileDQL true \"资料管理列表请求参数\"",
+		},
+		Tags:        []string{"资料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/asset/resource/resourcecontroller", ReceiverName: "ResourceFile", HandlerName: "Set"}: {
+		Summary:     "登记资料",
+		Description: "登记资料",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body resourcemodels.SysResourceFileDML true \"资料参数\"",
+		},
+		Tags:        []string{"资料管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/configuration/configurationcontroller", ReceiverName: "Configuration", HandlerName: "List"}: {
+		Summary:     "组态列表",
+		Description: "组态列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query configurationmodels.SysConfigurationReq true \"组态列表参数\"",
+		},
+		Tags:        []string{"组态/组态管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/configuration/configurationcontroller", ReceiverName: "Configuration", HandlerName: "Remove"}: {
+		Summary:     "删除组态",
+		Description: "删除组态",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"组态/组态管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/configuration/configurationcontroller", ReceiverName: "Configuration", HandlerName: "Set"}: {
+		Summary:     "保存组态",
+		Description: "保存组态",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body configurationmodels.SetSysConfiguration true \"设置组态参数\"",
+		},
+		Tags:        []string{"组态/组态管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Craft", HandlerName: "Detail"}: {
+		Summary:     "工艺详情",
+		Description: "工艺详情",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query craftroutemodels.SysCraftRouteDetailRequest true \"设备分组参数\"",
+		},
+		Tags:        []string{"工艺管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Craft", HandlerName: "GetRouteList"}: {
+		Summary:     "读取工艺列表",
+		Description: "读取工艺列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query craftroutemodels.SysCraftRouteListReq true \"设备分组列表请求参数\"",
+		},
+		Tags:        []string{"工艺管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Craft", HandlerName: "RemoveRoute"}: {
+		Summary:     "移除工艺",
+		Description: "移除工艺",
+		Returns:     "",
+		Params: map[string]string{
+			"craft_route_id": "path int64 true \"craft_route_id\"",
+		},
+		Tags:        []string{"工艺管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Craft", HandlerName: "Save"}: {
+		Summary:     "保存工艺制图",
+		Description: "保存工艺制图",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body craftroutemodels.ProcessTopo true \"设备分组参数\"",
+		},
+		Tags:        []string{"工艺管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Craft", HandlerName: "SetRoute"}: {
+		Summary:     "设置工艺路线",
+		Description: "设置工艺路线",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body craftroutemodels.SysCraftRouteRequest true \"设备分组参数\"",
+		},
+		Tags:        []string{"工艺管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Process", HandlerName: "GetProcessList"}: {
+		Summary:     "工序列表",
+		Description: "工序列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query craftroutemodels.SysProProcessListReq true \"设备分组参数\"",
+		},
+		Tags:        []string{"工艺管理/工序管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Process", HandlerName: "RemoveProcess"}: {
+		Summary:     "删除工序",
+		Description: "删除工序",
+		Returns:     "",
+		Params: map[string]string{
+			"process_ids": "path string true \"process_ids\"",
+		},
+		Tags:        []string{"工艺管理/工序管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Process", HandlerName: "SetProcess"}: {
+		Summary:     "设置工序",
+		Description: "设置工序",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body craftroutemodels.SysProProcess true \"设备分组参数\"",
+		},
+		Tags:        []string{"工艺管理/工序管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "ProcessContext", HandlerName: "GetProcessContextList"}: {
+		Summary:     "工序内容列表",
+		Description: "工序内容列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query craftroutemodels.SysProProcessContextListReq true \"设备分组参数\"",
+		},
+		Tags:        []string{"工艺管理/工序内容管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "ProcessContext", HandlerName: "RemoveProcessContextList"}: {
+		Summary:     "移除工序内容",
+		Description: "移除工序内容",
+		Returns:     "",
+		Params: map[string]string{
+			"context_ids": "path string true \"context_ids\"",
+		},
+		Tags:        []string{"工艺管理/工序内容管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "ProcessContext", HandlerName: "SetProcessContextList"}: {
+		Summary:     "设置工序内容",
+		Description: "设置工序内容",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body craftroutemodels.SysProSetProcessContent true \"设备分组参数\"",
+		},
+		Tags:        []string{"工艺管理/工序内容管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "RouteProcess", HandlerName: "GetRouteProcessList"}: {
+		Summary:     "组成工序列表",
+		Description: "组成工序列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body craftroutemodels.SysProRouteProcessListReq true \"组成工序列表参数\"",
+		},
+		Tags:        []string{"工艺管理/工序组成管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "RouteProcess", HandlerName: "RemoveRouteProcess"}: {
+		Summary:     "删除组成工序",
+		Description: "删除组成工序",
+		Returns:     "",
+		Params: map[string]string{
+			"route_process_ids": "path string true \"route_process_ids\"",
+		},
+		Tags:        []string{"工艺管理/工序组成管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "RouteProcess", HandlerName: "SetRouteProcess"}: {
+		Summary:     "设置组成工序",
+		Description: "设置组成工序",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body craftroutemodels.SysProRouteProcessSetRequest true \"设置组成工序参数\"",
+		},
+		Tags:        []string{"工艺管理/工序组成管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Schedule", HandlerName: "Detail"}: {
+		Summary:     "调度详情",
+		Description: "调度详情",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query craftroutemodels.DetailSysProductSchedule true \"组成工序列表参数\"",
+		},
+		Tags:        []string{"工艺管理/调度管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Schedule", HandlerName: "List"}: {
+		Summary:     "调度列表",
+		Description: "调度列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query craftroutemodels.SysProductScheduleListReq true \"组成工序列表参数\"",
+		},
+		Tags:        []string{"工艺管理/调度管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Schedule", HandlerName: "MonthList"}: {
+		Summary:     "月调度列表",
+		Description: "月调度列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query craftroutemodels.SysProductScheduleReq true \"组成工序列表参数\"",
+		},
+		Tags:        []string{"工艺管理/调度管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Schedule", HandlerName: "Remove"}: {
+		Summary:     "删除调度日程",
+		Description: "删除调度日程",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"工艺管理/调度管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Schedule", HandlerName: "Schedule"}: {
+		Summary:     "读取调度任务",
+		Description: "读取调度任务",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body craftroutemodels.ScheduleReq true \"读取调度任务参数\"",
+		},
+		Tags:        []string{"工艺管理/生产任务管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/craft/craftroutecontroller", ReceiverName: "Schedule", HandlerName: "Set"}: {
+		Summary:     "设置调度日程",
+		Description: "设置调度日程",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body craftroutemodels.SetSysProductSchedule true \"设置调度日程参数\"",
+		},
+		Tags:        []string{"工艺管理/调度管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "Config", HandlerName: "Bind"}: {
+		Summary:     "绑定Agent配置",
+		Description: "绑定Agent配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body daemonizemodels.BindGatewayConfigReq true \"参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "Config", HandlerName: "Generate"}: {
+		Summary:     "生成Agent配置",
+		Description: "生成Agent配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query daemonizemodels.GenerateGatewayConfigReq true \"参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "Config", HandlerName: "Info"}: {
+		Summary:     "读取Agent配置",
+		Description: "读取Agent配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query daemonizemodels.GetGatewayConfigReq true \"参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "Config", HandlerName: "List"}: {
+		Summary:     "Agent配置列表",
+		Description: "Agent配置列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query daemonizemodels.SysIotAgentConfigListReq true \"参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "Config", HandlerName: "Remove"}: {
+		Summary:     "移除配置",
+		Description: "移除配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "Config", HandlerName: "Set"}: {
+		Summary:     "设置Agent配置",
+		Description: "设置Agent配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body daemonizemodels.SysIotAgentConfigSetReq true \"参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "IotAgent", HandlerName: "Info"}: {
+		Summary:     "agent详情",
+		Description: "agent详情",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query daemonizemodels.SysIotAgentQueryReq true \"设备分组参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "IotAgent", HandlerName: "List"}: {
+		Summary:     "Agent列表",
+		Description: "Agent列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query daemonizemodels.SysIotAgentListReq true \"设备分组参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "IotAgent", HandlerName: "Remove"}: {
+		Summary:     "移除Agent",
+		Description: "移除Agent",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "IotAgent", HandlerName: "Set"}: {
+		Summary:     "设置Agent",
+		Description: "设置Agent",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body daemonizemodels.SysIotAgentSetReq true \"设备分组参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "IotAgent", HandlerName: "Start"}: {
+		Summary:     "启动Agent进程",
+		Description: "启动Agent进程",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body daemonizemodels.StartProcessReq true \"设备分组参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/daemonize/daemonizecontroller", ReceiverName: "IotAgent", HandlerName: "Stop"}: {
+		Summary:     "停止Agent进程",
+		Description: "停止Agent进程",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body daemonizemodels.StartProcessReq true \"设备分组参数\"",
+		},
+		Tags:        []string{"网关管理/Agent管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/dashboard/dashboardcontroller", ReceiverName: "Dashboard", HandlerName: "List"}: {
+		Summary:     "仪表盘列表",
+		Description: "仪表盘列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query dashboardmodels.SysDashboardReq true \"组成工序列表参数\"",
+		},
+		Tags:        []string{"仪表盘/仪表盘管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/dashboard/dashboardcontroller", ReceiverName: "Dashboard", HandlerName: "Query"}: {
+		Summary:     "查询面板",
+		Description: "查询面板",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body metricmodels.MetricDataQueryReq true \"组成工序列表参数\"",
+		},
+		Tags:        []string{"仪表盘/仪表盘管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/dashboard/dashboardcontroller", ReceiverName: "Dashboard", HandlerName: "Remove"}: {
+		Summary:     "删除仪表盘",
+		Description: "删除仪表盘",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"仪表盘/仪表盘管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/dashboard/dashboardcontroller", ReceiverName: "Dashboard", HandlerName: "Set"}: {
+		Summary:     "保存仪表盘",
+		Description: "保存仪表盘",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body dashboardmodels.SetSysDashboard true \"设置仪表盘参数\"",
+		},
+		Tags:        []string{"仪表盘/仪表盘管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/dashboard/dashboardcontroller", ReceiverName: "Data", HandlerName: "Info"}: {
+		Summary:     "读取面板",
+		Description: "读取面板",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query dashboardmodels.GetSysDashboardData true \"设置仪表盘参数\"",
+		},
+		Tags:        []string{"仪表盘/面板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/dashboard/dashboardcontroller", ReceiverName: "Data", HandlerName: "Remove"}: {
+		Summary:     "删除面板",
+		Description: "删除面板",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"仪表盘/面板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/dashboard/dashboardcontroller", ReceiverName: "Data", HandlerName: "Set"}: {
+		Summary:     "保存面板",
+		Description: "保存面板",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body dashboardmodels.SetSysDashboardData true \"设置仪表盘参数\"",
+		},
+		Tags:        []string{"仪表盘/面板管理"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "ControlLog", HandlerName: "List"}: {
+		Summary:     "控制记录列表",
+		Description: "控制记录列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemonitormodel.ControlLogListReq true \"控制记录列表\"",
+		},
+		Tags:        []string{"设备接入/控制记录"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "CameraOffer"}: {
+		Summary:     "摄像头 WebRTC SDP 协商",
+		Description: "提交前端 Offer，返回播放地址与 Answer",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemonitormodel.CameraOfferReq true \"摄像头协商参数\"",
+		},
+		Tags:        []string{"设备监控/摄像头"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "Control"}: {
+		Summary:     "设备控制",
+		Description: "设备控制",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemonitormodel.ControlReq true \"控制参数\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "ControlStatus"}: {
+		Summary:     "查询控制下发状态",
+		Description: "查询控制下发状态",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemonitormodel.ControlStatusReq true \"查询参数\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "DeviceByBuilding"}: {
+		Summary:     "通过建筑物读取设备",
+		Description: "通过建筑物读取设备",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body metricmodels.GatewayMetricDataQueryReq true \"指标预测查询参数\"",
+		},
+		Tags:        []string{"设备监控/通过建筑物读取设备"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "DeviceLayout"}: {
+		Summary:     "设备布局",
+		Description: "设备布局",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body metricmodels.GatewayMetricDataQueryReq true \"指标预测查询参数\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "Info"}: {
+		Summary:     "设备监控详情",
+		Description: "根据设备id读取设备实时信息",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "path string true \"设备id\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "InfoList"}: {
+		Summary:     "批量设备监控详情",
+		Description: "根据设备id列表批量读取设备实时信息",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemonitormodel.DeviceIdsReq true \"查询参数\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "List"}: {
+		Summary:     "设备监控",
+		Description: "设备监控",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.DeviceListReq true \"设备监控\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "Metric"}: {
+		Summary:     "设备指标",
+		Description: "设备指标",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body metricmodels.MetricQueryReq true \"设备监控\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "MetricPredict"}: {
+		Summary:     "导入告警数据",
+		Description: "导入告警数据",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body alertmodels.AlertLogData true \"助理列表参数\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "MetricPredictQuery"}: {
+		Summary:     "指标预测查询",
+		Description: "指标预测查询",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body metricmodels.GatewayMetricDataQueryReq true \"指标预测查询参数\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceMonitor", HandlerName: "Predict"}: {
+		Summary:     "预测指标",
+		Description: "预测指标",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body metricmodels.MetricQueryReq true \"设备监控\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceReport", HandlerName: "DevList"}: {
+		Summary:     "设备测点列表",
+		Description: "设备测点列表",
+		Returns:     "",
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceReport", HandlerName: "Export"}: {
+		Summary:     "导出实时数据",
+		Description: "导出实时数据",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemonitormodel.DevDataReq true \"实时数据表请求参数\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceReport", HandlerName: "List"}: {
+		Summary:     "实时数据",
+		Description: "实时数据",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemonitormodel.DevDataReq true \"实时数据表请求参数\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceReport", HandlerName: "RemoveDevMap"}: {
+		Summary:     "删除测点映射",
+		Description: "删除测点映射",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemonitormodel.RemoveDevMapInfo true \"时序数据测点\"",
+		},
+		Tags:        []string{"设备监控/删除测点映射"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceReport", HandlerName: "SearchTimeSeqList"}: {
+		Summary:     "时序数据测点",
+		Description: "时序数据测点",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query devicemodels.DeviceListReq true \"时序数据测点\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceReport", HandlerName: "SetDevMap"}: {
+		Summary:     "设置测点映射",
+		Description: "设置测点映射",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body devicemonitormodel.SetDevMapInfo true \"时序数据测点\"",
+		},
+		Tags:        []string{"设备监控/设置测点映射"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceUtilization", HandlerName: "Info"}: {
+		Summary:     "设备稼动率详情",
+		Description: "设备稼动率详情",
+		Returns:     "",
+		Params: map[string]string{
+			"DeviceId": "query int true \"设备id\"",
+			"End":      "query int false \"结束时间\"",
+			"Start":    "query int false \"开始时间\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceUtilization", HandlerName: "Search"}: {
+		Summary:     "能源大屏",
+		Description: "能源大屏",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body metricmodels.MetricQueryReq true \"能源大屏\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceUtilization", HandlerName: "SearchV2"}: {
+		Summary:     "能源大屏V2",
+		Description: "能源大屏V2",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body metricmodels.MetricQueryReq true \"能源大屏\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/devicemonitor/devicemonitorcontroller", ReceiverName: "DeviceUtilization", HandlerName: "Stat"}: {
+		Summary:     "稼动率统计",
+		Description: "稼动率统计",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body metricmodels.MetricQueryReq true \"稼动率统计\"",
+		},
+		Tags:        []string{"设备监控/设备监控"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/home/controller", ReceiverName: "Home", HandlerName: "GetHomeStats"}: {
+		Summary:     "首页统计",
+		Description: "首页统计",
+		Returns:     "",
+		Tags:        []string{"首页"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/system/controller", ReceiverName: "Electric", HandlerName: "List"}: {
+		Summary:     "设备电流配置列表",
+		Description: "设备电流配置列表",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "query models.SysDeviceElectricSettingDQL true \"助理列表参数\"",
+		},
+		Tags:        []string{"系统管理/设备配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/system/controller", ReceiverName: "Electric", HandlerName: "Remove"}: {
+		Summary:     "删除设备电流配置",
+		Description: "删除设备电流配置",
+		Returns:     "",
+		Params: map[string]string{
+			"ids": "path string true \"ids\"",
+		},
+		Tags:        []string{"系统管理/设备配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/business/iot/system/controller", ReceiverName: "Electric", HandlerName: "Set"}: {
+		Summary:     "设置设备电流配置",
+		Description: "设置设备电流配置",
+		Returns:     "",
+		Params: map[string]string{
+			"object": "body models.SysDeviceElectricSettingVO true \"设备电流配置参数\"",
+		},
+		Tags:        []string{"系统管理/设备配置"},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/utils/gin_mcp/pkg/convert", ReceiverName: "", HandlerName: "customOpHandler"}: {
+		Summary:     "Custom operation handler",
+		Description: "",
+		Returns:     "",
+		OperationID: "myCustomOp",
+	},
+	{PackagePath: "nova-factory-server/app/utils/gin_mcp/pkg/convert", ReceiverName: "", HandlerName: "defaultOpHandler"}: {
+		Summary:     "Default operation handler",
+		Description: "",
+		Returns:     "",
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/utils/gin_mcp/pkg/convert", ReceiverName: "", HandlerName: "duplicateOpHandler1"}: {
+		Summary:     "First handler with duplicate ID",
+		Description: "",
+		Returns:     "",
+		OperationID: "duplicateOp",
+	},
+	{PackagePath: "nova-factory-server/app/utils/gin_mcp/pkg/convert", ReceiverName: "", HandlerName: "duplicateOpHandler2"}: {
+		Summary:     "Second handler with duplicate ID",
+		Description: "",
+		Returns:     "",
+		OperationID: "duplicateOp",
+	},
+	{PackagePath: "nova-factory-server/app/utils/gin_mcp/pkg/convert", ReceiverName: "", HandlerName: "handler"}: {
+		Summary:     "测试处理器",
+		Description: "这是一个用于测试的处理器",
+		Returns:     "",
+		Params: map[string]string{
+			"id": "用户ID",
+		},
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/utils/gin_mcp/pkg/convert", ReceiverName: "PackagesDefinitions", HandlerName: "ParseTypes"}: {
+		Summary:     "",
+		Description: "",
+		Returns:     "parsed definitions.",
+		OperationID: "",
+	},
+	{PackagePath: "nova-factory-server/app/utils/gin_mcp/pkg/convert", ReceiverName: "PackagesDefinitions", HandlerName: "findPackagePathFromImports"}: {
+		Summary:     "",
+		Description: "",
+		Returns:     "the package paths of a package of @pkg.",
+		OperationID: "",
 	},
 }
