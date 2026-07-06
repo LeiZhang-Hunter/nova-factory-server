@@ -9,14 +9,27 @@ import (
 	"gorm.io/gorm"
 )
 
+var clickhouseOnce sync.Once
+var clickhouseInstance *ClickHouse
+
 type ClickHouse struct {
 	db  *gorm.DB
 	mtx sync.Mutex
 }
 
-func NewClickHouse() (*ClickHouse, error) {
+func newClickHouse() *ClickHouse {
 
-	return &ClickHouse{db: nil}, nil
+	return &ClickHouse{db: nil}
+}
+
+func GetClickHouse() *ClickHouse {
+	if clickhouseInstance != nil {
+		return clickhouseInstance
+	}
+	clickhouseOnce.Do(func() {
+		clickhouseInstance = newClickHouse()
+	})
+	return clickhouseInstance
 }
 
 func (c *ClickHouse) DB() *gorm.DB {

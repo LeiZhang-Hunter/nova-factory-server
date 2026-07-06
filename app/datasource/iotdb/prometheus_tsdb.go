@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -16,6 +17,9 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
+
+var tsDbOnce sync.Once
+var tsDbInstance *TsdbStorage
 
 // TSDBStorage 定义时序数据库存储，提供写入和查询能力。
 type TSDBStorage interface {
@@ -112,9 +116,16 @@ type TsdbStorage struct {
 	db *tsdb.DB
 }
 
-// NewTSDBStorage 打开一个本地 Prometheus TSDB 实例。
+func GetTSDBStorage() *TsdbStorage {
+	tsDbOnce.Do(func() {
+		tsDbInstance = newTSDBStorage()
+	})
+	return tsDbInstance
+}
+
+// newTSDBStorage 打开一个本地 Prometheus TSDB 实例。
 // 打开失败时直接触发 panic，以保持和项目内其他数据源构造函数一致。
-func NewTSDBStorage() *TsdbStorage {
+func newTSDBStorage() *TsdbStorage {
 	conf := loadTSDBConfig()
 	tsdbOpt := tsdb.DefaultOptions()
 	tsdbOpt.RetentionDuration = int64(conf.TSDBRetentionDuration / time.Millisecond)

@@ -13,7 +13,6 @@ import (
 	"nova-factory-server/app/business/iot/metric/device/metricmodels"
 	"nova-factory-server/app/constant/device"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
-	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/utils/math"
 	timeUtil "nova-factory-server/app/utils/time"
 	"sort"
@@ -25,7 +24,6 @@ import (
 )
 
 type DeviceUtilizationDaoImpl struct {
-	iotDb          *iotdb.IotDb
 	deviceDao      devicedao.IDeviceDao
 	deviceBuildDao buildingdao.BuildingDao
 	shiftDao       systemDao2.ISysShiftDao
@@ -33,13 +31,12 @@ type DeviceUtilizationDaoImpl struct {
 	dictDataDao    systemDao2.IDictDataDao
 }
 
-func NewDeviceUtilizationDaoImpl(iotDb *iotdb.IotDb, shiftDao systemDao2.ISysShiftDao,
+func NewDeviceUtilizationDaoImpl(shiftDao systemDao2.ISysShiftDao,
 	deviceDao devicedao.IDeviceDao,
 	deviceBuildDao buildingdao.BuildingDao,
 	metricDao metricdao.IMetricDao,
 	dictDataDao systemDao2.IDictDataDao) devicemonitordao.DeviceUtilizationDao {
 	return &DeviceUtilizationDaoImpl{
-		iotDb:          iotDb,
 		shiftDao:       shiftDao,
 		deviceDao:      deviceDao,
 		deviceBuildDao: deviceBuildDao,

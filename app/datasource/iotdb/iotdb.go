@@ -12,6 +12,9 @@ import (
 	"go.uber.org/zap"
 )
 
+var iotDbOnce sync.Once
+var iotDbInstance *IotDb
+
 type IotDb struct {
 	pool *client.SessionPool
 	mtx  sync.Mutex
@@ -70,8 +73,18 @@ func (m metricSample) value() float64 {
 	return m.val
 }
 
-func NewIotDb() *IotDb {
+func newIotDb() *IotDb {
 	return &IotDb{}
+}
+
+func GetIotDb() *IotDb {
+	if iotDbInstance != nil {
+		return iotDbInstance
+	}
+	iotDbOnce.Do(func() {
+		iotDbInstance = newIotDb()
+	})
+	return iotDbInstance
 }
 
 // connect 连接数据库

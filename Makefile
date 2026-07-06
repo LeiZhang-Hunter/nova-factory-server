@@ -30,6 +30,10 @@ wire-addons: addons
 swag:
 	cd app/ && swag  init
 
+# Generate MCP handler doc map from source comments
+gen-mcp-doc:
+	go run ./tools/handler-doc-gen
+
 # Parsing protobuf files and generating go files.
 pb:
 	protoc --go_out=. --go-grpc_out=. ./manifest/protobuf/metric/server.proto

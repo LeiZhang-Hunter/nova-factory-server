@@ -20,7 +20,6 @@ import (
 	"nova-factory-server/app/business/iot/metric/device/metriccontroller"
 	iotSystemControllerImpl "nova-factory-server/app/business/iot/system/controller"
 	"nova-factory-server/app/datasource/cache"
-	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/routes"
 )
@@ -30,7 +29,6 @@ var GinProviderSet = wire.NewSet(NewGinEngine)
 func NewGinEngine(
 	app *routes.App,
 	cache cache.Cache,
-	iotdb *iotdb.IotDb,
 	materialC *materialcontroller.Material,
 	craft *craftroutecontroller.CraftRoute,
 	metric *metriccontroller.MetricServer,

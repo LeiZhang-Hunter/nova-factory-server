@@ -18,9 +18,9 @@ type IControlLogDaoImpl struct {
 	clickhouse *clickhouse.ClickHouse
 }
 
-func NewIControlLogDaoImpl(clickhouse *clickhouse.ClickHouse) metricdao.IControlLogDao {
+func NewIControlLogDaoImpl() metricdao.IControlLogDao {
 	return &IControlLogDaoImpl{
-		clickhouse: clickhouse,
+		clickhouse: clickhouse.GetClickHouse(),
 		tableName:  "nova_control_log",
 	}
 }

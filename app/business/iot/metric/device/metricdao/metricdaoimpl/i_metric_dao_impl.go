@@ -27,20 +27,23 @@ func init() {
 }
 
 // NewMetricDaoImpl 根据 metric.datasource 创建指标 DAO。
-func NewMetricDaoImpl(clickhouse *clickhouse.ClickHouse,
-	iotDb *iotdb.IotDb) metricdao.IMetricDao {
+func NewMetricDaoImpl() metricdao.IMetricDao {
 	datasourceValue := viper.GetString("metric.datasource")
 	var exporter iDaoExport
 	switch datasourceValue {
 	case datasource.IOTDB:
 		{
-			exporter = newIotDbExport(iotDb)
+			exporter = newIotDbExport(iotdb.GetIotDb())
 			break
 		}
 	case datasource.CLICKHOUSE:
 		{
-			exporter = newIClickHouseExport(clickhouse)
+			exporter = newIClickHouseExport(clickhouse.GetClickHouse())
 			break
+		}
+	case datasource.PROMETHEUS_TSDB:
+		{
+			exporter = newPrometheusTSDBExport(iotdb.GetTSDBStorage())
 		}
 	default:
 		panic(fmt.Sprintf("datasource: %s is not exist", datasourceValue))

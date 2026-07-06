@@ -466,8 +466,19 @@ type HandlerDoc struct {
 	OperationID string
 }
 
-// parseHandlerComments parses function documentation from source code
+//go:generate go run ../../../../../tools/handler-doc-gen
+
+// parseHandlerComments parses function documentation from source code.
+// In production (binary-only, no source files), it falls back to build-time embedded docs.
 func parseHandlerComments(filePath string, handlerName string) (*HandlerDoc, error) {
+	// Try build-time embedded docs first (available in production without source files)
+	if docs, ok := handlerDocMap[filePath]; ok {
+		if doc, ok := docs[handlerName]; ok {
+			dc := doc
+			return &dc, nil
+		}
+	}
+
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
 	if err != nil {
@@ -488,14 +499,15 @@ func parseHandlerComments(filePath string, handlerName string) (*HandlerDoc, err
 					// Parse comments
 					lines := strings.Split(fn.Doc.Text(), "\n")
 					for _, line := range lines {
-						line = strings.ToLower(strings.TrimSpace(line))
+						lineTrim := strings.TrimSpace(line)
+						line = strings.ToLower(lineTrim)
 						switch {
 						case strings.HasPrefix(line, "@summary"):
-							doc.Summary = strings.TrimSpace(strings.TrimPrefix(line, "@summary"))
+							doc.Summary = strings.TrimSpace(strings.TrimPrefix(lineTrim, "@summary"))
 						case strings.HasPrefix(line, "@description"):
-							doc.Description = strings.TrimSpace(strings.TrimPrefix(line, "@description"))
+							doc.Description = strings.TrimSpace(strings.TrimPrefix(lineTrim, "@description"))
 						case strings.HasPrefix(line, "@param"):
-							paramText := strings.TrimSpace(strings.TrimPrefix(line, "@param"))
+							paramText := strings.TrimSpace(strings.TrimPrefix(lineTrim, "@param"))
 							parts := strings.SplitN(paramText, " ", 2)
 							if len(parts) == 2 {
 								paramName := strings.TrimSpace(parts[0])
@@ -503,9 +515,9 @@ func parseHandlerComments(filePath string, handlerName string) (*HandlerDoc, err
 								doc.Params[paramName] = paramDesc
 							}
 						case strings.HasPrefix(line, "@return"):
-							doc.Returns = strings.TrimSpace(strings.TrimPrefix(line, "@return"))
+							doc.Returns = strings.TrimSpace(strings.TrimPrefix(lineTrim, "@return"))
 						case strings.HasPrefix(line, "@tags"):
-							tagsText := strings.TrimSpace(strings.TrimPrefix(line, "@tags"))
+							tagsText := strings.TrimSpace(strings.TrimPrefix(lineTrim, "@tags"))
 							// Split on spaces and commas, trim whitespace, ignore empty entries
 							var tags []string
 							for _, sep := range []string{",", " "} {
@@ -523,8 +535,8 @@ func parseHandlerComments(filePath string, handlerName string) (*HandlerDoc, err
 								}
 							}
 							doc.Tags = tags
-						case strings.HasPrefix(line, "@operationId"):
-							opID := strings.TrimSpace(strings.TrimPrefix(line, "@operationId"))
+						case strings.HasPrefix(line, "@operationid"):
+							opID := strings.TrimSpace(strings.TrimPrefix(lineTrim, "@operationId"))
 							if opID != "" && doc.OperationID == "" {
 								doc.OperationID = opID
 							}
