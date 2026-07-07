@@ -15,9 +15,9 @@ type AlertLogClickhouseDaoImpl struct {
 	table      string
 }
 
-func NewAlertLogClickhouseDaoImpl(clickhouse *clickhouse.ClickHouse, agentDao daemonizedao.IotAgentDao) alertdao.AlertLogClickhouseDao {
+func NewAlertLogClickhouseDaoImpl(agentDao daemonizedao.IotAgentDao) alertdao.AlertLogClickhouseDao {
 	return &AlertLogClickhouseDaoImpl{
-		clickhouse: clickhouse,
+		clickhouse: clickhouse.GetClickHouse(),
 		table:      "nova_alert_log",
 		agentDao:   agentDao,
 	}

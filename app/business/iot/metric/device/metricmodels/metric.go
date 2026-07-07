@@ -88,7 +88,9 @@ type MetricDataQueryReq struct {
 	Type        string                  `json:"type"`
 	Name        string                  `json:"name"`
 	Start       uint64                  `json:"start"`
+	StartTime   string                  `json:"start_time"`
 	End         uint64                  `json:"end"`
+	EndTime     string                  `json:"end_time"`
 	Step        int                     `json:"step"`
 	Interval    int                     `json:"interval"`
 	Level       *int                    `json:"level"`

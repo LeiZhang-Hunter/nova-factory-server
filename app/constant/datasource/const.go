@@ -1,6 +1,11 @@
 package datasource
 
 const (
-	IOTDB      = "iotdb"
-	CLICKHOUSE = "clickhouse"
+	IOTDB           = "iotdb"
+	CLICKHOUSE      = "clickhouse"
+	PROMETHEUS_TSDB = "prometheus_tsdb"
+)
+
+const (
+	MetricPrefix = "nova_metrics"
 )
