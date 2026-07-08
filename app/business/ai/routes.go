@@ -79,5 +79,10 @@ func NewGinEngine(
 		gateway.ConfigPublishHistory.PrivateMcpRoutes(app.McpServer)
 		gateway.AgentConfigKey.PrivateMcpRoutes(app.McpServer)
 	}
+
+	// grpc
+	{
+		ai.Config.PrivateRoutes(app.GrpcServer)
+	}
 	return &AI{}
 }
