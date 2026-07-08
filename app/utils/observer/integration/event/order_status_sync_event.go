@@ -14,4 +14,11 @@ type ZOrderStatusSyncReqData interface {
 	GetTid() string
 	GetStatus() string
 	GetRefundstatus() string
+	GetDetailRefundStatus() []ZOrderDetailRefundStatus
+}
+
+// ZOrderDetailRefundStatus 单条订单明细退款状态，对应 detailrefundstatus。
+type ZOrderDetailRefundStatus struct {
+	OID          string `json:"oid"`
+	RefundStatus string `json:"refundstatus"`
 }
