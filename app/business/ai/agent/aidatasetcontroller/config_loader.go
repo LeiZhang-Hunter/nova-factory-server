@@ -44,17 +44,6 @@ func (configLoaderCodec) Unmarshal(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
 }
 
-type ConfigLoader struct {
-	manager             *AgentConfigManager
-	registry            *AgentRegistryManager
-	service             gatewayservice.IAIAgentOrchestrationService
-	gatewayService      gatewayservice.IAIGatewayService
-	configLoaderService aidatasetservice.IConfigLoaderService
-	agentService        gatewayservice.IAIAgentService
-
-	v1.UnimplementedAgentControllerServiceServer
-}
-
 func NewConfigLoaderGrpc(service gatewayservice.IAIAgentOrchestrationService,
 	gatewayService gatewayservice.IAIGatewayService,
 	configLoaderService aidatasetservice.IConfigLoaderService,
@@ -72,6 +61,17 @@ func NewConfigLoaderGrpc(service gatewayservice.IAIAgentOrchestrationService,
 // NewAgentConfigPublisher 提供智能体配置发布器实现。
 func NewAgentConfigPublisher(loader *ConfigLoader) gatewayservice.IAIAgentConfigPublisher {
 	return loader
+}
+
+type ConfigLoader struct {
+	manager             *AgentConfigManager
+	registry            *AgentRegistryManager
+	service             gatewayservice.IAIAgentOrchestrationService
+	gatewayService      gatewayservice.IAIGatewayService
+	configLoaderService aidatasetservice.IConfigLoaderService
+	agentService        gatewayservice.IAIAgentService
+
+	v1.UnimplementedAgentControllerServiceServer
 }
 
 // PrivateRoutes 注册 CameraService gRPC 服务。
