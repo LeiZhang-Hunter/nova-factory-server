@@ -10,6 +10,8 @@ import (
 // Integration 管家婆或者金蝶的配置
 type Integration interface {
 	GetService(c *gin.Context) (api.Service, config.Config, error)
+
+	GetEnabled(c *gin.Context) (config.Config, error)
 }
 
 type EmptyIntegrationStore struct{}
@@ -20,4 +22,8 @@ func NewEmptyIntegrationStore() Integration {
 
 func (*EmptyIntegrationStore) GetService(c *gin.Context) (api.Service, config.Config, error) {
 	return nil, nil, nil
+}
+
+func (*EmptyIntegrationStore) GetEnabled(c *gin.Context) (config.Config, error) {
+	return nil, nil
 }
