@@ -23,13 +23,13 @@ type SysAiPredictionControl struct {
 type SetSysAiPredictionControl struct {
 	ID              int64  `gorm:"column:id;primaryKey;comment:id" json:"id,string"`                               // id
 	DeviceGatewayID int64  `gorm:"column:device_gateway_id;not null;comment:网关id" json:"device_gateway_id,string"` // 网关id
-	Name            string `gorm:"column:name;not null;comment:智能预警名称" json:"name"`                                // 智能预警名称
+	Name            string `gorm:"column:name;not null;comment:智能预警名称" json:"name" binding:"max=255"`              // 智能预警名称
 	Parallelism     int64  `gorm:"column:parallelism;not null;comment:并发" json:"parallelism"`                      // 并发
 	Threshold       int64  `gorm:"column:threshold;not null;comment:threshold" json:"threshold"`                   // threshold
-	Model           string `gorm:"column:model;comment:预测模型" json:"model"`                                         // 预测模型
+	Model           string `gorm:"column:model;comment:预测模型" json:"model" binding:"max=50"`                        // 预测模型
 	Interval        int64  `gorm:"column:interval;not null;comment:预测时间段" json:"interval,string"`                  // 预测时间段
 	PredictLength   int64  `gorm:"column:predict_length;comment:预测长度" json:"predict_length"`                       // 预测长度
-	AggFunction     string `gorm:"column:agg_function;comment:聚合函数，用来计算图表" json:"agg_function"`                    // 聚合函数，用来计算图表
+	AggFunction     string `gorm:"column:agg_function;comment:聚合函数，用来计算图表" json:"agg_function" binding:"max=125"`  // 聚合函数，用来计算图表
 }
 
 func ToSysAiPredictionControl(set *SetSysAiPredictionControl) *SysAiPredictionControl {
@@ -47,7 +47,7 @@ func ToSysAiPredictionControl(set *SetSysAiPredictionControl) *SysAiPredictionCo
 }
 
 type SysAiPredictionControlListReq struct {
-	Name string `form:"name"` // 告警策略名称
+	Name string `form:"name" binding:"omitempty,max=255"` // 告警策略名称
 	baize.BaseEntityDQL
 }
 

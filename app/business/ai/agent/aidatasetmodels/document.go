@@ -45,9 +45,9 @@ type SysDatasetDocument struct {
 
 // PutDocumentRequest 更新文档请求
 type PutDocumentRequest struct {
-	Name         string                 `json:"name"`
+	Name         string                 `json:"name" binding:"omitempty,max=136"`
 	Enabled      *bool                  `json:"enabled,omitempty"`
-	ChunkMethod  string                 `json:"chunk_method,omitempty"`
+	ChunkMethod  string                 `json:"chunk_method,omitempty" binding:"omitempty,max=50"`
 	ParserConfig *ParserConfig          `json:"parser_config,omitempty"`
 	MetaFields   map[string]interface{} `json:"meta_fields,omitempty"`
 }

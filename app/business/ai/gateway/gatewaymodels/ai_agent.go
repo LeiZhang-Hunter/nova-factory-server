@@ -46,11 +46,11 @@ type AIAgentQuery struct {
 // AIAgentUpsert 智能体新增修改参数
 type AIAgentUpsert struct {
 	ID                        int64               `json:"id,string"`
-	Name                      string              `json:"name"`
-	Type                      string              `json:"type"`
+	Name                      string              `json:"name" binding:"max=255"`
+	Type                      string              `json:"type" binding:"max=255"`
 	Prompt                    string              `json:"prompt"`
-	DefaultLLMProviderID      string              `json:"defaultLlmProviderId"`
-	DefaultLLMModelID         string              `json:"defaultLlmModelId"`
+	DefaultLLMProviderID      string              `json:"defaultLlmProviderId" binding:"max=128"`
+	DefaultLLMModelID         string              `json:"defaultLlmModelId" binding:"max=128"`
 	LLMTemperature            float64             `json:"llmTemperature"`
 	LLMTopP                   float64             `json:"llmTopP"`
 	LLMMaxTokens              int32               `json:"llmMaxTokens"`
@@ -60,9 +60,9 @@ type AIAgentUpsert struct {
 	LLMMaxContextCount        int32               `json:"llmMaxContextCount"`
 	RetrievalTopK             int32               `json:"retrievalTopK"`
 	RetrievalMatchThreshold   float64             `json:"retrievalMatchThreshold"`
-	SandboxMode               string              `json:"sandboxMode"`
+	SandboxMode               string              `json:"sandboxMode" binding:"max=64"`
 	SandboxNetwork            *bool               `json:"sandboxNetwork"`
-	WorkDir                   string              `json:"workDir"`
+	WorkDir                   string              `json:"workDir" binding:"max=512"`
 	MCPEnabled                *bool               `json:"mcpEnabled"`
 	MCPServerIDs              string              `json:"mcpServerIds"`
 	MCPServerEnabledIDs       string              `json:"mcpServerEnabledIds"`

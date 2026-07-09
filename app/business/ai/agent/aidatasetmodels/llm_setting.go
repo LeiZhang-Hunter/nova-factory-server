@@ -22,15 +22,15 @@ type SysAiLLMSetting struct {
 
 type SetSysAiLLMSetting struct {
 	ID        int64  `json:"id,string"`
-	Name      string `json:"name"`
-	PublicKey string `json:"public_key"`
-	LlmID     string `json:"llm_id"`
-	EmbdID    string `json:"embd_id"`
-	AsrID     string `json:"asr_id"`
-	Img2txtID string `json:"img2txt_id"`
-	RerankID  string `json:"rerank_id"`
-	TtsID     string `json:"tts_id"`
-	ParserIDs string `json:"parser_ids"`
+	Name      string `json:"name" binding:"max=100"`
+	PublicKey string `json:"public_key" binding:"max=255"`
+	LlmID     string `json:"llm_id" binding:"max=128"`
+	EmbdID    string `json:"embd_id" binding:"max=128"`
+	AsrID     string `json:"asr_id" binding:"max=128"`
+	Img2txtID string `json:"img2txt_id" binding:"max=128"`
+	RerankID  string `json:"rerank_id" binding:"max=128"`
+	TtsID     string `json:"tts_id" binding:"max=256"`
+	ParserIDs string `json:"parser_ids" binding:"max=256"`
 	Credit    int64  `json:"credit"`
 	Status    bool   `json:"status"`
 }

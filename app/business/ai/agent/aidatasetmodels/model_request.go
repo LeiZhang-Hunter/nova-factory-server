@@ -23,6 +23,6 @@ type ModelResponse struct {
 }
 
 type EmbeddingModelConfigRequest struct {
-	ProviderID string `json:"providerId"`
-	ModelID    string `json:"modelId"`
+	ProviderID string `json:"providerId" binding:"max=128"`
+	ModelID    string `json:"modelId" binding:"max=128"`
 }

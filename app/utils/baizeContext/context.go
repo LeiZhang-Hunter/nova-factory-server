@@ -52,6 +52,9 @@ func GetSession(c *gin.Context) *sessionCache.Session {
 }
 func GetPermission(c *gin.Context) []string {
 	get := GetSession(c).Get(c, sessionStatus.Permission)
+	if get == "" {
+		return nil
+	}
 	permission := make([]string, 0)
 	err := json.Unmarshal([]byte(get), &permission)
 	if err != nil {

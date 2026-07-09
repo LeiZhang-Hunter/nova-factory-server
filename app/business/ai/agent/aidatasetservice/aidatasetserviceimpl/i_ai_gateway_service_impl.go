@@ -84,6 +84,13 @@ func (i *IAIGatewayServiceImpl) StopGeneration(c *gin.Context, req *aidatasetmod
 	if strings.TrimSpace(req.TabID) == "" {
 		return nil, errors.New("tab_id不能为空")
 	}
+	conversationInfo, err := i.conversationsService.GetByID(c, req.ConversationID)
+	if err != nil {
+		return nil, err
+	}
+	if conversationInfo == nil {
+		return nil, errors.New("会话不存在")
+	}
 	conversations, err := i.newConversationsClient(c)
 	if err != nil {
 		return nil, err
