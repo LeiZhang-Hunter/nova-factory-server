@@ -25,6 +25,7 @@ func (m *MCPServer) PrivateRoutes(router *gin.RouterGroup) {
 	group.GET("/list", middlewares.HasPermission("ai:mcp:server:list"), m.List)
 	group.POST("/set", middlewares.HasPermission("ai:mcp:server:set"), m.Set)
 	group.POST("/probe", middlewares.HasPermission("ai:mcp:server:probe"), m.McpProbe)
+	group.POST("/service/probe", middlewares.HasPermission("ai:mcp:server:service:probe"), m.ServiceMcpProbe)
 	group.DELETE("/remove/:ids", middlewares.HasPermission("ai:mcp:server:remove"), m.Delete)
 }
 
@@ -122,6 +123,31 @@ func (m *MCPServer) Delete(c *gin.Context) {
 // @Success 200 {object} response.ResponseData "探测成功"
 // @Router /ai/mcp/server/probe [post]
 func (m *MCPServer) McpProbe(c *gin.Context) {
+	req := new(gatewaymodels.MCPServerProbeRequest)
+	if err := c.ShouldBindJSON(req); err != nil {
+		baizeContext.ParameterError(c)
+		return
+	}
+
+	result, err := m.service.Probe(c, req)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+
+	baizeContext.SuccessData(c, result)
+}
+
+// ServiceMcpProbe 探测MCP本体服务连通性和能力
+// @Summary 探测MCP本体服务
+// @Description 连接指定MCP本体服务，完成初始化、心跳和工具探测，支持 SSE 和 Streamable HTTP
+// @Tags 工业智能体/MCP本体服务配置
+// @Param object body gatewaymodels.MCPServerProbeRequest true "MCP本体服务探测参数"
+// @Security BearerAuth
+// @Produce application/json
+// @Success 200 {object} response.ResponseData "探测成功"
+// @Router /ai/mcp/server/service/probe [post]
+func (m *MCPServer) ServiceMcpProbe(c *gin.Context) {
 	req := new(gatewaymodels.MCPServerProbeRequest)
 	if err := c.ShouldBindJSON(req); err != nil {
 		baizeContext.ParameterError(c)

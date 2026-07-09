@@ -323,6 +323,8 @@ func (m *MCPServerServiceImpl) ProbePerm(ctx *gin.Context, mcpServer *gin_mcp.Gi
 		userPermMap[p] = true
 	}
 
+	publicPermissionsData := mcpServer.GetAllPublicPermissions()
+
 	// 按权限过滤工具列表
 	// tool.Name 是 operationId (如 "GET_erp_master_product_list")
 	// 通过 m.operations 查找对应的 Method + Path
@@ -344,6 +346,11 @@ func (m *MCPServerServiceImpl) ProbePerm(ctx *gin.Context, mcpServer *gin_mcp.Gi
 		requiredPerm, hasRegistered := permissionsData[permKey]
 
 		if !hasRegistered {
+			_, ok = publicPermissionsData[permKey]
+			if ok {
+				// 公共接口
+				filtered = append(filtered, gin_mcp.ToMCPTool(tool))
+			}
 			continue
 		}
 

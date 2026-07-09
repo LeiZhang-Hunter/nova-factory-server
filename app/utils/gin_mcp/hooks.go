@@ -24,7 +24,7 @@ func (m *GinMCP) afterHook(ctx context.Context, id any, message *mcp.ListToolsRe
 		return
 	}
 
-	key, ok := h["Authorization"]
+	key, ok := h["Authorization-Api-Key"]
 	if !ok {
 		result.Tools = make([]mcp.Tool, 0)
 		return

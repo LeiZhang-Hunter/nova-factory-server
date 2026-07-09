@@ -50,6 +50,9 @@ type GinMCP struct {
 	executeToolFunc func(ctx context.Context, operationID string, parameters map[string]interface{}, headers http.Header) (interface{}, error)
 	mcpServer       *server.MCPServer
 	handler         http.Handler
+
+	permissionsPublicMu         sync.RWMutex
+	registeredPublicPermissions map[string]uint8
 }
 
 // Config represents the configuration options for GinMCP
@@ -74,16 +77,17 @@ func New(engine *gin.Engine, config *Config) *GinMCP {
 	}
 
 	m := &GinMCP{
-		engine:                engine,
-		name:                  config.Name,
-		description:           config.Description,
-		baseURL:               config.BaseURL,
-		operations:            make(map[string]types.Operation),
-		config:                config,
-		registeredSchemas:     make(map[string]types.RegisteredSchemaInfo),
-		registeredPermissions: make(map[string]string),
-		path:                  config.Path,
-		handler:               engine,
+		engine:                      engine,
+		name:                        config.Name,
+		description:                 config.Description,
+		baseURL:                     config.BaseURL,
+		operations:                  make(map[string]types.Operation),
+		config:                      config,
+		registeredSchemas:           make(map[string]types.RegisteredSchemaInfo),
+		registeredPermissions:       make(map[string]string),
+		registeredPublicPermissions: make(map[string]uint8),
+		path:                        config.Path,
+		handler:                     engine,
 	}
 
 	var hooks server.Hooks
@@ -946,4 +950,32 @@ func NewRAGFlowResolver(fallback string) BaseURLResolver {
 
 		return fallback
 	}
+}
+
+// RegisterPublicPermission associates a permission string with a specific route.
+// The method is automatically uppercased, and the key is "METHOD path".
+// Example: mcp.RegisterPublicPermission("GET", "/shop/goods/list")
+func (m *GinMCP) RegisterPublicPermission(method string, path string) {
+	m.permissionsPublicMu.Lock()
+	defer m.permissionsPublicMu.Unlock()
+
+	method = strings.ToUpper(method)
+	key := fmt.Sprintf("%s %s", method, path)
+	m.registeredPublicPermissions[key] = 0
+
+	if isDebugMode() {
+		log.Printf("Registered public permission for route %s", key)
+	}
+}
+
+// GetAllPublicPermissions returns a copy of all registered route-public-permission mappings.
+func (m *GinMCP) GetAllPublicPermissions() map[string]uint8 {
+	m.permissionsMu.RLock()
+	defer m.permissionsMu.RUnlock()
+
+	result := make(map[string]uint8)
+	for k, _ := range m.registeredPublicPermissions {
+		result[k] = 0
+	}
+	return result
 }
