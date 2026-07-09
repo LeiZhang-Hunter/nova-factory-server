@@ -35,13 +35,13 @@ type MCPServerQuery struct {
 
 type MCPServerUpsert struct {
 	ID          int64  `json:"id,string"`
-	Name        string `json:"name"`
+	Name        string `json:"name" binding:"max=255"`
 	Description string `json:"description"`
-	Transport   string `json:"transport"`
+	Transport   string `json:"transport" binding:"max=32"`
 	Command     string `json:"command"`
 	Args        string `json:"args"`
 	Env         string `json:"env"`
-	URL         string `json:"url"`
+	URL         string `json:"url" binding:"max=1024"`
 	Headers     string `json:"headers"`
 	Timeout     int32  `json:"timeout"`
 	IsCommon    *bool  `json:"isCommon"`
@@ -54,8 +54,8 @@ type MCPServerListData struct {
 }
 
 type MCPServerProbeRequest struct {
-	Transport string          `json:"transport"`
-	URL       string          `json:"url"`
+	Transport string          `json:"transport" binding:"max=32"`
+	URL       string          `json:"url" binding:"max=1024"`
 	Headers   json.RawMessage `json:"headers"`
 	Timeout   int32           `json:"timeout"`
 }

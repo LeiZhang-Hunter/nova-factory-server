@@ -26,9 +26,9 @@ type AIGatewayQuery struct {
 
 type AIGatewayUpsert struct {
 	ID      int64  `json:"id,string"`
-	Name    string `json:"name"`
-	BaseURL string `json:"baseUrl"`
-	APIKey  string `json:"apiKey"`
+	Name    string `json:"name" binding:"max=128"`
+	BaseURL string `json:"baseUrl" binding:"max=512"`
+	APIKey  string `json:"apiKey" binding:"max=512"`
 	Enabled *bool  `json:"enabled"`
 }
 

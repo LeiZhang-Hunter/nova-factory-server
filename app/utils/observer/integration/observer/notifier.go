@@ -131,17 +131,17 @@ func (n *Notifier) OnStockChanged(ev event.TransactionEvent[event.StockEvent]) e
 		err := n.notify(func(ob Observer) error {
 			err := ob.OnStockChanged(ev.ToEvent())
 			if err != nil {
-				zap.L().Error("Observer OnProductChanged", zap.Error(err))
+				zap.L().Error("Observer OnStockChanged", zap.Error(err))
 				notifyError(ev.ToEvent(), nil, err)
 				return err
 			}
 			notifySuccess(ev.ToEvent(), nil)
 			return nil
 		})
-		err = notifyFinish(ev.ToEvent())
-		if err != nil {
-			zap.L().Error("Observer OnProductChanged", zap.Error(err))
-			return err
+		finishErr := notifyFinish(ev.ToEvent())
+		if finishErr != nil {
+			zap.L().Error("Observer OnStockChanged", zap.Error(finishErr))
+			return finishErr
 		}
 		return err
 	}
@@ -158,10 +158,10 @@ func (n *Notifier) OnStockChanged(ev event.TransactionEvent[event.StockEvent]) e
 			return nil
 		})
 	})
-	err = notifyFinish(ev.ToEvent())
-	if err != nil {
-		zap.L().Error("Observer OnProductChanged", zap.Error(err))
-		return err
+	finishErr := notifyFinish(ev.ToEvent())
+	if finishErr != nil {
+		zap.L().Error("Observer OnStockChanged", zap.Error(finishErr))
+		return finishErr
 	}
 	return err
 }

@@ -7,12 +7,12 @@ import (
 
 // DataSetRequest 创建知识库请求
 type DataSetRequest struct {
-	Name           string        `json:"name" binding:"required"`
-	Avatar         string        `json:"avatar,omitempty"`
+	Name           string        `json:"name" binding:"required,max=136"`
+	Avatar         string        `json:"avatar,omitempty" binding:"omitempty,max=512"`
 	Description    string        `json:"description,omitempty"`
-	EmbeddingModel string        `json:"embedding_model,omitempty"`
-	Permission     string        `json:"permission,omitempty"`
-	ChunkMethod    string        `json:"chunk_method,omitempty"`
+	EmbeddingModel string        `json:"embedding_model,omitempty" binding:"omitempty,max=255"`
+	Permission     string        `json:"permission,omitempty" binding:"omitempty,max=255"`
+	ChunkMethod    string        `json:"chunk_method,omitempty" binding:"omitempty,max=50"`
 	Pagerank       string        `json:"pagerank,omitempty"`
 	ParserConfig   *ParserConfig `json:"parser_config,omitempty"`
 }
@@ -111,9 +111,9 @@ type SysDataset struct {
 
 // UpdateDataSetRequest 更新知识库请求
 type UpdateDataSetRequest struct {
-	Name           string        `json:"name" binding:"required"`
-	EmbeddingModel string        `json:"embedding_model,omitempty"`
-	ChunkMethod    string        `json:"chunk_method"`
+	Name           string        `json:"name" binding:"required,max=136"`
+	EmbeddingModel string        `json:"embedding_model,omitempty" binding:"omitempty,max=255"`
+	ChunkMethod    string        `json:"chunk_method" binding:"omitempty,max=50"`
 	ParserConfig   *ParserConfig `json:"parser_config,omitempty"`
 	Description    string        `json:"description,omitempty"`
 	Pagerank       int           `json:"pagerank"`
