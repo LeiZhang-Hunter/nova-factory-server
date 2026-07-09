@@ -42,16 +42,16 @@ type SysAiModelProviderListData struct {
 }
 
 type FactoryProviderUpsert struct {
-	Name string `json:"name"`
-	Logo string `json:"logo"`
-	Tags string `json:"tags"`
+	Name string `json:"name" binding:"max=128"`
+	Logo string `json:"logo" binding:"max=512"`
+	Tags string `json:"tags" binding:"max=2048"`
 }
 
 type FactoryLLMUpsert struct {
-	LLMName   string `json:"llm_name"`
-	Tags      string `json:"tags"`
+	LLMName   string `json:"llm_name" binding:"max=128"`
+	Tags      string `json:"tags" binding:"max=255"`
 	MaxTokens int64  `json:"max_tokens"`
-	ModelType string `json:"model_type"`
+	ModelType string `json:"model_type" binding:"max=128"`
 	IsTools   bool   `json:"is_tools"`
 }
 

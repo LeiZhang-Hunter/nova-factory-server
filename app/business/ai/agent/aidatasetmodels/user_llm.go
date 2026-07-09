@@ -45,10 +45,10 @@ func (e *SysUserLLM) GetStatus() string {
 }
 
 type SetSysUserLLM struct {
-	LLMFactory string `json:"llm_factory"`
+	LLMFactory string `json:"llm_factory" binding:"max=128"`
 	APIKey     string `json:"api_key"`
-	APIBase    string `json:"api_base"`
-	APIType    string `json:"api_type"`
+	APIBase    string `json:"api_base" binding:"max=255"`
+	APIType    string `json:"api_type" binding:"max=128"`
 }
 
 type GetSysUserLLMReq struct {

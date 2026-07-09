@@ -19,11 +19,11 @@ type AIAgentConfigPublishHistory struct {
 type AIAgentConfigPublishHistoryUpsert struct {
 	ID                 int64  `json:"id,string"`
 	AgentID            int64  `json:"agentId,string"`
-	Version            string `json:"version"`
+	Version            string `json:"version" binding:"max=64"`
 	Action             string `json:"action"`
 	ConfigSnapshot     string `json:"configSnapshot"`
 	ConfigMd5          string `json:"-"`
-	PublishDescription string `json:"publishDescription"`
+	PublishDescription string `json:"publishDescription" binding:"max=512"`
 }
 
 // AIAgentConfigPublishHistoryQuery 智能体配置发布历史查询参数。

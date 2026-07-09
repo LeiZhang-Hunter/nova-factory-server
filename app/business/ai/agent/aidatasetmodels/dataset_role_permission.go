@@ -28,7 +28,7 @@ type SetDatasetRolePermission struct {
 	DatasetID  []string `json:"datasetIds,string" binding:"required"`
 	DocumentID []string `json:"documentIds,string"`
 	Status     bool     `json:"status"`
-	Permission string   `json:"permission"`
+	Permission string   `json:"permission" binding:"omitempty,max=32"`
 }
 
 // DatasetRolePermissionQuery 知识库/文档-角色权限列表查询参数。
@@ -36,7 +36,7 @@ type DatasetRolePermissionQuery struct {
 	RoleID     int64  `form:"roleId,string"`
 	DatasetID  int64  `form:"datasetId,string"`
 	DocumentID int64  `form:"documentId,string"`
-	Permission string `form:"permission"`
+	Permission string `form:"permission" binding:"omitempty,max=32"`
 	baize.BaseEntityDQL
 }
 

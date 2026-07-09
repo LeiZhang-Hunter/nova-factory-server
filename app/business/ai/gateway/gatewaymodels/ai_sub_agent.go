@@ -37,9 +37,9 @@ type AISubAgentQuery struct {
 // AISubAgentUpsert 子智能体新增修改参数。
 type AISubAgentUpsert struct {
 	ID                        int64               `json:"id,string"`
-	Name                      string              `json:"name"`
-	Type                      string              `json:"subAgentType"`
-	CoreSubAgent              string              `json:"coreSubAgent"`
+	Name                      string              `json:"name" binding:"max=255"`
+	Type                      string              `json:"subAgentType" binding:"max=255"`
+	CoreSubAgent              string              `json:"coreSubAgent" binding:"max=255"`
 	Description               string              `json:"description"`
 	Instruction               string              `json:"instruction"`
 	MCPEnabled                *bool               `json:"mcpEnabled"`
@@ -61,10 +61,10 @@ type AISubAgentListData struct {
 // GraphAISubAgentUpsert 子智能体新增修改参数。
 type GraphAISubAgentUpsert struct {
 	ID                        int64               `json:"id,string"`
-	Name                      string              `json:"name"`
-	Type                      string              `json:"type"`
-	SubAgentType              string              `json:"subAgentType"`
-	CoreSubAgent              string              `json:"coreSubAgent"`
+	Name                      string              `json:"name" binding:"max=255"`
+	Type                      string              `json:"type" binding:"max=255"`
+	SubAgentType              string              `json:"subAgentType" binding:"max=255"`
+	CoreSubAgent              string              `json:"coreSubAgent" binding:"max=255"`
 	Description               string              `json:"description"`
 	Instruction               string              `json:"instruction"`
 	MCPEnabled                *bool               `json:"mcpEnabled"`

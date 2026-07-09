@@ -492,7 +492,7 @@ func (i *IChartServiceImpl) ChatsCompletions(c *gin.Context, req *aidatasetmodel
 				break // can end the loop as Read stops on first error anyway
 			}
 
-			fmt.Fprintf(w, "data: "+ev.Data+"\n\n")
+			fmt.Fprintf(w, "data: %s\n\n", ev.Data)
 			// Do something with the events, parse the JSON or whatever.
 			flusher.Flush()
 		}
@@ -627,7 +627,7 @@ func (i *IChartServiceImpl) AgentsCompletions(c *gin.Context, req *aidatasetmode
 				// handle read error
 				break // can end the loop as Read stops on first error anyway
 			}
-			fmt.Fprintf(w, "data: "+ev.Data+"\n\n")
+			fmt.Fprintf(w, "data: %s\n\n", ev.Data)
 			// Do something with the events, parse the JSON or whatever.
 			flusher.Flush()
 		}
@@ -682,7 +682,7 @@ func (i *IChartServiceImpl) Ask(c *gin.Context, req *aidatasetmodels.AskRequest)
 			// handle read error
 			break // can end the loop as Read stops on first error anyway
 		}
-		fmt.Fprintf(w, "data: "+ev.Data+"\n\n")
+		fmt.Fprintf(w, "data: %s\n\n", ev.Data)
 		// Do something with the events, parse the JSON or whatever.
 		flusher.Flush()
 	}

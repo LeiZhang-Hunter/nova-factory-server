@@ -22,7 +22,7 @@ type AgentConfigKeyQuery struct {
 // AgentConfigKeyUpsert API Key 保存参数。
 type AgentConfigKeyUpsert struct {
 	ID  int64  `json:"id,string"`
-	Key string `json:"key"`
+	Key string `json:"key" binding:"max=64"`
 }
 
 // AgentConfigKeyListData API Key 列表数据。

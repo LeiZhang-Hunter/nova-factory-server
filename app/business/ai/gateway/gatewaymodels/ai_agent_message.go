@@ -30,8 +30,8 @@ type AIAgentMessageUpsert struct {
 	ConversationID  int64  `json:"conversationId,string"`
 	Role            string `json:"role"`
 	Content         string `json:"content"`
-	ProviderID      string `json:"providerId"`
-	ModelID         string `json:"modelId"`
+	ProviderID      string `json:"providerId" binding:"max=255"`
+	ModelID         string `json:"modelId" binding:"max=255"`
 	Status          string `json:"status"`
 	Error           string `json:"error"`
 	InputTokens     int64  `json:"inputTokens"`

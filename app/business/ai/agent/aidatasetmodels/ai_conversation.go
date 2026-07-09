@@ -25,13 +25,13 @@ type AiConversation struct {
 type SetAiConversation struct {
 	ID             int64  `json:"id,string"`
 	AgentID        int64  `json:"agentId,string"`
-	AgentType      string `json:"agentType,string"`
-	Name           string `json:"name" binding:"required"`
+	AgentType      string `json:"agentType,string" binding:"max=255"`
+	Name           string `json:"name" binding:"required,max=255"`
 	Message        string `json:"message"`
-	LLMProviderID  string `json:"llmProviderId"`
-	LLMModelID     string `json:"llmModelId"`
+	LLMProviderID  string `json:"llmProviderId" binding:"max=128"`
+	LLMModelID     string `json:"llmModelId" binding:"max=128"`
 	EnableThinking *bool  `json:"enableThinking"`
-	ChatMode       string `json:"chatMode"`
+	ChatMode       string `json:"chatMode" binding:"max=32"`
 }
 
 type AiConversationQuery struct {

@@ -19,9 +19,9 @@ type InstalledSkill struct {
 // InstalledSkillUpsert 已安装技能新增修改参数
 type InstalledSkillUpsert struct {
 	ID          int64  `json:"id,string"`
-	Name        string `json:"name"`
-	Slug        string `json:"slug"`
-	Version     string `json:"version"`
+	Name        string `json:"name" binding:"max=255"`
+	Slug        string `json:"slug" binding:"max=255"`
+	Version     string `json:"version" binding:"max=255"`
 	Source      string `json:"source"`
 	Description string `json:"description"`
 	Enabled     *bool  `json:"enabled"`

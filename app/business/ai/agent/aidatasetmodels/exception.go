@@ -25,16 +25,16 @@ type SysAiPredictionException struct {
 }
 
 type SetSysAiPredictionException struct {
-	ID            int64    `gorm:"column:id;primaryKey;comment:id" json:"id,string"`                 // id
-	ReasonID      int64    `gorm:"column:reason_id;not null;comment:模型推理id" json:"reason_id,string"` // 模型推理id
-	ActionID      int64    `gorm:"column:action_id;not null;comment:处理通知id" json:"action_id,string"` // 处理通知id
-	Threshold     int64    `gorm:"column:threshold;not null;comment:threshold" json:"threshold"`     // threshold
-	Name          string   `gorm:"column:name;not null;comment:智能预警名称" json:"name"`                  // 智能预警名称
-	Dev           []string `gorm:"column:dev;comment:测点名称" json:"dev"`                               // 测点名称
-	Model         string   `gorm:"column:model;comment:预测模型" json:"model"`                           // 预测模型
-	Interval      int64    `gorm:"column:interval;not null;comment:预测时间段" json:"interval,string"`    // 预测时间段
-	PredictLength int64    `gorm:"column:predict_length;comment:预测长度" json:"predict_length"`         // 预测长度
-	AggFunction   string   `gorm:"column:agg_function;comment:聚合函数，用来计算图表" json:"agg_function"`      // 聚合函数，用来计算图表
+	ID            int64    `gorm:"column:id;primaryKey;comment:id" json:"id,string"`                              // id
+	ReasonID      int64    `gorm:"column:reason_id;not null;comment:模型推理id" json:"reason_id,string"`              // 模型推理id
+	ActionID      int64    `gorm:"column:action_id;not null;comment:处理通知id" json:"action_id,string"`              // 处理通知id
+	Threshold     int64    `gorm:"column:threshold;not null;comment:threshold" json:"threshold"`                  // threshold
+	Name          string   `gorm:"column:name;not null;comment:智能预警名称" json:"name" binding:"max=255"`             // 智能预警名称
+	Dev           []string `gorm:"column:dev;comment:测点名称" json:"dev"`                                            // 测点名称
+	Model         string   `gorm:"column:model;comment:预测模型" json:"model" binding:"max=50"`                       // 预测模型
+	Interval      int64    `gorm:"column:interval;not null;comment:预测时间段" json:"interval,string"`                 // 预测时间段
+	PredictLength int64    `gorm:"column:predict_length;comment:预测长度" json:"predict_length"`                      // 预测长度
+	AggFunction   string   `gorm:"column:agg_function;comment:聚合函数，用来计算图表" json:"agg_function" binding:"max=125"` // 聚合函数，用来计算图表
 }
 
 func ToSysAiPredictionException(set *SetSysAiPredictionException) *SysAiPredictionException {
@@ -58,7 +58,7 @@ func ToSysAiPredictionException(set *SetSysAiPredictionException) *SysAiPredicti
 }
 
 type SysAiPredictionExceptionListReq struct {
-	Name string `form:"name"` // 告警策略名称
+	Name string `form:"name" binding:"omitempty,max=255"` // 告警策略名称
 	baize.BaseEntityDQL
 }
 
