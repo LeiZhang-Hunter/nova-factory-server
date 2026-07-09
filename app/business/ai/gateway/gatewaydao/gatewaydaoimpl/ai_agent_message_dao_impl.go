@@ -159,6 +159,9 @@ func (a *AIAgentMessageDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentM
 	if req.Status != "" {
 		db = db.Where("status = ?", req.Status)
 	}
+	if userID := baizeContext.GetUserId(c); userID > 0 {
+		db = db.Where("create_by = ?", userID)
+	}
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
 		return nil, err
