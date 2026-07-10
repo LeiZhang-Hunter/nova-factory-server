@@ -42,3 +42,4 @@ data/tsdb
 app/cmd/otel/data/*
 app/data/*
 app/business/provider_gen.go
+handler_docs_gen.go

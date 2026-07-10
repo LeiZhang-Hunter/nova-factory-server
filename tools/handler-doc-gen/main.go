@@ -43,20 +43,7 @@ func main() {
 
 	entries := make(map[handlerIdentity]handlerDoc)
 	appDir := filepath.Join(root, "app")
-	err = filepath.WalkDir(appDir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return nil
-		}
-		if d.IsDir() {
-			name := d.Name()
-			if name == ".git" || name == "vendor" {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		if !strings.HasSuffix(path, ".go") {
-			return nil
-		}
+	err = walkGoFiles(appDir, func(path string) error {
 		if err := extractFromFile(root, moduleName, path, entries); err != nil {
 			fmt.Fprintf(os.Stderr, "skip %s: %v\n", path, err)
 		}
@@ -77,6 +64,64 @@ func main() {
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, err)
 	os.Exit(1)
+}
+
+func walkGoFiles(root string, visit func(path string) error) error {
+	return walkGoFilesInDir(root, make(map[string]struct{}), visit)
+}
+
+func walkGoFilesInDir(dir string, visiting map[string]struct{}, visit func(path string) error) error {
+	realDir, err := filepath.EvalSymlinks(dir)
+	if err == nil {
+		realDir, err = filepath.Abs(realDir)
+		if err == nil {
+			if _, ok := visiting[realDir]; ok {
+				return nil
+			}
+			visiting[realDir] = struct{}{}
+			defer delete(visiting, realDir)
+		}
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	for _, entry := range entries {
+		name := entry.Name()
+		path := filepath.Join(dir, name)
+		if entry.IsDir() {
+			if shouldSkipDir(name) {
+				continue
+			}
+			if err := walkGoFilesInDir(path, visiting, visit); err != nil {
+				return err
+			}
+			continue
+		}
+		if entry.Type()&os.ModeSymlink != 0 {
+			info, err := os.Stat(path)
+			if err == nil && info.IsDir() {
+				if shouldSkipDir(name) {
+					continue
+				}
+				if err := walkGoFilesInDir(path, visiting, visit); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		if strings.HasSuffix(path, ".go") {
+			if err := visit(path); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func shouldSkipDir(name string) bool {
+	return name == ".git" || name == "vendor"
 }
 
 func findModuleRoot() (string, error) {
