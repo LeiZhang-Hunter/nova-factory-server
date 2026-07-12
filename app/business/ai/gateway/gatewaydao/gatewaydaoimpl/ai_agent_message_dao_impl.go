@@ -121,7 +121,6 @@ func (a *AIAgentMessageDaoImpl) DeleteByConversationIDs(c *gin.Context, conversa
 	}
 	return a.db.WithContext(c).Table(a.table).
 		Where("conversation_id IN ?", conversationIDs).
-		Where("create_by = ?", baizeContext.GetUserId(c)).
 		Delete(&gatewaymodels.AIAgentMessage{}).Error
 }
 

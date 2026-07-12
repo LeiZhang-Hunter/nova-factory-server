@@ -278,6 +278,7 @@ CREATE TABLE IF NOT EXISTS ai_conversations (
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (id),
+    KEY idx_agent_id (agent_id),
     KEY idx_create_time (create_time),
     KEY idx_update_time (update_time),
     KEY idx_create_by (create_by)
