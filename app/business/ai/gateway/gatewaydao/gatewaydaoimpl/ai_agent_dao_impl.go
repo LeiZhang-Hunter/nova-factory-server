@@ -54,7 +54,7 @@ func (a *AIAgentDaoImpl) Update(c *gin.Context, req *gatewaymodels.AIAgentUpsert
 		Select("name", "type", "prompt", "default_llm_provider_id", "default_llm_model_id", "llm_temperature", "llm_top_p",
 			"llm_max_tokens", "enable_llm_temperature", "enable_llm_top_p", "enable_llm_max_tokens",
 			"llm_max_context_count", "sandbox_mode", "sandbox_network", "enable", "suppress_pre_tool_content",
-			"work_dir", "mcp_enabled", "mcp_server_ids", "mcp_server_enabled_ids", "allow_mcp_server_ids_tools", "update_by", "update_time").
+			"work_dir", "mcp_enabled", "mcp_server_ids", "mcp_server_enabled_ids", "allow_mcp_server_ids_tools", "forced_tool_choice_route", "update_by", "update_time").
 		Updates(item).Error; err != nil {
 		return nil, err
 	}
@@ -88,6 +88,7 @@ func (a *AIAgentDaoImpl) GetByID(c *gin.Context, id int64) (*gatewaymodels.AIAge
 		return nil, err
 	}
 	decodeAllowMcpServerIdsTools(&item)
+	decodeForcedToolChoiceRoute(&item)
 	return &item, nil
 }
 
@@ -104,6 +105,8 @@ func (a *AIAgentDaoImpl) GetEnabledByType(c *gin.Context, agentType string) (*ga
 		}
 		return nil, err
 	}
+	decodeAllowMcpServerIdsTools(&item)
+	decodeForcedToolChoiceRoute(&item)
 	return &item, nil
 }
 
@@ -146,6 +149,7 @@ func (a *AIAgentDaoImpl) List(c *gin.Context, req *gatewaymodels.AIAgentQuery) (
 	}
 	for _, row := range rows {
 		decodeAllowMcpServerIdsTools(row)
+		decodeForcedToolChoiceRoute(row)
 	}
 	return &gatewaymodels.AIAgentListData{
 		Rows:  rows,
@@ -174,6 +178,7 @@ func buildAIAgentModel(c *gin.Context, req *gatewaymodels.AIAgentUpsert) *gatewa
 		MCPServerIDs:              req.MCPServerIDs,
 		MCPServerEnabledIDs:       req.MCPServerEnabledIDs,
 		AllowMcpServerIdsToolsRaw: req.AllowMcpServerIdsToolsRaw,
+		ForcedToolChoiceRouteRaw:  req.ForcedToolChoiceRouteRaw,
 		SuppressPreToolContent:    req.SuppressPreToolContent,
 		Enable:                    req.Enable,
 		DeptID:                    baizeContext.GetDeptId(c),
@@ -192,6 +197,18 @@ func decodeAllowMcpServerIdsTools(item *gatewaymodels.AIAgent) {
 	_ = json.Unmarshal([]byte(content), &item.AllowMcpServerIdsTools)
 }
 
+func decodeForcedToolChoiceRoute(item *gatewaymodels.AIAgent) {
+	if item == nil {
+		return
+	}
+	item.ForcedToolChoiceRoute = make([]*gatewaymodels.ForcedToolChoiceConfig, 0)
+	content := strings.TrimSpace(item.ForcedToolChoiceRouteRaw)
+	if content == "" {
+		return
+	}
+	_ = json.Unmarshal([]byte(content), &item.ForcedToolChoiceRoute)
+}
+
 func (a *AIAgentDaoImpl) GetEnable(c context.Context) ([]*gatewaymodels.AIAgent, error) {
 	list := make([]*gatewaymodels.AIAgent, 0)
 	ret := a.db.Table(a.table).Where("enable = ?", true).Where("state = ?", commonStatus.NORMAL).Find(&list)
@@ -200,6 +217,10 @@ func (a *AIAgentDaoImpl) GetEnable(c context.Context) ([]*gatewaymodels.AIAgent,
 			return list, nil
 		}
 		return nil, ret.Error
+	}
+	for _, item := range list {
+		decodeAllowMcpServerIdsTools(item)
+		decodeForcedToolChoiceRoute(item)
 	}
 	return list, nil
 }
