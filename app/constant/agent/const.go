@@ -16,3 +16,6 @@ type ACTIVE_STATUS int
 
 var OFFLINE ACTIVE_STATUS = 0
 var ONLINE ACTIVE_STATUS = 1
+
+var AuthorizationApiKey string = "Authorization-Api-Key"
+var MCPToolNameHeader string = "X-MCP-Tool-Name"

@@ -165,7 +165,7 @@ func (a *AgentConfigKeyServiceImpl) validateUpsert(req *gatewaymodels.AgentConfi
 //   - int64: 该 Key 创建者的用户 ID，查询失败或 Key 不存在时返回 0
 func (a *AgentConfigKeyServiceImpl) GetUserId(key string) int64 {
 	info, err := a.dao.GetByKey(&gin.Context{}, key)
-	if err != nil {
+	if err != nil || info == nil {
 		return 0
 	}
 	return info.CreateBy
@@ -272,4 +272,25 @@ func (a *AgentConfigKeyServiceImpl) GetTool(c *gin.Context, key string) ([]strin
 		return nil, err
 	}
 	return tools, nil
+}
+
+func (a *AgentConfigKeyServiceImpl) GetInfo(c *gin.Context, apiKey string) (*key.Info, error) {
+	info, err := a.dao.GetByKey(c, apiKey)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, nil
+	}
+	tools := make([]string, 0)
+	if info.AllowMcpServerTools != "" {
+		if err := json.Unmarshal([]byte(info.AllowMcpServerTools), &tools); err != nil {
+			return nil, err
+		}
+	}
+	return &key.Info{
+		UserID: info.CreateBy,
+		DeptID: info.DeptID,
+		Tools:  tools,
+	}, nil
 }

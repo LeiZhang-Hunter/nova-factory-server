@@ -2,6 +2,7 @@ package aidatasetserviceimpl
 
 import (
 	"errors"
+	"nova-factory-server/app/constant/agent"
 	"nova-factory-server/app/utils/baizeContext"
 	"strings"
 
@@ -29,7 +30,7 @@ func NewAIGatewayService(gatewayService gatewayservice.IAIGatewayService,
 		conversationsService: conversationsService,
 		config: &coreclient.Config{
 			Algorithm:          coreclient.AlgorithmRoundRobin,
-			APIKeyHeader:       "Authorization-Api-Key",
+			APIKeyHeader:       agent.AuthorizationApiKey,
 			APIKeyPrefix:       "Bearer ",
 			AgentGatewayHeader: "X-Agent-Gateway",
 		},

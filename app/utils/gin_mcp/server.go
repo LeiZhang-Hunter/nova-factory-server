@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"nova-factory-server/app/constant/agent"
 	"nova-factory-server/app/utils/gin_mcp/pkg/convert"
 	"nova-factory-server/app/utils/gin_mcp/pkg/transport"
 	"nova-factory-server/app/utils/gin_mcp/pkg/types"
@@ -645,7 +646,7 @@ func (m *GinMCP) defaultExecuteTool(ctx context.Context, operationID string, par
 		}
 	}
 
-	return m.executeToolLogic(ctx, operation, parameters, baseURL, headers)
+	return m.executeToolLogic(ctx, operationID, operation, parameters, baseURL, headers)
 }
 
 // inMemoryExecuteTool executes the mapped Gin route directly in-process without using http.Client.
@@ -662,16 +663,17 @@ func (m *GinMCP) inMemoryExecuteTool(ctx context.Context, operationID string, pa
 		log.Printf("[Tool Execution] Found operation for tool '%s': Method=%s, Path=%s", operationID, operation.Method, operation.Path)
 	}
 
-	return m.executeToolLogicInMemory(ctx, operation, parameters, headers)
+	return m.executeToolLogicInMemory(ctx, operationID, operation, parameters, headers)
 }
 
 // executeToolLogic contains the core tool execution logic that can be reused
 // with different baseURL resolution strategies
-func (m *GinMCP) executeToolLogic(ctx context.Context, operation types.Operation, parameters map[string]interface{}, baseURL string, headers http.Header) (interface{}, error) {
+func (m *GinMCP) executeToolLogic(ctx context.Context, operationID string, operation types.Operation, parameters map[string]interface{}, baseURL string, headers http.Header) (interface{}, error) {
 	req, err := m.buildToolRequest(ctx, operation, parameters, baseURL, headers)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set(agent.MCPToolNameHeader, operationID)
 
 	if isDebugMode() {
 		log.Printf("[Tool Execution] Sending request with headers: %+v", req.Header)
@@ -691,7 +693,7 @@ func (m *GinMCP) executeToolLogic(ctx context.Context, operation types.Operation
 }
 
 // executeToolLogicInMemory executes the mapped route against the local Gin handler directly.
-func (m *GinMCP) executeToolLogicInMemory(ctx context.Context, operation types.Operation, parameters map[string]interface{}, headers http.Header) (interface{}, error) {
+func (m *GinMCP) executeToolLogicInMemory(ctx context.Context, operationID string, operation types.Operation, parameters map[string]interface{}, headers http.Header) (interface{}, error) {
 	handler := m.handler
 	if handler == nil {
 		handler = m.engine
@@ -704,6 +706,7 @@ func (m *GinMCP) executeToolLogicInMemory(ctx context.Context, operation types.O
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set(agent.MCPToolNameHeader, operationID)
 	if isDebugMode() {
 		log.Printf("[Tool Execution] Executing in-memory request: %s %s", req.Method, req.URL.String())
 	}

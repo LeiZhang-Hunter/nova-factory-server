@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go.uber.org/zap"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -163,6 +164,10 @@ func (agent *Agent) Set(c *gin.Context) {
 		baizeContext.Waring(c, err.Error())
 		return
 	}
+	if err := agent.prepareForcedToolChoiceRoute(c, req); err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
 	var (
 		data *gatewaymodels.AIAgent
 		err  error
@@ -224,6 +229,74 @@ func (agent *Agent) prepareAllowMcpServerIdsTools(c *gin.Context, req *gatewaymo
 	req.AllowMcpServerIdsTools = normalized
 	req.AllowMcpServerIdsToolsRaw = string(body)
 	return nil
+}
+
+func (agent *Agent) prepareForcedToolChoiceRoute(c *gin.Context, req *gatewaymodels.AIAgentUpsert) error {
+	if req == nil {
+		return errors.New("参数不能为空")
+	}
+	if len(req.ForcedToolChoiceRoute) == 0 {
+		req.ForcedToolChoiceRouteRaw = ""
+		req.ForcedToolChoiceRoute = nil
+		return nil
+	}
+
+	normalized := make([]*gatewaymodels.ForcedToolChoiceConfig, 0, len(req.ForcedToolChoiceRoute))
+	for index, item := range req.ForcedToolChoiceRoute {
+		if item == nil {
+			continue
+		}
+		server := strings.TrimSpace(item.Server)
+		toolName := strings.TrimSpace(item.ToolName)
+		regexpText := strings.TrimSpace(item.Regexp)
+		objectProductPattern := strings.TrimSpace(item.ObjectProductPattern)
+		toolRouteExclusionPattern := strings.TrimSpace(item.ToolRouteExclusionPattern)
+		if server == "" && toolName == "" && regexpText == "" && objectProductPattern == "" && toolRouteExclusionPattern == "" {
+			continue
+		}
+		if server == "" {
+			return fmt.Errorf("工具强制触发规则%d的MCP Server不能为空", index+1)
+		}
+		if toolName == "" {
+			return fmt.Errorf("工具强制触发规则%d的工具名称不能为空", index+1)
+		}
+		if regexpText == "" && objectProductPattern == "" {
+			return fmt.Errorf("工具强制触发规则%d至少需要配置正则表达式或目标匹配", index+1)
+		}
+		if err := validateRegexpPattern(regexpText); err != nil {
+			return fmt.Errorf("工具强制触发规则%d的正则表达式不合法: %w", index+1, err)
+		}
+		if err := validateRegexpPattern(toolRouteExclusionPattern); err != nil {
+			return fmt.Errorf("工具强制触发规则%d的工具路由排除规则不合法: %w", index+1, err)
+		}
+		normalized = append(normalized, &gatewaymodels.ForcedToolChoiceConfig{
+			ToolName:                  toolName,
+			Server:                    server,
+			Regexp:                    regexpText,
+			ObjectProductPattern:      objectProductPattern,
+			ToolRouteExclusionPattern: toolRouteExclusionPattern,
+		})
+	}
+	if len(normalized) == 0 {
+		req.ForcedToolChoiceRouteRaw = ""
+		req.ForcedToolChoiceRoute = nil
+		return nil
+	}
+	body, err := json.Marshal(normalized)
+	if err != nil {
+		return fmt.Errorf("工具强制触发规则编码失败: %w", err)
+	}
+	req.ForcedToolChoiceRoute = normalized
+	req.ForcedToolChoiceRouteRaw = string(body)
+	return nil
+}
+
+func validateRegexpPattern(pattern string) error {
+	if pattern == "" {
+		return nil
+	}
+	_, err := regexp.Compile(pattern)
+	return err
 }
 
 // Delete 删除智能体
