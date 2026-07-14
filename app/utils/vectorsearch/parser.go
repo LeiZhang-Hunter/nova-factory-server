@@ -2,8 +2,8 @@ package vectorsearch
 
 import "strings"
 
-// tokenize 对 query 做基础切词，并补充中文 n-gram 片段。
-func tokenize(query string) []string {
+// Tokenize 对 query 做基础切词，并补充中文 n-gram 片段。
+func Tokenize(query string) []string {
 	replaced := strings.Map(func(r rune) rune {
 		switch {
 		case isCJK(r), isAlphaNumeric(r):

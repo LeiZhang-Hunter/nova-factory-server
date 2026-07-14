@@ -1,9 +1,11 @@
 package shopcategory
 
 import (
+	"fmt"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/constant/shop"
 	store "nova-factory-server/app/utils/store/category"
+	"nova-factory-server/app/utils/vectorsearch"
 	"nova-factory-server/app/utils/vectorsearch/normalization/api"
 	"nova-factory-server/app/utils/vectorsearch/normalization/util"
 	"sort"
@@ -140,7 +142,7 @@ func (c *Category) appendCategoryMatch(ctx *api.Context, category matchedCategor
 
 func (c *Category) matchCategoriesFromCache(value string) []matchedCategory {
 	if c.cache == nil {
-		return nil
+		c.cache = store.GetStore(shop.ShopCategoryStoreName)
 	}
 	rows, ok := c.cache.Get()
 	if !ok {
@@ -149,6 +151,10 @@ func (c *Category) matchCategoriesFromCache(value string) []matchedCategory {
 	matches := make([]matchedCategory, 0)
 	seen := make(map[string]struct{})
 	collectMatchedCategories(rows, value, &matches, seen)
+	// 匹配不到，改成转义
+	if len(matches) == 0 {
+
+	}
 	sort.SliceStable(matches, func(i, j int) bool {
 		return len([]rune(matches[i].name)) > len([]rune(matches[j].name))
 	})
@@ -156,13 +162,15 @@ func (c *Category) matchCategoriesFromCache(value string) []matchedCategory {
 }
 
 func collectMatchedCategories(rows []store.ShopCategoryData, value string, matches *[]matchedCategory, seen map[string]struct{}) {
+	tokens := vectorsearch.Tokenize(value)
+	fmt.Println(tokens)
 	for _, row := range rows {
 		if row == nil {
 			continue
 		}
 		category, ok := row.(*shopmodels.CategoryInfo)
 		if ok {
-			name := util.NormalizeWhitespace(category.CategoryName)
+			name := strings.ToLower(util.NormalizeWhitespace(category.CategoryName))
 			if name != "" && matchKeyword(value, name, MatchContains) {
 				key := strconv.FormatInt(category.ID, 10) + ":" + name
 				if _, exists := seen[key]; !exists {
