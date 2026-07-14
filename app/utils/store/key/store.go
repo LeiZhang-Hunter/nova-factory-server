@@ -15,3 +15,7 @@ func (e *emptyKeys) GetUserId(key string) int64 {
 func (e *emptyKeys) GetTool(c *gin.Context, key string) ([]string, error) {
 	return []string{}, nil
 }
+
+func (e *emptyKeys) GetInfo(c *gin.Context, key string) (*Info, error) {
+	return nil, nil
+}

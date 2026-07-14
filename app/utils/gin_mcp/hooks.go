@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"net/http/httptest"
+	"nova-factory-server/app/constant/agent"
 	key2 "nova-factory-server/app/utils/store/key"
 )
 
@@ -24,7 +25,7 @@ func (m *GinMCP) afterHook(ctx context.Context, id any, message *mcp.ListToolsRe
 		return
 	}
 
-	key, ok := h["Authorization-Api-Key"]
+	key, ok := h[agent.AuthorizationApiKey]
 	if !ok {
 		result.Tools = make([]mcp.Tool, 0)
 		return

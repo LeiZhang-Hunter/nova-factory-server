@@ -112,6 +112,9 @@ func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiCon
 	if req.ID != 0 {
 		db = db.Where("id = ?", req.ID)
 	}
+	if req.AgentId != 0 {
+		db = db.Where("agent_id = ?", req.AgentId)
+	}
 	if strings.TrimSpace(req.Name) != "" {
 		db = db.Where("name LIKE ?", "%"+strings.TrimSpace(req.Name)+"%")
 	}
@@ -124,6 +127,7 @@ func (i *IAiConversationDaoImpl) List(c *gin.Context, req *aidatasetmodels.AiCon
 	if req.Size > 100 {
 		req.Size = 100
 	}
+
 	if req.UserId != 0 {
 		db = db.Where("create_by = ?", req.UserId)
 	} else {

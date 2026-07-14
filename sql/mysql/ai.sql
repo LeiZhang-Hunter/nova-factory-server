@@ -278,6 +278,7 @@ CREATE TABLE IF NOT EXISTS ai_conversations (
     `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
     `state` tinyint(1) NULL DEFAULT 0 COMMENT '操作状态（0正常 -1删除）',
     PRIMARY KEY (id),
+    KEY idx_agent_id (agent_id),
     KEY idx_create_time (create_time),
     KEY idx_update_time (update_time),
     KEY idx_create_by (create_by)
@@ -310,6 +311,7 @@ CREATE TABLE IF NOT EXISTS ai_agents (
     `config_version`             VARCHAR(128)    NOT NULL COMMENT '当前版本',
     `enable` tinyint(1) NULL DEFAULT 0 COMMENT '是否开启，0为关闭 1为开启',
     `suppress_pre_tool_content` tinyint(1) NULL DEFAULT 0 COMMENT '抑制工具提示是否开启，0为关闭 1为开启',
+    `forced_tool_choice_route` text NULL COMMENT '工具强制触发策略',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
