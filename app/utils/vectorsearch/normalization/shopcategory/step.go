@@ -1,11 +1,9 @@
 package shopcategory
 
 import (
-	"fmt"
 	"nova-factory-server/app/business/shop/product/shopmodels"
 	"nova-factory-server/app/constant/shop"
 	store "nova-factory-server/app/utils/store/category"
-	"nova-factory-server/app/utils/vectorsearch"
 	"nova-factory-server/app/utils/vectorsearch/normalization/api"
 	"nova-factory-server/app/utils/vectorsearch/normalization/util"
 	"sort"
@@ -161,9 +159,8 @@ func (c *Category) matchCategoriesFromCache(value string) []matchedCategory {
 	return matches
 }
 
+// collectMatchedCategories 收集分类
 func collectMatchedCategories(rows []store.ShopCategoryData, value string, matches *[]matchedCategory, seen map[string]struct{}) {
-	tokens := vectorsearch.Tokenize(value)
-	fmt.Println(tokens)
 	for _, row := range rows {
 		if row == nil {
 			continue
