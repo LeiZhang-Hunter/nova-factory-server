@@ -333,6 +333,31 @@ CREATE TABLE `sys_oper_log`  (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for sys_request_log
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_request_log`;
+CREATE TABLE `sys_request_log`  (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `log_type` VARCHAR(64) NOT NULL COMMENT '日志类型',
+    `source_module` VARCHAR(128) NOT NULL COMMENT '来源模块',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0 pending 1 success 2 failed',
+    `request_method` VARCHAR(16) NOT NULL COMMENT '请求方法',
+    `request_path` VARCHAR(512) NOT NULL COMMENT '请求路径',
+    `query_string` TEXT NULL COMMENT '查询参数',
+    `headers_json` LONGTEXT NULL COMMENT '请求头JSON',
+    `body_text` LONGTEXT NULL COMMENT '请求体',
+    `client_ip` VARCHAR(64) NULL COMMENT '客户端IP',
+    `user_agent` VARCHAR(512) NULL COMMENT 'User-Agent',
+    `error_message` LONGTEXT NULL COMMENT '错误信息',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_log_type` (`log_type`),
+    KEY `idx_status` (`status`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '请求日志记录' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
 -- Table structure for sys_permission
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_permission`;

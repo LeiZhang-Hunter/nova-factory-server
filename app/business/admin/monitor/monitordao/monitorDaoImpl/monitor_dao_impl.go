@@ -2,4 +2,4 @@ package monitorDaoImpl
 
 import "github.com/google/wire"
 
-var ProviderSet = wire.NewSet(NewLogininforDao, NewOperLog, NewJobDao)
+var ProviderSet = wire.NewSet(NewLogininforDao, NewOperLog, NewRequestLogDao, NewJobDao)
