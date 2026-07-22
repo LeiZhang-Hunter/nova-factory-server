@@ -81,6 +81,10 @@ voice:
     tts_volume: 50
     tts_pitch: 50
 vectorsearch:
+  threshold: 0.5
+  minKeep: 0
+  baseScoreMinGap: 0.08
+  baseScoreSmallGapFill: 0.7
   normalization:
     goods:
       # 商品查询通用归一化，适合做基础清洗和分类识别。

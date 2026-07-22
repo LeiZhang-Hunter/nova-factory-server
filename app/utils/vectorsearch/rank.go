@@ -4,6 +4,16 @@ import (
 	"math"
 	"sort"
 	"strings"
+
+	"github.com/spf13/viper"
+)
+
+const (
+	defaultRankThreshold             = 0.5
+	defaultRankMinKeep               = 0
+	defaultBaseScoreMinGap           = 0.08
+	defaultBaseScoreSmallGapFill     = 0.7
+	defaultBaseScoreWeakSmallGapFill = 0.2
 )
 
 // RankCandidate 表示进入应用层精排的候选文档。
@@ -84,10 +94,16 @@ func RerankCandidates(query *ProcessedQuery, candidates []RankCandidate, limit i
 		return ranked[i].Score > ranked[j].Score
 	})
 
-	threshold := calcDynamicThreshold(query, ranked)
-	minKeep := 1
-	if limit > 1 {
-		minKeep = minInt(limit, 3)
+	var threshold float64 = defaultRankThreshold
+	if !viper.IsSet("vectorsearch.threshold") {
+		threshold = calcDynamicThreshold(query, ranked)
+	} else {
+		threshold = vectorSearchRankThreshold()
+	}
+
+	var minKeep int = defaultRankMinKeep
+	if viper.IsSet("vectorsearch.minKeep") {
+		minKeep = vectorSearchRankMinKeep()
 	}
 
 	// 至少保留前几个候选，避免阈值过严导致"明明有结果却被过滤空"的体验问题。
@@ -100,9 +116,7 @@ func RerankCandidates(query *ProcessedQuery, candidates []RankCandidate, limit i
 			filtered = append(filtered, item)
 		}
 	}
-	if len(filtered) == 0 {
-		return ranked[:limit]
-	}
+
 	return filtered
 }
 
@@ -273,7 +287,7 @@ func calcDynamicThreshold(query *ProcessedQuery, ranked []RankedCandidate) float
 //
 // 这里使用 min-max 归一化：
 // - 正常情况下，把最小值压到 0，最大值压到 1
-// - 若所有分值几乎一样，则给一个保守的默认值，避免除零和无意义放大
+// - 若头尾分差过小，则给一个中性默认值，避免把微小差距放大成 1 和 0
 func normalizeBaseScores(candidates []RankCandidate) []float64 {
 	if len(candidates) == 0 {
 		return nil
@@ -290,11 +304,12 @@ func normalizeBaseScores(candidates []RankCandidate) []float64 {
 		}
 	}
 	result := make([]float64, 0, len(candidates))
-	if math.Abs(maxScore-minScore) < 1e-9 {
-		fill := 0.5
+	scoreGap := math.Abs(maxScore - minScore)
+	if scoreGap < vectorSearchBaseScoreMinGap() {
+		fill := vectorSearchBaseScoreSmallGapFill()
 		if maxScore <= 0 {
 			// 如果原始分本身也偏弱，则整体给更保守的基础分。
-			fill = 0.2
+			fill = defaultBaseScoreWeakSmallGapFill
 		}
 		for range candidates {
 			result = append(result, fill)
@@ -422,6 +437,56 @@ func maxFloat(values ...float64) float64 {
 		}
 	}
 	return maxValue
+}
+
+func vectorSearchBaseScoreMinGap() float64 {
+	if !viper.IsSet("vectorsearch.baseScoreMinGap") {
+		return defaultBaseScoreMinGap
+	}
+	minGap := viper.GetFloat64("vectorsearch.baseScoreMinGap")
+	if minGap < 0 {
+		return 0
+	}
+	return minGap
+}
+
+func vectorSearchBaseScoreSmallGapFill() float64 {
+	if !viper.IsSet("vectorsearch.baseScoreSmallGapFill") {
+		return defaultBaseScoreSmallGapFill
+	}
+	fill := viper.GetFloat64("vectorsearch.baseScoreSmallGapFill")
+	if fill < 0 {
+		return 0
+	}
+	if fill > 1 {
+		return 1
+	}
+	return fill
+}
+
+func vectorSearchRankThreshold() float64 {
+	if !viper.IsSet("vectorsearch.threshold") {
+		return defaultRankThreshold
+	}
+	threshold := viper.GetFloat64("vectorsearch.threshold")
+	if threshold < 0 {
+		return 0
+	}
+	if threshold > 1 {
+		return 1
+	}
+	return threshold
+}
+
+func vectorSearchRankMinKeep() int {
+	if !viper.IsSet("vectorsearch.minKeep") {
+		return defaultRankMinKeep
+	}
+	minKeep := viper.GetInt("vectorsearch.minKeep")
+	if minKeep < 0 {
+		return 0
+	}
+	return minKeep
 }
 
 // minInt 返回两个整数中的较小值。

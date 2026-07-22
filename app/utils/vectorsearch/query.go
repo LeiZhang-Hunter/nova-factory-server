@@ -38,7 +38,7 @@ func ProcessQueries(queries []string) ([]*ProcessedQuery, error) {
 func ProcessQuery(query string) *ProcessedQuery {
 	original := NormalizeWhitespace(query)
 	normalized := strings.ToLower(original)
-	tokens := tokenize(normalized)
+	tokens := Tokenize(normalized)
 	expanded := expandTokens(tokens)
 	categoryTerms := extractCategoryTerms(normalized, tokens)
 	keywords := dedupeKeywords(append(append(append(append([]string{normalized}, tokens...), expanded...), categoryTerms...)))
