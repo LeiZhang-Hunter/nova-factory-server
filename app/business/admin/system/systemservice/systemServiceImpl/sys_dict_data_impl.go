@@ -6,7 +6,9 @@ import (
 	"context"
 	"encoding/json"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/excel"
@@ -63,11 +65,11 @@ func (dictDataService *DictDataService) SelectDictDataByType(c *gin.Context, dic
 	}
 	return dictDataService.gzipNil
 }
-func (dictDataService *DictDataService) SelectDictDataList(c *gin.Context, dictData *systemmodels.SysDictDataDQL) (list []*systemmodels.SysDictDataVo, total int64) {
+func (dictDataService *DictDataService) SelectDictDataList(c *gin.Context, dictData *modelquery.SysDictDataDQL) (list []*modelresponse.SysDictDataVo, total int64) {
 	return dictDataService.dictDataDao.SelectDictDataList(c, dictData)
 
 }
-func (dictDataService *DictDataService) ExportDictData(c *gin.Context, dictData *systemmodels.SysDictDataDQL) (data []byte) {
+func (dictDataService *DictDataService) ExportDictData(c *gin.Context, dictData *modelquery.SysDictDataDQL) (data []byte) {
 	list, _ := dictDataService.dictDataDao.SelectDictDataList(c, dictData)
 	toExcel, err := excel.SliceToExcel(list)
 	if err != nil {
@@ -80,19 +82,19 @@ func (dictDataService *DictDataService) ExportDictData(c *gin.Context, dictData 
 	return buffer.Bytes()
 
 }
-func (dictDataService *DictDataService) SelectDictDataById(c *gin.Context, dictCode int64) (dictData *systemmodels.SysDictDataVo) {
+func (dictDataService *DictDataService) SelectDictDataById(c *gin.Context, dictCode int64) (dictData *modelresponse.SysDictDataVo) {
 	return dictDataService.dictDataDao.SelectDictDataById(c, dictCode)
 
 }
 
-func (dictDataService *DictDataService) InsertDictData(c *gin.Context, dictData *systemmodels.SysDictDataVo) {
+func (dictDataService *DictDataService) InsertDictData(c *gin.Context, dictData *modelrequest.SysDictDataDML) {
 	dictData.DictCode = snowflake.GenID()
 	dictDataService.dictDataDao.InsertDictData(c, dictData)
 	dictDataService.deleteDictCache(dictData.DictType)
 
 }
 
-func (dictDataService *DictDataService) UpdateDictData(c *gin.Context, dictData *systemmodels.SysDictDataVo) {
+func (dictDataService *DictDataService) UpdateDictData(c *gin.Context, dictData *modelrequest.SysDictDataDML) {
 	dictDataService.dictDataDao.UpdateDictData(c, dictData)
 	dictDataService.deleteDictCache(dictData.DictType)
 }

@@ -1,7 +1,10 @@
 package systemcontroller
 
 import (
-	systemModels2 "nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -9,6 +12,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+var _ = modelresponse.SysRoleVo{}
 
 type Role struct {
 	rs systemservice.IRoleService
@@ -52,13 +57,13 @@ func (rc *Role) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 查询角色列表查询
 // @Description 查询角色列表查询
 // @Tags 角色相关
-// @Param  object query systemmodels.SysRoleDQL true "查询信息"
+// @Param  object query modelquery.SysRoleDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysRoleVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysRoleVo}}  "成功"
 // @Router /system/role/list  [get]
 func (rc *Role) RoleList(c *gin.Context) {
-	role := new(systemModels2.SysRoleDQL)
+	role := new(modelquery.SysRoleDQL)
 	_ = c.ShouldBind(role)
 	if !baizeContext.IsAdmin(c) {
 		role.CreateBy = baizeContext.GetUserId(c)
@@ -68,7 +73,7 @@ func (rc *Role) RoleList(c *gin.Context) {
 }
 
 func (rc *Role) RoleExport(c *gin.Context) {
-	role := new(systemModels2.SysRoleDQL)
+	role := new(modelquery.SysRoleDQL)
 	_ = c.ShouldBind(role)
 	if !baizeContext.IsAdmin(c) {
 		role.CreateBy = baizeContext.GetUserId(c)
@@ -83,7 +88,7 @@ func (rc *Role) RoleExport(c *gin.Context) {
 // @Param id path string true "roleId"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysRoleVo}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysRoleVo}  "成功"
 // @Router /system/role/{roleId}  [get]
 func (rc *Role) RoleGetInfo(c *gin.Context) {
 	roleId := baizeContext.ParamInt64(c, "roleId")
@@ -99,13 +104,13 @@ func (rc *Role) RoleGetInfo(c *gin.Context) {
 // @Summary 添加角色
 // @Description 添加角色
 // @Tags 角色相关
-// @Param  object body systemmodels.SysRoleDML true "公司信息"
+// @Param  object body modelrequest.SysRoleDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/role  [post]
 func (rc *Role) RoleAdd(c *gin.Context) {
-	sysRole := new(systemModels2.SysRoleDML)
+	sysRole := new(modelrequest.SysRoleDML)
 	_ = c.ShouldBindJSON(sysRole)
 	if rc.rs.CheckRoleNameUnique(c, 0, sysRole.RoleName) {
 		baizeContext.Waring(c, "新增角色'"+sysRole.RoleName+"'失败，角色名称已存在")
@@ -121,13 +126,13 @@ func (rc *Role) RoleAdd(c *gin.Context) {
 // @Summary 修改角色
 // @Description 修改角色
 // @Tags 角色相关
-// @Param  object body systemmodels.SysRoleDML true "公司信息"
+// @Param  object body modelrequest.SysRoleDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/role  [put]
 func (rc *Role) RoleEdit(c *gin.Context) {
-	sysRole := new(systemModels2.SysRoleDML)
+	sysRole := new(modelrequest.SysRoleDML)
 	_ = c.ShouldBindJSON(sysRole)
 	if sysRole.RoleId == 1 {
 		baizeContext.Waring(c, "admin角色不能修改")
@@ -146,13 +151,13 @@ func (rc *Role) RoleEdit(c *gin.Context) {
 // @Summary 修改角色状态
 // @Description 修改角色状态
 // @Tags 角色相关
-// @Param  object body systemmodels.SysRoleDML true "公司信息"
+// @Param  object body modelrequest.SysRoleDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/role/changeStatus  [put]
 func (rc *Role) RoleChangeStatus(c *gin.Context) {
-	sysRole := new(systemModels2.SysRoleDML)
+	sysRole := new(modelrequest.SysRoleDML)
 	_ = c.ShouldBindJSON(sysRole)
 	sysRole.SetUpdateBy(baizeContext.GetUserId(c))
 	rc.rs.UpdateRoleStatus(c, sysRole)
@@ -182,13 +187,13 @@ func (rc *Role) RoleRemove(c *gin.Context) {
 // @Summary 查询角色授权用户列表查询
 // @Description 查询角色授权用户列表查询
 // @Tags 角色相关
-// @Param  object query systemmodels.SysRoleAndUserDQL true "查询信息"
+// @Param  object query modelquery.SysRoleAndUserDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysUserVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysUserVo}}  "成功"
 // @Router /system/role/changeStatus  [get]
 func (rc *Role) AllocatedList(c *gin.Context) {
-	user := new(systemModels2.SysRoleAndUserDQL)
+	user := new(modelquery.SysRoleAndUserDQL)
 	if err := c.ShouldBind(user); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -203,13 +208,13 @@ func (rc *Role) AllocatedList(c *gin.Context) {
 // @Summary 查询角色未授权用户列表查询
 // @Description 查询角色未授权用户列表查询
 // @Tags 角色相关
-// @Param  object query systemmodels.SysRoleAndUserDQL true "查询信息"
+// @Param  object query modelquery.SysRoleAndUserDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysUserVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysUserVo}}  "成功"
 // @Router /system/role/authUser/unallocatedList  [put]
 func (rc *Role) UnallocatedList(c *gin.Context) {
-	user := new(systemModels2.SysRoleAndUserDQL)
+	user := new(modelquery.SysRoleAndUserDQL)
 	if err := c.ShouldBind(user); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -238,13 +243,13 @@ func (rc *Role) InsertAuthUser(c *gin.Context) {
 // @Summary 取消用户角色
 // @Description 取消用户角色
 // @Tags 角色相关
-// @Param  object body systemmodels.SysUserRole  true  "用户id角色id"
+// @Param  object body modelentity.SysUserRole  true  "用户id角色id"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/role/authUser/cancel  [put]
 func (rc *Role) CancelAuthUser(c *gin.Context) {
-	userRole := new(systemModels2.SysUserRole)
+	userRole := new(modelentity.SysUserRole)
 	if err := c.ShouldBindJSON(userRole); err != nil {
 		baizeContext.ParameterError(c)
 		return

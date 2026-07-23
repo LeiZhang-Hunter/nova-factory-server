@@ -3,7 +3,10 @@ package systemdaoimpl
 import (
 	"errors"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/constant/commonStatus"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/snowflake"
@@ -25,8 +28,8 @@ func NewISysShiftDaoImpl(db *gorm.DB) systemdao.ISysShiftDao {
 	}
 }
 
-func (i *ISysShiftDaoImpl) Set(c *gin.Context, valueVO *systemmodels.SysWorkShiftSettingVO) (*systemmodels.SysWorkShiftSetting, error) {
-	value, err := systemmodels.ToSysWorkShiftSetting(valueVO)
+func (i *ISysShiftDaoImpl) Set(c *gin.Context, valueVO *modelrequest.SysWorkShiftSettingVO) (*modelentity.SysWorkShiftSetting, error) {
+	value, err := modelrequest.ToSysWorkShiftSetting(valueVO)
 	if err != nil {
 		return nil, err
 	}
@@ -48,10 +51,10 @@ func (i *ISysShiftDaoImpl) Remove(c *gin.Context, ids []string) error {
 	return ret.Error
 }
 
-func (i *ISysShiftDaoImpl) List(c *gin.Context, req *systemmodels.SysWorkShiftSettingReq) (*systemmodels.SysWorkShiftSettingList, error) {
+func (i *ISysShiftDaoImpl) List(c *gin.Context, req *modelquery.SysWorkShiftSettingReq) (*modelresponse.SysWorkShiftSettingList, error) {
 	db := i.db.Table(i.table)
 	if req == nil {
-		req = &systemmodels.SysWorkShiftSettingReq{}
+		req = &modelquery.SysWorkShiftSettingReq{}
 	}
 	if req.Name != "" {
 		db = db.Where("name like ?", "%"+req.Name+"%")
@@ -75,29 +78,29 @@ func (i *ISysShiftDaoImpl) List(c *gin.Context, req *systemmodels.SysWorkShiftSe
 	var total int64
 	ret := db.Count(&total)
 	if ret.Error != nil {
-		return &systemmodels.SysWorkShiftSettingList{
-			Rows:  make([]*systemmodels.SysWorkShiftSetting, 0),
+		return &modelresponse.SysWorkShiftSettingList{
+			Rows:  make([]*modelentity.SysWorkShiftSetting, 0),
 			Total: 0,
 		}, ret.Error
 	}
-	var dto []*systemmodels.SysWorkShiftSetting
+	var dto []*modelentity.SysWorkShiftSetting
 	ret = db.Offset(offset).Limit(size).Order("create_time desc").Find(&dto)
 	if ret.Error != nil {
-		return &systemmodels.SysWorkShiftSettingList{
-			Rows:  make([]*systemmodels.SysWorkShiftSetting, 0),
+		return &modelresponse.SysWorkShiftSettingList{
+			Rows:  make([]*modelentity.SysWorkShiftSetting, 0),
 			Total: 0,
 		}, ret.Error
 	}
 
-	return &systemmodels.SysWorkShiftSettingList{
+	return &modelresponse.SysWorkShiftSettingList{
 		Rows:  dto,
 		Total: total,
 	}, nil
 }
 
 // Check 查询时间是否冲突
-func (i *ISysShiftDaoImpl) Check(c *gin.Context, id int64, startTime int32, endTime int32) *systemmodels.SysWorkShiftSetting {
-	var info *systemmodels.SysWorkShiftSetting
+func (i *ISysShiftDaoImpl) Check(c *gin.Context, id int64, startTime int32, endTime int32) *modelentity.SysWorkShiftSetting {
+	var info *modelentity.SysWorkShiftSetting
 	_ = i.db.Table(i.table).Where("id != ?", id).Where("begin_time < ?", endTime).Where("end_time  > ?", endTime).Where("status = ?", true).Where("state = ?", commonStatus.NORMAL).First(&info)
 	if info != nil && info.ID != 0 {
 		return info
@@ -120,8 +123,8 @@ func (i *ISysShiftDaoImpl) Check(c *gin.Context, id int64, startTime int32, endT
 	return nil
 }
 
-func (i *ISysShiftDaoImpl) GetEnableShift(c *gin.Context) ([]*systemmodels.SysWorkShiftSetting, error) {
-	var dto []*systemmodels.SysWorkShiftSetting
+func (i *ISysShiftDaoImpl) GetEnableShift(c *gin.Context) ([]*modelentity.SysWorkShiftSetting, error) {
+	var dto []*modelentity.SysWorkShiftSetting
 	ret := i.db.Table(i.table).Where("status = ?", 1).Where("state = ?", commonStatus.NORMAL).Find(&dto)
 	if errors.Is(ret.Error, gorm.ErrRecordNotFound) {
 		return nil, nil

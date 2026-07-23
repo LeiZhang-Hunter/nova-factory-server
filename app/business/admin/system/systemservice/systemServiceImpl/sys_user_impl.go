@@ -5,7 +5,11 @@ import (
 	"nova-factory-server/app/baize"
 	systemDao2 "nova-factory-server/app/business/admin/system/systemdao"
 	systemDaoImpl2 "nova-factory-server/app/business/admin/system/systemdao/systemdaoimpl"
-	systemModels2 "nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
+	modelimporter "nova-factory-server/app/business/admin/system/systemmodels/importer"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	systemService2 "nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/constant/dataScopeAspect"
 	"nova-factory-server/app/constant/sessionStatus"
@@ -54,15 +58,15 @@ func NewUserService(ms sqly.SqlyContext, ud systemDao2.IUserDao, upd systemDao2.
 	}
 }
 
-func (userService *UserService) SelectUserByUserName(c *gin.Context, userName string) *systemModels2.User {
+func (userService *UserService) SelectUserByUserName(c *gin.Context, userName string) *modelentity.User {
 	return userService.userDao.SelectUserByUserName(c, userName)
 
 }
-func (userService *UserService) SelectUserList(c *gin.Context, user *systemModels2.SysUserDQL) (sysUserList []*systemModels2.SysUserVo, total int64) {
+func (userService *UserService) SelectUserList(c *gin.Context, user *modelquery.SysUserDQL) (sysUserList []*modelresponse.SysUserVo, total int64) {
 	return userService.userDao.SelectUserList(c, user)
 }
 
-func (userService *UserService) UserExport(c *gin.Context, user *systemModels2.SysUserDQL) (data []byte) {
+func (userService *UserService) UserExport(c *gin.Context, user *modelquery.SysUserDQL) (data []byte) {
 	sysUserList := userService.userDao.SelectUserListAll(c, user)
 	toExcel, err := excel.SliceToExcel(sysUserList)
 	if err != nil {
@@ -77,10 +81,10 @@ func (userService *UserService) UserExport(c *gin.Context, user *systemModels2.S
 
 func (userService *UserService) ImportTemplate(c *gin.Context) (data []byte) {
 	f := excelize.NewFile()
-	dept := new(systemModels2.SysDeptDQL)
+	dept := new(modelquery.SysDeptDQL)
 	dept.DataScope = baizeContext.GetDataScope(c, "d")
 	list := userService.deptDao.SelectDeptList(c, dept)
-	all := systemModels2.GetParentNameAll(list)
+	all := modelresponse.GetParentNameAll(list)
 	sqref := "C2:C100"
 	dvRange1 := excelize.NewDataValidation(true)
 	dvRange1.Sqref = sqref
@@ -126,8 +130,8 @@ func (userService *UserService) ImportTemplate(c *gin.Context) (data []byte) {
 
 }
 
-func (userService *UserService) SelectUserAndAccreditById(c *gin.Context, userId int64) (sysUser *systemModels2.UserAndAccredit) {
-	uaa := new(systemModels2.UserAndAccredit)
+func (userService *UserService) SelectUserAndAccreditById(c *gin.Context, userId int64) (sysUser *modelresponse.UserAndAccredit) {
+	uaa := new(modelresponse.UserAndAccredit)
 	uaa.User = userService.userDao.SelectUserById(c, userId)
 	uaa.Posts = userService.postDao.SelectPostAll(c)
 	rIds := userService.roleDao.SelectRoleListByUserId(c, userId)
@@ -147,8 +151,8 @@ func (userService *UserService) SelectUserAndAccreditById(c *gin.Context, userId
 	}
 	return uaa
 }
-func (userService *UserService) SelectAccredit(c *gin.Context) (sysUser *systemModels2.Accredit) {
-	ua := new(systemModels2.Accredit)
+func (userService *UserService) SelectAccredit(c *gin.Context) (sysUser *modelresponse.Accredit) {
+	ua := new(modelresponse.Accredit)
 	if baizeContext.IsAdmin(c) {
 		ua.Roles = userService.roleDao.SelectRoleIdAndNameAll(c)
 	} else {
@@ -158,7 +162,7 @@ func (userService *UserService) SelectAccredit(c *gin.Context) (sysUser *systemM
 	return ua
 }
 
-func (userService *UserService) InsertUser(c *gin.Context, sysUser *systemModels2.SysUserDML) {
+func (userService *UserService) InsertUser(c *gin.Context, sysUser *modelrequest.SysUserDML) {
 	sysUser.UserId = snowflake.GenID()
 	sysUser.Password = bCryptPasswordEncoder.HashPassword(sysUser.Password)
 	tx := userService.ms.MustBeginTx(c, nil)
@@ -187,7 +191,7 @@ func (userService *UserService) InsertUser(c *gin.Context, sysUser *systemModels
 
 }
 
-func (userService *UserService) UpdateUser(c *gin.Context, sysUser *systemModels2.SysUserDML) {
+func (userService *UserService) UpdateUser(c *gin.Context, sysUser *modelrequest.SysUserDML) {
 	userId := sysUser.UserId
 	tx := userService.ms.MustBeginTx(c, nil)
 
@@ -215,8 +219,8 @@ func (userService *UserService) UpdateUser(c *gin.Context, sysUser *systemModels
 	ud.UpdateUser(c, sysUser)
 }
 
-func (userService *UserService) UpdateUserStatus(c *gin.Context, sysUser *systemModels2.EditUserStatus) {
-	s := new(systemModels2.SysUserDML)
+func (userService *UserService) UpdateUserStatus(c *gin.Context, sysUser *modelrequest.EditUserStatus) {
+	s := new(modelrequest.SysUserDML)
 	s.UserId = sysUser.UserId
 	s.Status = sysUser.Status
 	s.BaseEntity = sysUser.BaseEntity
@@ -228,30 +232,30 @@ func (userService *UserService) ResetPwd(c *gin.Context, userId int64, password 
 
 }
 
-func (userService *UserService) insertUserPost(userId int64, posts []string) (userPost []*systemModels2.SysUserPost) {
+func (userService *UserService) insertUserPost(userId int64, posts []string) (userPost []*modelentity.SysUserPost) {
 
-	list := make([]*systemModels2.SysUserPost, 0, len(posts))
+	list := make([]*modelentity.SysUserPost, 0, len(posts))
 	for _, postId := range posts {
 		i, err := strconv.ParseInt(postId, 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		post := systemModels2.NewSysUserPost(userId, i)
+		post := modelentity.NewSysUserPost(userId, i)
 		list = append(list, post)
 	}
 	return list
 
 }
 
-func (userService *UserService) insertUserRole(userId int64, roles []string) (users []*systemModels2.SysUserRole) {
+func (userService *UserService) insertUserRole(userId int64, roles []string) (users []*modelentity.SysUserRole) {
 
-	list := make([]*systemModels2.SysUserRole, 0, len(roles))
+	list := make([]*modelentity.SysUserRole, 0, len(roles))
 	for _, roleId := range roles {
 		i, err := strconv.ParseInt(roleId, 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		role := systemModels2.NewSysUserRole(userId, i)
+		role := modelentity.NewSysUserRole(userId, i)
 		list = append(list, role)
 	}
 	return list
@@ -327,13 +331,13 @@ func (userService *UserService) UserImportData(c *gin.Context, fileHeader *multi
 			userNameSet.Add(row[0])
 		}
 	}
-	dept := new(systemModels2.SysDeptDQL)
+	dept := new(modelquery.SysDeptDQL)
 	dept.DataScope = baizeContext.GetDataScope(c, "d")
 	dl := userService.deptDao.SelectDeptList(c, dept)
-	ids := systemModels2.GetParentNameAndIds(dl)
-	list := make([]*systemModels2.SysUserDML, 0)
+	ids := modelresponse.GetParentNameAndIds(dl)
+	list := make([]*modelrequest.SysUserDML, 0)
 	password := bCryptPasswordEncoder.HashPassword(userService.cs.SelectConfigValueByKey(c, "sys.account.initPassword"))
-	list, msg, failureNum = systemModels2.RowsToSysUserDMLList(rows, msg, failureNum, ids, password, baizeContext.GetUserId(c))
+	list, msg, failureNum = modelimporter.RowsToSysUserDMLList(rows, msg, failureNum, ids, password, baizeContext.GetUserId(c))
 	names := userService.userDao.SelectUserNameByUserName(c, userNameSet.ToSlice())
 	for _, name := range names {
 		failureNum++
@@ -367,7 +371,7 @@ func (userService *UserService) UpdateUserAvatar(c *gin.Context, file *multipart
 func (userService *UserService) ResetUserPwd(c *gin.Context, userId int64, password string) {
 	userService.userDao.ResetUserPwd(c, userId, bCryptPasswordEncoder.HashPassword(password))
 }
-func (userService *UserService) UpdateUserProfile(c *gin.Context, sysUser *systemModels2.SysUserDML) {
+func (userService *UserService) UpdateUserProfile(c *gin.Context, sysUser *modelrequest.SysUserDML) {
 	userService.userDao.UpdateUser(c, sysUser)
 
 }
@@ -378,18 +382,18 @@ func (userService *UserService) MatchesPassword(c *gin.Context, rawPassword stri
 func (userService *UserService) InsertUserAuth(c *gin.Context, userId int64, roleIds []int64) {
 	userService.userRoleDao.DeleteUserRoleByUserId(c, userId)
 	if len(roleIds) != 0 {
-		list := make([]*systemModels2.SysUserRole, 0, len(roleIds))
+		list := make([]*modelentity.SysUserRole, 0, len(roleIds))
 		for _, roleId := range roleIds {
-			role := systemModels2.NewSysUserRole(userId, roleId)
+			role := modelentity.NewSysUserRole(userId, roleId)
 			list = append(list, role)
 		}
 		userService.userRoleDao.BatchUserRole(c, list)
 	}
 }
-func (userService *UserService) GetUserAuthRole(c *gin.Context, userId int64) *systemModels2.UserAndRoles {
-	uar := new(systemModels2.UserAndRoles)
+func (userService *UserService) GetUserAuthRole(c *gin.Context, userId int64) *modelresponse.UserAndRoles {
+	uar := new(modelresponse.UserAndRoles)
 	uar.User = userService.userDao.SelectUserById(c, userId)
-	s := new(systemModels2.SysRoleDQL)
+	s := new(modelquery.SysRoleDQL)
 	if !baizeContext.IsAdmin(c) {
 		s.CreateBy = baizeContext.GetUserId(c)
 	}
@@ -406,9 +410,9 @@ func (userService *UserService) GetUserAuthRole(c *gin.Context, userId int64) *s
 	return uar
 }
 
-func (userService *UserService) GetUserProfile(c *gin.Context) *systemModels2.UserProfile {
+func (userService *UserService) GetUserProfile(c *gin.Context) *modelresponse.UserProfile {
 	userId := baizeContext.GetUserId(c)
-	up := new(systemModels2.UserProfile)
+	up := new(modelresponse.UserProfile)
 	up.User = userService.userDao.SelectUserById(c, userId)
 	roles := userService.roleDao.SelectBasicRolesByUserId(c, userId)
 	roleNames := make([]string, 0, len(roles))
@@ -421,9 +425,9 @@ func (userService *UserService) GetUserProfile(c *gin.Context) *systemModels2.Us
 	return up
 }
 
-func (userService *UserService) UpdateUserDataScope(c *gin.Context, uds *systemModels2.SysUserDataScope) {
+func (userService *UserService) UpdateUserDataScope(c *gin.Context, uds *modelrequest.SysUserDataScope) {
 	userId := uds.UserId
-	su := new(systemModels2.SysUserDML)
+	su := new(modelrequest.SysUserDML)
 	su.SetUpdateBy(baizeContext.GetUserId(c))
 	su.UserId = userId
 	su.DataScope = uds.DataScope
@@ -440,20 +444,20 @@ func (userService *UserService) UpdateUserDataScope(c *gin.Context, uds *systemM
 	udsd.DeleteUserDeptScopeByUserId(c, userId)
 	systemDaoImpl2.NewSysUserDao(tx).UpdateUser(c, su)
 	if uds.DataScope == dataScopeAspect.DataScopeCustom && len(uds.DeptIds) != 0 {
-		scopes := make([]*systemModels2.SysUserDeptScope, 0, len(uds.DeptIds))
+		scopes := make([]*modelentity.SysUserDeptScope, 0, len(uds.DeptIds))
 		for _, id := range uds.DeptIds {
 			i, err := strconv.ParseInt(id, 10, 64)
 			if err != nil {
 				panic(err)
 			}
-			scopes = append(scopes, &systemModels2.SysUserDeptScope{UserId: userId, DeptId: i})
+			scopes = append(scopes, &modelentity.SysUserDeptScope{UserId: userId, DeptId: i})
 		}
 		udsd.BatchUserDeptScope(c, scopes)
 	}
 }
 
-func (userService *UserService) SelectUserDataScope(c *gin.Context, userId int64) *systemModels2.SysUserDataScope {
-	s := new(systemModels2.SysUserDataScope)
+func (userService *UserService) SelectUserDataScope(c *gin.Context, userId int64) *modelrequest.SysUserDataScope {
+	s := new(modelrequest.SysUserDataScope)
 	s.UserId = userId
 	s.DataScope = userService.userDao.SelectUserById(c, userId).DataScope
 	if s.DataScope == dataScopeAspect.DataScopeCustom {

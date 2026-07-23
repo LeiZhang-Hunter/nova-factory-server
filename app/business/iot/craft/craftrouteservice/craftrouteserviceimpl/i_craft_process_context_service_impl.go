@@ -2,7 +2,7 @@ package craftrouteserviceimpl
 
 import (
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
 	"nova-factory-server/app/business/iot/craft/craftroutedao"
 	"nova-factory-server/app/business/iot/craft/craftroutemodels"
 	"nova-factory-server/app/business/iot/craft/craftrouteservice"
@@ -64,7 +64,7 @@ func (i *ICraftProcessContextServiceImpl) List(c *gin.Context, req *craftroutemo
 	}
 
 	users := i.iUserDao.SelectByUserIds(c, userIds)
-	userVoMap := make(map[int64]*systemmodels.SysUserDML)
+	userVoMap := make(map[int64]*modelrequest.SysUserDML)
 	for _, v := range users {
 		userVoMap[v.UserId] = v
 	}

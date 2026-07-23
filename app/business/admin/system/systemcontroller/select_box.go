@@ -2,6 +2,7 @@ package systemcontroller
 
 import (
 	"nova-factory-server/app/baize"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+var _ = modelresponse.SelectPermission{}
 
 type SelectBox struct {
 	sbs systemservice.ISelectBoxService
@@ -34,7 +37,7 @@ func (s *SelectBox) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Tags 下拉框选项
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SelectPermission}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SelectPermission}  "成功"
 // @Router /system/selectBox/permission  [get]
 func (s *SelectBox) SelectPermission(c *gin.Context) {
 	baizeContext.SuccessData(c, s.sbs.SelectPermissionBox(c))
@@ -46,7 +49,7 @@ func (s *SelectBox) SelectPermission(c *gin.Context) {
 // @Tags 下拉框选项
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SelectPermission}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SelectPermission}  "成功"
 // @Router /system/selectBox/dept  [get]
 func (s *SelectBox) SelectDept(c *gin.Context) {
 	be := new(baize.BaseEntityDQL)

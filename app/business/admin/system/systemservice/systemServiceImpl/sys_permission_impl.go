@@ -3,7 +3,9 @@ package systemServiceImpl
 import (
 	"context"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/utils/snowflake"
 
@@ -17,27 +19,27 @@ type PermissionService struct {
 func NewPermissionService(pd systemdao.IPermissionDao) systemservice.ISysPermissionService {
 	return &PermissionService{pd: pd}
 }
-func (ps *PermissionService) SelectPermissionList(c *gin.Context, permission *systemmodels.SysPermissionDQL) (list []*systemmodels.SysPermissionVo) {
+func (ps *PermissionService) SelectPermissionList(c *gin.Context, permission *modelquery.SysPermissionDQL) (list []*modelresponse.SysPermissionVo) {
 
 	list = ps.pd.SelectPermissionList(c, permission)
 	return
 }
 
-func (ps *PermissionService) SelectPermissionById(ctx context.Context, permissionId int64) (Permission *systemmodels.SysPermissionVo) {
+func (ps *PermissionService) SelectPermissionById(ctx context.Context, permissionId int64) (Permission *modelresponse.SysPermissionVo) {
 	return ps.pd.SelectPermissionById(ctx, permissionId)
 }
 
-func (ps *PermissionService) SelectPermissionListByRoleIds(ctx context.Context, roleIds []int64) (list []*systemmodels.SysPermissionVo) {
+func (ps *PermissionService) SelectPermissionListByRoleIds(ctx context.Context, roleIds []int64) (list []*modelresponse.SysPermissionVo) {
 	return ps.pd.SelectPermissionListByRoleIds(ctx, roleIds)
 }
 
-func (ps *PermissionService) InsertPermission(ctx context.Context, permission *systemmodels.SysPermissionAdd) {
+func (ps *PermissionService) InsertPermission(ctx context.Context, permission *modelrequest.SysPermissionAdd) {
 	permission.PermissionId = snowflake.GenID()
 	permission.Status = "0"
 	ps.pd.InsertPermission(ctx, permission)
 }
 
-func (ps *PermissionService) UpdatePermission(ctx context.Context, permission *systemmodels.SysPermissionEdit) {
+func (ps *PermissionService) UpdatePermission(ctx context.Context, permission *modelrequest.SysPermissionEdit) {
 	ps.pd.UpdatePermission(ctx, permission)
 }
 

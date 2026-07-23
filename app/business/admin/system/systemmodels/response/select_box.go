@@ -1,4 +1,4 @@
-package systemmodels
+package response
 
 type SelectPermission struct {
 	PermissionId   int64  `json:"permissionId,string" db:"permission_id"`

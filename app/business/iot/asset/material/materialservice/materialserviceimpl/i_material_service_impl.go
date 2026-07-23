@@ -4,7 +4,7 @@ import (
 	"errors"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
 	"nova-factory-server/app/business/iot/asset/material/materialdao"
 	materialModels2 "nova-factory-server/app/business/iot/asset/material/materialmodels"
 	"nova-factory-server/app/business/iot/asset/material/materialservice"
@@ -91,7 +91,7 @@ func (m *MaterialService) SelectMaterialList(c *gin.Context, req *materialModels
 	}
 
 	users := m.iUserDao.SelectByUserIds(c, userIds)
-	userVoMap := make(map[int64]*systemmodels.SysUserDML)
+	userVoMap := make(map[int64]*modelrequest.SysUserDML)
 	for _, v := range users {
 		userVoMap[v.UserId] = v
 	}
@@ -181,7 +181,7 @@ func (m *MaterialService) InboundList(c *gin.Context, req *materialModels2.Inbou
 	}
 
 	users := m.iUserDao.SelectByUserIds(c, userIds)
-	userVoMap := make(map[int64]*systemmodels.SysUserDML)
+	userVoMap := make(map[int64]*modelrequest.SysUserDML)
 	for _, v := range users {
 		userVoMap[v.UserId] = v
 	}
@@ -231,7 +231,7 @@ func (m *MaterialService) OutboundList(c *gin.Context, req *materialModels2.Outb
 	}
 
 	users := m.iUserDao.SelectByUserIds(c, userIds)
-	userVoMap := make(map[int64]*systemmodels.SysUserDML)
+	userVoMap := make(map[int64]*modelrequest.SysUserDML)
 	for _, v := range users {
 		userVoMap[v.UserId] = v
 	}

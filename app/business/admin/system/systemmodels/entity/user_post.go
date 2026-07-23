@@ -1,4 +1,4 @@
-package systemmodels
+package entity
 
 type SysUserPost struct {
 	UserId int64 `db:"user_id"`

@@ -1,7 +1,9 @@
 package systemcontroller
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -9,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+var _ = modelresponse.SysPostVo{}
 
 type Post struct {
 	ps systemservice.IPostService
@@ -41,13 +45,13 @@ func (pc *Post) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 查询岗位列表查询
 // @Description 查询岗位列表查询
 // @Tags 岗位相关
-// @Param  object query systemmodels.SysPostDQL true "查询信息"
+// @Param  object query modelquery.SysPostDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysPostVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysPostVo}}  "成功"
 // @Router /system/post/list  [get]
 func (pc *Post) PostList(c *gin.Context) {
-	post := new(systemmodels.SysPostDQL)
+	post := new(modelquery.SysPostDQL)
 	_ = c.ShouldBind(post)
 	list, count := pc.ps.SelectPostList(c, post)
 	baizeContext.SuccessListData(c, list, count)
@@ -58,13 +62,13 @@ func (pc *Post) PostList(c *gin.Context) {
 // @Summary 导出岗位
 // @Description 导出岗位
 // @Tags 岗位相关
-// @Param  object query systemmodels.SysPostDQL true "查询信息"
+// @Param  object query modelquery.SysPostDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/octet-stream
 // @Success 200 {object} []byte
 // @Router /system/post/export [post]
 func (pc *Post) PostExport(c *gin.Context) {
-	post := new(systemmodels.SysPostDQL)
+	post := new(modelquery.SysPostDQL)
 	_ = c.ShouldBind(post)
 	data := pc.ps.PostExport(c, post)
 	baizeContext.DataPackageExcel(c, data)
@@ -77,7 +81,7 @@ func (pc *Post) PostExport(c *gin.Context) {
 // @Param id path string true "PostId"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysPostVo}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysPostVo}  "成功"
 // @Router /system/post/{postId}  [get]
 func (pc *Post) PostGetInfo(c *gin.Context) {
 	postId := baizeContext.ParamInt64(c, "postId")
@@ -92,13 +96,13 @@ func (pc *Post) PostGetInfo(c *gin.Context) {
 // @Summary 添加岗位
 // @Description 添加岗位
 // @Tags 岗位相关
-// @Param  object body systemmodels.SysPostVo true "公司信息"
+// @Param  object body modelrequest.SysPostDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/post  [post]
 func (pc *Post) PostAdd(c *gin.Context) {
-	sysPost := new(systemmodels.SysPostVo)
+	sysPost := new(modelrequest.SysPostDML)
 	if err := c.ShouldBindJSON(sysPost); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -112,13 +116,13 @@ func (pc *Post) PostAdd(c *gin.Context) {
 // @Summary 修改岗位
 // @Description 修改岗位
 // @Tags 岗位相关
-// @Param  object body systemmodels.SysPostVo true "公司信息"
+// @Param  object body modelrequest.SysPostDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/post  [put]
 func (pc *Post) PostEdit(c *gin.Context) {
-	post := new(systemmodels.SysPostVo)
+	post := new(modelrequest.SysPostDML)
 	if err := c.ShouldBindJSON(post); err != nil {
 		baizeContext.ParameterError(c)
 		return

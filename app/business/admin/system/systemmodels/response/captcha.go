@@ -1,4 +1,4 @@
-package systemmodels
+package response
 
 type CaptchaVo struct {
 	Id              string `json:"uuid"`

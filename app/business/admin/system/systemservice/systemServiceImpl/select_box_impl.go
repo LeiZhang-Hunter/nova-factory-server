@@ -3,7 +3,7 @@ package systemServiceImpl
 import (
 	"nova-factory-server/app/baize"
 	systemDao2 "nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/utils/baizeContext"
 
@@ -19,10 +19,10 @@ func NewSelectService(pd systemDao2.IPermissionDao, dd systemDao2.IDeptDao) syst
 	return &SelectService{pd: pd, dd: dd}
 }
 
-func (cs *SelectService) SelectPermissionBox(c *gin.Context) (list []*systemmodels.SelectPermission) {
+func (cs *SelectService) SelectPermissionBox(c *gin.Context) (list []*modelresponse.SelectPermission) {
 	return cs.pd.SelectPermissionListSelectBoxByPerm(c, baizeContext.GetPermission(c))
 }
 
-func (cs *SelectService) SelectDeptBox(c *gin.Context, be *baize.BaseEntityDQL) (list []*systemmodels.SelectDept) {
+func (cs *SelectService) SelectDeptBox(c *gin.Context, be *baize.BaseEntityDQL) (list []*modelresponse.SelectDept) {
 	return cs.dd.SelectDeptListSelectBox(c, be)
 }

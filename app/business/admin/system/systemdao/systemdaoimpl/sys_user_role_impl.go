@@ -3,7 +3,7 @@ package systemdaoimpl
 import (
 	"context"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
 
 	"github.com/baizeplus/sqly"
 )
@@ -27,7 +27,7 @@ func (sysUserRoleDao *sysUserRoleDao) DeleteUserRole(ctx context.Context, ids []
 	}
 }
 
-func (sysUserRoleDao *sysUserRoleDao) BatchUserRole(ctx context.Context, users []*systemmodels.SysUserRole) {
+func (sysUserRoleDao *sysUserRoleDao) BatchUserRole(ctx context.Context, users []*modelentity.SysUserRole) {
 
 	_, err := sysUserRoleDao.ms.NamedExecContext(ctx, "insert into sys_user_role(user_id, role_id) values (:user_id,:role_id)", users)
 	if err != nil {
@@ -54,7 +54,7 @@ func (sysUserRoleDao *sysUserRoleDao) CountUserRoleByRoleId(ctx context.Context,
 	}
 	return count
 }
-func (sysUserRoleDao *sysUserRoleDao) DeleteUserRoleInfo(ctx context.Context, userRole *systemmodels.SysUserRole) {
+func (sysUserRoleDao *sysUserRoleDao) DeleteUserRoleInfo(ctx context.Context, userRole *modelentity.SysUserRole) {
 	_, err := sysUserRoleDao.ms.NamedExecContext(ctx, "delete from sys_user_role where user_id=:user_id and role_id=:role_id", userRole)
 	if err != nil {
 		panic(err)

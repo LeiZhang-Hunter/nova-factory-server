@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"nova-factory-server/app/business/admin/monitor/monitormodels"
 	"nova-factory-server/app/business/admin/monitor/monitorservice"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/setting"
 
@@ -36,7 +36,7 @@ func (r *RedisSubscribe) SubscribeNotification() {
 	defer subscribe.Close()
 	ch := subscribe.Channel()
 	for msg := range ch {
-		var sse systemmodels.Sse
+		var sse modelentity.Sse
 		err := json.Unmarshal([]byte(msg.Payload), &sse)
 		if err != nil {
 			zap.L().Error("sse unmarshal error", zap.Error(err))

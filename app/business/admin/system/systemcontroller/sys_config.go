@@ -1,7 +1,9 @@
 package systemcontroller
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -9,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+var _ = modelresponse.SysConfigVo{}
 
 type Config struct {
 	cs systemservice.IConfigService
@@ -41,13 +45,13 @@ func (cc *Config) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 查询配置列表查询
 // @Description 查询配置列表查询
 // @Tags 配置相关
-// @Param  object query systemmodels.SysConfigDQL true "查询信息"
+// @Param  object query modelquery.SysConfigDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysConfigVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysConfigVo}}  "成功"
 // @Router /system/config/list  [get]
 func (cc *Config) ConfigList(c *gin.Context) {
-	config := new(systemmodels.SysConfigDQL)
+	config := new(modelquery.SysConfigDQL)
 	_ = c.ShouldBind(config)
 	list, count := cc.cs.SelectConfigList(c, config)
 	baizeContext.SuccessListData(c, list, count)
@@ -57,13 +61,13 @@ func (cc *Config) ConfigList(c *gin.Context) {
 // @Summary 导出配置
 // @Description 导出配置
 // @Tags 配置相关
-// @Param  object query systemmodels.SysConfigDQL true "查询信息"
+// @Param  object query modelquery.SysConfigDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/octet-stream
 // @Success 200 {object} []byte
 // @Router /system/config/export [post]
 func (cc *Config) ConfigExport(c *gin.Context) {
-	config := new(systemmodels.SysConfigDQL)
+	config := new(modelquery.SysConfigDQL)
 	_ = c.ShouldBind(config)
 	baizeContext.DataPackageExcel(c, cc.cs.ConfigExport(c, config))
 }
@@ -75,7 +79,7 @@ func (cc *Config) ConfigExport(c *gin.Context) {
 // @Param id path string true "ConfigId"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysConfigVo}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysConfigVo}  "成功"
 // @Router /system/config/{configId}  [get]
 func (cc *Config) ConfigGetInfo(c *gin.Context) {
 	ConfigId := baizeContext.ParamInt64(c, "configId")
@@ -90,13 +94,13 @@ func (cc *Config) ConfigGetInfo(c *gin.Context) {
 // @Summary 添加配置
 // @Description 添加配置
 // @Tags 配置相关
-// @Param  object body systemmodels.SysConfigVo true "公司信息"
+// @Param  object body modelrequest.SysConfigDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/Config  [post]
 func (cc *Config) ConfigAdd(c *gin.Context) {
-	sysConfig := new(systemmodels.SysConfigVo)
+	sysConfig := new(modelrequest.SysConfigDML)
 	if err := c.ShouldBindJSON(sysConfig); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -114,13 +118,13 @@ func (cc *Config) ConfigAdd(c *gin.Context) {
 // @Summary 修改配置
 // @Description 修改配置
 // @Tags 配置相关
-// @Param  object body systemmodels.SysConfigVo true "公司信息"
+// @Param  object body modelrequest.SysConfigDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/Config  [put]
 func (cc *Config) ConfigEdit(c *gin.Context) {
-	sysConfig := new(systemmodels.SysConfigVo)
+	sysConfig := new(modelrequest.SysConfigDML)
 	if err := c.ShouldBindJSON(sysConfig); err != nil {
 		baizeContext.ParameterError(c)
 		return

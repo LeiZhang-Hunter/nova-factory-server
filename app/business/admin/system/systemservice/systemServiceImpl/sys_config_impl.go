@@ -2,7 +2,9 @@ package systemServiceImpl
 
 import (
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/excel"
@@ -21,10 +23,10 @@ func NewConfigService(cd systemdao.IConfigDao,
 	return &ConfigService{cache: cache, cd: cd}
 }
 
-func (cs *ConfigService) SelectConfigList(c *gin.Context, config *systemmodels.SysConfigDQL) (sysConfigList []*systemmodels.SysConfigVo, total int64) {
+func (cs *ConfigService) SelectConfigList(c *gin.Context, config *modelquery.SysConfigDQL) (sysConfigList []*modelresponse.SysConfigVo, total int64) {
 	return cs.cd.SelectConfigList(c, config)
 }
-func (cs *ConfigService) ConfigExport(c *gin.Context, config *systemmodels.SysConfigDQL) (data []byte) {
+func (cs *ConfigService) ConfigExport(c *gin.Context, config *modelquery.SysConfigDQL) (data []byte) {
 	list := cs.cd.SelectConfigListAll(c, config)
 	toExcel, err := excel.SliceToExcel(list)
 	if err != nil {
@@ -37,16 +39,16 @@ func (cs *ConfigService) ConfigExport(c *gin.Context, config *systemmodels.SysCo
 	return buffer.Bytes()
 }
 
-func (cs *ConfigService) SelectConfigById(c *gin.Context, configId int64) (Config *systemmodels.SysConfigVo) {
+func (cs *ConfigService) SelectConfigById(c *gin.Context, configId int64) (Config *modelresponse.SysConfigVo) {
 	return cs.cd.SelectConfigById(c, configId)
 }
 
-func (cs *ConfigService) InsertConfig(c *gin.Context, config *systemmodels.SysConfigVo) {
+func (cs *ConfigService) InsertConfig(c *gin.Context, config *modelrequest.SysConfigDML) {
 	config.ConfigId = snowflake.GenID()
 	cs.cd.InsertConfig(c, config)
 }
 
-func (cs *ConfigService) UpdateConfig(c *gin.Context, config *systemmodels.SysConfigVo) {
+func (cs *ConfigService) UpdateConfig(c *gin.Context, config *modelrequest.SysConfigDML) {
 	cs.cd.UpdateConfig(c, config)
 	cs.cache.Del(c, cs.getCacheKey(config.ConfigKey))
 }

@@ -1,7 +1,9 @@
 package systemcontroller
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -9,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+var _ = modelresponse.SysDictDataVo{}
 
 type DictData struct {
 	dds systemservice.IDictDataService
@@ -44,13 +48,13 @@ func (ddc *DictData) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 查询字典列表
 // @Description 查询字典列表
 // @Tags 字典相关
-// @Param  object query systemmodels.SysDictDataDQL true "查询信息"
+// @Param  object query modelquery.SysDictDataDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysDictDataVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysDictDataVo}}  "成功"
 // @Router /system/dict/data/list  [get]
 func (ddc *DictData) DictDataList(c *gin.Context) {
-	dictData := new(systemmodels.SysDictDataDQL)
+	dictData := new(modelquery.SysDictDataDQL)
 	_ = c.ShouldBind(dictData)
 	list, count := ddc.dds.SelectDictDataList(c, dictData)
 	baizeContext.SuccessListData(c, list, count)
@@ -60,14 +64,14 @@ func (ddc *DictData) DictDataList(c *gin.Context) {
 // @Summary 导出配置
 // @Description 导出配置
 // @Tags 配置相关
-// @Param  object query systemmodels.SysConfigDQL true "查询信息"
+// @Param  object query modelquery.SysDictDataDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/octet-stream
 // @Success 200 {object} []byte
-// @Router /system/config/export [post]
+// @Router /system/dict/data/export [get]
 func (ddc *DictData) DictDataExport(c *gin.Context) {
 	//bzc := baizeContext.NewBaiZeContext(c)
-	//dictData := new(systemmodels.SysDictDataDQL)
+	//dictData := new(modelquery.SysDictDataDQL)
 	//_ = c.ShouldBind(dictData)
 	//bzc.DataPackageExcel(ddc.dds.ExportDictData(dictData))
 }
@@ -79,7 +83,7 @@ func (ddc *DictData) DictDataExport(c *gin.Context) {
 // @Param id path string true "dictCode"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysDictDataVo}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysDictDataVo}  "成功"
 // @Router /system/dict/data/{dictCode}  [get]
 func (ddc *DictData) DictDataGetInfo(c *gin.Context) {
 	dictCode := baizeContext.ParamInt64(c, "dictCode")
@@ -98,7 +102,7 @@ func (ddc *DictData) DictDataGetInfo(c *gin.Context) {
 // @Param id path string true "dictType"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysDictDataVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysDictDataVo}}  "成功"
 // @Router /system/dict/data/type/{dictType}  [get]
 func (ddc *DictData) DictDataType(c *gin.Context) {
 	sysDictDataList := ddc.dds.SelectDictDataByType(c, c.Param("dictType"))
@@ -109,13 +113,13 @@ func (ddc *DictData) DictDataType(c *gin.Context) {
 // @Summary 添加字典数据
 // @Description 添加字典数据
 // @Tags 字典相关
-// @Param  object body systemmodels.SysDictDataVo true "字典"
+// @Param  object body modelrequest.SysDictDataDML true "字典"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/dict/data  [post]
 func (ddc *DictData) DictDataAdd(c *gin.Context) {
-	dictData := new(systemmodels.SysDictDataVo)
+	dictData := new(modelrequest.SysDictDataDML)
 	_ = c.ShouldBindJSON(dictData)
 	dictData.SetCreateBy(baizeContext.GetUserId(c))
 	ddc.dds.InsertDictData(c, dictData)
@@ -126,13 +130,13 @@ func (ddc *DictData) DictDataAdd(c *gin.Context) {
 // @Summary 修改字典数据
 // @Description 修改字典数据
 // @Tags 字典相关
-// @Param  object body systemmodels.SysDictDataVo true "字典"
+// @Param  object body modelrequest.SysDictDataDML true "字典"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/dict/data  [put]
 func (ddc *DictData) DictDataEdit(c *gin.Context) {
-	dictData := new(systemmodels.SysDictDataVo)
+	dictData := new(modelrequest.SysDictDataDML)
 	_ = c.ShouldBindJSON(dictData)
 	dictData.SetUpdateBy(baizeContext.GetUserId(c))
 	ddc.dds.UpdateDictData(c, dictData)
@@ -146,7 +150,7 @@ func (ddc *DictData) DictDataEdit(c *gin.Context) {
 // @Param  dictCodes path []int64 true "dictCodes"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysDictDataVo}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysDictDataVo}  "成功"
 // @Router /system/dict/data/{dictCodes}  [delete]
 func (ddc *DictData) DictDataRemove(c *gin.Context) {
 	ddc.dds.DeleteDictDataByIds(c, baizeContext.ParamInt64Array(c, "dictCodes"))

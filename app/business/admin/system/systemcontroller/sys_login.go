@@ -4,7 +4,8 @@ import (
 	"context"
 	"nova-factory-server/app/business/admin/monitor/monitormodels"
 	"nova-factory-server/app/business/admin/monitor/monitorservice"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	systemService2 "nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/constant/userStatus"
 	"nova-factory-server/app/utils/bCryptPasswordEncoder"
@@ -16,6 +17,8 @@ import (
 	"github.com/mssola/user_agent"
 	"go.uber.org/zap"
 )
+
+var _ = modelresponse.LoginResp{}
 
 type Login struct {
 	ls    systemService2.ILoginService
@@ -42,14 +45,14 @@ func (lc *Login) PublicRoutes(router *gin.RouterGroup) {
 // @Summary 用户登录
 // @Description 用户登录
 // @Tags 登录
-// @Param  object body systemmodels.LoginBody true "登录信息"
-// @Success 200 {object}  response.ResponseData{data=systemmodels.LoginResp} "登录成功"
+// @Param  object body modelrequest.LoginBody true "登录信息"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.LoginResp} "登录成功"
 // @Failure 412 {object}  response.ResponseData "参数错误"
 // @Failure 500 {object}  response.ResponseData "服务器错误"
 // @Failure 600 {object}  response.ResponseData "用户名密码错误"
 // @Router /login [post]
 func (lc *Login) Login(c *gin.Context) {
-	var login systemmodels.LoginBody
+	var login modelrequest.LoginBody
 	if err := c.ShouldBindJSON(&login); err != nil {
 		zap.L().Debug("参数错误", zap.Error(err))
 		baizeContext.ParameterError(c)
@@ -117,11 +120,11 @@ func (lc *Login) Login(c *gin.Context) {
 // @Summary 用户登录
 // @Description 用户登录
 // @Tags 登录
-// @Param  object body systemmodels.LoginBody true "登录信息"
+// @Param  object body modelrequest.LoginBody true "登录信息"
 // @Success 200 {object}  response.ResponseData "注册成功"
 // @Router /register [post]
 func (lc *Login) Register(c *gin.Context) {
-	login := new(systemmodels.LoginBody)
+	login := new(modelrequest.LoginBody)
 	if err := c.ShouldBindJSON(login); err != nil {
 		zap.L().Debug("参数错误", zap.Error(err))
 		baizeContext.ParameterError(c)
@@ -149,7 +152,7 @@ func (lc *Login) Register(c *gin.Context) {
 // @Tags 登录
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.GetInfo}  "获取成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.GetInfo}  "获取成功"
 // @Router /getInfo [get]
 func (lc *Login) GetInfo(c *gin.Context) {
 	baizeContext.SuccessData(c, lc.ls.GetInfo(c))
@@ -185,7 +188,7 @@ func (lc *Login) GetCode(c *gin.Context) {
 //// @Description 获取路由
 //// @Tags 登录
 //// @Produce application/json
-//// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.RouterVo}} "获取成功"
+//// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.RouterVo}} "获取成功"
 //// @Router /getRouters [get]
 //func (lc *Login) GetRouters(c *gin.Context) {
 //	userId := baizeContext.GetUserId(c)

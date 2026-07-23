@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/baizeplus/sqly"
 )
@@ -22,10 +24,10 @@ func NewSysDictDataDao(ms sqly.SqlyContext) systemdao.IDictDataDao {
 	}
 }
 
-func (sysDictDataDao *sysDictDataDao) SelectDictDataByType(ctx context.Context, dictType string) (SysDictDataList []*systemmodels.SysDictDataVo) {
+func (sysDictDataDao *sysDictDataDao) SelectDictDataByType(ctx context.Context, dictType string) (SysDictDataList []*modelresponse.SysDictDataVo) {
 	whereSql := ` where status = '0' and dict_type = ? order by dict_sort asc`
 
-	SysDictDataList = make([]*systemmodels.SysDictDataVo, 0, 0)
+	SysDictDataList = make([]*modelresponse.SysDictDataVo, 0, 0)
 
 	err := sysDictDataDao.ms.SelectContext(ctx, &SysDictDataList, sysDictDataDao.dictDataSql+whereSql, dictType)
 	if err != nil {
@@ -34,7 +36,7 @@ func (sysDictDataDao *sysDictDataDao) SelectDictDataByType(ctx context.Context, 
 	return
 }
 
-func (sysDictDataDao *sysDictDataDao) SelectDictDataList(ctx context.Context, dictData *systemmodels.SysDictDataDQL) (list []*systemmodels.SysDictDataVo, total int64) {
+func (sysDictDataDao *sysDictDataDao) SelectDictDataList(ctx context.Context, dictData *modelquery.SysDictDataDQL) (list []*modelresponse.SysDictDataVo, total int64) {
 	whereSql := ``
 	if dictData.DictType != "" {
 		whereSql += " AND dict_type = :dict_type"
@@ -56,9 +58,9 @@ func (sysDictDataDao *sysDictDataDao) SelectDictDataList(ctx context.Context, di
 	return
 }
 
-func (sysDictDataDao *sysDictDataDao) SelectDictDataById(ctx context.Context, dictCode int64) (dictData *systemmodels.SysDictDataVo) {
+func (sysDictDataDao *sysDictDataDao) SelectDictDataById(ctx context.Context, dictCode int64) (dictData *modelresponse.SysDictDataVo) {
 
-	dictData = new(systemmodels.SysDictDataVo)
+	dictData = new(modelresponse.SysDictDataVo)
 	err := sysDictDataDao.ms.GetContext(ctx, dictData, sysDictDataDao.dictDataSql+" where dict_code = ?", dictCode)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
@@ -66,7 +68,7 @@ func (sysDictDataDao *sysDictDataDao) SelectDictDataById(ctx context.Context, di
 	return
 }
 
-func (sysDictDataDao *sysDictDataDao) InsertDictData(ctx context.Context, dictData *systemmodels.SysDictDataVo) {
+func (sysDictDataDao *sysDictDataDao) InsertDictData(ctx context.Context, dictData *modelrequest.SysDictDataDML) {
 	insertSQL := `insert into sys_dict_data(dict_code,dict_sort,dict_label,dict_value,dict_type,css_class,list_class,is_default,status,remark,create_by,create_time,update_by,update_time )
 					values(:dict_code,:dict_sort,:dict_label,:dict_value,:dict_type,:css_class,:list_class,:is_default,:status,:remark,:create_by,:create_time,:update_by,:update_time )`
 	_, err := sysDictDataDao.ms.NamedExecContext(ctx, insertSQL, dictData)
@@ -76,7 +78,7 @@ func (sysDictDataDao *sysDictDataDao) InsertDictData(ctx context.Context, dictDa
 	return
 }
 
-func (sysDictDataDao *sysDictDataDao) UpdateDictData(ctx context.Context, dictData *systemmodels.SysDictDataVo) {
+func (sysDictDataDao *sysDictDataDao) UpdateDictData(ctx context.Context, dictData *modelrequest.SysDictDataDML) {
 	updateSQL := `update sys_dict_data set update_time = :update_time , update_by = :update_by`
 
 	if dictData.DictSort != 0 {
