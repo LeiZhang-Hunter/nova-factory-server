@@ -143,7 +143,7 @@ func (r *RedisCache) Exists(ctx context.Context, keys ...string) int64 {
 	})
 	if err != nil {
 		log.Printf("[redis] Exists keys=%v failed after retries: %v", keys, err)
-		return 0
+		return -1
 	}
 	return cnt
 }

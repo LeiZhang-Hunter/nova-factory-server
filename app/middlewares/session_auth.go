@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"nova-factory-server/app/baize"
 	"nova-factory-server/app/constant/agent"
 	"nova-factory-server/app/constant/dataScopeAspect"
 	"nova-factory-server/app/constant/sessionStatus"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/middlewares/session"
+	"nova-factory-server/app/middlewares/session/sessionCache"
 	"nova-factory-server/app/utils/baizeContext"
 	keyStore "nova-factory-server/app/utils/store/key"
 	permissionStore "nova-factory-server/app/utils/store/permissions"
@@ -48,21 +48,18 @@ const (
 type AuthOption func(*SessionAuthBuilder)
 
 type SessionAuthBuilder struct {
-	cache       cache.Cache
-	domain      AuthDomain
-	mode        AuthMode
-	transport   AuthTransport
-	refresh     bool
-	ignorePaths baize.Set[string]
+	cache     cache.Cache
+	domain    AuthDomain
+	mode      AuthMode
+	transport AuthTransport
 }
 
 func NewSessionAuth(cache cache.Cache, domain AuthDomain, opts ...AuthOption) *SessionAuthBuilder {
 	builder := &SessionAuthBuilder{
-		cache:       cache,
-		domain:      domain,
-		mode:        RequiredAuth,
-		transport:   HTTPTransport,
-		ignorePaths: baize.Set[string]{},
+		cache:     cache,
+		domain:    domain,
+		mode:      RequiredAuth,
+		transport: HTTPTransport,
 	}
 	for _, opt := range opts {
 		opt(builder)
@@ -82,18 +79,6 @@ func WebSocket() AuthOption {
 	}
 }
 
-func Refresh() AuthOption {
-	return func(builder *SessionAuthBuilder) {
-		builder.refresh = true
-	}
-}
-
-func IgnorePaths(paths ...string) AuthOption {
-	return func(builder *SessionAuthBuilder) {
-		builder.IgnorePaths(paths...)
-	}
-}
-
 func (builder *SessionAuthBuilder) Optional() *SessionAuthBuilder {
 	builder.mode = OptionalAuth
 	return builder
@@ -101,18 +86,6 @@ func (builder *SessionAuthBuilder) Optional() *SessionAuthBuilder {
 
 func (builder *SessionAuthBuilder) ForWebSocket() *SessionAuthBuilder {
 	builder.transport = WebSocketTransport
-	return builder
-}
-
-func (builder *SessionAuthBuilder) WithRefresh() *SessionAuthBuilder {
-	builder.refresh = true
-	return builder
-}
-
-func (builder *SessionAuthBuilder) IgnorePaths(paths ...string) *SessionAuthBuilder {
-	for _, path := range paths {
-		builder.ignorePaths.Add(path)
-	}
 	return builder
 }
 
@@ -138,6 +111,10 @@ func (builder *SessionAuthBuilder) Build() gin.HandlerFunc {
 
 		currentSession, err := manager.Get(c, sessionID)
 		if err != nil {
+			if errors.Is(err, sessionCache.ErrSessionStoreUnavailable) {
+				builder.handleStoreUnavailable(c)
+				return
+			}
 			builder.handleFailure(c, http.StatusUnauthorized)
 			return
 		}
@@ -148,9 +125,6 @@ func (builder *SessionAuthBuilder) Build() gin.HandlerFunc {
 		}
 
 		c.Set(sessionStatus.SessionKey, currentSession)
-		if builder.shouldRefresh(c) {
-			_ = manager.Refresh(c, currentSession.Id())
-		}
 		c.Next()
 	}
 }
@@ -191,8 +165,6 @@ func (builder *SessionAuthBuilder) initAPIKeySession(c *gin.Context, apiKey stri
 	manager := builder.manager()
 	if sess, ok := builder.cachedAPIKeySession(c, manager, apiKey); ok {
 		c.Set(sessionStatus.SessionKey, sess)
-		_ = manager.Refresh(c, sess.Id())
-		builder.refreshAPIKeySessionMapping(c, apiKey, sess.Id())
 		return nil
 	}
 
@@ -202,7 +174,7 @@ func (builder *SessionAuthBuilder) initAPIKeySession(c *gin.Context, apiKey stri
 		return err
 	}
 	builder.fillAPIKeySessionData(c, sess, info, permissions)
-	builder.refreshAPIKeySessionMapping(c, apiKey, sess.Id())
+	builder.cacheAPIKeySessionMapping(c, apiKey, sess.Id())
 	return nil
 }
 
@@ -245,7 +217,7 @@ func (builder *SessionAuthBuilder) fillAPIKeySessionData(c *gin.Context, sess se
 	}
 }
 
-func (builder *SessionAuthBuilder) refreshAPIKeySessionMapping(c *gin.Context, apiKey string, sessionID string) {
+func (builder *SessionAuthBuilder) cacheAPIKeySessionMapping(c *gin.Context, apiKey string, sessionID string) {
 	expire := time.Duration(viper.GetInt("token.expire_time")) * time.Minute
 	builder.cache.Set(c, builder.apiKeySessionMappingKey(apiKey), sessionID, expire)
 }
@@ -315,10 +287,6 @@ func (builder *SessionAuthBuilder) expectedSessionType() string {
 	return sessionStatus.SessionTypeAdmin
 }
 
-func (builder *SessionAuthBuilder) shouldRefresh(c *gin.Context) bool {
-	return builder.refresh && !builder.ignorePaths.Contains(c.Request.RequestURI)
-}
-
 func (builder *SessionAuthBuilder) handleFailure(c *gin.Context, statusCode int) {
 	if builder.mode == OptionalAuth {
 		c.Next()
@@ -329,5 +297,18 @@ func (builder *SessionAuthBuilder) handleFailure(c *gin.Context, statusCode int)
 		return
 	}
 	baizeContext.InvalidToken(c)
+	c.Abort()
+}
+
+func (builder *SessionAuthBuilder) handleStoreUnavailable(c *gin.Context) {
+	if builder.mode == OptionalAuth {
+		c.Next()
+		return
+	}
+	if builder.transport == WebSocketTransport {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	baizeContext.SystemError(c)
 	c.Abort()
 }

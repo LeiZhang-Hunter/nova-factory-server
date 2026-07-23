@@ -136,14 +136,6 @@ func (m *Manager) RemoveSession(ctx *gin.Context) {
 	_ = m.Store.Remove(ctx, sess.Id())
 
 }
-func (m *Manager) RefreshSession(ctx *gin.Context) error {
-	sess, err := m.GetSession(ctx)
-	if err != nil {
-		return err
-	}
-	return m.Refresh(ctx, sess.Id())
-}
-
 func sessionUserId(sess Session, ctx *gin.Context) int64 {
 	userId, err := strconv.ParseInt(sess.Get(ctx, sessionStatus.UserId), 10, 64)
 	if err != nil {
