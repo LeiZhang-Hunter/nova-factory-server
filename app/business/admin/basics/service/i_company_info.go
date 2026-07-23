@@ -7,6 +7,6 @@ import (
 )
 
 type ICompanyInfoService interface {
-	SelectCompanyInfo(c *gin.Context) *models.CompanyInfoVo
-	SaveCompanyInfo(c *gin.Context, company *models.CompanyInfoVo)
+	SelectCompanyInfo(c *gin.Context) (*models.CompanyInfoVo, error)
+	SaveCompanyInfo(c *gin.Context, company *models.CompanyInfoVo) error
 }

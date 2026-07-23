@@ -39,7 +39,12 @@ func (cc *CompanyInfo) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Success 200 {object} response.ResponseData{data=models.CompanyInfoVo} "成功"
 // @Router /basics/company/info [get]
 func (cc *CompanyInfo) CompanyInfoGet(c *gin.Context) {
-	baizeContext.SuccessData(c, cc.cs.SelectCompanyInfo(c))
+	info, err := cc.cs.SelectCompanyInfo(c)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
+	baizeContext.SuccessData(c, info)
 }
 
 // CompanyInfoSave 保存公司信息
@@ -62,6 +67,10 @@ func (cc *CompanyInfo) CompanyInfoSave(c *gin.Context) {
 		baizeContext.ParameterError(c)
 		return
 	}
-	cc.cs.SaveCompanyInfo(c, company)
+	err := cc.cs.SaveCompanyInfo(c, company)
+	if err != nil {
+		baizeContext.Waring(c, err.Error())
+		return
+	}
 	baizeContext.Success(c)
 }

@@ -17,17 +17,20 @@ func NewCompanyInfoService(cd dao.ICompanyInfoDao) service.ICompanyInfoService {
 	return &CompanyInfoService{cd: cd}
 }
 
-func (s *CompanyInfoService) SelectCompanyInfo(c *gin.Context) *models.CompanyInfoVo {
+func (s *CompanyInfoService) SelectCompanyInfo(c *gin.Context) (*models.CompanyInfoVo, error) {
 	return s.cd.SelectCompanyInfo(c)
 }
 
-func (s *CompanyInfoService) SaveCompanyInfo(c *gin.Context, company *models.CompanyInfoVo) {
+func (s *CompanyInfoService) SaveCompanyInfo(c *gin.Context, company *models.CompanyInfoVo) error {
 	company.CompanyName = strings.TrimSpace(company.CompanyName)
 
-	if !s.cd.ExistsCompanyInfo(c) {
-		s.cd.InsertCompanyInfo(c, company)
-		return
+	exist, err := s.cd.ExistsCompanyInfo(c)
+	if err != nil {
+		return err
+	}
+	if !exist {
+		return s.cd.InsertCompanyInfo(c, company)
 	}
 
-	s.cd.UpdateCompanyInfo(c, company)
+	return s.cd.UpdateCompanyInfo(c, company)
 }
