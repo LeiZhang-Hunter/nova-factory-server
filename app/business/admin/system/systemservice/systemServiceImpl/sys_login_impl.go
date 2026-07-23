@@ -46,7 +46,11 @@ func NewLoginService(cache cache.Cache, ud systemDao2.IUserDao, pd systemDao2.IP
 
 func (loginService *LoginService) Login(c *gin.Context, user *systemModels2.User) *systemModels2.LoginResp {
 	manager := session.NewAdminManager(loginService.cache)
-	session, _ := manager.InitSession(c, user.UserId)
+	session, err := manager.InitSession(c, user.UserId)
+	if err != nil {
+		zap.L().Error("init login session failed", zap.Int64("userId", user.UserId), zap.Error(err))
+		panic(err)
+	}
 	session.Set(c, sessionStatus.SessionType, sessionStatus.SessionTypeAdmin)
 	session.Set(c, sessionStatus.Os, user.Os)
 	session.Set(c, sessionStatus.Browser, user.Browser)

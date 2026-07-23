@@ -19,11 +19,11 @@ func NewShopWebSocketAuth(cache cache.Cache) *SessionAuthBuilder {
 }
 
 func NewSessionAuthMiddlewareBuilder(cache cache.Cache) *SessionAuthBuilder {
-	return NewAdminAuth(cache).WithRefresh()
+	return NewAdminAuth(cache)
 }
 
 func NewShopSessionAuthMiddlewareBuilder(cache cache.Cache) *SessionAuthBuilder {
-	return NewShopAuth(cache).WithRefresh()
+	return NewShopAuth(cache)
 }
 
 func NewShopSessionAppAuthMiddlewareBuilder(cache cache.Cache) *SessionAuthBuilder {

@@ -2,6 +2,7 @@ package sessionCache
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -12,7 +13,6 @@ import (
 	"nova-factory-server/app/utils/stringUtils"
 
 	"github.com/spf13/viper"
-	"gopkg.in/errgo.v2/errors"
 )
 
 type SessionPrefix string
@@ -39,7 +39,8 @@ var (
 		Prefix:      ShopSessionPrefix,
 		SessionType: sessionStatus.SessionTypeShopUser,
 	}
-	ErrSessionNotFound = errors.New("session id not found")
+	ErrSessionNotFound         = errors.New("session id not found")
+	ErrSessionStoreUnavailable = errors.New("session store unavailable")
 )
 
 type Store struct {
@@ -81,6 +82,9 @@ func (s *Store) Remove(ctx context.Context, id string) error {
 
 func (s *Store) Get(ctx context.Context, id string) (*Session, error) {
 	cnt := s.cache.Exists(ctx, s.redisKey(id))
+	if cnt < 0 {
+		return nil, ErrSessionStoreUnavailable
+	}
 	if cnt != 1 {
 		return nil, ErrSessionNotFound
 	}
