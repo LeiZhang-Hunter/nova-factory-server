@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/baizeplus/sqly"
 )
@@ -22,8 +24,8 @@ func NewSysPostDao(ms sqly.SqlyContext) systemdao.IPostDao {
 	}
 }
 
-func (postDao *sysPostDao) SelectPostAll(ctx context.Context) (sysPost []*systemmodels.SysPostVo) {
-	sysPost = make([]*systemmodels.SysPostVo, 0)
+func (postDao *sysPostDao) SelectPostAll(ctx context.Context) (sysPost []*modelresponse.SysPostVo) {
+	sysPost = make([]*modelresponse.SysPostVo, 0)
 	err := postDao.ms.SelectContext(ctx, &sysPost, postDao.postSql+" order by post_sort")
 	if err != nil {
 		panic(err)
@@ -45,7 +47,7 @@ func (postDao *sysPostDao) SelectPostListByUserId(ctx context.Context, userId in
 	return
 }
 
-func (postDao *sysPostDao) SelectPostList(ctx context.Context, post *systemmodels.SysPostDQL) (list []*systemmodels.SysPostVo, total int64) {
+func (postDao *sysPostDao) SelectPostList(ctx context.Context, post *modelquery.SysPostDQL) (list []*modelresponse.SysPostVo, total int64) {
 	if post.OrderBy == "" {
 		post.OrderBy = "post_sort"
 	}
@@ -69,7 +71,7 @@ func (postDao *sysPostDao) SelectPostList(ctx context.Context, post *systemmodel
 	}
 	return
 }
-func (postDao *sysPostDao) SelectPostListAll(ctx context.Context, post *systemmodels.SysPostDQL) (list []*systemmodels.SysPostVo) {
+func (postDao *sysPostDao) SelectPostListAll(ctx context.Context, post *modelquery.SysPostDQL) (list []*modelresponse.SysPostVo) {
 	whereSql := ``
 	if post.PostCode != "" {
 		whereSql += " AND post_code like concat('%', :post_code, '%')"
@@ -84,7 +86,7 @@ func (postDao *sysPostDao) SelectPostListAll(ctx context.Context, post *systemmo
 	if whereSql != "" {
 		whereSql = " where " + whereSql[4:]
 	}
-	list = make([]*systemmodels.SysPostVo, 0)
+	list = make([]*modelresponse.SysPostVo, 0)
 	err := postDao.ms.NamedSelectContext(ctx, &list, postDao.postSql+whereSql, post)
 	if err != nil {
 		panic(err)
@@ -92,9 +94,9 @@ func (postDao *sysPostDao) SelectPostListAll(ctx context.Context, post *systemmo
 	return
 }
 
-func (postDao *sysPostDao) SelectPostById(ctx context.Context, postId int64) (dictData *systemmodels.SysPostVo) {
+func (postDao *sysPostDao) SelectPostById(ctx context.Context, postId int64) (dictData *modelresponse.SysPostVo) {
 
-	dictData = new(systemmodels.SysPostVo)
+	dictData = new(modelresponse.SysPostVo)
 	err := postDao.ms.GetContext(ctx, dictData, postDao.postSql+" where post_id = ?", postId)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
@@ -102,7 +104,7 @@ func (postDao *sysPostDao) SelectPostById(ctx context.Context, postId int64) (di
 	return
 }
 
-func (postDao *sysPostDao) InsertPost(ctx context.Context, post *systemmodels.SysPostVo) {
+func (postDao *sysPostDao) InsertPost(ctx context.Context, post *modelrequest.SysPostDML) {
 	insertSQL := `insert into sys_post(post_id,post_code,post_name,post_sort,status,remark,create_by,create_time,update_by,update_time )
 					values(:post_id,:post_code,:post_name,:post_sort,:status,:remark,:create_by,:create_time,:update_by,:update_time )`
 	_, err := postDao.ms.NamedExecContext(ctx, insertSQL, post)
@@ -112,7 +114,7 @@ func (postDao *sysPostDao) InsertPost(ctx context.Context, post *systemmodels.Sy
 	return
 }
 
-func (postDao *sysPostDao) UpdatePost(ctx context.Context, post *systemmodels.SysPostVo) {
+func (postDao *sysPostDao) UpdatePost(ctx context.Context, post *modelrequest.SysPostDML) {
 	updateSQL := `update sys_post set update_time = :update_time , update_by = :update_by`
 
 	if post.PostCode != "" {

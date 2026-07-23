@@ -1,7 +1,9 @@
 package systemcontroller
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -9,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+var _ = modelresponse.SysNoticeVo{}
 
 type Notice struct {
 	ns systemservice.ISysNoticeService
@@ -42,13 +46,13 @@ func (nc *Notice) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 消息通知列表
 // @Description 消息通知列表
 // @Tags 消息通知
-// @Param object query systemmodels.NoticeDQL false "查询信息"
+// @Param object query modelquery.NoticeDQL false "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]systemmodels.SysNoticeVo}} "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{rows=[]modelresponse.SysNoticeVo}} "成功"
 // @Router /system/notice/list [get]
 func (nc *Notice) NoticeList(c *gin.Context) {
-	n := new(systemmodels.NoticeDQL)
+	n := new(modelquery.NoticeDQL)
 	_ = c.ShouldBind(n)
 	n.DataScope = baizeContext.GetDataScope(c, "sys_notice")
 	if n.OrderBy == "" {
@@ -67,7 +71,7 @@ func (nc *Notice) NoticeList(c *gin.Context) {
 // @Param id path string true "id"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysNoticeVo} "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysNoticeVo} "成功"
 // @Router /system/notice/{id}  [get]
 func (nc *Notice) NoticeGetInfo(c *gin.Context) {
 	id := baizeContext.ParamInt64(c, "id")
@@ -83,13 +87,13 @@ func (nc *Notice) NoticeGetInfo(c *gin.Context) {
 // @Summary 新增消息通知
 // @Description 新增消息通知
 // @Tags 消息通知
-// @Param  object body systemmodels.SysNoticeVo true "系统角色"
+// @Param  object body modelrequest.SysNoticeDML true "系统角色"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData
 // @Router /system/notice [post]
 func (nc *Notice) NoticeAdd(c *gin.Context) {
-	na := new(systemmodels.SysNoticeVo)
+	na := new(modelrequest.SysNoticeDML)
 	if err := c.ShouldBindJSON(na); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -119,7 +123,7 @@ func (nc *Notice) NewMessage(c *gin.Context) {
 // @Param id path string true "id"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.ConsumptionNoticeVo} "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.ConsumptionNoticeVo} "成功"
 // @Router /system/consumption/{id}  [get]
 func (nc *Notice) UserNoticeGetInfo(c *gin.Context) {
 	id := baizeContext.ParamInt64(c, "id")
@@ -134,13 +138,13 @@ func (nc *Notice) UserNoticeGetInfo(c *gin.Context) {
 // @Summary 消费方获取消息列表
 // @Description 消费方获取消息列表
 // @Tags 消息通知
-// @Param object query systemmodels.ConsumptionNoticeDQL false "查询信息"
+// @Param object query modelquery.ConsumptionNoticeDQL false "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object} response.ResponseData{data=response.ListData{rows=[]systemmodels.ConsumptionNoticeVo}}
+// @Success 200 {object} response.ResponseData{data=response.ListData{rows=[]modelresponse.ConsumptionNoticeVo}}
 // @Router /system/consumption/userNoticeList [get]
 func (nc *Notice) UserNoticeList(c *gin.Context) {
-	n := new(systemmodels.ConsumptionNoticeDQL)
+	n := new(modelquery.ConsumptionNoticeDQL)
 	_ = c.ShouldBind(n)
 	n.UserId = baizeContext.GetUserId(c)
 	if n.OrderBy == "" {

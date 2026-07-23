@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
 
 	"github.com/baizeplus/sqly"
 )
@@ -27,7 +27,7 @@ func (sysRolePermissionDao *sysRolePermissionDao) SelectPermissionIdsByRoleId(ct
 	return ids
 }
 
-func (sysRolePermissionDao *sysRolePermissionDao) BatchRolePermission(ctx context.Context, list []*systemmodels.SysRolePermission) {
+func (sysRolePermissionDao *sysRolePermissionDao) BatchRolePermission(ctx context.Context, list []*modelentity.SysRolePermission) {
 	_, err := sysRolePermissionDao.ms.NamedExecContext(ctx, "insert into sys_role_permission(role_id, permission_id) values (:role_id,:permission_id)", list)
 	if err != nil {
 		panic(err)

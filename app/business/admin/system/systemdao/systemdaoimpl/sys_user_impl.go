@@ -6,7 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	systemModels2 "nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/baizeplus/sqly"
 )
@@ -57,7 +60,7 @@ func (userDao *sysUserDao) CheckEmailUnique(ctx context.Context, email string) i
 	return userId
 }
 
-func (userDao *sysUserDao) InsertUser(ctx context.Context, sysUser *systemModels2.SysUserDML) {
+func (userDao *sysUserDao) InsertUser(ctx context.Context, sysUser *modelrequest.SysUserDML) {
 	insertSQL := `insert into sys_user(user_id,user_name,nick_name,sex,password,data_scope,status,create_by,create_time,update_by,update_time %s)
 					values(:user_id,:user_name,:nick_name,:sex,:password,:data_scope,:status,:create_by,:create_time,:update_by,:update_time %s)`
 	key := ""
@@ -90,7 +93,7 @@ func (userDao *sysUserDao) InsertUser(ctx context.Context, sysUser *systemModels
 		panic(err)
 	}
 }
-func (userDao *sysUserDao) BatchInsertUser(ctx context.Context, sysUser []*systemModels2.SysUserDML) {
+func (userDao *sysUserDao) BatchInsertUser(ctx context.Context, sysUser []*modelrequest.SysUserDML) {
 	insertSQL := `insert into sys_user(user_id,user_name,nick_name,email,phonenumber,sex,password,data_scope,status,dept_id,create_by,create_time,update_by,update_time)
 					values(:user_id,:user_name,:nick_name,:email,:phonenumber,:sex,:password,:data_scope,:status,:dept_id,:create_by,:create_time,:update_by,:update_time)`
 	_, err := userDao.ms.NamedExecContext(ctx, insertSQL, sysUser)
@@ -100,7 +103,7 @@ func (userDao *sysUserDao) BatchInsertUser(ctx context.Context, sysUser []*syste
 	}
 }
 
-func (userDao *sysUserDao) UpdateUser(ctx context.Context, sysUser *systemModels2.SysUserDML) {
+func (userDao *sysUserDao) UpdateUser(ctx context.Context, sysUser *modelrequest.SysUserDML) {
 	updateSQL := `update sys_user set update_time = :update_time , update_by = :update_by`
 
 	if sysUser.Email != "" {
@@ -139,27 +142,27 @@ func (userDao *sysUserDao) UpdateUser(ctx context.Context, sysUser *systemModels
 	}
 }
 
-func (userDao *sysUserDao) SelectUserByUserName(ctx context.Context, userName string) (loginUser *systemModels2.User) {
+func (userDao *sysUserDao) SelectUserByUserName(ctx context.Context, userName string) (loginUser *modelentity.User) {
 	sqlStr := `select u.user_id, u.dept_id, u.user_name,  u.avatar, u.password, u.status, u.del_flag,u.data_scope
         from sys_user u
 		where u.user_name = ?			
 			`
 
-	loginUser = new(systemModels2.User)
+	loginUser = new(modelentity.User)
 	err := userDao.ms.GetContext(ctx, loginUser, sqlStr, userName)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
 	}
 	return
 }
-func (userDao *sysUserDao) SelectUserById(ctx context.Context, userId int64) (sysUser *systemModels2.SysUserVo) {
+func (userDao *sysUserDao) SelectUserById(ctx context.Context, userId int64) (sysUser *modelresponse.SysUserVo) {
 	sqlStr := `select u.user_id, u.dept_id, u.nick_name, u.user_name, u.email, u.avatar, u.phonenumber, u.sex, u.status, u.del_flag,  u.create_by, u.create_time, u.remark, d.dept_name, d.leader,  u.data_scope
         from sys_user u
 		    left join sys_dept d on u.dept_id = d.dept_id
 			where u.user_id = ?
 			`
 
-	sysUser = new(systemModels2.SysUserVo)
+	sysUser = new(modelresponse.SysUserVo)
 	err := userDao.ms.GetContext(ctx, sysUser, sqlStr, userId)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
@@ -167,7 +170,7 @@ func (userDao *sysUserDao) SelectUserById(ctx context.Context, userId int64) (sy
 	return
 }
 
-func (userDao *sysUserDao) SelectUserList(ctx context.Context, user *systemModels2.SysUserDQL) (list []*systemModels2.SysUserVo, total int64) {
+func (userDao *sysUserDao) SelectUserList(ctx context.Context, user *modelquery.SysUserDQL) (list []*modelresponse.SysUserVo, total int64) {
 	if user.OrderBy == "" {
 		user.OrderBy = "user_id"
 	}
@@ -202,7 +205,7 @@ func (userDao *sysUserDao) SelectUserList(ctx context.Context, user *systemModel
 
 }
 
-func (userDao *sysUserDao) SelectUserListAll(ctx context.Context, user *systemModels2.SysUserDQL) (list []*systemModels2.SysUserVo) {
+func (userDao *sysUserDao) SelectUserListAll(ctx context.Context, user *modelquery.SysUserDQL) (list []*modelresponse.SysUserVo) {
 	sql := `select u.user_id, u.dept_id, u.nick_name, u.user_name, u.email, u.avatar, u.phonenumber, u.sex, u.status, u.del_flag, u.create_by, u.create_time, u.remark, d.dept_name, d.leader
 			 from sys_user u left join sys_dept d on u.dept_id = d.dept_id where u.del_flag = '0'`
 	if user.UserName != "" {
@@ -283,8 +286,8 @@ func (userDao *sysUserDao) SelectUserIdsByDeptIds(ctx context.Context, deptIds [
 	return list
 }
 
-func (userDao *sysUserDao) SelectByUserIds(ctx context.Context, userIds []int64) []*systemModels2.SysUserDML {
-	list := make([]*systemModels2.SysUserDML, 0)
+func (userDao *sysUserDao) SelectByUserIds(ctx context.Context, userIds []int64) []*modelrequest.SysUserDML {
+	list := make([]*modelrequest.SysUserDML, 0)
 	if len(userIds) == 0 {
 		return list
 	}

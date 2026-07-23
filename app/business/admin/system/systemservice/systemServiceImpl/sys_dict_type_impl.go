@@ -2,7 +2,9 @@ package systemServiceImpl
 
 import (
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/datasource/cache"
 	"nova-factory-server/app/utils/excel"
@@ -26,11 +28,11 @@ func NewDictTypeService(dtd systemdao.IDictTypeDao,
 	}
 }
 
-func (dictTypeService *DictTypeService) SelectDictTypeList(c *gin.Context, dictType *systemmodels.SysDictTypeDQL) (list []*systemmodels.SysDictTypeVo, total int64) {
+func (dictTypeService *DictTypeService) SelectDictTypeList(c *gin.Context, dictType *modelquery.SysDictTypeDQL) (list []*modelresponse.SysDictTypeVo, total int64) {
 	return dictTypeService.dictTypeDao.SelectDictTypeList(c, dictType)
 
 }
-func (dictTypeService *DictTypeService) ExportDictType(c *gin.Context, dictType *systemmodels.SysDictTypeDQL) (data []byte) {
+func (dictTypeService *DictTypeService) ExportDictType(c *gin.Context, dictType *modelquery.SysDictTypeDQL) (data []byte) {
 	list := dictTypeService.dictTypeDao.SelectDictTypeAll(c, dictType)
 	toExcel, err := excel.SliceToExcel(list)
 	if err != nil {
@@ -43,7 +45,7 @@ func (dictTypeService *DictTypeService) ExportDictType(c *gin.Context, dictType 
 	return buffer.Bytes()
 }
 
-func (dictTypeService *DictTypeService) SelectDictTypeById(c *gin.Context, dictId int64) (dictType *systemmodels.SysDictTypeVo) {
+func (dictTypeService *DictTypeService) SelectDictTypeById(c *gin.Context, dictId int64) (dictType *modelresponse.SysDictTypeVo) {
 	return dictTypeService.dictTypeDao.SelectDictTypeById(c, dictId)
 
 }
@@ -51,12 +53,12 @@ func (dictTypeService *DictTypeService) SelectDictTypeByIds(c *gin.Context, dict
 	return dictTypeService.dictTypeDao.SelectDictTypeByIds(c, dictId)
 }
 
-func (dictTypeService *DictTypeService) InsertDictType(c *gin.Context, dictType *systemmodels.SysDictTypeVo) {
+func (dictTypeService *DictTypeService) InsertDictType(c *gin.Context, dictType *modelrequest.SysDictTypeDML) {
 	dictType.DictId = snowflake.GenID()
 	dictTypeService.dictTypeDao.InsertDictType(c, dictType)
 }
 
-func (dictTypeService *DictTypeService) UpdateDictType(c *gin.Context, dictType *systemmodels.SysDictTypeVo) {
+func (dictTypeService *DictTypeService) UpdateDictType(c *gin.Context, dictType *modelrequest.SysDictTypeDML) {
 	dictTypeService.dictTypeDao.UpdateDictType(c, dictType)
 }
 func (dictTypeService *DictTypeService) DeleteDictTypeByIds(c *gin.Context, dictIds []int64) {
@@ -73,6 +75,6 @@ func (dictTypeService *DictTypeService) CheckDictTypeUnique(c *gin.Context, id i
 func (dictTypeService *DictTypeService) DictTypeClearCache(c *gin.Context) {
 	dictTypeService.cache.Del(c, dictTypeService.dictKey+"*")
 }
-func (dictTypeService *DictTypeService) SelectDictTypeAll(c *gin.Context) (list []*systemmodels.SysDictTypeVo) {
-	return dictTypeService.dictTypeDao.SelectDictTypeAll(c, new(systemmodels.SysDictTypeDQL))
+func (dictTypeService *DictTypeService) SelectDictTypeAll(c *gin.Context) (list []*modelresponse.SysDictTypeVo) {
+	return dictTypeService.dictTypeDao.SelectDictTypeAll(c, new(modelquery.SysDictTypeDQL))
 }

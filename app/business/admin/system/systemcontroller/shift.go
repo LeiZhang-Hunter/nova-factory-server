@@ -2,7 +2,8 @@ package systemcontroller
 
 import (
 	"fmt"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -40,18 +41,18 @@ func (s *Shift) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 设置班次配置
 // @Description 设置班次配置
 // @Tags 系统管理/班次配置
-// @Param  object body systemmodels.SysWorkShiftSettingVO true "班次配置参数"
+// @Param  object body modelrequest.SysWorkShiftSettingVO true "班次配置参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
 // @Router /system/shift/set [post]
 func (s *Shift) Set(c *gin.Context) {
-	info := new(systemmodels.SysWorkShiftSettingVO)
+	info := new(modelrequest.SysWorkShiftSettingVO)
 	err := c.ShouldBindJSON(info)
 	if err != nil {
 		baizeContext.ParameterError(c)
 		return
 	}
 
-	setting, err := systemmodels.ToSysWorkShiftSetting(info)
+	setting, err := modelrequest.ToSysWorkShiftSetting(info)
 	if err != nil {
 		baizeContext.Waring(c, err.Error())
 		return
@@ -78,11 +79,11 @@ func (s *Shift) Set(c *gin.Context) {
 // @Summary 班次配置列表
 // @Description 班次配置列表
 // @Tags 系统管理/班次配置
-// @Param  object query systemmodels.SysWorkShiftSettingReq true "助理列表参数"
+// @Param  object query modelquery.SysWorkShiftSettingReq true "助理列表参数"
 // @Success 200 {object}  response.ResponseData "获取成功"
 // @Router /system/shift/list [get]
 func (s *Shift) List(c *gin.Context) {
-	req := new(systemmodels.SysWorkShiftSettingReq)
+	req := new(modelquery.SysWorkShiftSettingReq)
 	err := c.ShouldBindQuery(req)
 	if err != nil {
 		baizeContext.ParameterError(c)

@@ -1,4 +1,4 @@
-package systemmodels
+package entity
 
 type SysUserRole struct {
 	UserId int64 `json:"userId,string" db:"user_id"`

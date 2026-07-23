@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	systemModels2 "nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/baizeplus/sqly"
 )
@@ -24,9 +26,9 @@ func NewSysPermissionDao(ms sqly.SqlyContext) systemdao.IPermissionDao {
 	}
 }
 
-func (pd *SysPermissionDao) SelectPermissionById(ctx context.Context, permissionId int64) *systemModels2.SysPermissionVo {
+func (pd *SysPermissionDao) SelectPermissionById(ctx context.Context, permissionId int64) *modelresponse.SysPermissionVo {
 	whereSql := ` where permission_id = ?`
-	sp := new(systemModels2.SysPermissionVo)
+	sp := new(modelresponse.SysPermissionVo)
 	err := pd.ms.GetContext(ctx, sp, pd.selectPermissionSql+pd.fromPermissionSql+whereSql, permissionId)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil
@@ -35,7 +37,7 @@ func (pd *SysPermissionDao) SelectPermissionById(ctx context.Context, permission
 	}
 	return sp
 }
-func (pd *SysPermissionDao) SelectPermissionList(ctx context.Context, permission *systemModels2.SysPermissionDQL) (list []*systemModels2.SysPermissionVo) {
+func (pd *SysPermissionDao) SelectPermissionList(ctx context.Context, permission *modelquery.SysPermissionDQL) (list []*modelresponse.SysPermissionVo) {
 	whereSql := ``
 	if permission.Status != "" {
 		whereSql += " AND p.status = :status"
@@ -51,8 +53,8 @@ func (pd *SysPermissionDao) SelectPermissionList(ctx context.Context, permission
 	return
 
 }
-func (pd *SysPermissionDao) SelectPermissionListByParentId(ctx context.Context, parentId int64) (list []*systemModels2.SysPermissionVo) {
-	list = make([]*systemModels2.SysPermissionVo, 0)
+func (pd *SysPermissionDao) SelectPermissionListByParentId(ctx context.Context, parentId int64) (list []*modelresponse.SysPermissionVo) {
+	list = make([]*modelresponse.SysPermissionVo, 0)
 	err := pd.ms.SelectContext(ctx, &list, pd.selectPermissionSql+pd.fromPermissionSql+"where parent_id = ? ", parentId)
 	if err != nil {
 		panic(err)
@@ -60,10 +62,10 @@ func (pd *SysPermissionDao) SelectPermissionListByParentId(ctx context.Context, 
 	return list
 }
 
-func (pd *SysPermissionDao) SelectPermissionListByRoleIds(ctx context.Context, roleIds []int64) (list []*systemModels2.SysPermissionVo) {
+func (pd *SysPermissionDao) SelectPermissionListByRoleIds(ctx context.Context, roleIds []int64) (list []*modelresponse.SysPermissionVo) {
 	whereSql := `  left join sys_role_permission rp on rp.permission_id=p.permission_id
 where rp.role_id in (?)	`
-	list = make([]*systemModels2.SysPermissionVo, 0)
+	list = make([]*modelresponse.SysPermissionVo, 0)
 	query, args, err := sqly.In(pd.selectPermissionSql+pd.fromPermissionSql+whereSql, roleIds)
 	if err != nil {
 		panic(err)
@@ -76,7 +78,7 @@ where rp.role_id in (?)	`
 	return
 }
 
-func (pd *SysPermissionDao) InsertPermission(ctx context.Context, permission *systemModels2.SysPermissionAdd) {
+func (pd *SysPermissionDao) InsertPermission(ctx context.Context, permission *modelrequest.SysPermissionAdd) {
 	insertSQL := `insert into sys_permission(permission_id,permission_name,parent_id,permission,sort,status,create_by,create_time,update_by,update_time )
 					values(:permission_id,:permission_name,:parent_id,:permission,:sort,:status,:create_by,:create_time,:update_by,:update_time)`
 	_, err := pd.ms.NamedExecContext(ctx, insertSQL, permission)
@@ -86,7 +88,7 @@ func (pd *SysPermissionDao) InsertPermission(ctx context.Context, permission *sy
 	return
 }
 
-func (pd *SysPermissionDao) UpdatePermission(ctx context.Context, permission *systemModels2.SysPermissionEdit) {
+func (pd *SysPermissionDao) UpdatePermission(ctx context.Context, permission *modelrequest.SysPermissionEdit) {
 	updateSQL := `update sys_permission set update_time = :update_time, update_by = :update_by`
 
 	if permission.PermissionName != "" {
@@ -163,7 +165,7 @@ func (pd *SysPermissionDao) SelectPermissionAll(ctx context.Context) []string {
 	return permission
 }
 
-func (pd *SysPermissionDao) SelectPermissionListSelectBoxByPerm(ctx context.Context, perm []string) (list []*systemModels2.SelectPermission) {
+func (pd *SysPermissionDao) SelectPermissionListSelectBoxByPerm(ctx context.Context, perm []string) (list []*modelresponse.SelectPermission) {
 	selectSql := `select permission_id ,permission_name ,parent_id 
 				from sys_permission
 				where status = '0' and permission in (?)  order by sort`

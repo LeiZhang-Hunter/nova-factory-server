@@ -1,7 +1,9 @@
 package systemcontroller
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	systemService2 "nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/constant/dataScopeAspect"
 	"nova-factory-server/app/middlewares"
@@ -11,6 +13,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+var _ = modelresponse.SysUserVo{}
 
 type User struct {
 	us systemService2.IUserService
@@ -70,14 +74,14 @@ func (uc *User) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 修改用户状态
 // @Description 修改用户状态
 // @Tags 用户相关
-// @Param  object body systemmodels.EditUserStatus true "用户信息"
+// @Param  object body modelrequest.EditUserStatus true "用户信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData  "成功"
 // @Router /system/user/changeStatus [put]
 func (uc *User) ChangeStatus(c *gin.Context) {
 
-	sysUser := new(systemmodels.EditUserStatus)
+	sysUser := new(modelrequest.EditUserStatus)
 	if err := c.ShouldBindJSON(sysUser); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -95,13 +99,13 @@ func (uc *User) ChangeStatus(c *gin.Context) {
 // @Summary 重置密码
 // @Description 重置密码
 // @Tags 用户相关
-// @Param  object body systemmodels.ResetPwd true "密码"
+// @Param  object body modelrequest.ResetPwd true "密码"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData  "成功"
 // @Router /system/user/resetPwd [put]
 func (uc *User) ResetPwd(c *gin.Context) {
-	resetPwd := new(systemmodels.ResetPwd)
+	resetPwd := new(modelrequest.ResetPwd)
 	if err := c.ShouldBindJSON(resetPwd); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -114,14 +118,14 @@ func (uc *User) ResetPwd(c *gin.Context) {
 // @Summary 修改用户
 // @Description 修改用户
 // @Tags 用户相关
-// @Param  object body systemmodels.SysUserDML true "用户信息"
+// @Param  object body modelrequest.SysUserDML true "用户信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData  "成功"
 // @Router /system/user  [put]
 func (uc *User) UserEdit(c *gin.Context) {
 
-	sysUser := new(systemmodels.SysUserDML)
+	sysUser := new(modelrequest.SysUserDML)
 	_ = c.ShouldBindJSON(sysUser)
 	if sysUser.UserId == baizeContext.GetUserId(c) {
 		baizeContext.Waring(c, response.ForbiddenOperation)
@@ -144,13 +148,13 @@ func (uc *User) UserEdit(c *gin.Context) {
 // @Summary 修改数据权限
 // @Description 修改数据权限
 // @Tags 用户相关
-// @Param  object body systemmodels.SysUserDataScope true "用户权限信息"
+// @Param  object body modelrequest.SysUserDataScope true "用户权限信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData  "成功"
 // @Router /system/user/dataScope  [put]
 func (uc *User) UpdateUserDataScope(c *gin.Context) {
-	uds := new(systemmodels.SysUserDataScope)
+	uds := new(modelrequest.SysUserDataScope)
 	if err := c.ShouldBindJSON(uds); err != nil {
 		baizeContext.ParameterError(c)
 		return
@@ -189,14 +193,14 @@ func (uc *User) SelectUserDataScope(c *gin.Context) {
 // @Summary 添加用户
 // @Description 添加用户
 // @Tags 用户相关
-// @Param  object body systemmodels.SysUserDML true "用户信息"
+// @Param  object body modelrequest.SysUserDML true "用户信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData  "成功"
 // @Router /system/user  [post]
 func (uc *User) UserAdd(c *gin.Context) {
 
-	sysUser := new(systemmodels.SysUserDML)
+	sysUser := new(modelrequest.SysUserDML)
 	_ = c.ShouldBindJSON(sysUser)
 	if sysUser.DeptId == 0 {
 		sysUser.DeptId = baizeContext.GetDeptId(c)
@@ -222,13 +226,13 @@ func (uc *User) UserAdd(c *gin.Context) {
 // @Summary 查询用户列表
 // @Description 查询用户列表
 // @Tags 用户相关
-// @Param  object query systemmodels.SysUserDQL true "查询信息"
+// @Param  object query modelquery.SysUserDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysUserVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysUserVo}}  "成功"
 // @Router /system/user/list  [get]
 func (uc *User) UserList(c *gin.Context) {
-	user := new(systemmodels.SysUserDQL)
+	user := new(modelquery.SysUserDQL)
 	_ = c.ShouldBind(user)
 	user.DataScope = baizeContext.GetDataScope(c, "d")
 	list, count := uc.us.SelectUserList(c, user)
@@ -242,7 +246,7 @@ func (uc *User) UserList(c *gin.Context) {
 // @Tags 用户相关
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.Accredit}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.Accredit}  "成功"
 // @Router /system/user/  [get]
 func (uc *User) UserGetInfo(c *gin.Context) {
 	baizeContext.SuccessData(c, uc.us.SelectAccredit(c))
@@ -255,7 +259,7 @@ func (uc *User) UserGetInfo(c *gin.Context) {
 // @Param id path string true "userId"
 // @Security BearerAuth
 // @Produce application/json
-// // @Success 200 {object}  response.ResponseData{data=systemmodels.UserAndRoles}  "成功"
+// // @Success 200 {object}  response.ResponseData{data=modelresponse.UserAndRoles}  "成功"
 // @Router /system/user/authRole/{userId}  [get]
 func (uc *User) UserAuthRole(c *gin.Context) {
 	userId := baizeContext.ParamInt64(c, "userId")
@@ -272,7 +276,7 @@ func (uc *User) UserAuthRole(c *gin.Context) {
 // @Param id path int64 true "userId"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.UserAndAccredit}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.UserAndAccredit}  "成功"
 // @Router /system/user/{userId}  [get]
 func (uc *User) UserGetInfoById(c *gin.Context) {
 	userId := baizeContext.ParamInt64(c, "userId")
@@ -334,13 +338,13 @@ func (uc *User) UserImportData(c *gin.Context) {
 // @Summary 导出用户
 // @Description 导出用户
 // @Tags 系统用户
-// @Param  object query systemmodels.SysUserDQL true "查询信息"
+// @Param  object query modelquery.SysUserDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/octet-stream
 // @Success 200 {object} []byte
 // @Router /system/user/export [post]
 func (uc *User) UserExport(c *gin.Context) {
-	user := new(systemmodels.SysUserDQL)
+	user := new(modelquery.SysUserDQL)
 	_ = c.ShouldBind(user)
 	user.DataScope = baizeContext.GetDataScope(c, "d")
 	baizeContext.DataPackageExcel(c, uc.us.UserExport(c, user))
@@ -369,7 +373,7 @@ func (uc *User) ImportTemplate(c *gin.Context) {
 // @Param  string query string true "用户id"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysUserVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysUserVo}}  "成功"
 // @Router /system/user/authRole  [put]
 func (uc *User) InsertAuthRole(c *gin.Context) {
 	userId := baizeContext.QueryInt64(c, "userId")

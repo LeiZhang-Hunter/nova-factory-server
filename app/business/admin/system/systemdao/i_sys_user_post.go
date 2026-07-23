@@ -2,11 +2,11 @@ package systemdao
 
 import (
 	"context"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
 )
 
 type IUserPostDao interface {
-	BatchUserPost(ctx context.Context, users []*systemmodels.SysUserPost)
+	BatchUserPost(ctx context.Context, users []*modelentity.SysUserPost)
 	DeleteUserPostByUserId(ctx context.Context, userId int64)
 	DeleteUserPost(ctx context.Context, ids []int64)
 }

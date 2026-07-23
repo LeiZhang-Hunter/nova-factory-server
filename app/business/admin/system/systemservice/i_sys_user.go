@@ -2,22 +2,25 @@ package systemservice
 
 import (
 	"mime/multipart"
-	systemModels2 "nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/gin-gonic/gin"
 )
 
 type IUserService interface {
-	SelectUserByUserName(c *gin.Context, userName string) *systemModels2.User
-	SelectUserList(c *gin.Context, user *systemModels2.SysUserDQL) (sysUserList []*systemModels2.SysUserVo, total int64)
-	UserExport(c *gin.Context, user *systemModels2.SysUserDQL) (data []byte)
-	InsertUser(c *gin.Context, sysUser *systemModels2.SysUserDML)
-	UpdateUser(c *gin.Context, sysUser *systemModels2.SysUserDML)
+	SelectUserByUserName(c *gin.Context, userName string) *modelentity.User
+	SelectUserList(c *gin.Context, user *modelquery.SysUserDQL) (sysUserList []*modelresponse.SysUserVo, total int64)
+	UserExport(c *gin.Context, user *modelquery.SysUserDQL) (data []byte)
+	InsertUser(c *gin.Context, sysUser *modelrequest.SysUserDML)
+	UpdateUser(c *gin.Context, sysUser *modelrequest.SysUserDML)
 
-	UpdateUserDataScope(c *gin.Context, uds *systemModels2.SysUserDataScope)
-	SelectUserDataScope(c *gin.Context, userId int64) *systemModels2.SysUserDataScope
+	UpdateUserDataScope(c *gin.Context, uds *modelrequest.SysUserDataScope)
+	SelectUserDataScope(c *gin.Context, userId int64) *modelrequest.SysUserDataScope
 
-	UpdateUserStatus(c *gin.Context, sysUser *systemModels2.EditUserStatus)
+	UpdateUserStatus(c *gin.Context, sysUser *modelrequest.EditUserStatus)
 	ResetPwd(c *gin.Context, userId int64, password string)
 	CheckUserNameUnique(c *gin.Context, userName string) bool
 	CheckPhoneUnique(c *gin.Context, id int64, phonenumber string) bool
@@ -26,12 +29,12 @@ type IUserService interface {
 	UserImportData(c *gin.Context, file *multipart.FileHeader) (msg string, failureNum int)
 	UpdateUserAvatar(c *gin.Context, file *multipart.FileHeader) string
 	ResetUserPwd(c *gin.Context, userId int64, password string)
-	UpdateUserProfile(c *gin.Context, sysUser *systemModels2.SysUserDML)
+	UpdateUserProfile(c *gin.Context, sysUser *modelrequest.SysUserDML)
 	MatchesPassword(c *gin.Context, rawPassword string, userId int64) bool
 	InsertUserAuth(c *gin.Context, userId int64, roleIds []int64)
-	GetUserAuthRole(c *gin.Context, userId int64) *systemModels2.UserAndRoles
-	SelectUserAndAccreditById(c *gin.Context, userId int64) (sysUser *systemModels2.UserAndAccredit)
-	SelectAccredit(c *gin.Context) (sysUser *systemModels2.Accredit)
+	GetUserAuthRole(c *gin.Context, userId int64) *modelresponse.UserAndRoles
+	SelectUserAndAccreditById(c *gin.Context, userId int64) (sysUser *modelresponse.UserAndAccredit)
+	SelectAccredit(c *gin.Context) (sysUser *modelresponse.Accredit)
 	ImportTemplate(c *gin.Context) (data []byte)
-	GetUserProfile(c *gin.Context) *systemModels2.UserProfile
+	GetUserProfile(c *gin.Context) *modelresponse.UserProfile
 }

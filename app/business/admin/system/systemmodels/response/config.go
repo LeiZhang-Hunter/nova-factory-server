@@ -1,13 +1,6 @@
-package systemmodels
+package response
 
 import "nova-factory-server/app/baize"
-
-type SysConfigDQL struct {
-	ConfigName string `form:"configName" db:"config_name"` //参数名称
-	ConfigKey  string `form:"configKey" db:"config_key"`   //参数键名
-	ConfigType string `form:"configType" db:"config_type"` //系统内置（Y是 N否）
-	baize.BaseEntityDQL
-}
 
 type SysConfigVo struct {
 	ConfigId    int64  `json:"configId,string" db:"config_id"`             //参数主键

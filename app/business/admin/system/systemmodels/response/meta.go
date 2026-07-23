@@ -1,4 +1,4 @@
-package systemmodels
+package response
 
 type MetaVo struct {
 	Title   string `json:"title"`

@@ -2,7 +2,9 @@ package systemServiceImpl
 
 import (
 	systemDao2 "nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/utils/snowflake"
 	"strconv"
@@ -19,17 +21,17 @@ func NewDeptService(dd systemDao2.IDeptDao, rd systemDao2.IRoleDao) systemservic
 	return &DeptService{deptDao: dd, roleDao: rd}
 }
 
-func (ds *DeptService) SelectDeptList(c *gin.Context, dept *systemmodels.SysDeptDQL) (list []*systemmodels.SysDeptVo) {
+func (ds *DeptService) SelectDeptList(c *gin.Context, dept *modelquery.SysDeptDQL) (list []*modelresponse.SysDeptVo) {
 	return ds.deptDao.SelectDeptList(c, dept)
 
 }
 
-func (ds *DeptService) SelectDeptById(c *gin.Context, deptId int64) (dept *systemmodels.SysDeptVo) {
+func (ds *DeptService) SelectDeptById(c *gin.Context, deptId int64) (dept *modelresponse.SysDeptVo) {
 	return ds.deptDao.SelectDeptById(c, deptId)
 
 }
 
-func (ds *DeptService) InsertDept(c *gin.Context, dept *systemmodels.SysDeptVo) {
+func (ds *DeptService) InsertDept(c *gin.Context, dept *modelrequest.SysDeptDML) {
 	//获取上级部门祖籍信息
 	parentDept := ds.SelectDeptById(c, dept.ParentId)
 	dept.Ancestors = parentDept.Ancestors + "," + strconv.FormatInt(dept.ParentId, 10)
@@ -39,7 +41,7 @@ func (ds *DeptService) InsertDept(c *gin.Context, dept *systemmodels.SysDeptVo) 
 	return
 }
 
-func (ds *DeptService) UpdateDept(c *gin.Context, dept *systemmodels.SysDeptVo) {
+func (ds *DeptService) UpdateDept(c *gin.Context, dept *modelrequest.SysDeptDML) {
 	ds.deptDao.UpdateDept(c, dept)
 }
 func (ds *DeptService) DeleteDeptById(c *gin.Context, dept int64) {

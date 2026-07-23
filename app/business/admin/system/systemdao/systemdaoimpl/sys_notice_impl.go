@@ -5,7 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/baizeplus/sqly"
 )
@@ -18,7 +21,7 @@ func NewSysNoticeDao(ms sqly.SqlyContext) systemdao.ISysNoticeDao {
 	return &sysNoticeDao{ms: ms}
 }
 
-func (s *sysNoticeDao) SelectNoticeList(ctx context.Context, notice *systemmodels.NoticeDQL) (list []*systemmodels.SysNoticeVo, total int64) {
+func (s *sysNoticeDao) SelectNoticeList(ctx context.Context, notice *modelquery.NoticeDQL) (list []*modelresponse.SysNoticeVo, total int64) {
 	selectSql := `select id,title,type,txt,create_by,create_time,create_name,dept_ids from sys_notice  `
 	whereSql := ""
 	if notice.NoticeTitle != "" {
@@ -40,8 +43,8 @@ func (s *sysNoticeDao) SelectNoticeList(ctx context.Context, notice *systemmodel
 	return
 }
 
-func (s *sysNoticeDao) SelectNoticeById(ctx context.Context, id int64) *systemmodels.SysNoticeVo {
-	n := new(systemmodels.SysNoticeVo)
+func (s *sysNoticeDao) SelectNoticeById(ctx context.Context, id int64) *modelresponse.SysNoticeVo {
+	n := new(modelresponse.SysNoticeVo)
 	sqlStr := `select id,title,type,txt,create_by,create_time,create_name,dept_ids from sys_notice where id=?`
 	err := s.ms.GetContext(ctx, n, sqlStr, id)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -50,7 +53,7 @@ func (s *sysNoticeDao) SelectNoticeById(ctx context.Context, id int64) *systemmo
 	return n
 }
 
-func (s *sysNoticeDao) InsertNotice(ctx context.Context, notice *systemmodels.SysNoticeVo) {
+func (s *sysNoticeDao) InsertNotice(ctx context.Context, notice *modelrequest.SysNoticeDML) {
 	insertSQL := `insert into sys_notice(id,title,type,txt,create_name,dept_ids,dept_id,create_by,create_time)
 					values(:id,:title,:type,:txt,:create_name,:dept_ids,:dept_id,:create_by,:create_time)`
 	_, err := s.ms.NamedExecContext(ctx, insertSQL, notice)
@@ -69,7 +72,7 @@ func (s *sysNoticeDao) DeleteNoticeById(ctx context.Context, id int64) {
 	}
 }
 
-func (s *sysNoticeDao) BatchSysNoticeUsers(ctx context.Context, notice []*systemmodels.NoticeUser) {
+func (s *sysNoticeDao) BatchSysNoticeUsers(ctx context.Context, notice []*modelentity.NoticeUser) {
 	insertSQL := `insert into sys_notice_user(notice_id,user_id,status)
 					values(:notice_id,:user_id,:status)`
 	_, err := s.ms.NamedExecContext(ctx, insertSQL, notice)
@@ -88,8 +91,8 @@ func (s *sysNoticeDao) SelectNewMessageCountByUserId(ctx context.Context, userId
 	return count
 }
 
-func (s *sysNoticeDao) SelectConsumptionNoticeById(ctx context.Context, userId, noticeId int64) *systemmodels.ConsumptionNoticeVo {
-	vo := new(systemmodels.ConsumptionNoticeVo)
+func (s *sysNoticeDao) SelectConsumptionNoticeById(ctx context.Context, userId, noticeId int64) *modelresponse.ConsumptionNoticeVo {
+	vo := new(modelresponse.ConsumptionNoticeVo)
 	err := s.ms.GetContext(ctx, vo, `select sn.id,sn.title,sn.txt,sn.create_name, sn.type,sn.create_time,snu.status from sys_notice sn left join sys_notice_user snu on sn.id = snu.notice_id where snu.user_id=? and snu.notice_id=?`,
 		userId, noticeId)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -98,7 +101,7 @@ func (s *sysNoticeDao) SelectConsumptionNoticeById(ctx context.Context, userId, 
 	return vo
 }
 
-func (s *sysNoticeDao) SelectConsumptionNoticeList(ctx context.Context, notice *systemmodels.ConsumptionNoticeDQL) (list []*systemmodels.ConsumptionNoticeVo, total int64) {
+func (s *sysNoticeDao) SelectConsumptionNoticeList(ctx context.Context, notice *modelquery.ConsumptionNoticeDQL) (list []*modelresponse.ConsumptionNoticeVo, total int64) {
 	selectSql := `select sn.id,sn.title,sn.txt,sn.create_name,sn.create_time, sn.type,snu.status from sys_notice sn
 left join sys_notice_user snu on sn.id = snu.notice_id
 where snu.user_id=:user_id `

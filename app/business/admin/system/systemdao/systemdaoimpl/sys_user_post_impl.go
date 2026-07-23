@@ -3,7 +3,7 @@ package systemdaoimpl
 import (
 	"context"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
 
 	"github.com/baizeplus/sqly"
 )
@@ -16,7 +16,7 @@ func NewSysUserPostDao(ms sqly.SqlyContext) systemdao.IUserPostDao {
 	return &sysUserPostDao{ms: ms}
 }
 
-func (sysUserPostDao *sysUserPostDao) BatchUserPost(ctx context.Context, users []*systemmodels.SysUserPost) {
+func (sysUserPostDao *sysUserPostDao) BatchUserPost(ctx context.Context, users []*modelentity.SysUserPost) {
 
 	_, err := sysUserPostDao.ms.NamedExecContext(ctx, "insert into sys_user_post(user_id, post_id) values (:user_id,:post_id)", users)
 	if err != nil {

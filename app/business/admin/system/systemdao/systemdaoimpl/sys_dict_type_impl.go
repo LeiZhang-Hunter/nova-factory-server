@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/baizeplus/sqly"
 )
@@ -22,7 +24,7 @@ func NewSysDictTypeDao(ms sqly.SqlyContext) systemdao.IDictTypeDao {
 	}
 }
 
-func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeList(ctx context.Context, dictType *systemmodels.SysDictTypeDQL) (list []*systemmodels.SysDictTypeVo, total int64) {
+func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeList(ctx context.Context, dictType *modelquery.SysDictTypeDQL) (list []*modelresponse.SysDictTypeVo, total int64) {
 	whereSql := ``
 	if dictType.DictName != "" {
 		whereSql += " AND dict_name like concat('%', :dict_name, '%')"
@@ -44,7 +46,7 @@ func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeList(ctx context.Context, di
 	return
 }
 
-func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeAll(ctx context.Context, dictType *systemmodels.SysDictTypeDQL) (list []*systemmodels.SysDictTypeVo) {
+func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeAll(ctx context.Context, dictType *modelquery.SysDictTypeDQL) (list []*modelresponse.SysDictTypeVo) {
 	whereSql := ``
 	if dictType.DictName != "" {
 		whereSql += " AND dict_name like concat('%', :dictName, '%')"
@@ -59,7 +61,7 @@ func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeAll(ctx context.Context, dic
 	if whereSql != "" {
 		whereSql = " where " + whereSql[4:]
 	}
-	list = make([]*systemmodels.SysDictTypeVo, 0)
+	list = make([]*modelresponse.SysDictTypeVo, 0)
 	err := sysDictTypeDao.ms.SelectContext(ctx, &list, sysDictTypeDao.dictTypeSql+whereSql)
 	if err != nil {
 		panic(err)
@@ -67,9 +69,9 @@ func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeAll(ctx context.Context, dic
 	return
 }
 
-func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeById(ctx context.Context, dictId int64) (dictType *systemmodels.SysDictTypeVo) {
+func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeById(ctx context.Context, dictId int64) (dictType *modelresponse.SysDictTypeVo) {
 
-	dictType = new(systemmodels.SysDictTypeVo)
+	dictType = new(modelresponse.SysDictTypeVo)
 	err := sysDictTypeDao.ms.GetContext(ctx, dictType, sysDictTypeDao.dictTypeSql+" where dict_id = ?", dictId)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
@@ -91,7 +93,7 @@ func (sysDictTypeDao *sysDictTypeDao) SelectDictTypeByIds(ctx context.Context, d
 	return
 }
 
-func (sysDictTypeDao *sysDictTypeDao) InsertDictType(ctx context.Context, dictType *systemmodels.SysDictTypeVo) {
+func (sysDictTypeDao *sysDictTypeDao) InsertDictType(ctx context.Context, dictType *modelrequest.SysDictTypeDML) {
 	insertSQL := `insert into sys_dict_type(dict_id,dict_name,dict_type,status,remark,create_by,create_time,update_by,update_time )
 					values(:dict_id,:dict_name,:dict_type,:status,:remark,:create_by,:create_time,:update_by,:update_time )`
 
@@ -102,7 +104,7 @@ func (sysDictTypeDao *sysDictTypeDao) InsertDictType(ctx context.Context, dictTy
 	return
 }
 
-func (sysDictTypeDao *sysDictTypeDao) UpdateDictType(ctx context.Context, dictType *systemmodels.SysDictTypeVo) {
+func (sysDictTypeDao *sysDictTypeDao) UpdateDictType(ctx context.Context, dictType *modelrequest.SysDictTypeDML) {
 	updateSQL := `update sys_dict_type set update_time = :update_time , update_by = :update_by`
 
 	if dictType.DictName != "" {

@@ -1,15 +1,18 @@
 package systemservice
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/gin-gonic/gin"
 )
 
 type ISysShiftService interface {
-	Set(c *gin.Context, valueVO *systemmodels.SysWorkShiftSettingVO) (*systemmodels.SysWorkShiftSetting, error)
+	Set(c *gin.Context, valueVO *modelrequest.SysWorkShiftSettingVO) (*modelentity.SysWorkShiftSetting, error)
 	Remove(c *gin.Context, ids []string) error
-	List(c *gin.Context, req *systemmodels.SysWorkShiftSettingReq) (*systemmodels.SysWorkShiftSettingList, error)
+	List(c *gin.Context, req *modelquery.SysWorkShiftSettingReq) (*modelresponse.SysWorkShiftSettingList, error)
 	// Check 校验班次时间，防止重复
-	Check(c *gin.Context, id int64, startTime int32, endTime int32) *systemmodels.SysWorkShiftSetting
+	Check(c *gin.Context, id int64, startTime int32, endTime int32) *modelentity.SysWorkShiftSetting
 }

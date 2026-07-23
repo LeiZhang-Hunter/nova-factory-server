@@ -3,7 +3,7 @@ package systemdaoimpl
 import (
 	"context"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
 
 	"github.com/baizeplus/sqly"
 )
@@ -45,7 +45,7 @@ func (uds *sysUserDeptScopeDao) DeleteUserDeptScopeByUserId(ctx context.Context,
 	}
 
 }
-func (uds *sysUserDeptScopeDao) BatchUserDeptScope(ctx context.Context, list []*systemmodels.SysUserDeptScope) {
+func (uds *sysUserDeptScopeDao) BatchUserDeptScope(ctx context.Context, list []*modelentity.SysUserDeptScope) {
 	_, err := uds.ms.NamedExecContext(ctx, "insert into sys_user_dept_scope(user_id, dept_id) values (:user_id,:dept_id)", list)
 	if err != nil {
 		panic(err)
