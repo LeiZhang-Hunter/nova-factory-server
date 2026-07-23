@@ -131,6 +131,10 @@ func InvalidToken(c *gin.Context) {
 	c.Writer.Header().Set("Content-Encoding", "gzip")
 	c.Data(http.StatusOK, "application/json", unauthorizedGzip)
 }
+func SystemError(c *gin.Context) {
+	c.JSON(http.StatusInternalServerError, &response.ResponseData{Code: response.Error, Msg: response.Error.Msg()})
+	c.Set(sessionStatus.MsgKey, response.Error.Msg())
+}
 func PermissionDenied(c *gin.Context) {
 	c.Writer.Header().Set("Content-Encoding", "gzip")
 	c.Data(http.StatusOK, "application/json", forbiddenGzip)
