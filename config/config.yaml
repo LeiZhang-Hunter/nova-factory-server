@@ -68,6 +68,23 @@ milvus:
   username: ""
   password: ""
   db_name: "nova"
+  collection_load_timeout: 60s
+  collection_load_poll_interval: 1s
+  collection_load_cache_ttl: 30s
+  allowed_collections:
+    - product_vectors
+  load_fields:
+    - product_id
+    - name
+    - bar_code
+    - category_id
+    - category_name
+    - unit_id
+    - unit_name
+    - standard
+    - vector
+    - text_sparse_vector
+  skip_load_dynamic_field: true
 
 voice:
   xfyun:
