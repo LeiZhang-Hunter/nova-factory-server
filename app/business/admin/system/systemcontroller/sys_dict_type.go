@@ -1,7 +1,9 @@
 package systemcontroller
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	systemService2 "nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -10,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
+
+var _ = modelresponse.SysDictTypeVo{}
 
 type DictType struct {
 	dts systemService2.IDictTypeService
@@ -48,13 +52,13 @@ func (dtc *DictType) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 查询字典类型列表
 // @Description 查询字典类型列表
 // @Tags 字典相关
-// @Param  object query systemmodels.SysDictDataDQL true "查询信息"
+// @Param  object query modelquery.SysDictTypeDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysDictDataVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysDictTypeVo}}  "成功"
 // @Router /system/dict/type/list  [get]
 func (dtc *DictType) DictTypeList(c *gin.Context) {
-	dictType := new(systemmodels.SysDictTypeDQL)
+	dictType := new(modelquery.SysDictTypeDQL)
 	_ = c.ShouldBind(dictType)
 	list, count := dtc.dts.SelectDictTypeList(c, dictType)
 	baizeContext.SuccessListData(c, list, count)
@@ -65,26 +69,26 @@ func (dtc *DictType) DictTypeList(c *gin.Context) {
 // @Summary 导出字典类型
 // @Description 导出字典类型
 // @Tags 字典相关
-// @Param  object query systemmodels.SysDictDataDQL true "查询信息"
+// @Param  object query modelquery.SysDictTypeDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/octet-stream
 // @Success 200 {object} []byte
-// @Router /system/config/export [post]
+// @Router /system/dict/type/export [post]
 func (dtc *DictType) DictTypeExport(c *gin.Context) {
-	dictType := new(systemmodels.SysDictTypeDQL)
+	dictType := new(modelquery.SysDictTypeDQL)
 	_ = c.ShouldBind(dictType)
 	baizeContext.DataPackageExcel(c, dtc.dts.ExportDictType(c, dictType))
 }
 
-// DictTypeGetInfo 根据dictCode获取字典类型类型
-// @Summary 根据dictCode获取字典类型信息
-// @Description 根据dictCode获取字典类型信息
+// DictTypeGetInfo 根据dictId获取字典类型类型
+// @Summary 根据dictId获取字典类型信息
+// @Description 根据dictId获取字典类型信息
 // @Tags 字典相关
-// @Param id path string true "dictCode"
+// @Param id path string true "dictId"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysDictDataVo}  "成功"
-// @Router /system/dict/type/{dictCode}  [get]
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysDictTypeVo}  "成功"
+// @Router /system/dict/type/{dictId}  [get]
 func (dtc *DictType) DictTypeGetInfo(c *gin.Context) {
 	dictId := baizeContext.ParamInt64(c, "dictId")
 	if dictId == 0 {
@@ -100,13 +104,13 @@ func (dtc *DictType) DictTypeGetInfo(c *gin.Context) {
 // @Summary 添加字典类型数据
 // @Description 添加字典类型数据
 // @Tags 字典相关
-// @Param  object body systemmodels.SysDictDataVo true "字典"
+// @Param  object body modelrequest.SysDictTypeDML true "字典"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/dict/type  [post]
 func (dtc *DictType) DictTypeAdd(c *gin.Context) {
-	dictType := new(systemmodels.SysDictTypeVo)
+	dictType := new(modelrequest.SysDictTypeDML)
 	_ = c.ShouldBindJSON(dictType)
 	if dtc.dts.CheckDictTypeUnique(c, dictType.DictId, dictType.DictType) {
 		baizeContext.Waring(c, "新增字典'"+dictType.DictName+"'失败，字典类型已存在")
@@ -121,13 +125,13 @@ func (dtc *DictType) DictTypeAdd(c *gin.Context) {
 // @Summary 修改字典类型数据
 // @Description 修改字典类型数据
 // @Tags 字典相关
-// @Param  object body systemmodels.SysDictDataVo true "字典"
+// @Param  object body modelrequest.SysDictTypeDML true "字典"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/dict/type  [put]
 func (dtc *DictType) DictTypeEdit(c *gin.Context) {
-	dictType := new(systemmodels.SysDictTypeVo)
+	dictType := new(modelrequest.SysDictTypeDML)
 	_ = c.ShouldBindJSON(dictType)
 	if dtc.dts.CheckDictTypeUnique(c, dictType.DictId, dictType.DictType) {
 		baizeContext.Waring(c, "修改字典'"+dictType.DictName+"'失败，字典类型已存在")
@@ -140,8 +144,8 @@ func (dtc *DictType) DictTypeEdit(c *gin.Context) {
 }
 
 // DictTypeRemove 删除字典类型数据
-// @Summary 根据dictCode获取字典类型信息
-// @Description 根据dictCode获取字典类型信息
+// @Summary 根据dictId获取字典类型信息
+// @Description 根据dictId获取字典类型信息
 // @Tags 字典相关
 // @Param  object body []string true "字典"
 // @Security BearerAuth
@@ -179,7 +183,7 @@ func (dtc *DictType) DictTypeClearCache(c *gin.Context) {
 // @Tags 字典相关
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysDictDataVo}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysDictTypeVo}  "成功"
 // @Router /system/dict/type/optionSelect  [put]
 func (dtc *DictType) DictTypeOptionSelect(c *gin.Context) {
 	baizeContext.SuccessData(c, dtc.dts.SelectDictTypeAll(c))

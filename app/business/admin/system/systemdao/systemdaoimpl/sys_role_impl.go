@@ -5,7 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	systemModels2 "nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/baizeplus/sqly"
 )
@@ -22,7 +25,7 @@ type sysRoleDao struct {
 	selectSql string
 }
 
-func (rd *sysRoleDao) SelectRoleList(ctx context.Context, role *systemModels2.SysRoleDQL) (list []*systemModels2.SysRoleVo, total int64) {
+func (rd *sysRoleDao) SelectRoleList(ctx context.Context, role *modelquery.SysRoleDQL) (list []*modelresponse.SysRoleVo, total int64) {
 	if role.OrderBy == "" {
 		role.OrderBy = "r.role_sort"
 	}
@@ -48,7 +51,7 @@ func (rd *sysRoleDao) SelectRoleList(ctx context.Context, role *systemModels2.Sy
 	}
 	return
 }
-func (rd *sysRoleDao) SelectRoleAll(ctx context.Context, role *systemModels2.SysRoleDQL) (list []*systemModels2.SysRoleVo) {
+func (rd *sysRoleDao) SelectRoleAll(ctx context.Context, role *modelquery.SysRoleDQL) (list []*modelresponse.SysRoleVo) {
 	whereSql := " where r.del_flag = '0'"
 	if role.RoleName != "" {
 		whereSql += " AND r.role_name like concat('%', :role_name, '%')"
@@ -65,16 +68,16 @@ func (rd *sysRoleDao) SelectRoleAll(ctx context.Context, role *systemModels2.Sys
 	if role.CreateBy != 0 {
 		whereSql += " and r.create_by = :create_by"
 	}
-	list = make([]*systemModels2.SysRoleVo, 0)
+	list = make([]*modelresponse.SysRoleVo, 0)
 	err := rd.ms.NamedSelectContext(ctx, &list, rd.selectSql+whereSql, role)
 	if err != nil {
 		panic(err)
 	}
 	return
 }
-func (rd *sysRoleDao) SelectRoleById(ctx context.Context, roleId int64) (role *systemModels2.SysRoleVo) {
+func (rd *sysRoleDao) SelectRoleById(ctx context.Context, roleId int64) (role *modelresponse.SysRoleVo) {
 	whereSql := ` where r.role_id = ?`
-	role = new(systemModels2.SysRoleVo)
+	role = new(modelresponse.SysRoleVo)
 	err := rd.ms.GetContext(ctx, role, rd.selectSql+whereSql, roleId)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
@@ -82,12 +85,12 @@ func (rd *sysRoleDao) SelectRoleById(ctx context.Context, roleId int64) (role *s
 	return
 }
 
-func (rd *sysRoleDao) SelectBasicRolesByUserId(ctx context.Context, userId int64) (roles []*systemModels2.SysRole) {
+func (rd *sysRoleDao) SelectBasicRolesByUserId(ctx context.Context, userId int64) (roles []*modelentity.SysRole) {
 	sqlStr := `select  r.role_id, r.role_name
 				from sys_role r
 				left join sys_user_role ur  on r.role_id = ur.role_id
 				where  ur.user_id = ?`
-	roles = make([]*systemModels2.SysRole, 0, 2)
+	roles = make([]*modelentity.SysRole, 0, 2)
 	err := rd.ms.SelectContext(ctx, &roles, sqlStr, userId)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
@@ -109,7 +112,7 @@ func (rd *sysRoleDao) SelectRoleListByUserId(ctx context.Context, userId int64) 
 	return
 }
 
-func (rd *sysRoleDao) InsertRole(ctx context.Context, sysRole *systemModels2.SysRoleDML) {
+func (rd *sysRoleDao) InsertRole(ctx context.Context, sysRole *modelrequest.SysRoleDML) {
 	insertSQL := `insert into sys_role(role_id,role_name,role_sort,status,remark,create_by,create_time,update_by,update_time )
 					values(:role_id,:role_name,:role_sort,:status,:remark,:create_by,:create_time,:update_by,:update_time)`
 	_, err := rd.ms.NamedExecContext(ctx, insertSQL, sysRole)
@@ -119,7 +122,7 @@ func (rd *sysRoleDao) InsertRole(ctx context.Context, sysRole *systemModels2.Sys
 	return
 }
 
-func (rd *sysRoleDao) UpdateRole(ctx context.Context, sysRole *systemModels2.SysRoleDML) {
+func (rd *sysRoleDao) UpdateRole(ctx context.Context, sysRole *modelrequest.SysRoleDML) {
 	updateSQL := `update sys_role set update_time = :update_time , update_by = :update_by`
 
 	if sysRole.RoleName != "" {
@@ -163,7 +166,7 @@ func (rd *sysRoleDao) CheckRoleNameUnique(ctx context.Context, roleName string) 
 	return roleId
 }
 
-func (rd *sysRoleDao) SelectAllocatedList(ctx context.Context, user *systemModels2.SysRoleAndUserDQL) (list []*systemModels2.SysUserVo, total int64) {
+func (rd *sysRoleDao) SelectAllocatedList(ctx context.Context, user *modelquery.SysRoleAndUserDQL) (list []*modelresponse.SysUserVo, total int64) {
 	selectStr := ` select distinct u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.phonenumber, u.status, u.create_time`
 	whereSql := ` from sys_user u
 			 left join sys_dept d on u.dept_id = d.dept_id
@@ -183,7 +186,7 @@ func (rd *sysRoleDao) SelectAllocatedList(ctx context.Context, user *systemModel
 
 }
 
-func (rd *sysRoleDao) SelectUnallocatedList(ctx context.Context, user *systemModels2.SysRoleAndUserDQL) (list []*systemModels2.SysUserVo, total int64) {
+func (rd *sysRoleDao) SelectUnallocatedList(ctx context.Context, user *modelquery.SysRoleAndUserDQL) (list []*modelresponse.SysUserVo, total int64) {
 	selectStr := ` select distinct u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.phonenumber, u.status, u.create_time`
 
 	whereSql := `  from sys_user u
@@ -206,14 +209,14 @@ func (rd *sysRoleDao) SelectUnallocatedList(ctx context.Context, user *systemMod
 
 }
 
-func (rd *sysRoleDao) SelectRoleIdAndNameAll(ctx context.Context) (list []*systemModels2.SysRoleIdAndName) {
+func (rd *sysRoleDao) SelectRoleIdAndNameAll(ctx context.Context) (list []*modelresponse.SysRoleIdAndName) {
 	err := rd.ms.SelectContext(ctx, &list, "select role_id,role_name from sys_role where status = '0'and del_flag='0' order by role_sort")
 	if err != nil {
 		panic(err)
 	}
 	return
 }
-func (rd *sysRoleDao) SelectRoleIdAndName(ctx context.Context, userId int64, roleIds []int64) (list []*systemModels2.SysRoleIdAndName) {
+func (rd *sysRoleDao) SelectRoleIdAndName(ctx context.Context, userId int64, roleIds []int64) (list []*modelresponse.SysRoleIdAndName) {
 	in, i, err := sqly.In("select role_id,role_name from sys_role where status = '0' and del_flag='0'and (create_by=? or role_id in(?))order by role_sort", userId, roleIds)
 	if err != nil {
 		panic(err)

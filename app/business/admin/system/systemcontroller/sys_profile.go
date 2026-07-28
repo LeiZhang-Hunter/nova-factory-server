@@ -1,12 +1,15 @@
 package systemcontroller
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/utils/baizeContext"
 
 	"github.com/gin-gonic/gin"
 )
+
+var _ = modelresponse.UserProfile{}
 
 type Profile struct {
 	us systemservice.IUserService
@@ -29,7 +32,7 @@ func (pc *Profile) PrivateRoutes(router *gin.RouterGroup) {
 // @Tags 个人资料
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.UserProfile} "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.UserProfile} "成功"
 // @Router /system/user/profile  [get]
 func (pc *Profile) Profile(c *gin.Context) {
 	baizeContext.SuccessData(c, pc.us.GetUserProfile(c))
@@ -39,13 +42,13 @@ func (pc *Profile) Profile(c *gin.Context) {
 // @Summary 修改个人资料
 // @Description 修改个人资料
 // @Tags 个人资料
-// @Param  object body systemmodels.SysUserDML true "公司信息"
+// @Param  object body modelrequest.SysUserDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/user/profile  [put]
 func (pc *Profile) ProfileUpdateProfile(c *gin.Context) {
-	sysUser := new(systemmodels.SysUserDML)
+	sysUser := new(modelrequest.SysUserDML)
 	sysUser.UserId = baizeContext.GetUserId(c)
 	_ = c.ShouldBindJSON(sysUser)
 	if pc.us.CheckPhoneUnique(c, sysUser.UserId, sysUser.Phonenumber) {

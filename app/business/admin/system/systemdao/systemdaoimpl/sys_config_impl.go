@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/baizeplus/sqly"
 )
@@ -22,7 +24,7 @@ func NewSysConfigDao(ms sqly.SqlyContext) systemdao.IConfigDao {
 	}
 }
 
-func (s *sysConfigDao) SelectConfigList(ctx context.Context, config *systemmodels.SysConfigDQL) (list []*systemmodels.SysConfigVo, total int64) {
+func (s *sysConfigDao) SelectConfigList(ctx context.Context, config *modelquery.SysConfigDQL) (list []*modelresponse.SysConfigVo, total int64) {
 	whereSql := ``
 	if config.ConfigName != "" {
 		whereSql += " AND config_name like concat('%', :config_name, '%')"
@@ -43,7 +45,7 @@ func (s *sysConfigDao) SelectConfigList(ctx context.Context, config *systemmodel
 	}
 	return
 }
-func (s *sysConfigDao) SelectConfigListAll(ctx context.Context, config *systemmodels.SysConfigDQL) (list []*systemmodels.SysConfigVo) {
+func (s *sysConfigDao) SelectConfigListAll(ctx context.Context, config *modelquery.SysConfigDQL) (list []*modelresponse.SysConfigVo) {
 	whereSql := ``
 	if config.ConfigName != "" {
 		whereSql += " AND config_name like concat('%', :config_name, '%')"
@@ -58,7 +60,7 @@ func (s *sysConfigDao) SelectConfigListAll(ctx context.Context, config *systemmo
 	if whereSql != "" {
 		whereSql = " where " + whereSql[4:]
 	}
-	list = make([]*systemmodels.SysConfigVo, 0)
+	list = make([]*modelresponse.SysConfigVo, 0)
 	err := s.ms.NamedSelectContext(ctx, &list, s.configSql+whereSql, config)
 	if err != nil {
 		panic(err)
@@ -66,9 +68,9 @@ func (s *sysConfigDao) SelectConfigListAll(ctx context.Context, config *systemmo
 	return
 }
 
-func (s *sysConfigDao) SelectConfigById(ctx context.Context, configId int64) (config *systemmodels.SysConfigVo) {
+func (s *sysConfigDao) SelectConfigById(ctx context.Context, configId int64) (config *modelresponse.SysConfigVo) {
 	whereSql := ` where config_id = ?`
-	config = new(systemmodels.SysConfigVo)
+	config = new(modelresponse.SysConfigVo)
 	err := s.ms.GetContext(ctx, config, s.configSql+whereSql, configId)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
@@ -76,7 +78,7 @@ func (s *sysConfigDao) SelectConfigById(ctx context.Context, configId int64) (co
 	return config
 }
 
-func (s *sysConfigDao) InsertConfig(ctx context.Context, config *systemmodels.SysConfigVo) {
+func (s *sysConfigDao) InsertConfig(ctx context.Context, config *modelrequest.SysConfigDML) {
 	insertSQL := `insert into sys_config (config_id,config_name,config_key,config_value,config_type,remark,create_by,create_time,update_by,update_time)
 					values (:config_id,:config_name,:config_key,:config_value,:config_type,:remark,:create_by,:create_time,:update_by,:update_time)`
 	_, err := s.ms.NamedExecContext(ctx, insertSQL, config)
@@ -86,7 +88,7 @@ func (s *sysConfigDao) InsertConfig(ctx context.Context, config *systemmodels.Sy
 	return
 }
 
-func (s *sysConfigDao) UpdateConfig(ctx context.Context, config *systemmodels.SysConfigVo) {
+func (s *sysConfigDao) UpdateConfig(ctx context.Context, config *modelrequest.SysConfigDML) {
 	updateSQL := `update sys_config set  update_time =:update_time , update_by = :update_by `
 
 	if config.ConfigName != "" {

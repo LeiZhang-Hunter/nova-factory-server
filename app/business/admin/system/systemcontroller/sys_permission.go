@@ -1,7 +1,9 @@
 package systemcontroller
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -10,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
+
+var _ = modelresponse.SysPermissionVo{}
 
 type Permission struct {
 	ps systemservice.ISysPermissionService
@@ -41,13 +45,13 @@ func (pc *Permission) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 系统权限列表
 // @Description 系统权限列表
 // @Tags 系统权限
-// @Param object query systemmodels.SysPermissionDQL false "查询信息"
+// @Param object query modelquery.SysPermissionDQL false "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=[]systemmodels.SysPermissionVo} "成功"
+// @Success 200 {object}  response.ResponseData{data=[]modelresponse.SysPermissionVo} "成功"
 // @Router /system/permission/list [get]
 func (pc *Permission) PermissionList(c *gin.Context) {
-	permission := new(systemmodels.SysPermissionDQL)
+	permission := new(modelquery.SysPermissionDQL)
 	_ = c.ShouldBind(permission)
 	list := pc.ps.SelectPermissionList(c, permission)
 	baizeContext.SuccessData(c, list)
@@ -60,7 +64,7 @@ func (pc *Permission) PermissionList(c *gin.Context) {
 // @Param permissionId path string true "permissionId"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysPermissionVo} "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysPermissionVo} "成功"
 // @Router /system/permission/{permissionId}  [get]
 func (pc *Permission) PermissionGetInfo(c *gin.Context) {
 	permissionId := baizeContext.ParamInt64(c, "permissionId")
@@ -79,7 +83,7 @@ func (pc *Permission) PermissionGetInfo(c *gin.Context) {
 // @Param roleIds path string true "roleIds"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=[]systemmodels.SysPermissionVo} "成功"
+// @Success 200 {object}  response.ResponseData{data=[]modelresponse.SysPermissionVo} "成功"
 // @Router /system/permission/byRoleIds/{roleIds} [get]
 func (pc *Permission) PermissionListByRoleIds(c *gin.Context) {
 	roleIds := baizeContext.ParamInt64Array(c, "roleIds")
@@ -95,13 +99,13 @@ func (pc *Permission) PermissionListByRoleIds(c *gin.Context) {
 // @Summary 新增系统权限
 // @Description 新增系统权限
 // @Tags 系统权限
-// @Param  object body systemmodels.SysPermissionAdd true "系统权限"
+// @Param  object body modelrequest.SysPermissionAdd true "系统权限"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData
 // @Router /system/permission [post]
 func (pc *Permission) PermissionAdd(c *gin.Context) {
-	permission := new(systemmodels.SysPermissionAdd)
+	permission := new(modelrequest.SysPermissionAdd)
 	err := c.ShouldBind(permission)
 	if err != nil {
 		zap.L().Debug("参数错误", zap.Any("err", err))
@@ -117,13 +121,13 @@ func (pc *Permission) PermissionAdd(c *gin.Context) {
 // @Summary 修改系统权限
 // @Description 修改系统权限
 // @Tags 系统权限
-// @Param  object body systemmodels.SysPermissionEdit true "系统权限"
+// @Param  object body modelrequest.SysPermissionEdit true "系统权限"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object} response.ResponseData
 // @Router /system/permission [put]
 func (pc *Permission) PermissionEdit(c *gin.Context) {
-	permission := new(systemmodels.SysPermissionEdit)
+	permission := new(modelrequest.SysPermissionEdit)
 	_ = c.ShouldBind(permission)
 	permission.SetUpdateBy(baizeContext.GetUserId(c))
 	pc.ps.UpdatePermission(c, permission)

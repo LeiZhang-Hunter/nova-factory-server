@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
 	deviceDao2 "nova-factory-server/app/business/iot/asset/device/devicedao"
 	deviceModels2 "nova-factory-server/app/business/iot/asset/device/devicemodels"
 	"nova-factory-server/app/business/iot/asset/device/deviceservice"
@@ -151,7 +151,7 @@ func (d *DeviceService) SelectDeviceList(c *gin.Context, req *deviceModels2.Devi
 	}
 
 	users := d.iUserDao.SelectByUserIds(c, userIds)
-	userVoMap := make(map[int64]*systemmodels.SysUserDML)
+	userVoMap := make(map[int64]*modelrequest.SysUserDML)
 	for _, v := range users {
 		userVoMap[v.UserId] = v
 	}

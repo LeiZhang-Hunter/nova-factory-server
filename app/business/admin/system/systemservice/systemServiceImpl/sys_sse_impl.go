@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/constant/sessionStatus"
 	"nova-factory-server/app/datasource/cache"
@@ -19,7 +19,7 @@ import (
 )
 
 type SseService struct {
-	ChannelsMap map[string]chan *systemmodels.SseType
+	ChannelsMap map[string]chan *modelentity.SseType
 	userMap     map[int64][]string
 	mutex       sync.RWMutex
 	cache       cache.Cache
@@ -27,7 +27,7 @@ type SseService struct {
 
 func NewSseService(cache cache.Cache) systemservice.ISseService {
 	return &SseService{
-		ChannelsMap: make(map[string]chan *systemmodels.SseType),
+		ChannelsMap: make(map[string]chan *modelentity.SseType),
 		userMap:     make(map[int64][]string),
 		cache:       cache,
 	}
@@ -45,7 +45,7 @@ func (s *SseService) BuildNotificationChannel(c *gin.Context) {
 	id := baizeContext.GetSession(c).Id()
 	userId := baizeContext.GetUserId(c)
 	s.mutex.Lock()
-	var newChannel = make(chan *systemmodels.SseType)
+	var newChannel = make(chan *modelentity.SseType)
 	s.ChannelsMap[id] = newChannel
 	ids := s.userMap[userId]
 	if ids == nil {
@@ -90,7 +90,7 @@ func (s *SseService) BuildNotificationChannel(c *gin.Context) {
 	})
 
 }
-func (s *SseService) SendNotification(c context.Context, ss *systemmodels.Sse) {
+func (s *SseService) SendNotification(c context.Context, ss *modelentity.Sse) {
 	if setting.Conf.Cluster && !ss.RedisPublish {
 		ss.RedisPublish = true
 		marshal, err := json.Marshal(ss)

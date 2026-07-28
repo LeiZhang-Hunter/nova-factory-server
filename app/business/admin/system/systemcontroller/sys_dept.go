@@ -1,7 +1,9 @@
 package systemcontroller
 
 import (
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	"nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
@@ -10,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
+
+var _ = modelresponse.SysDeptVo{}
 
 type Dept struct {
 	ds systemservice.IDeptService
@@ -42,13 +46,13 @@ func (dc *Dept) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 // @Summary 查询部门列表查询
 // @Description 查询部门列表查询
 // @Tags 部门相关
-// @Param  object query systemmodels.SysDeptDQL true "查询信息"
+// @Param  object query modelquery.SysDeptDQL true "查询信息"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]systemmodels.SysDeptVo}}  "成功"
+// @Success 200 {object}  response.ResponseData{data=response.ListData{Rows=[]modelresponse.SysDeptVo}}  "成功"
 // @Router /system/dept  [get]
 func (dc *Dept) DeptList(c *gin.Context) {
-	dept := new(systemmodels.SysDeptDQL)
+	dept := new(modelquery.SysDeptDQL)
 	_ = c.ShouldBind(dept)
 	dept.DataScope = baizeContext.GetDataScope(c, "d")
 	baizeContext.SuccessData(c, dc.ds.SelectDeptList(c, dept))
@@ -62,7 +66,7 @@ func (dc *Dept) DeptList(c *gin.Context) {
 // @Param id path string true "deptId"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.SysDeptVo}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.SysDeptVo}  "成功"
 // @Router /system/dept/{deptId}  [get]
 func (dc *Dept) DeptGetInfo(c *gin.Context) {
 	deptId := baizeContext.ParamInt64(c, "deptId")
@@ -81,7 +85,7 @@ func (dc *Dept) DeptGetInfo(c *gin.Context) {
 // @Param id path string true "roleId"
 // @Security BearerAuth
 // @Produce application/json
-// @Success 200 {object}  response.ResponseData{data=systemmodels.RoleDeptTree}  "成功"
+// @Success 200 {object}  response.ResponseData{data=modelresponse.RoleDeptTree}  "成功"
 // @Router /system/dept/roleDeptTreeSelect/{roleId}  [get]
 func (dc *Dept) RoleDeptTreeSelect(c *gin.Context) {
 	//bzc := baizeContext.NewBaiZeContext(c)
@@ -90,9 +94,9 @@ func (dc *Dept) RoleDeptTreeSelect(c *gin.Context) {
 	//	zap.L().Error("参数错误")
 	//	bzc.ParameterError()
 	//}
-	//rdt := new(systemmodels.RoleDeptTree)
+	//rdt := new(modelresponse.RoleDeptTree)
 	//rdt.CheckedKeys = dc.ds.SelectDeptListByRoleId(roleId)
-	//rdt.Depts = dc.ds.SelectDeptList(new(systemmodels.SysDeptDQL))
+	//rdt.Depts = dc.ds.SelectDeptList(new(modelquery.SysDeptDQL))
 	//bzc.SuccessData(rdt)
 }
 
@@ -100,13 +104,13 @@ func (dc *Dept) RoleDeptTreeSelect(c *gin.Context) {
 // @Summary 添加部门
 // @Description 添加部门
 // @Tags 部门相关
-// @Param  object body systemmodels.SysDeptVo true "公司信息"
+// @Param  object body modelrequest.SysDeptDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/dept  [post]
 func (dc *Dept) DeptAdd(c *gin.Context) {
-	sysDept := new(systemmodels.SysDeptVo)
+	sysDept := new(modelrequest.SysDeptDML)
 	_ = c.ShouldBindJSON(sysDept)
 	if dc.ds.CheckDeptNameUnique(c, 0, sysDept.ParentId, sysDept.DeptName) {
 		baizeContext.Waring(c, "新增部门'"+sysDept.DeptName+"'失败，部门名称已存在")
@@ -121,13 +125,13 @@ func (dc *Dept) DeptAdd(c *gin.Context) {
 // @Summary 修改部门
 // @Description 修改部门
 // @Tags 部门相关
-// @Param  object body systemmodels.SysDeptVo true "公司信息"
+// @Param  object body modelrequest.SysDeptDML true "公司信息"
 // @Security BearerAuth
 // @Produce application/json
 // @Success 200 {object}  response.ResponseData "成功"
 // @Router /system/dept  [put]
 func (dc *Dept) DeptEdit(c *gin.Context) {
-	sysDept := new(systemmodels.SysDeptVo)
+	sysDept := new(modelrequest.SysDeptDML)
 	_ = c.ShouldBindJSON(sysDept)
 	if dc.ds.CheckDeptNameUnique(c, sysDept.DeptId, sysDept.ParentId, sysDept.DeptName) {
 		baizeContext.Waring(c, "修改部门'"+sysDept.DeptName+"'失败，部门名称已存在")

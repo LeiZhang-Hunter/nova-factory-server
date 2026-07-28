@@ -1,4 +1,4 @@
-package systemmodels
+package entity
 
 type SseType struct {
 	Key   string

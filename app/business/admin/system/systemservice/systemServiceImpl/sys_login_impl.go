@@ -4,7 +4,9 @@ import (
 	"nova-factory-server/app/business/admin/monitor/monitordao"
 	"nova-factory-server/app/business/admin/monitor/monitormodels"
 	systemDao2 "nova-factory-server/app/business/admin/system/systemdao"
-	systemModels2 "nova-factory-server/app/business/admin/system/systemmodels"
+	modelentity "nova-factory-server/app/business/admin/system/systemmodels/entity"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 	systemService2 "nova-factory-server/app/business/admin/system/systemservice"
 	"nova-factory-server/app/constant/dataScopeAspect"
 	"nova-factory-server/app/constant/sessionStatus"
@@ -44,7 +46,7 @@ func NewLoginService(cache cache.Cache, ud systemDao2.IUserDao, pd systemDao2.IP
 	return l
 }
 
-func (loginService *LoginService) Login(c *gin.Context, user *systemModels2.User) *systemModels2.LoginResp {
+func (loginService *LoginService) Login(c *gin.Context, user *modelentity.User) *modelresponse.LoginResp {
 	manager := session.NewAdminManager(loginService.cache)
 	session, err := manager.InitSession(c, user.UserId)
 	if err != nil {
@@ -56,14 +58,14 @@ func (loginService *LoginService) Login(c *gin.Context, user *systemModels2.User
 	session.Set(c, sessionStatus.Browser, user.Browser)
 	session.Set(c, sessionStatus.UserName, user.UserName)
 	session.Set(c, sessionStatus.Avatar, user.Avatar)
-	return &systemModels2.LoginResp{
+	return &modelresponse.LoginResp{
 		Token:      session.Id(),
 		ExpireTime: setting.Conf.ExpireTime * 60,
 	}
 }
 
-func (loginService *LoginService) Register(c *gin.Context, user *systemModels2.LoginBody) {
-	u := new(systemModels2.SysUserDML)
+func (loginService *LoginService) Register(c *gin.Context, user *modelrequest.LoginBody) {
+	u := new(modelrequest.SysUserDML)
 	u.Password = bCryptPasswordEncoder.HashPassword(user.Password)
 	u.DataScope = dataScopeAspect.NoDataScope
 	u.UserId = snowflake.GenID()
@@ -121,8 +123,8 @@ func (loginService *LoginService) getPermission(c *gin.Context, userId int64) []
 	return perms
 }
 
-func (loginService *LoginService) GenerateCode(c *gin.Context) (m *systemModels2.CaptchaVo) {
-	m = new(systemModels2.CaptchaVo)
+func (loginService *LoginService) GenerateCode(c *gin.Context) (m *modelresponse.CaptchaVo) {
+	m = new(modelresponse.CaptchaVo)
 	key := loginService.cs.SelectConfigValueByKey(c, "sys.account.captchaEnabled")
 	if key != "false" {
 		captcha := base64Captcha.NewCaptcha(loginService.driver, loginService.store)
@@ -149,14 +151,14 @@ func (loginService *LoginService) ForceLogout(c *gin.Context, token string) {
 	panic("等待补充")
 }
 
-func (loginService *LoginService) RolePermissionByRoles(roles []*systemModels2.SysRole) (loginRoles []int64) {
+func (loginService *LoginService) RolePermissionByRoles(roles []*modelentity.SysRole) (loginRoles []int64) {
 	loginRoles = make([]int64, 0, len(roles))
 	for _, role := range roles {
 		loginRoles = append(loginRoles, role.RoleId)
 	}
 	return
 }
-func (loginService *LoginService) GetInfo(c *gin.Context) *systemModels2.GetInfo {
+func (loginService *LoginService) GetInfo(c *gin.Context) *modelresponse.GetInfo {
 	userId := baizeContext.GetUserId(c)
 	roles := loginService.roleDao.SelectBasicRolesByUserId(c, userId)
 	loginRoles := loginService.RolePermissionByRoles(roles)
@@ -172,8 +174,8 @@ func (loginService *LoginService) GetInfo(c *gin.Context) *systemModels2.GetInfo
 	session.Set(c, sessionStatus.Avatar, user.Avatar)
 	session.Set(c, sessionStatus.DeptId, user.DeptId)
 	session.Set(c, sessionStatus.DataScopeAspect, user.DataScope)
-	getInfo := new(systemModels2.GetInfo)
-	u := new(systemModels2.User)
+	getInfo := new(modelresponse.GetInfo)
+	u := new(modelentity.User)
 	u.UserId = baizeContext.GetUserId(c)
 	u.UserName = baizeContext.GetUserName(c)
 	u.Avatar = baizeContext.GetAvatar(c)

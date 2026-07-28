@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	systemDao2 "nova-factory-server/app/business/admin/system/systemdao"
-	"nova-factory-server/app/business/admin/system/systemmodels"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
 	"nova-factory-server/app/business/ai/agent/aidatasetdao"
 	"nova-factory-server/app/business/ai/agent/aidatasetmodels"
 	"nova-factory-server/app/business/ai/agent/aidatasetservice"
@@ -205,7 +205,7 @@ func (i *IDataSetServiceImpl) SelectDataSet(c *gin.Context, request *aidatasetmo
 		}
 	}
 	users := i.iUserDao.SelectByUserIds(c, userIds)
-	userVoMap := make(map[int64]*systemmodels.SysUserDML)
+	userVoMap := make(map[int64]*modelrequest.SysUserDML)
 	for _, v := range users {
 		userVoMap[v.UserId] = v
 	}

@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"nova-factory-server/app/baize"
 	"nova-factory-server/app/business/admin/system/systemdao"
-	systemModels2 "nova-factory-server/app/business/admin/system/systemmodels"
+	modelquery "nova-factory-server/app/business/admin/system/systemmodels/query"
+	modelrequest "nova-factory-server/app/business/admin/system/systemmodels/request"
+	modelresponse "nova-factory-server/app/business/admin/system/systemmodels/response"
 
 	"github.com/baizeplus/sqly"
 )
@@ -24,7 +26,7 @@ func NewSysDeptDao(ms sqly.SqlyContext) systemdao.IDeptDao {
 	}
 }
 
-func (sysDeptDao *sysDeptDao) SelectDeptList(ctx context.Context, dept *systemModels2.SysDeptDQL) (list []*systemModels2.SysDeptVo) {
+func (sysDeptDao *sysDeptDao) SelectDeptList(ctx context.Context, dept *modelquery.SysDeptDQL) (list []*modelresponse.SysDeptVo) {
 	whereSql := ` where d.del_flag = '0'`
 	if dept.ParentId != 0 {
 		whereSql += " AND parent_id = :parent_id"
@@ -39,29 +41,29 @@ func (sysDeptDao *sysDeptDao) SelectDeptList(ctx context.Context, dept *systemMo
 		whereSql += " AND " + dept.DataScope
 	}
 	whereSql += " order by d.parent_id, d.order_num"
-	list = make([]*systemModels2.SysDeptVo, 0, 16)
+	list = make([]*modelresponse.SysDeptVo, 0, 16)
 	err := sysDeptDao.ms.NamedSelectContext(ctx, &list, sysDeptDao.deptSql+whereSql, dept)
 	if err != nil {
 		panic(err)
 	}
 	return list
 }
-func (sysDeptDao *sysDeptDao) SelectDeptListSelectBox(ctx context.Context, dept *baize.BaseEntityDQL) (list []*systemModels2.SelectDept) {
+func (sysDeptDao *sysDeptDao) SelectDeptListSelectBox(ctx context.Context, dept *baize.BaseEntityDQL) (list []*modelresponse.SelectDept) {
 	sql := `select d.dept_id, d.parent_id, d.dept_name from sys_dept d where d.del_flag = '0' `
 	if dept.DataScope != "" {
 		sql += " AND " + dept.DataScope
 	}
 	sql += " order by d.parent_id, d.order_num"
-	list = make([]*systemModels2.SelectDept, 0)
+	list = make([]*modelresponse.SelectDept, 0)
 	err := sysDeptDao.ms.NamedSelectContext(ctx, &list, sql, dept)
 	if err != nil {
 		panic(err)
 	}
 	return list
 }
-func (sysDeptDao *sysDeptDao) SelectDeptById(ctx context.Context, deptId int64) (dept *systemModels2.SysDeptVo) {
+func (sysDeptDao *sysDeptDao) SelectDeptById(ctx context.Context, deptId int64) (dept *modelresponse.SysDeptVo) {
 	whereSql := ` where d.dept_id = ?`
-	dept = new(systemModels2.SysDeptVo)
+	dept = new(modelresponse.SysDeptVo)
 	err := sysDeptDao.ms.GetContext(ctx, dept, sysDeptDao.deptSql+whereSql, deptId)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
@@ -69,7 +71,7 @@ func (sysDeptDao *sysDeptDao) SelectDeptById(ctx context.Context, deptId int64) 
 	return dept
 }
 
-func (sysDeptDao *sysDeptDao) InsertDept(ctx context.Context, dept *systemModels2.SysDeptVo) {
+func (sysDeptDao *sysDeptDao) InsertDept(ctx context.Context, dept *modelrequest.SysDeptDML) {
 	insertSQL := `insert into sys_dept(dept_id,parent_id,dept_name,order_num,create_by,create_time,update_by,update_time %s)
 					values(:dept_id,:parent_id,:dept_name,:order_num,:create_by,:create_time,:update_by,:update_time %s)`
 	key := ""
@@ -103,7 +105,7 @@ func (sysDeptDao *sysDeptDao) InsertDept(ctx context.Context, dept *systemModels
 	return
 }
 
-func (sysDeptDao *sysDeptDao) UpdateDept(ctx context.Context, dept *systemModels2.SysDeptVo) {
+func (sysDeptDao *sysDeptDao) UpdateDept(ctx context.Context, dept *modelrequest.SysDeptDML) {
 	updateSQL := `update sys_dept set order_num=:order_num , update_time = :update_time , update_by = :update_by `
 	if dept.ParentId != 0 {
 		updateSQL += ",parent_id = :parent_id"
