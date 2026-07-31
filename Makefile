@@ -13,7 +13,7 @@ init:
 # ADDONS_DIR points to the external addon repository.
 # ADDONS defaults to all non-hidden first-level directories under ADDONS_DIR.
 # WIRE_TAGS are always enabled for the main server; ADDONS are appended by wire-addons.
-ADDONS_DIR ?= /home/zhanglei/project/nova/nova-factory-addons-be
+ADDONS_DIR ?= ./app/business
 ADDONS ?= $(shell if [ -d "$(ADDONS_DIR)" ]; then find "$(ADDONS_DIR)" -mindepth 1 -maxdepth 1 -type d ! -name ".*" -exec basename {} \; | sort | tr '\n' ' '; fi)
 WIRE_TAGS ?= ai iot
 
