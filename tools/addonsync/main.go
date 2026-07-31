@@ -9,7 +9,9 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"unicode"
@@ -59,8 +61,8 @@ func linkAddons(businessDir, addonsDir string, enabled map[string]bool) error {
 
 		info, err := os.Lstat(dst)
 		if err == nil {
-			if info.Mode()&os.ModeSymlink == 0 {
-				continue
+			if !isDirLink(info, dst) {
+				continue // real directory, skip
 			}
 			target, err := os.Readlink(dst)
 			if err != nil {
@@ -70,19 +72,52 @@ func linkAddons(businessDir, addonsDir string, enabled map[string]bool) error {
 				target = filepath.Join(filepath.Dir(dst), target)
 			}
 			if filepath.Clean(target) == filepath.Clean(src) {
-				continue
+				continue // already links to the right place
 			}
-			return fmt.Errorf("%s already links to %s", dst, target)
+			// Link points elsewhere — remove stale link and recreate
+			if err := os.Remove(dst); err != nil {
+				return fmt.Errorf("remove stale link %s: %w", dst, err)
+			}
 		}
 		if !os.IsNotExist(err) {
 			return err
 		}
-		if err := os.Symlink(src, dst); err != nil {
+		if err := createDirLink(src, dst); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+// createDirLink creates a directory link from link to target.
+// On Windows it uses mklink /J (junction, no admin required).
+// On Unix it uses os.Symlink.
+func createDirLink(target, link string) error {
+	if runtime.GOOS == "windows" {
+		// mklink /J <link> <target> — note reversed order vs ln -s!
+		cmd := exec.Command("cmd", "/c", "mklink", "/J", link, target)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("mklink /J %s -> %s: %w\n%s", link, target, err, out)
+		}
+		return nil
+	}
+	return os.Symlink(target, link)
+}
+
+// isDirLink reports whether the path is a directory symlink or (on Windows) a junction.
+func isDirLink(info os.FileInfo, path string) bool {
+	if info.Mode()&os.ModeSymlink != 0 {
+		return true
+	}
+	// Windows junctions report as ModeDir; os.Readlink succeeds on them
+	if runtime.GOOS == "windows" {
+		if _, err := os.Readlink(path); err == nil {
+			return true
+		}
+	}
+	return false
 }
 
 func discoverAddonNames(addonsDir string, enabled map[string]bool) ([]string, error) {
