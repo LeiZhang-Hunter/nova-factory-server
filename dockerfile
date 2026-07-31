@@ -23,7 +23,7 @@ COPY nova-factory-addons-be/datasyncapi app/business/datasyncapi
 WORKDIR /src/app
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
     go build -trimpath -ldflags="-s -w" \
-    -tags="ai iot shop datasyncapi" \
+    -tags="ai shop datasyncapi" \
     -o /out/nova-factory-server .
 
 FROM debian:bookworm-slim

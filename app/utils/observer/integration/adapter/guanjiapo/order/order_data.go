@@ -177,6 +177,32 @@ func toOrderSyncAccounts(accounts []event.Account) []*orderAccount {
 	return result
 }
 
+// ---- 订单状态同步 ----
+
+type syncOrderStatusItem struct {
+	Tid                string                           `json:"tid"`
+	Status             string                           `json:"status"`
+	RefundStatus       string                           `json:"refundstatus"`
+	DetailRefundStatus []event.ZOrderDetailRefundStatus `json:"detailrefundstatus,omitempty"`
+}
+
+type syncOrderStatusList struct {
+	Orders []syncOrderStatusItem `json:"orders"`
+}
+
+func toSyncOrderStatus(orders []event.ZOrderStatusSyncReqData) *syncOrderStatusList {
+	items := make([]syncOrderStatusItem, 0, len(orders))
+	for _, v := range orders {
+		items = append(items, syncOrderStatusItem{
+			Tid:                v.GetTid(),
+			Status:             v.GetStatus(),
+			RefundStatus:       v.GetRefundstatus(),
+			DetailRefundStatus: v.GetDetailRefundStatus(),
+		})
+	}
+	return &syncOrderStatusList{Orders: items}
+}
+
 func toSyncAfterSaleOrders(reqData event.ZAfterSaleOrderSyncReqDataEvent) []syncAfterSaleOrders {
 	result := make([]syncAfterSaleOrders, 0)
 	for _, v := range *reqData.GetOrders() {
