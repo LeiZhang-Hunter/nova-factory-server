@@ -6,23 +6,27 @@ import (
 	"github.com/google/wire"
 	admin "nova-factory-server/app/business/admin"
 	ai "nova-factory-server/app/business/ai"
+	data "nova-factory-server/app/business/data"
 	iot "nova-factory-server/app/business/iot"
 )
 
 type Plugins struct {
 	Admin *admin.Admin
 	AI    *ai.AI
+	Data  *data.Data
 	Iot   *iot.Iot
 }
 
 func NewPlugins(
 	adminPlugin *admin.Admin,
 	aiPlugin *ai.AI,
+	dataPlugin *data.Data,
 	iotPlugin *iot.Iot,
 ) *Plugins {
 	return &Plugins{
 		Admin: adminPlugin,
 		AI:    aiPlugin,
+		Data:  dataPlugin,
 		Iot:   iotPlugin,
 	}
 }
@@ -30,6 +34,7 @@ func NewPlugins(
 var ProviderSet = wire.NewSet(
 	admin.ProviderSet,
 	ai.ProviderSet,
+	data.ProviderSet,
 	iot.ProviderSet,
 	NewPlugins,
 )
