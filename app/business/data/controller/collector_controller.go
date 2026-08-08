@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"strconv"
-
 	"nova-factory-server/app/business/data/models/dto"
 	"nova-factory-server/app/business/data/service"
 	"nova-factory-server/app/middlewares"
@@ -10,6 +8,7 @@ import (
 	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 )
 
 // CollectorController 采集器控制器
@@ -104,8 +103,8 @@ func (ctrl *CollectorController) GetCollector(c *gin.Context) {
 // @Success 200 {object} response.ResponseData{data=[]dto.Collector}
 // @Router /data/collectors [get]
 func (ctrl *CollectorController) ListCollectors(c *gin.Context) {
-	pageNum, _ := strconv.Atoi(c.DefaultQuery("pageNum", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	pageNum := cast.ToInt(c.DefaultQuery("pageNum", "1"))
+	pageSize := cast.ToInt(c.DefaultQuery("pageSize", "10"))
 	name := c.Query("name")
 	deviceID := c.Query("deviceId")
 	status := c.Query("status")

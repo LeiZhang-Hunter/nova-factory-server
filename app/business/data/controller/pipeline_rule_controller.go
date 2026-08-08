@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"strconv"
-
 	"nova-factory-server/app/business/data/models/dto"
 	"nova-factory-server/app/business/data/service"
 	"nova-factory-server/app/middlewares"
@@ -10,6 +8,7 @@ import (
 	"nova-factory-server/app/utils/gin_mcp"
 
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 )
 
 type PipelineRuleController struct{ service service.IPipelineRuleService }
@@ -59,8 +58,8 @@ func (ctrl *PipelineRuleController) Get(c *gin.Context) {
 }
 
 func (ctrl *PipelineRuleController) List(c *gin.Context) {
-	pageNum, _ := strconv.Atoi(c.DefaultQuery("pageNum", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	pageNum := cast.ToInt(c.DefaultQuery("pageNum", "1"))
+	pageSize := cast.ToInt(c.DefaultQuery("pageSize", "10"))
 	if pageNum < 1 {
 		pageNum = 1
 	}
@@ -154,8 +153,8 @@ func (ctrl *ServiceConnectionController) Get(c *gin.Context) {
 }
 
 func (ctrl *ServiceConnectionController) List(c *gin.Context) {
-	pageNum, _ := strconv.Atoi(c.DefaultQuery("pageNum", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	pageNum := cast.ToInt(c.DefaultQuery("pageNum", "1"))
+	pageSize := cast.ToInt(c.DefaultQuery("pageSize", "10"))
 	if pageNum < 1 {
 		pageNum = 1
 	}

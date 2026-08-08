@@ -7,6 +7,8 @@ import (
 
 	"nova-factory-server/app/business/data/models/dto"
 	"nova-factory-server/app/business/data/models/entity"
+
+	"github.com/spf13/cast"
 )
 
 func validatePipelineBundle(raw json.RawMessage, sourceType string) (*dto.PipelineBundle, []string, error) {
@@ -164,5 +166,5 @@ func normalizeJSON(raw json.RawMessage) (string, error) {
 		return "", err
 	}
 	normalized, err := json.Marshal(value)
-	return string(normalized), err
+	return cast.ToString(normalized), err
 }

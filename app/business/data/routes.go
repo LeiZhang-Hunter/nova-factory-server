@@ -28,6 +28,7 @@ func NewGinEngine(
 		dc.PipelineRuleAgentController.PrivateRoutes(group)
 		dc.ServiceConnectionController.PrivateRoutes(group)
 		dc.CollectorController.PrivateRoutes(group)
+		dc.ModelConfigController.PrivateRoutes(group)
 	}
 
 	{
@@ -35,6 +36,7 @@ func NewGinEngine(
 		dc.PipelineRuleAgentController.PrivateMcpRoutes(app.McpServer)
 		dc.ServiceConnectionController.PrivateMcpRoutes(app.McpServer)
 		dc.CollectorController.PrivateMcpRoutes(app.McpServer)
+		dc.ModelConfigController.PrivateMcpRoutes(app.McpServer)
 	}
 
 	return &Data{}

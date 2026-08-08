@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,155 +9,44 @@ import (
 	"strings"
 	"time"
 
-	arkadapter "github.com/cloudwego/eino-ext/components/model/ark"
-	claudeadapter "github.com/cloudwego/eino-ext/components/model/claude"
-	deepseekadapter "github.com/cloudwego/eino-ext/components/model/deepseek"
-	geminiadapter "github.com/cloudwego/eino-ext/components/model/gemini"
-	ollamaadapter "github.com/cloudwego/eino-ext/components/model/ollama"
-	openaiadapter "github.com/cloudwego/eino-ext/components/model/openai"
-	qwenadapter "github.com/cloudwego/eino-ext/components/model/qwen"
-	"github.com/cloudwego/eino/components/model"
-	"github.com/cloudwego/eino/schema"
+	"nova-factory-server/app/business/data/dao"
+	"nova-factory-server/app/business/data/models/entity"
+	chatmodelutil "nova-factory-server/app/utils/einoAgent"
+	chatmodelstore "nova-factory-server/app/utils/store/chatmodel"
+
+	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
-	"github.com/spf13/viper"
+	"github.com/spf13/cast"
 	"github.com/xuri/excelize/v2"
-	"google.golang.org/genai"
 )
 
 type Service struct {
-	model model.BaseChatModel
+	modelConfigDao dao.IModelConfigDAO
 }
 
 var ProviderSet = wire.NewSet(NewService)
 
-func NewService() (*Service, error) {
-	if !viper.GetBool("chatwitheino.enabled") {
-		return &Service{}, nil
+func NewService(modelConfigDao dao.IModelConfigDAO) *Service {
+	return &Service{modelConfigDao: modelConfigDao}
+}
+
+const (
+	// defaultModelTimeout 模型请求超时，data_model_config 暂无该字段，固定默认值。
+	defaultModelTimeout = 120 * time.Second
+)
+
+// Generate 每次请求时解析模型配置并初始化模型后生成 Pipeline 配置草稿。
+func (s *Service) Generate(c *gin.Context, header *multipart.FileHeader, sourceType string) (json.RawMessage, error) {
+	if s == nil || s.modelConfigDao == nil {
+		return nil, errors.New("数据平台 Agent 未初始化")
 	}
-	modelName := strings.TrimSpace(viper.GetString("chatwitheino.model"))
-	if modelName == "" {
-		return nil, errors.New("chatwitheino.model 不能为空")
-	}
-	timeoutText := strings.TrimSpace(viper.GetString("chatwitheino.timeout"))
-	if timeoutText == "" {
-		timeoutText = "120s"
-	}
-	timeout, err := time.ParseDuration(timeoutText)
+	modelCfg, err := s.resolveModelConfig(c)
 	if err != nil {
-		return nil, fmt.Errorf("chatwitheino.timeout 配置无效: %w", err)
+		return nil, err
 	}
-	temperature := float32(viper.GetFloat64("chatwitheino.temperature"))
-	maxTokens := viper.GetInt("chatwitheino.max_tokens")
-	if maxTokens <= 0 {
-		maxTokens = 8192
-	}
-	protocol := strings.ToLower(strings.TrimSpace(viper.GetString("chatwitheino.protocol")))
-	if protocol == "" {
-		protocol = "openai"
-	}
-	m, err := newChatModel(context.Background(), protocol, chatModelConfig{
-		APIKey:      viper.GetString("chatwitheino.api_key"),
-		BaseURL:     strings.TrimRight(strings.TrimSpace(viper.GetString("chatwitheino.base_url")), "/"),
-		Model:       modelName,
-		MaxTokens:   maxTokens,
-		Temperature: temperature,
-		Timeout:     timeout,
-	})
+	m, err := chatmodelutil.NewChatModel(c, modelCfg.Protocol, *modelCfg)
 	if err != nil {
-		return nil, fmt.Errorf("创建 ChatWithEino 模型失败（protocol=%s）: %w", protocol, err)
-	}
-	return &Service{model: m}, nil
-}
-
-type chatModelConfig struct {
-	APIKey      string
-	BaseURL     string
-	Model       string
-	MaxTokens   int
-	Temperature float32
-	Timeout     time.Duration
-}
-
-func newChatModel(ctx context.Context, protocol string, config chatModelConfig) (model.BaseChatModel, error) {
-	switch protocol {
-	case "openai":
-		return openaiadapter.NewChatModel(ctx, &openaiadapter.ChatModelConfig{
-			APIKey:      config.APIKey,
-			BaseURL:     config.BaseURL,
-			Model:       config.Model,
-			MaxTokens:   &config.MaxTokens,
-			Temperature: &config.Temperature,
-			Timeout:     config.Timeout,
-		})
-	case "qwen":
-		return qwenadapter.NewChatModel(ctx, &qwenadapter.ChatModelConfig{
-			APIKey:      config.APIKey,
-			BaseURL:     config.BaseURL,
-			Model:       config.Model,
-			MaxTokens:   &config.MaxTokens,
-			Temperature: &config.Temperature,
-			Timeout:     config.Timeout,
-		})
-	case "ark":
-		return arkadapter.NewChatModel(ctx, &arkadapter.ChatModelConfig{
-			APIKey:      config.APIKey,
-			BaseURL:     config.BaseURL,
-			Model:       config.Model,
-			MaxTokens:   &config.MaxTokens,
-			Temperature: &config.Temperature,
-			Timeout:     &config.Timeout,
-		})
-	case "ollama":
-		return ollamaadapter.NewChatModel(ctx, &ollamaadapter.ChatModelConfig{
-			BaseURL: config.BaseURL,
-			Model:   config.Model,
-			Timeout: config.Timeout,
-			Options: &ollamaadapter.Options{Temperature: config.Temperature, NumPredict: config.MaxTokens},
-		})
-	case "gemini":
-		clientConfig := &genai.ClientConfig{APIKey: config.APIKey}
-		if config.BaseURL != "" {
-			clientConfig.HTTPOptions = genai.HTTPOptions{BaseURL: config.BaseURL}
-		}
-		client, err := genai.NewClient(ctx, clientConfig)
-		if err != nil {
-			return nil, fmt.Errorf("创建 Gemini 客户端失败: %w", err)
-		}
-		return geminiadapter.NewChatModel(ctx, &geminiadapter.Config{
-			Client:      client,
-			Model:       config.Model,
-			MaxTokens:   &config.MaxTokens,
-			Temperature: &config.Temperature,
-		})
-	case "deepseek":
-		return deepseekadapter.NewChatModel(ctx, &deepseekadapter.ChatModelConfig{
-			APIKey:      config.APIKey,
-			BaseURL:     config.BaseURL,
-			Model:       config.Model,
-			MaxTokens:   config.MaxTokens,
-			Temperature: config.Temperature,
-			Timeout:     config.Timeout,
-		})
-	case "claude":
-		var baseURL *string
-		if config.BaseURL != "" {
-			baseURL = &config.BaseURL
-		}
-		return claudeadapter.NewChatModel(ctx, &claudeadapter.Config{
-			APIKey:      config.APIKey,
-			BaseURL:     baseURL,
-			Model:       config.Model,
-			MaxTokens:   config.MaxTokens,
-			Temperature: &config.Temperature,
-		})
-	default:
-		return nil, fmt.Errorf("暂不支持模型协议 %q", protocol)
-	}
-}
-
-func (s *Service) Generate(ctx context.Context, header *multipart.FileHeader, sourceType string) (json.RawMessage, error) {
-	if s == nil || s.model == nil {
-		return nil, errors.New("ChatWithEino 未启用或模型未配置")
+		return nil, fmt.Errorf("创建模型失败（protocol=%s）: %w", modelCfg.Protocol, err)
 	}
 	f, err := header.Open()
 	if err != nil {
@@ -223,11 +111,65 @@ func (s *Service) Generate(ctx context.Context, header *multipart.FileHeader, so
 
 Excel 结构摘要：
 %s`, sourceType, header.Filename, content)
-	out, err := s.model.Generate(ctx, []*schema.Message{{Role: schema.System, Content: "你必须输出严格 JSON 配置。"}, {Role: schema.User, Content: prompt}})
+	out, err := chatmodelutil.Generate(c, m, "你必须输出严格 JSON 配置。", prompt)
 	if err != nil {
 		return nil, err
 	}
 	return normalizeModelJSON(out.Content)
+}
+
+// resolveModelConfig 读取 data_model_config 表，并经由 store 层获取 AI 模块连接信息后合并。
+func (s *Service) resolveModelConfig(c *gin.Context) (*chatmodelutil.Config, error) {
+	row, err := s.modelConfigDao.Get(c)
+	if err != nil {
+		return nil, err
+	}
+	if row == nil || strings.TrimSpace(row.Provider) == "" || strings.TrimSpace(row.Model) == "" {
+		return nil, errors.New("数据平台未配置模型，请先在「配置管理 → 模型配置」中设置模型供应商与默认模型")
+	}
+	conn, err := chatmodelstore.GetStore().GetConnection(c, row.Provider, row.Model)
+	if err != nil {
+		return nil, fmt.Errorf("读取模型连接信息失败: %w", err)
+	}
+	if conn == nil {
+		return nil, fmt.Errorf("AI 模块未配置模型 %q 的连接信息（api_type/api_key）", row.Model)
+	}
+	return buildChatModelConfig(row, conn)
+}
+
+// buildChatModelConfig 合并 data_model_config 与 AI 连接信息，生成模型初始化配置。
+func buildChatModelConfig(row *entity.ModelConfig, conn chatmodelstore.LlmConnection) (*chatmodelutil.Config, error) {
+	if row == nil || conn == nil {
+		return nil, errors.New("模型配置或连接信息不能为空")
+	}
+	protocol := strings.ToLower(strings.TrimSpace(conn.GetAPIType()))
+	if protocol == "" {
+		return nil, errors.New("模型连接缺少 api_type")
+	}
+	// max_tokens 仅在启用时下发；未启用则传 0（适配层会省略该参数，交由模型使用默认值）。
+	// 注意：不能回退使用 ai_user_llm.max_tokens，该字段是模型上下文长度（可能高达百万），
+	// 远超各家模型 max_tokens 输出上限，会触发 400。
+	maxTokens := 0
+	if row.EnableMaxTokens && row.MaxTokens > 0 {
+		maxTokens = row.MaxTokens
+	}
+	cfg := &chatmodelutil.Config{
+		Protocol:  protocol,
+		APIKey:    conn.GetAPIKey(),
+		BaseURL:   strings.TrimRight(strings.TrimSpace(conn.GetAPIBase()), "/"),
+		Model:     strings.TrimSpace(row.Model),
+		MaxTokens: maxTokens,
+		Timeout:   defaultModelTimeout,
+	}
+	if row.EnableTemperature {
+		temperature := cast.ToFloat32(row.Temperature)
+		cfg.Temperature = &temperature
+	}
+	if row.EnableTopP {
+		topP := cast.ToFloat32(row.TopP)
+		cfg.TopP = &topP
+	}
+	return cfg, nil
 }
 
 func normalizeModelJSON(content string) (json.RawMessage, error) {
@@ -269,5 +211,5 @@ func summarizeExcel(r io.Reader) (string, error) {
 		}
 	}
 	b, _ := json.Marshal(result)
-	return string(b), nil
+	return cast.ToString(b), nil
 }
