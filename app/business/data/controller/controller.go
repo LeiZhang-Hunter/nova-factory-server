@@ -9,7 +9,6 @@ var ProviderSet = wire.NewSet(
 	NewServiceConnectionController,
 	NewCollectorController,
 	NewPipelineRuleAgentController,
-	NewModelConfigController,
 	wire.Struct(new(DataControllers), "*"),
 )
 
@@ -18,5 +17,4 @@ type DataControllers struct {
 	ServiceConnectionController *ServiceConnectionController
 	CollectorController         *CollectorController
 	PipelineRuleAgentController *PipelineRuleAgentController
-	ModelConfigController       *ModelConfigController
 }

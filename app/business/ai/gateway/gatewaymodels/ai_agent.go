@@ -38,6 +38,7 @@ type AIAgent struct {
 	ConfigVersion             string                    `json:"configVersion" gorm:"column:config_version"`
 	ActiveVersion             string                    `json:"activeVersion" gorm:"-"`
 	Enable                    *bool                     `json:"enable"`
+	Deletable                 bool                      `json:"deletable" gorm:"column:deletable"`
 	ForcedToolChoiceRouteRaw  string                    `json:"-" gorm:"column:forced_tool_choice_route"`
 	ForcedToolChoiceRoute     []*ForcedToolChoiceConfig `json:"forcedToolChoiceRoute" gorm:"-"`
 	DeptID                    int64                     `json:"deptId" gorm:"column:dept_id"`
@@ -79,6 +80,7 @@ type AIAgentUpsert struct {
 	MCPServerEnabledIDs       string                    `json:"mcpServerEnabledIds"`
 	AllowMcpServerIdsToolsRaw string                    `json:"-"`
 	Enable                    *bool                     `json:"enable"`
+	Deletable                 *bool                     `json:"deletable"`
 	SuppressPreToolContent    *bool                     `json:"suppressPreToolContent"`
 	AllowMcpServerIdsTools    map[string][]string       `json:"allowMcpServerIdsTools"` //允许描述的工具 mcp server id => tools
 	ForcedToolChoiceRouteRaw  string                    `json:"-"`
