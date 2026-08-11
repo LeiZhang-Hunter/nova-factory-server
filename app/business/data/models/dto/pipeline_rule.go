@@ -27,14 +27,14 @@ type CreatePipelineRuleRequest struct {
 	Description string          `json:"description"`
 	SourceType  string          `json:"source_type" binding:"required,oneof=file mysql api"`
 	Status      string          `json:"status" binding:"omitempty,oneof=enabled disabled"`
-	Config      json.RawMessage `json:"config" binding:"required"`
+	Config      json.RawMessage `json:"config" binding:"required" swaggertype:"object"`
 }
 
 type UpdatePipelineRuleRequest struct {
 	Name        string          `json:"name" binding:"required,max=255"`
 	Description string          `json:"description"`
 	Status      string          `json:"status" binding:"required,oneof=enabled disabled"`
-	Config      json.RawMessage `json:"config" binding:"required"`
+	Config      json.RawMessage `json:"config" binding:"required" swaggertype:"object"`
 }
 
 type PipelineRuleResponse struct {
@@ -44,7 +44,7 @@ type PipelineRuleResponse struct {
 	SourceType  string          `json:"source_type"`
 	Status      string          `json:"status"`
 	Version     int             `json:"version"`
-	Config      json.RawMessage `json:"config"`
+	Config      json.RawMessage `json:"config" swaggertype:"object"`
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
 }
@@ -54,7 +54,7 @@ type CreateServiceConnectionRequest struct {
 	Description string            `json:"description"`
 	SourceType  string            `json:"source_type" binding:"required,oneof=mysql api"`
 	Status      string            `json:"status" binding:"omitempty,oneof=enabled disabled"`
-	Config      json.RawMessage   `json:"config" binding:"required"`
+	Config      json.RawMessage   `json:"config" binding:"required" swaggertype:"object"`
 	Credentials map[string]string `json:"credentials"`
 }
 
@@ -62,7 +62,7 @@ type UpdateServiceConnectionRequest struct {
 	Name        string             `json:"name" binding:"required,max=255"`
 	Description string             `json:"description"`
 	Status      string             `json:"status" binding:"required,oneof=enabled disabled"`
-	Config      json.RawMessage    `json:"config" binding:"required"`
+	Config      json.RawMessage    `json:"config" binding:"required" swaggertype:"object"`
 	Credentials *map[string]string `json:"credentials"`
 }
 
@@ -72,7 +72,7 @@ type ServiceConnectionResponse struct {
 	Description           string          `json:"description"`
 	SourceType            string          `json:"source_type"`
 	Status                string          `json:"status"`
-	Config                json.RawMessage `json:"config"`
+	Config                json.RawMessage `json:"config" swaggertype:"object"`
 	CredentialFields      []string        `json:"credential_fields"`
 	CredentialsConfigured bool            `json:"credentials_configured"`
 	CreatedAt             time.Time       `json:"created_at"`

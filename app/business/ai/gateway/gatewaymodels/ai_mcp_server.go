@@ -56,7 +56,7 @@ type MCPServerListData struct {
 type MCPServerProbeRequest struct {
 	Transport string          `json:"transport" binding:"max=32"`
 	URL       string          `json:"url" binding:"max=1024"`
-	Headers   json.RawMessage `json:"headers"`
+	Headers   json.RawMessage `json:"headers" swaggertype:"object"`
 	Timeout   int32           `json:"timeout"`
 }
 

@@ -10,6 +10,7 @@ type IPipelineRuleDAO interface {
 	Create(context.Context, *entity.PipelineRule) error
 	GetByID(context.Context, string) (*entity.PipelineRule, error)
 	GetByName(context.Context, string, string) (*entity.PipelineRule, error)
+	ListByIDs(context.Context, []string) ([]entity.PipelineRule, error)
 	List(context.Context, int, int, string, string, string) ([]entity.PipelineRule, int64, error)
 	Update(context.Context, *entity.PipelineRule) error
 	Delete(context.Context, string) error

@@ -34,6 +34,16 @@ func (ctrl *PipelineRuleController) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 	router.RegisterPermission("DELETE", "/data/pipeline-rules/:id", "data:service:rule:remove")
 }
 
+// Create 创建 Pipeline 规则
+// @Summary 创建 Pipeline 规则
+// @Description 创建数据采集 Pipeline 规则
+// @Tags 数据平台-Pipeline规则管理
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param body body dto.CreatePipelineRuleRequest true "创建 Pipeline 规则请求"
+// @Success 200 {object} response.ResponseData{data=dto.PipelineRuleResponse}
+// @Router /data/pipeline-rules [post]
 func (ctrl *PipelineRuleController) Create(c *gin.Context) {
 	var req dto.CreatePipelineRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -48,6 +58,15 @@ func (ctrl *PipelineRuleController) Create(c *gin.Context) {
 	baizeContext.SuccessData(c, result)
 }
 
+// Get 获取 Pipeline 规则详情
+// @Summary 获取 Pipeline 规则详情
+// @Description 获取 Pipeline 规则详情
+// @Tags 数据平台-Pipeline规则管理
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "规则ID"
+// @Success 200 {object} response.ResponseData{data=dto.PipelineRuleResponse}
+// @Router /data/pipeline-rules/{id} [get]
 func (ctrl *PipelineRuleController) Get(c *gin.Context) {
 	result, err := ctrl.service.Get(c, c.Param("id"))
 	if err != nil {
@@ -57,6 +76,19 @@ func (ctrl *PipelineRuleController) Get(c *gin.Context) {
 	baizeContext.SuccessData(c, result)
 }
 
+// List 获取 Pipeline 规则列表
+// @Summary 获取 Pipeline 规则列表
+// @Description 分页查询 Pipeline 规则
+// @Tags 数据平台-Pipeline规则管理
+// @Security BearerAuth
+// @Produce json
+// @Param pageNum query int false "页码"
+// @Param pageSize query int false "每页数量"
+// @Param sourceType query string false "数据源类型"
+// @Param name query string false "规则名称"
+// @Param status query string false "状态"
+// @Success 200 {object} response.ResponseData{data=[]dto.PipelineRuleResponse}
+// @Router /data/pipeline-rules [get]
 func (ctrl *PipelineRuleController) List(c *gin.Context) {
 	pageNum := cast.ToInt(c.DefaultQuery("pageNum", "1"))
 	pageSize := cast.ToInt(c.DefaultQuery("pageSize", "10"))
@@ -74,6 +106,17 @@ func (ctrl *PipelineRuleController) List(c *gin.Context) {
 	baizeContext.SuccessListData(c, rows, total)
 }
 
+// Update 更新 Pipeline 规则
+// @Summary 更新 Pipeline 规则
+// @Description 更新 Pipeline 规则
+// @Tags 数据平台-Pipeline规则管理
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "规则ID"
+// @Param body body dto.UpdatePipelineRuleRequest true "更新 Pipeline 规则请求"
+// @Success 200 {object} response.ResponseData{data=dto.PipelineRuleResponse}
+// @Router /data/pipeline-rules/{id} [put]
 func (ctrl *PipelineRuleController) Update(c *gin.Context) {
 	var req dto.UpdatePipelineRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -88,6 +131,15 @@ func (ctrl *PipelineRuleController) Update(c *gin.Context) {
 	baizeContext.SuccessData(c, result)
 }
 
+// Delete 删除 Pipeline 规则
+// @Summary 删除 Pipeline 规则
+// @Description 删除 Pipeline 规则
+// @Tags 数据平台-Pipeline规则管理
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "规则ID"
+// @Success 200 {object} response.ResponseData
+// @Router /data/pipeline-rules/{id} [delete]
 func (ctrl *PipelineRuleController) Delete(c *gin.Context) {
 	if err := ctrl.service.Delete(c, c.Param("id")); err != nil {
 		baizeContext.Waring(c, err.Error())
@@ -129,6 +181,16 @@ func (ctrl *ServiceConnectionController) PrivateMcpRoutes(router *gin_mcp.GinMCP
 	router.RegisterPermission("DELETE", "/data/service-connections/:id", "data:service:connection:remove")
 }
 
+// Create 创建服务连接
+// @Summary 创建服务连接
+// @Description 创建数据源服务连接档案
+// @Tags 数据平台-服务连接管理
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param body body dto.CreateServiceConnectionRequest true "创建服务连接请求"
+// @Success 200 {object} response.ResponseData{data=dto.ServiceConnectionResponse}
+// @Router /data/service-connections [post]
 func (ctrl *ServiceConnectionController) Create(c *gin.Context) {
 	var req dto.CreateServiceConnectionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -143,6 +205,15 @@ func (ctrl *ServiceConnectionController) Create(c *gin.Context) {
 	baizeContext.SuccessData(c, result)
 }
 
+// Get 获取服务连接详情
+// @Summary 获取服务连接详情
+// @Description 获取服务连接详情
+// @Tags 数据平台-服务连接管理
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "连接ID"
+// @Success 200 {object} response.ResponseData{data=dto.ServiceConnectionResponse}
+// @Router /data/service-connections/{id} [get]
 func (ctrl *ServiceConnectionController) Get(c *gin.Context) {
 	result, err := ctrl.service.Get(c, c.Param("id"))
 	if err != nil {
@@ -152,6 +223,19 @@ func (ctrl *ServiceConnectionController) Get(c *gin.Context) {
 	baizeContext.SuccessData(c, result)
 }
 
+// List 获取服务连接列表
+// @Summary 获取服务连接列表
+// @Description 分页查询服务连接
+// @Tags 数据平台-服务连接管理
+// @Security BearerAuth
+// @Produce json
+// @Param pageNum query int false "页码"
+// @Param pageSize query int false "每页数量"
+// @Param sourceType query string false "数据源类型"
+// @Param name query string false "连接名称"
+// @Param status query string false "状态"
+// @Success 200 {object} response.ResponseData{data=[]dto.ServiceConnectionResponse}
+// @Router /data/service-connections [get]
 func (ctrl *ServiceConnectionController) List(c *gin.Context) {
 	pageNum := cast.ToInt(c.DefaultQuery("pageNum", "1"))
 	pageSize := cast.ToInt(c.DefaultQuery("pageSize", "10"))
@@ -169,6 +253,17 @@ func (ctrl *ServiceConnectionController) List(c *gin.Context) {
 	baizeContext.SuccessListData(c, rows, total)
 }
 
+// Update 更新服务连接
+// @Summary 更新服务连接
+// @Description 更新服务连接
+// @Tags 数据平台-服务连接管理
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path string true "连接ID"
+// @Param body body dto.UpdateServiceConnectionRequest true "更新服务连接请求"
+// @Success 200 {object} response.ResponseData{data=dto.ServiceConnectionResponse}
+// @Router /data/service-connections/{id} [put]
 func (ctrl *ServiceConnectionController) Update(c *gin.Context) {
 	var req dto.UpdateServiceConnectionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -183,6 +278,15 @@ func (ctrl *ServiceConnectionController) Update(c *gin.Context) {
 	baizeContext.SuccessData(c, result)
 }
 
+// Delete 删除服务连接
+// @Summary 删除服务连接
+// @Description 删除服务连接
+// @Tags 数据平台-服务连接管理
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "连接ID"
+// @Success 200 {object} response.ResponseData
+// @Router /data/service-connections/{id} [delete]
 func (ctrl *ServiceConnectionController) Delete(c *gin.Context) {
 	if err := ctrl.service.Delete(c, c.Param("id")); err != nil {
 		baizeContext.Waring(c, err.Error())

@@ -40,6 +40,14 @@ func (d *IPipelineRuleDAOImpl) GetByName(ctx context.Context, sourceType, name s
 	}
 	return &rule, nil
 }
+func (d *IPipelineRuleDAOImpl) ListByIDs(ctx context.Context, ids []string) ([]entity.PipelineRule, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	var rows []entity.PipelineRule
+	err := d.db.WithContext(ctx).Where("id IN ?", ids).Find(&rows).Error
+	return rows, err
+}
 func (d *IPipelineRuleDAOImpl) List(ctx context.Context, offset, limit int, sourceType, name, status string) ([]entity.PipelineRule, int64, error) {
 	var rows []entity.PipelineRule
 	var total int64

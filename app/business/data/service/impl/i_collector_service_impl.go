@@ -24,8 +24,8 @@ func NewICollectorServiceImpl(collectorDao dao.ICollectorDAO) service.ICollector
 	return &ICollectorServiceImpl{collectorDao: collectorDao}
 }
 
-// CreateCollector 创建采集器
-func (s *ICollectorServiceImpl) CreateCollector(c *gin.Context, req *dto.CreateCollectorRequest) (*entity.Collector, error) {
+// Create 创建采集器
+func (s *ICollectorServiceImpl) Create(c *gin.Context, req *dto.CreateCollectorRequest) (*dto.CollectorResponse, error) {
 	// 设备 ID 唯一性检查
 	if req.DeviceID != "" {
 		existing, err := s.collectorDao.GetByDeviceID(c, req.DeviceID)
@@ -50,11 +50,11 @@ func (s *ICollectorServiceImpl) CreateCollector(c *gin.Context, req *dto.CreateC
 		return nil, err
 	}
 
-	return col, nil
+	return collectorResponse(col), nil
 }
 
-// GetCollector 获取采集器
-func (s *ICollectorServiceImpl) GetCollector(c *gin.Context, id string) (*entity.Collector, error) {
+// Get 获取采集器
+func (s *ICollectorServiceImpl) Get(c *gin.Context, id string) (*dto.CollectorResponse, error) {
 	col, err := s.collectorDao.GetByID(c, id)
 	if err != nil {
 		return nil, err
@@ -62,31 +62,39 @@ func (s *ICollectorServiceImpl) GetCollector(c *gin.Context, id string) (*entity
 	if col == nil {
 		return nil, fmt.Errorf("采集器不存在")
 	}
-	return col, nil
+	return collectorResponse(col), nil
 }
 
-// ListCollectors 列表
-func (s *ICollectorServiceImpl) ListCollectors(c *gin.Context, offset, limit int, name, deviceID, status string) ([]entity.Collector, int64, error) {
-	return s.collectorDao.List(c, offset, limit, name, deviceID, status)
+// List 列表
+func (s *ICollectorServiceImpl) List(c *gin.Context, offset, limit int, name, deviceID, status string) ([]dto.CollectorResponse, int64, error) {
+	rows, total, err := s.collectorDao.List(c, offset, limit, name, deviceID, status)
+	if err != nil {
+		return nil, 0, err
+	}
+	out := make([]dto.CollectorResponse, 0, len(rows))
+	for i := range rows {
+		out = append(out, *collectorResponse(&rows[i]))
+	}
+	return out, total, nil
 }
 
-// ListAllOnline 获取全部在线采集器（用于下发弹窗）
-func (s *ICollectorServiceImpl) ListAllOnline(c *gin.Context) ([]entity.Collector, error) {
+// ListOnline 获取全部在线采集器（用于下发弹窗）
+func (s *ICollectorServiceImpl) ListOnline(c *gin.Context) ([]dto.CollectorResponse, error) {
 	all, err := s.collectorDao.ListAll(c)
 	if err != nil {
 		return nil, err
 	}
-	var online []entity.Collector
-	for _, col := range all {
-		if col.Status == entity.StatusOnline {
-			online = append(online, col)
+	online := make([]dto.CollectorResponse, 0)
+	for i := range all {
+		if all[i].Status == entity.StatusOnline {
+			online = append(online, *collectorResponse(&all[i]))
 		}
 	}
 	return online, nil
 }
 
-// UpdateCollector 更新采集器
-func (s *ICollectorServiceImpl) UpdateCollector(c *gin.Context, id string, req *dto.UpdateCollectorRequest) (*entity.Collector, error) {
+// Update 更新采集器
+func (s *ICollectorServiceImpl) Update(c *gin.Context, id string, req *dto.UpdateCollectorRequest) (*dto.CollectorResponse, error) {
 	col, err := s.collectorDao.GetByID(c, id)
 	if err != nil {
 		return nil, err
@@ -115,11 +123,11 @@ func (s *ICollectorServiceImpl) UpdateCollector(c *gin.Context, id string, req *
 		return nil, err
 	}
 
-	return col, nil
+	return collectorResponse(col), nil
 }
 
-// DeleteCollector 删除
-func (s *ICollectorServiceImpl) DeleteCollector(c *gin.Context, id string) error {
+// Delete 删除
+func (s *ICollectorServiceImpl) Delete(c *gin.Context, id string) error {
 	col, err := s.collectorDao.GetByID(c, id)
 	if err != nil {
 		return err
@@ -128,6 +136,33 @@ func (s *ICollectorServiceImpl) DeleteCollector(c *gin.Context, id string) error
 		return fmt.Errorf("采集器不存在")
 	}
 	return s.collectorDao.Delete(c, id)
+}
+
+func collectorResponse(col *entity.Collector) *dto.CollectorResponse {
+	return &dto.CollectorResponse{
+		ID:              col.ID,
+		Name:            col.Name,
+		DeviceID:        col.DeviceID,
+		Token:           col.Token,
+		Status:          col.Status,
+		LastHeartbeat:   col.LastHeartbeat,
+		LastConnectedAt: col.LastConnectedAt,
+		Version:         col.Version,
+		Tags:            unmarshalTags(col.Tags),
+		CreatedAt:       col.CreatedAt,
+		UpdatedAt:       col.UpdatedAt,
+	}
+}
+
+func unmarshalTags(tags string) []string {
+	if tags == "" {
+		return nil
+	}
+	var out []string
+	if err := json.Unmarshal([]byte(tags), &out); err != nil {
+		return nil
+	}
+	return out
 }
 
 func marshalTags(tags []string) string {

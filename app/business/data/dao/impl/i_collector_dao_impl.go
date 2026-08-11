@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"time"
 
 	"nova-factory-server/app/business/data/dao"
 	"nova-factory-server/app/business/data/models/entity"
@@ -28,7 +29,7 @@ func (d *ICollectorDAOImpl) Create(ctx context.Context, c *entity.Collector) err
 func (d *ICollectorDAOImpl) GetByID(ctx context.Context, id string) (*entity.Collector, error) {
 	var c entity.Collector
 	err := d.db.WithContext(ctx).
-		Where("id = ? AND deleted_at IS NULL", id).
+		Where("id = ?", id).
 		First(&c).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -43,7 +44,7 @@ func (d *ICollectorDAOImpl) GetByID(ctx context.Context, id string) (*entity.Col
 func (d *ICollectorDAOImpl) GetByDeviceID(ctx context.Context, deviceID string) (*entity.Collector, error) {
 	var c entity.Collector
 	err := d.db.WithContext(ctx).
-		Where("device_id = ? AND deleted_at IS NULL", deviceID).
+		Where("device_id = ?", deviceID).
 		First(&c).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -60,8 +61,7 @@ func (d *ICollectorDAOImpl) List(ctx context.Context, offset, limit int, name, d
 	var total int64
 
 	query := d.db.WithContext(ctx).
-		Model(&entity.Collector{}).
-		Where("deleted_at IS NULL")
+		Model(&entity.Collector{})
 
 	if name != "" {
 		query = query.Where("name LIKE ?", "%"+name+"%")
@@ -90,7 +90,6 @@ func (d *ICollectorDAOImpl) List(ctx context.Context, offset, limit int, name, d
 func (d *ICollectorDAOImpl) ListAll(ctx context.Context) ([]entity.Collector, error) {
 	var collectors []entity.Collector
 	err := d.db.WithContext(ctx).
-		Where("deleted_at IS NULL").
 		Order("created_at DESC").
 		Find(&collectors).Error
 	return collectors, err
@@ -100,14 +99,27 @@ func (d *ICollectorDAOImpl) ListAll(ctx context.Context) ([]entity.Collector, er
 func (d *ICollectorDAOImpl) Update(ctx context.Context, c *entity.Collector) error {
 	return d.db.WithContext(ctx).
 		Model(&entity.Collector{}).
-		Where("id = ? AND deleted_at IS NULL", c.ID).
+		Where("id = ?", c.ID).
 		Updates(c).Error
+}
+
+// UpdateHeartbeat 刷新采集器心跳与下发状态
+func (d *ICollectorDAOImpl) UpdateHeartbeat(ctx context.Context, id string, heartbeat, connectedAt time.Time, checksum string, dispatchedAt *time.Time) error {
+	updates := map[string]interface{}{
+		"status":            entity.StatusOnline,
+		"last_heartbeat":    heartbeat,
+		"last_connected_at": connectedAt,
+	}
+	if checksum != "" {
+		updates["last_checksum"] = checksum
+	}
+	if dispatchedAt != nil {
+		updates["last_dispatched_at"] = dispatchedAt
+	}
+	return d.db.WithContext(ctx).Model(&entity.Collector{}).Where("id = ?", id).Updates(updates).Error
 }
 
 // Delete 软删除
 func (d *ICollectorDAOImpl) Delete(ctx context.Context, id string) error {
-	return d.db.WithContext(ctx).
-		Model(&entity.Collector{}).
-		Where("id = ?", id).
-		Update("deleted_at", gorm.Expr("NOW()")).Error
+	return d.db.WithContext(ctx).Delete(&entity.Collector{}, "id = ?", id).Error
 }

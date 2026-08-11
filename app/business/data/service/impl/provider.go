@@ -6,4 +6,5 @@ var ProviderSet = wire.NewSet(
 	NewIPipelineRuleServiceImpl,
 	NewIServiceConnectionServiceImpl,
 	NewICollectorServiceImpl,
+	NewICollectorRuleServiceImpl,
 )

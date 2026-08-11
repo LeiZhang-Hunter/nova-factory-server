@@ -28,6 +28,17 @@ func (c *PipelineRuleAgentController) PrivateRoutes(router *gin.RouterGroup) {
 func (c *PipelineRuleAgentController) PrivateMcpRoutes(router *gin_mcp.GinMCP) {
 	router.RegisterPermission("POST", "/data/pipeline-rules/generate-from-excel", "data:service:rule:add")
 }
+
+// Generate 从 Excel 生成 Pipeline 配置草稿
+// @Summary 从 Excel 生成 Pipeline 配置
+// @Description 上传 Excel 文件，由 Agent 生成 Pipeline 配置草稿并校验
+// @Tags 数据平台-Pipeline规则管理
+// @Security BearerAuth
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "Excel 文件（.xlsx，不超过 20MB）"
+// @Success 200 {object} response.ResponseData{data=map[string]interface{}}
+// @Router /data/pipeline-rules/generate-from-excel [post]
 func (c *PipelineRuleAgentController) Generate(ctx *gin.Context) {
 	header, err := ctx.FormFile("file")
 	if err != nil || header == nil {

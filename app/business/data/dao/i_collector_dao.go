@@ -2,6 +2,8 @@ package dao
 
 import (
 	"context"
+	"time"
+
 	"nova-factory-server/app/business/data/models/entity"
 )
 
@@ -13,5 +15,6 @@ type ICollectorDAO interface {
 	List(ctx context.Context, offset, limit int, name, deviceID, status string) ([]entity.Collector, int64, error)
 	ListAll(ctx context.Context) ([]entity.Collector, error)
 	Update(ctx context.Context, c *entity.Collector) error
+	UpdateHeartbeat(ctx context.Context, id string, heartbeat, connectedAt time.Time, checksum string, dispatchedAt *time.Time) error
 	Delete(ctx context.Context, id string) error
 }

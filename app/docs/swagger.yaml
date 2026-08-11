@@ -2258,6 +2258,284 @@ definitions:
         description: 数据名字
         type: string
     type: object
+  dto.BindCollectorRulesRequest:
+    properties:
+      rule_ids:
+        items:
+          type: string
+        minItems: 1
+        type: array
+    required:
+    - rule_ids
+    type: object
+  dto.CollectorResponse:
+    properties:
+      created_at:
+        type: string
+      device_id:
+        type: string
+      id:
+        type: string
+      last_checksum:
+        type: string
+      last_connected_at:
+        type: string
+      last_dispatched_at:
+        type: string
+      last_heartbeat:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      token:
+        type: string
+      updated_at:
+        type: string
+      version:
+        type: string
+    type: object
+  dto.CreateCollectorRequest:
+    properties:
+      device_id:
+        maxLength: 100
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      token:
+        type: string
+    required:
+    - name
+    type: object
+  dto.CreatePipelineRuleRequest:
+    properties:
+      config:
+        type: object
+      description:
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      source_type:
+        enum:
+        - file
+        - mysql
+        - api
+        type: string
+      status:
+        enum:
+        - enabled
+        - disabled
+        type: string
+    required:
+    - config
+    - name
+    - source_type
+    type: object
+  dto.CreateServiceConnectionRequest:
+    properties:
+      config:
+        type: object
+      credentials:
+        additionalProperties:
+          type: string
+        type: object
+      description:
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      source_type:
+        enum:
+        - mysql
+        - api
+        type: string
+      status:
+        enum:
+        - enabled
+        - disabled
+        type: string
+    required:
+    - config
+    - name
+    - source_type
+    type: object
+  dto.DispatchLogResponse:
+    properties:
+      collector_id:
+        type: string
+      collector_name:
+        type: string
+      config:
+        type: string
+      config_md5:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      dispatch_no:
+        type: integer
+      id:
+        type: string
+      rule_ids:
+        items:
+          type: string
+        type: array
+      rule_names:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.DispatchPreviewResponse:
+    properties:
+      checksum:
+        type: string
+      collector_id:
+        type: string
+      config:
+        type: string
+      rules:
+        items:
+          $ref: '#/definitions/dto.PreviewRuleItem'
+        type: array
+    type: object
+  dto.PipelineRuleResponse:
+    properties:
+      config:
+        type: object
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      source_type:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      version:
+        type: integer
+    type: object
+  dto.PreviewRuleItem:
+    properties:
+      rule_id:
+        type: string
+      rule_name:
+        type: string
+      source_type:
+        type: string
+      status:
+        type: string
+      version:
+        type: integer
+    type: object
+  dto.PullRulesResponse:
+    properties:
+      checksum:
+        type: string
+      config:
+        type: string
+      device_id:
+        type: string
+      updated:
+        type: boolean
+    type: object
+  dto.ServiceConnectionResponse:
+    properties:
+      config:
+        type: object
+      created_at:
+        type: string
+      credential_fields:
+        items:
+          type: string
+        type: array
+      credentials_configured:
+        type: boolean
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      source_type:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dto.UpdateCollectorRequest:
+    properties:
+      device_id:
+        maxLength: 100
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      token:
+        type: string
+    type: object
+  dto.UpdatePipelineRuleRequest:
+    properties:
+      config:
+        type: object
+      description:
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      status:
+        enum:
+        - enabled
+        - disabled
+        type: string
+    required:
+    - config
+    - name
+    - status
+    type: object
+  dto.UpdateServiceConnectionRequest:
+    properties:
+      config:
+        type: object
+      credentials:
+        additionalProperties:
+          type: string
+        type: object
+      description:
+        type: string
+      name:
+        maxLength: 255
+        type: string
+      status:
+        enum:
+        - enabled
+        - disabled
+        type: string
+    required:
+    - config
+    - name
+    - status
+    type: object
   entity.SysUserRole:
     properties:
       roleId:
@@ -2385,6 +2663,8 @@ definitions:
       defaultLlmProviderId:
         maxLength: 128
         type: string
+      deletable:
+        type: boolean
       enable:
         type: boolean
       enableLlmMaxTokens:
@@ -2555,6 +2835,17 @@ definitions:
         type: string
     type: object
   gatewaymodels.MCPServerProbeRequest:
+    properties:
+      headers:
+        type: object
+      timeout:
+        type: integer
+      transport:
+        maxLength: 32
+        type: string
+      url:
+        maxLength: 1024
+        type: string
     type: object
   gatewaymodels.MCPServerUpsert:
     properties:
@@ -3592,6 +3883,7 @@ definitions:
     - 412
     - 500
     - 600
+    format: int64
     type: integer
     x-enum-comments:
       Error: 系统异常
@@ -3600,6 +3892,13 @@ definitions:
       Success: 成功
       Unauthorized: token失效
       Waring: 详情看msg
+    x-enum-descriptions:
+    - 成功
+    - token失效
+    - 没有权限
+    - 参数错误
+    - 系统异常
+    - 详情看msg
     x-enum-varnames:
     - Success
     - Unauthorized
@@ -4958,6 +5257,7 @@ paths:
       description: 下载文档
       parameters:
       - description: document_id
+        format: int64
         in: path
         name: document_id
         required: true
@@ -5077,6 +5377,7 @@ paths:
       description: 移除数据集
       parameters:
       - description: dataset_id
+        format: int64
         in: path
         name: dataset_id
         required: true
@@ -5531,6 +5832,7 @@ paths:
       description: 更新文档
       parameters:
       - description: document_id
+        format: int64
         in: path
         name: document_id
         required: true
@@ -5560,6 +5862,7 @@ paths:
       description: 上传文档
       parameters:
       - description: datasetId
+        format: int64
         in: path
         name: datasetId
         required: true
@@ -6408,6 +6711,7 @@ paths:
       description: 告警数据详情
       parameters:
       - description: objectId
+        format: int64
         in: query
         name: object
         required: true
@@ -8749,6 +9053,7 @@ paths:
       description: 移除工艺
       parameters:
       - description: craft_route_id
+        format: int64
         in: path
         name: craft_route_id
         required: true
@@ -9184,6 +9489,668 @@ paths:
       summary: 保存仪表盘
       tags:
       - 仪表盘/仪表盘管理
+  /data/collectors:
+    get:
+      description: 获取采集器设备列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageNum
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 设备名称
+        in: query
+        name: name
+        type: string
+      - description: 设备ID
+        in: query
+        name: deviceId
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.CollectorResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取采集器列表
+      tags:
+      - 数据平台-采集器管理
+    post:
+      consumes:
+      - application/json
+      description: 创建采集器设备
+      parameters:
+      - description: 创建采集器请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCollectorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CollectorResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建采集器
+      tags:
+      - 数据平台-采集器管理
+  /data/collectors/{id}:
+    delete:
+      description: 删除采集器设备
+      parameters:
+      - description: 采集器ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除采集器
+      tags:
+      - 数据平台-采集器管理
+    get:
+      description: 获取采集器设备详情
+      parameters:
+      - description: 采集器ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CollectorResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取采集器详情
+      tags:
+      - 数据平台-采集器管理
+    put:
+      consumes:
+      - application/json
+      description: 更新采集器设备信息
+      parameters:
+      - description: 采集器ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新采集器请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCollectorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CollectorResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新采集器
+      tags:
+      - 数据平台-采集器管理
+  /data/collectors/{id}/rules:
+    post:
+      consumes:
+      - application/json
+      description: 将多选规则的 pipelines 合并为一条配置快照并写入下发记录
+      parameters:
+      - description: 采集器ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 下发规则请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BindCollectorRulesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DispatchLogResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 给采集器下发规则
+      tags:
+      - 数据平台-采集器下发
+  /data/collectors/{id}/rules/preview:
+    get:
+      description: 预览采集器最近一次下发的合并配置（等价于设备下次拉取内容）
+      parameters:
+      - description: 采集器ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DispatchPreviewResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 当前已下发规则预览
+      tags:
+      - 数据平台-采集器下发
+    post:
+      consumes:
+      - application/json
+      description: 提交拟下发规则集合，预览合并后的配置与校验和（不落库不写日志）
+      parameters:
+      - description: 采集器ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 拟下发规则请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BindCollectorRulesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DispatchPreviewResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 拟下发集合预览
+      tags:
+      - 数据平台-采集器下发
+  /data/collectors/online:
+    get:
+      description: 获取全部在线采集器
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.CollectorResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取在线采集器
+      tags:
+      - 数据平台-采集器管理
+  /data/collectors/rules:
+    get:
+      description: 采集器定时调用，携带当前配置 MD5 获取最新下发规则，并刷新在线状态
+      parameters:
+      - description: 设备ID
+        in: header
+        name: X-Device-Id
+        required: true
+        type: string
+      - description: 设备Token
+        in: header
+        name: X-Device-Token
+        required: true
+        type: string
+      - description: 当前配置 MD5
+        in: header
+        name: X-Config-MD5
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PullRulesResponse'
+              type: object
+      summary: 采集器拉取最新下发规则
+      tags:
+      - 数据平台-采集器下发
+  /data/dispatch-logs:
+    get:
+      description: 分页查询规则下发记录
+      parameters:
+      - description: 页码
+        in: query
+        name: pageNum
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 采集器ID
+        in: query
+        name: collectorId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.DispatchLogResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 下发版本记录
+      tags:
+      - 数据平台-采集器下发
+  /data/pipeline-rules:
+    get:
+      description: 分页查询 Pipeline 规则
+      parameters:
+      - description: 页码
+        in: query
+        name: pageNum
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 数据源类型
+        in: query
+        name: sourceType
+        type: string
+      - description: 规则名称
+        in: query
+        name: name
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.PipelineRuleResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取 Pipeline 规则列表
+      tags:
+      - 数据平台-Pipeline规则管理
+    post:
+      consumes:
+      - application/json
+      description: 创建数据采集 Pipeline 规则
+      parameters:
+      - description: 创建 Pipeline 规则请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePipelineRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PipelineRuleResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建 Pipeline 规则
+      tags:
+      - 数据平台-Pipeline规则管理
+  /data/pipeline-rules/{id}:
+    delete:
+      description: 删除 Pipeline 规则
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除 Pipeline 规则
+      tags:
+      - 数据平台-Pipeline规则管理
+    get:
+      description: 获取 Pipeline 规则详情
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PipelineRuleResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取 Pipeline 规则详情
+      tags:
+      - 数据平台-Pipeline规则管理
+    put:
+      consumes:
+      - application/json
+      description: 更新 Pipeline 规则
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新 Pipeline 规则请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePipelineRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PipelineRuleResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新 Pipeline 规则
+      tags:
+      - 数据平台-Pipeline规则管理
+  /data/pipeline-rules/generate-from-excel:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传 Excel 文件，由 Agent 生成 Pipeline 配置草稿并校验
+      parameters:
+      - description: Excel 文件（.xlsx，不超过 20MB）
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 从 Excel 生成 Pipeline 配置
+      tags:
+      - 数据平台-Pipeline规则管理
+  /data/service-connections:
+    get:
+      description: 分页查询服务连接
+      parameters:
+      - description: 页码
+        in: query
+        name: pageNum
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 数据源类型
+        in: query
+        name: sourceType
+        type: string
+      - description: 连接名称
+        in: query
+        name: name
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.ServiceConnectionResponse'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取服务连接列表
+      tags:
+      - 数据平台-服务连接管理
+    post:
+      consumes:
+      - application/json
+      description: 创建数据源服务连接档案
+      parameters:
+      - description: 创建服务连接请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateServiceConnectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ServiceConnectionResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 创建服务连接
+      tags:
+      - 数据平台-服务连接管理
+  /data/service-connections/{id}:
+    delete:
+      description: 删除服务连接
+      parameters:
+      - description: 连接ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ResponseData'
+      security:
+      - BearerAuth: []
+      summary: 删除服务连接
+      tags:
+      - 数据平台-服务连接管理
+    get:
+      description: 获取服务连接详情
+      parameters:
+      - description: 连接ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ServiceConnectionResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 获取服务连接详情
+      tags:
+      - 数据平台-服务连接管理
+    put:
+      consumes:
+      - application/json
+      description: 更新服务连接
+      parameters:
+      - description: 连接ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新服务连接请求
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateServiceConnectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.ResponseData'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ServiceConnectionResponse'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: 更新服务连接
+      tags:
+      - 数据平台-服务连接管理
   /device/monitor/camera/offer:
     post:
       description: 提交前端 Offer，返回播放地址与 Answer
@@ -10412,6 +11379,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:
@@ -10881,6 +11849,7 @@ paths:
         description: dictCodes
         in: path
         items:
+          format: int64
           type: integer
         name: dictCodes
         required: true
@@ -10940,6 +11909,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:
@@ -11165,6 +12135,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:
@@ -11740,6 +12711,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:
@@ -12365,6 +13337,7 @@ paths:
         description: userIds
         in: path
         items:
+          format: int64
           type: integer
         name: userIds
         required: true
@@ -12386,6 +13359,7 @@ paths:
       description: 根据用户ID获取用户信息
       parameters:
       - description: userId
+        format: int64
         in: path
         name: id
         required: true
@@ -12511,6 +13485,7 @@ paths:
       description: 查询用户数据权限
       parameters:
       - description: userId
+        format: int64
         in: path
         name: id
         required: true
@@ -12580,6 +13555,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:
@@ -12620,6 +13596,7 @@ paths:
           description: OK
           schema:
             items:
+              format: int32
               type: integer
             type: array
       security:
