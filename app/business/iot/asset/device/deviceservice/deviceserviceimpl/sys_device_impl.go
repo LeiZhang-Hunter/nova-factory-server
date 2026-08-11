@@ -11,7 +11,7 @@ import (
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitordao"
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
 	"nova-factory-server/app/business/iot/metric/device/metricdao"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"
@@ -61,9 +61,25 @@ func (d *DeviceService) installTable(c *gin.Context, info *deviceModels2.DeviceI
 	if err != nil {
 		return
 	}
+	if len(list) == 0 {
+		return
+	}
+
+	if templateDao := d.metricDao.Template(); templateDao != nil {
+		metricTemplateData := deviceModels2.FromTemplateDataToMetricTemplate(list)
+		if err := templateDao.Update(metricTemplateData); err != nil {
+			zap.L().Error("sync device metric template error", zap.Error(err))
+			return
+		}
+	}
+
+	if err := d.metricDao.InstallDevice(c, int64(info.DeviceId), int64(info.DeviceProtocolId)); err != nil {
+		zap.L().Error("install device metric storage error", zap.Error(err))
+		return
+	}
 
 	for _, v := range list {
-		devKey := iotdb.MakeDeviceTemplateName(int64(info.DeviceId), int64(info.DeviceProtocolId), v.DeviceConfigID)
+		devKey := iotdb.MakeDeviceDataPath(int64(info.DeviceId), v.DeviceConfigID)
 		err := d.mapDao.Save(c, &devicemonitormodel.SysIotDbDevMap{
 			DeviceID:   int64(info.DeviceId),
 			TemplateID: int64(info.DeviceProtocolId),
@@ -74,10 +90,6 @@ func (d *DeviceService) installTable(c *gin.Context, info *deviceModels2.DeviceI
 		})
 		if err != nil {
 			zap.L().Error("save iotdb device map error", zap.Error(err))
-		}
-		err = d.metricDao.InstallDevice(c, int64(info.DeviceId), v)
-		if err != nil {
-			zap.L().Error("InstallDevice error", zap.Error(err))
 		}
 	}
 }
@@ -239,15 +251,15 @@ func (d *DeviceService) unInstallTable(c *gin.Context, info *deviceModels2.Devic
 	}
 
 	for _, v := range list {
-		devKey := iotdb.MakeDeviceTemplateName(int64(info.DeviceId), int64(info.DeviceProtocolId), v.DeviceConfigID)
+		devKey := iotdb.MakeDeviceDataPath(int64(info.DeviceId), v.DeviceConfigID)
 		err = d.mapDao.Remove(c, devKey)
 		if err != nil {
 			zap.L().Error("uninstall device template error", zap.Error(err))
 		}
-		err := d.metricDao.UnInStallDevice(c, int64(info.DeviceId), v.TemplateID, v.DeviceConfigID)
-		if err != nil {
-			zap.L().Error("InstallDevice error", zap.Error(err))
-		}
+	}
+
+	if err := d.metricDao.UnInStallDevice(c, int64(info.DeviceId), int64(info.DeviceProtocolId)); err != nil {
+		zap.L().Error("uninstall device metric storage error", zap.Error(err))
 	}
 }
 

@@ -1,199 +1,33 @@
-package metricdaoimpl
+package iotdb
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/apache/iotdb-client-go/client"
 	"github.com/gin-gonic/gin"
-	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
 	"go.uber.org/zap"
 	"nova-factory-server/app/business/iot/asset/device/devicemodels"
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/iotdb"
 	"nova-factory-server/app/utils/math"
 	"nova-factory-server/app/utils/time"
-	"nova-factory-server/app/utils/uuid"
-	"sort"
 	"strings"
 	stdtime "time"
 )
 
-type iotDbExport struct {
+type query struct {
 	iotDb *iotdb.IotDb
 }
 
-func newIotDbExport(iotDb *iotdb.IotDb) iDaoExport {
-	i := &iotDbExport{
+func newQuery(iotDb *iotdb.IotDb) *query {
+	return &query{
 		iotDb: iotDb,
 	}
-	i.init()
-	return i
 }
 
-func (i *iotDbExport) init() {
-	session, err := i.iotDb.GetSession()
-	if err != nil {
-		zap.L().Error("iotdb.GetSession()", zap.Error(err))
-		panic(err)
-	}
-	defer i.iotDb.PutSession(session)
-	for {
-		statement, err := session.ExecuteStatement("count databases root.device")
-		if err != nil {
-			zap.L().Error("execute statement", zap.Error(err))
-			stdtime.Sleep(1 * stdtime.Second)
-			continue
-		}
-		hasDatabase, err := statement.Next()
-		if err != nil {
-			zap.L().Error("get hasDatabase", zap.Error(err))
-			stdtime.Sleep(1 * stdtime.Second)
-			continue
-		}
-
-		count := statement.GetInt32("count")
-		if count < 1 {
-			session.ExecuteStatement("create database root.device")
-			stdtime.Sleep(1 * stdtime.Second)
-			continue
-		}
-
-		statement, err = session.ExecuteStatement("count databases root.run_status_device")
-		if err != nil {
-			stdtime.Sleep(1 * stdtime.Second)
-			return
-		}
-		hasDatabase, err = statement.Next()
-		if err != nil {
-			zap.L().Error("get hasDatabase", zap.Error(err))
-			stdtime.Sleep(1 * stdtime.Second)
-			continue
-		}
-
-		if !hasDatabase {
-			stdtime.Sleep(1 * stdtime.Second)
-			continue
-		}
-
-		count = statement.GetInt32("count")
-		if count < 1 {
-			session.ExecuteStatement("create database root.run_status_device")
-			stdtime.Sleep(1 * stdtime.Second)
-			continue
-		}
-
-		break
-	}
-
-	// 创建设备数据采集模板
-	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (value DOUBLE)", iotdb2.NOVA_DEVICE_TEMPLATE))
-	// 创建设备运行时间统计模板
-	session.ExecuteStatement(fmt.Sprintf("create device template %s ALIGNED (duration INT64, status INT64)", iotdb2.NOVA_DEVICE_RUN_TEMPLATE))
-
-}
-
-type iotMetricMeta struct {
-	kind       string
-	properties map[string]string
-	name       string
-}
-
-func (m iotMetricMeta) GetKind() string {
-	return m.kind
-}
-
-func (m iotMetricMeta) GetProperties() map[string]string {
-	return m.properties
-}
-
-func (m iotMetricMeta) GetName() string {
-	if len(m.properties) == 0 {
-		return m.kind
-	}
-
-	keys := make([]string, 0, len(m.properties))
-	for key := range m.properties {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-
-	var builder strings.Builder
-	builder.WriteString(m.kind)
-	for _, key := range keys {
-		builder.WriteString("|")
-		builder.WriteString(key)
-		builder.WriteString("=")
-		builder.WriteString(m.properties[key])
-	}
-	metricBuildStr := builder.String()
-	str := uuid.MakeMd5([]byte(metricBuildStr))
-	return str
-}
-
-type iotMetricQueryResult struct {
-	data *metricmodels.MetricQueryData
-}
-
-func (r *iotMetricQueryResult) GetName() string {
-	//TODO implement me
-	return ""
-}
-
-func (r *iotMetricQueryResult) GetKind() string {
-	return ""
-}
-
-func (r *iotMetricQueryResult) GetProperties() map[string]string {
-	return nil
-}
-
-func (r *iotMetricQueryResult) AddSeries(series iotdb.MetricSeries) error {
-	iotSeries, ok := series.(iotdb.IotDBMetricSeries)
-	if !ok {
-		return fmt.Errorf("unsupported iotdb metric series %T", series)
-	}
-	for _, sample := range iotSeries.Samples {
-		r.data.Values = append(r.data.Values, metricmodels.MetricQueryValue{
-			Time:  sample.Timestamp,
-			Value: math.RoundFloat(sample.Value, 2),
-		})
-	}
-	return nil
-}
-
-func (i *iotDbExport) Export(ctx context.Context, data []*metricmodels.NovaMetricsDevice) error {
-	if len(data) == 0 {
-		return nil
-	}
-
-	samples := make([]iotdb.MetricSample, 0, len(data))
-	for _, value := range data {
-		if value == nil || value.StartTimeUnix == nil {
-			continue
-		}
-		name := iotdb2.MakeDeviceTemplateName(int64(value.DeviceId), int64(value.TemplateId), int64(value.DataId)) + ".value"
-		samples = append(samples, iotdb.NewMetricSample(name, nil, value.StartTimeUnix.UnixMilli(), value.Value))
-	}
-	if len(samples) == 0 {
-		return nil
-	}
-
-	appender := i.iotDb.Appender()
-	if err := appender.Append(samples); err != nil {
-		zap.L().Error("iotdb appender append error", zap.Error(err))
-		return err
-	}
-	if err := appender.Commit(); err != nil {
-		zap.L().Error("iotdb appender commit error", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-func (i *iotDbExport) Metric(c *gin.Context, req *metricmodels.MetricQueryReq) (*metricmodels.MetricQueryData, error) {
+func (i *query) Metric(c *gin.Context, req *metricmodels.MetricQueryReq) (*metricmodels.MetricQueryData, error) {
 	if req == nil {
 		return nil, nil
 	}
@@ -215,7 +49,7 @@ func (i *iotDbExport) Metric(c *gin.Context, req *metricmodels.MetricQueryReq) (
 		req.Step = 1
 	}
 
-	name := iotdb2.MakeDeviceTemplateName(int64(req.DeviceId), int64(req.TemplateId), int64(req.DataId))
+	name := iotdb2.MakeDeviceDataPath(int64(req.DeviceId), int64(req.DataId))
 	data := metricmodels.NewMetricQueryData()
 	data.Id = name
 	sql := fmt.Sprintf("select avg(value) as value from %s group by([%s, %s), %dm, %dm);",
@@ -240,138 +74,8 @@ func (i *iotDbExport) Metric(c *gin.Context, req *metricmodels.MetricQueryReq) (
 	return data, nil
 }
 
-// InstallDevice 安装设备模板
-func (i *iotDbExport) InstallDevice(c *gin.Context, deviceId int64, device *devicemodels.SysModbusDeviceConfigData) error {
-	session, err := i.iotDb.GetSession()
-	if err != nil {
-		zap.L().Error("读取session失败", zap.Error(err))
-		return err
-	}
-	defer i.iotDb.PutSession(session)
-
-	name := iotdb2.MakeDeviceTemplateName(deviceId, device.TemplateID, device.DeviceConfigID)
-	// 创建设备模板
-	group, err := session.SetStorageGroup(name)
-	if err != nil {
-		zap.L().Error("创建设备数据库失败, ", zap.Error(err), zap.Any("code", group.GetCode()))
-		return err
-	}
-
-	// 挂载设备模板
-	_, err = session.ExecuteStatement(fmt.Sprintf("set device template %s to %s", iotdb2.NOVA_DEVICE_TEMPLATE, name))
-	if err != nil {
-		zap.L().Error("绑定设备数据库失败, ", zap.Error(err))
-		return err
-	}
-
-	// 激活设备模板
-	_, err = session.ExecuteStatement(fmt.Sprintf("create timeseries using device template on %s", name))
-	if err != nil {
-		zap.L().Error("激活设备模板失败, ", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-// InstallRunStatusDevice 运行状态设备模板
-func (i *iotDbExport) InstallRunStatusDevice(c *gin.Context, deviceId int64) error {
-	session, err := i.iotDb.GetSession()
-	if err != nil {
-		zap.L().Error("读取session失败", zap.Error(err))
-		return err
-	}
-	defer i.iotDb.PutSession(session)
-
-	name := iotdb2.MakeRunDeviceTemplateName(deviceId)
-	// 创建设备模板
-	group, err := session.SetStorageGroup(name)
-	if err != nil {
-		zap.L().Error("创建设备数据库失败, ", zap.Error(err), zap.Any("code", group.GetCode()))
-		return err
-	}
-
-	// 挂载设备模板
-	_, err = session.ExecuteStatement(fmt.Sprintf("set device template %s to %s", iotdb2.NOVA_DEVICE_RUN_TEMPLATE, name))
-	if err != nil {
-		zap.L().Error("绑定设备数据库失败, ", zap.Error(err))
-		return err
-	}
-
-	// 激活设备模板
-	_, err = session.ExecuteStatement(fmt.Sprintf("create timeseries using device template on %s", name))
-	if err != nil {
-		zap.L().Error("激活设备模板失败, ", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-// UnInStallRunStatusDevice 卸载设备运行状态模板
-func (i *iotDbExport) UnInStallRunStatusDevice(c *gin.Context, deviceId int64) error {
-	session, err := i.iotDb.GetSession()
-	if err != nil {
-		zap.L().Error("读取session失败", zap.Error(err))
-		return err
-	}
-	defer i.iotDb.PutSession(session)
-
-	name := fmt.Sprintf(iotdb2.ROOT_RUN_STATUS_DEVICE_TEMPLATE_NAME, deviceId)
-
-	// 删除模板表示的某一组时间序列
-	_, err = session.ExecuteStatement(fmt.Sprintf("deactivate device template %s from %s", iotdb2.NOVA_DEVICE_RUN_TEMPLATE, name))
-	if err != nil {
-		zap.L().Error("deactivate  device template", zap.Error(err))
-		return err
-	}
-
-	_, err = session.ExecuteStatement(fmt.Sprintf("unset device template %s from %s", iotdb2.NOVA_DEVICE_RUN_TEMPLATE, name))
-	if err != nil {
-		zap.L().Error("unset  device template", zap.Error(err))
-		return err
-	}
-
-	_, err = session.ExecuteStatement(fmt.Sprintf("drop database %s", name))
-	if err != nil {
-		zap.L().Error("unset  device template", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-// UnInStallDevice 卸载设备模板
-func (i *iotDbExport) UnInStallDevice(c *gin.Context, deviceId int64, templateId int64, dataId int64) error {
-	session, err := i.iotDb.GetSession()
-	if err != nil {
-		zap.L().Error("读取session失败", zap.Error(err))
-		return err
-	}
-	defer i.iotDb.PutSession(session)
-
-	name := iotdb2.MakeDeviceTemplateName(deviceId, templateId, dataId)
-
-	// 删除模板表示的某一组时间序列
-	_, err = session.ExecuteStatement(fmt.Sprintf("deactivate device template %s from %s", iotdb2.NOVA_DEVICE_TEMPLATE, name))
-	if err != nil {
-		zap.L().Error("deactivate  device template", zap.Error(err))
-		return err
-	}
-
-	_, err = session.ExecuteStatement(fmt.Sprintf("unset device template %s from %s", iotdb2.NOVA_DEVICE_TEMPLATE, name))
-	if err != nil {
-		zap.L().Error("unset  device template", zap.Error(err))
-		return err
-	}
-
-	_, err = session.ExecuteStatement(fmt.Sprintf("drop database %s", name))
-	if err != nil {
-		zap.L().Error("unset  device template", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
 // Predict 趋势预测
-func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *devicemodels.SysModbusDeviceConfigData, req *metricmodels.MetricQueryReq) (*metricmodels.MetricQueryData, error) {
+func (i *query) Predict(c *gin.Context, deviceId int64, device *devicemodels.SysModbusDeviceConfigData, req *metricmodels.MetricQueryReq) (*metricmodels.MetricQueryData, error) {
 	if req == nil {
 		return nil, nil
 	}
@@ -399,7 +103,7 @@ func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *devicemode
 	if req.Step <= 0 {
 		req.Step = 1
 	}
-	name := iotdb2.MakeDeviceTemplateName(int64(req.DeviceId), int64(req.TemplateId), int64(req.DataId))
+	name := iotdb2.MakeDeviceDataPath(int64(req.DeviceId), int64(req.DataId))
 	var timeout int64 = 5000
 	var data *metricmodels.MetricQueryData = metricmodels.NewMetricQueryData()
 	if device.AggFunction == "" {
@@ -428,7 +132,7 @@ func (i *iotDbExport) Predict(c *gin.Context, deviceId int64, device *devicemode
 	return data, nil
 }
 
-func (i *iotDbExport) List(c *gin.Context, req *devicemonitormodel.DevDataReq) (*devicemonitormodel.DevDataResp, error) {
+func (i *query) List(c *gin.Context, req *devicemonitormodel.DevDataReq) (*devicemonitormodel.DevDataResp, error) {
 	var startTime string
 	if req.Start > 0 {
 		startTime = time.GetStartTime(req.Start, 200)
@@ -511,7 +215,7 @@ func (i *iotDbExport) List(c *gin.Context, req *devicemonitormodel.DevDataReq) (
 	return &resp, nil
 }
 
-func (i *iotDbExport) Count(c *gin.Context, req *devicemonitormodel.DevDataReq) (uint64, error) {
+func (i *query) Count(c *gin.Context, req *devicemonitormodel.DevDataReq) (uint64, error) {
 	var startTime string
 	if req.Start > 0 {
 		startTime = time.GetStartTime(req.Start, 200)
@@ -587,7 +291,7 @@ func (i *iotDbExport) Count(c *gin.Context, req *devicemonitormodel.DevDataReq) 
 }
 
 // Query dashboard 查询接口
-func (i *iotDbExport) Query(c *gin.Context, req *metricmodels.MetricDataQueryReq) (*metricmodels.MetricQueryData, error) {
+func (i *query) Query(c *gin.Context, req *metricmodels.MetricDataQueryReq) (*metricmodels.MetricQueryData, error) {
 	if req == nil {
 		return nil, nil
 	}
@@ -776,7 +480,7 @@ func (i *iotDbExport) Query(c *gin.Context, req *metricmodels.MetricDataQueryReq
 	return data, nil
 }
 
-func (i *iotDbExport) CounterByTimeRange(startTime int64, endTime int64, interval string) (*metricmodels.MetricQueryData, error) {
+func (i *query) CounterByTimeRange(startTime int64, endTime int64, interval string) (*metricmodels.MetricQueryData, error) {
 	session, err := i.iotDb.GetSession()
 	if err != nil {
 		zap.L().Error("读取session失败", zap.Error(err))
@@ -906,7 +610,7 @@ func (i *iotDbExport) CounterByTimeRange(startTime int64, endTime int64, interva
 	return data, nil
 }
 
-func (i *iotDbExport) CounterByDevice(c *gin.Context, startTime int64, endTime int64, limit int) (*devicemonitormodel.TypeDeviceCounterRank, error) {
+func (i *query) CounterByDevice(c *gin.Context, startTime int64, endTime int64, limit int) (*devicemonitormodel.TypeDeviceCounterRank, error) {
 	session, err := i.iotDb.GetSession()
 	if err != nil {
 		zap.L().Error("读取session失败", zap.Error(err))
@@ -943,7 +647,7 @@ func (i *iotDbExport) CounterByDevice(c *gin.Context, startTime int64, endTime i
 	return &rank, nil
 }
 
-func (i *iotDbExport) StatDeviceStatus(c *gin.Context, startTime string, endTime string,
+func (i *query) StatDeviceStatus(c *gin.Context, startTime string, endTime string,
 	status int) (*devicemonitormodel.DeviceStatusList, error) {
 	session, err := i.iotDb.GetSession()
 	if err != nil {
@@ -982,7 +686,7 @@ func (i *iotDbExport) StatDeviceStatus(c *gin.Context, startTime string, endTime
 	return data, nil
 }
 
-func (i *iotDbExport) StatDeviceProcess(c *gin.Context, startTime string, endTime string, interval string,
+func (i *query) StatDeviceProcess(c *gin.Context, startTime string, endTime string, interval string,
 	status int) (*devicemonitormodel.DeviceProcessList, error) {
 	var processList devicemonitormodel.DeviceProcessList
 	processList.List = make(map[string][]devicemonitormodel.DeviceStatus)
@@ -1022,7 +726,7 @@ func (i *iotDbExport) StatDeviceProcess(c *gin.Context, startTime string, endTim
 	return &processList, nil
 }
 
-func (i *iotDbExport) StatDeviceRunStatus(c *gin.Context, startTime string,
+func (i *query) StatDeviceRunStatus(c *gin.Context, startTime string,
 	endTime string) ([]devicemonitormodel.DeviceRunStat, error) {
 	var runStatList []devicemonitormodel.DeviceRunStat = make([]devicemonitormodel.DeviceRunStat, 0)
 	session, err := i.iotDb.GetSession()
@@ -1058,7 +762,7 @@ func (i *iotDbExport) StatDeviceRunStatus(c *gin.Context, startTime string,
 	return runStatList, nil
 }
 
-func (i *iotDbExport) StatDeviceStatusByDeviceId(c *gin.Context, startTime string, endTime string,
+func (i *query) StatDeviceStatusByDeviceId(c *gin.Context, startTime string, endTime string,
 	deviceId int64, status int) (*devicemonitormodel.DeviceStatusList, error) {
 	session, err := i.iotDb.GetSession()
 	if err != nil {
@@ -1097,7 +801,7 @@ func (i *iotDbExport) StatDeviceStatusByDeviceId(c *gin.Context, startTime strin
 	return data, nil
 }
 
-func (i *iotDbExport) StatDeviceProcessByDeviceId(c *gin.Context, startTime string, endTime string,
+func (i *query) StatDeviceProcessByDeviceId(c *gin.Context, startTime string, endTime string,
 	deviceId int64, interval string,
 	status int) (*devicemonitormodel.DeviceProcessList, error) {
 	var processList devicemonitormodel.DeviceProcessList
@@ -1138,58 +842,4 @@ func (i *iotDbExport) StatDeviceProcessByDeviceId(c *gin.Context, startTime stri
 	}
 
 	return &processList, nil
-}
-
-// ExportTimeData 导入时序数据
-func metricEndTime(end uint64) stdtime.Time {
-	if end == 0 {
-		return stdtime.Now()
-	}
-	return stdtime.UnixMilli(int64(end))
-}
-
-func (i *iotDbExport) ExportTimeData(ctx context.Context, data map[string][]*v1.ResourceTimeMetrics) error {
-	if len(data) == 0 {
-		return nil
-	}
-
-	var samples []iotdb.MetricSample
-	for table, list := range data {
-		for _, value := range list {
-			if value == nil {
-				continue
-			}
-			timestamp := time.MicroToGTime(value.TimeUnixNano).UnixMilli()
-			for _, metric := range value.Metrics {
-				if metric == nil {
-					continue
-				}
-
-				var metricValue float64
-				if metric.GetValue() == nil {
-					metricValue = 0
-				} else if _, ok := metric.GetValue().(*v1.TimeDataMetric_AsDouble); ok {
-					metricValue = metric.GetAsDouble()
-				} else {
-					metricValue = float64(metric.GetAsInt())
-				}
-
-				samples = append(samples, iotdb.NewMetricSample(table+"."+metric.Field, nil, timestamp, metricValue))
-			}
-		}
-	}
-	if len(samples) == 0 {
-		return nil
-	}
-
-	appender := i.iotDb.Appender()
-	if err := appender.Append(samples); err != nil {
-		zap.L().Error("iotdb appender append time data error", zap.Error(err))
-		return err
-	}
-	if err := appender.Commit(); err != nil {
-		zap.L().Error("iotdb appender commit time data error", zap.Error(err))
-		return err
-	}
-	return nil
 }

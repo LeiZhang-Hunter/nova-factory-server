@@ -1,0 +1,7 @@
+type: monitor
+scope_name: nova-factory-server/app/business/iot/metric/monitor
+status:
+  class: exporter
+  stability:
+    development: [traces, metrics, logs]
+  distributions: []

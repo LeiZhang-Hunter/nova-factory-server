@@ -4,7 +4,7 @@ import (
 	"nova-factory-server/app/business/admin/monitor/monitormodels"
 	"nova-factory-server/app/business/iot/alert/alertmodels"
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 )
 
 type DeviceStats struct {

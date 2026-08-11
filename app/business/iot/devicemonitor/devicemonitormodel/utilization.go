@@ -1,7 +1,7 @@
 package devicemonitormodel
 
 import (
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 )
 
 // DeviceUtilizationReq 稼动率请求

@@ -4,7 +4,7 @@ import (
 	"context"
 	"nova-factory-server/app/business/iot/asset/device/devicemodels"
 	deviceMonitorModel2 "nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 
 	"github.com/gin-gonic/gin"
 )

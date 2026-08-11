@@ -2,7 +2,7 @@ package main
 
 import (
 	"nova-factory-server/app/business/ai/aiDataSetModels"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/cmd/prediction/condition"
 	"nova-factory-server/app/utils/gateway/v1/config/app/intercept/logalert"
 

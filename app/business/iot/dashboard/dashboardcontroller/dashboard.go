@@ -3,7 +3,7 @@ package dashboardcontroller
 import (
 	"nova-factory-server/app/business/iot/dashboard/dashboardmodels"
 	"nova-factory-server/app/business/iot/dashboard/dashboardservice"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/middlewares"
 	"nova-factory-server/app/utils/baizeContext"
 	"nova-factory-server/app/utils/gin_mcp"

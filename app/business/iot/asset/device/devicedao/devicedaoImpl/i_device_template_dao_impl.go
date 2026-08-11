@@ -35,7 +35,11 @@ func (i *IDeviceTemplateDaoImpl) Add(c *gin.Context, template *devicemodels.SysD
 }
 
 func (i *IDeviceTemplateDaoImpl) Update(c *gin.Context, template *devicemodels.SysDeviceTemplate) (*devicemodels.SysDeviceTemplate, error) {
-	ret := i.db.Table(i.tableName).Where("template_id = ?", template.TemplateID).Updates(template)
+	return i.UpdateWithTx(c, i.db.WithContext(c), template)
+}
+
+func (i *IDeviceTemplateDaoImpl) UpdateWithTx(c *gin.Context, tx *gorm.DB, template *devicemodels.SysDeviceTemplate) (*devicemodels.SysDeviceTemplate, error) {
+	ret := tx.Table(i.tableName).Where("template_id = ?", template.TemplateID).Updates(template)
 	return template, ret.Error
 }
 

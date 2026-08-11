@@ -3,6 +3,7 @@ package devicemodels
 import (
 	"encoding/json"
 	"nova-factory-server/app/baize"
+	"nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 
 	"go.uber.org/zap"
 )
@@ -33,6 +34,24 @@ type SysModbusDeviceConfigData struct {
 	DeptID                int64  `gorm:"column:dept_id;comment:部门ID" json:"dept_id"`                                     // 部门ID
 	State                 bool   `gorm:"column:state;comment:操作状态（0正常 -1删除）" json:"state"`                               // 操作状态（0正常 -1删除）
 	baize.BaseEntity
+}
+
+// FromTemplateDataToMetricTemplate 从模板数据到指标模板
+func FromTemplateDataToMetricTemplate(data []*SysModbusDeviceConfigData) []entity.DeviceTemplate {
+	list := make([]entity.DeviceTemplate, 0)
+	if len(data) == 0 {
+		return list
+	}
+
+	for _, item := range data {
+		list = append(list, entity.DeviceTemplate{
+			TemplateId: item.TemplateID,
+			DataId:     item.DeviceConfigID,
+			DataName:   item.Name,
+			DeviceType: item.Type,
+		})
+	}
+	return list
 }
 
 func OfSysModbusDeviceConfigData(req *SetSysModbusDeviceConfigDataReq) *SysModbusDeviceConfigData {

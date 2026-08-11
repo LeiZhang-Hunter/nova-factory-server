@@ -1,11 +1,17 @@
 package main
 
 import (
+	"context"
+	"errors"
+	"net"
+	"net/http"
+	"time"
+
+	"github.com/soheilhy/cmux"
 	"github.com/spf13/viper"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
-	"net"
-	"time"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -27,6 +33,12 @@ func main() {
 		panic(err)
 	}
 	defer cleanup()
+	otelCleanup, err := registerMonitorOTLPGRPC(context.Background(), s)
+	if err != nil {
+		panic(err)
+	}
+	defer otelCleanup()
+
 	var host string
 	if viper.GetString("metric.host") == "" {
 		host = "0.0.0.0:6000"
@@ -38,11 +50,19 @@ func main() {
 		panic(err)
 	}
 
-	zap.L().Info("start grpc server", zap.String("host", host))
-	err = s.Serve(listen)
-	if err != nil {
-		panic(err)
-	} // grpc服务启动
+	mux := cmux.New(listen)
+	grpcListener := mux.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+	httpListener := mux.Match(cmux.HTTP1Fast())
+	httpServer := newMonitorHTTPServer()
 
-	return
+	errCh := make(chan error, 3)
+	go func() { errCh <- s.Serve(grpcListener) }()
+	go func() { errCh <- httpServer.Serve(httpListener) }()
+	go func() { errCh <- mux.Serve() }()
+
+	zap.L().Info("start grpc/http server", zap.String("host", host), zap.String("http_endpoint", "/otel/monitor"))
+	err = <-errCh
+	if err != nil && !errors.Is(err, grpc.ErrServerStopped) && !errors.Is(err, http.ErrServerClosed) {
+		panic(err)
+	}
 }
