@@ -4,7 +4,7 @@ import (
 	"context"
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
 	"nova-factory-server/app/business/iot/metric/device/metricdao"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/datasource/clickhouse"
 	"nova-factory-server/app/utils/time"
 	systime "time"

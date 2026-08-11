@@ -4,7 +4,7 @@ import (
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitordao"
 	deviceMonitorModel2 "nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
 	"nova-factory-server/app/business/iot/metric/device/metricdao"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/business/iot/metric/device/metricservice"
 
 	"github.com/gin-gonic/gin"

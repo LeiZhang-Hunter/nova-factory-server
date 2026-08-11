@@ -10,7 +10,7 @@ import (
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitordao"
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
 	"nova-factory-server/app/business/iot/metric/device/metricdao"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/constant/device"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/utils/math"

@@ -1,4 +1,4 @@
-package metricmodels
+package entity
 
 import "github.com/gogf/gf/os/gtime"
 

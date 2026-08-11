@@ -12,7 +12,7 @@ import (
 	deviceMonitorModel2 "nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
 	deviceMonitorService2 "nova-factory-server/app/business/iot/devicemonitor/devicemonitorservice"
 	metricDao2 "nova-factory-server/app/business/iot/metric/device/metricdao"
-	metricModels2 "nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricModels2 "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"
@@ -239,7 +239,7 @@ func (d *DeviceMonitorServiceImpl) PredictQuery(c *gin.Context, req *metricModel
 		index := 0
 		for _, metric := range req.QueryMetric {
 			index++
-			str := iotdb.MakeDeviceTemplateName(metric.DeviceId, metric.TemplateId, metric.DataId)
+			str := iotdb.MakeDeviceDataPath(metric.DeviceId, metric.DataId)
 			name += str
 			if index != len(req.QueryMetric) {
 				name += ","
