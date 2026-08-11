@@ -20,6 +20,7 @@ func newAdder(iotDb *iotdb.IotDb) *adder {
 	}
 }
 
+// Export 导入数据
 func (i *adder) Export(ctx context.Context, data []*metricmodels.NovaMetricsDevice) error {
 	if len(data) == 0 {
 		return nil
