@@ -53,7 +53,7 @@ func (a *AIAgentDaoImpl) Update(c *gin.Context, req *gatewaymodels.AIAgentUpsert
 		Where("state = ?", commonStatus.NORMAL).
 		Select("name", "type", "prompt", "default_llm_provider_id", "default_llm_model_id", "llm_temperature", "llm_top_p",
 			"llm_max_tokens", "enable_llm_temperature", "enable_llm_top_p", "enable_llm_max_tokens",
-			"llm_max_context_count", "sandbox_mode", "sandbox_network", "enable", "suppress_pre_tool_content",
+			"llm_max_context_count", "sandbox_mode", "sandbox_network", "enable", "deletable", "suppress_pre_tool_content",
 			"work_dir", "mcp_enabled", "mcp_server_ids", "mcp_server_enabled_ids", "allow_mcp_server_ids_tools", "forced_tool_choice_route", "update_by", "update_time").
 		Updates(item).Error; err != nil {
 		return nil, err
@@ -181,6 +181,7 @@ func buildAIAgentModel(c *gin.Context, req *gatewaymodels.AIAgentUpsert) *gatewa
 		ForcedToolChoiceRouteRaw:  req.ForcedToolChoiceRouteRaw,
 		SuppressPreToolContent:    req.SuppressPreToolContent,
 		Enable:                    req.Enable,
+		Deletable:                 req.Deletable != nil && *req.Deletable,
 		DeptID:                    baizeContext.GetDeptId(c),
 	}
 }

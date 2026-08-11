@@ -310,6 +310,7 @@ CREATE TABLE IF NOT EXISTS ai_agents (
     `allow_mcp_server_ids_tools` text NULL COMMENT 'MCP服务工具列表',
     `config_version`             VARCHAR(128)    NOT NULL COMMENT '当前版本',
     `enable` tinyint(1) NULL DEFAULT 0 COMMENT '是否开启，0为关闭 1为开启',
+    `deletable` tinyint(1) NOT NULL DEFAULT 1 COMMENT '是否允许删除，0为不允许 1为允许',
     `suppress_pre_tool_content` tinyint(1) NULL DEFAULT 0 COMMENT '抑制工具提示是否开启，0为关闭 1为开启',
     `forced_tool_choice_route` text NULL COMMENT '工具强制触发策略',
     `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',

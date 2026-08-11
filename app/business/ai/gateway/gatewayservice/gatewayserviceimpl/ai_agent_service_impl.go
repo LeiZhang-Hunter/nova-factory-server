@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"nova-factory-server/app/business/ai/gateway/gatewayservice"
 	rediskey "nova-factory-server/app/constant/redis"
 	"nova-factory-server/app/datasource/cache"
+	agentconfigstore "nova-factory-server/app/utils/store/agentconfig"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -27,7 +29,9 @@ type AIAgentServiceImpl struct {
 // NewAIAgentService 创建智能体配置服务。
 func NewAIAgentService(dao gatewaydao.IAIAgentDao,
 	orchestrationDao gatewaydao.IAIAgentOrchestrationDao, cache cache.Cache) gatewayservice.IAIAgentService {
-	return &AIAgentServiceImpl{dao: dao, orchestrationDao: orchestrationDao, cache: cache}
+	svc := &AIAgentServiceImpl{dao: dao, orchestrationDao: orchestrationDao, cache: cache}
+	agentconfigstore.RegisterStore(&agentConfigStore{service: svc})
+	return svc
 }
 
 // Create 新增智能体配置。
@@ -75,6 +79,9 @@ func (a *AIAgentServiceImpl) DeleteByIDs(c *gin.Context, ids []int64) error {
 		}
 		if current == nil {
 			return errors.New("智能体不存在")
+		}
+		if !current.Deletable {
+			return fmt.Errorf("智能体「%s」不允许删除", current.Name)
 		}
 	}
 	return a.dao.DeleteByIDs(c, ids)
@@ -217,6 +224,9 @@ func (a *AIAgentServiceImpl) prepareUpsert(req *gatewaymodels.AIAgentUpsert, isU
 	}
 	if req.MCPEnabled == nil {
 		req.MCPEnabled = agentBoolPtr(false)
+	}
+	if req.Deletable == nil {
+		req.Deletable = agentBoolPtr(true)
 	}
 	if req.LLMMaxTokens < 0 || req.LLMMaxContextCount < 0 || req.RetrievalTopK < 0 {
 		return errors.New("数字参数不能小于0")

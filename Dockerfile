@@ -1,4 +1,5 @@
 ARG GO_VERSION=1.26.1
+ARG BUILD_TAGS
 
 FROM golang:${GO_VERSION}-bookworm AS builder
 
@@ -23,7 +24,7 @@ COPY nova-factory-addons-be/datasyncapi app/business/datasyncapi
 WORKDIR /src/app
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
     go build -trimpath -ldflags="-s -w" \
-    -tags="ai shop datasyncapi" \
+    -tags="${BUILD_TAGS}" \
     -o /out/nova-factory-server .
 
 FROM debian:bookworm-slim

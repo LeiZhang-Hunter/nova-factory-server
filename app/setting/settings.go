@@ -10,15 +10,32 @@ import (
 var Conf = new(AppConfig)
 
 type AppConfig struct {
-	Name         string `mapstructure:"name"`
-	Mode         string `mapstructure:"mode"`
-	Version      string `mapstructure:"version"`
-	Port         int    `mapstructure:"port"`
-	Host         string `mapstructure:"host"`
-	Cluster      bool   `mapstructure:"cluster"`
-	*TokenConfig `mapstructure:"token"`
-	*LogConfig   `mapstructure:"log"`
-	AesKey       string `mapstructure:"aes_key"`
+	Name                string `mapstructure:"name"`
+	Mode                string `mapstructure:"mode"`
+	Version             string `mapstructure:"version"`
+	Port                int    `mapstructure:"port"`
+	Host                string `mapstructure:"host"`
+	Cluster             bool   `mapstructure:"cluster"`
+	*TokenConfig        `mapstructure:"token"`
+	*LogConfig          `mapstructure:"log"`
+	AesKey              string `mapstructure:"aes_key"`
+	*DataConfig         `mapstructure:"data"`
+	*ChatWithEinoConfig `mapstructure:"chatwitheino"`
+}
+
+type DataConfig struct {
+	CredentialsKey string `mapstructure:"credentials_key"`
+}
+
+type ChatWithEinoConfig struct {
+	Enabled     bool    `mapstructure:"enabled"`
+	Protocol    string  `mapstructure:"protocol"`
+	BaseURL     string  `mapstructure:"base_url"`
+	APIKey      string  `mapstructure:"api_key"`
+	Model       string  `mapstructure:"model"`
+	MaxTokens   int     `mapstructure:"max_tokens"`
+	Temperature float32 `mapstructure:"temperature"`
+	Timeout     string  `mapstructure:"timeout"`
 }
 
 type TokenConfig struct {

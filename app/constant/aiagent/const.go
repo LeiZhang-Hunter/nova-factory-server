@@ -24,3 +24,6 @@ var ConfigInitType ConfigUpdate = "init"
 var ConfigRemoveType ConfigUpdate = "remove"
 
 var AgentType string = "agent"
+
+// DataAgentType 数据平台（data 模块）使用的智能体类型。
+var DataAgentType = "data"

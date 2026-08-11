@@ -1,6 +1,18 @@
 name: "baize"
 mode: "dev" #dev 开发模式，日志打印到控制台，prod  生产模式，日志不打印控制台
 aes_key: "zhide-api"
+data:
+  credentials_key: "zhide-api"
+
+chatwitheino:
+  enabled: false
+  protocol: "openai" # 支持 openai、qwen、deepseek、ark、claude、gemini、ollama
+  base_url: "https://your-model-provider.example/v1"
+  api_key: "change-me"
+  model: "change-me"
+  max_tokens: 8192
+  temperature: 0.1
+  timeout: "120s"
 port: 8080
 version: 2.0.0
 start_time: "2022-08-08"  #此日期用于雪花算法
