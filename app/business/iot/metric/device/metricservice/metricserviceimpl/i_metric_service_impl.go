@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
 	"nova-factory-server/app/business/iot/metric/device/metricdao"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/business/iot/metric/device/metricservice"
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/datasource/cache"

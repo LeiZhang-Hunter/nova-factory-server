@@ -3,7 +3,7 @@ package devicemodels
 import (
 	"encoding/json"
 	"nova-factory-server/app/baize"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/constant/device"
 
 	"github.com/gogf/gf/util/gconv"

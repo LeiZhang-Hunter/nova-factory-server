@@ -3,7 +3,7 @@ package metricserviceimpl
 import (
 	"context"
 	"nova-factory-server/app/business/iot/metric/device/metricdao"
-	"nova-factory-server/app/business/iot/metric/device/metricmodels"
+	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/business/iot/metric/device/metricservice"
 	time2 "nova-factory-server/app/utils/time"
 
