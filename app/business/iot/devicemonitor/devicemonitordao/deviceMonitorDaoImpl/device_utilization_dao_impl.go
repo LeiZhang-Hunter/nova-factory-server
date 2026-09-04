@@ -61,7 +61,9 @@ func (d *DeviceUtilizationDaoImpl) Stat(c *gin.Context, req *devicemonitormodel.
 		startTime = timeUtil.GetStartTime(uint64(start), 200)
 	}
 	endTime := timeUtil.GetEndTimeUseNow(req.End, true)
-
+	fmt.Println(req.End)
+	fmt.Println(startTime)
+	fmt.Println(endTime)
 	// 查询所有班次，用来计算工作时间的稼动率
 	// 使用Parse函数解析字符串为time.Time类型
 	endTimeUnix, err := systime.Parse("2006-01-02 15:04:05", endTime)
@@ -216,8 +218,18 @@ func (d *DeviceUtilizationDaoImpl) Stat(c *gin.Context, req *devicemonitormodel.
 			waitRate = waitData.Rate
 		}
 
+		// 空转时间统计
+		idlingTime := 0
+		idlingTimeStr := "00"
+		idlingRate := 0.0
+		if idlingData, ok := statusMap[int(device.IDLING)]; ok {
+			idlingTime = int(idlingData.Time)
+			idlingTimeStr = idlingData.TimeStr
+			idlingRate = idlingData.Rate
+		}
+
 		// 停机时间统计
-		stopTime := shiftTime - runTime - waitTime
+		stopTime := shiftTime - runTime - waitTime - idlingTime
 		stopTimeStr := "00"
 		stopRate := 0.0
 		if stopTime < 0 {
@@ -225,7 +237,7 @@ func (d *DeviceUtilizationDaoImpl) Stat(c *gin.Context, req *devicemonitormodel.
 		}
 		if stopTime > 0 {
 			stopTimeStr = timeUtil.SecondsToHMS(int64(stopTime))
-			stopRate = 100 - runRate - waitRate
+			stopRate = 100 - runRate - waitRate - idlingRate
 		}
 
 		buildId := v.DeviceBuildingId
@@ -244,6 +256,11 @@ func (d *DeviceUtilizationDaoImpl) Stat(c *gin.Context, req *devicemonitormodel.
 			WaitTimeStr: waitTimeStr,
 			WaitRate:    waitRate,
 			WaitRateStr: fmt.Sprintf("%.2f", waitRate) + "%",
+
+			IdlingTime:    uint64(idlingTime),
+			IdlingTimeStr: idlingTimeStr,
+			IdlingRate:    idlingRate,
+			IdlingRateStr: fmt.Sprintf("%.2f", waitRate) + "%",
 
 			StopTime:    uint64(stopTime),
 			StopTimeStr: stopTimeStr,

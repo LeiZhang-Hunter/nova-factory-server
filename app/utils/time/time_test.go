@@ -33,3 +33,11 @@ func TestEndTime(t *testing.T) {
 	startStr = GetEndTime(uint64(start), 0)
 	fmt.Println(startStr)
 }
+
+func TestEndTimeUseNow(t *testing.T) {
+	startStr := GetStartTime(uint64(1788280363719), 0)
+	fmt.Println(startStr)
+
+	endStr := GetEndTimeUseNow(uint64(1788539563719), true)
+	fmt.Println(endStr)
+}
