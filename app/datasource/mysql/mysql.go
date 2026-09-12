@@ -101,20 +101,27 @@ func NewDB() *gorm.DB {
 	default:
 		gormLogLevel = gormlogger.Silent
 	}
-	gdb, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: gormlogger.New(
-			log.New(os.Stdout, "\r\n", log.LstdFlags),
-			gormlogger.Config{
-				SlowThreshold:             time.Duration(d.SlowThreshold) * time.Millisecond,
-				LogLevel:                  gormLogLevel,
-				IgnoreRecordNotFoundError: true,
-				Colorful:                  false,
-				ParameterizedQueries:      false,
-			},
-		),
-	})
-	if err != nil {
-		panic(err)
+
+	var gdb *gorm.DB
+	var err error
+	for {
+		gdb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+			Logger: gormlogger.New(
+				log.New(os.Stdout, "\r\n", log.LstdFlags),
+				gormlogger.Config{
+					SlowThreshold:             time.Duration(d.SlowThreshold) * time.Millisecond,
+					LogLevel:                  gormLogLevel,
+					IgnoreRecordNotFoundError: true,
+					Colorful:                  false,
+					ParameterizedQueries:      false,
+				},
+			),
+		})
+		if err != nil {
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		break
 	}
 
 	sqlDB, err := gdb.DB()
