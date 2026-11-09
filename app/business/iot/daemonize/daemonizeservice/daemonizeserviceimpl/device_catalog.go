@@ -14,78 +14,48 @@ import (
 	catalogresponse "nova-factory-server/app/business/iot/daemonize/daemonizemodels/response"
 )
 
-// Catalog converts a consistent asset snapshot into passive device configuration.
+// Catalog 根据网关设备快照生成完整配置目录。
 func (s *iGatewayConfigServiceImpl) Catalog(ctx context.Context, id int64) (*catalogresponse.Catalog, error) {
 	snapshot, err := s.deviceDao.GetGatewayCatalog(ctx, id)
 	if err != nil {
 		return nil, err
 	}
+
 	zap.L().Info("已读取网关设备配置快照", zap.Int64("gatewayId", id), zap.Int("devices", len(snapshot.Devices)), zap.Int("templates", len(snapshot.Templates)), zap.Int("points", len(snapshot.Points)))
-	catalog := &catalogresponse.Catalog{
-		GatewayID: strconv.FormatInt(id, 10),
-		Devices:   []catalogresponse.Device{},
+	return buildDeviceCatalog(id, snapshot)
+}
+
+// buildDeviceCatalog 按设备协议转换快照，并计算目录版本。
+func buildDeviceCatalog(id int64, snapshot *catalogresponse.CatalogSnapshot) (*catalogresponse.Catalog, error) {
+	catalog := &catalogresponse.Catalog{GatewayID: strconv.FormatInt(id, 10), Devices: []catalogresponse.Device{}}
+	templates := make(map[int64]*devicemodels.SysDeviceTemplate, len(snapshot.Templates))
+	points := make(map[int64][]*devicemodels.SysModbusDeviceConfigData)
+	for _, template := range snapshot.Templates {
+		templates[template.TemplateID] = template
 	}
-	templates := map[int64]*devicemodels.SysDeviceTemplate{}
-	for _, t := range snapshot.Templates {
-		templates[t.TemplateID] = t
+	for _, point := range snapshot.Points {
+		points[point.TemplateID] = append(points[point.TemplateID], point)
 	}
-	points := map[int64][]catalogresponse.Point{}
-	for _, p := range snapshot.Points {
-		if p.Register == nil || p.FunctionCode < 1 || p.FunctionCode > 4 {
-			return nil, fmt.Errorf("template %d has unsupported measurement configuration", p.TemplateID)
+
+	for _, device := range snapshot.Devices {
+		converter, err := catalogConverterFor(device.ProtocolType)
+		if err != nil {
+			return nil, fmt.Errorf("device %d: %w", device.DeviceId, err)
 		}
-		points[p.TemplateID] = append(points[p.TemplateID], catalogresponse.Point{
-			ID:           strconv.FormatInt(p.DeviceConfigID, 10),
-			Name:         p.Name,
-			Type:         p.Type,
-			Register:     *p.Register,
-			FunctionCode: int8(p.FunctionCode),
-			Sort:         p.Sort,
-			Unit:         p.Unit,
-			Precision:    p.Precision,
-			Expression:   p.Expression,
-			DataFormat:   p.DataFormat,
-		})
+
+		template := templates[int64(device.DeviceProtocolId)]
+		data := points[int64(device.DeviceProtocolId)]
+		if template == nil || len(data) == 0 {
+			return nil, fmt.Errorf("device %d template is incomplete", device.DeviceId)
+		}
+
+		item, err := converter.convert(device, template, data)
+		if err != nil {
+			return nil, fmt.Errorf("device %d template %d: %w", device.DeviceId, template.TemplateID, err)
+		}
+		catalog.Devices = append(catalog.Devices, item)
 	}
-	for _, d := range snapshot.Devices {
-		if d.ProtocolType != "modbus-tcp" && d.ProtocolType != "modbus_tcp" {
-			return nil, fmt.Errorf("device %d protocol is not supported by catalog v1", d.DeviceId)
-		}
-		t := templates[int64(d.DeviceProtocolId)]
-		if t == nil || len(points[t.TemplateID]) == 0 {
-			return nil, fmt.Errorf("device %d template is incomplete", d.DeviceId)
-		}
-		var ext devicemodels.ExtensionInfo
-		if json.Unmarshal([]byte(d.Extension), &ext) != nil || len(ext.LocalInfo) != 1 {
-			return nil, fmt.Errorf("device %d requires exactly one local connection", d.DeviceId)
-		}
-		connection := ext.LocalInfo[0]
-		if connection.Slave <= 0 || connection.Quantity == 0 || connection.Address == "" {
-			return nil, fmt.Errorf("device %d local connection is incomplete", d.DeviceId)
-		}
-		config, _ := json.Marshal(map[string]any{
-			"ipAddress":    connection.Address,
-			"slaveAddress": connection.Slave,
-			"maxRegisters": connection.Quantity,
-		})
-		name, number := "", ""
-		if d.Name != nil {
-			name = *d.Name
-		}
-		if d.Number != nil {
-			number = *d.Number
-		}
-		catalog.Devices = append(catalog.Devices, catalogresponse.Device{
-			ID:           strconv.FormatUint(d.DeviceId, 10),
-			Name:         name,
-			Number:       number,
-			Protocol:     "modbus_tcp",
-			Config:       config,
-			TemplateID:   strconv.FormatInt(t.TemplateID, 10),
-			TemplateName: t.Name,
-			Points:       points[t.TemplateID],
-		})
-	}
+
 	body, err := json.Marshal(catalog)
 	if err != nil {
 		return nil, err
@@ -93,6 +63,7 @@ func (s *iGatewayConfigServiceImpl) Catalog(ctx context.Context, id int64) (*cat
 	if len(body) > 16<<20 {
 		return nil, errors.New("catalog exceeds size limit")
 	}
+
 	catalog.Version = fmt.Sprintf("%x", sha256.Sum256(body))
 	return catalog, nil
 }
