@@ -63,6 +63,13 @@ func (i *iotAgentServiceImpl) List(ctx *gin.Context, req *daemonizemodels.SysIot
 func (i *iotAgentServiceImpl) Update(ctx *gin.Context, req *daemonizemodels.SysIotAgentSetReq) (*daemonizemodels.SysIotAgent, error) {
 	data := daemonizemodels.ToSysIotAgent(req)
 	data.SetUpdateBy(baizeContext.GetUserId(ctx))
+	info, err := i.dao.GetByObjectId(ctx, req.ObjectID)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return i.dao.Create(ctx, data)
+	}
 	return i.dao.Update(ctx, data)
 }
 
