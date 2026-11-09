@@ -66,6 +66,12 @@ daemonize:
   server_list:
     - 127.0.0.1:10050
   debug: true
+gateway_mqtt:
+  enabled: false # 启用后连接 MQTT Broker，响应网关设备配置目录请求
+  broker: "tcp://127.0.0.1:1883" # 支持 tcp:// 或 ssl://，须包含端口
+  client_id: "nova-factory-catalog" # 集群部署时每个实例使用不同的客户端 ID
+  username: ""
+  password: ""
 iotdb:
   host: 192.168.2.100
   port: 6667

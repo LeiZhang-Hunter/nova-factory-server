@@ -26,6 +26,7 @@ const (
 // StartCatalogMQTT 启动网关配置目录响应服务，返回的清理函数应在服务关闭时调用。
 func (c *Config) StartCatalogMQTT(ctx context.Context) (func(), error) {
 	if !viper.GetBool("gateway_mqtt.enabled") {
+		zap.L().Info("网关 MQTT 配置目录服务未启用")
 		return func() {}, nil
 	}
 
@@ -72,6 +73,7 @@ func (c *Config) StartCatalogMQTT(ctx context.Context) (func(), error) {
 		return nil, errors.New("gateway MQTT subscription timed out")
 	}
 
+	zap.L().Info("网关 MQTT 配置目录服务已启动")
 	return cleanup, nil
 }
 
@@ -122,9 +124,10 @@ func catalogOnConnect(ctx context.Context, jobs chan<- catalogwire.Request, subs
 
 		select {
 		case jobs <- req:
+			zap.L().Info("收到网关配置目录请求", zap.String("gatewayId", req.GatewayID), zap.String("requestId", req.RequestID))
 		case <-ctx.Done():
 		default:
-			zap.L().Warn("gateway MQTT catalog queue full")
+			zap.L().Warn("网关配置目录请求队列已满", zap.String("gatewayId", req.GatewayID), zap.String("requestId", req.RequestID))
 		}
 	}
 
@@ -133,7 +136,9 @@ func catalogOnConnect(ctx context.Context, jobs chan<- catalogwire.Request, subs
 		var err error
 		if !token.WaitTimeout(5*time.Second) || token.Error() != nil {
 			err = errors.New("gateway MQTT catalog subscription failed")
-			zap.L().Error("gateway MQTT catalog subscription failed")
+			zap.L().Error("订阅网关配置目录请求失败", zap.Error(token.Error()))
+		} else {
+			zap.L().Info("已订阅网关配置目录请求")
 		}
 
 		select {
@@ -161,12 +166,17 @@ func (c *Config) runCatalogWorker(ctx context.Context, client mqtt.Client, jobs 
 
 // answerCatalog 验证网关请求，生成并发布签名后的目录响应。
 func (c *Config) answerCatalog(ctx context.Context, client mqtt.Client, req catalogwire.Request) {
+	started := time.Now()
+	log := zap.L().With(zap.String("gatewayId", req.GatewayID), zap.String("requestId", req.RequestID))
+
 	id, _ := strconv.ParseUint(req.GatewayID, 10, 64)
 	agent, err := c.agentService.GetByObjectId(ctx, id)
 	if err != nil || agent == nil || agent.Username != req.Username || !req.Verify(agent.Password, time.Now()) {
+		log.Warn("网关配置目录请求认证失败", zap.Error(err))
 		return
 	}
 
+	log.Info("网关配置目录请求认证通过，开始查询设备配置")
 	reply := catalogwire.Response{
 		RequestID: req.RequestID,
 		GatewayID: req.GatewayID,
@@ -178,23 +188,33 @@ func (c *Config) answerCatalog(ctx context.Context, client mqtt.Client, req cata
 	}
 
 	if err != nil || len(reply.Catalog) > catalogwire.MaxBytes-4096 {
+		log.Warn("网关配置目录生成失败", zap.Error(err), zap.Int("catalogBytes", len(reply.Catalog)))
 		reply.Error = "catalog unavailable"
 		reply.Catalog = nil
-		zap.L().Warn("gateway MQTT catalog generation failed")
+	} else if catalog != nil {
+		pointCount := 0
+		for _, device := range catalog.Devices {
+			pointCount += len(device.Points)
+		}
+		log.Info("网关配置目录已生成", zap.Int("devices", len(catalog.Devices)), zap.Int("points", pointCount), zap.String("version", catalog.Version), zap.Int("catalogBytes", len(reply.Catalog)))
 	}
 
 	reply.Signature = reply.Sign(agent.Password)
 	body, err := json.Marshal(reply)
 	if err != nil {
+		log.Error("网关配置目录响应序列化失败", zap.Error(err))
 		return
 	}
 
 	token := client.Publish(catalogwire.ResponseTopic(req.GatewayID, req.RequestID), 1, false, body)
 	select {
 	case <-ctx.Done():
+		log.Warn("网关配置目录响应发布已取消", zap.Error(ctx.Err()), zap.Duration("duration", time.Since(started)))
 	case <-token.Done():
 		if token.Error() != nil {
-			zap.L().Warn("gateway MQTT catalog response failed")
+			log.Warn("网关配置目录响应发布失败", zap.Error(token.Error()), zap.Duration("duration", time.Since(started)))
+		} else {
+			log.Info("网关配置目录响应已发布", zap.Bool("catalogError", reply.Error != ""), zap.Duration("duration", time.Since(started)))
 		}
 	}
 }

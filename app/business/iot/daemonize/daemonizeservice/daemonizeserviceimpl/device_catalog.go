@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"go.uber.org/zap"
+
 	"nova-factory-server/app/business/iot/asset/device/devicemodels"
 	catalogresponse "nova-factory-server/app/business/iot/daemonize/daemonizemodels/response"
 )
@@ -18,6 +20,7 @@ func (s *iGatewayConfigServiceImpl) Catalog(ctx context.Context, id int64) (*cat
 	if err != nil {
 		return nil, err
 	}
+	zap.L().Info("已读取网关设备配置快照", zap.Int64("gatewayId", id), zap.Int("devices", len(snapshot.Devices)), zap.Int("templates", len(snapshot.Templates)), zap.Int("points", len(snapshot.Points)))
 	catalog := &catalogresponse.Catalog{
 		GatewayID: strconv.FormatInt(id, 10),
 		Devices:   []catalogresponse.Device{},
