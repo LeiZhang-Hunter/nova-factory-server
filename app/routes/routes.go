@@ -23,6 +23,7 @@ import (
 )
 
 type App struct {
+	Shutdown   []func()
 	Engine     *gin.Engine
 	McpServer  *server.GinMCP
 	GrpcServer *grpcx.GrpcServer

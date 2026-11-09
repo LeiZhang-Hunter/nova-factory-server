@@ -334,7 +334,7 @@ CREATE TABLE IF NOT EXISTS mcp_servers (
     id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'MCP服务ID',
     `name` varchar(255) NOT NULL COMMENT 'MCP服务名称',
     `description` text NULL COMMENT 'MCP服务描述',
-    `transport` varchar(32) NOT NULL DEFAULT 'stdio' COMMENT '传输方式: stdio | streamableHttp',
+    `transport` varchar(32) NOT NULL DEFAULT 'stdio' COMMENT '传输方式: stdio | streamableHttp | sse',
     `command` text NULL COMMENT 'stdio 模式启动命令',
     `args` text NULL COMMENT 'stdio 模式参数(JSON数组字符串)',
     `env` text NULL COMMENT 'stdio 模式环境变量(JSON对象字符串)',
@@ -475,7 +475,7 @@ CREATE TABLE IF NOT EXISTS `ai_agent_config_publish_history` (
   COLLATE = utf8mb4_general_ci
   COMMENT = 'AI智能体配置发布历史表';
 
-CREATE TABLE IF NOT EXISTS `ai_agent_config_key`
+CREATE TABLE IF NOT EXISTS `sys_agent_config_key`
 (
     `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `key` varchar(64) NOT NULL COMMENT '密钥',

@@ -3,13 +3,14 @@ package metricserviceimpl
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"github.com/gogf/gf/os/gtime"
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
 	"nova-factory-server/app/business/iot/metric/device/metricdao"
 	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/business/iot/metric/device/metricservice"
 	"nova-factory-server/app/constant/device"
 	"nova-factory-server/app/datasource/cache"
-	time2 "nova-factory-server/app/utils/time"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -57,6 +58,9 @@ func (m *IMetricServiceImpl) Export(c context.Context, request *v1.ExportMetrics
 
 			var values []*metricmodels.NovaMetricsDevice = make([]*metricmodels.NovaMetricsDevice, 0)
 			for _, mVale := range metric.Metrics {
+				if mVale == nil {
+					return errors.New("nil device metric")
+				}
 				var v float64
 				if mVale.GetValue() == nil {
 					v = 0
@@ -76,15 +80,15 @@ func (m *IMetricServiceImpl) Export(c context.Context, request *v1.ExportMetrics
 					},
 					DataId:        mVale.DataId,
 					SeriesId:      request.SeriesId,
-					StartTimeUnix: time2.MicroToGTime(mVale.StartTimeUnixNano),
-					TimeUnix:      time2.MicroToGTime(mVale.TimeUnixNano),
+					StartTimeUnix: gtime.New(time.UnixMicro(int64(mVale.StartTimeUnixNano))),
+					TimeUnix:      gtime.New(time.UnixMicro(int64(mVale.TimeUnixNano))),
 					Value:         v,
 				})
 			}
 			err := m.export(c, values, request.SeriesId)
 			if err != nil {
 				zap.L().Error("export error", zap.Error(err))
-				continue
+				return err
 			}
 		}
 

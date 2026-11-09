@@ -1,12 +1,15 @@
 package devicedao
 
 import (
+	"context"
 	"nova-factory-server/app/business/iot/asset/device/devicemodels"
+	catalogresponse "nova-factory-server/app/business/iot/daemonize/daemonizemodels/response"
 
 	"github.com/gin-gonic/gin"
 )
 
 type IDeviceDao interface {
+	GetGatewayCatalog(context.Context, int64) (*catalogresponse.CatalogSnapshot, error)
 	InsertDevice(c *gin.Context, device *devicemodels.DeviceInfo) (*devicemodels.DeviceVO, error)
 	UpdateDevice(c *gin.Context, device *devicemodels.DeviceInfo) (*devicemodels.DeviceVO, error)
 	GetDeviceGroupByName(c *gin.Context, name string) (*devicemodels.DeviceVO, error)

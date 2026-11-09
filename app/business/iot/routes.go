@@ -4,6 +4,7 @@
 package iot
 
 import (
+	"context"
 	"github.com/google/wire"
 	"nova-factory-server/app/business/iot/alert/alertcontroller"
 	"nova-factory-server/app/business/iot/asset/building/buildingcontroller"
@@ -166,6 +167,13 @@ func NewGinEngine(
 	s := app.GrpcServer
 	controller.Daemonize.PrivateRoutes(s)
 	controller.Config.PrivateGrpcRoutes(s)
+	metric.Metric.ValidateGateway = controller.Config.ValidateTelemetry
+	metric.Metric.PrivateGrpcRoutes(s.Server)
+	cleanup, err := controller.Config.StartCatalogMQTT(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	app.Shutdown = append(app.Shutdown, cleanup)
 	deviceMonitor.DeviceControl.PrivateRoutes(s)
 	deviceMonitor.CameraGrpc.PrivateRoutes(s)
 

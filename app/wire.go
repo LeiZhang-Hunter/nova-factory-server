@@ -12,7 +12,7 @@ import (
 	"nova-factory-server/app/routes"
 )
 
-func finalEngine(app *routes.App, _ *business.Plugins) *gin.Engine {
+func finalEngine(app *routes.App, _ *business.Plugins) (*gin.Engine, func()) {
 	type McpConfig struct {
 		Path           string `mapstructure:"path"`
 		OperationsPath string `mapstructure:"operationsPath"`
@@ -26,7 +26,11 @@ func finalEngine(app *routes.App, _ *business.Plugins) *gin.Engine {
 	// 4. Mount the MCP server endpoint
 	app.McpServer.Mount() // MCP clients will connect here
 	app.GrpcServer.Start()
-	return app.Engine
+	return app.Engine, func() {
+		for i := len(app.Shutdown) - 1; i >= 0; i-- {
+			app.Shutdown[i]()
+		}
+	}
 }
 
 func wireApp() (*gin.Engine, func(), error) {

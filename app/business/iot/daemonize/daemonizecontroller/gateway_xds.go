@@ -2,6 +2,7 @@ package daemonizecontroller
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -31,6 +32,12 @@ func (c *Config) PrivateGrpcRoutes(router *grpcx.GrpcServer) {
 func (c *Config) FetchResources(ctx context.Context, req *xdsv1.DiscoveryRequest) (*xdsv1.DiscoveryResponse, error) {
 	gatewayID, err := c.authorizeGateway(ctx, req.GetGatewayId())
 	if err != nil {
+		return nil, err
+	}
+	if req.GetTypeUrl() == deviceCatalogTypeURL {
+		return c.buildCatalogResponse(ctx, gatewayID)
+	}
+	if err = c.ensureTypeURL(req.GetTypeUrl()); err != nil {
 		return nil, err
 	}
 	return c.buildDiscoveryResponse(ctx, gatewayID)
@@ -243,4 +250,27 @@ func firstValue(values []string) string {
 		return ""
 	}
 	return values[0]
+}
+
+const deviceCatalogTypeURL = "gateway.catalog.v1.DeviceCatalog"
+
+func (c *Config) buildCatalogResponse(ctx context.Context, id uint64) (*xdsv1.DiscoveryResponse, error) {
+	catalog, err := c.service.Catalog(ctx, int64(id))
+	if err != nil {
+		return nil, err
+	}
+	body, err := json.Marshal(catalog)
+	if err != nil {
+		return nil, err
+	}
+	return &xdsv1.DiscoveryResponse{
+		TypeUrl:     deviceCatalogTypeURL,
+		VersionInfo: catalog.Version,
+		Resources: []*xdsv1.Resource{{
+			Name:            catalog.GatewayID,
+			ResourceVersion: catalog.Version,
+			TypeUrl:         deviceCatalogTypeURL,
+			Body:            body,
+		}},
+	}, nil
 }

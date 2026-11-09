@@ -8,21 +8,14 @@ SET FOREIGN_KEY_CHECKS = 0;
 CREATE TABLE `sys_device`  (
     `device_id` bigint(20) NOT NULL COMMENT '设备主键',
     `device_group_id` bigint(20) NOT NULL  COMMENT '设备分组id',
-    `device_class_id` bigint(20) NOT NULL  COMMENT '设备分类id',
     `device_protocol_id` bigint(20) NOT NULL  COMMENT '协议id',
     `device_building_id` bigint(20) NOT NULL  COMMENT '建筑物id',
     `device_gateway_id` bigint(20) NOT NULL  COMMENT '网关id',
     `slave` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '从设备地址',
     `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '设备名称',
     `number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '设备编号',
-    `communication_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '通信方式',
     `protocol_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '协议类型',
-    `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '设备类型',
-    `action` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL  COMMENT '行为字段',
-    `extension` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL  COMMENT '扩展字段',
-    `control_type` int(11) NULL DEFAULT 0 COMMENT '控制模式 0 是手动 1是自动',
     `mode_url` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '模型图片',
-    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
@@ -111,7 +104,6 @@ CREATE TABLE `sys_device_template`
     `vendor` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '供应商',
     `protocol` varchar(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '协议类型',
     `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL  COMMENT '备注',
-    `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '部门ID',
     `create_by` bigint(20) NULL DEFAULT NULL COMMENT '创建者',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
     `update_by` bigint(20) NULL DEFAULT NULL COMMENT '更新者',
@@ -121,7 +113,7 @@ CREATE TABLE `sys_device_template`
     KEY (`protocol`)
 ) ENGINE = InnoDB  CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'modbus数据模板' ROW_FORMAT = Dynamic;
 
-CREATE TABLE `sys_modbus_device_config_data` (
+CREATE TABLE `sys_device_template_config_data` (
     `device_config_id` bigint NOT NULL COMMENT '文档id',
     `template_id` bigint NOT NULL COMMENT '模板id',
     `name` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '数据名称',
@@ -151,7 +143,7 @@ CREATE TABLE `sys_modbus_device_config_data` (
     `expression` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '转换表达式',
     PRIMARY KEY (`device_config_id`) USING BTREE,
     KEY `template_id` (`template_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='modbus数据配置';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='测点配置';
 -- alter table sys_modbus_device_config_data add column `expression` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '转换表达式';
 -- alter table sys_modbus_device_config_data add column `configuration_enable` tinyint(1) DEFAULT '0' COMMENT '组态属性';
 

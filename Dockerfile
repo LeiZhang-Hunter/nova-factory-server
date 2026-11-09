@@ -23,7 +23,7 @@ COPY nova-factory-addons-be/datasyncapi app/business/datasyncapi
 # Build tags: ai iot shop datasyncapi (matches production deployment)
 WORKDIR /src/app
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
-    go build -trimpath -ldflags="-s -w" \
+    go build -mod=mod -trimpath -ldflags="-s -w" \
     -tags="${BUILD_TAGS}" \
     -o /out/nova-factory-server .
 
