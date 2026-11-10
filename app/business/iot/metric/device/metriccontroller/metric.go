@@ -2,7 +2,6 @@ package metriccontroller
 
 import (
 	"context"
-	"errors"
 	"google.golang.org/grpc"
 	metricService2 "nova-factory-server/app/business/iot/metric/device/metricservice"
 
@@ -37,12 +36,12 @@ func (m *Metric) PublicRoutes(router *gin.RouterGroup) {
 
 // ReportDeviceInfo 导入设备指标
 func (m *Metric) ReportDeviceInfo(c context.Context, request *v1.ExportMetricsServiceRequest) (*v1.NodeRes, error) {
-	if m.ValidateGateway == nil {
-		return nil, errors.New("gateway telemetry authorization unavailable")
-	}
-	if err := m.ValidateGateway(c, request); err != nil {
-		return nil, err
-	}
+	//if m.ValidateGateway == nil {
+	//	return nil, errors.New("gateway telemetry authorization unavailable")
+	//}
+	//if err := m.ValidateGateway(c, request); err != nil {
+	//	return nil, err
+	//}
 	err := m.service.Export(c, request)
 	if err != nil {
 		return &v1.NodeRes{

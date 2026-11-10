@@ -50,10 +50,12 @@ func (i *query) Metric(c *gin.Context, req *metricmodels.MetricQueryReq) (*metri
 	}
 
 	name := iotdb2.MakeDeviceDataPath(int64(req.DeviceId), int64(req.DataId))
+	deviceName := iotdb2.MakeDeviceDataName(int64(req.DeviceId))
+	measurement := deviceTemplateNodeName(int64(req.DataId))
 	data := metricmodels.NewMetricQueryData()
 	data.Id = name
-	sql := fmt.Sprintf("select avg(value) as value from %s group by([%s, %s), %dm, %dm);",
-		name, startTime, endTime, req.Step, req.Step)
+	sql := fmt.Sprintf("select avg(%s) as value from %s group by([%s, %s), %dm, %dm);",
+		measurement, deviceName, startTime, endTime, req.Step, req.Step)
 
 	querier, err := i.iotDb.Querier(stdtime.UnixMilli(int64(req.Start)), metricEndTime(req.End))
 	if err != nil {
@@ -104,13 +106,15 @@ func (i *query) Predict(c *gin.Context, deviceId int64, device *devicemodels.Sys
 		req.Step = 1
 	}
 	name := iotdb2.MakeDeviceDataPath(int64(req.DeviceId), int64(req.DataId))
+	deviceName := iotdb2.MakeDeviceDataName(int64(req.DeviceId))
+	measurement := deviceTemplateNodeName(int64(req.DataId))
 	var timeout int64 = 5000
 	var data *metricmodels.MetricQueryData = metricmodels.NewMetricQueryData()
 	if device.AggFunction == "" {
 		device.AggFunction = "avg"
 	}
-	sql := fmt.Sprintf("select %s(value) as value from %s group by([%s, %s), %dm, %dm)", device.AggFunction,
-		name, startTime, endTime, req.Step, req.Step)
+	sql := fmt.Sprintf("select %s(%s) as value from %s group by([%s, %s), %dm, %dm)", device.AggFunction,
+		measurement, deviceName, startTime, endTime, req.Step, req.Step)
 	predictSql := fmt.Sprintf("call inference(stl_forecaster, \"%s\", generateTime=True, predict_length=10)",
 		sql)
 	// select avg(value) from root.device.dev375986234780028928 group by([2025-07-07 20:52:28, 2025-07-07 21:52:28), 3m, 3m);
@@ -330,6 +334,7 @@ func (i *query) Query(c *gin.Context, req *metricmodels.MetricDataQueryReq) (*me
 	if req.Field == "" {
 		req.Field = " as value"
 	}
+	queryName, queryExpression := deviceMetricQuery(req)
 
 	var having string
 	if req.Having != "" {
@@ -347,15 +352,15 @@ func (i *query) Query(c *gin.Context, req *metricmodels.MetricDataQueryReq) (*me
 	var sql string
 	if req.Type == "bar" || req.Type == "line" || req.Type == "area" || req.Type == "toplist" {
 		if req.Step != 0 {
-			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm, %dm)%s %s",
-				req.Expression, req.Field, req.Name, startTime, endTime, interval, req.Step, level, having)
+			sql = fmt.Sprintf("select %s from %s group by([%s, %s), %dm, %dm)%s %s",
+				queryExpression, queryName, startTime, endTime, interval, req.Step, level, having)
 		} else {
-			sql = fmt.Sprintf("select %s %s from %s group by([%s, %s), %dm)%s %s",
-				req.Expression, req.Field, req.Name, startTime, endTime, interval, level, having)
+			sql = fmt.Sprintf("select %s from %s group by([%s, %s), %dm)%s %s",
+				queryExpression, queryName, startTime, endTime, interval, level, having)
 		}
 	} else {
-		sql = fmt.Sprintf("select %s %s from %s where time > %s and time < %s",
-			req.Expression, req.Field, req.Name, startTime, endTime)
+		sql = fmt.Sprintf("select %s from %s where time > %s and time < %s",
+			queryExpression, queryName, startTime, endTime)
 	}
 
 	if req.Predict.Param == "" {
@@ -478,6 +483,39 @@ func (i *query) Query(c *gin.Context, req *metricmodels.MetricDataQueryReq) (*me
 	}
 
 	return data, nil
+}
+
+// deviceMetricQuery 将设备测点请求映射为 IoTDB 设备节点和测点列。
+func deviceMetricQuery(req *metricmodels.MetricDataQueryReq) (string, string) {
+	if req == nil || len(req.QueryMetric) == 0 {
+		if req == nil {
+			return "", ""
+		}
+		return req.Name, req.Expression + req.Field
+	}
+
+	devices := make([]string, 0, len(req.QueryMetric))
+	expressions := make([]string, 0, len(req.QueryMetric))
+	seenDevices := make(map[string]struct{}, len(req.QueryMetric))
+	for _, metric := range req.QueryMetric {
+		if metric == nil {
+			continue
+		}
+		device := iotdb2.MakeDeviceDataName(metric.DeviceId)
+		measurement := deviceTemplateNodeName(metric.DataId)
+		if _, exists := seenDevices[device]; !exists {
+			devices = append(devices, device)
+			seenDevices[device] = struct{}{}
+		}
+
+		expression := strings.ReplaceAll(req.Expression, "value", measurement)
+		field := req.Field
+		if len(req.QueryMetric) > 1 && field == " as value" {
+			field = " as " + measurement
+		}
+		expressions = append(expressions, expression+field)
+	}
+	return strings.Join(devices, ","), strings.Join(expressions, ", ")
 }
 
 func (i *query) CounterByTimeRange(startTime int64, endTime int64, interval string) (*metricmodels.MetricQueryData, error) {

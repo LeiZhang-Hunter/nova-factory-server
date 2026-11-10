@@ -31,7 +31,7 @@ func (i *adder) Export(ctx context.Context, data []*metricmodels.NovaMetricsDevi
 		if value == nil || value.StartTimeUnix == nil {
 			continue
 		}
-		name := iotdb2.MakeDeviceDataPath(int64(value.DeviceId), int64(value.DataId)) + ".value"
+		name := iotdb2.MakeDeviceDataPath(int64(value.DeviceId), int64(value.DataId))
 		samples = append(samples, iotdb.NewMetricSample(name, nil, value.StartTimeUnix.UnixMilli(), value.Value))
 	}
 	if len(samples) == 0 {
