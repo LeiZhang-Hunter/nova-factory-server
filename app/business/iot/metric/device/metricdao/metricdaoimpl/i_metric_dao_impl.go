@@ -117,7 +117,7 @@ func (m *MetricDaoImpl) Adder() metricdao.IMetricAdderDao {
 }
 
 func (m *MetricDaoImpl) CounterByTimeRange(startTime int64, endTime int64, interval string) (*entity.MetricQueryData, error) {
-	storage, ok := m.storage.(interface {
+	storage, ok := m.storage.Questioner().(interface {
 		CounterByTimeRange(startTime int64, endTime int64, interval string) (*entity.MetricQueryData, error)
 	})
 	if !ok {
@@ -127,7 +127,7 @@ func (m *MetricDaoImpl) CounterByTimeRange(startTime int64, endTime int64, inter
 }
 
 func (m *MetricDaoImpl) CounterByDevice(c *gin.Context, startTime int64, endTime int64, limit int) (*devicemonitormodel.TypeDeviceCounterRank, error) {
-	storage, ok := m.storage.(interface {
+	storage, ok := m.storage.Questioner().(interface {
 		CounterByDevice(c *gin.Context, startTime int64, endTime int64, limit int) (*devicemonitormodel.TypeDeviceCounterRank, error)
 	})
 	if !ok {
@@ -137,7 +137,7 @@ func (m *MetricDaoImpl) CounterByDevice(c *gin.Context, startTime int64, endTime
 }
 
 func (m *MetricDaoImpl) StatDeviceStatus(c *gin.Context, startTime string, endTime string, status int) (*devicemonitormodel.DeviceStatusList, error) {
-	storage, ok := m.storage.(interface {
+	storage, ok := m.storage.Questioner().(interface {
 		StatDeviceStatus(c *gin.Context, startTime string, endTime string, status int) (*devicemonitormodel.DeviceStatusList, error)
 	})
 	if !ok {
@@ -147,7 +147,7 @@ func (m *MetricDaoImpl) StatDeviceStatus(c *gin.Context, startTime string, endTi
 }
 
 func (m *MetricDaoImpl) StatDeviceProcess(c *gin.Context, startTime string, endTime string, interval string, status int) (*devicemonitormodel.DeviceProcessList, error) {
-	storage, ok := m.storage.(interface {
+	storage, ok := m.storage.Questioner().(interface {
 		StatDeviceProcess(c *gin.Context, startTime string, endTime string, interval string, status int) (*devicemonitormodel.DeviceProcessList, error)
 	})
 	if !ok {
@@ -157,7 +157,7 @@ func (m *MetricDaoImpl) StatDeviceProcess(c *gin.Context, startTime string, endT
 }
 
 func (m *MetricDaoImpl) StatDeviceRunStatus(c *gin.Context, startTime string, endTime string) ([]devicemonitormodel.DeviceRunStat, error) {
-	storage, ok := m.storage.(interface {
+	storage, ok := m.storage.Questioner().(interface {
 		StatDeviceRunStatus(c *gin.Context, startTime string, endTime string) ([]devicemonitormodel.DeviceRunStat, error)
 	})
 	if !ok {
@@ -167,7 +167,7 @@ func (m *MetricDaoImpl) StatDeviceRunStatus(c *gin.Context, startTime string, en
 }
 
 func (m *MetricDaoImpl) StatDeviceStatusByDeviceId(c *gin.Context, startTime string, endTime string, deviceId int64, status int) (*devicemonitormodel.DeviceStatusList, error) {
-	storage, ok := m.storage.(interface {
+	storage, ok := m.storage.Questioner().(interface {
 		StatDeviceStatusByDeviceId(c *gin.Context, startTime string, endTime string, deviceId int64, status int) (*devicemonitormodel.DeviceStatusList, error)
 	})
 	if !ok {
@@ -177,7 +177,7 @@ func (m *MetricDaoImpl) StatDeviceStatusByDeviceId(c *gin.Context, startTime str
 }
 
 func (m *MetricDaoImpl) StatDeviceProcessByDeviceId(c *gin.Context, startTime string, endTime string, deviceId int64, interval string, status int) (*devicemonitormodel.DeviceProcessList, error) {
-	storage, ok := m.storage.(interface {
+	storage, ok := m.storage.Questioner().(interface {
 		StatDeviceProcessByDeviceId(c *gin.Context, startTime string, endTime string, deviceId int64, interval string, status int) (*devicemonitormodel.DeviceProcessList, error)
 	})
 	if !ok {

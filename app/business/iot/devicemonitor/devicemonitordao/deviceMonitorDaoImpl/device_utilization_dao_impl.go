@@ -457,6 +457,9 @@ func (d *DeviceUtilizationDaoImpl) SearchV2(c *gin.Context,
 
 	// 计算设备履历
 	for deviceId, deviceValue := range deviceMap {
+		if deviceValue == nil {
+			continue
+		}
 		deviceKey := iotdb2.MakeRunDeviceTemplateName(deviceId)
 		build, ok := buildingNameMap[int64(deviceValue.DeviceBuildingId)]
 		if !ok {
