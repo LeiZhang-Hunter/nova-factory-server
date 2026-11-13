@@ -61,6 +61,33 @@ func NewMetricSample(kind string, properties map[string]string, timestamp int64,
 	}
 }
 
+// intMetricSample 保留整数原值，避免经 float64 转换丢失精度。
+type intMetricSample struct {
+	metricSample
+	intValue int64
+}
+
+// NewIntMetricSample 创建按 INT64 写入 IoTDB 的样本。
+func NewIntMetricSample(kind string, properties map[string]string, timestamp int64, value int64) MetricSample {
+	return intMetricSample{
+		metricSample: metricSample{kind: kind, properties: copyStringMap(properties), ts: timestamp},
+		intValue:     value,
+	}
+}
+
+// value 为仅支持浮点值的时序存储提供整数样本的浮点表示。
+func (m intMetricSample) value() float64 {
+	return float64(m.intValue)
+}
+
+// iotDBSampleValue 返回与样本原始数值类型一致的 IoTDB 类型和值。
+func iotDBSampleValue(sample MetricSample) (client.TSDataType, interface{}) {
+	if integer, ok := sample.(intMetricSample); ok {
+		return client.INT64, integer.intValue
+	}
+	return client.DOUBLE, sample.value()
+}
+
 func (m metricSample) GetKind() string {
 	return m.kind
 }
@@ -302,8 +329,9 @@ func (a *iotDBAppender) Commit() error {
 
 		deviceIDs = append(deviceIDs, deviceID)
 		measurements = append(measurements, []string{measurement})
-		dataTypes = append(dataTypes, []client.TSDataType{client.DOUBLE})
-		values = append(values, []interface{}{sample.value()})
+		dataType, value := iotDBSampleValue(sample)
+		dataTypes = append(dataTypes, []client.TSDataType{dataType})
+		values = append(values, []interface{}{value})
 		timestamps = append(timestamps, sample.timestamp())
 	}
 

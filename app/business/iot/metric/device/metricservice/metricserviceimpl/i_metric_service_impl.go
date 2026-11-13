@@ -4,18 +4,24 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"math"
+	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
 	"github.com/gogf/gf/os/gtime"
+	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
+
 	"nova-factory-server/app/business/iot/devicemonitor/devicemonitormodel"
 	"nova-factory-server/app/business/iot/metric/device/metricdao"
 	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	"nova-factory-server/app/business/iot/metric/device/metricservice"
 	"nova-factory-server/app/constant/device"
+	iotdbconstant "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/cache"
-	"time"
-
-	"github.com/gin-gonic/gin"
-	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
-	"go.uber.org/zap"
 )
 
 type IMetricServiceImpl struct {
@@ -162,6 +168,7 @@ func (m *IMetricServiceImpl) List(c *gin.Context, req *devicemonitormodel.DevDat
 	return list, nil
 }
 
+// ExportTimeData 将运行状态字段规范为整数后按表分组写入。
 func (m *IMetricServiceImpl) ExportTimeData(c context.Context, request *v1.ExportTimeDataRequest) error {
 	if request == nil {
 		return nil
@@ -173,6 +180,15 @@ func (m *IMetricServiceImpl) ExportTimeData(c context.Context, request *v1.Expor
 
 	var list map[string][]*v1.ResourceTimeMetrics = make(map[string][]*v1.ResourceTimeMetrics)
 	for _, v := range request.ResourceMetrics {
+		if v == nil {
+			continue
+		}
+		if strings.HasPrefix(v.Table, iotdbconstant.ROOT_RUN_STATUS_DEVICE_TEMPLATE_NAME) {
+			v = proto.Clone(v).(*v1.ResourceTimeMetrics)
+			if err := normalizeRunStatusMetrics(v); err != nil {
+				return err
+			}
+		}
 		_, ok := list[v.Table]
 		if !ok {
 			list[v.Table] = make([]*v1.ResourceTimeMetrics, 0)
@@ -187,6 +203,28 @@ func (m *IMetricServiceImpl) ExportTimeData(c context.Context, request *v1.Expor
 	if err != nil {
 		zap.L().Error("export time data error", zap.Error(err))
 		return err
+	}
+	return nil
+}
+
+// normalizeRunStatusMetrics 将模板要求的整数值转换为 AsInt，拒绝有损转换。
+func normalizeRunStatusMetrics(resource *v1.ResourceTimeMetrics) error {
+	for _, metric := range resource.Metrics {
+		if metric == nil || (metric.Field != "duration" && metric.Field != "status") {
+			continue
+		}
+		switch value := metric.GetValue().(type) {
+		case *v1.TimeDataMetric_AsInt:
+			continue
+		case *v1.TimeDataMetric_AsDouble:
+			if math.IsNaN(value.AsDouble) || math.IsInf(value.AsDouble, 0) ||
+				value.AsDouble < -0x1p63 || value.AsDouble >= 0x1p63 || math.Trunc(value.AsDouble) != value.AsDouble {
+				return fmt.Errorf("%s.%s requires an INT64 value, got %v", resource.Table, metric.Field, value.AsDouble)
+			}
+			metric.Value = &v1.TimeDataMetric_AsInt{AsInt: int64(value.AsDouble)}
+		case nil:
+			metric.Value = &v1.TimeDataMetric_AsInt{AsInt: 0}
+		}
 	}
 	return nil
 }

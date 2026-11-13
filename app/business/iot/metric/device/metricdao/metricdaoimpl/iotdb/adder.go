@@ -2,12 +2,14 @@ package iotdb
 
 import (
 	"context"
+	"time"
+
 	v1 "github.com/novawatcher-io/nova-factory-payload/metric/grpc/v1"
 	"go.uber.org/zap"
+
 	metricmodels "nova-factory-server/app/business/iot/metric/device/metricmodels/entity"
 	iotdb2 "nova-factory-server/app/constant/iotdb"
 	"nova-factory-server/app/datasource/iotdb"
-	"nova-factory-server/app/utils/time"
 )
 
 type adder struct {
@@ -50,6 +52,7 @@ func (i *adder) Export(ctx context.Context, data []*metricmodels.NovaMetricsDevi
 	return nil
 }
 
+// ExportTimeData 将协议中的纳秒时间戳转换为毫秒后写入 IoTDB。
 func (i *adder) ExportTimeData(ctx context.Context, data map[string][]*v1.ResourceTimeMetrics) error {
 	if len(data) == 0 {
 		return nil
@@ -61,9 +64,13 @@ func (i *adder) ExportTimeData(ctx context.Context, data map[string][]*v1.Resour
 			if value == nil {
 				continue
 			}
-			timestamp := time.MicroToGTime(value.TimeUnixNano).UnixMilli()
+			timestamp := time.Unix(0, int64(value.TimeUnixNano)).UnixMilli()
 			for _, metric := range value.Metrics {
 				if metric == nil {
+					continue
+				}
+				if integer, ok := metric.GetValue().(*v1.TimeDataMetric_AsInt); ok {
+					samples = append(samples, iotdb.NewIntMetricSample(table+"."+metric.Field, nil, timestamp, integer.AsInt))
 					continue
 				}
 

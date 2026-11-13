@@ -21,3 +21,7 @@ func newGatewayTelemetryServer(metric *Metric) *gatewayTelemetryServer {
 func (s *gatewayTelemetryServer) ReportDeviceInfo(ctx context.Context, request *v1.ExportMetricsServiceRequest) (*v1.NodeRes, error) {
 	return s.metric.ReportDeviceInfo(ctx, request)
 }
+
+func (s *gatewayTelemetryServer) ReportTimeData(ctx context.Context, request *v1.ExportTimeDataRequest) (*v1.NodeRes, error) {
+	return s.metric.ReportTimeData(ctx, request)
+}
